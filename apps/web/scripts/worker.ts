@@ -110,6 +110,9 @@ async function start() {
           }
         } else if (job.type === 'REINSTALL_K3S') {
           await reinstallK3sCluster(payload);
+        } else if (job.type === 'REINSTALL_VPS') {
+          const { vpsId, templateName, password } = payload;
+          await VpsProvisioningService.reinstallVps(vpsId, templateName, password);
         } else {
           throw new Error(`Unknown job type: ${job.type}`);
         }

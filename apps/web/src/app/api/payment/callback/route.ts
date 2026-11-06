@@ -244,7 +244,7 @@ export async function POST(req: NextRequest) {
              const newExpires = new Date();
              newExpires.setMonth(newExpires.getMonth() + cycle);
 
-             await prisma.vpsService.update({
+             const vps = await prisma.vpsService.update({
                where: { id: invoice.vpsServiceId },
                data: { 
                  status: 'PENDING',
@@ -252,10 +252,13 @@ export async function POST(req: NextRequest) {
                }
              });
              
-               import('@/lib/vps-provisioning').then(({ VpsProvisioningService }) => {
-                 VpsProvisioningService.provisionVps(invoice.vpsServiceId!)
-                   .catch(err => console.error(`VPS Provisioning failed for VPS ID ${invoice.vpsServiceId}:`, err));
-               });
+             import('@/lib/job-queue').then(({ JobQueueService }) => {
+               JobQueueService.enqueue('PROVISION_VPS', {
+                 vpsId: vps.id,
+                 userId: invoice.userId,
+                 hourlyRate: vps.hourlyRate || 0
+               }).catch(err => console.error(`VPS Provisioning enqueue failed for VPS ID ${invoice.vpsServiceId}:`, err));
+             });
                
                // Affiliate Commission Logic (Anti-Fraud: First VPS Purchase only)
                if (invoice.user?.referredById) {

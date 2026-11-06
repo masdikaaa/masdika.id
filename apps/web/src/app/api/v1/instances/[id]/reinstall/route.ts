@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { VpsProvisioningService } from "@/lib/vps-provisioning";
+import { JobQueueService } from "@/lib/job-queue";
 import { authenticateReseller, apiError, parseId, readJson, passwordError } from "@/lib/reseller-api";
 
 export const dynamic = "force-dynamic";
@@ -45,9 +45,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     });
     if (lock.count === 0) return apiError("Instance state changed. Please retry.", 409);
 
-    // Runs in the background; on failure the service puts the VM into STOPPED so it can be retried
-    VpsProvisioningService.reinstallVps(vps.id, template.name, password).catch((e) => {
-      console.error(`[RESELLER_API] Reinstall failed for VPS ${vps.id}:`, e);
+    // Enqueue reinstall into background worker queue for safe, zero-downtime execution
+    await JobQueueService.enqueue('REINSTALL_VPS', {
+      vpsId: vps.id,
+      templateName: template.name,
+      password,
     });
 
     return NextResponse.json({ success: true, message: "OS Reinstallation process started" }, { status: 202 });

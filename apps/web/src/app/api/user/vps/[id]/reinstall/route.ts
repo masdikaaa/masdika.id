@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from '@/lib/auth-middleware';
 import { prisma } from "@/lib/prisma";
-import { VpsProvisioningService } from "@/lib/vps-provisioning";
+import { JobQueueService } from "@/lib/job-queue";
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -30,6 +30,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       return NextResponse.json({ error: "VPS is suspended or terminated. Reinstallation is blocked." }, { status: 403 });
     }
 
+    if (vps.status === "PROVISIONING") {
+      return NextResponse.json({ error: "VPS is already being provisioned or reinstalled." }, { status: 409 });
+    }
+
     const body = await req.json();
     const { templateName, password } = body;
 
@@ -43,10 +47,20 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         return NextResponse.json({ error: "Invalid template selected" }, { status: 400 });
     }
 
-    // Trigger reinstall process asynchronously so we don't block the API response
-    // In production, you'd use a background worker queue (like BullMQ)
-    VpsProvisioningService.reinstallVps(vps.id, templateName, password).catch(err => {
-        console.error("Async Reinstall failed:", err);
+    // Atomic lock so concurrent reinstall calls cannot collide
+    const lock = await prisma.vpsService.updateMany({
+      where: { id: vps.id, status: vps.status },
+      data: { status: "PROVISIONING" },
+    });
+    if (lock.count === 0) {
+      return NextResponse.json({ error: "Instance state changed. Please retry." }, { status: 409 });
+    }
+
+    // Enqueue reinstall task into background worker queue for resilient, zero-downtime execution
+    await JobQueueService.enqueue('REINSTALL_VPS', {
+      vpsId: vps.id,
+      templateName,
+      password,
     });
 
     return NextResponse.json({ message: "Reinstallation started. The server will be rebuilt shortly." });

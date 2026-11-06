@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 
-export type JobType = 'PROVISION_VPS' | 'INSTALL_K3S' | 'REINSTALL_K3S';
+export type JobType = 'PROVISION_VPS' | 'INSTALL_K3S' | 'REINSTALL_K3S' | 'REINSTALL_VPS';
 
 export class JobQueueService {
   static async enqueue(type: JobType, payload: any) {

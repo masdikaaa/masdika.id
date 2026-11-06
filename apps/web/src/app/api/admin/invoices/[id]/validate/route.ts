@@ -95,9 +95,12 @@ export async function POST(
           }
         });
         
-        import('@/lib/vps-provisioning').then(({ VpsProvisioningService }) => {
-          VpsProvisioningService.provisionVps(vps.id)
-            .catch(err => console.error(`VPS Provisioning failed for VPS ID ${vps.id}:`, err));
+        import('@/lib/job-queue').then(({ JobQueueService }) => {
+          JobQueueService.enqueue('PROVISION_VPS', {
+            vpsId: vps.id,
+            userId: vps.userId,
+            hourlyRate: vps.hourlyRate
+          }).catch(err => console.error(`VPS Provisioning enqueue failed for VPS ID ${vps.id}:`, err));
         });
       } else {
         // Renewal

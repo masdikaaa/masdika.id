@@ -6,6 +6,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { ProxmoxClient } from "@/lib/proxmox";
 import { Address4 } from "ip-address";
 import { getBandwidthOptions, bandwidthHourlyCost, BASE_BANDWIDTH_MBPS } from "@/lib/vps-bandwidth";
+import { JobQueueService } from "@/lib/job-queue";
 
 // Security: Hostname validation regex (RFC 1123)
 const HOSTNAME_REGEX = /^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
@@ -360,17 +361,14 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // Trigger the provisioning via Job Queue
-      import('@/lib/job-queue').then(({ JobQueueService }) => {
-        JobQueueService.enqueue('PROVISION_VPS', { 
-          vpsId: vpsService.id, 
-          options: { ipv4Count, ipv6Count, reservedIpId, firewallRules, vpcId },
-          userId,
-          hourlyRate: vpsData.hourlyRate,
-          k3sClusterId,
-          action
-        })
-        .catch((err) => console.error(`Failed to enqueue PROVISION_VPS job for VPS ID ${vpsService.id}:`, err));
+      // Trigger the provisioning via Job Queue (guaranteed persisted before HTTP response)
+      await JobQueueService.enqueue('PROVISION_VPS', { 
+        vpsId: vpsService.id, 
+        options: { ipv4Count, ipv6Count, reservedIpId, firewallRules, vpcId },
+        userId,
+        hourlyRate: vpsData.hourlyRate,
+        k3sClusterId,
+        action
       });
 
       return NextResponse.json({ success: true, vpsId: vpsService.id, k3sClusterId });

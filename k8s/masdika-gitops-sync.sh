@@ -14,6 +14,7 @@ if [ "$REMOTE_IMAGE" != "$CURRENT_IMAGE" ]; then
   echo "$(date): Found new image in GitOps manifest: $REMOTE_IMAGE (current: $CURRENT_IMAGE). Applying update..."
   kubectl apply -f "$MANIFEST_URL" -n masdika
   kubectl rollout status deployment/masdika-app -n masdika --timeout=180s
+  kubectl rollout status deployment/masdika-worker -n masdika --timeout=360s
   echo "$(date): Deployment updated and healthy: $REMOTE_IMAGE"
 fi
 

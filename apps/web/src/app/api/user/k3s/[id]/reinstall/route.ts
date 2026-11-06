@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
-import { K3sProvisioningService } from "@/lib/k3s-provisioning";
+import { JobQueueService } from "@/lib/job-queue";
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -66,17 +66,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       data: { status: "INSTALLING_K3S" }
     });
 
-    import('@/lib/job-queue').then(({ JobQueueService }) => {
-      JobQueueService.enqueue('REINSTALL_K3S', { 
-        clusterId: cluster.id,
-        version: version,
-        ipAddress: ipAddress, // master IP
-        masterVpcIp: masterNode.vpcIp,
-        masterNodeId: masterNode.id,
-        masterUsername: masterNode.username,
-        masterRootPassword: masterNode.rootPassword
-      })
-      .catch((err) => console.error(`Failed to enqueue REINSTALL_K3S job for cluster ID ${cluster.id}:`, err));
+    await JobQueueService.enqueue('REINSTALL_K3S', { 
+      clusterId: cluster.id,
+      version: version,
+      ipAddress: ipAddress, // master IP
+      masterVpcIp: masterNode.vpcIp,
+      masterNodeId: masterNode.id,
+      masterUsername: masterNode.username,
+      masterRootPassword: masterNode.rootPassword
     });
 
     return NextResponse.json({ success: true, message: "Cluster reinstallation queued" });

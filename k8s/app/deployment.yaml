@@ -25,6 +25,7 @@ spec:
       labels:
         app: masdika-app
     spec:
+      terminationGracePeriodSeconds: 60
       automountServiceAccountToken: false
       securityContext:
         fsGroup: 1001 # GID nodejs agar permissions mount uploads writable oleh user nextjs
@@ -175,7 +176,10 @@ spec:
   replicas: 1
   revisionHistoryLimit: 0
   strategy:
-    type: Recreate
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: masdika-worker
@@ -184,6 +188,7 @@ spec:
       labels:
         app: masdika-worker
     spec:
+      terminationGracePeriodSeconds: 300
       automountServiceAccountToken: false
       securityContext:
         fsGroup: 1001
@@ -277,6 +282,14 @@ spec:
             - name: app-storage
               mountPath: /app/apps/web/storage/upload-buffers
               subPath: upload-buffers
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 2
           livenessProbe:
             httpGet:
               path: /health
@@ -320,6 +333,7 @@ spec:
       labels:
         app: masdika-vnc-proxy
     spec:
+      terminationGracePeriodSeconds: 60
       automountServiceAccountToken: false
       initContainers:
         - name: wait-for-dependencies
