@@ -101,7 +101,7 @@ export function HeroAvatarFrame({
             )}
           >
             <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
-              <Icon className="w-3.5 h-3.5 sm:w-5 sm:h-5" aria-hidden="true" />
+              <Icon className="w-3.5 h-3.5 sm:w-5 sm:h-5" role="presentation" aria-hidden="true" aria-label={badge.label} />
             </div>
             <div className="min-w-0">
               <div className="text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-slate-600 dark:text-zinc-400 leading-none truncate">

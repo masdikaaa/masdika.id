@@ -214,10 +214,13 @@ export default function proxy(request: NextRequest) {
   response.headers.set('X-XSS-Protection', '1; mode=block');
 
   // 4. Disable client browser caching for HTML routes & dynamic APIs
-  // Ensures browser always loads the latest UI without getting stuck on old cached pages.
+  // Ensures browser and Cloudflare CDN always load the latest UI without getting stuck on old cached pages.
   // Data caching is handled on the server via Redis.
   if (!pathname.startsWith('/uploads/')) {
-    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0');
+    response.headers.set('CDN-Cache-Control', 'no-store');
+    response.headers.set('Cloudflare-CDN-Cache-Control', 'no-store');
+    response.headers.set('Surrogate-Control', 'no-store');
     response.headers.set('Pragma', 'no-cache');
     response.headers.set('Expires', '0');
   }

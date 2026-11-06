@@ -197,7 +197,7 @@ export function Footer({ socialLinks }: { socialLinks?: any }) {
         </div>
 
         <div className="pt-8 border-t border-[var(--border-subtle)] flex flex-col items-center justify-center gap-4">
-          <p className="text-xs text-center text-[var(--text-muted)]">
+          <p className="text-xs text-center text-slate-600 dark:text-zinc-400 font-medium">
             © {new Date().getFullYear()} PT Masdika Teknologi Indonesia. All Rights Reserved.
           </p>
         </div>

@@ -3,7 +3,9 @@ import { getCachedData } from "@/lib/cache";
 import { prisma } from "@/lib/prisma";
 import { HomeClient } from "./HomeClient";
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 const fetchProjects = () =>
   prisma.project.findMany({

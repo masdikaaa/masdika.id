@@ -669,7 +669,7 @@ export function HomeClient({
                 <div className="group relative w-full h-full rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 hover:shadow-xl dark:hover:shadow-[0_0_25px_rgba(6,182,212,0.08)] transition-all duration-300 hover:-translate-y-1 p-5 sm:p-6 flex flex-col">
                   <div className="flex items-start justify-between gap-3 mb-4">
                     <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center border shrink-0 transition-colors", iconBoxStyle)}>
-                      <card.icon className={cn("w-5 h-5 transition-transform duration-300 group-hover:scale-110", iconAccent)} />
+                      <card.icon className={cn("w-5 h-5 transition-transform duration-300 group-hover:scale-110", iconAccent)} role="presentation" aria-hidden="true" aria-label={card.title} />
                     </div>
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)]">
                       <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400" />
@@ -762,8 +762,8 @@ export function HomeClient({
                         <div className="flex items-center gap-3 min-w-0">
                           <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center border shrink-0 transition-transform duration-300 group-hover:scale-105", iconBoxStyle)}>
                             {prod.title === "Managed K3s"
-                              ? <prod.icon className={cn("w-5 h-5", iconAccent)} aria-hidden="true" />
-                              : <prod.icon className={cn("w-5 h-5", iconAccent)} strokeWidth={1.75} aria-hidden="true" />
+                              ? <prod.icon className={cn("w-5 h-5", iconAccent)} role="presentation" aria-hidden="true" aria-label={prod.title} />
+                              : <prod.icon className={cn("w-5 h-5", iconAccent)} strokeWidth={1.75} role="presentation" aria-hidden="true" aria-label={prod.title} />
                             }
                           </div>
                           <div className="min-w-0">
@@ -839,7 +839,7 @@ export function HomeClient({
                   {/* Top row: Icon box + Category badge */}
                   <div className="flex items-start justify-between gap-3 mb-5">
                     <div className="w-12 h-12 rounded-xl flex items-center justify-center border border-[var(--border-primary)] bg-[var(--surface-secondary)] group-hover:border-cyan-500/30 transition-colors shrink-0">
-                      <infra.icon className={cn("w-6 h-6 transition-transform duration-300 group-hover:scale-110", infra.iconColor)} aria-hidden="true" />
+                      <infra.icon className={cn("w-6 h-6 transition-transform duration-300 group-hover:scale-110", infra.iconColor)} role="presentation" aria-hidden="true" aria-label={infra.name} />
                     </div>
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)]">
                       <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400" />
@@ -977,7 +977,7 @@ export function HomeClient({
                       <div className="flex items-start justify-between gap-3 mb-5">
                         <div className="flex items-center gap-3 min-w-0">
                           <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center border shrink-0 transition-transform duration-300 group-hover:scale-105", iconBoxStyle)}>
-                            <srv.icon className="w-5 h-5" strokeWidth={1.75} />
+                            <srv.icon className="w-5 h-5" strokeWidth={1.75} role="presentation" aria-hidden="true" aria-label={srv.title} />
                           </div>
                           <div className="min-w-0">
                             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 block">
@@ -1224,7 +1224,7 @@ export function HomeClient({
                     <div className="flex items-center justify-between gap-3 mb-4">
                       <div className="flex items-center gap-2.5">
                         <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center border shrink-0 transition-colors", iconBoxStyle)}>
-                          <Quote className={cn("w-4 h-4", iconAccent)} />
+                          <Quote className={cn("w-4 h-4", iconAccent)} role="presentation" aria-hidden="true" aria-label="Quote icon" />
                         </div>
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)]">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
@@ -1233,7 +1233,7 @@ export function HomeClient({
                       </div>
 
                       <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs font-mono font-bold shrink-0">
-                        <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500 dark:fill-amber-400 dark:text-amber-400" aria-hidden="true" />
+                        <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500 dark:fill-amber-400 dark:text-amber-400" role="presentation" aria-hidden="true" aria-label="Rating icon" />
                         <span>{ratingVal}</span>
                       </div>
                     </div>
@@ -1292,9 +1292,9 @@ export function HomeClient({
                             <p className="font-bold text-sm text-[var(--text-primary)] truncate">
                               {testi.name}
                             </p>
-                            <BadgeCheck className="w-4 h-4 text-cyan-500 dark:text-cyan-400 shrink-0" />
+                            <BadgeCheck className="w-4 h-4 text-cyan-500 dark:text-cyan-400 shrink-0" role="presentation" aria-hidden="true" aria-label="Verified client" />
                           </div>
-                          <p className="text-xs font-mono text-[var(--text-muted)] truncate">
+                          <p className="text-xs font-mono text-slate-600 dark:text-zinc-400 font-medium truncate">
                             {testi.role}
                           </p>
                         </div>
