@@ -9,12 +9,16 @@ export const revalidate = 0;
 export const fetchCache = 'force-no-store';
 
 export const metadata: Metadata = {
-  title: "Masdika - Cloud VPS Indonesia, High-Performance Compute & Kubernetes",
-  description: "Deploy scalable, ultra-fast Cloud VPS & Managed Kubernetes with pure NVMe SSD storage, sub-20ms latency across Indonesia, and flexible hourly pay-as-you-go billing.",
+  title: "Masdika - Cloud VPS Murah Indonesia, High-Performance Compute & Kubernetes",
+  description: "Deploy scalable, ultra-fast Cloud VPS murah Indonesia & Managed Kubernetes dengan pure NVMe SSD storage, sub-20ms latency, dan sistem hemat hourly pay-as-you-go.",
   keywords: [
-    "Cloud VPS",
-    "Cloud VPS Indonesia",
     "VPS Murah",
+    "VPS Murah Indonesia",
+    "Sewa VPS Murah",
+    "Cloud VPS Murah",
+    "Cloud VPS Murah Indonesia",
+    "Beli VPS Murah",
+    "Cloud VPS Indonesia",
     "VPS Pay As You Go",
     "High Performance Compute",
     "Managed Kubernetes",
@@ -23,15 +27,14 @@ export const metadata: Metadata = {
     "Cloud Infrastructure",
     "Masdika",
     "Masdika VPS",
-    "KVM VPS",
-    "Beli VPS"
+    "KVM VPS"
   ],
   alternates: {
     canonical: "https://www.masdika.id",
   },
   openGraph: {
-    title: "Masdika - Cloud VPS Indonesia, High-Performance Compute & Kubernetes",
-    description: "Deploy scalable, ultra-fast Cloud VPS & Managed Kubernetes with pure NVMe SSD storage, sub-20ms latency across Indonesia, and flexible hourly pay-as-you-go billing.",
+    title: "Masdika - Cloud VPS Murah Indonesia, High-Performance Compute & Kubernetes",
+    description: "Deploy scalable, ultra-fast Cloud VPS murah Indonesia & Managed Kubernetes dengan pure NVMe SSD storage, sub-20ms latency, dan sistem hemat hourly pay-as-you-go.",
     url: "https://www.masdika.id",
     siteName: "Masdika",
     images: [
@@ -39,16 +42,16 @@ export const metadata: Metadata = {
         url: "/og-image.webp",
         width: 1200,
         height: 630,
-        alt: "Masdika - Cloud VPS Indonesia & High-Performance Compute",
+        alt: "Masdika - Cloud VPS Murah Indonesia & High-Performance Compute",
       },
     ],
-    locale: "en_US",
+    locale: "id_ID",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Masdika - Cloud VPS Indonesia, High-Performance Compute & Kubernetes",
-    description: "Deploy scalable, ultra-fast Cloud VPS & Managed Kubernetes with pure NVMe SSD storage, sub-20ms latency across Indonesia, and flexible hourly pay-as-you-go billing.",
+    title: "Masdika - Cloud VPS Murah Indonesia, High-Performance Compute & Kubernetes",
+    description: "Deploy scalable, ultra-fast Cloud VPS murah Indonesia & Managed Kubernetes dengan pure NVMe SSD storage, sub-20ms latency, dan sistem hemat hourly pay-as-you-go.",
     images: ["/og-image.webp"],
   },
 };

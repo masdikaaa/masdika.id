@@ -30,7 +30,7 @@ const getCachedMetaDescription = () =>
   );
 
 export async function generateMetadata(): Promise<Metadata> {
-  let description = "Deploy scalable, lightning-fast Cloud VPS & Managed Kubernetes with pure NVMe SSD storage, sub-20ms latency across Indonesia, and flexible hourly pay-as-you-go billing.";
+  let description = "Deploy scalable, lightning-fast Cloud VPS murah Indonesia & Managed Kubernetes dengan pure NVMe SSD, sub-20ms latency lokal, dan sistem hemat hourly pay-as-you-go.";
   try {
     const metaDescSetting = await getCachedMetaDescription();
     if (metaDescSetting && metaDescSetting.value.trim() !== '') {
@@ -49,14 +49,19 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL(siteUrl),
     title: {
       template: "%s | Masdika",
-      default: "Masdika - Cloud VPS Indonesia, High-Performance Compute & Kubernetes",
+      default: "Masdika - Cloud VPS Murah Indonesia, High-Performance Compute & Kubernetes",
     },
     description,
     keywords: [
+      "VPS Murah",
+      "VPS Murah Indonesia",
+      "Sewa VPS Murah",
+      "Cloud VPS Murah",
+      "Cloud VPS Murah Indonesia",
+      "Beli VPS Murah",
       "Cloud VPS",
       "Cloud VPS Indonesia",
       "High Performance Compute",
-      "VPS Murah",
       "VPS Pay As You Go",
       "Managed Kubernetes",
       "K3s",
@@ -186,19 +191,26 @@ export default async function RootLayout({
                 {
                   "@type": "Product",
                   "@id": "https://www.masdika.id/#cloud-vps",
-                  "name": "Masdika Cloud VPS",
-                  "description": "High-Performance Cloud Virtual Private Servers powered by enterprise Intel Xeon, pure NVMe SSD storage, KVM virtualization, and sub-20ms low latency routing across Indonesia.",
+                  "name": "Masdika Cloud VPS Murah Indonesia",
+                  "alternateName": [
+                    "VPS Murah Indonesia",
+                    "Cloud VPS Murah",
+                    "Sewa VPS Murah",
+                    "Masdika Cloud VPS",
+                    "KVM VPS Murah"
+                  ],
+                  "description": "Layanan Cloud VPS murah Indonesia berkinerja tinggi didukung prosesor enterprise Intel Xeon, pure NVMe SSD storage, KVM virtualization, dan sistem hemat Pay-As-You-Go per jam.",
                   "brand": {
                     "@id": "https://www.masdika.id/#organization"
                   },
-                  "category": "Cloud Computing > Virtual Private Server",
+                  "category": "Cloud Computing > Virtual Private Server > VPS Murah",
                   "offers": {
                     "@type": "AggregateOffer",
                     "priceCurrency": "IDR",
                     "lowPrice": "100",
                     "highPrice": "500000",
                     "priceValidUntil": "2027-12-31",
-                    "offerCount": "50",
+                    "offerCount": "100",
                     "availability": "https://schema.org/InStock"
                   }
                 },
