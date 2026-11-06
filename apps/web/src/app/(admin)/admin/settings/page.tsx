@@ -143,7 +143,7 @@ export default function SettingsPage() {
             contact_location: data.settings?.contact_location || "",
             contact_phone: data.settings?.contact_phone || "",
             hero_title: data.settings?.hero_title || "Hi, I'm Masdika,",
-            hero_description: data.settings?.hero_description || "Specializing in highly available cloud infrastructure, CI/CD automation, and scalable backend services. I build robust systems that power modern digital businesses.",
+            hero_description: data.settings?.hero_description || "Specializing in resilient cloud infrastructure, DevOps automation, and self-hosted cloud services. Powering modern applications with high-performance VPS, Managed Kubernetes, File CDN, and developer tools.",
             hero_typing_text: data.settings?.hero_typing_text || "Cloud Engineer, DevOps Expert, SysAdmin Pro, Backend Dev",
             cv_url: data.settings?.cv_url || "",
             meta_description: data.settings?.meta_description || "",

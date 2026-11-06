@@ -486,7 +486,7 @@ export function HomeClient({
 
               <p className="text-lg md:text-xl mb-10 max-w-xl leading-relaxed text-[var(--text-secondary)]">
                 {settings?.hero_description ||
-                  "Specializing in highly available cloud infrastructure, CI/CD automation, and scalable backend services. I build robust systems that power modern digital businesses."}
+                  "Specializing in resilient cloud infrastructure, DevOps automation, and self-hosted cloud services. Powering modern applications with high-performance VPS, Managed Kubernetes, File CDN, and developer tools."}
               </p>
 
               {/* Action Buttons using shared Button primitives */}
