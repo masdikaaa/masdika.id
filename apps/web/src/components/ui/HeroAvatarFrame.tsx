@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { HeroOrnaments } from "@/components/ui/PremiumBackground";
 
 export interface HeroBadgeItem {
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   label: string;
   value: React.ReactNode;
 }
