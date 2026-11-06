@@ -143,6 +143,13 @@ export default function proxy(request: NextRequest) {
 
   const isAdminPath = pathname.startsWith('/admin');
   const isAdminApi = pathname.startsWith('/api/admin');
+  const isProtectedApi =
+    pathname.startsWith('/api/admin') ||
+    pathname.startsWith('/api/user') ||
+    pathname.startsWith('/api/dashboard') ||
+    pathname.startsWith('/api/tickets') ||
+    pathname.startsWith('/api/tunnels');
+  const isProtectedUi = pathname.startsWith('/admin') || pathname.startsWith('/dashboard');
 
   let response: NextResponse | undefined;
 
@@ -153,7 +160,7 @@ export default function proxy(request: NextRequest) {
   }
 
   // Check authentication for protected paths
-  if (isAdminPath || isAdminApi || pathname.startsWith('/dashboard') || pathname.startsWith('/api/user')) {
+  if (isProtectedUi || isProtectedApi) {
     // STRICT RUNTIME SECURITY CHECK
     if (process.env.NODE_ENV === 'production' && (!process.env.SESSION_SECRET || SESSION_SECRET === 'dev_fallback_session_secret_do_not_use_in_production')) {
       throw new Error('CRITICAL SECURITY ERROR: SESSION_SECRET is missing. Middleware cannot safely verify sessions.');
@@ -163,8 +170,8 @@ export default function proxy(request: NextRequest) {
     const session = verifySessionTokenEdge(sessionCookie?.value, SESSION_SECRET);
 
     if (!session?.userId) {
-      if (isAdminApi) {
-        // Return 401 for API requests
+      if (isProtectedApi) {
+        // Return 401 JSON for all protected API requests
         response = NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       } else {
         // Redirect to login page for UI requests
