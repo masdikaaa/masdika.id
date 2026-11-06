@@ -726,6 +726,16 @@ button[aria-label="Check List"],
   overflow-wrap: anywhere !important;
 }
 
+.prose > :first-child,
+.prose-invert > :first-child {
+  margin-top: 0 !important;
+}
+
+.prose > :last-child,
+.prose-invert > :last-child {
+  margin-bottom: 0 !important;
+}
+
 .prose h1,
 .prose-invert h1 {
   font-size: 2.25rem !important;
@@ -795,13 +805,13 @@ button[aria-label="Check List"],
 .prose h3,
 .prose h4,
 .prose strong {
-  color: #0f172a !important;
+  color: var(--text-primary) !important;
 }
 .prose p,
 .prose ul,
 .prose ol,
 .prose li {
-  color: #475569 !important;
+  color: var(--text-secondary) !important;
 }
 .prose a {
   color: #0891b2 !important;
@@ -820,7 +830,7 @@ html.dark .prose strong,
 .prose-invert h3,
 .prose-invert h4,
 .prose-invert strong {
-  color: #ffffff !important;
+  color: var(--text-primary) !important;
 }
 html.dark .prose p,
 html.dark .prose ul,
@@ -830,7 +840,7 @@ html.dark .prose li,
 .prose-invert ul,
 .prose-invert ol,
 .prose-invert li {
-  color: #a1a1aa !important;
+  color: var(--text-secondary) !important;
 }
 html.dark .prose a,
 .prose-invert a {
