@@ -77,3 +77,22 @@ export const getPublicSettings = async () => {
     return {};
   }
 };
+
+/**
+ * Invalidate in-memory and Redis caches for public settings.
+ * Must be invoked whenever settings are modified in the admin panel.
+ */
+export const invalidatePublicSettingsCache = async () => {
+  l1SettingsCache = null;
+  pendingFetch = null;
+  if (redis) {
+    try {
+      await Promise.allSettled([
+        redis.del('public_settings'),
+        redis.del('settings:public_list')
+      ]);
+    } catch (err) {
+      console.warn('[Cache Error] Failed to invalidate public settings in Redis:', (err as Error).message);
+    }
+  }
+};

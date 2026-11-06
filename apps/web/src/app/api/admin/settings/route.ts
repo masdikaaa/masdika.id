@@ -7,6 +7,8 @@ import path from 'path';
 import { requireAuth } from '@/lib/auth-middleware';
 import { getUploadsDir } from '@/lib/file-utils';
 import { invalidateRustFSCache } from '@/lib/rustfs';
+import { invalidatePublicSettingsCache } from '@/lib/settings';
+import { revalidatePath } from 'next/cache';
 
 export async function GET() {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
@@ -114,6 +116,10 @@ export async function PUT(req: Request) {
     }
 
     invalidateRustFSCache();
+    await invalidatePublicSettingsCache();
+    try {
+      revalidatePath('/', 'layout');
+    } catch {}
 
     // Update profile image
     if (profileImage !== undefined) {
