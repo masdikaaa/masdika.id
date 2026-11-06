@@ -762,8 +762,8 @@ export function HomeClient({
                         <div className="flex items-center gap-3 min-w-0">
                           <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center border shrink-0 transition-transform duration-300 group-hover:scale-105", iconBoxStyle)}>
                             {prod.title === "Managed K3s"
-                              ? <prod.icon className={cn("w-5 h-5", iconAccent)} />
-                              : <prod.icon className={cn("w-5 h-5", iconAccent)} strokeWidth={1.75} />
+                              ? <prod.icon className={cn("w-5 h-5", iconAccent)} aria-hidden="true" />
+                              : <prod.icon className={cn("w-5 h-5", iconAccent)} strokeWidth={1.75} aria-hidden="true" />
                             }
                           </div>
                           <div className="min-w-0">
@@ -839,7 +839,7 @@ export function HomeClient({
                   {/* Top row: Icon box + Category badge */}
                   <div className="flex items-start justify-between gap-3 mb-5">
                     <div className="w-12 h-12 rounded-xl flex items-center justify-center border border-[var(--border-primary)] bg-[var(--surface-secondary)] group-hover:border-cyan-500/30 transition-colors shrink-0">
-                      <infra.icon className={cn("w-6 h-6 transition-transform duration-300 group-hover:scale-110", infra.iconColor)} />
+                      <infra.icon className={cn("w-6 h-6 transition-transform duration-300 group-hover:scale-110", infra.iconColor)} aria-hidden="true" />
                     </div>
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)]">
                       <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400" />
@@ -1232,8 +1232,8 @@ export function HomeClient({
                         </span>
                       </div>
 
-                      <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-mono font-bold shrink-0">
-                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                      <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs font-mono font-bold shrink-0">
+                        <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500 dark:fill-amber-400 dark:text-amber-400" aria-hidden="true" />
                         <span>{ratingVal}</span>
                       </div>
                     </div>

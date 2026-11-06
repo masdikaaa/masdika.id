@@ -10,7 +10,7 @@ import { ShieldCheck } from "lucide-react";
  * Official Dell Vector Logo
  */
 export function DellLogo({ className, ...props }: React.SVGProps<SVGSVGElement>) {
-  return <SiDell className={className} {...(props as any)} />;
+  return <SiDell className={className} aria-hidden="true" {...(props as any)} />;
 }
 
 /**
@@ -23,8 +23,7 @@ export function JuniperLogo({ className, ...props }: React.SVGProps<SVGSVGElemen
       viewBox="0 0 718.2 196.3"
       fill="currentColor"
       xmlns="http://www.w3.org/2000/svg"
-      role="img"
-      aria-label="Juniper Networks"
+      aria-hidden="true"
       className={className}
       {...props}
     >
@@ -38,14 +37,14 @@ export function JuniperLogo({ className, ...props }: React.SVGProps<SVGSVGElemen
  * Official Intel Vector Logo
  */
 export function IntelLogo({ className, ...props }: React.SVGProps<SVGSVGElement>) {
-  return <SiIntel className={className} {...(props as any)} />;
+  return <SiIntel className={className} aria-hidden="true" {...(props as any)} />;
 }
 
 /**
  * Official MikroTik Vector Logo
  */
 export function MikrotikLogo({ className, ...props }: React.SVGProps<SVGSVGElement>) {
-  return <SiMikrotik className={className} {...(props as any)} />;
+  return <SiMikrotik className={className} aria-hidden="true" {...(props as any)} />;
 }
 
 /**
@@ -136,7 +135,7 @@ export function EnterpriseInfraSidebarCard({ className }: { className?: string }
     {
       name: "MikroTik",
       role: "Edge BGP",
-      icon: <SiMikrotik className="w-3.5 h-3.5" />,
+      icon: <SiMikrotik className="w-3.5 h-3.5" aria-hidden="true" />,
       color: "text-slate-800 dark:text-white",
       title: "Edge routing & VPC powered by MikroTik® RouterOS",
     },
@@ -150,7 +149,7 @@ export function EnterpriseInfraSidebarCard({ className }: { className?: string }
     {
       name: "Dell",
       role: "PowerEdge",
-      icon: <SiDell className="w-3.5 h-3.5" />,
+      icon: <SiDell className="w-3.5 h-3.5" aria-hidden="true" />,
       color: "text-[#007DB8] dark:text-[#38bdf8]",
       title: "Server hardware powered by Dell PowerEdge",
     },

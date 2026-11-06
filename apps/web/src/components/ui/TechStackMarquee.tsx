@@ -127,6 +127,7 @@ function TechCard({ skill, isDark }: { skill: TechItem; isDark: boolean }) {
                 "h-6 w-6 transition-transform duration-300 group-hover:scale-110",
                 skill.iconColor || "text-[var(--text-primary)]"
               )}
+              aria-hidden="true"
             />
           ) : (
             <img

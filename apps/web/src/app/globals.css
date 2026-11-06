@@ -14,7 +14,7 @@
   --surface-elevated: rgba(0, 0, 0, 0.02);
   --text-primary: #0f172a;
   --text-secondary: #475569;
-  --text-muted: #94a3b8;
+  --text-muted: #52525b;
   --border-primary: rgba(0, 0, 0, 0.08);
   --border-subtle: rgba(0, 0, 0, 0.04);
   --glass-bg: rgba(255, 255, 255, 0.7);
@@ -44,7 +44,7 @@ html.light {
   --surface-elevated: rgba(0, 0, 0, 0.02);
   --text-primary: #0f172a;
   --text-secondary: #475569;
-  --text-muted: #94a3b8;
+  --text-muted: #52525b;
   --border-primary: rgba(0, 0, 0, 0.08);
   --border-subtle: rgba(0, 0, 0, 0.04);
   --glass-bg: rgba(255, 255, 255, 0.7);
@@ -73,8 +73,8 @@ html.dark {
   --surface-secondary: #121216;
   --surface-elevated: #18181d;
   --text-primary: #ffffff;
-  --text-secondary: #a1a1aa;
-  --text-muted: #71717a;
+  --text-secondary: #d4d4d8;
+  --text-muted: #a1a1aa;
   --border-primary: rgba(255, 255, 255, 0.08);
   --border-subtle: rgba(255, 255, 255, 0.04);
   --glass-bg: rgba(12, 12, 14, 0.75);
