@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: "Managed Kubernetes (K3s) Indonesia - High Availability Clusters",
-  description: "Deploy production-ready Managed K3s Kubernetes clusters in seconds with automated control plane, private VPC VLAN networking, and pure NVMe SSD worker nodes in Indonesia.",
+  description: "Deploy production-ready Managed K3s Kubernetes clusters in seconds with automated control plane, private VPC VLAN networking, and Enterprise SSD worker nodes in Indonesia.",
   keywords: [
     "Managed Kubernetes",
     "Managed K3s Indonesia",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Managed Kubernetes (K3s) Indonesia - High Availability Clusters | Masdika",
-    description: "Deploy production-ready Managed K3s Kubernetes clusters in seconds with automated control plane, private VPC VLAN networking, and pure NVMe SSD worker nodes in Indonesia.",
+    description: "Deploy production-ready Managed K3s Kubernetes clusters in seconds with automated control plane, private VPC VLAN networking, and Enterprise SSD worker nodes in Indonesia.",
     url: "https://www.masdika.id/k3s",
     siteName: "Masdika",
     images: [
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Managed Kubernetes (K3s) Indonesia - High Availability Clusters | Masdika",
-    description: "Deploy production-ready Managed K3s Kubernetes clusters in seconds with automated control plane, private VPC VLAN networking, and pure NVMe SSD worker nodes in Indonesia.",
+    description: "Deploy production-ready Managed K3s Kubernetes clusters in seconds with automated control plane, private VPC VLAN networking, and Enterprise SSD worker nodes in Indonesia.",
     images: ["/og-image.webp"],
   },
 };

@@ -87,11 +87,11 @@ const PRODUCTS = [
     title: "High-Performance VPS",
     subtitle: "Proxmox KVM Virtualization",
     description:
-      "Dedicated vCPU Intel Xeon instances with NVMe SSD or high-capacity HDD storage, full root SSH, and private VPC networking.",
+      "Dedicated vCPU Intel Xeon instances with Enterprise SSD or high-capacity HDD storage, full root SSH, and private VPC networking.",
     href: "/vps",
     type: "IaaS",
     sla: "99.98% SLA",
-    specs: ["Full Root Access", "NVMe SSD & HDD", "Up to 1 Gbps"],
+    specs: ["Full Root Access", "Enterprise SSD & HDD", "Up to 1 Gbps"],
     cta: "Configure VPS",
   },
   {

@@ -78,11 +78,11 @@ const REPEATED_OPERATING_SYSTEMS = [
 const VPS_FAQS = [
   {
     q: "Apakah Masdika menyediakan Cloud VPS murah di Indonesia?",
-    a: "Ya! Masdika menyediakan layanan Cloud VPS murah Indonesia berkualitas enterprise dengan sistem pembayaran hemat Pay-As-You-Go per jam, penyimpanan ultra-cepat Pure NVMe SSD, dan routing lokal IIX latensi di bawah 20ms."
+    a: "Ya! Masdika menyediakan layanan Cloud VPS murah Indonesia berkualitas enterprise dengan sistem pembayaran hemat Pay-As-You-Go per jam, penyimpanan cepat Enterprise SSD, dan routing lokal IIX latensi di bawah 20ms."
   },
   {
     q: "Berapa harga sewa Cloud VPS murah di Masdika?",
-    a: "Sewa VPS di Masdika dihitung transparan secara per jam (pay-as-you-go) mulai dari Rp 100/jam untuk vCPU, Rp 50/jam untuk RAM, dan Rp 15/jam untuk NVMe SSD. Anda hanya membayar apa yang Anda gunakan tanpa biaya kontrak bulanan yang mahal."
+    a: "Sewa VPS di Masdika dihitung transparan secara per jam (pay-as-you-go) mulai dari Rp 100/jam untuk vCPU, Rp 50/jam untuk RAM, dan Rp 15/jam untuk Enterprise SSD. Anda hanya membayar apa yang Anda gunakan tanpa biaya kontrak bulanan yang mahal."
   },
   {
     q: "Apakah ada minimal deposit saldo untuk mulai sewa VPS murah?",
@@ -300,7 +300,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
 
               {/* Subtitle / Lead (Ukuran sama persis Home Page) */}
               <p className="text-lg md:text-xl mb-10 max-w-xl leading-relaxed text-[var(--text-secondary)] font-normal">
-                Deploy scalable, lightning-fast Cloud VPS murah Indonesia berbasis KVM dalam hitungan detik. Menggunakan pure NVMe SSD, sistem fleksibel hourly pay-as-you-go, dan latensi lokal di bawah 20ms.
+                Deploy scalable, lightning-fast Cloud VPS murah Indonesia berbasis KVM dalam hitungan detik. Menggunakan Enterprise SSD &amp; SAS HDD, sistem fleksibel hourly pay-as-you-go, dan latensi lokal di bawah 20ms.
               </p>
 
               {/* Action Buttons (size="lg" sama persis Home Page) */}

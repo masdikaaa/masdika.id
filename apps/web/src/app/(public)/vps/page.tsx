@@ -6,8 +6,8 @@ import { getCachedData } from "@/lib/cache";
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: "Cloud VPS Murah Indonesia - High-Performance Compute & Pure NVMe | Masdika",
-  description: "Sewa Cloud VPS murah Indonesia berkinerja tinggi didukung enterprise Intel Xeon, pure NVMe SSD, dan sistem hemat Pay-As-You-Go per jam. Latency super rendah <20ms IIX.",
+  title: "Cloud VPS Murah Indonesia - High-Performance Compute & Enterprise SSD | Masdika",
+  description: "Sewa Cloud VPS murah Indonesia berkinerja tinggi didukung enterprise Intel Xeon, High-Speed Enterprise SSD, dan sistem hemat Pay-As-You-Go per jam. Latency super rendah <20ms IIX.",
   keywords: [
     "VPS Murah",
     "VPS Murah Indonesia",
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     "VPS Pay As You Go",
     "Cloud VPS Indonesia",
     "High Performance Compute",
-    "NVMe VPS",
+    "SSD VPS",
     "KVM VPS Indonesia",
     "Masdika VPS",
     "Cloud Server Indonesia",
@@ -28,8 +28,8 @@ export const metadata: Metadata = {
     canonical: "https://www.masdika.id/vps",
   },
   openGraph: {
-    title: "Cloud VPS Murah Indonesia - High-Performance Compute & Pure NVMe | Masdika",
-    description: "Sewa Cloud VPS murah Indonesia berkinerja tinggi didukung enterprise Intel Xeon, pure NVMe SSD, dan sistem hemat Pay-As-You-Go per jam. Latency super rendah <20ms IIX.",
+    title: "Cloud VPS Murah Indonesia - High-Performance Compute & Enterprise SSD | Masdika",
+    description: "Sewa Cloud VPS murah Indonesia berkinerja tinggi didukung enterprise Intel Xeon, High-Speed Enterprise SSD, dan sistem hemat Pay-As-You-Go per jam. Latency super rendah <20ms IIX.",
     url: "https://www.masdika.id/vps",
     siteName: "Masdika",
     images: [
@@ -45,8 +45,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Cloud VPS Murah Indonesia - High-Performance Compute & Pure NVMe | Masdika",
-    description: "Sewa Cloud VPS murah Indonesia berkinerja tinggi didukung enterprise Intel Xeon, pure NVMe SSD, dan sistem hemat Pay-As-You-Go per jam. Latency super rendah <20ms IIX.",
+    title: "Cloud VPS Murah Indonesia - High-Performance Compute & Enterprise SSD | Masdika",
+    description: "Sewa Cloud VPS murah Indonesia berkinerja tinggi didukung enterprise Intel Xeon, High-Speed Enterprise SSD, dan sistem hemat Pay-As-You-Go per jam. Latency super rendah <20ms IIX.",
     images: ["/og-image.webp"],
   },
 };
@@ -90,7 +90,7 @@ export default async function VpsLandingPage() {
           "Masdika Cloud VPS",
           "KVM VPS Murah"
         ],
-        "description": "Layanan Cloud VPS murah Indonesia berkinerja tinggi didukung prosesor enterprise Intel Xeon, penyimpanan pure NVMe SSD, virtualisasi KVM terisolasi, dan sistem hemat Pay-As-You-Go per jam.",
+        "description": "Layanan Cloud VPS murah Indonesia berkinerja tinggi didukung prosesor enterprise Intel Xeon, penyimpanan Enterprise SSD, virtualisasi KVM terisolasi, dan sistem hemat Pay-As-You-Go per jam.",
         "category": "Cloud Computing > Virtual Private Server > VPS Murah",
         "image": "https://www.masdika.id/og-image.webp",
         "brand": {
@@ -123,7 +123,7 @@ export default async function VpsLandingPage() {
             "name": "Apakah Masdika menyediakan Cloud VPS murah di Indonesia?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Ya, Masdika menyediakan layanan Cloud VPS murah Indonesia berkualitas enterprise dengan sistem pembayaran hemat Pay-As-You-Go per jam, penyimpanan ultra-cepat Pure NVMe SSD, dan routing lokal IIX latensi di bawah 20ms."
+              "text": "Ya, Masdika menyediakan layanan Cloud VPS murah Indonesia berkualitas enterprise dengan sistem pembayaran hemat Pay-As-You-Go per jam, penyimpanan cepat Enterprise SSD, dan routing lokal IIX latensi di bawah 20ms."
             }
           },
           {
@@ -131,7 +131,7 @@ export default async function VpsLandingPage() {
             "name": "Berapa harga sewa Cloud VPS murah di Masdika?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Sewa VPS di Masdika dihitung transparan secara per jam (pay-as-you-go) mulai dari Rp 100/jam untuk vCPU, Rp 50/jam untuk RAM, dan Rp 15/jam untuk NVMe SSD. Anda hanya membayar apa yang Anda gunakan tanpa biaya kontrak bulanan yang mahal."
+              "text": "Sewa VPS di Masdika dihitung transparan secara per jam (pay-as-you-go) mulai dari Rp 100/jam untuk vCPU, Rp 50/jam untuk RAM, dan Rp 15/jam untuk Enterprise SSD. Anda hanya membayar apa yang Anda gunakan tanpa biaya kontrak bulanan yang mahal."
             }
           },
           {
