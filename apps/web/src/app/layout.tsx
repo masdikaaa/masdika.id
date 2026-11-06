@@ -30,7 +30,7 @@ const getCachedMetaDescription = () =>
   );
 
 export async function generateMetadata(): Promise<Metadata> {
-  let description = "Portfolio of Masdika, Cloud Engineer, DevOps Engineer, and System Administrator based in Sidoarjo, Indonesia.";
+  let description = "Deploy scalable, lightning-fast Cloud VPS & Managed Kubernetes with Enterprise SSD storage, sub-20ms latency across Indonesia, and flexible hourly pay-as-you-go billing.";
   try {
     const metaDescSetting = await getCachedMetaDescription();
     if (metaDescSetting && metaDescSetting.value.trim() !== '') {
