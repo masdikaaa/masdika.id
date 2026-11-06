@@ -6,9 +6,42 @@ import { getCachedData } from "@/lib/cache";
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: "Cloud VPS - High Performance Compute",
-  description: "Deploy scalable, lightning-fast cloud virtual private servers. Powered by Intel Xeon E5-2673v4, enterprise-grade storage, and KVM virtualization.",
+  title: "Cloud VPS Indonesia - High Performance Compute & Pure NVMe",
+  description: "Deploy scalable, lightning-fast Cloud VPS in Indonesia powered by enterprise Intel Xeon, pure NVMe SSD storage, sub-20ms IIX low latency, and hourly pay-as-you-go billing.",
+  keywords: [
+    "Cloud VPS Indonesia",
+    "VPS Murah Indonesia",
+    "High Performance Compute",
+    "NVMe VPS",
+    "Pay As You Go VPS",
+    "KVM VPS Indonesia",
+    "Masdika VPS",
+    "Cloud Server Indonesia",
+    "Low Latency VPS"
+  ],
+  alternates: {
+    canonical: "https://www.masdika.id/vps",
+  },
   openGraph: {
+    title: "Cloud VPS Indonesia - High Performance Compute & Pure NVMe | Masdika",
+    description: "Deploy scalable, lightning-fast Cloud VPS in Indonesia powered by enterprise Intel Xeon, pure NVMe SSD storage, sub-20ms IIX low latency, and hourly pay-as-you-go billing.",
+    url: "https://www.masdika.id/vps",
+    siteName: "Masdika",
+    images: [
+      {
+        url: "/og-image.webp",
+        width: 1200,
+        height: 630,
+        alt: "Masdika Cloud VPS",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Cloud VPS Indonesia - High Performance Compute & Pure NVMe | Masdika",
+    description: "Deploy scalable, lightning-fast Cloud VPS in Indonesia powered by enterprise Intel Xeon, pure NVMe SSD storage, sub-20ms IIX low latency, and hourly pay-as-you-go billing.",
     images: ["/og-image.webp"],
   },
 };

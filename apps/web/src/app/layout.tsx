@@ -30,7 +30,7 @@ const getCachedMetaDescription = () =>
   );
 
 export async function generateMetadata(): Promise<Metadata> {
-  let description = "Portfolio of Masdika, Cloud Engineer, DevOps Engineer, and System Administrator based in Sidoarjo, Indonesia.";
+  let description = "Deploy scalable, lightning-fast Cloud VPS & Managed Kubernetes with pure NVMe SSD storage, sub-20ms latency across Indonesia, and flexible hourly pay-as-you-go billing.";
   try {
     const metaDescSetting = await getCachedMetaDescription();
     if (metaDescSetting && metaDescSetting.value.trim() !== '') {
@@ -48,12 +48,51 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL(siteUrl),
     title: {
-      template: "%s",
-      default: "Masdika | Cloud & DevOps Engineer",
+      template: "%s | Masdika",
+      default: "Masdika - Cloud VPS Indonesia, High-Performance Compute & Kubernetes",
     },
     description,
+    keywords: [
+      "Cloud VPS",
+      "Cloud VPS Indonesia",
+      "High Performance Compute",
+      "VPS Murah",
+      "VPS Pay As You Go",
+      "Managed Kubernetes",
+      "K3s",
+      "NVMe VPS",
+      "KVM VPS",
+      "Cloud Hosting",
+      "Masdika",
+      "Masdika Cloud",
+      "Masdika VPS",
+      "Low Latency Cloud Indonesia",
+      "Server VPS Indonesia"
+    ],
+    authors: [{ name: "Masdika", url: siteUrl }],
+    creator: "Masdika",
+    publisher: "Masdika",
+    formatDetection: {
+      email: false,
+      address: false,
+      telephone: false,
+    },
+    alternates: {
+      canonical: siteUrl,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
     openGraph: {
-      title: "Masdika | Cloud & DevOps Engineer",
+      title: "Masdika - Cloud VPS Indonesia, High-Performance Compute & Kubernetes",
       description,
       url: siteUrl,
       siteName: 'Masdika',
@@ -62,6 +101,7 @@ export async function generateMetadata(): Promise<Metadata> {
           url: ogImageUrl,
           width: 1200,
           height: 630,
+          alt: "Masdika - High-Performance Cloud VPS & Infrastructure",
         },
       ],
       locale: 'en_US',
@@ -69,13 +109,15 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: "Masdika | Cloud & DevOps Engineer",
+      title: "Masdika - Cloud VPS Indonesia, High-Performance Compute & Kubernetes",
       description,
       images: [ogImageUrl],
+      creator: "@masdikaid",
     },
     icons: {
       icon: '/favicon.ico',
       shortcut: '/favicon.ico',
+      apple: '/favicon.ico',
     },
   };
 }
@@ -102,6 +144,85 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        {/* Structured Data (Schema.org) for Google Knowledge Graph & AI Overview */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "Organization",
+                  "@id": "https://www.masdika.id/#organization",
+                  "name": "Masdika",
+                  "alternateName": ["Masdika Cloud", "Masdika.ID", "Masdika VPS"],
+                  "url": "https://www.masdika.id",
+                  "logo": "https://www.masdika.id/favicon.ico",
+                  "description": "Enterprise-grade Cloud VPS, High-Performance Compute, and Managed Kubernetes (K3s) hosting provider in Indonesia.",
+                  "foundingLocation": {
+                    "@type": "Place",
+                    "name": "Sidoarjo, Indonesia"
+                  },
+                  "sameAs": [
+                    "https://github.com/masdikaaa",
+                    "https://youtube.com/@masdikaid"
+                  ]
+                },
+                {
+                  "@type": "WebSite",
+                  "@id": "https://www.masdika.id/#website",
+                  "url": "https://www.masdika.id",
+                  "name": "Masdika",
+                  "publisher": {
+                    "@id": "https://www.masdika.id/#organization"
+                  },
+                  "inLanguage": "en-US",
+                  "potentialAction": {
+                    "@type": "SearchAction",
+                    "target": "https://www.masdika.id/blog?q={search_term_string}",
+                    "query-input": "required name=search_term_string"
+                  }
+                },
+                {
+                  "@type": "Product",
+                  "@id": "https://www.masdika.id/#cloud-vps",
+                  "name": "Masdika Cloud VPS",
+                  "description": "High-Performance Cloud Virtual Private Servers powered by enterprise Intel Xeon, pure NVMe SSD storage, KVM virtualization, and sub-20ms low latency routing across Indonesia.",
+                  "brand": {
+                    "@id": "https://www.masdika.id/#organization"
+                  },
+                  "category": "Cloud Computing > Virtual Private Server",
+                  "offers": {
+                    "@type": "AggregateOffer",
+                    "priceCurrency": "IDR",
+                    "lowPrice": "100",
+                    "highPrice": "500000",
+                    "priceValidUntil": "2027-12-31",
+                    "offerCount": "50",
+                    "availability": "https://schema.org/InStock"
+                  }
+                },
+                {
+                  "@type": "Product",
+                  "@id": "https://www.masdika.id/#managed-k3s",
+                  "name": "Masdika Managed Kubernetes (K3s)",
+                  "description": "Production-grade Managed K3s Kubernetes clusters with automated master control-plane, private VPC VLAN networking, and instant worker scaling.",
+                  "brand": {
+                    "@id": "https://www.masdika.id/#organization"
+                  },
+                  "category": "Cloud Computing > Managed Kubernetes",
+                  "offers": {
+                    "@type": "AggregateOffer",
+                    "priceCurrency": "IDR",
+                    "lowPrice": "100",
+                    "priceValidUntil": "2027-12-31",
+                    "availability": "https://schema.org/InStock"
+                  }
+                }
+              ]
+            })
+          }}
+        />
         {/* Preconnect & DNS-Prefetch for high-frequency external endpoints */}
         <link rel="dns-prefetch" href="https://challenges.cloudflare.com" />
         <link rel="preconnect" href="https://challenges.cloudflare.com" crossOrigin="anonymous" />

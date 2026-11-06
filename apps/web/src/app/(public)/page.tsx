@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import { getPublicSettings } from "@/lib/settings";
 import { getCachedData } from "@/lib/cache";
 import { prisma } from "@/lib/prisma";
@@ -6,6 +7,51 @@ import { HomeClient } from "./HomeClient";
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 export const fetchCache = 'force-no-store';
+
+export const metadata: Metadata = {
+  title: "Masdika - Cloud VPS Indonesia, High-Performance Compute & Kubernetes",
+  description: "Deploy scalable, ultra-fast Cloud VPS & Managed Kubernetes with pure NVMe SSD storage, sub-20ms latency across Indonesia, and flexible hourly pay-as-you-go billing.",
+  keywords: [
+    "Cloud VPS",
+    "Cloud VPS Indonesia",
+    "VPS Murah",
+    "VPS Pay As You Go",
+    "High Performance Compute",
+    "Managed Kubernetes",
+    "K3s",
+    "NVMe VPS",
+    "Cloud Infrastructure",
+    "Masdika",
+    "Masdika VPS",
+    "KVM VPS",
+    "Beli VPS"
+  ],
+  alternates: {
+    canonical: "https://www.masdika.id",
+  },
+  openGraph: {
+    title: "Masdika - Cloud VPS Indonesia, High-Performance Compute & Kubernetes",
+    description: "Deploy scalable, ultra-fast Cloud VPS & Managed Kubernetes with pure NVMe SSD storage, sub-20ms latency across Indonesia, and flexible hourly pay-as-you-go billing.",
+    url: "https://www.masdika.id",
+    siteName: "Masdika",
+    images: [
+      {
+        url: "/og-image.webp",
+        width: 1200,
+        height: 630,
+        alt: "Masdika - Cloud VPS Indonesia & High-Performance Compute",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Masdika - Cloud VPS Indonesia, High-Performance Compute & Kubernetes",
+    description: "Deploy scalable, ultra-fast Cloud VPS & Managed Kubernetes with pure NVMe SSD storage, sub-20ms latency across Indonesia, and flexible hourly pay-as-you-go billing.",
+    images: ["/og-image.webp"],
+  },
+};
 
 const fetchProjects = () =>
   prisma.project.findMany({

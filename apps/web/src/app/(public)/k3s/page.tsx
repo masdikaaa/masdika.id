@@ -6,9 +6,41 @@ import { getCachedData } from "@/lib/cache";
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: "Managed Kubernetes (K3s) - High Availability Clusters",
-  description: "Deploy lightweight, highly available managed Kubernetes clusters in seconds. We handle the control plane so you can focus on your apps.",
+  title: "Managed Kubernetes (K3s) Indonesia - High Availability Clusters",
+  description: "Deploy production-ready Managed K3s Kubernetes clusters in seconds with automated control plane, private VPC VLAN networking, and pure NVMe SSD worker nodes in Indonesia.",
+  keywords: [
+    "Managed Kubernetes",
+    "Managed K3s Indonesia",
+    "Kubernetes Murah",
+    "K3s Cluster Indonesia",
+    "Cloud Kubernetes",
+    "Container Hosting",
+    "Masdika Kubernetes",
+    "High Availability Kubernetes"
+  ],
+  alternates: {
+    canonical: "https://www.masdika.id/k3s",
+  },
   openGraph: {
+    title: "Managed Kubernetes (K3s) Indonesia - High Availability Clusters | Masdika",
+    description: "Deploy production-ready Managed K3s Kubernetes clusters in seconds with automated control plane, private VPC VLAN networking, and pure NVMe SSD worker nodes in Indonesia.",
+    url: "https://www.masdika.id/k3s",
+    siteName: "Masdika",
+    images: [
+      {
+        url: "/og-image.webp",
+        width: 1200,
+        height: 630,
+        alt: "Masdika Managed Kubernetes K3s",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Managed Kubernetes (K3s) Indonesia - High Availability Clusters | Masdika",
+    description: "Deploy production-ready Managed K3s Kubernetes clusters in seconds with automated control plane, private VPC VLAN networking, and pure NVMe SSD worker nodes in Indonesia.",
     images: ["/og-image.webp"],
   },
 };

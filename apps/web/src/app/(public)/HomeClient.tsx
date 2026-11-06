@@ -1164,7 +1164,7 @@ export function HomeClient({
       </section>
 
       {/* ── 7. TESTIMONIALS ─────────────────────────────────────────── */}
-      <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
+      <section className="py-16 lg:py-24 relative z-10 overflow-hidden" data-nosnippet>
         <SectionOrnaments variant="sides" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <FadeIn direction="down" className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12 sm:mb-16">
@@ -1198,7 +1198,7 @@ export function HomeClient({
             </div>
           </FadeIn>
 
-          <div className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_4%,black_96%,transparent)]">
+          <div className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_4%,black_96%,transparent)]" data-nosnippet>
             <div
               ref={scrollRef}
               className={`flex items-start gap-5 py-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isDragging ? "cursor-grabbing select-none" : "cursor-grab"}`}
