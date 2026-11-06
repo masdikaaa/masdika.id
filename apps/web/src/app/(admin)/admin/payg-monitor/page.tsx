@@ -555,7 +555,7 @@ export default function PaygMonitorPage() {
                                       <td className={cn("py-2.5 px-3 text-right font-medium whitespace-nowrap", isDark ? "text-cyan-400" : "text-cyan-700")}>
                                         {formatRupiah(svc.hourlyRate)}
                                         {svc.fullHourlyRate !== undefined && svc.fullHourlyRate !== svc.hourlyRate && (
-                                          <div className={cn("text-[10px] font-normal", isDark ? "text-zinc-500" : "text-slate-400")} title="Full rate when running. Stopped VPS only pays storage.">
+                                          <div className={cn("text-[10px] font-normal", isDark ? "text-zinc-500" : "text-slate-400")} title="Full reservation rate applies continuously.">
                                             <span className="line-through">{formatRupiah(svc.fullHourlyRate)}</span> storage only
                                           </div>
                                         )}
