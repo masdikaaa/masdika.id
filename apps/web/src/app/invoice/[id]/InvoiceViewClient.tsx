@@ -16,7 +16,6 @@ import {
   Share2, 
   CheckCircle2, 
   Clock, 
-  Server, 
   Wallet, 
   Layers, 
   Network, 
@@ -25,6 +24,7 @@ import {
   Globe, 
   CreditCard
 } from 'lucide-react';
+import { getInvoiceServiceIcon } from '@/components/invoice/InvoiceServiceIcon';
 import { toast } from 'sonner';
 
 interface InvoiceViewClientProps {
@@ -457,15 +457,7 @@ export default function InvoiceViewClient({ invoice, isPaid, decryptedName, decr
                       <td className="py-5 px-4 sm:px-6 align-top">
                         <div className="space-y-2">
                           <div className="flex items-center gap-2">
-                            {invoice.type === "VPS" || invoice.type === "VPS_UPGRADE" ? (
-                              <Server className="w-4 h-4 text-cyan-400 shrink-0" />
-                            ) : invoice.type === "TOP_UP" ? (
-                              <Wallet className="w-4 h-4 text-emerald-400 shrink-0" />
-                            ) : invoice.type === "IP_RESERVATION" ? (
-                              <Globe className="w-4 h-4 text-cyan-400 shrink-0" />
-                            ) : (
-                              <Layers className="w-4 h-4 text-cyan-400 shrink-0" />
-                            )}
+                            {getInvoiceServiceIcon(invoice, "w-4 h-4 shrink-0")}
                             <h3 className={cn("font-bold text-sm sm:text-base print-dark", isDark ? "text-white" : "text-slate-900")}>
                               {itemTitle}
                             </h3>
@@ -548,15 +540,7 @@ export default function InvoiceViewClient({ invoice, isPaid, decryptedName, decr
               <div className="block sm:hidden p-4 space-y-3.5 print:hidden">
                 <div className="space-y-1.5">
                   <div className="flex items-start gap-2.5">
-                    {invoice.type === "VPS" || invoice.type === "VPS_UPGRADE" ? (
-                      <Server className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-                    ) : invoice.type === "TOP_UP" ? (
-                      <Wallet className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                    ) : invoice.type === "IP_RESERVATION" ? (
-                      <Globe className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-                    ) : (
-                      <Layers className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-                    )}
+                    {getInvoiceServiceIcon(invoice, "w-4 h-4 shrink-0 mt-0.5")}
                     <h3 className={cn("font-bold text-sm leading-snug break-words", isDark ? "text-white" : "text-slate-900")}>
                       {itemTitle}
                     </h3>

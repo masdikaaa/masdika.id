@@ -2,7 +2,7 @@
 
 import { useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
-import { Receipt, Globe, Clock, CheckCircle, XCircle, CreditCard, ExternalLink, ArrowUpCircle, Printer, Plus, X, Wallet, Building2, Store, QrCode, Database, Layers, ArrowRight, RefreshCw, HardDrive, Cloud, Activity, Music, PlaySquare, FileText, Code2, Server, Box, Loader2, Search, Calendar, Filter, ChevronLeft, ChevronRight } from "lucide-react";
+import { Receipt, Globe, Clock, CheckCircle, XCircle, CreditCard, ExternalLink, ArrowUpCircle, Printer, Plus, X, Wallet, Building2, Store, QrCode, Database, Layers, ArrowRight, RefreshCw, HardDrive, Cloud, Activity, Music, PlaySquare, FileText, Code2, Server, Terminal, Network, Box, Loader2, Search, Calendar, Filter, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { formatRupiah, getCycleText } from "@/lib/billing";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -11,20 +11,7 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Pagination } from "@/components/ui/Pagination";
 import { useTheme } from "@/components/ThemeProvider";
-
-const getServiceIcon = (service: string) => {
-  if (!service) return <Database className="w-4 h-4 text-cyan-400" />;
-  const s = service.toUpperCase();
-  if (s.includes('STORAGE') || s.includes('CDN')) return <HardDrive className="w-4 h-4 text-cyan-400" />;
-  if (s.includes('DB') || s.includes('DATABASE')) return <Database className="w-4 h-4 text-cyan-400" />;
-  if (s.includes('BMKG') || s.includes('WEATHER')) return <Cloud className="w-4 h-4 text-cyan-400" />;
-  if (s.includes('EARTHQUAKE') || s.includes('QUAKE')) return <Activity className="w-4 h-4 text-cyan-400" />;
-  if (s.includes('SPOTIFY') || s.includes('MUSIC')) return <Music className="w-4 h-4 text-cyan-400" />;
-  if (s.includes('TIKTOK') || s.includes('YOUTUBE') || s.includes('VIDEO')) return <PlaySquare className="w-4 h-4 text-cyan-400" />;
-  if (s.includes('BLOG') || s.includes('TEXT')) return <FileText className="w-4 h-4 text-cyan-400" />;
-  
-  return <Code2 className="w-4 h-4 text-cyan-400" />;
-};
+import { getInvoiceServiceIcon, InvoiceItemDescription } from "@/components/invoice/InvoiceServiceIcon";
 
 export default function CustomerBillingPage() {
   const fetchBilling = async () => {
@@ -215,7 +202,7 @@ export default function CustomerBillingPage() {
                       return (
                         <div key={key} className={cn("flex items-center justify-between p-3 rounded-xl transition-colors border mb-1", isDark ? "hover:bg-white/[0.04] border-transparent hover:border-white/[0.08]" : "hover:bg-white border-transparent hover:border-slate-200/90")}>
                           <div className="flex items-center gap-3 overflow-hidden">
-                            <div className="shrink-0">{getServiceIcon(s.plan?.service)}</div>
+                            <div className="shrink-0">{getInvoiceServiceIcon(s.plan?.service)}</div>
                             <div className="min-w-0">
                               <div className="flex items-center gap-1.5 flex-wrap">
                                 <span className={cn("text-sm font-bold truncate", isDark ? "text-white" : "text-slate-900")}>{s.plan?.name}</span>
@@ -257,7 +244,7 @@ export default function CustomerBillingPage() {
                       return (
                         <div key={key} className={cn("flex items-center justify-between p-3 rounded-xl transition-colors border mb-1", isDark ? "hover:bg-white/[0.04] border-transparent hover:border-white/[0.08]" : "hover:bg-white border-transparent hover:border-slate-200/90")}>
                           <div className="flex items-center gap-3 overflow-hidden">
-                            <Server className="w-4 h-4 text-cyan-400 shrink-0" />
+                            <Terminal className="w-4 h-4 text-cyan-400 shrink-0" />
                             <div className="min-w-0">
                               <div className="flex items-center gap-1.5 flex-wrap">
                                 <span className={cn("text-sm font-bold truncate", isDark ? "text-white" : "text-slate-900")}>{v.hostname}</span>
@@ -299,7 +286,7 @@ export default function CustomerBillingPage() {
                       return (
                         <div key={key} className={cn("flex items-center justify-between p-3 rounded-xl transition-colors border mb-1", isDark ? "hover:bg-white/[0.04] border-transparent hover:border-white/[0.08]" : "hover:bg-white border-transparent hover:border-slate-200/90")}>
                           <div className="flex items-center gap-3 overflow-hidden">
-                            <Globe className="w-4 h-4 text-cyan-400 shrink-0" />
+                            <Network className="w-4 h-4 text-cyan-400 shrink-0" />
                             <div className="min-w-0">
                               <div className={cn("text-sm font-bold truncate", isDark ? "text-white" : "text-slate-900")}>{ip.ipAddress}</div>
                               <div className={cn("text-xs truncate", isDark ? "text-zinc-500" : "text-slate-500")}>{ip.billingMode === 'PAYG' ? 'PAYG' : formatRupiah(ip.monthlyPrice || (ip.hourlyRate * 720))}</div>
@@ -468,87 +455,7 @@ export default function CustomerBillingPage() {
                       </div>
                     </td>
                     <td className={cn("px-3.5 py-2 whitespace-nowrap font-medium", isDark ? "text-white" : "text-slate-900")}>
-                      {invoice.type === 'TOP_UP' ? (
-                        <div className="flex items-center gap-2">
-                          <ArrowUpCircle className="w-4 h-4 text-cyan-400" />
-                          <span>Account Top Up</span>
-                        </div>
-                      ) : invoice.type === 'VPS' || invoice.type === 'VPS_UPGRADE' ? (
-                        <div className="flex flex-col gap-0.5">
-                          <div className="flex items-center gap-2">
-                            <Server className="w-4 h-4 text-cyan-400 shrink-0" />
-                            <span className={cn("truncate font-bold", isDark ? "text-white" : "text-slate-900")}>{invoice.vpsService?.hostname ? `${invoice.type === 'VPS_UPGRADE' ? 'VPS Upgrade' : 'Cloud VPS'} - ${invoice.vpsService.hostname}` : (['PAYG_FIRST_HOUR', 'PAYG_RUNNING', 'PAYG_COMPLETED'].includes(invoice.reference) ? 'Cloud VPS (PAYG)' : 'Cloud VPS Order')}</span>
-                          </div>
-                          <span className={cn("text-xs ml-[24px]", isDark ? "text-zinc-500" : "text-slate-500")}>
-                            {invoice.vpsService?.billingMode === 'PAYG' || ['PAYG_FIRST_HOUR', 'PAYG_RUNNING', 'PAYG_COMPLETED'].includes(invoice.reference) ? 'Pay-As-You-Go' : 'Flex Month'}
-                          </span>
-                          {(invoice.type === 'VPS_UPGRADE' || invoice.type === 'VPS') && invoice.details && (() => {
-                            try {
-                              const d = JSON.parse(invoice.details);
-                              const hasDetails = d.type === 'PAYG_MONTHLY_USAGE' || d.newCpu || d.cpu || d.newRam || d.ram || d.newDisk || d.disk || d.newBackup !== undefined;
-                              if (!hasDetails) return null;
-                              return (
-                                <div className="ml-[24px] mt-1.5 flex flex-wrap gap-1.5 text-[10px] text-cyan-400 font-mono bg-cyan-500/10 px-2 py-1.5 rounded-lg border border-cyan-500/20 w-fit">
-                                  {d.type === 'PAYG_MONTHLY_USAGE' && <span>Monthly Usage</span>}
-                                  {(d.newCpu || d.cpu) && <span>CPU: {d.newCpu || d.cpu} Cores</span>}
-                                  {(d.newRam || d.ram) && <span>RAM: {d.newRam || d.ram}GB</span>}
-                                  {(d.newDisk || d.disk) && <span>Disk: {d.newDisk || d.disk}GB</span>}
-                                  {d.newBackup !== undefined && <span>Backup: {d.newBackup}GB</span>}
-                                </div>
-                              )
-                            } catch (e) { return null; }
-                          })()}
-                        </div>
-
-                      ) : invoice.type === 'IP_RESERVATION' ? (
-                        <div className="flex flex-col gap-0.5">
-                          <div className="flex items-center gap-2">
-                            <Globe className="w-4 h-4 text-cyan-400 shrink-0" />
-                            <span className={cn("truncate font-bold font-mono", isDark ? "text-white" : "text-slate-900")}>
-                              {invoice.details ? (() => { try { return JSON.parse(invoice.details).ipAddress; } catch(e) { return 'Reserved IP'; } })() : 'Reserved IP'}
-                            </span>
-                          </div>
-                          <span className={cn("text-xs ml-[24px]", isDark ? "text-zinc-500" : "text-slate-500")}>Reserved IP</span>
-                        </div>
-                      ) : invoice.type === 'SUBSCRIPTION' && invoice.vpsServiceId ? (
-                        <div className="flex flex-col gap-0.5">
-                          <div className="flex items-center gap-2">
-                            <Server className="w-4 h-4 text-cyan-400 shrink-0" />
-                            <span className={cn("truncate font-bold", isDark ? "text-white" : "text-slate-900")}>{invoice.vpsService?.hostname || 'Cloud VPS'}</span>
-                          </div>
-                          <span className={cn("text-xs ml-[24px]", isDark ? "text-zinc-500" : "text-slate-500")}>PAYG FINAL BILLING</span>
-                          {invoice.details && (() => {
-                            try {
-                              const d = JSON.parse(invoice.details);
-                              if (Array.isArray(d) && d[0]?.name) {
-                                return (
-                                  <div className="ml-[24px] mt-1.5 flex flex-wrap gap-1.5 text-[10px] text-cyan-400 font-mono bg-cyan-500/10 px-2 py-1.5 rounded-lg border border-cyan-500/20 w-fit">
-                                    <span>{d[0].name}</span>
-                                  </div>
-                                )
-                              }
-                            } catch(e) {}
-                            return null;
-                          })()}
-                        </div>
-                      ) : invoice.subscription ? (
-                        <div className="flex flex-col gap-0.5">
-                          <div className="flex items-center gap-2">
-                            <div className="shrink-0">{getServiceIcon(invoice.subscription?.plan?.service)}</div>
-                            <span className={cn("truncate font-bold", isDark ? "text-white" : "text-slate-900")}>{`${invoice.subscription?.plan?.service?.replace('_', ' ')} - ${invoice.subscription?.plan?.name}`}</span>
-                          </div>
-                          <span className={cn("text-xs ml-[24px]", isDark ? "text-zinc-500" : "text-slate-500")}>
-                            {['PAYG_RUNNING', 'PAYG_COMPLETED'].includes(invoice.reference) ? 'Pay-As-You-Go' : `Cycle: ${getCycleText(invoice.subscription?.cycle)}`}
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col gap-0.5">
-                          <div className="flex items-center gap-2">
-                            <Database className={cn("w-4 h-4 shrink-0", isDark ? "text-zinc-500" : "text-slate-500")} />
-                            <span className={cn("italic", isDark ? "text-zinc-500" : "text-slate-500")}>Plan Data Unavailable</span>
-                          </div>
-                        </div>
-                      )}
+                      <InvoiceItemDescription invoice={invoice} isDark={isDark} />
                     </td>
                     <td className="px-3.5 py-2 font-bold whitespace-nowrap">
                       {formatRupiah(invoice.amount)}
