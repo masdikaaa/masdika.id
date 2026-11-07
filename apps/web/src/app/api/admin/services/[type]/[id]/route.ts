@@ -26,7 +26,6 @@ export async function DELETE(req: Request, props: { params: Promise<{ type: stri
         case 'subscriptions': 
           result = await prisma.subscription.delete({ where: { id } }); 
           break;
-        case 'shortlinks': result = await prisma.shortLink.delete({ where: { id } }); break;
         case 'apikeys': result = await prisma.apiKey.delete({ where: { id } }); break;
         case 'vps': 
           const vpsHard = await prisma.vpsService.findUnique({ where: { id } });
@@ -66,12 +65,6 @@ export async function DELETE(req: Request, props: { params: Promise<{ type: stri
         result = await prisma.subscription.update({
           where: { id },
           data: { status: statusValue, terminationDate: new Date() }
-        });
-        break;
-      case 'shortlinks':
-        result = await prisma.shortLink.update({
-          where: { id },
-          data: { status: statusValue }
         });
         break;
       case 'apikeys':

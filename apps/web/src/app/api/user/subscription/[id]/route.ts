@@ -54,7 +54,7 @@ export async function DELETE(
 
     try {
 
-      // Add other service cleanups here in the future if needed (e.g., Shortener, API keys)
+      // Add other service cleanups here in the future if needed (e.g., API keys)
 
       // 3. Finalize any PAYG invoices
       if (subscription.cycle === 'HOURLY') {

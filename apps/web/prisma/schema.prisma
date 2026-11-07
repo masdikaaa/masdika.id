@@ -45,7 +45,6 @@ model User {
   reservedIps        ReservedIp[]
   resetTokens        ResetToken[]
   secureFiles        SecureMedia[]
-  shortLinks         ShortLink[]
   subscriptions      Subscription[]
   supportTickets     SupportTicket[]
   ticketMessages     TicketMessage[]
@@ -539,21 +538,6 @@ model RegistrationOtp {
   phone        String?
   postalCode   String?
   state        String?
-}
-
-model ShortLink {
-  id        Int      @id @default(autoincrement())
-  code      String   @unique
-  url       String
-  clicks    Int      @default(0)
-  status    String   @default("ACTIVE")
-  userId    Int?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([status])
 }
 
 model Plan {

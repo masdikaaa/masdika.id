@@ -21,7 +21,6 @@ export async function GET(req: Request, props: { params: Promise<{ id: string }>
         },
 
         secureFiles: true,
-        shortLinks: true,
         apiKeys: true
       }
     });

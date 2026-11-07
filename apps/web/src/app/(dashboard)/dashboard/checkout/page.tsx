@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, Suspense } from "react";
 import { useTheme } from "@/components/ThemeProvider";
 import {
   Check, ChevronRight, ChevronLeft, ShieldCheck,
-  Wallet, Code2, Link as LinkIcon, Cloud,
+  Wallet, Code2, Cloud,
   UploadCloud, Server, FileVideo, Music, PlaySquare,
   FileText, Activity, X, ArrowUpCircle, ShoppingCart, Loader2, BadgeCheck, RefreshCw, Terminal, Plus
 } from "lucide-react";
@@ -97,8 +97,7 @@ interface ServiceDef {
 const CATEGORIES = [
   { id: "COMPUTE", name: "Compute & VPS", icon: Server },
   { id: "STORAGE_CDN", name: "File CDN", icon: UploadCloud },
-  { id: "DEVELOPER_API", name: "Developer APIs", icon: Code2 },
-  { id: "URL_SHORTENER", name: "URL Shortener", icon: LinkIcon }
+  { id: "DEVELOPER_API", name: "Developer APIs", icon: Code2 }
 ];
 
 const SERVICES: ServiceDef[] = [
@@ -128,15 +127,6 @@ const SERVICES: ServiceDef[] = [
     desc: "Low-latency edge object delivery with automatic media optimization.",
     badge: "Edge Speed",
     tags: ["Global Edge", "Image Optimizer", "98.99% SLA"]
-  },
-  {
-    id: "SHORTENER",
-    name: "URL Shortener",
-    category: "URL_SHORTENER",
-    icon: LinkIcon,
-    desc: "Custom branded short links with real-time click telemetry and QR generation.",
-    badge: "Analytics",
-    tags: ["Custom Domains", "Click Telemetry", "QR Codes"]
   },
   {
     id: "TIKTOK",
@@ -383,10 +373,6 @@ function CheckoutContent() {
       if (limits.transferGB) specs.push(`${limits.transferGB} GB Bandwidth / mo`);
       if (limits.requests && limits.requests !== 'unlimited') specs.push(`${limits.requests.toString().toUpperCase()} API Requests`);
       if (limits.requests === 'unlimited') specs.push(`Unlimited API Requests`);
-    } else if (plan.service === 'SHORTENER') {
-      if (limits.requests && limits.requests !== 'unlimited') specs.push(`${limits.requests.toString().toUpperCase()} Custom Short Links`);
-      if (limits.requests === 'unlimited') specs.push(`Unlimited Custom Links`);
-      specs.push('Advanced Analytics');
     } else {
       if (limits.requests && limits.requests !== 'unlimited') specs.push(`${limits.requests.toString().toUpperCase()} API Requests`);
       if (limits.requests === 'unlimited') specs.push(`Unlimited API Requests`);

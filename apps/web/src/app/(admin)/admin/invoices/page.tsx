@@ -2,7 +2,7 @@
 
 import { useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
-import { Receipt, Trash2, CheckCircle, Clock, XCircle, CreditCard, Link as LinkIcon, Download, Search, Eye, Printer, Globe, Wallet, Database, HardDrive, Cloud, Activity, Music, PlaySquare, FileText, Code2, Server, RefreshCw } from "lucide-react";
+import { Receipt, Trash2, CheckCircle, Clock, XCircle, CreditCard, Download, Search, Eye, Printer, Globe, Wallet, Database, HardDrive, Cloud, Activity, Music, PlaySquare, FileText, Code2, Server, RefreshCw } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { AdminLoader } from "@/components/admin/AdminLoader";
 
@@ -16,7 +16,6 @@ const getServiceIcon = (service: string, isDark: boolean) => {
   if (s.includes('SPOTIFY') || s.includes('MUSIC')) return <Music className={cn("w-4 h-4", isDark ? "text-green-400" : "text-slate-700")} />;
   if (s.includes('TIKTOK') || s.includes('YOUTUBE') || s.includes('VIDEO')) return <PlaySquare className={cn("w-4 h-4", isDark ? "text-red-400" : "text-slate-700")} />;
   if (s.includes('BLOG') || s.includes('TEXT')) return <FileText className={cn("w-4 h-4", isDark ? "text-orange-400" : "text-slate-700")} />;
-  if (s.includes('SHORTENER') || s.includes('URL')) return <LinkIcon className={cn("w-4 h-4", isDark ? "text-indigo-400" : "text-slate-700")} />;
   
   return <Code2 className={cn("w-4 h-4", isDark ? "text-indigo-400" : "text-slate-700")} />;
 };

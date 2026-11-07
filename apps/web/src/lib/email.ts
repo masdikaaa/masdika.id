@@ -1414,19 +1414,6 @@ export async function sendCustomerPaymentSuccessEmail(details: {
  */
 function getServiceUsageGuide(serviceName: string, baseUrl: string): string {
   const guides: Record<string, string> = {
-
-    'SHORTENER': `
-      <h3 style="color: #10b981; margin: 20px 0 10px 0; font-size: 16px;">🔗 Getting Started with URL Shortener</h3>
-      <table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom: 15px;">
-        <tr><td style="background-color: #020617; padding: 16px; border-radius: 8px; border: 1px solid #1e293b;">
-          <p style="margin: 0 0 8px 0; color: #ffffff; font-size: 14px; font-weight: bold;">Step 1: Create Short Links</p>
-          <p style="margin: 0 0 12px 0; color: #9ca3af; font-size: 13px;">Go to <a href="${baseUrl}/dashboard/shortener" style="color: #06b6d4;">Dashboard → URL Shortener</a> and paste your long URL. A random short alias will be generated automatically.</p>
-          <p style="margin: 0 0 8px 0; color: #ffffff; font-size: 14px; font-weight: bold;">Step 2: Share Your Link</p>
-          <p style="margin: 0 0 12px 0; color: #9ca3af; font-size: 13px;">Copy the shortened URL and share it anywhere - social media, emails, QR codes, etc.</p>
-          <p style="margin: 0 0 8px 0; color: #ffffff; font-size: 14px; font-weight: bold;">Step 3: Track Analytics</p>
-          <p style="margin: 0; color: #9ca3af; font-size: 13px;">View click statistics and analytics for each link directly from your dashboard.</p>
-        </td></tr>
-      </table>`,
     'API_HUB': `
       <h3 style="color: #a855f7; margin: 20px 0 10px 0; font-size: 16px;">⚡ Getting Started with API Hub</h3>
       <table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom: 15px;">

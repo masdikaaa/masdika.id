@@ -2,7 +2,7 @@
 
 import { useUrlNumber } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
-import { Play, Terminal, Key, Activity, Code2, Copy, CheckCircle2, Check, Upload, AlertCircle, Lock, Loader2, ArrowLeft, ChevronLeft, Cloud, Link as LinkIcon, Radio, CloudRain, RefreshCw } from "lucide-react";
+import { Play, Terminal, Key, Activity, Code2, Copy, CheckCircle2, Check, Upload, AlertCircle, Lock, Loader2, ArrowLeft, ChevronLeft, Cloud, Radio, CloudRain, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -19,14 +19,6 @@ const API_CONFIG: Record<string, any> = {
     endpoint: 'https://masdika.id/api/public/upload',
     requiresUpload: true,
     icon: Cloud
-  },
-  'SHORTENER': {
-    title: 'Masdika URL Shortener API',
-    desc: 'Create and manage shortened URLs programmatically. Accepts a long URL and returns an auto-generated short link.',
-    methods: ['POST'],
-    endpoint: 'https://masdika.id/api/shortener',
-    bodyTemplate: '{\n  "url": "https://example.com"\n}',
-    icon: LinkIcon
   },
   'BMKG_EARTHQUAKE': {
     title: 'BMKG Earthquake API',

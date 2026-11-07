@@ -33,12 +33,6 @@ export async function PUT(req: Request, props: { params: Promise<{ type: string;
         });
         break;
 
-      case 'shortlinks':
-        result = await prisma.shortLink.update({
-          where: { id },
-          data: { status: statusValue }
-        });
-        break;
       case 'apikeys':
         result = await prisma.apiKey.update({
           where: { id },

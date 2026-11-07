@@ -22,7 +22,7 @@ interface ProvisioningVisualizerProps {
   logs: LogLine[];
   stats?: StatLine[];
   title?: string;
-  iconType?: "vps" | "k3s" | "api-hub" | "file-cdn" | "shortener";
+  iconType?: "vps" | "k3s" | "api-hub" | "file-cdn";
   targetServer?: string;
   provisionEstimate?: string;
 }

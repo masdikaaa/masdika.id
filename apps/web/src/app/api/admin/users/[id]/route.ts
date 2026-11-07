@@ -39,7 +39,6 @@ export async function GET(req: Request, props: { params: Promise<{ id: string }>
         subscriptions: { include: { plan: true } },
 
         apiKeys: true,
-        shortLinks: true,
         vpsServices: { where: { kubernetesClusterId: null }, include: { assignedIps: true } },
         kubernetesClusters: true,
       }
@@ -77,7 +76,6 @@ export async function DELETE(req: Request, props: { params: Promise<{ id: string
 
 
     await prisma.apiKey.deleteMany({ where: { userId: user.id } });
-    await prisma.shortLink.deleteMany({ where: { userId: user.id } });
     
     // 4.5. Find and delete VPC Peerings and VPC Networks from Mikrotik
     const peerings = await prisma.vpcPeering.findMany({

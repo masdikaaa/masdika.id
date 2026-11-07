@@ -2,7 +2,7 @@
 import { useUrlNumber } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
-import { Key, Activity, Clock, Loader2, Server, User as UserIcon, Trash2, RefreshCw, Link as LinkIcon } from "lucide-react";
+import { Key, Activity, Clock, Loader2, Server, User as UserIcon, Trash2, RefreshCw } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
@@ -75,7 +75,7 @@ export default function AdminApiHubPage() {
       <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-2">
         <div>
           <h1 className={cn("text-xl sm:text-2xl font-bold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>API Hub Users</h1>
-          <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Monitor API key usage, short URLs, and active developers in real-time.</p>
+          <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Monitor API key usage and active developers in real-time.</p>
         </div>
         <div className="flex items-center gap-3">
           <div className={cn("px-3.5 py-2 rounded-lg font-semibold text-xs border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
@@ -92,7 +92,7 @@ export default function AdminApiHubPage() {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
         <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Total API Keys</span>
@@ -135,21 +135,6 @@ export default function AdminApiHubPage() {
           </div>
           <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
             Registered accounts
-          </div>
-        </div>
-
-        <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-          <div className="flex items-center justify-between mb-3">
-            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>Short Links</span>
-            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
-              <LinkIcon className="w-4 h-4" />
-            </div>
-          </div>
-          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-            {users.reduce((acc: number, curr: any) => acc + (curr.shortLinkCount || 0), 0)}
-          </div>
-          <div className={cn("mt-2 text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>
-            Generated tracking URLs
           </div>
         </div>
       </div>
@@ -200,11 +185,6 @@ export default function AdminApiHubPage() {
                         ) : (
                           <span className={cn("text-sm italic", isDark ? "text-zinc-500" : "text-slate-500")}>No API Keys Generated</span>
                         )}
-                        {user.shortLinkCount > 0 && (
-                          <span className={cn("font-medium text-xs mt-1 bg-emerald-500/10 w-fit px-2 py-0.5 rounded", isDark ? "text-emerald-400" : "text-emerald-700")}>
-                            {user.shortLinkCount} Short Links
-                          </span>
-                        )}
                       </div>
                     </td>
                     <td className="px-3.5 py-2.5">
@@ -241,7 +221,7 @@ export default function AdminApiHubPage() {
         onClose={() => setDeleteId(null)}
         onConfirm={handleDelete}
         title="Delete Customer API Keys"
-        description="Are you sure you want to delete all API keys for this customer? This will permanently remove their active API keys and short links, but their account and other data will be retained. This action cannot be undone."
+        description="Are you sure you want to delete all API keys for this customer? This will permanently remove their active API keys, but their account and other data will be retained. This action cannot be undone."
         confirmText="Delete Keys"
         isLoading={deleting}
       />

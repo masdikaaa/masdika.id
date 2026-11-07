@@ -12,7 +12,6 @@ import {
   Terminal, 
   Code2, 
   UploadCloud, 
-  Link2, 
   FlaskConical, 
   Copy, 
   Check, 
@@ -103,7 +102,6 @@ export default function LookingGlassPage() {
   const productLinks = [
     { title: "API Hub", desc: "Discover and test public REST APIs for your projects.", path: "/api-hub", icon: FlaskConical },
     { title: "File CDN", desc: "Securely upload temporary files up to 100MB.", path: "/file-cdn", icon: UploadCloud },
-    { title: "URL Shortener", desc: "Create premium short links with custom aliases.", path: "/shortener", icon: Link2 },
     { title: "Cloud VPS", desc: "High-performance virtual private servers with SSD.", path: "/vps", icon: Terminal },
     { title: "Kubernetes (K3s)", desc: "Lightweight, fully managed Kubernetes clusters.", path: "/k3s", icon: SiKubernetes },
     { title: "Reseller API", desc: "Integrate our cloud provisioning programmatically.", path: "/reseller-api", icon: Code2 },

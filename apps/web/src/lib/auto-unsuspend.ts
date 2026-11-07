@@ -241,7 +241,7 @@ export async function attemptAutoUnsuspendVps(vpsId: number) {
 }
 
 /**
- * Attempts to unsuspend a Subscription (File CDN, Shortener, API Hub, etc.)
+ * Attempts to unsuspend a Subscription (File CDN, API Hub, etc.)
  */
 export async function attemptAutoUnsuspendSubscription(subscriptionId: number) {
   try {

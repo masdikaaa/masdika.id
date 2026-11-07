@@ -23,16 +23,6 @@ const SEED_DATA = [
     isPremium: false,
   },
   {
-    slug: "shortener",
-    name: "Masdika URL Shortener API",
-    description: "Create and manage shortened URLs programmatically. Accepts a long URL and returns an auto-generated short link. Requires API Key authentication.",
-    icon: "echo",
-    endpoint: "https://www.masdika.id/api/shortener",
-    method: "POST",
-    category: "Tools",
-    isPremium: false,
-  },
-  {
     slug: "youtube-downloader",
     name: "YouTube Downloader API",
     description: "Extract video metadata and direct MP4/MP3 download links from YouTube. Fast and reliable stream extraction.",
@@ -74,6 +64,9 @@ export async function GET(req: NextRequest) {
         create: data
       });
     }
+
+    // Clean up deprecated projects if any
+    await prisma.apiProject.deleteMany({ where: { slug: "shortener" } }).catch(() => {});
 
     const projects = await prisma.apiProject.findMany({
       orderBy: { createdAt: "desc" }

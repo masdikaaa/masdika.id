@@ -21,7 +21,6 @@ import {
   UploadCloud,
   Code,
   CodeXml,
-  Link2,
   Terminal,
   Sun,
   Moon,
@@ -130,13 +129,6 @@ const DEV_MENU_ITEMS: MenuItem[] = [
     description: "Discover and test public REST APIs for your projects.",
     href: "/api-hub",
     icon: CodeXml,
-    badge: "New",
-  },
-  {
-    title: "URL Shortener",
-    description: "Create premium short links with custom aliases.",
-    href: "/shortener",
-    icon: Link2,
     badge: "New",
   },
   {

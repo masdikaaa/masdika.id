@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from "react";
 import { Reorder } from "framer-motion";
-import { GripVertical, Calendar, Briefcase, Users, FileText, BookOpen, Save, RotateCcw, UploadCloud, Code, Compass, User, Server, LayoutDashboard, Star, Link2, Database, Cloud, Box , RefreshCw , Settings, Terminal, CodeXml } from "lucide-react";
+import { GripVertical, Calendar, Briefcase, Users, FileText, BookOpen, Save, RotateCcw, UploadCloud, Code, Compass, User, Server, LayoutDashboard, Star, Database, Cloud, Box , RefreshCw , Settings, Terminal, CodeXml } from "lucide-react";
 import { SiKubernetes } from "react-icons/si";
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
@@ -17,7 +17,6 @@ const MENU_META: Record<string, { label: string; description: string; icon: Reac
   upload:    { label: "File CDN",       description: "Securely upload temporary files up to 100MB.",                 icon: UploadCloud, color: "text-cyan-400", bg: "bg-cyan-500/10" },
   "api-hub": { label: "API Hub",             description: "Discover and test public REST APIs for your projects.",        icon: Code,      color: "text-cyan-400", bg: "bg-cyan-500/10" },
   "reseller-api": { label: "Reseller API",   description: "White-label VPS provisioning API.",                            icon: CodeXml,   color: "text-cyan-400", bg: "bg-cyan-500/10" },
-  shortener: { label: "URL Shortener",       description: "Create premium short links with custom aliases.",              icon: Link2,     color: "text-cyan-400", bg: "bg-cyan-500/10" },
   vps:       { label: "Cloud VPS",           description: "High-performance virtual private servers.",                    icon: Terminal,     color: "text-cyan-400", bg: "bg-cyan-500/10" },
   k3s:       { label: "Kubernetes (K3s)",    description: "Lightweight, fully managed Kubernetes clusters.",              icon: SiKubernetes,       color: "text-cyan-400", bg: "bg-cyan-500/10" },
   about:     { label: "About",               description: "Learn more about who we are and what we do.",                  icon: User,      color: "text-cyan-400", bg: "bg-cyan-500/10" },
@@ -29,8 +28,8 @@ const MENU_META: Record<string, { label: string; description: string; icon: Reac
 const DEFAULT_ORDER  = ['events', 'vacancies', 'community', 'blog', 'series'];
 const DEFAULT_BADGES = { events: 'New', vacancies: 'New', series: 'New' } as Record<string, string | false>;
 
-const DEFAULT_DEV_ORDER  = ['api-hub', 'reseller-api', 'shortener', 'upload', 'vps', 'k3s'];
-const DEFAULT_DEV_BADGES = { 'api-hub': 'New', 'reseller-api': 'New', shortener: 'New', upload: 'New', vps: 'Premium', k3s: 'Premium' } as Record<string, string | false>;
+const DEFAULT_DEV_ORDER  = ['api-hub', 'reseller-api', 'upload', 'vps', 'k3s'];
+const DEFAULT_DEV_BADGES = { 'api-hub': 'New', 'reseller-api': 'New', upload: 'New', vps: 'Premium', k3s: 'Premium' } as Record<string, string | false>;
 
 const DEFAULT_COMPANY_ORDER  = ['about', 'services', 'portfolio', 'skills'];
 const DEFAULT_COMPANY_BADGES = {} as Record<string, string | false>;

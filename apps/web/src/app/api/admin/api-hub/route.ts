@@ -13,8 +13,7 @@ export async function GET() {
     const users = await prisma.user.findMany({
       where: { role: 'USER' },
       include: {
-        apiKeys: true,
-        shortLinks: true
+        apiKeys: true
       },
       orderBy: { createdAt: 'desc' }
     });
@@ -34,7 +33,6 @@ export async function GET() {
         totalUsage,
         lastUsed: lastUsedKey ? lastUsedKey.lastUsed : null,
         keyCount: user.apiKeys.length,
-        shortLinkCount: user.shortLinks.length,
         apiKeys: user.apiKeys.map((k: any) => ({
           name: k.name || "Default Key",
           key: k.key
@@ -76,12 +74,7 @@ export async function DELETE(req: Request) {
       where: { userId }
     });
 
-    // Delete all Short Links associated with the user
-    await prisma.shortLink.deleteMany({
-      where: { userId }
-    });
-
-    return NextResponse.json({ success: true, message: 'Customer API keys and short links deleted successfully' });
+    return NextResponse.json({ success: true, message: 'Customer API keys deleted successfully' });
   } catch (error) {
     console.error('Error deleting api hub user:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

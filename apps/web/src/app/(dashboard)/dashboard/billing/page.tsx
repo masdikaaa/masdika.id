@@ -2,7 +2,7 @@
 
 import { useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
-import { Receipt, Globe, Clock, CheckCircle, XCircle, CreditCard, ExternalLink, ArrowUpCircle, Printer, Plus, X, Wallet, Building2, Store, QrCode, Database, Layers, ArrowRight, RefreshCw, HardDrive, Cloud, Activity, Music, PlaySquare, FileText, Link as LinkIcon, Code2, Server, Box, Loader2, Search, Calendar, Filter, ChevronLeft, ChevronRight } from "lucide-react";
+import { Receipt, Globe, Clock, CheckCircle, XCircle, CreditCard, ExternalLink, ArrowUpCircle, Printer, Plus, X, Wallet, Building2, Store, QrCode, Database, Layers, ArrowRight, RefreshCw, HardDrive, Cloud, Activity, Music, PlaySquare, FileText, Code2, Server, Box, Loader2, Search, Calendar, Filter, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { formatRupiah, getCycleText } from "@/lib/billing";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -22,7 +22,6 @@ const getServiceIcon = (service: string) => {
   if (s.includes('SPOTIFY') || s.includes('MUSIC')) return <Music className="w-4 h-4 text-cyan-400" />;
   if (s.includes('TIKTOK') || s.includes('YOUTUBE') || s.includes('VIDEO')) return <PlaySquare className="w-4 h-4 text-cyan-400" />;
   if (s.includes('BLOG') || s.includes('TEXT')) return <FileText className="w-4 h-4 text-cyan-400" />;
-  if (s.includes('SHORTENER') || s.includes('URL')) return <LinkIcon className="w-4 h-4 text-cyan-400" />;
   
   return <Code2 className="w-4 h-4 text-cyan-400" />;
 };

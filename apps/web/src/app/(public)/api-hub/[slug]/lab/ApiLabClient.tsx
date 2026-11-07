@@ -21,9 +21,7 @@ export default function ApiLabClient({ project }: { project: any }) {
   const [selectedKeyIndex, setSelectedKeyIndex] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [requestBody, setRequestBody] = useState(() => {
-    if (project.slug === "shortener") {
-      return '{\n  "url": "https://example.com"\n}';
-    } else if (project.slug === "youtube-downloader") {
+    if (project.slug === "youtube-downloader") {
       return '{\n  "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"\n}';
     } else if (project.slug === "tiktok-downloader") {
       return '{\n  "url": "https://www.tiktok.com/@tiktok/video/7106594312292453678"\n}';
@@ -59,7 +57,6 @@ export default function ApiLabClient({ project }: { project: any }) {
         if (allKeys && allKeys.length > 0) {
           const getServiceFromSlug = (slug: string) => {
             switch (slug) {
-              case 'shortener': return 'SHORTENER';
               case 'youtube-downloader': return 'YOUTUBE';
               case 'tiktok-downloader': return 'TIKTOK';
               case 'spotify-downloader': return 'SPOTIFY';
@@ -665,9 +662,7 @@ export default function ApiLabClient({ project }: { project: any }) {
                     }
                   } else if (project.method === "POST" || project.method === "PUT") {
                     let bodyContent = '{}';
-                    if (project.slug === "shortener") {
-                      bodyContent = '{\n  "url": "https://example.com"\n}';
-                    } else if (project.slug === "youtube-downloader") {
+                    if (project.slug === "youtube-downloader") {
                       bodyContent = '{\n  "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"\n}';
                     } else if (project.slug === "tiktok-downloader") {
                       bodyContent = '{\n  "url": "https://www.tiktok.com/@tiktok/video/7106594312292453678"\n}';

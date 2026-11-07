@@ -15,7 +15,7 @@ interface ProvisioningSectionProps {
   logs: any[];
   stats: any[];
   terminalTitle?: string;
-  iconType?: "vps" | "k3s" | "api-hub" | "file-cdn" | "shortener";
+  iconType?: "vps" | "k3s" | "api-hub" | "file-cdn";
   targetServer?: string;
   provisionEstimate?: string;
 }

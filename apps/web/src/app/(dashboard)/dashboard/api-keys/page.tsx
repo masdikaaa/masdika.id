@@ -233,7 +233,7 @@ export default function DashboardApiKeys() {
             </div>
             <h4 className={cn("text-lg sm:text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Active API Service</h4>
             <p className={cn("text-xs sm:text-sm max-w-md mx-auto mb-6 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
-              You need an active subscription to any API service (like File CDN or URL Shortener) to generate and manage API keys.
+              You need an active subscription to any API service (like File CDN or Developer APIs) to generate and manage API keys.
             </p>
             <Link href="/dashboard/checkout" className="inline-flex items-center justify-center bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold px-3.5 py-2 rounded-xl text-xs sm:text-xs transition-all">
               View Plans

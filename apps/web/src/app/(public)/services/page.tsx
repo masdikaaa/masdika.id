@@ -12,7 +12,6 @@ import {
   Terminal, 
   ArrowRight, 
   Code, 
-  Link2, 
   MessageSquare,
   Layout,
   CheckCircle,
@@ -51,14 +50,6 @@ export default function ServicesPage() {
       percentage: 99,
       description: "Blazing fast Virtual Private Servers with dedicated resources, SSD & HDD storage options, and root access.",
       href: "/vps"
-    },
-    {
-      icon: Link2,
-      title: "URL Shortener",
-      type: "SaaS",
-      percentage: 99,
-      description: "Fast, reliable, and trackable short links to optimize your marketing campaigns and share URLs gracefully.",
-      href: "/shortener"
     },
     {
       icon: Cloud,

@@ -3,7 +3,7 @@ import { useUpdateEffect, useUrlNumber, useUrlTab } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Plus, Edit2, Trash2, LayoutList, Server, Zap, Link as LinkIcon, Database, Check, X, ShieldAlert, CheckCircle, FileText, FileVideo, Music, PlaySquare, Cloud, Activity, UploadCloud, ChevronDown, LayoutDashboard, RefreshCw } from "lucide-react";
+import { Plus, Edit2, Trash2, LayoutList, Server, Zap, Database, Check, X, ShieldAlert, CheckCircle, FileText, FileVideo, Music, PlaySquare, Cloud, Activity, UploadCloud, ChevronDown, LayoutDashboard, RefreshCw } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { formatRupiah } from "@/lib/billing";
 import { Pagination } from "@/components/ui/Pagination";
@@ -23,8 +23,6 @@ interface Plan {
 const getDefaultLimitFields = (service: string) => {
   if (service === 'CDN') {
     return [{key: 'storageGB', value: '10'}, {key: 'transferGB', value: '50'}, {key: 'requests', value: 'unlimited'}];
-  } else if (service === 'SHORTENER') {
-    return [{key: 'links', value: '500'}];
   } else {
     return [{key: 'requests', value: '10000'}];
   }
@@ -176,7 +174,6 @@ export default function AdminPlansPage() {
   const getServiceIcon = (service: string) => {
     switch (service) {
       case 'CDN': return <UploadCloud className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} />;
-      case 'SHORTENER': return <LinkIcon className={cn("w-4 h-4", isDark ? "text-emerald-400" : "text-emerald-700")} />;
       case 'TIKTOK': return <FileVideo className={cn("w-4 h-4", isDark ? "text-purple-400" : "text-purple-700")} />;
       case 'SPOTIFY': return <Music className={cn("w-4 h-4", isDark ? "text-purple-400" : "text-purple-700")} />;
       case 'YOUTUBE': return <PlaySquare className={cn("w-4 h-4", isDark ? "text-purple-400" : "text-purple-700")} />;
@@ -344,7 +341,7 @@ export default function AdminPlansPage() {
       {/* Filter and Control Bar (GAMBAR 1 Style) */}
       <div className={cn("p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
         <div className={cn("inline-flex items-center gap-1 p-1 rounded-xl border max-w-full overflow-x-auto scrollbar-none self-start", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
-          {["ALL", "CDN", "SHORTENER", "PASTEBIN", "LINK_BIO"].map((srv) => {
+          {["ALL", "CDN", "PASTEBIN", "LINK_BIO"].map((srv) => {
             const count = srv === "ALL" ? plans.length : plans.filter(p => p.service === srv).length;
             return (
               <button
@@ -513,7 +510,6 @@ export default function AdminPlansPage() {
                       setLimitFields(getDefaultLimitFields(newService));
                     }}
                     options={[
-                      { value: "SHORTENER", label: "URL Shortener" },
                       { value: "CDN", label: "CDN" },
                       { value: "TIKTOK", label: "TikTok Downloader" },
                       { value: "SPOTIFY", label: "Spotify Downloader" },

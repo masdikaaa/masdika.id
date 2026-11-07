@@ -20,7 +20,6 @@ import {
   FileText,
   Calendar,
   Clock,
-  Link2,
   Building2,
   Quote,
   BadgeCheck,
@@ -93,18 +92,6 @@ const PRODUCTS = [
     sla: "99.98% SLA",
     specs: ["Full Root Access", "Enterprise SSD & HDD", "Up to 1 Gbps"],
     cta: "Configure VPS",
-  },
-  {
-    icon: Link2,
-    title: "URL Shortener",
-    subtitle: "Branded Links & Click Analytics",
-    description:
-      "Low-latency edge link redirection with custom aliases, QR code generation, and geographic click stream analytics.",
-    href: "/shortener",
-    type: "SaaS",
-    sla: "99.99% SLA",
-    specs: ["Custom Slugs", "Geo Analytics", "Instant Redirect"],
-    cta: "Create Short Link",
   },
   {
     icon: Cloud,
