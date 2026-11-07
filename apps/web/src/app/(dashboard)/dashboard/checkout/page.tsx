@@ -95,9 +95,9 @@ interface ServiceDef {
 }
 
 const CATEGORIES = [
-  { id: "COMPUTE", name: "Compute & VPS", icon: Server },
+  { id: "COMPUTE", name: "Cloud Compute", icon: Server },
   { id: "STORAGE_CDN", name: "File CDN", icon: UploadCloud },
-  { id: "DEVELOPER_API", name: "Developer APIs", icon: Code2 }
+  { id: "DEVELOPER_API", name: "API Hub", icon: Code2 }
 ];
 
 const SERVICES: ServiceDef[] = [
@@ -484,7 +484,7 @@ function CheckoutContent() {
               {/* Segmented Category Control */}
               <div
                 className={cn(
-                  "p-1 rounded-xl border grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-1",
+                  "p-1 rounded-xl border flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar w-full sm:w-auto",
                   isDark ? "bg-[#111115] border-white/[0.06]" : "bg-slate-100/90 border-slate-200/80"
                 )}
               >
@@ -507,21 +507,21 @@ function CheckoutContent() {
                         }
                       }}
                       className={cn(
-                        "flex items-center justify-center sm:justify-start gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer",
+                        "flex-1 sm:flex-none flex items-center justify-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all shrink-0 whitespace-nowrap cursor-pointer select-none",
                         active
                           ? isDark
                             ? "bg-[#1c1c22] text-white border border-white/[0.1] shadow-xs"
                             : "bg-white text-slate-900 border border-slate-200/80 shadow-2xs"
                           : isDark
-                            ? "text-zinc-400 hover:text-zinc-200 border border-transparent"
-                            : "text-slate-600 hover:text-slate-900 border border-transparent"
+                            ? "text-zinc-400 hover:text-zinc-200 border border-transparent hover:bg-white/[0.03]"
+                            : "text-slate-600 hover:text-slate-900 border border-transparent hover:bg-white/60"
                       )}
                     >
                       <CatIcon className={cn("w-3.5 h-3.5 shrink-0", active ? "text-cyan-400" : isDark ? "text-zinc-500" : "text-slate-400")} />
-                      <span className="truncate">{cat.name}</span>
+                      <span className="whitespace-nowrap font-medium">{cat.name}</span>
                       <span
                         className={cn(
-                          "text-[10px] px-1.5 py-0.2 rounded font-mono font-bold shrink-0",
+                          "text-[10px] px-1.5 py-0.5 rounded font-mono font-bold shrink-0",
                           active
                             ? isDark ? "bg-cyan-500/15 text-cyan-400" : "bg-cyan-50 text-cyan-700"
                             : isDark ? "bg-white/[0.04] text-zinc-500" : "bg-slate-200/70 text-slate-500"
