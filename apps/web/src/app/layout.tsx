@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { Tracker } from "@/components/Tracker";
+import { UserPresenceHeartbeat } from "@/components/UserPresenceHeartbeat";
 import { prisma } from "@/lib/prisma";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import Script from "next/script";
@@ -310,6 +311,7 @@ export default async function RootLayout({
         <ThemeProvider initialTheme={initialTheme}>
           <InitialPreloader />
           <Tracker />
+          <UserPresenceHeartbeat />
           <main className="flex-1 flex flex-col overflow-x-hidden">
             {children}
           </main>

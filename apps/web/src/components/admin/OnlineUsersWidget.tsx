@@ -1,48 +1,35 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
 import { Users, Wifi, ChevronLeft, ChevronRight } from "lucide-react";
+import { useRealtimePresence } from "@/lib/useRealtimePresence";
 
 function getRelativeTime(dateString: string) {
   const diffInSeconds = Math.floor((new Date().getTime() - new Date(dateString).getTime()) / 1000);
-  if (diffInSeconds < 60) return "Just now";
+  if (diffInSeconds < 60) return "Active now";
   return `${Math.floor(diffInSeconds / 60)}m ago`;
 }
 
 export function OnlineUsersWidget() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const [onlineUsers, setOnlineUsers] = useState<any[]>([]);
+  const { onlineUsers, isConnected } = useRealtimePresence();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
+  // Re-render relative time every 10 seconds in real-time
+  const [, setTick] = useState(0);
   useEffect(() => {
-    const fetchOnlineUsers = () => {
-      fetch("/api/admin/online-users", { cache: "no-store" })
-        .then((res) => res.json())
-        .then((data) => {
-          if (Array.isArray(data)) {
-            setOnlineUsers(data);
-          }
-        })
-        .catch((err) => console.error("Failed to load online users:", err));
-    };
-
-    fetchOnlineUsers();
-    // Also ping explicitly just in case layout didn't trigger it yet
-    fetch('/api/user/ping', { method: 'POST' }).catch(() => {});
-
-    const interval = setInterval(() => {
-      fetchOnlineUsers();
-      fetch('/api/user/ping', { method: 'POST' }).catch(() => {});
-    }, 30000); // refresh every 30 seconds
-    return () => clearInterval(interval);
+    const timer = setInterval(() => {
+      setTick((t) => (t + 1) % 1000000);
+    }, 10000);
+    return () => clearInterval(timer);
   }, []);
 
-  const totalPages = Math.ceil(onlineUsers.length / itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(onlineUsers.length / itemsPerPage));
   const displayedUsers = onlineUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
@@ -52,12 +39,14 @@ export function OnlineUsersWidget() {
       <div className="relative z-10 flex items-center justify-between mb-4">
         <div>
           <h2 className={cn("text-sm font-bold tracking-tight flex items-center gap-1.5", isDark ? "text-white" : "text-slate-900")}>
-            <Wifi className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
+            <Wifi className={cn("w-3.5 h-3.5 text-emerald-500", isConnected && "animate-pulse")} />
             Online Users
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
           </h2>
-          <div className={cn("text-[11px] mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>Active in the last 5 minutes</div>
+          <div className={cn("text-[11px] mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>Real-time live presence</div>
         </div>
-        <div className={cn("px-2.5 py-0.5 rounded-full text-[11px] font-bold border", isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200")}>
+        <div className={cn("px-2.5 py-0.5 rounded-full text-[11px] font-bold border flex items-center gap-1.5", isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200")}>
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
           {onlineUsers.length} Online
         </div>
       </div>
@@ -99,7 +88,7 @@ export function OnlineUsersWidget() {
                     </span>
                     <div className="flex items-center gap-1.5 truncate">
                       <span className={cn("text-[10px] truncate", isDark ? "text-zinc-500" : "text-slate-500")}>{user.email}</span>
-                      <span className={cn("text-[9px] px-1.5 rounded-full border shrink-0", isDark ? "bg-white/5 border-white/10 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-500")}>
+                      <span className={cn("text-[9px] px-1.5 rounded-full border shrink-0", isDark ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700")}>
                         {getRelativeTime(user.lastActive)}
                       </span>
                     </div>

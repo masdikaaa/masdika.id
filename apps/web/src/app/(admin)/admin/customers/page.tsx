@@ -3,7 +3,7 @@ import { useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from "react";
-import { Users, Trash2, ShieldAlert, CheckCircle, Eye, Ban, Play, Activity, Search , RefreshCw, Gift, X, Wallet, ShieldCheck } from "lucide-react";
+import { Users, Trash2, ShieldAlert, CheckCircle, Eye, Ban, Play, Activity, Search , RefreshCw, Gift, X, Wallet, ShieldCheck, Wifi } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -12,11 +12,16 @@ import { Pagination } from "@/components/ui/Pagination";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { LastSeenBadge } from "@/components/ui/LastSeenBadge";
 import { isUserOnline } from "@/lib/last-seen";
+import { useRealtimePresence } from "@/lib/useRealtimePresence";
 
 export default function AdminCustomersPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const { isConnected, onlineUsers } = useRealtimePresence();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   const fetchUsers = async (query?: string | React.MouseEvent) => {
+    setIsRefreshing(true);
     try {
       const q = typeof query === "string" ? query.trim() : searchQuery.trim();
       const url = q ? `/api/admin/users?q=${encodeURIComponent(q)}` : "/api/admin/users";
@@ -29,6 +34,7 @@ export default function AdminCustomersPage() {
       console.error(err);
     } finally {
       setLoading(false);
+      setTimeout(() => setIsRefreshing(false), 500);
     }
   };
 
@@ -108,6 +114,53 @@ export default function AdminCustomersPage() {
     }, 250);
     return () => clearTimeout(timer);
   }, [searchQuery]);
+
+  // Real-time Facebook-style presence updates without page refresh
+  useEffect(() => {
+    const handlePing = (e: any) => {
+      const pingUser = e.detail;
+      if (!pingUser?.id) return;
+      setUsers((prev) =>
+        prev.map((u) => {
+          if (u.id === pingUser.id) {
+            return { ...u, lastActive: pingUser.lastActive };
+          }
+          return u;
+        })
+      );
+    };
+
+    const handleSync = (e: any) => {
+      const onlineList = e.detail;
+      if (!Array.isArray(onlineList)) return;
+      const map = new Map(onlineList.map((item: any) => [item.id, item.lastActive]));
+      setUsers((prev) =>
+        prev.map((u) => {
+          const latestActive = map.get(u.id);
+          if (latestActive) {
+            return { ...u, lastActive: latestActive };
+          }
+          return u;
+        })
+      );
+    };
+
+    window.addEventListener("presence_user_ping", handlePing);
+    window.addEventListener("presence_sync", handleSync);
+    return () => {
+      window.removeEventListener("presence_user_ping", handlePing);
+      window.removeEventListener("presence_sync", handleSync);
+    };
+  }, []);
+
+  // Periodic ticker so relative timestamps and online status re-evaluate live
+  const [, setPresenceTick] = useState(0);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setPresenceTick((t) => (t + 1) % 1000000);
+    }, 10000);
+    return () => clearInterval(timer);
+  }, []);
 
 
   const handleDeleteUserConfirm = async () => {
@@ -285,21 +338,27 @@ export default function AdminCustomersPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto justify-between sm:justify-end">
-          <div className={cn("px-4 py-2 rounded-lg border font-medium text-sm md:text-base text-center sm:text-left", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
-            Total Customers: {users.length}
+        <div className="flex items-center gap-2.5 shrink-0 w-full sm:w-auto justify-between sm:justify-end flex-wrap">
+          <div className={cn("px-3.5 py-2 rounded-lg border font-semibold text-xs flex items-center gap-2", isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200")}>
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>{onlineCount} Online</span>
+            <span className="text-[10px] opacity-75 font-mono">LIVE</span>
+          </div>
+          <div className={cn("px-3.5 py-2 rounded-lg border font-semibold text-xs flex items-center gap-1.5", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+            <span>Total Customers:</span>
+            <span className="font-bold text-white">{users.length}</span>
           </div>
           <button
             onClick={() => fetchUsers(searchQuery)}
-            disabled={loading}
+            disabled={isRefreshing || loading}
             className={cn(
-              "inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border text-sm font-medium transition-all cursor-pointer",
+              "inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border text-xs font-semibold transition-all cursor-pointer",
               isDark
                 ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white"
                 : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900"
             )}
           >
-            <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin text-cyan-500")} />
+            <RefreshCw className={cn("w-3.5 h-3.5", (isRefreshing || loading) && "animate-spin text-cyan-400")} />
             <span>Refresh</span>
           </button>
         </div>

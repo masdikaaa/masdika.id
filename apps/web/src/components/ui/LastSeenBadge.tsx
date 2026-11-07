@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { formatLastSeen } from "@/lib/last-seen";
 
@@ -21,6 +21,15 @@ export function LastSeenBadge({
   variant = "pill",
   align,
 }: LastSeenBadgeProps) {
+  // Re-evaluate relative time every 10s so status updates in real-time without page reload
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTick((t) => (t + 1) % 1000000);
+    }, 10000);
+    return () => clearInterval(timer);
+  }, []);
+
   const info = formatLastSeen(date);
 
   // Default alignment: left if showing subtext, center if standalone pill
