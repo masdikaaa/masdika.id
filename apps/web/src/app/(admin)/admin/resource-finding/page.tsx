@@ -12,6 +12,7 @@ import {
   RefreshCw,
   Search,
   Copy,
+  Check,
   ExternalLink,
   Power,
   PowerOff,
@@ -202,6 +203,7 @@ export default function AdminResourceFindingPage() {
   const [throttleModalVps, setThrottleModalVps] = useState<VpsResourceItem | null>(null);
   const [throttleRate, setThrottleRate] = useState<string>("1.25");
   const [actionLoading, setActionLoading] = useState(false);
+  const [copiedIp, setCopiedIp] = useState<string | null>(null);
 
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
@@ -336,8 +338,13 @@ export default function AdminResourceFindingPage() {
   };
 
   const copyToClipboard = (text: string) => {
+    if (!text || text === "-") return;
     navigator.clipboard.writeText(text);
-    toast.success("IP copied to clipboard");
+    setCopiedIp(text);
+    toast.success(`Copied IP (${text}) to clipboard`);
+    setTimeout(() => {
+      setCopiedIp((prev) => (prev === text ? null : prev));
+    }, 1500);
   };
 
   // Filtered & Sorted VPS List
@@ -857,15 +864,27 @@ export default function AdminResourceFindingPage() {
                 <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-100 dark:border-white/5">
                   <div className="flex items-center gap-1.5 font-mono">
                     <span className={cn("text-[11px] font-sans font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>IP:</span>
-                    <span className={cn("font-bold text-xs", isDark ? "text-zinc-200" : "text-slate-800")}>{vps.primaryIp}</span>
-                    {vps.primaryIp !== "-" && (
+                    {vps.primaryIp !== "-" ? (
                       <button
+                        type="button"
                         onClick={() => copyToClipboard(vps.primaryIp)}
-                        className="p-1 rounded text-zinc-400 hover:text-white transition-colors"
-                        title="Copy IP"
+                        className={cn(
+                          "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-xs font-mono font-bold transition-all active:scale-95",
+                          isDark
+                            ? "bg-zinc-900/60 border-zinc-800 text-zinc-200 hover:border-cyan-500/40"
+                            : "bg-slate-100 border-slate-200 text-slate-800 hover:border-cyan-500/50"
+                        )}
+                        title={`Click to copy IP ${vps.primaryIp}`}
                       >
-                        <Copy className="w-3 h-3" />
+                        <span>{vps.primaryIp}</span>
+                        {copiedIp === vps.primaryIp ? (
+                          <Check className="w-3 h-3 text-emerald-400 shrink-0" />
+                        ) : (
+                          <Copy className="w-3 h-3 text-zinc-400 shrink-0 opacity-70" />
+                        )}
                       </button>
+                    ) : (
+                      <span className="text-zinc-500 font-mono text-xs">-</span>
                     )}
                   </div>
                   <div className={cn("text-[11px] font-mono", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -1234,19 +1253,19 @@ export default function AdminResourceFindingPage() {
       </div>
 
       {/* DESKTOP FULL-SPACE DATA TABLE (hidden lg:block) */}
-      <div className={cn("hidden lg:block rounded-2xl border overflow-hidden", isDark ? "bg-[#0c0c0e] border-white/10" : "bg-white border-slate-200")}>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm border-collapse">
+      <div className={cn("hidden lg:block rounded-2xl border overflow-hidden shadow-sm", isDark ? "bg-[#0c0c0e] border-white/10" : "bg-white border-slate-200")}>
+        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-zinc-700/40 scrollbar-track-transparent">
+          <table className="w-full min-w-[1360px] text-left text-sm border-collapse">
             <thead>
-              <tr className={cn("border-b text-xs uppercase font-bold tracking-wider", isDark ? "bg-white/[0.02] border-white/10 text-zinc-400" : "bg-slate-50/80 border-slate-200 text-slate-500")}>
-                <th className="py-3.5 px-4">VPS & Customer</th>
-                <th className="py-3.5 px-4">Network & IP</th>
+              <tr className={cn("border-b text-[11px] uppercase font-bold tracking-wider select-none", isDark ? "bg-white/[0.02] border-white/10 text-zinc-400" : "bg-slate-50/80 border-slate-200 text-slate-500")}>
+                <th className="py-3.5 px-4 min-w-[220px]">VPS & Customer</th>
+                <th className="py-3.5 px-4 min-w-[200px]">Network & IP</th>
                 <th className="py-3.5 px-4 min-w-[170px]">CPU Load</th>
-                <th className="py-3.5 px-4 min-w-[170px]">Memory (RAM)</th>
-                <th className="py-3.5 px-4 min-w-[170px]">Disk & Uptime</th>
-                <th className="py-3.5 px-4 text-center">Status</th>
-                <th className="py-3.5 px-4 text-center">Severity</th>
-                <th className="py-3.5 px-4 text-right min-w-[280px]">Actions</th>
+                <th className="py-3.5 px-4 min-w-[200px]">Memory (RAM)</th>
+                <th className="py-3.5 px-4 min-w-[160px]">Disk & Uptime</th>
+                <th className="py-3.5 px-4 text-center min-w-[110px]">Status</th>
+                <th className="py-3.5 px-4 text-center min-w-[110px]">Severity</th>
+                <th className="py-3.5 px-4 text-right min-w-[310px]">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-white/5 font-normal">
@@ -1300,24 +1319,24 @@ export default function AdminResourceFindingPage() {
                       {/* VPS & Customer */}
                       <td className="py-4 px-4 align-middle">
                         <div className="flex items-start gap-3">
-                          <div className={cn("p-2 rounded-xl mt-0.5 border shrink-0", isDark ? "bg-black/30 border-white/10" : "bg-slate-100 border-slate-200")}>
+                          <div className={cn("p-2 rounded-xl mt-0.5 border shrink-0", isDark ? "bg-black/40 border-white/10" : "bg-slate-100 border-slate-200")}>
                             <Server className={cn("w-4 h-4", vps.isOnline ? "text-cyan-500" : "text-zinc-400")} />
                           </div>
                           <div className="min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className={cn("font-bold text-sm truncate max-w-[170px]", isDark ? "text-white" : "text-slate-900")} title={vps.hostname}>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className={cn("font-bold text-sm truncate max-w-[160px]", isDark ? "text-white" : "text-slate-900")} title={vps.hostname}>
                                 {vps.hostname}
                               </span>
                               {vps.vmid && (
-                                <span className={cn("px-1.5 py-0.5 rounded text-[10px] font-mono font-bold border", isDark ? "bg-white/5 border-white/10 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+                                <span className={cn("px-1.5 py-0.5 rounded text-[10px] font-mono font-bold border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
                                   #{vps.vmid}
                                 </span>
                               )}
-                              <span className={cn("px-1.5 py-0.5 rounded text-[10px] font-medium border", isDark ? "bg-white/5 border-white/5 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-600")}>
+                              <span className={cn("px-1.5 py-0.5 rounded text-[10px] font-mono border", isDark ? "bg-white/5 border-white/5 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-600")}>
                                 {vps.node}
                               </span>
                             </div>
-                            <div className="mt-1 space-y-1 text-xs">
+                            <div className="mt-1 space-y-0.5 text-xs">
                               <div className="flex items-center gap-1.5">
                                 <User className="w-3.5 h-3.5 shrink-0 text-zinc-400" />
                                 <span className={cn("font-medium truncate max-w-[180px]", isDark ? "text-zinc-200" : "text-slate-800")} title={vps.user.name}>
@@ -1325,7 +1344,7 @@ export default function AdminResourceFindingPage() {
                                 </span>
                               </div>
                               <div className="flex items-center gap-1.5">
-                                <Mail className="w-3.5 h-3.5 shrink-0 text-zinc-400" />
+                                <Mail className="w-3.5 h-3.5 shrink-0 text-zinc-500" />
                                 <span className={cn("text-[11px] truncate max-w-[180px] font-mono", isDark ? "text-zinc-400" : "text-slate-500")} title={vps.user.email}>
                                   {vps.user.email}
                                 </span>
@@ -1342,20 +1361,32 @@ export default function AdminResourceFindingPage() {
 
                       {/* Network & IP */}
                       <td className="py-4 px-4 align-middle">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-1.5 font-mono text-xs font-semibold">
-                            <span className={isDark ? "text-zinc-200" : "text-slate-800"}>{vps.primaryIp}</span>
-                            {vps.primaryIp !== "-" && (
-                              <button
-                                onClick={() => copyToClipboard(vps.primaryIp)}
-                                className="p-1 rounded hover:bg-slate-200 dark:hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
-                                title="Copy IP address"
-                              >
-                                <Copy className="w-3 h-3" />
-                              </button>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1.5 text-xs font-mono font-medium">
+                        <div className="space-y-1.5">
+                          {vps.primaryIp && vps.primaryIp !== "-" ? (
+                            <button
+                              type="button"
+                              onClick={() => copyToClipboard(vps.primaryIp)}
+                              className={cn(
+                                "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-xs font-mono font-semibold transition-all duration-150 cursor-pointer text-left group/ip w-fit",
+                                isDark
+                                  ? "bg-zinc-900/60 border-zinc-800 text-zinc-200 hover:border-cyan-500/40 hover:text-cyan-300 hover:bg-zinc-800/60"
+                                  : "bg-slate-50 border-slate-200 text-slate-800 hover:border-cyan-500/50 hover:text-cyan-700 hover:bg-slate-100"
+                              )}
+                              title={`Click to copy IP ${vps.primaryIp}`}
+                            >
+                              <Network className="w-3 h-3 text-cyan-500 shrink-0" />
+                              <span>{vps.primaryIp}</span>
+                              {copiedIp === vps.primaryIp ? (
+                                <Check className="w-3 h-3 text-emerald-400 shrink-0 ml-0.5" />
+                              ) : (
+                                <Copy className="w-3 h-3 text-zinc-400 opacity-0 group-hover/ip:opacity-100 transition-opacity shrink-0 ml-0.5" />
+                              )}
+                            </button>
+                          ) : (
+                            <span className="text-zinc-500 font-mono text-xs">-</span>
+                          )}
+
+                          <div className="flex items-center gap-1.5 text-xs font-mono font-medium whitespace-nowrap">
                             <span className="inline-flex items-center gap-0.5 text-[11px] text-cyan-400 font-semibold" title="Live Incoming Throughput">
                               <ArrowDownRight className="w-3.5 h-3.5 shrink-0" /> {formatSpeed(vps.netSpeedIn)}
                             </span>
@@ -1364,11 +1395,13 @@ export default function AdminResourceFindingPage() {
                               <ArrowUpRight className="w-3.5 h-3.5 shrink-0" /> {formatSpeed(vps.netSpeedOut)}
                             </span>
                           </div>
-                          <div className={cn("text-[11px] font-mono", isDark ? "text-zinc-400" : "text-slate-500")}>
-                            Total: <span className="font-semibold">{formatBytes(vps.totalBandwidth)}</span>
+
+                          <div className={cn("text-[11px] font-mono whitespace-nowrap", isDark ? "text-zinc-400" : "text-slate-500")}>
+                            Total: <span className="font-semibold text-zinc-300 dark:text-zinc-200">{formatBytes(vps.totalBandwidth)}</span>
                           </div>
+
                           {vps.isNetDisabled ? (
-                            <div className="pt-1">
+                            <div className="pt-0.5">
                               <div
                                 className={cn(
                                   "inline-flex items-center gap-2 pl-2 pr-1.5 py-0.5 rounded-lg border text-[11px] font-medium whitespace-nowrap transition-colors",
@@ -1397,7 +1430,7 @@ export default function AdminResourceFindingPage() {
                               </div>
                             </div>
                           ) : vps.rateLimit && vps.rateLimit > 0 ? (
-                            <div className="pt-1">
+                            <div className="pt-0.5">
                               <div
                                 className={cn(
                                   "inline-flex items-center gap-2 pl-2 pr-1.5 py-0.5 rounded-lg border text-[11px] font-medium whitespace-nowrap transition-colors",
@@ -1432,10 +1465,10 @@ export default function AdminResourceFindingPage() {
                       {/* CPU Load - Perfectly Level & Symmetric */}
                       <td className="py-4 px-4 align-middle">
                         <div className="space-y-2">
-                          <div className="flex items-baseline justify-between h-5">
+                          <div className="flex items-baseline justify-between gap-2 h-5">
                             <span
                               className={cn(
-                                "font-bold text-sm font-mono leading-none",
+                                "font-bold text-sm font-mono leading-none shrink-0",
                                 vps.cpuPercent >= 80
                                   ? "text-rose-500"
                                   : vps.cpuPercent >= 60
@@ -1447,7 +1480,7 @@ export default function AdminResourceFindingPage() {
                             >
                               {vps.cpuPercent.toFixed(1)}%
                             </span>
-                            <span className={cn("text-[11px] font-mono leading-none", isDark ? "text-zinc-400" : "text-slate-500")}>
+                            <span className={cn("text-[11px] font-mono leading-none whitespace-nowrap", isDark ? "text-zinc-400" : "text-slate-500")}>
                               {vps.cpuCores} {vps.cpuCores > 1 ? "Cores" : "Core"}
                             </span>
                           </div>
@@ -1457,7 +1490,7 @@ export default function AdminResourceFindingPage() {
                               style={{ width: `${Math.min(vps.cpuPercent, 100)}%` }}
                             />
                           </div>
-                          <div className={cn("text-[10px] leading-none truncate h-4 flex items-center", isDark ? "text-zinc-500" : "text-slate-400")}>
+                          <div className={cn("text-[10px] leading-none truncate h-4 flex items-center font-medium", isDark ? "text-zinc-500" : "text-slate-400")}>
                             {vps.cpuPercent >= 80 ? "Critical Strain" : vps.cpuPercent >= 60 ? "Elevated Usage" : "Normal Load"}
                           </div>
                         </div>
@@ -1466,10 +1499,10 @@ export default function AdminResourceFindingPage() {
                       {/* Memory (RAM) - Perfectly Level & Symmetric */}
                       <td className="py-4 px-4 align-middle">
                         <div className="space-y-2">
-                          <div className="flex items-baseline justify-between h-5">
+                          <div className="flex items-baseline justify-between gap-3 h-5">
                             <span
                               className={cn(
-                                "font-bold text-sm font-mono leading-none",
+                                "font-bold text-sm font-mono leading-none shrink-0",
                                 vps.memPercent >= 90
                                   ? "text-rose-500"
                                   : vps.memPercent >= 75
@@ -1481,7 +1514,7 @@ export default function AdminResourceFindingPage() {
                             >
                               {vps.memPercent.toFixed(1)}%
                             </span>
-                            <span className={cn("text-[11px] font-mono leading-none", isDark ? "text-zinc-400" : "text-slate-500")}>
+                            <span className={cn("text-[11px] font-mono leading-none whitespace-nowrap", isDark ? "text-zinc-400" : "text-slate-500")}>
                               {formatBytes(vps.memBytes, 1)} / {formatBytes(vps.maxMemBytes, 0)}
                             </span>
                           </div>
@@ -1491,7 +1524,7 @@ export default function AdminResourceFindingPage() {
                               style={{ width: `${Math.min(vps.memPercent, 100)}%` }}
                             />
                           </div>
-                          <div className={cn("text-[10px] leading-none truncate h-4 flex items-center", isDark ? "text-zinc-500" : "text-slate-400")}>
+                          <div className={cn("text-[10px] leading-none truncate h-4 flex items-center font-medium", isDark ? "text-zinc-500" : "text-slate-400")}>
                             {vps.memPercent >= 90 ? "Out-of-Memory Danger" : vps.memPercent >= 75 ? "High Allocation" : "Optimal Memory"}
                           </div>
                         </div>
@@ -1500,10 +1533,10 @@ export default function AdminResourceFindingPage() {
                       {/* Disk & Uptime - Perfectly Level & Symmetric */}
                       <td className="py-4 px-4 align-middle">
                         <div className="space-y-2">
-                          <div className="flex items-baseline justify-between h-5">
+                          <div className="flex items-baseline justify-between gap-2 h-5">
                             <span
                               className={cn(
-                                "font-bold text-sm font-mono leading-none",
+                                "font-bold text-sm font-mono leading-none shrink-0",
                                 vps.diskPercent >= 90
                                   ? "text-rose-500"
                                   : isDark
@@ -1513,7 +1546,7 @@ export default function AdminResourceFindingPage() {
                             >
                               {vps.diskPercent.toFixed(1)}%
                             </span>
-                            <span className={cn("text-[11px] font-mono leading-none", isDark ? "text-zinc-400" : "text-slate-500")}>
+                            <span className={cn("text-[11px] font-mono leading-none whitespace-nowrap", isDark ? "text-zinc-400" : "text-slate-500")}>
                               {formatBytes(vps.maxDiskBytes, 0)}
                             </span>
                           </div>
@@ -1523,7 +1556,7 @@ export default function AdminResourceFindingPage() {
                               style={{ width: `${Math.min(vps.diskPercent, 100)}%` }}
                             />
                           </div>
-                          <div className={cn("text-[10px] leading-none truncate h-4 flex items-center gap-1", isDark ? "text-zinc-500" : "text-slate-400")}>
+                          <div className={cn("text-[10px] leading-none truncate h-4 flex items-center gap-1 font-mono font-medium", isDark ? "text-zinc-500" : "text-slate-400")}>
                             <Clock className="w-2.5 h-2.5 shrink-0" />
                             <span>Uptime: {formatUptime(vps.uptime)}</span>
                           </div>
@@ -1581,12 +1614,12 @@ export default function AdminResourceFindingPage() {
 
                       {/* Actions */}
                       <td className="py-4 px-4 align-middle text-right">
-                        <div className="flex items-center justify-end gap-1.5">
+                        <div className="flex items-center justify-end gap-2">
                           {/* Inspect Modal Trigger */}
                           <button
                             onClick={() => openInspectModal(vps)}
                             className={cn(
-                              "p-2 rounded-xl border text-xs font-semibold transition-all active:scale-95 flex items-center gap-1.5",
+                              "px-2.5 py-1.5 rounded-xl border text-xs font-semibold transition-all active:scale-95 flex items-center gap-1.5 shrink-0",
                               isDark
                                 ? "bg-cyan-950/40 hover:bg-cyan-900/60 text-cyan-400 border-cyan-500/30"
                                 : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border-cyan-200"
@@ -1594,196 +1627,210 @@ export default function AdminResourceFindingPage() {
                             title="Inspect Deep Telemetry & Graphs"
                           >
                             <Eye className="w-3.5 h-3.5" />
-                            <span className="hidden xl:inline">Inspect</span>
+                            <span>Inspect</span>
                           </button>
 
-                          {/* Power Actions: Start */}
-                          <button
-                            disabled={vps.isOnline || vps.dbStatus === "SUSPENDED"}
-                            onClick={() => {
-                              setConfirmModal({
-                                isOpen: true,
-                                title: `Start VPS #${vps.vmid || vps.id}?`,
-                                description: `Power on ${vps.hostname}? This will boot up the operating system.`,
-                                confirmText: "Start VPS",
-                                variant: "success",
-                                onConfirm: async () => {
-                                  await handleVpsAction(vps.id, "start");
-                                },
-                              });
-                            }}
-                            className={cn(
-                              "p-2 rounded-xl border transition-all text-xs font-semibold flex items-center justify-center",
-                              vps.isOnline || vps.dbStatus === "SUSPENDED"
-                                ? "opacity-30 cursor-not-allowed border-transparent text-zinc-500"
-                                : isDark
-                                ? "bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border-emerald-500/30"
-                                : "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-300"
-                            )}
-                            title={vps.isOnline ? "VPS is already running" : "Start VPS"}
-                          >
-                            <Play className="w-3.5 h-3.5 fill-current" />
-                          </button>
-
-                          {/* Power Actions: Reboot */}
-                          <button
-                            disabled={!vps.isOnline}
-                            onClick={() => {
-                              setConfirmModal({
-                                isOpen: true,
-                                title: `Reboot VPS #${vps.vmid || vps.id}?`,
-                                description: `Are you sure you want to reboot ${vps.hostname}? This will momentarily disrupt customer workloads.`,
-                                confirmText: "Reboot Now",
-                                variant: "warning",
-                                onConfirm: async () => {
-                                  await handleVpsAction(vps.id, "reboot");
-                                },
-                              });
-                            }}
-                            className={cn(
-                              "p-2 rounded-xl border transition-all text-xs font-semibold flex items-center justify-center",
-                              !vps.isOnline
-                                ? "opacity-30 cursor-not-allowed border-transparent text-zinc-500"
-                                : isDark
-                                ? "bg-white/5 hover:bg-cyan-500/20 text-zinc-300 hover:text-cyan-300 border-white/10 hover:border-cyan-500/30"
-                                : "bg-white hover:bg-cyan-50 text-slate-700 hover:text-cyan-800 border-slate-200 hover:border-cyan-300"
-                            )}
-                            title={!vps.isOnline ? "VPS is offline" : "Reboot VPS"}
-                          >
-                            <RotateCw className="w-3.5 h-3.5" />
-                          </button>
-
-                          {/* Power Actions: Shutdown (Graceful) */}
-                          <button
-                            disabled={!vps.isOnline}
-                            onClick={() => {
-                              setConfirmModal({
-                                isOpen: true,
-                                title: `Shutdown VPS #${vps.vmid || vps.id}?`,
-                                description: `Send graceful ACPI shutdown signal to ${vps.hostname}? Operating system will safely close processes and power off.`,
-                                confirmText: "Shutdown",
-                                variant: "warning",
-                                onConfirm: async () => {
-                                  await handleVpsAction(vps.id, "shutdown");
-                                },
-                              });
-                            }}
-                            className={cn(
-                              "p-2 rounded-xl border transition-all text-xs font-semibold flex items-center justify-center",
-                              !vps.isOnline
-                                ? "opacity-30 cursor-not-allowed border-transparent text-zinc-500"
-                                : isDark
-                                ? "bg-white/5 hover:bg-amber-500/20 text-zinc-300 hover:text-amber-300 border-white/10 hover:border-amber-500/30"
-                                : "bg-white hover:bg-amber-50 text-slate-700 hover:text-amber-800 border-slate-200 hover:border-amber-300"
-                            )}
-                            title={!vps.isOnline ? "VPS is offline" : "Graceful Shutdown (Power Off)"}
-                          >
-                            <Power className="w-3.5 h-3.5" />
-                          </button>
-
-                          {/* Power Actions: Force Stop */}
-                          <button
-                            disabled={!vps.isOnline}
-                            onClick={() => {
-                              setConfirmModal({
-                                isOpen: true,
-                                title: `Force Stop VPS #${vps.vmid || vps.id}?`,
-                                description: `Are you sure you want to forcefully stop ${vps.hostname}? Use this if the VM is consuming 100% CPU or unresponsive.`,
-                                confirmText: "Force Stop",
-                                variant: "danger",
-                                onConfirm: async () => {
-                                  await handleVpsAction(vps.id, "stop");
-                                },
-                              });
-                            }}
-                            className={cn(
-                              "p-2 rounded-xl border transition-all text-xs font-semibold flex items-center justify-center",
-                              !vps.isOnline
-                                ? "opacity-30 cursor-not-allowed border-transparent text-zinc-500"
-                                : isDark
-                                ? "bg-white/5 hover:bg-rose-500/20 text-zinc-300 hover:text-rose-300 border-white/10 hover:border-rose-500/30"
-                                : "bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-800 border-slate-200 hover:border-rose-300"
-                            )}
-                            title={!vps.isOnline ? "VPS is offline" : "Force Stop VPS"}
-                          >
-                            <Square className="w-3.5 h-3.5 fill-current" />
-                          </button>
-
-                          {/* Bandwidth Throttle / Rate Limiter */}
-                          <button
-                            onClick={() => {
-                              setThrottleModalVps(vps);
-                              setThrottleRate(vps.rateLimit ? vps.rateLimit.toString() : "10");
-                            }}
-                            className={cn(
-                              "p-2 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center",
-                              vps.isNetDisabled
-                                ? isDark
-                                  ? "bg-rose-500/15 text-rose-300 border-rose-500/40 hover:bg-rose-500/25"
-                                  : "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100"
-                                : vps.rateLimit && vps.rateLimit > 0
-                                ? isDark
-                                  ? "bg-cyan-500/15 text-cyan-300 border-cyan-500/40 hover:bg-cyan-500/25"
-                                  : "bg-cyan-50 text-cyan-700 border-cyan-200 hover:bg-cyan-100"
-                                : isDark
-                                ? "bg-white/5 hover:bg-cyan-500/20 text-zinc-300 hover:text-cyan-300 border-white/10 hover:border-cyan-500/30"
-                                : "bg-white hover:bg-cyan-50 text-slate-700 hover:text-cyan-700 border-slate-200 hover:border-cyan-200"
-                            )}
-                            title={
-                              vps.isNetDisabled
-                                ? "Internet access is disabled (Click to manage)"
-                                : vps.rateLimit && vps.rateLimit > 0
-                                ? `Currently throttled to ${vps.rateLimit} Mbps. Click to adjust or unthrottle.`
-                                : "Throttle Bandwidth (Set Rate Limit)"
-                            }
-                          >
-                            {vps.isNetDisabled ? <WifiOff className="w-3.5 h-3.5" /> : <Gauge className="w-3.5 h-3.5" />}
-                          </button>
-
-                          {/* Suspend / Lock or Unsuspend */}
-                          {vps.dbStatus === "SUSPENDED" ? (
+                          {/* Power Controls Cluster */}
+                          <div className={cn(
+                            "inline-flex items-center p-0.5 rounded-xl border shrink-0",
+                            isDark ? "bg-zinc-900/60 border-white/10" : "bg-slate-100 border-slate-200"
+                          )}>
+                            {/* Power Actions: Start */}
                             <button
+                              disabled={vps.isOnline || vps.dbStatus === "SUSPENDED"}
                               onClick={() => {
                                 setConfirmModal({
                                   isOpen: true,
-                                  title: `Unsuspend VPS #${vps.vmid || vps.id}?`,
-                                  description: `Unsuspend and restore ${vps.hostname}? Customer access will be reinstated and the VPS will boot.`,
-                                  confirmText: "Unsuspend VPS",
+                                  title: `Start VPS #${vps.vmid || vps.id}?`,
+                                  description: `Power on ${vps.hostname}? This will boot up the operating system.`,
+                                  confirmText: "Start VPS",
                                   variant: "success",
                                   onConfirm: async () => {
-                                    await handleVpsAction(vps.id, "unsuspend");
+                                    await handleVpsAction(vps.id, "start");
                                   },
                                 });
                               }}
                               className={cn(
-                                "p-2 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center",
-                                isDark
-                                  ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
-                                  : "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200"
+                                "p-1.5 rounded-lg transition-all text-xs font-semibold flex items-center justify-center",
+                                vps.isOnline || vps.dbStatus === "SUSPENDED"
+                                  ? "opacity-25 cursor-not-allowed text-zinc-500"
+                                  : isDark
+                                  ? "hover:bg-emerald-500/20 text-emerald-400"
+                                  : "hover:bg-emerald-100 text-emerald-700"
                               )}
-                              title="Unsuspend and restore customer VPS"
+                              title={vps.isOnline ? "VPS is already running" : "Start VPS"}
                             >
-                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <Play className="w-3.5 h-3.5 fill-current" />
                             </button>
-                          ) : (
+
+                            {/* Power Actions: Reboot */}
                             <button
+                              disabled={!vps.isOnline}
                               onClick={() => {
-                                setSuspendModalVps(vps);
-                                setSuspendReason(
-                                  vps.cpuPercent >= 80
-                                    ? `[RESOURCE_LIMIT] Excessive CPU load detected (${vps.cpuPercent.toFixed(1)}%). Suspended to protect node stability.`
-                                    : `[RESOURCE_LIMIT] High resource consumption detected. Please contact administrator.`
-                                );
+                                setConfirmModal({
+                                  isOpen: true,
+                                  title: `Reboot VPS #${vps.vmid || vps.id}?`,
+                                  description: `Are you sure you want to reboot ${vps.hostname}? This will momentarily disrupt customer workloads.`,
+                                  confirmText: "Reboot Now",
+                                  variant: "warning",
+                                  onConfirm: async () => {
+                                    await handleVpsAction(vps.id, "reboot");
+                                  },
+                                });
                               }}
                               className={cn(
-                                "p-2 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center",
-                                isDark ? "bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-rose-400 border-white/10" : "bg-white hover:bg-slate-100 text-slate-600 hover:text-rose-600 border-slate-200"
+                                "p-1.5 rounded-lg transition-all text-xs font-semibold flex items-center justify-center",
+                                !vps.isOnline
+                                  ? "opacity-25 cursor-not-allowed text-zinc-500"
+                                  : isDark
+                                  ? "hover:bg-cyan-500/20 text-zinc-300 hover:text-cyan-300"
+                                  : "hover:bg-cyan-100 text-slate-700 hover:text-cyan-800"
                               )}
-                              title="Suspend & Lock VPS due to resource abuse"
+                              title={!vps.isOnline ? "VPS is offline" : "Reboot VPS"}
                             >
-                              <Ban className="w-3.5 h-3.5" />
+                              <RotateCw className="w-3.5 h-3.5" />
                             </button>
-                          )}
+
+                            {/* Power Actions: Shutdown (Graceful) */}
+                            <button
+                              disabled={!vps.isOnline}
+                              onClick={() => {
+                                setConfirmModal({
+                                  isOpen: true,
+                                  title: `Shutdown VPS #${vps.vmid || vps.id}?`,
+                                  description: `Send graceful ACPI shutdown signal to ${vps.hostname}? Operating system will safely close processes and power off.`,
+                                  confirmText: "Shutdown",
+                                  variant: "warning",
+                                  onConfirm: async () => {
+                                    await handleVpsAction(vps.id, "shutdown");
+                                  },
+                                });
+                              }}
+                              className={cn(
+                                "p-1.5 rounded-lg transition-all text-xs font-semibold flex items-center justify-center",
+                                !vps.isOnline
+                                  ? "opacity-25 cursor-not-allowed text-zinc-500"
+                                  : isDark
+                                  ? "hover:bg-amber-500/20 text-zinc-300 hover:text-amber-300"
+                                  : "hover:bg-amber-100 text-slate-700 hover:text-amber-800"
+                              )}
+                              title={!vps.isOnline ? "VPS is offline" : "Graceful Shutdown (Power Off)"}
+                            >
+                              <Power className="w-3.5 h-3.5" />
+                            </button>
+
+                            {/* Power Actions: Force Stop */}
+                            <button
+                              disabled={!vps.isOnline}
+                              onClick={() => {
+                                setConfirmModal({
+                                  isOpen: true,
+                                  title: `Force Stop VPS #${vps.vmid || vps.id}?`,
+                                  description: `Are you sure you want to forcefully stop ${vps.hostname}? Use this if the VM is consuming 100% CPU or unresponsive.`,
+                                  confirmText: "Force Stop",
+                                  variant: "danger",
+                                  onConfirm: async () => {
+                                    await handleVpsAction(vps.id, "stop");
+                                  },
+                                });
+                              }}
+                              className={cn(
+                                "p-1.5 rounded-lg transition-all text-xs font-semibold flex items-center justify-center",
+                                !vps.isOnline
+                                  ? "opacity-25 cursor-not-allowed text-zinc-500"
+                                  : isDark
+                                  ? "hover:bg-rose-500/20 text-zinc-300 hover:text-rose-300"
+                                  : "hover:bg-rose-100 text-slate-700 hover:text-rose-800"
+                              )}
+                              title={!vps.isOnline ? "VPS is offline" : "Force Stop VPS"}
+                            >
+                              <Square className="w-3.5 h-3.5 fill-current" />
+                            </button>
+                          </div>
+
+                          {/* Policy / Control Cluster */}
+                          <div className={cn(
+                            "inline-flex items-center p-0.5 rounded-xl border shrink-0",
+                            isDark ? "bg-zinc-900/60 border-white/10" : "bg-slate-100 border-slate-200"
+                          )}>
+                            {/* Bandwidth Throttle / Rate Limiter */}
+                            <button
+                              onClick={() => {
+                                setThrottleModalVps(vps);
+                                setThrottleRate(vps.rateLimit ? vps.rateLimit.toString() : "10");
+                              }}
+                              className={cn(
+                                "p-1.5 rounded-lg transition-all flex items-center justify-center",
+                                vps.isNetDisabled
+                                  ? isDark
+                                    ? "bg-rose-500/20 text-rose-300 hover:bg-rose-500/30"
+                                    : "bg-rose-100 text-rose-800 hover:bg-rose-200"
+                                  : vps.rateLimit && vps.rateLimit > 0
+                                  ? isDark
+                                    ? "bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30"
+                                    : "bg-cyan-100 text-cyan-800 hover:bg-cyan-200"
+                                  : isDark
+                                  ? "text-zinc-400 hover:text-cyan-300 hover:bg-white/5"
+                                  : "text-slate-600 hover:text-cyan-700 hover:bg-slate-200/60"
+                              )}
+                              title={
+                                vps.isNetDisabled
+                                  ? "Internet access is disabled (Click to manage)"
+                                  : vps.rateLimit && vps.rateLimit > 0
+                                  ? `Currently throttled to ${vps.rateLimit} Mbps. Click to adjust or unthrottle.`
+                                  : "Throttle Bandwidth (Set Rate Limit)"
+                              }
+                            >
+                              {vps.isNetDisabled ? <WifiOff className="w-3.5 h-3.5" /> : <Gauge className="w-3.5 h-3.5" />}
+                            </button>
+
+                            {/* Suspend / Lock or Unsuspend */}
+                            {vps.dbStatus === "SUSPENDED" ? (
+                              <button
+                                onClick={() => {
+                                  setConfirmModal({
+                                    isOpen: true,
+                                    title: `Unsuspend VPS #${vps.vmid || vps.id}?`,
+                                    description: `Unsuspend and restore ${vps.hostname}? Customer access will be reinstated and the VPS will boot.`,
+                                    confirmText: "Unsuspend VPS",
+                                    variant: "success",
+                                    onConfirm: async () => {
+                                      await handleVpsAction(vps.id, "unsuspend");
+                                    },
+                                  });
+                                }}
+                                className={cn(
+                                  "p-1.5 rounded-lg transition-all flex items-center justify-center",
+                                  isDark
+                                    ? "bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30"
+                                    : "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
+                                )}
+                                title="Unsuspend VPS"
+                              >
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  setSuspendModalVps(vps);
+                                  setSuspendReason(
+                                    vps.cpuPercent >= 80
+                                      ? `[RESOURCE_LIMIT] Excessive CPU load detected (${vps.cpuPercent.toFixed(1)}%). Suspended to protect node stability.`
+                                      : `[RESOURCE_LIMIT] High resource consumption detected. Please contact administrator.`
+                                  );
+                                }}
+                                className={cn(
+                                  "p-1.5 rounded-lg transition-all flex items-center justify-center",
+                                  isDark
+                                    ? "text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10"
+                                    : "text-slate-600 hover:text-rose-700 hover:bg-rose-50"
+                                )}
+                                title="Suspend VPS (Lock down instance)"
+                              >
+                                <Ban className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </td>
                     </tr>
