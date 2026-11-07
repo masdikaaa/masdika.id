@@ -2,12 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
 
+const OBSOLETE_SERVICES = ['SHORTENER', 'PASTEBIN', 'LINK_BIO', 'OBJECT STORAGE'];
+
 export async function GET(req: NextRequest) {
   try {
     const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
     if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
+    // Auto-purge any lingering obsolete plans from previous releases
+    prisma.plan.deleteMany({
+      where: { service: { in: OBSOLETE_SERVICES } }
+    }).catch(console.error);
+
     const plans = await prisma.plan.findMany({
+      where: {
+        service: { notIn: OBSOLETE_SERVICES }
+      },
       orderBy: [
         { service: 'asc' },
         { price: 'asc' }

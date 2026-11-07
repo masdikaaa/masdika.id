@@ -183,8 +183,23 @@ export default function AdminPlansPage() {
       default: return <Server className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} />;
     }
   };
-  const services = ["ALL", ...Array.from(new Set(plans.map(p => p.service)))];
-  const filteredPlans = activeTab === "ALL" ? plans : plans.filter(p => p.service === activeTab);
+
+  const SERVICE_LABELS: Record<string, string> = {
+    ALL: "All Services",
+    CDN: "File CDN",
+    TIKTOK: "TikTok API",
+    SPOTIFY: "Spotify API",
+    YOUTUBE: "YouTube API",
+    BLOG: "Blog API",
+    BMKG_WEATHER: "BMKG Weather",
+    BMKG_EARTHQUAKE: "BMKG Earthquake",
+  };
+
+  const OBSOLETE_SERVICES = new Set(["SHORTENER", "PASTEBIN", "LINK_BIO", "OBJECT STORAGE"]);
+  const validPlans = plans.filter(p => !OBSOLETE_SERVICES.has(p.service));
+  const activeServices = Array.from(new Set(validPlans.map(p => p.service)));
+  const services = ["ALL", ...activeServices];
+  const filteredPlans = activeTab === "ALL" ? validPlans : validPlans.filter(p => p.service === activeTab);
   const totalPages = Math.ceil(filteredPlans.length / itemsPerPage);
   const paginatedPlans = filteredPlans.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   // Reset page when tab changes
@@ -241,10 +256,10 @@ export default function AdminPlansPage() {
     return <AdminLoader />;
   }
 
-  const totalCount = plans.length;
-  const activeCount = plans.filter(p => p.isActive).length;
-  const popularCount = plans.filter(p => p.isPopular).length;
-  const servicesCovered = new Set(plans.map(p => p.service)).size;
+  const totalCount = validPlans.length;
+  const activeCount = validPlans.filter(p => p.isActive).length;
+  const popularCount = validPlans.filter(p => p.isPopular).length;
+  const servicesCovered = activeServices.length;
 
   return (
     <div className="space-y-6">
@@ -338,23 +353,24 @@ export default function AdminPlansPage() {
         </div>
       </div>
 
-      {/* Filter and Control Bar (GAMBAR 1 Style) */}
+      {/* Filter and Control Bar */}
       <div className={cn("p-4 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
-        <div className={cn("inline-flex items-center gap-1 p-1 rounded-xl border max-w-full overflow-x-auto scrollbar-none self-start", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
-          {["ALL", "CDN", "PASTEBIN", "LINK_BIO"].map((srv) => {
-            const count = srv === "ALL" ? plans.length : plans.filter(p => p.service === srv).length;
+        <div className={cn("inline-flex items-center gap-1.5 p-1 rounded-xl border max-w-full overflow-x-auto scrollbar-none self-start", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
+          {services.map((srv) => {
+            const count = srv === "ALL" ? validPlans.length : validPlans.filter(p => p.service === srv).length;
+            const label = SERVICE_LABELS[srv] || srv.replace(/_/g, ' ');
             return (
               <button
                 key={srv}
                 onClick={() => { setActiveTab(srv); setCurrentPage(1); }}
                 className={cn(
-                  "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5",
+                  "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer select-none",
                   activeTab === srv
                     ? "bg-cyan-500 text-slate-950 shadow-sm"
                     : isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-white"
                 )}
               >
-                <span>{srv === "ALL" ? "All Services" : srv.replace('_', ' ')}</span>
+                <span>{label}</span>
                 <span className={cn("px-1.5 py-0.2 rounded-full text-[10px]", activeTab === srv ? "bg-slate-950/20 text-slate-950 font-bold" : isDark ? "bg-white/10 text-zinc-300" : "bg-slate-200 text-slate-700")}>
                   {count}
                 </span>
@@ -402,7 +418,7 @@ export default function AdminPlansPage() {
                     <AdminLoader className="min-h-[200px]" />
                   </td>
                 </tr>
-              ) : plans.length === 0 ? (
+              ) : validPlans.length === 0 ? (
                 <tr>
                   <td colSpan={7} className={cn("px-6 py-12 text-center", isDark ? "text-zinc-500" : "text-slate-500")}>
                     No plans found. Click "Add New Plan" to create one.
@@ -423,7 +439,9 @@ export default function AdminPlansPage() {
                     <td className="px-3.5 py-2.5 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         {getServiceIcon(plan.service)}
-                        <span className={cn("font-medium", isDark ? "text-white" : "text-slate-900")}>{plan.service.replace('_', ' ')}</span>
+                        <span className={cn("font-medium", isDark ? "text-white" : "text-slate-900")}>
+                          {SERVICE_LABELS[plan.service] || plan.service.replace(/_/g, ' ')}
+                        </span>
                       </div>
                     </td>
                     <td className="px-3.5 py-2.5 whitespace-nowrap">
@@ -510,11 +528,11 @@ export default function AdminPlansPage() {
                       setLimitFields(getDefaultLimitFields(newService));
                     }}
                     options={[
-                      { value: "CDN", label: "CDN" },
-                      { value: "TIKTOK", label: "TikTok Downloader" },
-                      { value: "SPOTIFY", label: "Spotify Downloader" },
+                      { value: "CDN", label: "File CDN" },
+                      { value: "TIKTOK", label: "TikTok API" },
+                      { value: "SPOTIFY", label: "Spotify API" },
                       { value: "YOUTUBE", label: "YouTube API" },
-                      { value: "BLOG", label: "Blog Service" },
+                      { value: "BLOG", label: "Blog API" },
                       { value: "BMKG_WEATHER", label: "BMKG Weather API" },
                       { value: "BMKG_EARTHQUAKE", label: "BMKG Earthquake API" }
                     ]}
