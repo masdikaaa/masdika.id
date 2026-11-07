@@ -29,9 +29,8 @@ export function OnlineUsersWidget() {
     return () => clearInterval(timer);
   }, []);
 
-  const customerUsers = onlineUsers.filter((u) => u.role !== "ADMIN" && u.role !== "SUPER_ADMIN");
-  const totalPages = Math.max(1, Math.ceil(customerUsers.length / itemsPerPage));
-  const displayedUsers = customerUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(onlineUsers.length / itemsPerPage));
+  const displayedUsers = onlineUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
     <div className={cn("backdrop-blur-xl rounded-2xl border p-4 sm:p-5 relative overflow-hidden group hover:border-cyan-500/30 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-sm" : "bg-white border-slate-200 shadow-sm")}>
@@ -48,12 +47,12 @@ export function OnlineUsersWidget() {
         </div>
         <div className={cn("px-2.5 py-0.5 rounded-full text-[11px] font-bold border flex items-center gap-1.5", isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200")}>
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          {customerUsers.length} Online
+          {onlineUsers.length} Online
         </div>
       </div>
 
       <div className="relative z-10 flex flex-col min-h-[170px]">
-        {customerUsers.length === 0 ? (
+        {onlineUsers.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center p-6 my-auto">
             <div className={cn(
               "w-9 h-9 rounded-full flex items-center justify-center mb-2.5 border",
@@ -65,7 +64,7 @@ export function OnlineUsersWidget() {
               No users online right now
             </p>
             <p className={cn("text-[10px] mt-0.5", isDark ? "text-zinc-600" : "text-slate-400")}>
-              Active customer sessions will appear here in real-time
+              Active user sessions will appear here in real-time
             </p>
           </div>
         ) : (
