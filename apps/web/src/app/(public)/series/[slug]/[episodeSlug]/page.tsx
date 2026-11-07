@@ -332,14 +332,14 @@ export default async function EpisodePage({
 
           {/* Content */}
           {episode.content && (
-            <article className="w-full mb-10 sm:mb-12" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>
+            <article className="w-full mb-8 sm:mb-10" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>
               <MarkdownContent content={episode.content} />
             </article>
           )}
 
           {/* Prev / Next Navigation */}
           {prev || next ? (
-            <div className="pt-8 sm:pt-10 border-t border-[var(--border-primary)] grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {prev ? (
                 <Link
                   href={`/series/${slug}/${prev.slug}`}
@@ -404,31 +404,29 @@ export default async function EpisodePage({
               )}
             </div>
           ) : (
-            <div className="pt-8 sm:pt-10 border-t border-[var(--border-primary)]">
-              <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 hover:border-cyan-500/40 transition-all duration-300">
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-cyan-500" />
-                    <span className="text-xs font-mono font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400">
-                      Course Overview
-                    </span>
-                  </div>
-                  <h3 className="text-lg sm:text-xl font-bold text-[var(--text-primary)]">
-                    {series.title}
-                  </h3>
-                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed max-w-xl">
-                    You are viewing Episode {episode.order + 1} of {totalEpisodes}. Browse other modules or return to the complete syllabus.
-                  </p>
+            <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 hover:border-cyan-500/40 transition-all duration-300">
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-cyan-500" />
+                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400">
+                    Course Overview
+                  </span>
                 </div>
-                <Button
-                  variant="secondary"
-                  size="md"
-                  href={`/series/${slug}`}
-                  leftIcon={<ChevronLeft className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />}
-                >
-                  View All Episodes
-                </Button>
+                <h3 className="text-lg sm:text-xl font-bold text-[var(--text-primary)]">
+                  {series.title}
+                </h3>
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed max-w-xl">
+                  You are viewing Episode {episode.order + 1} of {totalEpisodes}. Browse other modules or return to the complete syllabus.
+                </p>
               </div>
+              <Button
+                variant="secondary"
+                size="md"
+                href={`/series/${slug}`}
+                leftIcon={<ChevronLeft className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />}
+              >
+                View All Episodes
+              </Button>
             </div>
           )}
         </div>
