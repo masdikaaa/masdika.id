@@ -231,7 +231,7 @@ export default function SettingsPage() {
     setRustFSTestResult(null);
     const toastId = toast.loading("Testing connection to RustFS...");
     try {
-      const res = await fetch('/api/admin/rustfs/test', {
+      const res = await fetch('/api/admin/rustfs/test-connection', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -268,7 +268,7 @@ export default function SettingsPage() {
     setTargetTestResult(null);
     const toastId = toast.loading("Testing connection to target RustFS server & verifying all 3 buckets...");
     try {
-      const res = await fetch('/api/admin/rustfs/test', {
+      const res = await fetch('/api/admin/rustfs/test-connection', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
