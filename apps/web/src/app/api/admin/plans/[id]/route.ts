@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
+import { VALID_SERVICES } from "../route";
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -15,6 +16,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     if (!name || !service || price === undefined || !limits) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    if (!VALID_SERVICES.includes(service as any)) {
+      return NextResponse.json({ error: `Invalid service. Allowed: ${VALID_SERVICES.join(', ')}` }, { status: 400 });
     }
 
     // Validate JSON

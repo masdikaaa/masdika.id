@@ -96,13 +96,13 @@ const PRODUCTS = [
   {
     icon: Cloud,
     title: "File CDN",
-    subtitle: "S3-Backed Object Storage",
+    subtitle: "Global Edge Content Delivery",
     description:
-      "High-throughput S3-compatible object storage powered by RustFS with byte-range video streaming and token access control.",
+      "High-throughput edge media and file delivery powered by RustFS with byte-range video streaming and token access control.",
     href: "/file-cdn",
     type: "PaaS",
     sla: "98.99% SLA",
-    specs: ["RustFS S3 Engine", "Range Streaming", "Public & Private"],
+    specs: ["Edge Media Engine", "Range Streaming", "Public & Private"],
     cta: "Explore File CDN",
   },
   {

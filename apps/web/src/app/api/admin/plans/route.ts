@@ -2,21 +2,29 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
 
-const OBSOLETE_SERVICES = ['SHORTENER', 'PASTEBIN', 'LINK_BIO', 'OBJECT STORAGE'];
+export const VALID_SERVICES = [
+  'CDN',
+  'TIKTOK',
+  'SPOTIFY',
+  'YOUTUBE',
+  'BLOG',
+  'BMKG_WEATHER',
+  'BMKG_EARTHQUAKE',
+] as const;
 
 export async function GET(req: NextRequest) {
   try {
     const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
     if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
-    // Auto-purge any lingering obsolete plans from previous releases
+    // Auto-purge any lingering obsolete plans outside the official active services
     prisma.plan.deleteMany({
-      where: { service: { in: OBSOLETE_SERVICES } }
+      where: { service: { notIn: VALID_SERVICES as unknown as string[] } }
     }).catch(console.error);
 
     const plans = await prisma.plan.findMany({
       where: {
-        service: { notIn: OBSOLETE_SERVICES }
+        service: { in: VALID_SERVICES as unknown as string[] }
       },
       orderBy: [
         { service: 'asc' },
@@ -39,6 +47,10 @@ export async function POST(req: NextRequest) {
 
     if (!name || !service || price === undefined || !limits) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    if (!VALID_SERVICES.includes(service as any)) {
+      return NextResponse.json({ error: `Invalid service. Allowed: ${VALID_SERVICES.join(', ')}` }, { status: 400 });
     }
 
     // Validate JSON

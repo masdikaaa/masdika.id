@@ -195,11 +195,22 @@ export default function AdminPlansPage() {
     BMKG_EARTHQUAKE: "BMKG Earthquake",
   };
 
-  const OBSOLETE_SERVICES = new Set(["SHORTENER", "PASTEBIN", "LINK_BIO", "OBJECT STORAGE"]);
-  const validPlans = plans.filter(p => !OBSOLETE_SERVICES.has(p.service));
+  const VALID_SERVICES = new Set([
+    "CDN",
+    "TIKTOK",
+    "SPOTIFY",
+    "YOUTUBE",
+    "BLOG",
+    "BMKG_WEATHER",
+    "BMKG_EARTHQUAKE"
+  ]);
+
+  // Strict whitelist: Only display and allow official active services
+  const validPlans = plans.filter(p => VALID_SERVICES.has(p.service));
   const activeServices = Array.from(new Set(validPlans.map(p => p.service)));
   const services = ["ALL", ...activeServices];
-  const filteredPlans = activeTab === "ALL" ? validPlans : validPlans.filter(p => p.service === activeTab);
+  const currentTab = activeTab !== "ALL" && !VALID_SERVICES.has(activeTab) ? "ALL" : activeTab;
+  const filteredPlans = currentTab === "ALL" ? validPlans : validPlans.filter(p => p.service === currentTab);
   const totalPages = Math.ceil(filteredPlans.length / itemsPerPage);
   const paginatedPlans = filteredPlans.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   // Reset page when tab changes
@@ -365,13 +376,13 @@ export default function AdminPlansPage() {
                 onClick={() => { setActiveTab(srv); setCurrentPage(1); }}
                 className={cn(
                   "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer select-none",
-                  activeTab === srv
+                  currentTab === srv
                     ? "bg-cyan-500 text-slate-950 shadow-sm"
                     : isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-white"
                 )}
               >
                 <span>{label}</span>
-                <span className={cn("px-1.5 py-0.2 rounded-full text-[10px]", activeTab === srv ? "bg-slate-950/20 text-slate-950 font-bold" : isDark ? "bg-white/10 text-zinc-300" : "bg-slate-200 text-slate-700")}>
+                <span className={cn("px-1.5 py-0.2 rounded-full text-[10px]", currentTab === srv ? "bg-slate-950/20 text-slate-950 font-bold" : isDark ? "bg-white/10 text-zinc-300" : "bg-slate-200 text-slate-700")}>
                   {count}
                 </span>
               </button>
