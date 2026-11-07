@@ -18,13 +18,14 @@ export default function AdminAffiliatePage() {
    
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [processingId, setProcessingId] = useState<number | null>(null);
   const [statusFilter, setStatusFilter] = useUrlString<string>("statusFilter", "ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [confirmAction, setConfirmAction] = useState<{ id: number; action: "APPROVE" | "REJECT" } | null>(null);
 
   const fetchWithdrawals = async () => {
-    setLoading(true);
+    setIsRefreshing(true);
     try {
       const res = await fetch(`/api/admin/affiliate${statusFilter !== 'ALL' ? `?status=${statusFilter}` : ''}`);
       const json = await res.json();
@@ -37,6 +38,7 @@ export default function AdminAffiliatePage() {
       toast.error("Network error occurred");
     } finally {
       setLoading(false);
+      setTimeout(() => setIsRefreshing(false), 500);
     }
   };
 
@@ -97,118 +99,119 @@ export default function AdminAffiliatePage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto justify-between sm:justify-end">
-          <div className={cn("px-4 py-2 rounded-lg border font-medium text-sm md:text-base text-center sm:text-left", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
-            Total Requests: {totalRequests}
+        <div className="flex items-center gap-2.5 shrink-0 w-full sm:w-auto justify-between sm:justify-end">
+          <div className={cn("px-3.5 py-2 rounded-lg border font-semibold text-xs flex items-center gap-1.5", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+            <span>Total Requests:</span>
+            <span className="font-bold text-white">{totalRequests}</span>
           </div>
           <button
-            onClick={fetchWithdrawals}
-            disabled={loading}
+            onClick={() => fetchWithdrawals()}
+            disabled={isRefreshing || loading}
             className={cn(
-              "inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border text-xs font-medium transition-all cursor-pointer",
+              "inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border text-xs font-semibold transition-all cursor-pointer",
               isDark
                 ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white"
                 : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900"
             )}
           >
-            <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin text-cyan-500")} />
+            <RefreshCw className={cn("w-3.5 h-3.5", (isRefreshing || loading) && "animate-spin text-cyan-400")} />
             <span>Refresh</span>
           </button>
         </div>
       </div>
 
       {/* ── STATS CARDS ──────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 w-full">
         {/* Total Requests */}
         <div className={cn(
-          "relative overflow-hidden rounded-2xl border p-5 transition-colors",
-          isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
+          "relative overflow-hidden rounded-xl border p-3.5 sm:p-4 transition-colors",
+          isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-sm" : "bg-white border-slate-200 shadow-sm"
         )}>
-          <div className="flex items-center justify-between">
-            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+          <div className="flex items-center justify-between mb-2">
+            <span className={cn("text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
               Total Requests
             </span>
             <div className={cn(
-              "w-9 h-9 rounded-xl border flex items-center justify-center",
+              "w-8 h-8 rounded-lg border flex items-center justify-center",
               isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600"
             )}>
-              <Gift className="w-4 h-4" />
+              <Gift className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="mt-4 flex items-baseline gap-2">
-            <span className={cn("text-xl sm:text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-lg sm:text-xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
               {totalRequests}
             </span>
-            <span className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>All Submissions</span>
+            <span className={cn("text-[11px] font-medium", isDark ? "text-cyan-400" : "text-cyan-600")}>All Submissions</span>
           </div>
         </div>
 
         {/* Pending Review */}
         <div className={cn(
-          "relative overflow-hidden rounded-2xl border p-5 transition-colors",
-          isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
+          "relative overflow-hidden rounded-xl border p-3.5 sm:p-4 transition-colors",
+          isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-sm" : "bg-white border-slate-200 shadow-sm"
         )}>
-          <div className="flex items-center justify-between">
-            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+          <div className="flex items-center justify-between mb-2">
+            <span className={cn("text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
               Pending Review
             </span>
             <div className={cn(
-              "w-9 h-9 rounded-xl border flex items-center justify-center",
+              "w-8 h-8 rounded-lg border flex items-center justify-center",
               isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600"
             )}>
-              <Clock className="w-4 h-4" />
+              <Clock className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="mt-4 flex items-baseline gap-2">
-            <span className={cn("text-xl sm:text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-lg sm:text-xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
               {pendingCount}
             </span>
-            <span className={cn("text-xs font-medium", isDark ? "text-amber-400" : "text-amber-600")}>Awaiting Action</span>
+            <span className={cn("text-[11px] font-medium", isDark ? "text-amber-400" : "text-amber-600")}>Awaiting Action</span>
           </div>
         </div>
 
         {/* Paid Requests */}
         <div className={cn(
-          "relative overflow-hidden rounded-2xl border p-5 transition-colors",
-          isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
+          "relative overflow-hidden rounded-xl border p-3.5 sm:p-4 transition-colors",
+          isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-sm" : "bg-white border-slate-200 shadow-sm"
         )}>
-          <div className="flex items-center justify-between">
-            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+          <div className="flex items-center justify-between mb-2">
+            <span className={cn("text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
               Completed Payouts
             </span>
             <div className={cn(
-              "w-9 h-9 rounded-xl border flex items-center justify-center",
+              "w-8 h-8 rounded-lg border flex items-center justify-center",
               isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600"
             )}>
-              <CheckCircle className="w-4 h-4" />
+              <CheckCircle className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="mt-4 flex items-baseline gap-2">
-            <span className={cn("text-xl sm:text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-lg sm:text-xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
               {paidCount}
             </span>
-            <span className={cn("text-xs font-medium", isDark ? "text-emerald-400" : "text-emerald-600")}>Approved</span>
+            <span className={cn("text-[11px] font-medium", isDark ? "text-emerald-400" : "text-emerald-600")}>Approved</span>
           </div>
         </div>
 
         {/* Total Paid Volume */}
         <div className={cn(
-          "relative overflow-hidden rounded-2xl border p-5 transition-colors",
+          "relative overflow-hidden rounded-xl border p-3.5 sm:p-4 transition-colors",
           isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
         )}>
-          <div className="flex items-center justify-between">
-            <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+          <div className="flex items-center justify-between mb-2">
+            <span className={cn("text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
               Total Paid Out
             </span>
             <div className={cn(
-              "w-9 h-9 rounded-xl border flex items-center justify-center",
+              "w-8 h-8 rounded-lg border flex items-center justify-center",
               isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600"
             )}>
-              <Wallet className="w-4 h-4" />
+              <Wallet className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="mt-4 flex items-baseline gap-2">
-            <span className={cn("text-lg sm:text-xl font-bold truncate", isDark ? "text-white" : "text-slate-900")}>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-lg sm:text-xl font-bold truncate tracking-tight", isDark ? "text-white" : "text-slate-900")}>
               {formatRupiah(totalPaidAmount)}
             </span>
           </div>
@@ -217,12 +220,12 @@ export default function AdminAffiliatePage() {
 
       {/* ── CONTROLS & FILTER BAR ────────────────────────────────────────────── */}
       <div className={cn(
-        "flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 border p-4 rounded-2xl transition-colors w-full",
-        isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
+        "flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 border p-3 rounded-xl transition-colors w-full",
+        isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-sm" : "bg-white border-slate-200 shadow-sm"
       )}>
         {/* Status Tab switch */}
         <div className={cn(
-          "inline-flex items-center gap-1 p-1 rounded-xl border max-w-full overflow-x-auto scrollbar-none self-start",
+          "inline-flex items-center gap-1 p-1 rounded-lg border max-w-full overflow-x-auto scrollbar-none self-start",
           isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200"
         )}>
           {[
@@ -235,7 +238,7 @@ export default function AdminAffiliatePage() {
               key={tab.id}
               onClick={() => setStatusFilter(tab.id)}
               className={cn(
-                "inline-flex items-center justify-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap select-none",
+                "inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer whitespace-nowrap select-none",
                 statusFilter === tab.id
                   ? "bg-cyan-500 text-slate-950 font-bold shadow-sm"
                   : isDark
@@ -245,7 +248,7 @@ export default function AdminAffiliatePage() {
             >
               <span>{tab.label}</span>
               <span className={cn(
-                "px-1.5 py-0.5 rounded-md text-[10px] font-bold leading-none shrink-0 transition-colors",
+                "px-1.5 py-0.5 rounded-full text-[10px] font-bold leading-none shrink-0 transition-colors",
                 statusFilter === tab.id
                   ? "bg-slate-950/20 text-slate-950 font-bold"
                   : isDark
@@ -259,15 +262,15 @@ export default function AdminAffiliatePage() {
         </div>
 
         {/* Search */}
-        <div className="relative flex-1 min-w-[200px] sm:min-w-[260px] w-full sm:w-auto">
-          <Search className={cn("w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2", isDark ? "text-zinc-500" : "text-slate-400")} />
+        <div className="relative w-full sm:w-64 md:w-72 shrink-0">
+          <Search className={cn("w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2", isDark ? "text-zinc-500" : "text-slate-400")} />
           <input
             type="text"
             placeholder="Search user, email, bank, or account..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className={cn(
-              "w-full pl-10 pr-4 py-2 rounded-xl border text-xs focus:outline-none transition-all",
+              "w-full pl-8 pr-3 py-1.5 rounded-lg border text-xs focus:outline-none transition-all",
               isDark
                 ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder-zinc-500 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                 : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-600 focus:bg-white"
@@ -277,7 +280,7 @@ export default function AdminAffiliatePage() {
       </div>
 
       {/* ── DATA SECTION ─────────────────────────────────────────────────────── */}
-      <div className={cn("border rounded-2xl overflow-hidden relative z-10", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+      <div className={cn("border rounded-xl overflow-hidden relative z-10", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-sm" : "bg-white border-slate-200 shadow-sm")}>
         <div className="overflow-x-auto relative z-10">
           <table className={cn("w-full text-left text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
             <thead className={cn("text-xs uppercase font-semibold border-b", isDark ? "bg-[#0a0a0c] text-slate-400 border-white/[0.08]" : "bg-slate-50 text-slate-500 border-slate-200")}>
