@@ -7,6 +7,7 @@ import { getClientIp } from '@/lib/get-ip';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { parseUserAgent } from '@/lib/device';
 import { syncCustomerToElastic } from '@/lib/sync-elasticsearch';
+import { notifyUserPresencePing } from '@/lib/presence-emitter';
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -173,11 +174,21 @@ export async function GET(req: Request) {
       console.error('Failed to record Google login log:', logErr);
     }
 
-    // Update lastActive timestamp on successful Google login
+    // Update lastActive timestamp on successful Google login and immediately broadcast presence
+    const now = new Date();
     await prisma.user.update({
       where: { id: user.id },
-      data: { lastActive: new Date() },
+      data: { lastActive: now },
     }).catch(err => console.debug("google login lastActive update error:", err));
+
+    notifyUserPresencePing({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      image: user.image,
+      role: user.role,
+      lastActive: now,
+    });
 
     const redirectUrl = new URL(user.role === 'ADMIN' ? '/admin' : '/dashboard', baseUrl);
     const response = NextResponse.redirect(redirectUrl);

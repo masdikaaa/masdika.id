@@ -36,6 +36,9 @@ export async function fetchOnlineUsersList(): Promise<OnlineUserSummary[]> {
         lastActive: {
           gte: fiveMinutesAgo,
         },
+        role: {
+          notIn: ['ADMIN', 'SUPER_ADMIN'],
+        },
       },
       select: {
         id: true,
@@ -72,6 +75,11 @@ export function notifyUserPresencePing(user: {
   role?: string;
   lastActive: Date;
 }) {
+  // Never broadcast ADMIN or SUPER_ADMIN in customer online presence
+  if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+    return;
+  }
+
   const decryptedName = user.name ? (decryptDeterministic(user.name) || 'Unknown') : 'Unknown';
   const decryptedEmail = user.email ? (decryptDeterministic(user.email) || '') : '';
 

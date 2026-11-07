@@ -9,6 +9,7 @@ import { verify } from 'otplib';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
 import { parseUserAgent } from '@/lib/device';
+import { notifyUserPresencePing } from '@/lib/presence-emitter';
 
 export async function POST(req: Request) {
   try {
@@ -250,11 +251,21 @@ export async function POST(req: Request) {
       }
     }
 
-    // Update lastActive timestamp on successful login
+    // Update lastActive timestamp on successful login and immediately broadcast presence
+    const now = new Date();
     await prisma.user.update({
       where: { id: user.id },
-      data: { lastActive: new Date() },
+      data: { lastActive: now },
     }).catch(err => console.debug("login lastActive update error:", err));
+
+    notifyUserPresencePing({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      image: user.image,
+      role: user.role,
+      lastActive: now,
+    });
 
     const response = NextResponse.json({ success: true, user: { id: user.id, email: user.email, name: user.name, role: user.role } });
     
