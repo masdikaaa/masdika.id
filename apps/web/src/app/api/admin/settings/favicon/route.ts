@@ -4,7 +4,6 @@ import path from 'path';
 import { requireAuth } from '@/lib/auth-middleware';
 
 const FAVICON_PATH = path.join(process.cwd(), 'src', 'app', 'favicon.ico');
-const PUBLIC_FAVICON_PATH = path.join(process.cwd(), 'public', 'favicon.ico');
 
 export async function POST(req: Request) {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
@@ -41,12 +40,6 @@ export async function POST(req: Request) {
 
     // Overwrite the file
     fs.writeFileSync(FAVICON_PATH, buffer);
-    try {
-      const publicDir = path.dirname(PUBLIC_FAVICON_PATH);
-      if (fs.existsSync(publicDir)) {
-        fs.writeFileSync(PUBLIC_FAVICON_PATH, buffer);
-      }
-    } catch {}
 
     return NextResponse.json({ success: true, message: 'Favicon updated successfully' });
   } catch (error) {
@@ -63,11 +56,6 @@ export async function DELETE() {
     if (fs.existsSync(FAVICON_PATH)) {
       fs.unlinkSync(FAVICON_PATH);
     }
-    try {
-      if (fs.existsSync(PUBLIC_FAVICON_PATH)) {
-        fs.unlinkSync(PUBLIC_FAVICON_PATH);
-      }
-    } catch {}
     return NextResponse.json({ success: true, message: 'Favicon deleted successfully' });
   } catch (error) {
     console.error('Error deleting favicon:', error);

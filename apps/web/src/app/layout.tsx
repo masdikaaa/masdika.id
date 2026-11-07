@@ -112,17 +112,10 @@ export async function generateMetadata(): Promise<Metadata> {
       creator: "@masdikaid",
     },
     icons: {
-      icon: [
-        { url: '/favicon.ico', sizes: 'any' },
-        { url: '/icon.png', type: 'image/png', sizes: '32x32' },
-        { url: '/icon-192.png', type: 'image/png', sizes: '192x192' },
-      ],
+      icon: '/favicon.ico',
       shortcut: '/favicon.ico',
-      apple: [
-        { url: '/apple-icon.png', sizes: '180x180', type: 'image/png' },
-      ],
+      apple: '/favicon.ico',
     },
-    manifest: '/manifest.json',
   };
 }
 
