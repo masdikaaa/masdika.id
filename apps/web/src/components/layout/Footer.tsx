@@ -52,7 +52,7 @@ export function Footer({ socialLinks }: { socialLinks?: any }) {
           <div className="lg:col-span-3">
             <Link href="/" className="flex items-center group w-fit mb-6">
               <img
-                src={isDark ? "/masdika-logo-dark-mode.svg" : "/masdika-logo-light-mode.svg"}
+                src={isDark ? "/images/brand/masdika-logo-dark-mode.svg" : "/images/brand/masdika-logo-light-mode.svg"}
                 alt="Masdika Logo"
                 width={130}
                 height={32}

@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Managed Kubernetes (K3s)",
     description: "Deploy, manage, and scale your containerized applications effortlessly with Masdika's Managed K3s Kubernetes Engine.",
-    images: ["/og-image.webp"],
+    images: ["/images/brand/og-image.webp"],
   },
 };
 

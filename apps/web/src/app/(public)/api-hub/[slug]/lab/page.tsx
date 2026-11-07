@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       type: 'website',
       images: [
         {
-          url: '/og-image.webp',
+          url: '/images/brand/og-image.webp',
           width: 1200,
           height: 630,
         },
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       card: 'summary_large_image',
       title: `${project.name} Lab - API Hub`,
       description: project.description,
-      images: ['/og-image.webp'],
+      images: ['/images/brand/og-image.webp'],
     }
   };
 }

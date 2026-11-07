@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Service Level Agreement',
     description: 'Our commitment to providing reliable, highly-available cloud services.',
-    images: ['/og-image.webp'],
+    images: ['/images/brand/og-image.webp'],
   },
 };
 

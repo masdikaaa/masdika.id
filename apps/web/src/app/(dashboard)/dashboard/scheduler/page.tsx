@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     siteName: 'Masdika',
     images: [
       {
-        url: '/og-image.webp',
+        url: '/images/brand/og-image.webp',
         width: 1200,
         height: 630,
         alt: 'Masdika Auto Scheduler',
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Auto Scheduler',
     description: 'Schedule your VPS to automatically start and stop to save costs.',
-    images: ['/og-image.webp'],
+    images: ['/images/brand/og-image.webp'],
   },
 };
 

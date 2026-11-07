@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     siteName: "Masdika",
     images: [
       {
-        url: "/og-image.webp",
+        url: "/images/brand/og-image.webp",
         width: 1200,
         height: 630,
         alt: "Masdika | Cloud & DevOps Engineer",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Masdika | Cloud & DevOps Engineer",
     description: "Portfolio of Masdika, Cloud & DevOps Engineer. Discover enterprise infrastructure projects, high-performance Cloud VPS hosting, Managed Kubernetes, and scalable cloud solutions.",
-    images: ["/og-image.webp"],
+    images: ["/images/brand/og-image.webp"],
   },
 };
 

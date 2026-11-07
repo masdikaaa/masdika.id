@@ -408,7 +408,7 @@ export default function SkillsPage() {
             {/* Right – Hero Avatar */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
-                imageSrc="/skills.webp"
+                imageSrc="/images/mascots/skills.webp"
                 imageAlt="Masdika – Technical Skills"
                 imageWidth={1024}
                 imageHeight={1024}

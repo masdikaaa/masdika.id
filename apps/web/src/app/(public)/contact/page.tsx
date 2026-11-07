@@ -192,7 +192,7 @@ export default function ContactPage() {
             {/* Right Column: Hero Avatar (contact.webp / contact.png) with 4 Floating Badges */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
-                imageSrc="/contact.webp"
+                imageSrc="/images/mascots/contact.webp"
                 imageAlt="Masdika Contact Mascot"
                 imageWidth={1536}
                 imageHeight={1024}

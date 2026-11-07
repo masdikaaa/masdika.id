@@ -292,13 +292,13 @@ export default function InvoiceViewClient({ invoice, isPaid, decryptedName, decr
               <div className="space-y-2.5 sm:space-y-3 w-full md:w-auto min-w-0">
                 <div className="flex items-center gap-3">
                   <img
-                    src={isDark ? "/masdika-logo-dark-mode.svg" : "/masdika-logo-light-mode.svg"}
+                    src={isDark ? "/images/brand/masdika-logo-dark-mode.svg" : "/images/brand/masdika-logo-light-mode.svg"}
                     alt="Masdika Logo"
                     className="h-8 sm:h-9 w-auto print:hidden"
                   />
                   {/* Clean High-Contrast Print Logo fallback */}
                   <img
-                    src="/masdika-logo-light-mode.svg"
+                    src="/images/brand/masdika-logo-light-mode.svg"
                     alt="Masdika Logo"
                     className="hidden print:block h-8 w-auto"
                   />

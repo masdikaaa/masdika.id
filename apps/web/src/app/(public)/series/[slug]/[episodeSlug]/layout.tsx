@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import path from "path";
 
 async function getOgImage(imageUrl: string | null | undefined): Promise<string> {
-  if (!imageUrl) return "/og-image.webp";
+  if (!imageUrl) return "/images/brand/og-image.webp";
   try {
     const sharpModule = await import('sharp');
     const sharp = sharpModule.default || sharpModule;
@@ -11,16 +11,16 @@ async function getOgImage(imageUrl: string | null | undefined): Promise<string> 
       const imgPath = path.join(process.cwd(), "public", imageUrl);
       const meta = await sharp(imgPath).metadata();
       const ratio = (meta.width || 1) / (meta.height || 1);
-      return ratio > 1.7 ? imageUrl : "/og-image.webp";
+      return ratio > 1.7 ? imageUrl : "/images/brand/og-image.webp";
     } else {
       const res = await fetch(imageUrl, { signal: AbortSignal.timeout(3000) });
       const buffer = Buffer.from(await res.arrayBuffer());
       const meta = await sharp(buffer).metadata();
       const ratio = (meta.width || 1) / (meta.height || 1);
-      return ratio > 1.7 ? imageUrl : "/og-image.webp";
+      return ratio > 1.7 ? imageUrl : "/images/brand/og-image.webp";
     }
   } catch {
-    return "/og-image.webp";
+    return "/images/brand/og-image.webp";
   }
 }
 

@@ -88,7 +88,7 @@ function ResetPasswordForm() {
         {/* Logo */}
         <Link href="/" className="flex items-center group w-fit mb-6">
           <img
-            src={isDark ? "/masdika-logo-dark-mode.svg" : "/masdika-logo-light-mode.svg"}
+            src={isDark ? "/images/brand/masdika-logo-dark-mode.svg" : "/images/brand/masdika-logo-light-mode.svg"}
             alt="Masdika Logo"
             className="h-8 w-auto"
           />

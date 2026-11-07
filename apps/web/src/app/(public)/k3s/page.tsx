@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     siteName: "Masdika",
     images: [
       {
-        url: "/og-image.webp",
+        url: "/images/brand/og-image.webp",
         width: 1200,
         height: 630,
         alt: "Masdika Managed Kubernetes K3s",
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Managed Kubernetes (K3s) Indonesia - High Availability Clusters | Masdika",
     description: "Deploy production-ready Managed K3s Kubernetes clusters in seconds with automated control plane, private VPC VLAN networking, and Enterprise SSD worker nodes in Indonesia.",
-    images: ["/og-image.webp"],
+    images: ["/images/brand/og-image.webp"],
   },
 };
 

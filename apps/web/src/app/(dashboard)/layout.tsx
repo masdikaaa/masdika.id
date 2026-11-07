@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     siteName: 'Masdika',
     images: [
       {
-        url: '/og-image.webp',
+        url: '/images/brand/og-image.webp',
         width: 1200,
         height: 630,
         alt: 'Masdika Cloud Services',
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Dashboard',
     description: 'Manage your API keys, subscriptions, and Masdika cloud services.',
-    images: ['/og-image.webp'],
+    images: ['/images/brand/og-image.webp'],
   },
 };
 

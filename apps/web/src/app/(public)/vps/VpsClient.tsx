@@ -315,7 +315,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
             {/* Right – Hero Avatar (vps.webp) with 4 Floating Badges */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
-                imageSrc="/vps.webp"
+                imageSrc="/images/mascots/vps.webp"
                 imageAlt="Masdika – Cloud VPS & Compute"
                 imageWidth={1536}
                 imageHeight={1024}

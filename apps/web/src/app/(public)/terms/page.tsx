@@ -62,7 +62,7 @@ export default function TermsPage() {
             {/* Right – Hero Avatar (term-condition.webp) with Floating Badges */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
-                imageSrc="/term-condition.webp"
+                imageSrc="/images/mascots/term-condition.webp"
                 imageAlt="Masdika – Terms and Conditions"
                 imageWidth={1536}
                 imageHeight={1024}

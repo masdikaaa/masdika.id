@@ -68,7 +68,7 @@ export default function PrivacyPolicyPage() {
             {/* Right – Hero Avatar (privacy-policy.webp) with Floating Badges */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
-                imageSrc="/privacy-policy.webp"
+                imageSrc="/images/mascots/privacy-policy.webp"
                 imageAlt="Masdika – Privacy Policy"
                 imageWidth={1536}
                 imageHeight={1024}

@@ -252,13 +252,13 @@ export async function generateMetadata({
         url: `${siteUrl}/media/${token}`,
         siteName: "Masdika Secure Media",
         type: "website",
-        images: [{ url: "/og-image.webp", width: 1200, height: 630, alt: media.originalName }],
+        images: [{ url: "/images/brand/og-image.webp", width: 1200, height: 630, alt: media.originalName }],
       },
       twitter: {
         card: "summary_large_image",
         title,
         description,
-        images: ["/og-image.webp"],
+        images: ["/images/brand/og-image.webp"],
       },
     };
   } catch {

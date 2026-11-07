@@ -154,7 +154,7 @@ export default function ServicesPage() {
             {/* Right – Hero Avatar (services.webp) with 4 Floating Badges (All 4 Visible on Mobile) */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
-                imageSrc="/services.webp"
+                imageSrc="/images/mascots/services.webp"
                 imageAlt="Masdika – Services & Solutions"
                 imageWidth={1024}
                 imageHeight={1024}

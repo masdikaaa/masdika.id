@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Privacy Policy',
     description: 'Our commitment to protecting your privacy and personal data at Masdika Cloud.',
-    images: ['/og-image.webp'],
+    images: ['/images/brand/og-image.webp'],
   },
 };
 

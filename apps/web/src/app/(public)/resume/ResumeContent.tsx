@@ -186,7 +186,7 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
             {/* Right – Hero Avatar */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
-                imageSrc="/about.webp"
+                imageSrc="/images/mascots/about.webp"
                 imageAlt="Masdika – About Me"
                 imageWidth={1180}
                 imageHeight={1060}

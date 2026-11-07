@@ -611,7 +611,7 @@ export default function ResellerApiClient() {
             {/* Right – Hero Avatar (reseller-api.webp) with 4 Floating Badges */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
-                imageSrc="/reseller-api.webp"
+                imageSrc="/images/mascots/reseller-api.webp"
                 imageAlt="Masdika – White-Label Reseller API"
                 imageWidth={1536}
                 imageHeight={1024}

@@ -6,13 +6,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Learning Series",
     description: "Structured learning series covering networking, cloud infrastructure, DevOps, and more.",
-    images: [{ url: "/og-image.webp" }],
+    images: [{ url: "/images/brand/og-image.webp" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Learning Series",
     description: "Structured learning series covering networking, cloud infrastructure, DevOps, and more.",
-    images: ["/og-image.webp"],
+    images: ["/images/brand/og-image.webp"],
   },
 };
 

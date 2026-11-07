@@ -110,7 +110,7 @@ export default function ForgotPasswordPage() {
             <div className="flex items-center justify-between mb-6 sm:mb-8 pt-1">
               <Link href="/" className="flex items-center group transition-transform hover:scale-105">
                 <img
-                  src={isDark ? "/masdika-logo-dark-mode.svg" : "/masdika-logo-light-mode.svg"}
+                  src={isDark ? "/images/brand/masdika-logo-dark-mode.svg" : "/images/brand/masdika-logo-light-mode.svg"}
                   alt="Masdika Logo"
                   className="h-8 w-auto"
                 />
@@ -146,7 +146,7 @@ export default function ForgotPasswordPage() {
             <div className="lg:hidden flex items-center gap-3 p-2.5 sm:p-3 mb-6 rounded-2xl border bg-cyan-500/5 border-cyan-500/20 w-full min-w-0 overflow-hidden">
               <div className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-xl overflow-hidden bg-cyan-500/10 flex-shrink-0 flex items-center justify-center p-0.5">
                 <Image
-                  src="/forgot-password.webp"
+                  src="/images/auth/forgot-password.webp"
                   alt="Masdika Assistant"
                   width={48}
                   height={48}
@@ -409,7 +409,7 @@ export default function ForgotPasswordPage() {
               className="relative z-10 flex flex-col items-center"
             >
               <Image
-                src="/forgot-password.webp"
+                src="/images/auth/forgot-password.webp"
                 alt="Masdika Assistant"
                 width={380}
                 height={470}

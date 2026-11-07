@@ -283,7 +283,7 @@ export default function DashboardLayoutClient({
         <div className={cn("h-16 flex items-center px-6 border-b shrink-0", isDark ? "border-white/10" : "border-slate-200")}>
           <Link href="/" className="flex items-center group w-fit">
               <img
-                src={isDark ? "/masdika-logo-dark-mode.svg" : "/masdika-logo-light-mode.svg"}
+                src={isDark ? "/images/brand/masdika-logo-dark-mode.svg" : "/images/brand/masdika-logo-light-mode.svg"}
                 alt="Masdika Logo"
                 className="h-8 w-auto"
               />

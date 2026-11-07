@@ -37,13 +37,13 @@ export async function generateMetadata(
     openGraph: {
       title,
       description,
-      images: [{ url: '/og-image.webp', width: 1200, height: 630 }],
+      images: [{ url: '/images/brand/og-image.webp', width: 1200, height: 630 }],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: ['/og-image.webp'],
+      images: ['/images/brand/og-image.webp'],
     }
   };
 }

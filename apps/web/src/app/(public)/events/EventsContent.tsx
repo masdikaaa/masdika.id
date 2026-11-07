@@ -87,7 +87,7 @@ export function EventsContent({ opportunities }: { opportunities: any }) {
             {/* Right – Hero Avatar (event-webinar.webp) with 4 Floating Badges */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
-                imageSrc="/event-webinar.webp"
+                imageSrc="/images/mascots/event-webinar.webp"
                 imageAlt="Masdika – Events & Webinars"
                 imageWidth={1536}
                 imageHeight={1024}

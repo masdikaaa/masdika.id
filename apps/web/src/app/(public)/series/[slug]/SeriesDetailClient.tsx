@@ -38,8 +38,8 @@ function EpisodeCard({ ep, index, totalEpisodes, seriesSlug, seriesImage }: Epis
   // Preferred image: episode image -> series image -> list-episodes illustration
   const imageSrc = !noImg
     ? useFallbackImg
-      ? (seriesImage || "/list-episodes.webp")
-      : (ep.image || seriesImage || "/list-episodes.webp")
+      ? (seriesImage || "/images/mascots/list-episodes.webp")
+      : (ep.image || seriesImage || "/images/mascots/list-episodes.webp")
     : null;
 
   const handleImageError = () => {
@@ -179,7 +179,7 @@ export function SeriesDetailClient({ initialSeries, slug }: { initialSeries: any
     "@type": "Course",
     "name": series.title,
     "description": series.description,
-    "image": series.image || `${process.env.NEXT_PUBLIC_APP_URL}/og-image.webp`,
+    "image": series.image || `${process.env.NEXT_PUBLIC_APP_URL}/images/brand/og-image.webp`,
     "provider": {
       "@type": "Person",
       "name": "Masdika",
@@ -311,7 +311,7 @@ export function SeriesDetailClient({ initialSeries, slug }: { initialSeries: any
                 className="relative flex items-center justify-center mt-6 lg:mt-0"
               >
                 <HeroAvatarFrame
-                  imageSrc="/list-episodes.webp"
+                  imageSrc="/images/mascots/list-episodes.webp"
                   imageAlt={series.title}
                   imageWidth={1536}
                   imageHeight={1024}

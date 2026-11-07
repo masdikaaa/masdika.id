@@ -191,7 +191,7 @@ export default function CommunityClient({ initialGroups }: { initialGroups: Comm
             {/* Right – Hero Avatar (community.webp) with 4 Floating Badges */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
-                imageSrc="/community.webp"
+                imageSrc="/images/mascots/community.webp"
                 imageAlt="Masdika – Developer Community"
                 imageWidth={1536}
                 imageHeight={1024}

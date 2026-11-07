@@ -311,7 +311,7 @@ export function Navbar({ socialLinks }: { socialLinks?: any }) {
               className="flex items-center group w-fit focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 rounded-lg p-1"
             >
               <img
-                src={isDark ? "/masdika-logo-dark-mode.svg" : "/masdika-logo-light-mode.svg"}
+                src={isDark ? "/images/brand/masdika-logo-dark-mode.svg" : "/images/brand/masdika-logo-light-mode.svg"}
                 alt="Masdika Logo"
                 width={130}
                 height={32}

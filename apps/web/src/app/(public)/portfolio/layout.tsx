@@ -19,12 +19,12 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title,
       description,
-      images: ['/og-image.webp'],
+      images: ['/images/brand/og-image.webp'],
     },
     twitter: {
       title,
       description,
-      images: ['/og-image.webp'],
+      images: ['/images/brand/og-image.webp'],
     },
   };
 }

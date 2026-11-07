@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     siteName: "Masdika",
     images: [
       {
-        url: "/og-image.webp",
+        url: "/images/brand/og-image.webp",
         width: 1200,
         height: 630,
         alt: "Masdika Cloud VPS - High Performance Compute",
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Cloud VPS - High Performance Compute & Enterprise SSD",
     description: "Deploy scalable, lightning-fast Cloud VPS powered by enterprise Intel Xeon, high-speed Enterprise SSD & SAS HDD storage, and sub-20ms latency across Indonesia.",
-    images: ["/og-image.webp"],
+    images: ["/images/brand/og-image.webp"],
   },
 };
 
@@ -84,7 +84,7 @@ export default async function VpsLandingPage() {
         "name": "Cloud VPS - High Performance Compute",
         "description": "High-Performance Cloud Virtual Private Servers powered by enterprise Intel Xeon, high-speed Enterprise SSD & SAS HDD storage, isolated KVM virtualization, and flexible hourly Pay-As-You-Go billing.",
         "category": "Cloud Computing > Virtual Private Server",
-        "image": "https://www.masdika.id/og-image.webp",
+        "image": "https://www.masdika.id/images/brand/og-image.webp",
         "brand": {
           "@type": "Brand",
           "name": "Masdika"

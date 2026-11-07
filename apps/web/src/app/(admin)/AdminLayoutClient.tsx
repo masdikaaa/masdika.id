@@ -241,7 +241,7 @@ export default function AdminLayout({
           <Link href="/" className="flex items-center group w-fit">
               { }
               <img
-                src={isDark ? "/masdika-logo-dark-mode.svg" : "/masdika-logo-light-mode.svg"}
+                src={isDark ? "/images/brand/masdika-logo-dark-mode.svg" : "/images/brand/masdika-logo-light-mode.svg"}
                 alt="Masdika Logo"
                 className="h-8 w-auto"
               />

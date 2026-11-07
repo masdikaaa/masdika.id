@@ -290,7 +290,7 @@ export function BlogContent({ initialPosts = [] }: { initialPosts?: BlogPostItem
             {/* Right – Hero Avatar (blog.webp) with 4 Floating Badges */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
-                imageSrc="/blog.webp"
+                imageSrc="/images/mascots/blog.webp"
                 imageAlt="Masdika – Tech Blog & Articles"
                 imageWidth={1536}
                 imageHeight={1024}

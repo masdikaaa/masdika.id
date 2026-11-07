@@ -16,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const rawSiteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.masdika.id';
   const siteUrl = rawSiteUrl.replace(/^["']|["']$/g, '').trim();
   const title = 'Developer Community Groups';
-  const ogImageUrl = '/og-image.webp';
+  const ogImageUrl = '/images/brand/og-image.webp';
 
   return {
     title,

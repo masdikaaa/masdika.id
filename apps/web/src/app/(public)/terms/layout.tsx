@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Terms of Service',
     description: 'Terms and conditions for using Masdika Cloud services.',
-    images: ['/og-image.webp'],
+    images: ['/images/brand/og-image.webp'],
   },
 };
 

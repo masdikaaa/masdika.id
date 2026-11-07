@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   title: "Portfolio - Projects & Engineering Work",
   description: "Explore enterprise cloud infrastructure, Kubernetes deployments, and automated CI/CD systems built by Masdika.",
   openGraph: {
-    images: ["/og-image.webp"],
+    images: ["/images/brand/og-image.webp"],
   },
 };
 

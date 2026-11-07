@@ -80,7 +80,7 @@ export function VacanciesContent({ opportunities }: { opportunities: Opportunity
             {/* Right – Hero Avatar (job-vacancies.webp) with 4 Floating Badges */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
-                imageSrc="/job-vacancies.webp"
+                imageSrc="/images/mascots/job-vacancies.webp"
                 imageAlt="Masdika – Job Vacancies"
                 imageWidth={1536}
                 imageHeight={1024}

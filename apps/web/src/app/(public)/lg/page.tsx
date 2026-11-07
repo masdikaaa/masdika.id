@@ -177,7 +177,7 @@ export default function LookingGlassPage() {
             {/* Right – Hero Avatar (looking-glass.webp) with Floating Badges */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
-                imageSrc="/looking-glass.webp"
+                imageSrc="/images/mascots/looking-glass.webp"
                 imageAlt="Masdika – Network Routing & Looking Glass"
                 imageWidth={1536}
                 imageHeight={1024}

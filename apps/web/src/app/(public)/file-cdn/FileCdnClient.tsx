@@ -216,7 +216,7 @@ export default function FileCdnClient({
             {/* Right – Hero Avatar (file-cdn.webp) with 4 Floating Badges */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
-                imageSrc="/file-cdn.webp"
+                imageSrc="/images/mascots/file-cdn.webp"
                 imageAlt="Masdika Edge CDN & Temporary Storage"
                 imageWidth={1536}
                 imageHeight={1024}

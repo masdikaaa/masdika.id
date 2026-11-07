@@ -68,7 +68,7 @@ export default function SLAPage() {
             {/* Right – Hero Avatar (sla.webp) with Floating Badges */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
-                imageSrc="/sla.webp"
+                imageSrc="/images/mascots/sla.webp"
                 imageAlt="Masdika – Service Level Agreement"
                 imageWidth={1145}
                 imageHeight={1374}

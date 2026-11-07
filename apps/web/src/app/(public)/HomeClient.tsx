@@ -505,7 +505,7 @@ export function HomeClient({
               className="relative flex items-center justify-center mt-4 lg:mt-0 order-2"
             >
               <HeroAvatarFrame
-                imageSrc="/masdika.webp"
+                imageSrc="/images/mascots/masdika.webp"
                 imageAlt="Masdika – Cloud Engineer"
                 imageWidth={720}
                 imageHeight={864}
@@ -1433,7 +1433,7 @@ export function HomeClient({
             {/* Right Hero Image (Desktop: Attached directly to bottom card border) */}
             <div className="hidden md:block absolute right-6 lg:right-12 xl:right-16 -bottom-3 lg:-bottom-4 xl:-bottom-5 pointer-events-none select-none z-10">
               <Image
-                src="/herocard1.webp"
+                src="/images/mascots/herocard1.webp"
                 alt="Ready to Scale Infrastructure - Masdika"
                 width={1178}
                 height={1265}
@@ -1445,7 +1445,7 @@ export function HomeClient({
             {/* Mobile Hero (Centered at bottom, attached directly to bottom card border) */}
             <div className="block md:hidden mt-6 -mb-6 sm:-mb-8 flex justify-center pointer-events-none select-none">
               <Image
-                src="/herocard1.webp"
+                src="/images/mascots/herocard1.webp"
                 alt="Ready to Scale Infrastructure - Masdika"
                 width={1178}
                 height={1265}

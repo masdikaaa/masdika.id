@@ -224,7 +224,7 @@ export default function ApiHubClient({
             {/* Right – Hero Avatar (api-hub.webp) with 4 Floating Badges */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
-                imageSrc="/api-hub.webp"
+                imageSrc="/images/mascots/api-hub.webp"
                 imageAlt="Masdika API Hub Mascot"
                 imageWidth={1536}
                 imageHeight={1024}

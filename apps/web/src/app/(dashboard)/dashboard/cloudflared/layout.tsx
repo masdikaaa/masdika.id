@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     siteName: 'Masdika',
     images: [
       {
-        url: '/og-image.webp',
+        url: '/images/brand/og-image.webp',
         width: 1200,
         height: 630,
         alt: 'Masdika Cloudflared Tunnels',
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Cloudflared Tunnels',
     description: 'Add your domains, create tunnels, and securely expose your local services to the internet.',
-    images: ['/og-image.webp'],
+    images: ['/images/brand/og-image.webp'],
   },
 };
 

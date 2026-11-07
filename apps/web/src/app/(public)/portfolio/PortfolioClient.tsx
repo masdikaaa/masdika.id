@@ -134,7 +134,7 @@ export function PortfolioClient({ initialProjects = [] }: PortfolioClientProps) 
             {/* Right – Hero Avatar (portofolio.webp) with 4 Floating Info Badges (All 4 Visible on Mobile) */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
-                imageSrc="/portofolio.webp"
+                imageSrc="/images/mascots/portofolio.webp"
                 imageAlt="Masdika – Portfolio Works"
                 imageWidth={1323}
                 imageHeight={1189}

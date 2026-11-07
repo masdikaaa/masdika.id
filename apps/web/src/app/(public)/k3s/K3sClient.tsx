@@ -139,7 +139,7 @@ export default function K3sClient({ safePricing, isK3sEnabled }: { safePricing: 
             {/* Right – Hero Avatar (kube.webp) with 4 Floating Badges */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
-                imageSrc="/kube.webp"
+                imageSrc="/images/mascots/kube.webp"
                 imageAlt="Masdika – Managed Kubernetes Clusters"
                 imageWidth={1536}
                 imageHeight={1024}

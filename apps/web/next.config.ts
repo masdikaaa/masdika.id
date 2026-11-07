@@ -43,6 +43,34 @@ const nextConfig: NextConfig = {
     formats: ["image/webp"],
     minimumCacheTTL: 31536000,
   },
+  async rewrites() {
+    return [
+      {
+        source: "/og-image.webp",
+        destination: "/images/brand/og-image.webp",
+      },
+      {
+        source: "/logo-email.webp",
+        destination: "/images/brand/logo-email.webp",
+      },
+      {
+        source: "/masdika-logo-dark-mode.svg",
+        destination: "/images/brand/masdika-logo-dark-mode.svg",
+      },
+      {
+        source: "/masdika-logo-light-mode.svg",
+        destination: "/images/brand/masdika-logo-light-mode.svg",
+      },
+      {
+        source: "/forgot-password.webp",
+        destination: "/images/auth/forgot-password.webp",
+      },
+      {
+        source: "/:mascot(about|api-hub|blog|community|contact|event-webinar|file-cdn|herocard1|job-vacancies|kube|list-episodes|looking-glass|masdika|portofolio|privacy-policy|reseller-api|series|services|skills|sla|term-condition|vps).webp",
+        destination: "/images/mascots/:mascot.webp",
+      },
+    ];
+  },
   async headers() {
     return [
       // ── Aggressive static-asset caching (images, fonts, icons) ──

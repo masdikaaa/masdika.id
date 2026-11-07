@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Login',
     description: 'Sign in to your Masdika account to access your personalized dashboard and manage your services.',
-    images: ['/og-image.webp'],
+    images: ['/images/brand/og-image.webp'],
   }
 };
 

@@ -53,7 +53,7 @@ const item = {
 
 function SeriesThumbnail({ src, alt }: { src?: string | null; alt: string }) {
   const [imgError, setImgError] = useState(false);
-  const finalSrc = !imgError && src ? src : "/list-episodes.webp";
+  const finalSrc = !imgError && src ? src : "/images/mascots/list-episodes.webp";
 
   return (
     <Image
@@ -173,7 +173,7 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
               className="relative flex items-center justify-center mt-6 lg:mt-0"
             >
               <HeroAvatarFrame
-                imageSrc="/series.webp"
+                imageSrc="/images/mascots/series.webp"
                 imageAlt="Masdika – Learning Series"
                 imageWidth={1536}
                 imageHeight={1024}

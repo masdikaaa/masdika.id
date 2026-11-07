@@ -139,7 +139,7 @@ export default function LoginPage() {
             <div className="flex items-center justify-between mb-6 sm:mb-8 pt-1">
               <Link href="/" className="flex items-center group transition-transform hover:scale-105">
                 <img
-                  src={isDark ? "/masdika-logo-dark-mode.svg" : "/masdika-logo-light-mode.svg"}
+                  src={isDark ? "/images/brand/masdika-logo-dark-mode.svg" : "/images/brand/masdika-logo-light-mode.svg"}
                   alt="Masdika Logo"
                   className="h-8 w-auto"
                 />
