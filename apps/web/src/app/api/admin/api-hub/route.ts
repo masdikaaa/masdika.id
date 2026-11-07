@@ -2,8 +2,16 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth-middleware';
 import { decryptDeterministic } from '@/lib/encryption';
-import path from 'path';
-import { unlink } from 'fs/promises';
+
+const API_HUB_SERVICES = [
+  'TIKTOK',
+  'SPOTIFY',
+  'YOUTUBE',
+  'BLOG',
+  'BMKG_WEATHER',
+  'BMKG_EARTHQUAKE',
+  'API_HUB'
+];
 
 export async function GET() {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
@@ -11,19 +19,56 @@ export async function GET() {
 
   try {
     const users = await prisma.user.findMany({
-      where: { role: 'USER' },
+      where: {
+        role: 'USER',
+        OR: [
+          {
+            subscriptions: {
+              some: {
+                plan: {
+                  service: { in: API_HUB_SERVICES }
+                }
+              }
+            }
+          },
+          {
+            apiKeys: {
+              some: {
+                AND: [
+                  { service: { in: API_HUB_SERVICES } },
+                  { service: { not: 'RESELLER' } }
+                ]
+              }
+            }
+          }
+        ]
+      },
       include: {
-        apiKeys: true
+        apiKeys: {
+          where: {
+            service: { not: 'RESELLER' }
+          }
+        },
+        subscriptions: {
+          where: {
+            plan: {
+              service: { in: API_HUB_SERVICES }
+            }
+          },
+          include: {
+            plan: true
+          }
+        }
       },
       orderBy: { createdAt: 'desc' }
     });
 
     const formattedData = users.map(user => {
-      const totalUsage = user.apiKeys.reduce((acc: number, key: any) => acc + key.usageCount, 0);
+      const totalUsage = user.apiKeys.reduce((acc: number, key: any) => acc + (key.usageCount || 0), 0);
       const lastUsedKey = [...user.apiKeys].sort((a: any, b: any) => {
         if (!a.lastUsed) return 1;
         if (!b.lastUsed) return -1;
-        return b.lastUsed.getTime() - a.lastUsed.getTime();
+        return new Date(b.lastUsed).getTime() - new Date(a.lastUsed).getTime();
       })[0];
 
       return {
@@ -35,7 +80,16 @@ export async function GET() {
         keyCount: user.apiKeys.length,
         apiKeys: user.apiKeys.map((k: any) => ({
           name: k.name || "Default Key",
-          key: k.key
+          key: k.key,
+          service: k.service
+        })),
+        subscriptions: user.subscriptions.map((s: any) => ({
+          id: s.id,
+          service: s.plan.service,
+          planName: s.plan.name,
+          status: s.status,
+          cycle: s.cycle,
+          expiresAt: s.expiresAt
         }))
       };
     });
@@ -69,9 +123,12 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: 'Cannot delete an ADMIN account' }, { status: 403 });
     }
 
-    // Delete all API keys associated with the user
+    // Delete all API keys associated with the user for API Hub services (exclude RESELLER keys)
     await prisma.apiKey.deleteMany({
-      where: { userId }
+      where: {
+        userId,
+        service: { not: 'RESELLER' }
+      }
     });
 
     return NextResponse.json({ success: true, message: 'Customer API keys deleted successfully' });

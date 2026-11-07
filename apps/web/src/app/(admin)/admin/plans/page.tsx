@@ -31,6 +31,7 @@ export default function AdminPlansPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const fetchPlans = async () => {
+    setIsRefreshing(true);
     try {
       const res = await fetch("/api/admin/plans");
       const data = await res.json();
@@ -42,11 +43,13 @@ export default function AdminPlansPage() {
       toast.error("Failed to fetch plans");
     } finally {
       setLoading(false);
+      setTimeout(() => setIsRefreshing(false), 500);
     }
   };
 
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
@@ -290,13 +293,14 @@ export default function AdminPlansPage() {
             <span className="font-bold text-white">{totalCount}</span>
           </div>
           <button
-            onClick={() => { setLoading(true); fetchPlans(); }}
+            onClick={() => fetchPlans()}
+            disabled={isRefreshing || loading}
             className={cn(
-              "px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 border",
+              "px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 border cursor-pointer",
               isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
             )}
           >
-            <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
+            <RefreshCw className={cn("w-3.5 h-3.5", (isRefreshing || loading) && "animate-spin text-cyan-400")} />
             <span>Refresh</span>
           </button>
           <button
