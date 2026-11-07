@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
 import { Users, Wifi, ChevronLeft, ChevronRight } from "lucide-react";
@@ -67,27 +68,51 @@ export function OnlineUsersWidget() {
         ) : (
           <div className="flex flex-col gap-1.5 flex-1">
             {displayedUsers.map((user) => (
-              <div key={user.id} className={cn("flex items-center gap-2.5 p-2 rounded-xl transition-colors border", isDark ? "hover:bg-white/5 border-transparent hover:border-white/5" : "hover:bg-slate-50 border-transparent hover:border-slate-100")}>
-                <div className="relative">
-                  {user.image ? (
-                    <img src={user.image} alt={user.name} className="w-7 h-7 rounded-full object-cover" />
-                  ) : (
-                    <div className={cn("w-7 h-7 rounded-full flex items-center justify-center font-bold text-[11px]", isDark ? "bg-slate-800 text-slate-300" : "bg-slate-100 text-slate-600")}>
-                      {user.name?.substring(0, 2).toUpperCase() || 'US'}
-                    </div>
-                  )}
-                  <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-emerald-500 rounded-full border-2 border-white dark:border-[#0c0c0e]"></div>
-                </div>
-                <div className="flex flex-col truncate">
-                  <span className={cn("text-xs font-semibold truncate", isDark ? "text-zinc-200" : "text-slate-800")}>{user.name}</span>
-                  <div className="flex items-center gap-1.5">
-                    <span className={cn("text-[10px] truncate", isDark ? "text-zinc-500" : "text-slate-500")}>{user.email}</span>
-                    <span className={cn("text-[9px] px-1.5 rounded-full border", isDark ? "bg-white/5 border-white/10 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-500")}>
-                      {getRelativeTime(user.lastActive)}
+              <Link
+                key={user.id}
+                href={`/admin/customers/${user.id}`}
+                className={cn(
+                  "flex items-center justify-between gap-2.5 p-2 rounded-xl transition-all border group/user cursor-pointer",
+                  isDark
+                    ? "hover:bg-white/[0.06] border-transparent hover:border-cyan-500/30"
+                    : "hover:bg-cyan-50/60 border-transparent hover:border-cyan-200"
+                )}
+                title={`View ${user.name}'s customer profile`}
+              >
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                  <div className="relative shrink-0">
+                    {user.image ? (
+                      <img src={user.image} alt={user.name} className="w-7 h-7 rounded-full object-cover" />
+                    ) : (
+                      <div className={cn("w-7 h-7 rounded-full flex items-center justify-center font-bold text-[11px]", isDark ? "bg-slate-800 text-slate-300" : "bg-slate-100 text-slate-600")}>
+                        {user.name?.substring(0, 2).toUpperCase() || 'US'}
+                      </div>
+                    )}
+                    <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-emerald-500 rounded-full border-2 border-white dark:border-[#0c0c0e]"></div>
+                  </div>
+                  <div className="flex flex-col truncate min-w-0">
+                    <span className={cn(
+                      "text-xs font-semibold truncate transition-colors",
+                      isDark ? "text-zinc-200 group-hover/user:text-cyan-400" : "text-slate-800 group-hover/user:text-cyan-700"
+                    )}>
+                      {user.name}
                     </span>
+                    <div className="flex items-center gap-1.5 truncate">
+                      <span className={cn("text-[10px] truncate", isDark ? "text-zinc-500" : "text-slate-500")}>{user.email}</span>
+                      <span className={cn("text-[9px] px-1.5 rounded-full border shrink-0", isDark ? "bg-white/5 border-white/10 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-500")}>
+                        {getRelativeTime(user.lastActive)}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
+
+                <div className={cn(
+                  "opacity-0 group-hover/user:opacity-100 transition-all transform translate-x-1 group-hover/user:translate-x-0 p-1 rounded-lg shrink-0",
+                  isDark ? "text-cyan-400" : "text-cyan-600"
+                )}>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </div>
+              </Link>
             ))}
           </div>
         )}
