@@ -20,16 +20,18 @@ import {
   AlertTriangle,
   Server,
   Radar,
-  ArrowRight,
   Filter,
+  RefreshCw,
+  Maximize2,
+  Terminal,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { HeroAvatarFrame } from "@/components/ui/HeroAvatarFrame";
-import { TiltCard } from "@/components/animations/TiltCard";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
+import { worldPaths, indonesiaRegionPaths, MapPath } from "@/data/threat-map-geo";
 
 interface AttackEvent {
   id: string;
@@ -78,10 +80,10 @@ interface ImpactRipple {
   opacity: number;
 }
 
-// Map real coordinate [lat, lng] onto tactical 1000x500 SVG canvas
+// Convert real [lat, lng] to tactical 1000x500 canvas coordinates matching the geo dataset
 function projectCoords(lat: number, lng: number, mode: 'world' | 'indonesia'): [number, number] {
   if (mode === 'indonesia') {
-    // Indonesian Archipelago Coordinate Bounding Box
+    // Indonesian Archipelago Coordinate Bounding Box (matches threat-map-geo.ts)
     const minLng = 94;
     const maxLng = 142;
     const minLat = -12;
@@ -92,17 +94,17 @@ function projectCoords(lat: number, lng: number, mode: 'world' | 'indonesia'): [
 
     const x = ((clampedLng - minLng) / (maxLng - minLng)) * 1000;
     const y = ((maxLat - clampedLat) / (maxLat - minLat)) * 500;
-    return [Math.round(x), Math.round(y)];
+    return [Math.round(x * 10) / 10, Math.round(y * 10) / 10];
   }
 
-  // World Mercator Tactical Projection
+  // World Mercator Tactical Projection (matches threat-map-geo.ts)
   const x = ((lng + 180) / 360) * 1000;
   const latRad = (lat * Math.PI) / 180;
   const mercN = Math.log(Math.tan(Math.PI / 4 + latRad / 2));
   const y = 250 - (500 * mercN) / (2 * Math.PI);
   return [
-    Math.round(Math.max(15, Math.min(985, x))),
-    Math.round(Math.max(20, Math.min(480, y))),
+    Math.round(x * 10) / 10,
+    Math.round(Math.max(15, Math.min(485, y)) * 10) / 10,
   ];
 }
 
@@ -130,7 +132,9 @@ export default function ThreatMapPage() {
   const [topThreats, setTopThreats] = useState<any[]>([]);
   const [targetedIndustries, setTargetedIndustries] = useState<any[]>([]);
 
-  // Ref to track seen IDs to trigger immediate live projectile when new attacks occur
+  // Sequential counters to guarantee 100% unique React keys
+  const impactSeqRef = useRef(0);
+  const laserSeqRef = useRef(0);
   const seenEventIdsRef = useRef<Set<string>>(new Set());
 
   // Live real-time clock (UTC and Asia/Jakarta WIB)
@@ -156,22 +160,23 @@ export default function ThreatMapPage() {
     const [x1, y1] = projectCoords(atk.sourceCoords[0], atk.sourceCoords[1], region);
     const [x2, y2] = projectCoords(atk.targetCoords[0], atk.targetCoords[1], region);
 
-    // Dynamic curve control point
+    // Parabolic arc height
     const dx = Math.abs(x2 - x1);
-    const arcHeight = region === 'indonesia' ? Math.max(45, dx * 0.25) : Math.max(70, dx * 0.2);
+    const arcHeight = region === 'indonesia' ? Math.max(40, dx * 0.22) : Math.max(65, dx * 0.18);
     const midX = (x1 + x2) / 2;
     const midY = Math.min(y1, y2) - arcHeight;
 
     const color = atk.isReal
-      ? '#ef4444' // Crimson Neon Red for verified live attacks
+      ? '#ef4444' // Vivid crimson red for verified live attacks
       : atk.severity === 'Critical'
       ? '#f43f5e'
       : atk.severity === 'High'
       ? '#f59e0b'
       : isDark ? '#06b6d4' : '#0284c7';
 
+    laserSeqRef.current++;
     const newLaser: ActiveLaser = {
-      id: `${atk.id}-${Date.now()}`,
+      id: `laser-${laserSeqRef.current}-${Date.now()}`,
       x1,
       y1,
       x2,
@@ -214,11 +219,11 @@ export default function ThreatMapPage() {
           const realOnes = fetchedEvents.filter(e => e.isReal);
           if (realOnes.length > 0) {
             realOnes.slice(0, 3).forEach((atk, idx) => {
-              setTimeout(() => spawnLaser(atk), idx * 700);
+              setTimeout(() => spawnLaser(atk), idx * 600);
             });
           } else if (fetchedEvents.length > 0) {
             fetchedEvents.slice(0, 3).forEach((atk, idx) => {
-              setTimeout(() => spawnLaser(atk), idx * 600);
+              setTimeout(() => spawnLaser(atk), idx * 500);
             });
           }
         }
@@ -236,26 +241,32 @@ export default function ThreatMapPage() {
           const step = laser.isReal ? 0.038 : 0.032;
           const nextProgress = laser.progress + step;
           if (nextProgress >= 1) {
-            // Impact! Trigger concentric shockwaves at Datacenter target
-            setImpacts(prev => [
-              ...prev.slice(-15),
+            // Impact! Trigger shockwaves with guaranteed unique keys
+            impactSeqRef.current++;
+            const seq = impactSeqRef.current;
+            const newImpacts: ImpactRipple[] = [
               {
-                id: `impact-main-${Date.now()}-${Math.random()}`,
+                id: `impact-main-${seq}-${Date.now()}`,
                 x: laser.x2,
                 y: laser.y2,
                 color: laser.color,
-                radius: laser.isReal ? 10 : 5,
+                radius: laser.isReal ? 12 : 6,
                 opacity: 1,
               },
-              ...(laser.isReal ? [{
-                id: `impact-ring-${Date.now()}`,
+            ];
+
+            if (laser.isReal) {
+              newImpacts.push({
+                id: `impact-ring-${seq}-${Date.now()}`,
                 x: laser.x2,
                 y: laser.y2,
                 color: '#f59e0b',
-                radius: 3,
+                radius: 4,
                 opacity: 0.9,
-              }] : [])
-            ]);
+              });
+            }
+
+            setImpacts(prev => [...prev.slice(-16), ...newImpacts]);
           } else {
             nextLasers.push({ ...laser, progress: nextProgress });
           }
@@ -301,7 +312,7 @@ export default function ThreatMapPage() {
               // Immediately spawn laser for the brand new event
               spawnLaser(newEvents[0]);
             } else {
-              // Pick a random event to animate continuously
+              // Continuously cycle through events
               const randomPick = incoming[Math.floor(Math.random() * incoming.length)];
               spawnLaser(randomPick);
             }
@@ -329,12 +340,22 @@ export default function ThreatMapPage() {
     return attacks.filter(a => a.severity.toLowerCase() === filterSeverity.toLowerCase());
   }, [attacks, filterSeverity]);
 
+  // Datacenter Target Coordinates for SVG
+  const targetHubCoords = useMemo(() => {
+    // Sidoarjo Datacenter [-7.4478, 112.7183]
+    return projectCoords(-7.4478, 112.7183, region);
+  }, [region]);
+
+  const jakartaCoords = useMemo(() => {
+    return projectCoords(-6.2088, 106.8456, region);
+  }, [region]);
+
   return (
     <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-20 lg:pb-28 font-sans bg-[var(--background)] text-[var(--text-primary)] transition-colors duration-200">
       <main className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
 
-        {/* ── 0. HERO SECTION (Consistent with Looking Glass & Contact) ── */}
-        <section className="relative mb-12 sm:mb-16">
+        {/* ── 0. HERO SECTION (Consistent with Looking Glass, Contact & VPS) ── */}
+        <section className="relative mb-10 sm:mb-14">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8 sm:gap-12">
             
             {/* Left Column: Heading & Technical Badges */}
@@ -403,7 +424,7 @@ export default function ThreatMapPage() {
           </div>
         </section>
 
-        {/* ── 1. REAL-TIME THREAT MAP COCKPIT (FortiGuard Style) ─────── */}
+        {/* ── 1. REAL-TIME THREAT MAP COCKPIT (Authentic GIS Coastlines) ── */}
         <section id="radar-cockpit" className="space-y-6">
 
           {/* Cockpit Header Toolbar */}
@@ -519,7 +540,7 @@ export default function ThreatMapPage() {
             <div className={cn(
               "absolute inset-0 pointer-events-none bg-[size:40px_40px]",
               isDark
-                ? "bg-[linear-gradient(to_right,#00e5ff08_1px,transparent_1px),linear-gradient(to_bottom,#00e5ff08_1px,transparent_1px)]"
+                ? "bg-[linear-gradient(to_right,#00e5ff06_1px,transparent_1px),linear-gradient(to_bottom,#00e5ff06_1px,transparent_1px)]"
                 : "bg-[linear-gradient(to_right,#0284c70d_1px,transparent_1px),linear-gradient(to_bottom,#0284c70d_1px,transparent_1px)]"
             )} />
 
@@ -532,7 +553,7 @@ export default function ThreatMapPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 relative z-10">
               
               {/* Map Canvas Visualizer (8 Cols) */}
-              <div className="lg:col-span-8 p-4 sm:p-6 lg:border-r border-b lg:border-b-0 border-[var(--border-subtle)] flex flex-col justify-between min-h-[490px] sm:min-h-[580px] relative">
+              <div className="lg:col-span-8 p-4 sm:p-6 lg:border-r border-b lg:border-b-0 border-[var(--border-subtle)] flex flex-col justify-between min-h-[500px] sm:min-h-[590px] relative">
                 
                 {/* HUD Overlay Badges */}
                 <div className="absolute top-5 left-5 z-20 flex flex-wrap items-center gap-2">
@@ -580,7 +601,7 @@ export default function ThreatMapPage() {
                   )}
                 </AnimatePresence>
 
-                {/* SVG Tactical Vector Map */}
+                {/* SVG Tactical Vector Map with Real GIS Coastlines */}
                 <div className="w-full h-full flex items-center justify-center relative py-6">
                   <svg
                     viewBox="0 0 1000 500"
@@ -600,176 +621,99 @@ export default function ThreatMapPage() {
                         <stop offset="40%" stopColor="#0284c7" stopOpacity="0.35" />
                         <stop offset="100%" stopColor={isDark ? "#040b17" : "#f8fafc"} stopOpacity="0" />
                       </radialGradient>
-
-                      <radialGradient id="real-target-beacon" cx="50%" cy="50%" r="50%">
-                        <stop offset="0%" stopColor="#ef4444" stopOpacity="0.9" />
-                        <stop offset="50%" stopColor="#dc2626" stopOpacity="0.4" />
-                        <stop offset="100%" stopColor={isDark ? "#040b17" : "#f8fafc"} stopOpacity="0" />
-                      </radialGradient>
                     </defs>
 
                     {/* Radar Coordinate Grid & Concentric Scanning Rings */}
-                    <circle cx="500" cy="250" r="140" fill="none" stroke={isDark ? "#06b6d4" : "#0284c7"} strokeWidth="0.5" strokeDasharray="3,3" opacity="0.25" />
-                    <circle cx="500" cy="250" r="260" fill="none" stroke={isDark ? "#06b6d4" : "#0284c7"} strokeWidth="0.5" strokeDasharray="4,4" opacity="0.18" />
-                    <circle cx="500" cy="250" r="380" fill="none" stroke={isDark ? "#06b6d4" : "#0284c7"} strokeWidth="0.5" strokeDasharray="5,5" opacity="0.12" />
+                    <circle cx="500" cy="250" r="140" fill="none" stroke={isDark ? "#06b6d4" : "#0284c7"} strokeWidth="0.5" strokeDasharray="3,3" opacity="0.22" />
+                    <circle cx="500" cy="250" r="260" fill="none" stroke={isDark ? "#06b6d4" : "#0284c7"} strokeWidth="0.5" strokeDasharray="4,4" opacity="0.16" />
+                    <circle cx="500" cy="250" r="380" fill="none" stroke={isDark ? "#06b6d4" : "#0284c7"} strokeWidth="0.5" strokeDasharray="5,5" opacity="0.1" />
 
                     {/* Map Coordinate Parallels & Meridians */}
-                    <line x1="50" y1="250" x2="950" y2="250" stroke={isDark ? "#0ea5e9" : "#0284c7"} strokeWidth="0.5" strokeDasharray="2,4" opacity="0.2" />
-                    <line x1="500" y1="30" x2="500" y2="470" stroke={isDark ? "#0ea5e9" : "#0284c7"} strokeWidth="0.5" strokeDasharray="2,4" opacity="0.2" />
+                    <line x1="40" y1="250" x2="960" y2="250" stroke={isDark ? "#0ea5e9" : "#0284c7"} strokeWidth="0.5" strokeDasharray="2,4" opacity="0.2" />
+                    <line x1="500" y1="20" x2="500" y2="480" stroke={isDark ? "#0ea5e9" : "#0284c7"} strokeWidth="0.5" strokeDasharray="2,4" opacity="0.2" />
 
-                    {/* Vector Map Outlines */}
+                    {/* Real Geographic Vector Map Outlines */}
                     {region === 'indonesia' ? (
-                      /* Detailed Indonesian Archipelago */
+                      /* Indonesia Region: High-Fidelity GIS Archipelago + Neighbors */
                       <g className="transition-all duration-700 ease-in-out">
-                        {/* Sumatra */}
-                        <path
-                          d="M 100,160 Q 140,210 190,260 L 230,310 L 260,335 L 240,345 L 180,285 L 120,225 L 80,165 Z"
-                          fill={isDark ? "#0a1f3a" : "#cbd5e1"}
-                          stroke={isDark ? "#0ea5e9" : "#0284c7"}
-                          strokeWidth="1.5"
-                          opacity="0.9"
-                        />
-                        {/* Java (Home of Sidoarjo Datacenter Hub) */}
-                        <path
-                          d="M 270,350 L 330,355 L 420,365 L 500,368 L 540,378 L 470,385 L 360,380 L 265,362 Z"
-                          fill={isDark ? "#123766" : "#94a3b8"}
-                          stroke={isDark ? "#38bdf8" : "#0369a1"}
-                          strokeWidth="2.2"
-                          opacity="0.95"
-                        />
-                        {/* Madura Island (adjacent to Sidoarjo/Surabaya) */}
-                        <path
-                          d="M 485,355 L 535,358 L 530,365 L 480,362 Z"
-                          fill={isDark ? "#123766" : "#94a3b8"}
-                          stroke={isDark ? "#38bdf8" : "#0369a1"}
-                          strokeWidth="1.5"
-                          opacity="0.9"
-                        />
-                        {/* Bali & Nusa Tenggara */}
-                        <path
-                          d="M 550,375 L 575,376 L 620,380 L 680,380 L 670,390 L 610,388 L 545,382 Z"
-                          fill={isDark ? "#0a1f3a" : "#cbd5e1"}
-                          stroke={isDark ? "#0ea5e9" : "#0284c7"}
-                          strokeWidth="1.5"
-                          opacity="0.85"
-                        />
-                        {/* Kalimantan (Borneo) */}
-                        <path
-                          d="M 320,185 L 410,175 L 450,225 L 425,285 L 340,280 L 305,225 Z"
-                          fill={isDark ? "#0a1f3a" : "#cbd5e1"}
-                          stroke={isDark ? "#0ea5e9" : "#0284c7"}
-                          strokeWidth="1.5"
-                          opacity="0.9"
-                        />
-                        {/* Sulawesi */}
-                        <path
-                          d="M 475,195 L 525,215 L 495,255 L 535,295 L 505,305 L 465,255 L 485,225 Z"
-                          fill={isDark ? "#0a1f3a" : "#cbd5e1"}
-                          stroke={isDark ? "#0ea5e9" : "#0284c7"}
-                          strokeWidth="1.5"
-                          opacity="0.9"
-                        />
-                        {/* Maluku */}
-                        <path
-                          d="M 575,235 L 615,255 L 605,305 L 565,285 Z"
-                          fill={isDark ? "#0a1f3a" : "#cbd5e1"}
-                          stroke={isDark ? "#0ea5e9" : "#0284c7"}
-                          strokeWidth="1.2"
-                          opacity="0.8"
-                        />
-                        {/* Papua */}
-                        <path
-                          d="M 685,255 Q 765,235 845,255 L 855,335 L 755,335 L 705,295 Z"
-                          fill={isDark ? "#0a1f3a" : "#cbd5e1"}
-                          stroke={isDark ? "#0ea5e9" : "#0284c7"}
-                          strokeWidth="1.5"
-                          opacity="0.9"
-                        />
+                        {indonesiaRegionPaths.map((poly) => {
+                          const isID = poly.isIndonesia;
+                          return (
+                            <path
+                              key={poly.id}
+                              d={poly.d}
+                              fill={
+                                isID
+                                  ? isDark ? "#102a4e" : "#cbd5e1"
+                                  : isDark ? "#071628" : "#f1f5f9"
+                              }
+                              stroke={
+                                isID
+                                  ? isDark ? "#00f0ff" : "#0284c7"
+                                  : isDark ? "#1b3860" : "#94a3b8"
+                              }
+                              strokeWidth={isID ? "1.8" : "0.8"}
+                              opacity={isID ? 0.95 : 0.45}
+                              className="transition-colors duration-300"
+                            />
+                          );
+                        })}
 
-                        {/* Target Beacon: Masdika Sidoarjo Datacenter Hub */}
-                        <g transform="translate(485, 372)">
-                          <circle r="26" fill="url(#target-beacon)" className="animate-ping" opacity="0.85" />
-                          <circle r="14" fill={isDark ? "#06b6d4" : "#0284c7"} opacity="0.3" />
-                          <circle r="5" fill={isDark ? "#06b6d4" : "#0284c7"} stroke="#ffffff" strokeWidth="1.8" />
-                          <text x="12" y="-8" fill={isDark ? "#38bdf8" : "#0369a1"} fontSize="11" fontWeight="bold" fontFamily="monospace">
-                            Sidoarjo Edge DC [ID]
-                          </text>
-                          <text x="12" y="6" fill={isDark ? "#7dd3fc" : "#0284c7"} fontSize="9" fontFamily="monospace">
-                            AS63859 [PRIMARY HUB]
-                          </text>
-                        </g>
-
-                        {/* Jakarta Core Gateway */}
-                        <g transform="translate(295, 356)">
-                          <circle r="4" fill={isDark ? "#38bdf8" : "#0284c7"} stroke="#ffffff" strokeWidth="1.2" />
-                          <text x="-95" y="-8" fill={isDark ? "#bae6fd" : "#334155"} fontSize="10" fontFamily="monospace">
+                        {/* Secondary Core Node: Jakarta Gateway */}
+                        <g transform={`translate(${jakartaCoords[0]}, ${jakartaCoords[1]})`}>
+                          <circle r="3.5" fill={isDark ? "#38bdf8" : "#0284c7"} stroke="#ffffff" strokeWidth="1" />
+                          <text x="-80" y="-8" fill={isDark ? "#7dd3fc" : "#475569"} fontSize="9" fontFamily="monospace">
                             Jakarta Core [ID]
                           </text>
                         </g>
 
-                        {/* Semarang Transit Node */}
-                        <g transform="translate(415, 365)">
-                          <circle r="3.5" fill={isDark ? "#38bdf8" : "#0284c7"} />
-                          <text x="-40" y="16" fill={isDark ? "#bae6fd" : "#334155"} fontSize="9" fontFamily="monospace">
-                            Semarang Node [ID]
+                        {/* Primary Target Beacon: Masdika Sidoarjo Datacenter Hub */}
+                        <g transform={`translate(${targetHubCoords[0]}, ${targetHubCoords[1]})`}>
+                          <circle r="26" fill="url(#target-beacon)" className="animate-ping" opacity="0.85" />
+                          <circle r="14" fill={isDark ? "#06b6d4" : "#0284c7"} opacity="0.3" />
+                          <circle r="5" fill={isDark ? "#06b6d4" : "#0284c7"} stroke="#ffffff" strokeWidth="1.8" />
+                          
+                          {/* Staggered Leader Label below node to avoid overlaps */}
+                          <line x1="0" y1="8" x2="0" y2="24" stroke={isDark ? "#38bdf8" : "#0284c7"} strokeWidth="1" strokeDasharray="2,2" />
+                          <line x1="0" y1="24" x2="30" y2="24" stroke={isDark ? "#38bdf8" : "#0284c7"} strokeWidth="1" />
+                          <text x="36" y="22" fill={isDark ? "#38bdf8" : "#0369a1"} fontSize="11" fontWeight="bold" fontFamily="monospace">
+                            MASDIKA SIDOARJO HUB [ID]
+                          </text>
+                          <text x="36" y="34" fill={isDark ? "#7dd3fc" : "#0284c7"} fontSize="9" fontFamily="monospace">
+                            AS63859 [PRIMARY DATACENTER]
                           </text>
                         </g>
                       </g>
                     ) : (
-                      /* Global Continents View */
+                      /* World View: Real Natural Earth GIS Countries */
                       <g className="transition-all duration-700 ease-in-out">
-                        {/* North America */}
-                        <path
-                          d="M 90,90 L 240,80 L 270,170 L 200,230 L 140,170 Z"
-                          fill={isDark ? "#0a1f3a" : "#cbd5e1"}
-                          stroke={isDark ? "#0ea5e9" : "#0284c7"}
-                          strokeWidth="1.2"
-                          opacity="0.85"
-                        />
-                        {/* South America */}
-                        <path
-                          d="M 250,250 L 330,270 L 310,400 L 250,360 Z"
-                          fill={isDark ? "#0a1f3a" : "#cbd5e1"}
-                          stroke={isDark ? "#0ea5e9" : "#0284c7"}
-                          strokeWidth="1.2"
-                          opacity="0.85"
-                        />
-                        {/* Europe */}
-                        <path
-                          d="M 430,100 L 510,90 L 520,160 L 440,160 Z"
-                          fill={isDark ? "#0a1f3a" : "#cbd5e1"}
-                          stroke={isDark ? "#0ea5e9" : "#0284c7"}
-                          strokeWidth="1.2"
-                          opacity="0.85"
-                        />
-                        {/* Africa */}
-                        <path
-                          d="M 440,180 L 540,180 L 510,330 L 450,270 Z"
-                          fill={isDark ? "#0a1f3a" : "#cbd5e1"}
-                          stroke={isDark ? "#0ea5e9" : "#0284c7"}
-                          strokeWidth="1.2"
-                          opacity="0.85"
-                        />
-                        {/* Asia */}
-                        <path
-                          d="M 530,70 L 810,80 L 790,230 L 640,230 L 530,160 Z"
-                          fill={isDark ? "#0a1f3a" : "#cbd5e1"}
-                          stroke={isDark ? "#0ea5e9" : "#0284c7"}
-                          strokeWidth="1.2"
-                          opacity="0.85"
-                        />
-                        {/* Australia */}
-                        <path
-                          d="M 770,320 L 880,330 L 850,420 L 770,400 Z"
-                          fill={isDark ? "#0a1f3a" : "#cbd5e1"}
-                          stroke={isDark ? "#0ea5e9" : "#0284c7"}
-                          strokeWidth="1.2"
-                          opacity="0.85"
-                        />
-                        {/* Target Node: Indonesia */}
-                        <g transform="translate(735, 275)">
+                        {worldPaths.map((country) => {
+                          const isID = country.id === 'IDN';
+                          return (
+                            <path
+                              key={country.id}
+                              d={country.d}
+                              fill={
+                                isID
+                                  ? isDark ? "#00f0ff30" : "#0284c730"
+                                  : isDark ? "#0c233f" : "#cbd5e1"
+                              }
+                              stroke={
+                                isID
+                                  ? isDark ? "#00f0ff" : "#0284c7"
+                                  : isDark ? "#0ea5e9" : "#0284c7"
+                              }
+                              strokeWidth={isID ? "1.8" : "0.7"}
+                              opacity={isID ? 1 : 0.8}
+                              className="transition-colors duration-300"
+                            />
+                          );
+                        })}
+
+                        {/* Target Node: Indonesia Masdika Hub */}
+                        <g transform={`translate(${targetHubCoords[0]}, ${targetHubCoords[1]})`}>
                           <circle r="22" fill="url(#target-beacon)" className="animate-ping" opacity="0.85" />
-                          <circle r="6" fill={isDark ? "#06b6d4" : "#0284c7"} stroke="#ffffff" strokeWidth="1.5" />
+                          <circle r="5.5" fill={isDark ? "#06b6d4" : "#0284c7"} stroke="#ffffff" strokeWidth="1.5" />
                           <text x="12" y="-6" fill={isDark ? "#38bdf8" : "#0369a1"} fontSize="10" fontWeight="bold" fontFamily="monospace">
                             Masdika Edge [ID]
                           </text>
@@ -818,7 +762,7 @@ export default function ThreatMapPage() {
                       );
                     })}
 
-                    {/* Impact Shockwaves on Target Hit */}
+                    {/* Impact Shockwaves on Target Hit (Guaranteed Unique Keys) */}
                     {impacts.map(impact => (
                       <circle
                         key={impact.id}
@@ -858,7 +802,7 @@ export default function ThreatMapPage() {
 
               </div>
 
-              {/* Right Sidebars: Top Threats & Targeted Industries (4 Cols) */}
+              {/* Right Sidebars: Top Threats & Targeted Sectors (4 Cols) */}
               <div className={cn(
                 "lg:col-span-4 p-4 sm:p-6 space-y-6 transition-colors duration-200",
                 isDark ? "bg-[#061222]/95" : "bg-white"
@@ -1109,76 +1053,6 @@ export default function ThreatMapPage() {
 
           </div>
 
-        </section>
-
-        {/* ── 2. ARCHITECTURE & MULTI-LAYER MITIGATION SUITE ──────── */}
-        <section className="pt-16 sm:pt-20">
-          <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
-            <span className="text-xs font-mono font-bold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
-              ENTERPRISE ATTACK RESISTANCE
-            </span>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] tracking-tight leading-[1.15] mb-4">
-              Bank-Grade Infrastructure Defense
-            </h2>
-            <p className="text-base sm:text-lg text-[var(--text-secondary)] font-normal leading-relaxed">
-              Every packet entering our Sidoarjo Edge and upstream connections is filtered through multiple autonomous defense tiers before reaching your instances.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            
-            {/* Card 1: Edge BGP Volumetric DDoS Filtering */}
-            <TiltCard intensity={5} className="p-6 sm:p-8 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 shadow-sm transition-all relative overflow-hidden">
-              <div className="w-12 h-12 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-6">
-                <Globe className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold text-[var(--text-primary)] mb-3">
-                Volumetric DDoS Scrubbing
-              </h3>
-              <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-6">
-                Multi-Tbps Anycast global scrubbing centers intercept UDP amplification, SYN floods, and DNS reflection attacks before they can touch upstream peering lines.
-              </p>
-              <div className="flex items-center gap-2 text-xs font-mono text-cyan-600 dark:text-cyan-400">
-                <ShieldCheck className="w-4 h-4" />
-                <span>Zero Downtime SLA</span>
-              </div>
-            </TiltCard>
-
-            {/* Card 2: L7 Application Shield & WAF */}
-            <TiltCard intensity={5} className="p-6 sm:p-8 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 shadow-sm transition-all relative overflow-hidden">
-              <div className="w-12 h-12 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-6">
-                <ShieldAlert className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold text-[var(--text-primary)] mb-3">
-                Intelligent Layer-7 WAF
-              </h3>
-              <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-6">
-                Automated rate-limiting, OWASP Top 10 rule enforcement, and real-time behavioral fingerprinting to block credential stuffing and malicious path crawlers.
-              </p>
-              <div className="flex items-center gap-2 text-xs font-mono text-cyan-600 dark:text-cyan-400">
-                <CheckCircle2 className="w-4 h-4" />
-                <span>Traefik &amp; Cloudflare Hardened</span>
-              </div>
-            </TiltCard>
-
-            {/* Card 3: Host Privilege & Promtail Audit */}
-            <TiltCard intensity={5} className="p-6 sm:p-8 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 shadow-sm transition-all relative overflow-hidden">
-              <div className="w-12 h-12 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-6">
-                <Lock className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold text-[var(--text-primary)] mb-3">
-                Host Privilege &amp; Sudo Auditing
-              </h3>
-              <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-6">
-                Promtail and Loki stream host authentication logs continuously. Unauthorized root escalation and brute-force attempts trigger instant automated IP blacklisting.
-              </p>
-              <div className="flex items-center gap-2 text-xs font-mono text-cyan-600 dark:text-cyan-400">
-                <Activity className="w-4 h-4" />
-                <span>Prometheus SOC Integration</span>
-              </div>
-            </TiltCard>
-
-          </div>
         </section>
 
       </main>
