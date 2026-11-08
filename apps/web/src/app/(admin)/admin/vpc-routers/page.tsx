@@ -384,13 +384,25 @@ export default function VpcRoutersPage() {
               </div>
 
               <div className="md:col-span-2 space-y-2 pt-2">
-                <label className="flex items-center gap-2 cursor-pointer">
+                <label className="group flex items-center gap-2.5 cursor-pointer select-none w-fit">
                   <input
                     type="checkbox"
                     checked={formData.useSsl}
                     onChange={(e) => setFormData({ ...formData, useSsl: e.target.checked })}
-                    className={cn("w-4 h-4 rounded text-cyan-500 focus:ring-cyan-500/20", isDark ? "bg-[#0a0a0c] border-white/[0.08] focus:ring-offset-[#0b1322]" : "bg-white border-slate-200")}
+                    className="sr-only"
                   />
+                  <div
+                    className={cn(
+                      "w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-all shadow-xs",
+                      formData.useSsl
+                        ? "bg-cyan-500 border border-cyan-400 text-slate-950"
+                        : isDark
+                        ? "border border-slate-700 bg-[#0a0a0c] group-hover:border-slate-500"
+                        : "border border-slate-300 bg-white group-hover:border-slate-400"
+                    )}
+                  >
+                    {formData.useSsl && <CheckCircle2 className="w-3.5 h-3.5 stroke-[2.5]" />}
+                  </div>
                   <span className={cn("text-sm font-medium", isDark ? "text-zinc-300" : "text-slate-600")}>Use SSL (api-ssl)</span>
                 </label>
               </div>
