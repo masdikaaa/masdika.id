@@ -24,6 +24,11 @@ export function useRealtimePresence() {
         const data = await res.json();
         if (Array.isArray(data)) {
           setOnlineUsers(data);
+          window.dispatchEvent(
+            new CustomEvent("presence_sync", {
+              detail: data,
+            })
+          );
         }
       }
     } catch (err) {
@@ -35,19 +40,17 @@ export function useRealtimePresence() {
     let eventSource: EventSource | null = null;
     let isSubscribed = true;
 
-    const startFallbackPolling = () => {
-      if (fallbackIntervalRef.current) return;
-      fetchOnlineUsers();
-      fallbackIntervalRef.current = setInterval(fetchOnlineUsers, 5000);
-    };
+    // 1. Instant REST fetch on component mount (0 delay, populated within 50ms)
+    fetchOnlineUsers();
 
-    const stopFallbackPolling = () => {
-      if (fallbackIntervalRef.current) {
-        clearInterval(fallbackIntervalRef.current);
-        fallbackIntervalRef.current = null;
+    // 2. Continuous background sync polling every 4s (cluster-proof across all K3s pod replicas)
+    const pollInterval = setInterval(() => {
+      if (isSubscribed) {
+        fetchOnlineUsers();
       }
-    };
+    }, 4000);
 
+    // 3. Real-time EventSource connection for sub-second push updates
     try {
       if (typeof window !== "undefined" && "EventSource" in window) {
         eventSource = new EventSource("/api/admin/presence/stream");
@@ -55,14 +58,15 @@ export function useRealtimePresence() {
         eventSource.onopen = () => {
           if (!isSubscribed) return;
           setIsConnected(true);
-          stopFallbackPolling();
         };
 
         eventSource.addEventListener("init", (event: MessageEvent) => {
           if (!isSubscribed) return;
           try {
             const data: RealtimeOnlineUser[] = JSON.parse(event.data);
-            setOnlineUsers(data);
+            if (Array.isArray(data)) {
+              setOnlineUsers(data);
+            }
           } catch (e) {
             console.error("Failed to parse presence init:", e);
           }
@@ -98,12 +102,14 @@ export function useRealtimePresence() {
           if (!isSubscribed) return;
           try {
             const data: RealtimeOnlineUser[] = JSON.parse(event.data);
-            setOnlineUsers(data);
-            window.dispatchEvent(
-              new CustomEvent("presence_sync", {
-                detail: data,
-              })
-            );
+            if (Array.isArray(data)) {
+              setOnlineUsers(data);
+              window.dispatchEvent(
+                new CustomEvent("presence_sync", {
+                  detail: data,
+                })
+              );
+            }
           } catch (e) {
             console.error("Failed to parse presence sync:", e);
           }
@@ -112,22 +118,18 @@ export function useRealtimePresence() {
         eventSource.onerror = () => {
           if (!isSubscribed) return;
           setIsConnected(false);
-          // Fall back to polling when SSE drops
-          startFallbackPolling();
         };
-      } else {
-        startFallbackPolling();
       }
     } catch {
-      startFallbackPolling();
+      // EventSource failed; background pollInterval keeps data up-to-date
     }
 
     return () => {
       isSubscribed = false;
+      clearInterval(pollInterval);
       if (eventSource) {
         eventSource.close();
       }
-      stopFallbackPolling();
     };
   }, [fetchOnlineUsers]);
 

@@ -27,6 +27,9 @@ export async function GET(req: Request) {
         }
       };
 
+      // Push 2KB initial comment padding to immediately bypass Cloudflare / Traefik / Nginx buffering
+      safeEnqueue(`: ${' '.repeat(2048)}\n\n`);
+
       // 1. Send initial state immediately
       try {
         const initialUsers = await fetchOnlineUsersList();

@@ -52,8 +52,8 @@ export async function fetchOnlineUsersList(): Promise<OnlineUserSummary[]> {
 
     return users.map((u) => ({
       id: u.id,
-      name: u.name ? (decryptDeterministic(u.name) || 'Unknown') : 'Unknown',
-      email: u.email ? (decryptDeterministic(u.email) || '') : '',
+      name: u.name ? (decryptDeterministic(u.name) || u.name || 'Unknown') : 'Unknown',
+      email: u.email ? (decryptDeterministic(u.email) || u.email || '') : '',
       image: u.image || null,
       role: u.role,
       lastActive: u.lastActive ? u.lastActive.toISOString() : new Date().toISOString(),
