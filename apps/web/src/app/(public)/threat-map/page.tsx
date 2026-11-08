@@ -41,6 +41,7 @@ interface AttackEvent {
   sourceCountry: string;
   sourceCode: string;
   sourceFlag: string;
+  sourceIp: string;
   sourceCoords: [number, number];
   targetCity: string;
   targetCountry: string;
@@ -51,6 +52,7 @@ interface AttackEvent {
   protocol: 'TCP' | 'UDP' | 'HTTPS' | 'SSH';
   port: number;
   mitigation: string;
+  isReal?: boolean;
 }
 
 interface ActiveLaser {
@@ -66,6 +68,8 @@ interface ActiveLaser {
   severity: string;
   sourceCity: string;
   attackName: string;
+  isReal?: boolean;
+  sourceIp?: string;
 }
 
 interface ImpactWave {
@@ -83,13 +87,13 @@ function projectCoords(lat: number, lng: number, mode: 'world' | 'indonesia'): [
     // Focused on Indonesian archipelago roughly Lat -11 to 6, Lng 95 to 141
     const x = ((lng - 95) / (141 - 95)) * 1000;
     const y = ((6 - lat) / (6 - -11)) * 500;
-    return [Math.max(10, Math.min(990, x)), Math.max(10, Math.min(490, y))];
+    return [Math.max(15, Math.min(985, x)), Math.max(15, Math.min(485, y))];
   }
 
   // Equirectangular projection for world
   const x = ((lng + 180) / 360) * 1000;
   const y = ((90 - lat) / 180) * 500;
-  return [x, y];
+  return [Math.max(10, Math.min(990, x)), Math.max(10, Math.min(490, y))];
 }
 
 export default function ThreatMapPage() {
@@ -104,6 +108,7 @@ export default function ThreatMapPage() {
     attacksPerSecond: 14,
     blockedIn24h: 853490,
     activeOutbreaks: 142,
+    realIncidentsCount: 0,
     threatPosture: 'Normal / Protected',
     edgeStatus: '100% Mitigated / Zero Breaches',
   });
@@ -129,31 +134,22 @@ export default function ThreatMapPage() {
     return () => clearInterval(timer);
   }, []);
 
-  // Initial data fetch from /api/threats
-  useEffect(() => {
-    fetch('/api/threats?count=20')
-      .then(res => res.json())
-      .then(data => {
-        if (data.status === 'success') {
-          setAttacks(data.events || []);
-          setStats(data.stats);
-          setTopThreats(data.topThreats || []);
-          setTargetedIndustries(data.targetedIndustries || []);
-        }
-      })
-      .catch(err => console.error("Error fetching threat data:", err));
-  }, []);
-
-  // Fire laser animation helper
+  // Fire laser animation helper with special highlight for real attacks
   const spawnLaser = (atk: AttackEvent) => {
     const [x1, y1] = projectCoords(atk.sourceCoords[0], atk.sourceCoords[1], region);
     const [x2, y2] = projectCoords(atk.targetCoords[0], atk.targetCoords[1], region);
 
     // Create a high-altitude control point for quadratic bezier curve
     const midX = (x1 + x2) / 2;
-    const midY = Math.min(y1, y2) - (region === 'indonesia' ? 60 : 100);
+    const midY = Math.min(y1, y2) - (region === 'indonesia' ? 70 : 110);
 
-    const color = atk.severity === 'Critical' ? '#ff2a6d' : atk.severity === 'High' ? '#ff9f1c' : '#05d9e8';
+    const color = atk.isReal
+      ? '#ff0055' // Super intense neon red for real attacks!
+      : atk.severity === 'Critical'
+      ? '#ff2a6d'
+      : atk.severity === 'High'
+      ? '#ff9f1c'
+      : '#05d9e8';
 
     const newLaser: ActiveLaser = {
       id: atk.id,
@@ -168,10 +164,35 @@ export default function ThreatMapPage() {
       severity: atk.severity,
       sourceCity: atk.sourceCity,
       attackName: atk.attackName,
+      isReal: atk.isReal,
+      sourceIp: atk.sourceIp,
     };
 
-    setLasers(prev => [...prev.slice(-15), newLaser]);
+    setLasers(prev => [...prev.slice(-18), newLaser]);
   };
+
+  // Initial data fetch from /api/threats
+  useEffect(() => {
+    fetch('/api/threats?count=20')
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success') {
+          setAttacks(data.events || []);
+          setStats(data.stats);
+          setTopThreats(data.topThreats || []);
+          setTargetedIndustries(data.targetedIndustries || []);
+
+          // Spawn lasers for initial real attacks so user immediately sees them!
+          const realOnes = (data.events || []).filter((e: AttackEvent) => e.isReal);
+          if (realOnes.length > 0) {
+            realOnes.slice(0, 3).forEach((atk: AttackEvent, idx: number) => {
+              setTimeout(() => spawnLaser(atk), idx * 600);
+            });
+          }
+        }
+      })
+      .catch(err => console.error("Error fetching threat data:", err));
+  }, [region]);
 
   // Continuous animation loop for laser beams & impact shockwaves
   useEffect(() => {
@@ -180,19 +201,27 @@ export default function ThreatMapPage() {
       setLasers(prevLasers => {
         const nextLasers: ActiveLaser[] = [];
         for (const laser of prevLasers) {
-          const nextProgress = laser.progress + 0.035; // speed of laser
+          const nextProgress = laser.progress + (laser.isReal ? 0.045 : 0.035);
           if (nextProgress >= 1) {
             // Impact! Trigger shockwave
             setImpacts(prev => [
-              ...prev.slice(-12),
+              ...prev.slice(-15),
               {
                 id: `impact-${Date.now()}-${Math.random()}`,
                 x: laser.x2,
                 y: laser.y2,
                 color: laser.color,
-                radius: 4,
+                radius: laser.isReal ? 8 : 4,
+                opacity: 1,
+              },
+              ...(laser.isReal ? [{
+                id: `impact-gold-${Date.now()}`,
+                x: laser.x2,
+                y: laser.y2,
+                color: '#ffcc00',
+                radius: 2,
                 opacity: 0.9,
-              }
+              }] : [])
             ]);
           } else {
             nextLasers.push({ ...laser, progress: nextProgress });
@@ -206,7 +235,7 @@ export default function ThreatMapPage() {
         prevImpacts
           .map(imp => ({
             ...imp,
-            radius: imp.radius + 1.2,
+            radius: imp.radius + 1.4,
             opacity: imp.opacity - 0.03,
           }))
           .filter(imp => imp.opacity > 0)
@@ -229,7 +258,12 @@ export default function ThreatMapPage() {
         .then(data => {
           if (data.events && data.events.length > 0) {
             const newAtk: AttackEvent = data.events[0];
-            setAttacks(prev => [newAtk, ...prev.slice(0, 35)]);
+            setAttacks(prev => {
+              // Ensure real events always stay on top
+              const exists = prev.some(p => p.id === newAtk.id);
+              if (exists) return prev;
+              return [newAtk, ...prev.slice(0, 35)];
+            });
             spawnLaser(newAtk);
 
             // Increment stats slightly to reflect live traffic
@@ -276,7 +310,7 @@ export default function ThreatMapPage() {
               </h1>
 
               <p className="text-lg md:text-xl mb-8 max-w-xl leading-relaxed text-emerald-100/70 font-normal">
-                Visualizing incoming exploit probes, DDoS vectors, and zero-day vulnerabilities in real-time — continuously mitigated across our Sidoarjo Edge Datacenter and tier-1 BGP backbones.
+                Visualizing incoming exploit probes, DDoS vectors, and real-world attack incidents mitigated across our Sidoarjo Edge Datacenter and tier-1 BGP backbones.
               </p>
 
               <div className="flex flex-wrap items-center gap-4">
@@ -355,6 +389,17 @@ export default function ThreatMapPage() {
               {/* Center / Right: Live Counters & Region Toggles */}
               <div className="flex flex-wrap items-center gap-3 sm:gap-6">
                 
+                {/* Verified Real Attacks Badge */}
+                {stats.realIncidentsCount > 0 && (
+                  <div className="px-3.5 py-1.5 rounded-xl border border-rose-500/50 bg-rose-950/40 flex items-center gap-2 shadow-lg shadow-rose-950/50 animate-pulse">
+                    <AlertTriangle className="w-4 h-4 text-rose-400" />
+                    <div className="flex flex-col">
+                      <span className="text-[9px] font-mono uppercase text-rose-300 font-bold">VERIFIED MASDIKA ATTACKS</span>
+                      <span className="text-xs font-mono font-black text-white">{stats.realIncidentsCount} INCIDENTS LOGGED</span>
+                    </div>
+                  </div>
+                )}
+
                 {/* Attack Rate Widget */}
                 <div className="px-4 py-2 rounded-xl border border-emerald-500/20 bg-[#020b08]/80 flex flex-col items-center">
                   <span className="text-[10px] font-mono uppercase text-emerald-400/80 font-bold">ATTACKS / SEC</span>
@@ -369,14 +414,6 @@ export default function ThreatMapPage() {
                   <span className="text-[10px] font-mono uppercase text-emerald-400/80 font-bold">BLOCKED IN 24H</span>
                   <span className="text-lg sm:text-xl font-mono font-black text-emerald-300">
                     {stats.blockedIn24h.toLocaleString()}
-                  </span>
-                </div>
-
-                {/* Active Outbreaks Widget */}
-                <div className="px-4 py-2 rounded-xl border border-emerald-500/20 bg-[#020b08]/80 flex flex-col items-center">
-                  <span className="text-[10px] font-mono uppercase text-emerald-400/80 font-bold">ACTIVE OUTBREAKS</span>
-                  <span className="text-lg sm:text-xl font-mono font-black text-amber-300">
-                    {stats.activeOutbreaks}
                   </span>
                 </div>
 
@@ -455,7 +492,7 @@ export default function ThreatMapPage() {
                     <defs>
                       {/* Glow Filters */}
                       <filter id="laser-glow" x="-20%" y="-20%" width="140%" height="140%">
-                        <feGaussianBlur stdDeviation="3" result="blur" />
+                        <feGaussianBlur stdDeviation="3.5" result="blur" />
                         <feMerge>
                           <feMergeNode in="blur" />
                           <feMergeNode in="SourceGraphic" />
@@ -540,13 +577,13 @@ export default function ThreatMapPage() {
                         {/* Indonesia Labels & Target Beacons */}
                         {/* Sidoarjo Datacenter Hub Beacon */}
                         <g transform="translate(480, 372)">
-                          <circle r="22" fill="url(#target-beacon)" className="animate-ping" opacity="0.6" />
+                          <circle r="24" fill="url(#target-beacon)" className="animate-ping" opacity="0.7" />
                           <circle r="12" fill="#00ff88" opacity="0.3" />
                           <circle r="5" fill="#00ff88" stroke="#ffffff" strokeWidth="1.5" />
-                          <text x="10" y="-8" fill="#00ff88" fontSize="11" fontWeight="bold" fontFamily="monospace">
+                          <text x="12" y="-8" fill="#00ff88" fontSize="11" fontWeight="bold" fontFamily="monospace">
                             Sidoarjo Edge DC 🇮🇩
                           </text>
-                          <text x="10" y="6" fill="#00e5ff" fontSize="9" fontFamily="monospace">
+                          <text x="12" y="6" fill="#00e5ff" fontSize="9" fontFamily="monospace">
                             AS63859 [PRIMARY HUB]
                           </text>
                         </g>
@@ -620,9 +657,9 @@ export default function ThreatMapPage() {
                         />
                         {/* Target Node: Indonesia */}
                         <g transform="translate(730, 275)">
-                          <circle r="18" fill="url(#target-beacon)" className="animate-ping" opacity="0.7" />
+                          <circle r="20" fill="url(#target-beacon)" className="animate-ping" opacity="0.8" />
                           <circle r="6" fill="#00ff88" stroke="#ffffff" strokeWidth="1.5" />
-                          <text x="10" y="-6" fill="#00ff88" fontSize="10" fontWeight="bold" fontFamily="monospace">
+                          <text x="12" y="-6" fill="#00ff88" fontSize="10" fontWeight="bold" fontFamily="monospace">
                             Masdika Edge ID 🇮🇩
                           </text>
                         </g>
@@ -643,19 +680,29 @@ export default function ThreatMapPage() {
                             d={`M ${laser.x1},${laser.y1} Q ${laser.cx},${laser.cy} ${laser.x2},${laser.y2}`}
                             fill="none"
                             stroke={laser.color}
-                            strokeWidth="1.2"
-                            strokeDasharray="4,4"
-                            opacity="0.35"
+                            strokeWidth={laser.isReal ? "3" : "1.2"}
+                            strokeDasharray={laser.isReal ? "6,3" : "4,4"}
+                            opacity={laser.isReal ? "0.9" : "0.35"}
                           />
 
                           {/* Source Beacon Dot */}
-                          <circle cx={laser.x1} cy={laser.y1} r="3" fill={laser.color} opacity="0.8" />
+                          <circle cx={laser.x1} cy={laser.y1} r={laser.isReal ? "5" : "3"} fill={laser.color} opacity="0.9" />
 
                           {/* Laser Head Projectile */}
-                          <circle cx={currentX} cy={currentY} r="4" fill="#ffffff" stroke={laser.color} strokeWidth="2" />
+                          <circle cx={currentX} cy={currentY} r={laser.isReal ? "6" : "4"} fill="#ffffff" stroke={laser.color} strokeWidth={laser.isReal ? "3" : "2"} />
 
                           {/* Glowing Comet Tail */}
-                          <circle cx={currentX} cy={currentY} r="8" fill={laser.color} opacity="0.4" />
+                          <circle cx={currentX} cy={currentY} r={laser.isReal ? "14" : "8"} fill={laser.color} opacity={laser.isReal ? "0.6" : "0.4"} />
+
+                          {/* Real Attack HUD Floating Label */}
+                          {laser.isReal && (
+                            <g transform={`translate(${currentX}, ${currentY - 20})`}>
+                              <rect x="-85" y="-12" width="170" height="20" rx="4" fill="#ff0055" opacity="0.9" stroke="#ffffff" strokeWidth="1" />
+                              <text x="0" y="2" textAnchor="middle" fill="#ffffff" fontSize="9" fontWeight="bold" fontFamily="monospace">
+                                🚨 LIVE ATTACK: {laser.sourceCity}
+                              </text>
+                            </g>
+                          )}
                         </g>
                       );
                     })}
@@ -669,7 +716,7 @@ export default function ThreatMapPage() {
                         r={impact.radius}
                         fill="none"
                         stroke={impact.color}
-                        strokeWidth="2"
+                        strokeWidth="2.5"
                         opacity={impact.opacity}
                       />
                     ))}
@@ -679,17 +726,17 @@ export default function ThreatMapPage() {
                 {/* Legend Bar Bottom */}
                 <div className="pt-4 border-t border-emerald-500/20 flex flex-wrap items-center justify-between gap-4 text-xs font-mono">
                   <div className="flex items-center gap-4">
-                    <span className="flex items-center gap-1.5 text-emerald-400 font-bold">
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-                      Target Beacon (Masdika Edge)
-                    </span>
                     <span className="flex items-center gap-1.5 text-rose-400 font-bold">
-                      <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
-                      Critical Exploit Vector
+                      <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping" />
+                      Verified Real Attack (Live DB/Sensor)
+                    </span>
+                    <span className="flex items-center gap-1.5 text-emerald-400 font-bold">
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+                      Target (Masdika Sidoarjo Edge)
                     </span>
                     <span className="flex items-center gap-1.5 text-amber-400 font-bold">
                       <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-                      High / DDoS Probe
+                      High / DDoS Vector
                     </span>
                   </div>
 
@@ -821,7 +868,7 @@ export default function ThreatMapPage() {
                     <tr>
                       <th className="py-2.5 px-4">Time</th>
                       <th className="py-2.5 px-4">Threat Vector / CVE Exploit</th>
-                      <th className="py-2.5 px-4">Source Location</th>
+                      <th className="py-2.5 px-4">Source Location &amp; IP</th>
                       <th className="py-2.5 px-4">Target Node</th>
                       <th className="py-2.5 px-4">Severity</th>
                       <th className="py-2.5 px-4">Mitigation Status</th>
@@ -832,24 +879,41 @@ export default function ThreatMapPage() {
                       {filteredAttacks.slice(0, 10).map((atk) => (
                         <motion.tr
                           key={atk.id}
-                          initial={{ opacity: 0, y: -10, backgroundColor: 'rgba(0, 255, 136, 0.15)' }}
-                          animate={{ opacity: 1, y: 0, backgroundColor: 'transparent' }}
+                          initial={{ opacity: 0, y: -10, backgroundColor: atk.isReal ? 'rgba(255, 0, 85, 0.25)' : 'rgba(0, 255, 136, 0.15)' }}
+                          animate={{ opacity: 1, y: 0, backgroundColor: atk.isReal ? 'rgba(255, 0, 85, 0.08)' : 'transparent' }}
                           exit={{ opacity: 0 }}
                           transition={{ duration: 0.4 }}
-                          className="hover:bg-emerald-950/30 transition-colors"
+                          className={cn(
+                            "transition-colors",
+                            atk.isReal ? "bg-rose-950/20 hover:bg-rose-950/40 border-l-2 border-rose-500" : "hover:bg-emerald-950/30"
+                          )}
                         >
                           <td className="py-2.5 px-4 text-emerald-400/70 whitespace-nowrap">
                             {atk.timestamp}
                           </td>
                           <td className="py-2.5 px-4 font-bold text-white whitespace-nowrap">
-                            {atk.attackName}
+                            <div className="flex items-center gap-2">
+                              {atk.isReal && (
+                                <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold uppercase bg-rose-500 text-white animate-pulse shadow-sm shadow-rose-500/50">
+                                  VERIFIED ATTACK
+                                </span>
+                              )}
+                              <span>{atk.attackName}</span>
+                            </div>
                           </td>
                           <td className="py-2.5 px-4 whitespace-nowrap">
-                            <span className="flex items-center gap-1.5">
-                              <span>{atk.sourceFlag}</span>
-                              <span className="text-emerald-100">{atk.sourceCity}</span>
-                              <span className="text-emerald-400/60 text-[10px]">({atk.sourceCode})</span>
-                            </span>
+                            <div className="flex flex-col">
+                              <span className="flex items-center gap-1.5 font-bold">
+                                <span>{atk.sourceFlag}</span>
+                                <span className={atk.isReal ? "text-rose-300 font-bold" : "text-emerald-100"}>{atk.sourceCity}</span>
+                                <span className="text-emerald-400/60 text-[10px]">({atk.sourceCode})</span>
+                              </span>
+                              {atk.sourceIp && (
+                                <span className="text-[10px] text-cyan-400/90 font-mono">
+                                  IP: {atk.sourceIp}
+                                </span>
+                              )}
+                            </div>
                           </td>
                           <td className="py-2.5 px-4 whitespace-nowrap">
                             <span className="flex items-center gap-1.5 text-cyan-300">
@@ -962,4 +1026,3 @@ export default function ThreatMapPage() {
     </div>
   );
 }
-
