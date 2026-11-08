@@ -25,6 +25,10 @@ import {
   Maximize2,
   Terminal,
   ArrowRight,
+  Cpu,
+  Network,
+  Eye,
+  Shield,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
@@ -32,7 +36,7 @@ import { Badge } from "@/components/ui/Badge";
 import { HeroAvatarFrame } from "@/components/ui/HeroAvatarFrame";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
-import { worldPaths, indonesiaRegionPaths, MapPath } from "@/data/threat-map-geo";
+import { worldPaths, indonesiaRegionPaths } from "@/data/threat-map-geo";
 
 interface AttackEvent {
   id: string;
@@ -167,10 +171,11 @@ export default function ThreatMapPage() {
     const midX = (x1 + x2) / 2;
     const midY = Math.min(y1, y2) - arcHeight;
 
+    // Professional, elegant colors (subtle rose coral for real, amber for high, cyan for medium)
     const color = atk.isReal
-      ? '#ef4444' // Vivid crimson red for verified live attacks
+      ? '#f43f5e' // Elegant rose coral for verified live attacks
       : atk.severity === 'Critical'
-      ? '#f43f5e'
+      ? '#fb7185'
       : atk.severity === 'High'
       ? '#f59e0b'
       : isDark ? '#06b6d4' : '#0284c7';
@@ -198,7 +203,7 @@ export default function ThreatMapPage() {
 
     if (atk.isReal) {
       setRecentLiveAlert(atk);
-      setTimeout(() => setRecentLiveAlert(null), 4000);
+      setTimeout(() => setRecentLiveAlert(null), 3500);
     }
   };
 
@@ -239,7 +244,7 @@ export default function ThreatMapPage() {
       setLasers(prevLasers => {
         const nextLasers: ActiveLaser[] = [];
         for (const laser of prevLasers) {
-          const step = laser.isReal ? 0.038 : 0.032;
+          const step = laser.isReal ? 0.036 : 0.030;
           const nextProgress = laser.progress + step;
           if (nextProgress >= 1) {
             // Impact! Trigger shockwaves with guaranteed unique keys
@@ -251,8 +256,8 @@ export default function ThreatMapPage() {
                 x: laser.x2,
                 y: laser.y2,
                 color: laser.color,
-                radius: laser.isReal ? 12 : 6,
-                opacity: 1,
+                radius: laser.isReal ? 10 : 5,
+                opacity: 0.9,
               },
             ];
 
@@ -261,9 +266,9 @@ export default function ThreatMapPage() {
                 id: `impact-ring-${seq}-${Date.now()}`,
                 x: laser.x2,
                 y: laser.y2,
-                color: '#f59e0b',
-                radius: 4,
-                opacity: 0.9,
+                color: '#38bdf8',
+                radius: 3,
+                opacity: 0.8,
               });
             }
 
@@ -280,7 +285,7 @@ export default function ThreatMapPage() {
         prevImpacts
           .map(imp => ({
             ...imp,
-            radius: imp.radius + 1.6,
+            radius: imp.radius + 1.4,
             opacity: imp.opacity - 0.035,
           }))
           .filter(imp => imp.opacity > 0)
@@ -553,7 +558,7 @@ export default function ThreatMapPage() {
               {/* Map Canvas Visualizer (8 Cols) */}
               <div className="lg:col-span-8 p-4 sm:p-6 lg:border-r border-b lg:border-b-0 border-[var(--border-subtle)] flex flex-col justify-between min-h-[500px] sm:min-h-[590px] relative">
                 
-                {/* HUD Overlay Badges */}
+                {/* HUD Overlay Badges & Calm Event Ribbon */}
                 <div className="absolute top-5 left-5 z-20 flex flex-wrap items-center gap-2">
                   <div className={cn(
                     "px-3 py-1 rounded-full border text-xs font-mono font-bold flex items-center gap-1.5 shadow-sm backdrop-blur-md",
@@ -576,28 +581,20 @@ export default function ThreatMapPage() {
                   </div>
 
                   {stats.realIncidentsCount > 0 && (
-                    <div className="px-3 py-1 rounded-full border border-rose-500/50 bg-rose-500/15 text-rose-500 text-xs font-mono font-bold flex items-center gap-1.5 shadow-sm shadow-rose-500/20 backdrop-blur-md animate-pulse">
+                    <div className="px-3 py-1 rounded-full border border-rose-500/30 bg-rose-500/10 text-rose-500 dark:text-rose-400 text-xs font-mono font-bold flex items-center gap-1.5 shadow-sm backdrop-blur-md">
                       <ShieldAlert className="w-3.5 h-3.5 text-rose-500" />
                       <span>{stats.realIncidentsCount} VERIFIED REAL INCIDENTS</span>
                     </div>
                   )}
-                </div>
 
-                {/* Instant HUD Alert Banner for Verified Real Attacks */}
-                <AnimatePresence>
+                  {/* Sleek, Non-Intrusive Live Telemetry Ticker Ribbon */}
                   {recentLiveAlert && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -20, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -15, scale: 0.95 }}
-                      transition={{ duration: 0.3 }}
-                      className="absolute top-16 left-5 z-30 flex items-center gap-2.5 px-4 py-2 rounded-xl bg-rose-600 text-white font-mono text-xs font-bold shadow-lg shadow-rose-600/40 border border-white/20"
-                    >
-                      <ShieldAlert className="w-4 h-4 text-white animate-bounce" />
-                      <span>LIVE INCIDENT: {recentLiveAlert.sourceCity} [{recentLiveAlert.sourceCode}] &rarr; SIDOARJO DATACENTER</span>
-                    </motion.div>
+                    <div className="px-3 py-1 rounded-full border border-cyan-500/30 bg-cyan-950/40 text-cyan-300 text-xs font-mono font-bold flex items-center gap-1.5 backdrop-blur-md">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
+                      <span>LIVE PROBE: {recentLiveAlert.sourceCity} [{recentLiveAlert.sourceCode}]</span>
+                    </div>
                   )}
-                </AnimatePresence>
+                </div>
 
                 {/* SVG Tactical Vector Map with Real GIS Coastlines */}
                 <div className="w-full h-full flex items-center justify-center relative py-6">
@@ -732,27 +729,41 @@ export default function ThreatMapPage() {
                             d={`M ${laser.x1},${laser.y1} Q ${laser.cx},${laser.cy} ${laser.x2},${laser.y2}`}
                             fill="none"
                             stroke={laser.color}
-                            strokeWidth={laser.isReal ? "3.2" : "1.4"}
-                            strokeDasharray={laser.isReal ? "8,4" : "5,4"}
+                            strokeWidth={laser.isReal ? "2.4" : "1.2"}
+                            strokeDasharray={laser.isReal ? "6,3" : "4,4"}
                             opacity={laser.isReal ? "0.95" : "0.45"}
                           />
 
                           {/* Source Origin Beacon */}
-                          <circle cx={laser.x1} cy={laser.y1} r={laser.isReal ? "5.5" : "3.5"} fill={laser.color} opacity="0.95" />
-                          {laser.isReal && (
-                            <circle cx={laser.x1} cy={laser.y1} r="10" fill="none" stroke={laser.color} strokeWidth="1" className="animate-ping" />
-                          )}
+                          <circle cx={laser.x1} cy={laser.y1} r={laser.isReal ? "4.5" : "3"} fill={laser.color} opacity="0.95" />
 
                           {/* Missile / Laser Head Projectile */}
-                          <circle cx={currentX} cy={currentY} r={laser.isReal ? "6.5" : "4.5"} fill="#ffffff" stroke={laser.color} strokeWidth={laser.isReal ? "3.5" : "2"} />
-                          <circle cx={currentX} cy={currentY} r={laser.isReal ? "16" : "9"} fill={laser.color} opacity={laser.isReal ? "0.6" : "0.35"} />
+                          <circle cx={currentX} cy={currentY} r={laser.isReal ? "5.5" : "4"} fill="#ffffff" stroke={laser.color} strokeWidth={laser.isReal ? "2.5" : "1.8"} />
+                          <circle cx={currentX} cy={currentY} r={laser.isReal ? "12" : "7"} fill={laser.color} opacity={laser.isReal ? "0.45" : "0.25"} />
 
-                          {/* Real Attack HUD Callout */}
+                          {/* Refined Glass HUD Callout for Laser */}
                           {laser.isReal && (
-                            <g transform={`translate(${currentX}, ${currentY - 22})`}>
-                              <rect x="-95" y="-12" width="190" height="22" rx="4" fill="#ef4444" opacity="0.95" stroke="#ffffff" strokeWidth="1" />
-                              <text x="0" y="3" textAnchor="middle" fill="#ffffff" fontSize="9" fontWeight="bold" fontFamily="monospace">
-                                LIVE ATTACK: {laser.sourceCity} [{laser.sourceCode}]
+                            <g transform={`translate(${currentX}, ${currentY - 18})`}>
+                              <rect
+                                x="-65"
+                                y="-10"
+                                width="130"
+                                height="20"
+                                rx="4"
+                                fill={isDark ? "rgba(8, 23, 44, 0.9)" : "rgba(255, 255, 255, 0.95)"}
+                                stroke="rgba(244, 63, 94, 0.6)"
+                                strokeWidth="1"
+                              />
+                              <text
+                                x="0"
+                                y="3"
+                                textAnchor="middle"
+                                fill={isDark ? "#f43f5e" : "#e11d48"}
+                                fontSize="9"
+                                fontWeight="bold"
+                                fontFamily="monospace"
+                              >
+                                {laser.sourceCity} [{laser.sourceCode}]
                               </text>
                             </g>
                           )}
@@ -769,7 +780,7 @@ export default function ThreatMapPage() {
                         r={impact.radius}
                         fill="none"
                         stroke={impact.color}
-                        strokeWidth="2.5"
+                        strokeWidth="2"
                         opacity={impact.opacity}
                       />
                     ))}
@@ -780,7 +791,7 @@ export default function ThreatMapPage() {
                 <div className="pt-4 border-t border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-4 text-xs font-mono">
                   <div className="flex flex-wrap items-center gap-4">
                     <span className="flex items-center gap-1.5 text-rose-500 font-bold">
-                      <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
                       Verified Real Attack (Live DB/Sensor)
                     </span>
                     <span className="flex items-center gap-1.5 text-cyan-600 dark:text-cyan-400 font-bold">
@@ -908,9 +919,9 @@ export default function ThreatMapPage() {
               
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                 <div className="flex items-center gap-2">
-                  <span className="flex h-2.5 w-2.5 relative">
+                  <span className="flex h-2 w-2 relative">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
                   </span>
                   <span className="font-mono text-xs sm:text-sm font-bold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-2">
                     REAL-TIME ATTACK STREAM &amp; PROBES
@@ -940,7 +951,7 @@ export default function ThreatMapPage() {
                         "px-2.5 py-1 rounded-md uppercase font-bold text-[10px] transition-all",
                         filterSeverity === tab.key
                           ? tab.key === 'real'
-                            ? "bg-rose-500 text-white shadow-sm shadow-rose-500/30"
+                            ? "bg-rose-500/20 text-rose-500 dark:text-rose-400 border border-rose-500/40"
                             : "bg-cyan-500 text-slate-950 shadow-sm"
                           : "border border-[var(--border-primary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--surface)]"
                       )}
@@ -951,7 +962,7 @@ export default function ThreatMapPage() {
                 </div>
               </div>
 
-              {/* Live Streaming Table */}
+              {/* Live Streaming Table (Clean, Non-Garish Enterprise Style) */}
               <div className="overflow-x-auto rounded-xl border border-[var(--border-primary)] bg-[var(--surface)]">
                 <table className="w-full text-left font-mono text-xs text-[var(--text-primary)]">
                   <thead className={cn(
@@ -972,26 +983,26 @@ export default function ThreatMapPage() {
                       {filteredAttacks.slice(0, 12).map((atk) => (
                         <motion.tr
                           key={atk.id}
-                          initial={{ opacity: 0, y: -8 }}
+                          initial={{ opacity: 0, y: -6 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0 }}
-                          transition={{ duration: 0.3 }}
+                          transition={{ duration: 0.25 }}
                           className={cn(
                             "transition-colors",
                             atk.isReal
-                              ? "bg-rose-500/10 hover:bg-rose-500/15 border-l-2 border-rose-500"
+                              ? "border-l-2 border-rose-500/70 hover:bg-[var(--surface-secondary)]"
                               : "hover:bg-[var(--surface-secondary)]"
                           )}
                         >
                           <td className="py-2.5 px-4 text-[var(--text-secondary)] whitespace-nowrap">
                             {atk.timestamp}
                           </td>
-                          <td className="py-2.5 px-4 font-bold text-[var(--text-primary)] whitespace-nowrap">
+                          <td className="py-2.5 px-4 font-semibold text-[var(--text-primary)] whitespace-nowrap">
                             <div className="flex items-center gap-2">
                               {atk.isReal && (
-                                <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold uppercase bg-rose-500 text-white animate-pulse shadow-sm shadow-rose-500/40 flex items-center gap-1">
+                                <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-medium uppercase bg-rose-500/10 text-rose-500 dark:text-rose-400 border border-rose-500/20 flex items-center gap-1">
                                   <ShieldAlert className="w-2.5 h-2.5" />
-                                  VERIFIED ATTACK
+                                  LIVE INCIDENT
                                 </span>
                               )}
                               <span>{atk.attackName}</span>
@@ -1003,12 +1014,12 @@ export default function ThreatMapPage() {
                                 <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30">
                                   {atk.sourceCode}
                                 </span>
-                                <span className={atk.isReal ? "text-rose-600 dark:text-rose-300 font-bold" : "text-[var(--text-primary)]"}>
+                                <span className="text-[var(--text-primary)]">
                                   {atk.sourceCity}
                                 </span>
                               </span>
                               {atk.sourceIp && (
-                                <span className="text-[10px] text-cyan-600 dark:text-cyan-400 font-mono">
+                                <span className="text-[10px] text-[var(--text-secondary)] font-mono">
                                   IP: {atk.sourceIp}
                                 </span>
                               )}
@@ -1027,10 +1038,10 @@ export default function ThreatMapPage() {
                               className={cn(
                                 "px-2 py-0.5 rounded text-[10px] font-bold uppercase",
                                 atk.severity === 'Critical'
-                                  ? "bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30"
+                                  ? "bg-rose-500/10 text-rose-500 dark:text-rose-400 border border-rose-500/20"
                                   : atk.severity === 'High'
-                                  ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
-                                  : "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30"
+                                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                                  : "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20"
                               )}
                             >
                               {atk.severity}
@@ -1051,6 +1062,170 @@ export default function ThreatMapPage() {
 
           </div>
 
+        </section>
+
+        {/* ── 2. CARA KERJA SISTEM PERTAHANAN ANCAMAN MASDIKA ─────────── */}
+        <section className="pt-20 sm:pt-28 pb-6">
+          <div className="max-w-3xl mx-auto text-center mb-14 sm:mb-18">
+            <div className="inline-flex items-center gap-2 mb-3">
+              <Badge variant="brand" dot dotColor="bg-cyan-400" size="sm" className="font-mono uppercase">
+                SECURITY ARCHITECTURE &amp; PIPELINE
+              </Badge>
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[var(--text-primary)] tracking-tight leading-[1.15] mb-4">
+              Cara Kerja Pertahanan <br />
+              <span className="bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-500 bg-clip-text text-transparent">
+                Threat Intelligence Masdika.
+              </span>
+            </h2>
+            <p className="text-base sm:text-lg text-[var(--text-secondary)] font-normal leading-relaxed">
+              Setiap paket jaringan yang menuju infrastruktur Sidoarjo Datacenter dan Cloud VPS Masdika disaring melalui 4 lapis mitigasi otonom terkoordinasi sebelum mencapai server Anda.
+            </p>
+          </div>
+
+          {/* 4-Stage Architecture Pipeline Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            
+            {/* Stage 01 */}
+            <div className={cn(
+              "p-6 sm:p-7 rounded-2xl border border-[var(--border-primary)] transition-all duration-300 relative group flex flex-col justify-between",
+              isDark ? "bg-[var(--surface)] hover:border-cyan-500/40" : "bg-white hover:border-cyan-500/50 shadow-sm"
+            )}>
+              <div>
+                <div className="flex items-center justify-between mb-5">
+                  <div className="w-12 h-12 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
+                    <Globe className="w-6 h-6" />
+                  </div>
+                  <span className="text-xs font-mono font-bold text-cyan-500 dark:text-cyan-400 px-2.5 py-1 rounded-md bg-cyan-500/10 border border-cyan-500/20">
+                    STAGE 01
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2.5">
+                  Anycast DDoS Scrubbing
+                </h3>
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-6 font-normal">
+                  Serangan volumetrik L3/L4 (SYN flood, UDP amplification, DNS reflection) langsung dibelokkan dan disaring di pusat scrubbing global Anycast BGP sebelum masuk ke link fisik ISP.
+                </p>
+              </div>
+              <div className="pt-4 border-t border-[var(--border-subtle)] text-xs font-mono text-[var(--text-secondary)] flex items-center justify-between">
+                <span>Mitigasi:</span>
+                <span className="font-semibold text-cyan-600 dark:text-cyan-400">Zero Downtime SLA</span>
+              </div>
+            </div>
+
+            {/* Stage 02 */}
+            <div className={cn(
+              "p-6 sm:p-7 rounded-2xl border border-[var(--border-primary)] transition-all duration-300 relative group flex flex-col justify-between",
+              isDark ? "bg-[var(--surface)] hover:border-cyan-500/40" : "bg-white hover:border-cyan-500/50 shadow-sm"
+            )}>
+              <div>
+                <div className="flex items-center justify-between mb-5">
+                  <div className="w-12 h-12 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
+                    <Layers className="w-6 h-6" />
+                  </div>
+                  <span className="text-xs font-mono font-bold text-cyan-500 dark:text-cyan-400 px-2.5 py-1 rounded-md bg-cyan-500/10 border border-cyan-500/20">
+                    STAGE 02
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2.5">
+                  L7 WAF &amp; Rate Limiting
+                </h3>
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-6 font-normal">
+                  Traefik reverse proxy dan edge firewall menganalisis header HTTP/HTTPS. Eksploitasi OWASP Top 10, SQL injection, crawler bot jahat, dan burst traffic otomatis terkena HTTP 429 &amp; 403.
+                </p>
+              </div>
+              <div className="pt-4 border-t border-[var(--border-subtle)] text-xs font-mono text-[var(--text-secondary)] flex items-center justify-between">
+                <span>Enforcement:</span>
+                <span className="font-semibold text-cyan-600 dark:text-cyan-400">Traefik + Cloudflare</span>
+              </div>
+            </div>
+
+            {/* Stage 03 */}
+            <div className={cn(
+              "p-6 sm:p-7 rounded-2xl border border-[var(--border-primary)] transition-all duration-300 relative group flex flex-col justify-between",
+              isDark ? "bg-[var(--surface)] hover:border-cyan-500/40" : "bg-white hover:border-cyan-500/50 shadow-sm"
+            )}>
+              <div>
+                <div className="flex items-center justify-between mb-5">
+                  <div className="w-12 h-12 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
+                    <Lock className="w-6 h-6" />
+                  </div>
+                  <span className="text-xs font-mono font-bold text-cyan-500 dark:text-cyan-400 px-2.5 py-1 rounded-md bg-cyan-500/10 border border-cyan-500/20">
+                    STAGE 03
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2.5">
+                  Anti-Brute-Force Shield
+                </h3>
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-6 font-normal">
+                  Setiap kegagalan autentikasi dicatat seketika di database. 5 kali percobaan gagal berturut-turut langsung memicu karantina IP permanen ke blacklist firewall tanpa memberi celah kamus kata sandi.
+                </p>
+              </div>
+              <div className="pt-4 border-t border-[var(--border-subtle)] text-xs font-mono text-[var(--text-secondary)] flex items-center justify-between">
+                <span>Karantina:</span>
+                <span className="font-semibold text-cyan-600 dark:text-cyan-400">Auto IP Blacklist</span>
+              </div>
+            </div>
+
+            {/* Stage 04 */}
+            <div className={cn(
+              "p-6 sm:p-7 rounded-2xl border border-[var(--border-primary)] transition-all duration-300 relative group flex flex-col justify-between",
+              isDark ? "bg-[var(--surface)] hover:border-cyan-500/40" : "bg-white hover:border-cyan-500/50 shadow-sm"
+            )}>
+              <div>
+                <div className="flex items-center justify-between mb-5">
+                  <div className="w-12 h-12 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
+                    <Activity className="w-6 h-6" />
+                  </div>
+                  <span className="text-xs font-mono font-bold text-cyan-500 dark:text-cyan-400 px-2.5 py-1 rounded-md bg-cyan-500/10 border border-cyan-500/20">
+                    STAGE 04
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2.5">
+                  Promtail Host Audit &amp; SOC
+                </h3>
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-6 font-normal">
+                  Log sistem Linux (`auth.log`) di-stream secara non-stop oleh Promtail ke Loki dan Prometheus. Percobaan akses SSH dan audit sudo langsung dikorelasikan ke peta radar secara real-time.
+                </p>
+              </div>
+              <div className="pt-4 border-t border-[var(--border-subtle)] text-xs font-mono text-[var(--text-secondary)] flex items-center justify-between">
+                <span>Observabilitas:</span>
+                <span className="font-semibold text-cyan-600 dark:text-cyan-400">Prometheus + Loki</span>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Infrastructure Guarantee Banner */}
+          <div className={cn(
+            "mt-10 p-6 sm:p-8 rounded-2xl border border-[var(--border-primary)] transition-colors duration-200 flex flex-col md:flex-row items-center justify-between gap-6",
+            isDark ? "bg-[var(--surface)]" : "bg-white shadow-sm"
+          )}>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <div>
+                <h4 className="text-base font-bold text-[var(--text-primary)]">
+                  Transparansi Telemetri Tanpa Kompromi
+                </h4>
+                <p className="text-sm text-[var(--text-secondary)] font-normal leading-relaxed">
+                  Semua insiden yang Anda lihat di radar ini adalah telemetri pertahanan aktif yang sukses diredam oleh shield Masdika tanpa insiden kebocoran data.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 shrink-0">
+              <Button
+                variant="secondary"
+                size="md"
+                href="/lg"
+                className="font-mono text-xs"
+              >
+                Uji Latensi Looking Glass
+              </Button>
+            </div>
+          </div>
         </section>
 
       </main>
