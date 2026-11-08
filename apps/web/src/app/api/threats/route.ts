@@ -359,16 +359,23 @@ export async function GET(request: Request) {
       prisma.loginLog.findMany({
         where: { success: false },
         orderBy: { createdAt: 'desc' },
-        take: 12,
+        take: 24,
       }),
       prisma.blockedUser.findMany({
         orderBy: { createdAt: 'desc' },
-        take: 6,
+        take: 8,
       }),
     ]);
 
+    // Track seen IPs to show rich geographical diversity (Bengkulu, Pekanbaru, Surabaya, West Jakarta, Malang, etc.)
+    const seenIpsCount = new Map<string, number>();
+
     // Process real failed login attempts
     for (const log of realFailedLogins) {
+      const currentIpCount = seenIpsCount.get(log.ipAddress) || 0;
+      if (currentIpCount >= 2) continue; // Allow at most 2 per IP to maintain diverse city origins
+      seenIpsCount.set(log.ipAddress, currentIpCount + 1);
+
       const geo = await resolveIpGeo(log.ipAddress);
       const logDate = new Date(log.createdAt);
       const hours = String(logDate.getHours()).padStart(2, '0');

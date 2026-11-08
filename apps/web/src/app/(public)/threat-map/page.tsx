@@ -117,6 +117,33 @@ const ALPHA3_TO_ALPHA2: Record<string, string> = {
   ZAF: 'za', ZMB: 'zm', ZWE: 'zw',
 };
 
+// Centroid coordinates [lat, lng] for instant precision auto-zoom on country click
+const COUNTRY_CENTROIDS: Record<string, [number, number]> = {
+  ID: [-2.5, 118.0], IDN: [-2.5, 118.0],
+  DE: [51.1, 10.4], DEU: [51.1, 10.4],
+  US: [39.0, -98.0], USA: [39.0, -98.0],
+  IT: [41.9, 12.5], ITA: [41.9, 12.5],
+  JP: [36.2, 138.2], JPN: [36.2, 138.2],
+  IS: [64.9, -18.5], ISL: [64.9, -18.5],
+  ZA: [-29.0, 24.0], ZAF: [-29.0, 24.0],
+  DK: [56.2, 9.5], DNK: [56.2, 9.5],
+  CA: [56.0, -106.0], CAN: [56.0, -106.0],
+  FR: [46.6, 2.2], FRA: [46.6, 2.2],
+  NL: [52.1, 5.3], NLD: [52.1, 5.3],
+  AT: [47.5, 14.5], AUT: [47.5, 14.5],
+  RU: [60.0, 90.0], RUS: [60.0, 90.0],
+  CN: [35.0, 104.0], CHN: [35.0, 104.0],
+  IN: [20.5, 78.9], IND: [20.5, 78.9],
+  BR: [-14.2, -51.9], BRA: [-14.2, -51.9],
+  AU: [-25.2, 133.7], AUS: [-25.2, 133.7],
+  TR: [39.0, 35.2], TUR: [39.0, 35.2],
+  PL: [52.0, 19.1], POL: [52.0, 19.1],
+  MX: [23.6, -102.5], MEX: [23.6, -102.5],
+  SG: [1.35, 103.8], SGP: [1.35, 103.8],
+  GB: [54.0, -2.5], GBR: [54.0, -2.5],
+  KR: [36.5, 127.8], KOR: [36.5, 127.8],
+};
+
 // Crisp, standardized rectangular country flag (FortiGuard Threat Map style)
 function CountryFlag({ code, className }: { code: string; className?: string }) {
   const safeCode = (code || 'ID').toLowerCase().trim();
@@ -214,12 +241,15 @@ export default function ThreatMapPage() {
   // Country Vector Hover State (FortiGuard Style Country Highlight & Tooltip)
   const [hoveredCountry, setHoveredCountry] = useState<HoveredCountryInfo | null>(null);
 
-  // Interactive Zoom & Pan State with non-passive wheel prevention
+  // Interactive Zoom & Pan State with non-passive wheel prevention on full card
+  const visualizerCardRef = useRef<HTMLDivElement>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef({ x: 0, y: 0 });
+  const dragStartClientRef = useRef({ x: 0, y: 0 });
+  const streamTickRef = useRef(0);
 
   const [stats, setStats] = useState({
     attacksPerSecond: 18,
@@ -278,21 +308,29 @@ export default function ThreatMapPage() {
     setHoveredCountry(null);
   }, [region]);
 
-  // Native Non-Passive Wheel Event Listener on Map to prevent window scroll
+  // Native Non-Passive Wheel Event Listener on Card to 100% prevent browser window scroll
   useEffect(() => {
-    const el = mapContainerRef.current;
+    const el = visualizerCardRef.current;
     if (!el) return;
 
     const handleNativeWheel = (e: WheelEvent) => {
-      // PREVENT BROWSER WINDOW FROM SCROLLING WHEN CURSOR IS OVER THE MAP
+      // PREVENT BROWSER WINDOW FROM SCROLLING WHEN CURSOR IS ANYWHERE OVER MAP COCKPIT
       e.preventDefault();
       e.stopPropagation();
 
       const delta = e.deltaY;
       setZoom(prev => {
-        const step = delta < 0 ? 0.2 : -0.2;
-        const next = Math.round((prev + step) * 10) / 10;
-        return Math.min(4.0, Math.max(0.7, next));
+        const step = delta < 0 ? 0.25 : -0.25;
+        const next = Math.min(4.0, Math.max(0.7, Math.round((prev + step) * 10) / 10));
+        if (next <= 1) {
+          setPan({ x: 0, y: 0 });
+        } else {
+          setPan(p => ({
+            x: Math.max(-450 * next, Math.min(450 * next, p.x)),
+            y: Math.max(-450 * next, Math.min(450 * next, p.y)),
+          }));
+        }
+        return next;
       });
     };
 
@@ -302,17 +340,82 @@ export default function ThreatMapPage() {
     };
   }, []);
 
+  // Precision Auto-Zoom to Any Country (Centering that country smoothly in the 1000x500 canvas)
+  const zoomToCountry = (codeOrId: string, customZoom?: number) => {
+    const upper = codeOrId.toUpperCase();
+    if (upper === 'ID' || upper === 'IDN') {
+      if (region !== 'indonesia') {
+        setRegion('indonesia');
+      }
+      setZoom(1.8);
+      setPan({ x: 0, y: 0 });
+      return;
+    }
+
+    if (region === 'indonesia') {
+      setRegion('world');
+    }
+
+    const coords = COUNTRY_CENTROIDS[upper];
+    if (coords) {
+      const [targetX, targetY] = projectCoords(coords[0], coords[1], 'world');
+      const z = customZoom || 2.4;
+      const maxPan = 450 * z;
+      const newPanX = Math.max(-maxPan, Math.min(maxPan, (500 - targetX) * z));
+      const newPanY = Math.max(-maxPan, Math.min(maxPan, (250 - targetY) * z));
+      setZoom(z);
+      setPan({ x: Math.round(newPanX), y: Math.round(newPanY) });
+    }
+  };
+
+  // Country Click Auto-Zoom Handler
+  const handleCountryClick = (country: { id: string; name: string }, e: React.MouseEvent<SVGPathElement>) => {
+    e.stopPropagation();
+    const dist = Math.hypot(e.clientX - dragStartClientRef.current.x, e.clientY - dragStartClientRef.current.y);
+    if (dist > 6) return; // User was panning/dragging, ignore click
+
+    if (country.id === 'IDN') {
+      if (region === 'world') {
+        setRegion('indonesia');
+        setZoom(1);
+        setPan({ x: 0, y: 0 });
+      } else {
+        setZoom(2.2);
+        setPan({ x: 0, y: 0 });
+      }
+      return;
+    }
+
+    try {
+      const bbox = (e.currentTarget as SVGGraphicsElement).getBBox();
+      if (bbox && bbox.width > 0 && bbox.height > 0) {
+        const targetX = bbox.x + bbox.width / 2;
+        const targetY = bbox.y + bbox.height / 2;
+        const targetZoom = Math.min(3.4, Math.max(1.8, Math.min(650 / Math.max(bbox.width, 25), 320 / Math.max(bbox.height, 25))));
+        const maxPan = 450 * targetZoom;
+        const newPanX = Math.max(-maxPan, Math.min(maxPan, (500 - targetX) * targetZoom));
+        const newPanY = Math.max(-maxPan, Math.min(maxPan, (250 - targetY) * targetZoom));
+        setZoom(Math.round(targetZoom * 10) / 10);
+        setPan({ x: Math.round(newPanX), y: Math.round(newPanY) });
+        return;
+      }
+    } catch {}
+
+    zoomToCountry(country.id);
+  };
+
   // Pan / Drag handlers
   const onMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return;
     setIsDragging(true);
     dragStartRef.current = { x: e.clientX - pan.x, y: e.clientY - pan.y };
+    dragStartClientRef.current = { x: e.clientX, y: e.clientY };
   };
 
   const onMouseMove = (e: React.MouseEvent) => {
     if (!isDragging) return;
     // Limit panning bounds so the map is never lost
-    const maxPan = 400 * zoom;
+    const maxPan = 450 * zoom;
     const newX = Math.max(-maxPan, Math.min(maxPan, e.clientX - dragStartRef.current.x));
     const newY = Math.max(-maxPan, Math.min(maxPan, e.clientY - dragStartRef.current.y));
     setPan({ x: newX, y: newY });
@@ -414,11 +517,20 @@ export default function ThreatMapPage() {
 
           fetchedEvents.forEach(e => seenEventIdsRef.current.add(e.id));
 
-          // Spawn lasers for initial attacks
+          // Spawn lasers for initial attacks: ALWAYS prioritize attacks hitting Masdika Sidoarjo Hub!
           if (fetchedEvents.length > 0) {
-            fetchedEvents.slice(0, 4).forEach((atk, idx) => {
-              setTimeout(() => spawnLaser(atk), idx * 450);
-            });
+            const masdikaInitial = fetchedEvents.filter(e => e.isReal || e.targetCity.includes('Sidoarjo') || e.targetCode === 'ID');
+            const globalInitial = fetchedEvents.filter(e => !e.isReal && !e.targetCity.includes('Sidoarjo'));
+
+            if (masdikaInitial.length > 0) {
+              spawnLaser(masdikaInitial[0]);
+            }
+            if (masdikaInitial.length > 1) {
+              setTimeout(() => spawnLaser(masdikaInitial[1]), 650);
+            }
+            if (region === 'world' && globalInitial.length > 0) {
+              setTimeout(() => spawnLaser(globalInitial[0]), 1300);
+            }
           }
         }
       })
@@ -500,10 +612,29 @@ export default function ThreatMapPage() {
             // Directly update attacks stream with database real attacks at the top
             setAttacks(incoming);
 
-            // Periodically fire projectile laser
-            const randomPick = incoming[Math.floor(Math.random() * incoming.length)];
-            if (randomPick) {
-              spawnLaser(randomPick);
+            // Prioritize Masdika Sidoarjo Edge DC hits on every tick, and interleave global outbreaks
+            streamTickRef.current++;
+            const tick = streamTickRef.current;
+
+            const masdikaTargets = incoming.filter(e => e.isReal || e.targetCity.includes('Sidoarjo') || e.targetCode === 'ID');
+            const globalOutbreaks = incoming.filter(e => !e.isReal && !e.targetCity.includes('Sidoarjo'));
+
+            // 1. ALWAYS fire an attack targeting Masdika Sidoarjo Edge Datacenter!
+            if (masdikaTargets.length > 0) {
+              const realOnly = masdikaTargets.filter(e => e.isReal);
+              const chosenMasdika = realOnly.length > 0 && tick % 2 === 0
+                ? realOnly[tick % realOnly.length]
+                : masdikaTargets[tick % masdikaTargets.length];
+              spawnLaser(chosenMasdika);
+            }
+
+            // 2. In World view, also spawn a worldwide outbreak laser offset by 900ms
+            if (region === 'world' && globalOutbreaks.length > 0) {
+              const chosenGlobal = globalOutbreaks[tick % globalOutbreaks.length];
+              setTimeout(() => spawnLaser(chosenGlobal), 900);
+            } else if (region === 'indonesia' && masdikaTargets.length > 1) {
+              const secondPick = masdikaTargets[(tick + 1) % masdikaTargets.length];
+              setTimeout(() => spawnLaser(secondPick), 1000);
             }
 
             if (data.stats) {
@@ -757,7 +888,11 @@ export default function ThreatMapPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 relative z-10">
               
               {/* Map Canvas Visualizer (8 Cols) */}
-              <div className="lg:col-span-8 p-4 sm:p-6 lg:border-r border-b lg:border-b-0 border-[var(--border-subtle)] flex flex-col justify-between min-h-[500px] sm:min-h-[590px] relative">
+              <div
+                ref={visualizerCardRef}
+                style={{ overscrollBehavior: 'contain', touchAction: 'none' }}
+                className="lg:col-span-8 p-4 sm:p-6 lg:border-r border-b lg:border-b-0 border-[var(--border-subtle)] flex flex-col justify-between min-h-[500px] sm:min-h-[590px] relative"
+              >
                 
                 {/* Top-Left: Compact Defense & Incident Radar Status */}
                 <div className="absolute top-4 left-4 z-20 flex items-center gap-2 pointer-events-none">
@@ -887,6 +1022,7 @@ export default function ThreatMapPage() {
                 <div
                   ref={mapContainerRef}
                   className="w-full h-full flex items-center justify-center relative py-6 overflow-hidden"
+                  style={{ overscrollBehavior: 'contain', touchAction: 'none' }}
                   onMouseMove={handleCountryMove}
                 >
                   <svg
@@ -926,10 +1062,9 @@ export default function ThreatMapPage() {
                     {/* Transform Group for Zoom & Pan */}
                     <g
                       clipPath="url(#map-clip)"
-                      transform={`translate(${pan.x}, ${pan.y}) scale(${zoom})`}
+                      transform={`translate(${500 + pan.x}, ${250 + pan.y}) scale(${zoom}) translate(-500, -250)`}
                       style={{
-                        transformOrigin: '500px 250px',
-                        transition: isDragging ? 'none' : 'transform 0.15s ease-out',
+                        transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
                       }}
                     >
                       {/* Radar Coordinate Grid & Concentric Scanning Rings */}
@@ -953,6 +1088,7 @@ export default function ThreatMapPage() {
                               <path
                                 key={poly.id}
                                 d={poly.d}
+                                onClick={(e) => handleCountryClick({ id: poly.id, name: poly.name }, e)}
                                 onMouseEnter={(e) => handleCountryHover({ id: poly.id, name: poly.name }, e)}
                                 onMouseLeave={() => setHoveredCountry(null)}
                                 fill={
@@ -1012,6 +1148,7 @@ export default function ThreatMapPage() {
                               <path
                                 key={country.id}
                                 d={country.d}
+                                onClick={(e) => handleCountryClick(country, e)}
                                 onMouseEnter={(e) => handleCountryHover(country, e)}
                                 onMouseLeave={() => setHoveredCountry(null)}
                                 fill={
@@ -1175,19 +1312,24 @@ export default function ThreatMapPage() {
                 isDark ? "bg-[#061222]/95" : "bg-white"
               )}>
                 
-                {/* Top Countries / Attack Origins (FortiGuard Threat Map Style) */}
+                {/* Top Countries / Attack Origins (FortiGuard Threat Map Style - Interactive Auto-Zoom) */}
                 <div>
                   <div className="flex items-center justify-between mb-3 border-b border-[var(--border-subtle)] pb-2">
                     <span className="font-mono text-xs font-bold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-1.5">
                       <Globe className="w-3.5 h-3.5 text-cyan-500" />
                       Top Attack Origins
                     </span>
-                    <span className="text-[10px] font-mono text-[var(--text-secondary)]">Last 24 Hours</span>
+                    <span className="text-[10px] font-mono text-[var(--text-secondary)]">Click to Auto-Zoom</span>
                   </div>
 
-                  <div className="space-y-2.5">
+                  <div className="space-y-2">
                     {topCountries.map((c, idx) => (
-                      <div key={idx} className="group cursor-default">
+                      <div
+                        key={idx}
+                        onClick={() => zoomToCountry(c.code)}
+                        title={`Click to auto-zoom map to ${c.name}`}
+                        className="group cursor-pointer p-1.5 -mx-1.5 rounded-lg hover:bg-cyan-500/10 transition-colors"
+                      >
                         <div className="flex items-center justify-between text-xs font-mono mb-1">
                           <span className="flex items-center gap-2 truncate max-w-[210px] text-[var(--text-secondary)] group-hover:text-cyan-500 transition-colors">
                             <CountryFlag code={c.code} />
