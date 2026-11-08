@@ -9,7 +9,9 @@ export const revalidate = 0;
 export const fetchCache = 'force-no-store';
 
 export const metadata: Metadata = {
-  title: "Masdika | Cloud & DevOps Engineer",
+  title: {
+    absolute: "Masdika | Cloud & DevOps Engineer",
+  },
   description: "Portfolio of Masdika, Cloud & DevOps Engineer. Discover enterprise infrastructure projects, high-performance Cloud VPS hosting, Managed Kubernetes, and scalable cloud solutions.",
   alternates: {
     canonical: "https://www.masdika.id",
