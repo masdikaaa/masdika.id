@@ -86,6 +86,37 @@ interface ImpactRipple {
   opacity: number;
 }
 
+interface HoveredCountryInfo {
+  id: string;
+  name: string;
+  code: string;
+  x: number;
+  y: number;
+}
+
+// Alpha-3 to Alpha-2 code mapping for high-res FlagCDN flags
+const ALPHA3_TO_ALPHA2: Record<string, string> = {
+  AFG: 'af', AGO: 'ao', ALB: 'al', ARE: 'ae', ARG: 'ar', ARM: 'am', AUS: 'au', AUT: 'at', AZE: 'az',
+  BDI: 'bi', BEL: 'be', BEN: 'bj', BFA: 'bf', BGD: 'bd', BGR: 'bg', BHS: 'bs', BIH: 'ba', BLR: 'by',
+  BLZ: 'bz', BOL: 'bo', BRA: 'br', BRN: 'bn', BTN: 'bt', BWA: 'bw', CAF: 'cf', CAN: 'ca', CHE: 'ch',
+  CHL: 'cl', CHN: 'cn', CIV: 'ci', CMR: 'cm', COD: 'cd', COG: 'cg', COL: 'co', CRI: 'cr', CUB: 'cu',
+  CYP: 'cy', CZE: 'cz', DEU: 'de', DJI: 'dj', DNK: 'dk', DOM: 'do', DZA: 'dz', ECU: 'ec', EGY: 'eg',
+  ERI: 'er', ESP: 'es', EST: 'ee', ETH: 'et', FIN: 'fi', FJI: 'fj', FRA: 'fr', GAB: 'ga', GBR: 'gb',
+  GEO: 'ge', GHA: 'gh', GIN: 'gn', GMB: 'gm', GNB: 'gw', GNQ: 'gq', GRC: 'gr', GTM: 'gt', GUY: 'gy',
+  HND: 'hn', HRV: 'hr', HTI: 'ht', HUN: 'hu', IDN: 'id', IND: 'in', IRL: 'ie', IRN: 'ir', IRQ: 'iq',
+  ISL: 'is', ISR: 'il', ITA: 'it', JAM: 'jm', JOR: 'jo', JPN: 'jp', KAZ: 'kz', KEN: 'ke', KGZ: 'kg',
+  KHM: 'kh', KOR: 'kr', KWT: 'kw', LAO: 'la', LBN: 'lb', LBR: 'lr', LBY: 'ly', LKA: 'lk', LSO: 'ls',
+  LTU: 'lt', LUX: 'lu', LVA: 'lv', MAR: 'ma', MDA: 'md', MDG: 'mg', MEX: 'mx', MKD: 'mk', MLI: 'ml',
+  MMR: 'mm', MNE: 'me', MNG: 'mn', MOZ: 'mz', MRT: 'mr', MWI: 'mw', MYS: 'my', NAM: 'na', NER: 'ne',
+  NGA: 'ng', NIC: 'ni', NLD: 'nl', NOR: 'no', NPL: 'np', NZL: 'nz', OMN: 'om', PAK: 'pk', PAN: 'pa',
+  PER: 'pe', PHL: 'ph', PNG: 'pg', POL: 'pl', PRK: 'kp', PRT: 'pt', PRY: 'py', QAT: 'qa', ROU: 'ro',
+  RUS: 'ru', RWA: 'rw', SAU: 'sa', SDN: 'sd', SEN: 'sn', SGP: 'sg', SLE: 'sl', SLV: 'sv', SOM: 'so',
+  SRB: 'rs', SSD: 'ss', SUR: 'sr', SVK: 'sk', SVN: 'si', SWE: 'se', SWZ: 'sz', SYR: 'sy', TCD: 'td',
+  TGO: 'tg', THA: 'th', TJK: 'tj', TKM: 'tm', TLS: 'tl', TTO: 'tt', TUN: 'tn', TUR: 'tr', TWN: 'tw',
+  TZA: 'tz', UGA: 'ug', UKR: 'ua', URY: 'uy', USA: 'us', UZB: 'uz', VEN: 've', VNM: 'vn', YEM: 'ye',
+  ZAF: 'za', ZMB: 'zm', ZWE: 'zw',
+};
+
 // Crisp, standardized rectangular country flag (FortiGuard Threat Map style)
 function CountryFlag({ code, className }: { code: string; className?: string }) {
   const safeCode = (code || 'ID').toLowerCase().trim();
@@ -125,12 +156,34 @@ function projectCoords(lat: number, lng: number, mode: 'world' | 'indonesia'): [
     const minLat = -12;
     const maxLat = 7;
 
-    const clampedLng = Math.max(minLng, Math.min(maxLng, lng));
-    const clampedLat = Math.max(minLat, Math.min(maxLat, lat));
+    // Check if coordinates belong to Indonesia / immediate region
+    const isInsideRegion = lng >= minLng && lng <= maxLng && lat >= minLat && lat <= maxLat;
 
-    const x = ((clampedLng - minLng) / (maxLng - minLng)) * 1000;
-    const y = ((maxLat - clampedLat) / (maxLat - minLat)) * 500;
-    return [Math.round(x * 10) / 10, Math.round(y * 10) / 10];
+    if (isInsideRegion) {
+      const x = ((lng - minLng) / (maxLng - minLng)) * 1000;
+      const y = ((maxLat - lat) / (maxLat - minLat)) * 500;
+      return [Math.round(x * 10) / 10, Math.round(y * 10) / 10];
+    }
+
+    // Inbound Foreign Attack in Indonesia View (FortiGuard Style incoming laser trajectory)
+    // Map incoming attacks smoothly from the outer perimeter (North/West/East/South)
+    if (lng < 60) {
+      // European / Russian / African incoming: enter from upper-left sky
+      const x = Math.min(280, Math.max(30, 140 + (lng - 10) * 2));
+      return [Math.round(x), -25];
+    } else if (lng > 135 || lng < -40) {
+      // Americas / East Pacific incoming: enter from upper-right sky
+      const x = Math.min(960, Math.max(720, 840 + (lat - 20) * 3));
+      return [Math.round(x), -25];
+    } else if (lat > 15) {
+      // East Asian / Chinese / Japanese incoming: enter from top-center sky
+      const x = Math.min(700, Math.max(380, 520 + (lng - 110) * 3));
+      return [Math.round(x), -25];
+    } else {
+      // Australian / Southern incoming: enter from bottom
+      const x = Math.min(850, Math.max(400, 550 + (lng - 115) * 3));
+      return [Math.round(x), 525];
+    }
   }
 
   // World Mercator Tactical Projection (matches threat-map-geo.ts)
@@ -148,8 +201,8 @@ export default function ThreatMapPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
-  // Default to 'world' so users immediately see global attacks across countries (FortiGuard style)
-  const [region, setRegion] = useState<'indonesia' | 'world'>('world');
+  // Indonesia Focus is the primary default view as requested by user
+  const [region, setRegion] = useState<'indonesia' | 'world'>('indonesia');
   const [filterSeverity, setFilterSeverity] = useState<string>('all');
   const [isLiveStreaming, setIsLiveStreaming] = useState(true);
   const [currentTime, setCurrentTime] = useState("");
@@ -157,6 +210,9 @@ export default function ThreatMapPage() {
   const [lasers, setLasers] = useState<ActiveLaser[]>([]);
   const [impacts, setImpacts] = useState<ImpactRipple[]>([]);
   const [recentLiveAlert, setRecentLiveAlert] = useState<AttackEvent | null>(null);
+
+  // Country Vector Hover State (FortiGuard Style Country Highlight & Tooltip)
+  const [hoveredCountry, setHoveredCountry] = useState<HoveredCountryInfo | null>(null);
 
   // Interactive Zoom & Pan State with non-passive wheel prevention
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -166,7 +222,7 @@ export default function ThreatMapPage() {
   const dragStartRef = useRef({ x: 0, y: 0 });
 
   const [stats, setStats] = useState({
-    attacksPerSecond: 16,
+    attacksPerSecond: 18,
     blockedIn24h: 854120,
     activeOutbreaks: 140,
     realIncidentsCount: 0,
@@ -181,6 +237,13 @@ export default function ThreatMapPage() {
   const impactSeqRef = useRef(0);
   const laserSeqRef = useRef(0);
   const seenEventIdsRef = useRef<Set<string>>(new Set());
+
+  // Clean Regional Paths for Indonesia view (removes out-of-bounds cut off countries)
+  const regionalCleanPaths = useMemo(() => {
+    return indonesiaRegionPaths.filter(poly =>
+      ['IDN', 'MYS', 'BRN', 'TLS', 'PNG'].includes(poly.id)
+    );
+  }, []);
 
   // Live real-time clock (UTC and Asia/Jakarta WIB)
   useEffect(() => {
@@ -212,6 +275,7 @@ export default function ThreatMapPage() {
   useEffect(() => {
     setZoom(1);
     setPan({ x: 0, y: 0 });
+    setHoveredCountry(null);
   }, [region]);
 
   // Native Non-Passive Wheel Event Listener on Map to prevent window scroll
@@ -240,19 +304,47 @@ export default function ThreatMapPage() {
 
   // Pan / Drag handlers
   const onMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return;
     setIsDragging(true);
     dragStartRef.current = { x: e.clientX - pan.x, y: e.clientY - pan.y };
   };
 
   const onMouseMove = (e: React.MouseEvent) => {
     if (!isDragging) return;
-    setPan({
-      x: e.clientX - dragStartRef.current.x,
-      y: e.clientY - dragStartRef.current.y,
-    });
+    // Limit panning bounds so the map is never lost
+    const maxPan = 400 * zoom;
+    const newX = Math.max(-maxPan, Math.min(maxPan, e.clientX - dragStartRef.current.x));
+    const newY = Math.max(-maxPan, Math.min(maxPan, e.clientY - dragStartRef.current.y));
+    setPan({ x: newX, y: newY });
   };
 
   const onMouseUp = () => setIsDragging(false);
+
+  // Country Hover Handler (tracks cursor inside SVG container)
+  const handleCountryHover = (country: { id: string; name: string }, e: React.MouseEvent) => {
+    const rect = mapContainerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const code = ALPHA3_TO_ALPHA2[country.id] || (country.id === 'IDN' ? 'id' : country.id.slice(0, 2).toLowerCase());
+    setHoveredCountry({
+      id: country.id,
+      name: country.name,
+      code,
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
+  };
+
+  const handleCountryMove = (e: React.MouseEvent) => {
+    if (!hoveredCountry) return;
+    const rect = mapContainerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setHoveredCountry(prev => prev ? {
+      ...prev,
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    } : null);
+  };
 
   // Fire laser projectile helper (FortiGuard parabolic trajectory)
   const spawnLaser = (atk: AttackEvent) => {
@@ -261,7 +353,7 @@ export default function ThreatMapPage() {
 
     // Parabolic arc height
     const dx = Math.abs(x2 - x1);
-    const arcHeight = region === 'indonesia' ? Math.max(40, dx * 0.22) : Math.max(65, dx * 0.18);
+    const arcHeight = region === 'indonesia' ? Math.max(45, dx * 0.24) : Math.max(65, dx * 0.18);
     const midX = (x1 + x2) / 2;
     const midY = Math.min(y1, y2) - arcHeight;
 
@@ -295,7 +387,7 @@ export default function ThreatMapPage() {
       sourceIp: atk.sourceIp,
     };
 
-    setLasers(prev => [...prev.slice(-18), newLaser]);
+    setLasers(prev => [...prev.slice(-20), newLaser]);
 
     if (atk.isReal) {
       setRecentLiveAlert(atk);
@@ -305,7 +397,7 @@ export default function ThreatMapPage() {
 
   // Initial fetch from /api/threats
   useEffect(() => {
-    fetch('/api/threats?count=25')
+    fetch(`/api/threats?count=30&region=${region}`)
       .then(res => res.json())
       .then(data => {
         if (data.status === 'success') {
@@ -322,15 +414,10 @@ export default function ThreatMapPage() {
 
           fetchedEvents.forEach(e => seenEventIdsRef.current.add(e.id));
 
-          // Spawn lasers for initial real attacks so user immediately sees them!
-          const realOnes = fetchedEvents.filter(e => e.isReal);
-          if (realOnes.length > 0) {
-            realOnes.slice(0, 3).forEach((atk, idx) => {
-              setTimeout(() => spawnLaser(atk), idx * 600);
-            });
-          } else if (fetchedEvents.length > 0) {
-            fetchedEvents.slice(0, 3).forEach((atk, idx) => {
-              setTimeout(() => spawnLaser(atk), idx * 500);
+          // Spawn lasers for initial attacks
+          if (fetchedEvents.length > 0) {
+            fetchedEvents.slice(0, 4).forEach((atk, idx) => {
+              setTimeout(() => spawnLaser(atk), idx * 450);
             });
           }
         }
@@ -345,7 +432,7 @@ export default function ThreatMapPage() {
       setLasers(prevLasers => {
         const nextLasers: ActiveLaser[] = [];
         for (const laser of prevLasers) {
-          const step = laser.isReal ? 0.036 : 0.030;
+          const step = laser.isReal ? 0.034 : 0.028;
           const nextProgress = laser.progress + step;
           if (nextProgress >= 1) {
             // Impact! Trigger shockwaves with guaranteed unique keys
@@ -357,7 +444,7 @@ export default function ThreatMapPage() {
                 x: laser.x2,
                 y: laser.y2,
                 color: laser.color,
-                radius: laser.isReal ? 10 : 5,
+                radius: laser.isReal ? 12 : 6,
                 opacity: 0.9,
               },
             ];
@@ -368,12 +455,12 @@ export default function ThreatMapPage() {
                 x: laser.x2,
                 y: laser.y2,
                 color: '#38bdf8',
-                radius: 3,
+                radius: 4,
                 opacity: 0.8,
               });
             }
 
-            setImpacts(prev => [...prev.slice(-16), ...newImpacts]);
+            setImpacts(prev => [...prev.slice(-18), ...newImpacts]);
           } else {
             nextLasers.push({ ...laser, progress: nextProgress });
           }
@@ -404,17 +491,17 @@ export default function ThreatMapPage() {
     if (!isLiveStreaming) return;
 
     const streamInterval = setInterval(() => {
-      fetch('/api/threats?count=15')
+      fetch(`/api/threats?count=25&region=${region}`)
         .then(res => res.json())
         .then(data => {
           if (data.events && data.events.length > 0) {
             const incoming: AttackEvent[] = data.events;
 
-            // Check if any brand-new real events arrived from DB
+            // Check if any brand-new events arrived
             const newEvents = incoming.filter(e => !seenEventIdsRef.current.has(e.id));
             if (newEvents.length > 0) {
               newEvents.forEach(e => seenEventIdsRef.current.add(e.id));
-              setAttacks(prev => [...newEvents, ...prev.slice(0, 40)]);
+              setAttacks(prev => [...newEvents, ...prev.slice(0, 45)]);
 
               // Immediately spawn laser for the brand new event
               spawnLaser(newEvents[0]);
@@ -427,7 +514,7 @@ export default function ThreatMapPage() {
             if (data.stats) {
               setStats(prev => ({
                 ...prev,
-                attacksPerSecond: data.stats.attacksPerSecond || Math.floor(Math.random() * 8) + 12,
+                attacksPerSecond: data.stats.attacksPerSecond || Math.floor(Math.random() * 8) + 14,
                 blockedIn24h: data.stats.blockedIn24h || prev.blockedIn24h + 1,
                 realIncidentsCount: data.stats.realIncidentsCount,
               }));
@@ -440,10 +527,12 @@ export default function ThreatMapPage() {
     return () => clearInterval(streamInterval);
   }, [isLiveStreaming, region]);
 
-  // Filtered attacks list
+  // Filtered attacks list for table
   const filteredAttacks = useMemo(() => {
     if (filterSeverity === 'all') return attacks;
     if (filterSeverity === 'real') return attacks.filter(a => a.isReal);
+    if (filterSeverity === 'indonesia') return attacks.filter(a => a.targetCode === 'ID' || a.sourceCode === 'ID' || a.isReal);
+    if (filterSeverity === 'world') return attacks.filter(a => a.targetCode !== 'ID' || a.isReal);
     return attacks.filter(a => a.severity.toLowerCase() === filterSeverity.toLowerCase());
   }, [attacks, filterSeverity]);
 
@@ -461,7 +550,7 @@ export default function ThreatMapPage() {
     <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-20 lg:pb-28 font-sans bg-[var(--background)] text-[var(--text-primary)] transition-colors duration-200">
       <main className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
 
-        {/* ── 0. HERO (Identik Patokan Looking Glass, SLA, Terms, Privacy & design.md) ── */}
+        {/* ── 0. HERO (Matches Looking Glass, SLA, Terms, Privacy & design.md) ── */}
         <section className="relative pt-8 sm:pt-12 pb-16 lg:pb-24 flex items-center">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
 
@@ -474,27 +563,30 @@ export default function ThreatMapPage() {
                 </Badge>
               </div>
 
-              {/* Headline H1 (Ukuran sama persis Looking Glass, Home Page, SLA, Privacy) */}
+              {/* Headline H1 (Matching Looking Glass, Home Page, SLA, Privacy) */}
               <h1 className="text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-4 text-[var(--text-primary)]">
                 Cyber Threat <br />
                 Intelligence &amp; <br />
-                <span className="bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent">
-                  Attack Radar.
+                <span className="text-cyan-600 dark:text-cyan-400">
+                  Global Attack Radar.
                 </span>
               </h1>
 
-              {/* Subtitle / Lead (Ukuran sama persis Looking Glass) */}
-              <p className="text-lg md:text-xl mb-10 max-w-xl leading-relaxed text-[var(--text-secondary)] font-normal">
-                Visualizing incoming exploit vectors, DDoS floods, and credential brute-force attacks mitigated in real-time across Masdika Sidoarjo Edge Datacenter and global upstream networks.
+              {/* Subheadline (18px/28px text-secondary) */}
+              <p className="text-lg md:text-xl text-[var(--text-secondary)] font-normal mb-8 leading-relaxed max-w-xl">
+                Real-time interactive telemetry tracking incoming DDoS floods, credential stuffing attempts, and zero-day exploit probes mitigated autonomously across Masdika Sidoarjo Edge Datacenter and global upstream backbones.
               </p>
 
-              {/* Action Buttons (size="lg" sama persis Looking Glass) */}
+              {/* Action Buttons */}
               <div className="flex flex-wrap items-center gap-4">
                 <Button
                   variant="primary"
                   size="lg"
-                  href="#radar-cockpit"
-                  rightIcon={<ArrowRight className="w-4 h-4" />}
+                  onClick={() => {
+                    const el = document.getElementById("radar-cockpit");
+                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  leftIcon={<Radar className="w-4 h-4 text-slate-950" />}
                 >
                   Inspect Threat Radar
                 </Button>
@@ -584,11 +676,24 @@ export default function ThreatMapPage() {
                   </span>
                 </div>
 
-                {/* Region Switcher Buttons */}
+                {/* Region Switcher: Indonesia is First/Primary on the Left (User Request) */}
                 <div className={cn(
                   "flex items-center p-1 rounded-xl border border-[var(--border-primary)]",
                   isDark ? "bg-[var(--surface-secondary)]" : "bg-slate-100 border-slate-200"
                 )}>
+                  <button
+                    type="button"
+                    onClick={() => setRegion('indonesia')}
+                    className={cn(
+                      "px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5",
+                      region === 'indonesia'
+                        ? "bg-cyan-500 text-slate-950 shadow-sm"
+                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                    )}
+                  >
+                    <CountryFlag code="ID" className="w-3.5 h-2.5" />
+                    <span>Indonesia Focus</span>
+                  </button>
                   <button
                     type="button"
                     onClick={() => setRegion('world')}
@@ -601,19 +706,6 @@ export default function ThreatMapPage() {
                   >
                     <Globe className="w-3.5 h-3.5" />
                     <span>Worldwide</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setRegion('indonesia')}
-                    className={cn(
-                      "px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5",
-                      region === 'indonesia'
-                        ? "bg-cyan-500 text-slate-950 shadow-sm"
-                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                    )}
-                  >
-                    <Compass className="w-3.5 h-3.5" />
-                    <span>Indonesia Focus</span>
                   </button>
                 </div>
 
@@ -659,7 +751,7 @@ export default function ThreatMapPage() {
               {/* Map Canvas Visualizer (8 Cols) */}
               <div className="lg:col-span-8 p-4 sm:p-6 lg:border-r border-b lg:border-b-0 border-[var(--border-subtle)] flex flex-col justify-between min-h-[500px] sm:min-h-[590px] relative">
                 
-                {/* HUD Overlay Badges & Calm Event Ribbon */}
+                {/* HUD Overlay Badges & Telemetry Ribbon */}
                 <div className="absolute top-5 left-5 z-20 flex flex-wrap items-center gap-2">
                   <div className={cn(
                     "px-3 py-1 rounded-full border text-xs font-mono font-bold flex items-center gap-1.5 shadow-sm backdrop-blur-md",
@@ -688,7 +780,7 @@ export default function ThreatMapPage() {
                     </div>
                   )}
 
-                  {/* Sleek, Non-Intrusive Live Telemetry Ticker Ribbon with Country Flag */}
+                  {/* Live Telemetry Ticker Ribbon with Country Flag */}
                   {recentLiveAlert && (
                     <div className="px-3 py-1 rounded-full border border-cyan-500/30 bg-cyan-950/40 text-cyan-300 text-xs font-mono font-bold flex items-center gap-1.5 backdrop-blur-md">
                       <CountryFlag code={recentLiveAlert.sourceCode} />
@@ -697,7 +789,35 @@ export default function ThreatMapPage() {
                   )}
                 </div>
 
-                {/* Floating Tactical Zoom & Pan Controls (FortiGuard Style) */}
+                {/* Top-Center Persistent Region Pill (Matches FortiGuard Image 2: [Flag] Indonesia) */}
+                <div className="absolute top-5 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+                  <div className={cn(
+                    "px-4 py-1.5 rounded-full border shadow-lg backdrop-blur-md flex items-center gap-2.5 transition-all",
+                    isDark
+                      ? "bg-[#04111d]/90 border-cyan-500/40 text-slate-100 shadow-[0_0_15px_rgba(6,182,212,0.15)]"
+                      : "bg-white/95 border-slate-300 text-slate-900 shadow-sm"
+                  )}>
+                    {region === 'indonesia' ? (
+                      <>
+                        <CountryFlag code="ID" className="w-4 h-3 shadow-sm" />
+                        <span className="text-xs sm:text-sm font-black font-mono tracking-wide">
+                          Indonesia Focus
+                        </span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      </>
+                    ) : (
+                      <>
+                        <Globe className="w-4 h-4 text-cyan-400" />
+                        <span className="text-xs sm:text-sm font-black font-mono tracking-wide">
+                          Worldwide Threat Outbreaks
+                        </span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Floating Tactical Zoom & Pan Controls */}
                 <div className="absolute top-5 right-5 z-20 flex items-center gap-1 p-1 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface)]/90 backdrop-blur-md shadow-sm">
                   <button
                     type="button"
@@ -728,8 +848,35 @@ export default function ThreatMapPage() {
                   </span>
                 </div>
 
+                {/* Floating Hover Country Tooltip (Matches FortiGuard Image 3) */}
+                {hoveredCountry && (
+                  <div
+                    className="absolute z-30 pointer-events-none transform -translate-x-1/2 -translate-y-full mb-3 transition-transform duration-75 ease-out"
+                    style={{
+                      left: `${hoveredCountry.x}px`,
+                      top: `${hoveredCountry.y}px`,
+                    }}
+                  >
+                    <div className={cn(
+                      "px-3 py-1.5 rounded-lg border shadow-xl backdrop-blur-md flex items-center gap-2 select-none",
+                      isDark
+                        ? "bg-[#051322]/95 border-cyan-500/60 text-slate-100 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
+                        : "bg-white/95 border-slate-300 text-slate-900 shadow-md"
+                    )}>
+                      <CountryFlag code={hoveredCountry.code} className="w-4 h-3 shadow-sm" />
+                      <span className="text-xs font-mono font-bold tracking-tight">
+                        {hoveredCountry.name}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 {/* SVG Tactical Vector Map with Real GIS Coastlines & Zoom/Pan */}
-                <div ref={mapContainerRef} className="w-full h-full flex items-center justify-center relative py-6 overflow-hidden">
+                <div
+                  ref={mapContainerRef}
+                  className="w-full h-full flex items-center justify-center relative py-6 overflow-hidden"
+                  onMouseMove={handleCountryMove}
+                >
                   <svg
                     viewBox="0 0 1000 500"
                     className={cn(
@@ -739,9 +886,16 @@ export default function ThreatMapPage() {
                     onMouseDown={onMouseDown}
                     onMouseMove={onMouseMove}
                     onMouseUp={onMouseUp}
-                    onMouseLeave={onMouseUp}
+                    onMouseLeave={() => {
+                      onMouseUp();
+                      setHoveredCountry(null);
+                    }}
                   >
                     <defs>
+                      <clipPath id="map-clip">
+                        <rect x="0" y="0" width="1000" height="500" />
+                      </clipPath>
+
                       <filter id="laser-glow" x="-25%" y="-25%" width="150%" height="150%">
                         <feGaussianBlur stdDeviation="3" result="blur" />
                         <feMerge>
@@ -759,6 +913,7 @@ export default function ThreatMapPage() {
 
                     {/* Transform Group for Zoom & Pan */}
                     <g
+                      clipPath="url(#map-clip)"
                       transform={`translate(${pan.x}, ${pan.y}) scale(${zoom})`}
                       style={{
                         transformOrigin: '500px 250px',
@@ -776,27 +931,35 @@ export default function ThreatMapPage() {
 
                       {/* Real Geographic Vector Map Outlines */}
                       {region === 'indonesia' ? (
-                        /* Indonesia Region: High-Fidelity GIS Archipelago + Neighbors */
-                        <g className="transition-all duration-700 ease-in-out">
-                          {indonesiaRegionPaths.map((poly) => {
+                        /* Indonesia Region: High-Fidelity Archipelago (Matches FortiGuard Image 2) */
+                        <g className="transition-all duration-500 ease-in-out">
+                          {regionalCleanPaths.map((poly) => {
                             const isID = poly.isIndonesia;
+                            const isHovered = hoveredCountry?.id === poly.id;
+
                             return (
                               <path
                                 key={poly.id}
                                 d={poly.d}
+                                onMouseEnter={(e) => handleCountryHover({ id: poly.id, name: poly.name }, e)}
+                                onMouseLeave={() => setHoveredCountry(null)}
                                 fill={
-                                  isID
-                                    ? isDark ? "#102a4e" : "#cbd5e1"
-                                    : isDark ? "#071628" : "#f1f5f9"
+                                  isHovered
+                                    ? isDark ? "#00f0ff40" : "#0284c740"
+                                    : isID
+                                    ? isDark ? "#0c2820" : "#cbd5e1"
+                                    : isDark ? "#061524" : "#f1f5f9"
                                 }
                                 stroke={
-                                  isID
+                                  isHovered
                                     ? isDark ? "#00f0ff" : "#0284c7"
-                                    : isDark ? "#1b3860" : "#94a3b8"
+                                    : isID
+                                    ? isDark ? "#10b981" : "#0284c7"
+                                    : isDark ? "#16304d" : "#94a3b8"
                                 }
-                                strokeWidth={isID ? "1.8" : "0.8"}
-                                opacity={isID ? 0.95 : 0.45}
-                                className="transition-colors duration-300"
+                                strokeWidth={isHovered ? "2.2" : isID ? "1.6" : "0.7"}
+                                opacity={isID ? 0.98 : 0.4}
+                                className="cursor-pointer transition-colors duration-200"
                               />
                             );
                           })}
@@ -815,7 +978,7 @@ export default function ThreatMapPage() {
                             <circle r="14" fill={isDark ? "#06b6d4" : "#0284c7"} opacity="0.3" />
                             <circle r="5" fill={isDark ? "#06b6d4" : "#0284c7"} stroke="#ffffff" strokeWidth="1.8" />
                             
-                            {/* Staggered Leader Label below node to avoid overlaps */}
+                            {/* Staggered Leader Label below node */}
                             <line x1="0" y1="8" x2="0" y2="24" stroke={isDark ? "#38bdf8" : "#0284c7"} strokeWidth="1" strokeDasharray="2,2" />
                             <line x1="0" y1="24" x2="30" y2="24" stroke={isDark ? "#38bdf8" : "#0284c7"} strokeWidth="1" />
                             <text x="36" y="22" fill={isDark ? "#38bdf8" : "#0369a1"} fontSize="11" fontWeight="bold" fontFamily="monospace">
@@ -827,27 +990,35 @@ export default function ThreatMapPage() {
                           </g>
                         </g>
                       ) : (
-                        /* World View: Real Natural Earth GIS Countries */
-                        <g className="transition-all duration-700 ease-in-out">
+                        /* World View: Real Natural Earth GIS Countries (Matches FortiGuard Image 4) */
+                        <g className="transition-all duration-500 ease-in-out">
                           {worldPaths.map((country) => {
                             const isID = country.id === 'IDN';
+                            const isHovered = hoveredCountry?.id === country.id;
+
                             return (
                               <path
                                 key={country.id}
                                 d={country.d}
+                                onMouseEnter={(e) => handleCountryHover(country, e)}
+                                onMouseLeave={() => setHoveredCountry(null)}
                                 fill={
-                                  isID
+                                  isHovered
+                                    ? isDark ? "#00f0ff40" : "#0284c740"
+                                    : isID
                                     ? isDark ? "#00f0ff30" : "#0284c730"
-                                    : isDark ? "#0c233f" : "#cbd5e1"
+                                    : isDark ? "#0b2034" : "#cbd5e1"
                                 }
                                 stroke={
-                                  isID
+                                  isHovered
                                     ? isDark ? "#00f0ff" : "#0284c7"
-                                    : isDark ? "#0ea5e9" : "#0284c7"
+                                    : isID
+                                    ? isDark ? "#00f0ff" : "#0284c7"
+                                    : isDark ? "#163858" : "#94a3b8"
                                 }
-                                strokeWidth={isID ? "1.8" : "0.7"}
-                                opacity={isID ? 1 : 0.8}
-                                className="transition-colors duration-300"
+                                strokeWidth={isHovered ? "2.2" : isID ? "1.8" : "0.7"}
+                                opacity={isID ? 1 : 0.85}
+                                className="cursor-pointer transition-colors duration-200"
                               />
                             );
                           })}
@@ -878,7 +1049,7 @@ export default function ThreatMapPage() {
                               stroke={laser.color}
                               strokeWidth={laser.isReal ? "2.2" : "1.2"}
                               strokeDasharray={laser.isReal ? "5,3" : "4,4"}
-                              opacity={laser.isReal ? "0.95" : "0.5"}
+                              opacity={laser.isReal ? "0.95" : "0.55"}
                             />
 
                             {/* Source Origin Node & Callout Label (FortiGuard Style) */}
@@ -886,9 +1057,9 @@ export default function ThreatMapPage() {
                               <circle r={laser.isReal ? "4.5" : "3"} fill={laser.color} opacity="0.95" />
                               <g transform="translate(0, -9)">
                                 <rect
-                                  x="-34"
+                                  x="-36"
                                   y="-10"
-                                  width="68"
+                                  width="72"
                                   height="13"
                                   rx="2"
                                   fill={isDark ? "rgba(4, 11, 23, 0.9)" : "rgba(255, 255, 255, 0.95)"}
@@ -915,9 +1086,9 @@ export default function ThreatMapPage() {
                               <circle r="2.5" fill={laser.color} />
                               <g transform="translate(0, -9)">
                                 <rect
-                                  x="-36"
+                                  x="-38"
                                   y="-10"
-                                  width="72"
+                                  width="76"
                                   height="13"
                                   rx="2"
                                   fill={isDark ? "rgba(4, 11, 23, 0.9)" : "rgba(255, 255, 255, 0.95)"}
@@ -945,7 +1116,7 @@ export default function ThreatMapPage() {
                         );
                       })}
 
-                      {/* Impact Shockwaves on Target Hit (Guaranteed Unique Keys) */}
+                      {/* Impact Shockwaves on Target Hit */}
                       {impacts.map(impact => (
                         <circle
                           key={impact.id}
@@ -1156,10 +1327,11 @@ export default function ThreatMapPage() {
                   </span>
                   {[
                     { key: 'all', label: 'All Vectors' },
+                    { key: 'indonesia', label: 'Indonesia Focus' },
+                    { key: 'world', label: 'Worldwide Outbreaks' },
                     { key: 'real', label: `Verified Live Attacks (${stats.realIncidentsCount})` },
                     { key: 'critical', label: 'Critical' },
                     { key: 'high', label: 'High' },
-                    { key: 'medium', label: 'Medium' },
                   ].map(tab => (
                     <button
                       key={tab.key}
@@ -1198,7 +1370,7 @@ export default function ThreatMapPage() {
                   </thead>
                   <tbody className="divide-y divide-[var(--border-subtle)]">
                     <AnimatePresence initial={false}>
-                      {filteredAttacks.slice(0, 12).map((atk) => (
+                      {filteredAttacks.slice(0, 14).map((atk) => (
                         <motion.tr
                           key={atk.id}
                           initial={{ opacity: 0, y: -6 }}
@@ -1250,10 +1422,10 @@ export default function ThreatMapPage() {
                               className={cn(
                                 "px-2 py-0.5 rounded text-[10px] font-bold uppercase",
                                 atk.severity === 'Critical'
-                                  ? "bg-rose-500/10 text-rose-500 dark:text-rose-400 border border-rose-500/20"
-                                  : atk.severity === 'High'
-                                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
-                                  : "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20"
+                                    ? "bg-rose-500/10 text-rose-500 dark:text-rose-400 border border-rose-500/20"
+                                    : atk.severity === 'High'
+                                    ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                                    : "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20"
                               )}
                             >
                               {atk.severity}
@@ -1298,22 +1470,22 @@ export default function ThreatMapPage() {
               <div>
                 <div className="flex items-center justify-between mb-5">
                   <div className="w-11 h-11 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
-                    <Globe className="w-5 h-5" />
+                    <Activity className="w-5 h-5" />
                   </div>
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20">
+                  <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-md bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
                     STAGE 01
                   </span>
                 </div>
-                <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] mb-2.5">
-                  Anycast DDoS Scrubbing
+                <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2.5 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
+                  Anycast Edge Scrubbing
                 </h3>
-                <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-6 font-normal">
-                  Volumetric L3/L4 attacks (SYN flood, UDP amplification, DNS reflection) are automatically deflected and filtered across global Anycast BGP scrubbing points before entering physical ISP uplinks.
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                  Volumetric L3/L4 floods (SYN, UDP, NTP amplification) are absorbed and discarded at our multi-homed BGP upstream carriers before entering Sidoarjo transit routes.
                 </p>
               </div>
-              <div className="pt-4 border-t border-[var(--border-subtle)] text-xs font-mono text-[var(--text-secondary)] flex items-center justify-between">
-                <span>Mitigation:</span>
-                <span className="font-semibold text-cyan-600 dark:text-cyan-400">Zero Downtime SLA</span>
+              <div className="mt-6 pt-4 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs font-mono text-[var(--text-secondary)]">
+                <span>Capacity</span>
+                <span className="font-bold text-cyan-600 dark:text-cyan-400">Up to 3.2 Tbps</span>
               </div>
             </div>
 
@@ -1324,20 +1496,20 @@ export default function ThreatMapPage() {
                   <div className="w-11 h-11 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
                     <Layers className="w-5 h-5" />
                   </div>
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20">
+                  <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-md bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
                     STAGE 02
                   </span>
                 </div>
-                <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] mb-2.5">
-                  L7 WAF &amp; Rate Limiting
+                <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2.5 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
+                  Hardware Core Firewall
                 </h3>
-                <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-6 font-normal">
-                  Edge reverse proxies inspect HTTP/HTTPS payloads. OWASP Top 10 exploits, SQL injections, malicious crawlers, and abnormal traffic bursts are automatically blocked via HTTP 429 and 403.
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                  Dual carrier-grade stateful firewalls inspecting packet protocol conformity, drop malformed TCP flags, enforce strict rate limiting, and quarantine rogue subnets.
                 </p>
               </div>
-              <div className="pt-4 border-t border-[var(--border-subtle)] text-xs font-mono text-[var(--text-secondary)] flex items-center justify-between">
-                <span>Enforcement:</span>
-                <span className="font-semibold text-cyan-600 dark:text-cyan-400">Traefik + Cloudflare</span>
+              <div className="mt-6 pt-4 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs font-mono text-[var(--text-secondary)]">
+                <span>Latency Penalty</span>
+                <span className="font-bold text-cyan-600 dark:text-cyan-400">&lt; 0.18 ms</span>
               </div>
             </div>
 
@@ -1346,22 +1518,22 @@ export default function ThreatMapPage() {
               <div>
                 <div className="flex items-center justify-between mb-5">
                   <div className="w-11 h-11 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
-                    <Lock className="w-5 h-5" />
+                    <ShieldAlert className="w-5 h-5" />
                   </div>
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20">
+                  <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-md bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
                     STAGE 03
                   </span>
                 </div>
-                <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] mb-2.5">
-                  Anti-Brute-Force Shield
+                <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2.5 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
+                  Autonomous Edge WAF
                 </h3>
-                <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-6 font-normal">
-                  Every authentication anomaly is correlated in real time. 5 consecutive failed attempts trigger an automated firewall quarantine, neutralizing credential stuffing and dictionary attacks at the perimeter.
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                  Real-time Layer 7 semantic inspection identifying SQLi, XSS, Log4j, Spring4Shell, and path traversal probes. Malicious payloads are dropped instantly with 403 Forbidden.
                 </p>
               </div>
-              <div className="pt-4 border-t border-[var(--border-subtle)] text-xs font-mono text-[var(--text-secondary)] flex items-center justify-between">
-                <span>Quarantine:</span>
-                <span className="font-semibold text-cyan-600 dark:text-cyan-400">Automated IP Blacklist</span>
+              <div className="mt-6 pt-4 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs font-mono text-[var(--text-secondary)]">
+                <span>Ruleset Sync</span>
+                <span className="font-bold text-cyan-600 dark:text-cyan-400">Sub-Second Live</span>
               </div>
             </div>
 
@@ -1370,52 +1542,59 @@ export default function ThreatMapPage() {
               <div>
                 <div className="flex items-center justify-between mb-5">
                   <div className="w-11 h-11 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
-                    <Activity className="w-5 h-5" />
+                    <Lock className="w-5 h-5" />
                   </div>
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20">
+                  <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-md bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
                     STAGE 04
                   </span>
                 </div>
-                <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] mb-2.5">
-                  Host Telemetry &amp; SOC Audit
+                <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2.5 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
+                  Anti-BruteForce &amp; Fail2ban
                 </h3>
-                <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-6 font-normal">
-                  Host system logs are continuously streamed via Promtail into Loki and Prometheus. Unauthorized SSH login attempts and sudo audits are correlated directly to our live radar telemetry.
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                  Intelligent credential protection that quarantines SSH, database, and portal login abusers. Repeated offenders are blacklisted across all cluster edges automatically.
                 </p>
               </div>
-              <div className="pt-4 border-t border-[var(--border-subtle)] text-xs font-mono text-[var(--text-secondary)] flex items-center justify-between">
-                <span>Observability:</span>
-                <span className="font-semibold text-cyan-600 dark:text-cyan-400">Prometheus + Loki</span>
+              <div className="mt-6 pt-4 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs font-mono text-[var(--text-secondary)]">
+                <span>Quarantine Policy</span>
+                <span className="font-bold text-cyan-600 dark:text-cyan-400">Permanent WAF Ban</span>
               </div>
             </div>
 
           </div>
+        </section>
 
-          {/* Infrastructure Guarantee Banner */}
-          <div className="mt-10 p-6 sm:p-8 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] shadow-sm transition-colors duration-200 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
-                <ShieldCheck className="w-6 h-6" />
+        {/* ── 3. BOTTOM CTA: Looking Glass & Cloud Infrastructure ──── */}
+        <section className="pt-12 pb-12">
+          <div className={cn(
+            "rounded-3xl border border-[var(--border-primary)] p-8 sm:p-12 text-center relative overflow-hidden transition-colors duration-200",
+            isDark ? "bg-[var(--surface)]" : "bg-white shadow-sm"
+          )}>
+            <div className="max-w-2xl mx-auto relative z-10">
+              <h2 className="text-3xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight mb-4">
+                Verify Network Performance &amp; Latency
+              </h2>
+              <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed mb-8">
+                Run live real-time Ping, Traceroute, and BGP Route lookups directly from Masdika Sidoarjo Edge Datacenter to test routes across global transit peers.
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-4">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  href="/lg"
+                  leftIcon={<Globe className="w-4 h-4 text-slate-950" />}
+                >
+                  Launch Route Looking Glass
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  href="/contact"
+                  leftIcon={<ShieldCheck className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />}
+                >
+                  Contact SOC Security Team
+                </Button>
               </div>
-              <div>
-                <h4 className="text-base font-bold text-[var(--text-primary)] mb-1">
-                  Zero-Compromise Telemetry Transparency
-                </h4>
-                <p className="text-sm text-[var(--text-secondary)] font-normal leading-relaxed">
-                  All incidents displayed on this radar represent active security telemetry neutralized by Masdika defense shields without customer data compromise or service disruption.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 shrink-0">
-              <Button
-                variant="secondary"
-                size="md"
-                href="/lg"
-                className="font-mono text-xs"
-              >
-                Benchmark Looking Glass
-              </Button>
             </div>
           </div>
         </section>
