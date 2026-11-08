@@ -969,8 +969,8 @@ export default function ThreatMapPage() {
                             className={cn(
                               "h-full rounded-full transition-all duration-500",
                               idx === 0
-                                ? "bg-gradient-to-r from-cyan-500 to-emerald-400"
-                                : "bg-gradient-to-r from-cyan-600 to-cyan-400"
+                                ? "bg-cyan-500 dark:bg-cyan-400"
+                                : "bg-cyan-600/70 dark:bg-cyan-500/60"
                             )}
                             style={{ width: `${c.percent}%` }}
                           />
@@ -1006,8 +1006,8 @@ export default function ThreatMapPage() {
                             className={cn(
                               "h-full rounded-full transition-all duration-500",
                               idx === 0
-                                ? "bg-gradient-to-r from-rose-500 to-amber-400"
-                                : "bg-gradient-to-r from-cyan-500 to-cyan-300"
+                                ? "bg-rose-500 dark:bg-rose-400"
+                                : "bg-cyan-500/80 dark:bg-cyan-400/80"
                             )}
                             style={{ width: `${threat.percent}%` }}
                           />
@@ -1189,22 +1189,17 @@ export default function ThreatMapPage() {
 
         </section>
 
-        {/* ── 2. CARA KERJA SISTEM PERTAHANAN ANCAMAN MASDIKA ─────────── */}
+        {/* ── 2. AUTONOMOUS THREAT DEFENSE PIPELINE ─────────────────── */}
         <section className="pt-20 sm:pt-28 pb-6">
-          <div className="max-w-3xl mx-auto text-center mb-14 sm:mb-18">
-            <div className="inline-flex items-center gap-2 mb-3">
-              <Badge variant="brand" dot dotColor="bg-cyan-400" size="sm" className="font-mono uppercase">
-                SECURITY ARCHITECTURE &amp; PIPELINE
-              </Badge>
-            </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[var(--text-primary)] tracking-tight leading-[1.15] mb-4">
-              Cara Kerja Pertahanan <br />
-              <span className="bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-500 bg-clip-text text-transparent">
-                Threat Intelligence Masdika.
-              </span>
+          <div className="max-w-3xl mx-auto text-center mb-12 sm:mb-16">
+            <span className="text-xs font-mono font-bold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+              SECURITY ARCHITECTURE &amp; PIPELINE
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] tracking-tight leading-[1.15] mb-4">
+              Autonomous Threat Defense Pipeline
             </h2>
             <p className="text-base sm:text-lg text-[var(--text-secondary)] font-normal leading-relaxed">
-              Setiap paket jaringan yang menuju infrastruktur Sidoarjo Datacenter dan Cloud VPS Masdika disaring melalui 4 lapis mitigasi otonom terkoordinasi sebelum mencapai server Anda.
+              Every incoming network packet destined for Masdika Sidoarjo Edge Datacenter and Cloud VPS is inspected through 4 synchronized layers of autonomous mitigation before reaching your instances.
             </p>
           </div>
 
@@ -1212,51 +1207,45 @@ export default function ThreatMapPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             
             {/* Stage 01 */}
-            <div className={cn(
-              "p-6 sm:p-7 rounded-2xl border border-[var(--border-primary)] transition-all duration-300 relative group flex flex-col justify-between",
-              isDark ? "bg-[var(--surface)] hover:border-cyan-500/40" : "bg-white hover:border-cyan-500/50 shadow-sm"
-            )}>
+            <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 p-6 sm:p-7 shadow-sm transition-all duration-300 relative group flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-5">
-                  <div className="w-12 h-12 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
-                    <Globe className="w-6 h-6" />
+                  <div className="w-11 h-11 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
+                    <Globe className="w-5 h-5" />
                   </div>
-                  <span className="text-xs font-mono font-bold text-cyan-500 dark:text-cyan-400 px-2.5 py-1 rounded-md bg-cyan-500/10 border border-cyan-500/20">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20">
                     STAGE 01
                   </span>
                 </div>
-                <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2.5">
+                <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] mb-2.5">
                   Anycast DDoS Scrubbing
                 </h3>
                 <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-6 font-normal">
-                  Serangan volumetrik L3/L4 (SYN flood, UDP amplification, DNS reflection) langsung dibelokkan dan disaring di pusat scrubbing global Anycast BGP sebelum masuk ke link fisik ISP.
+                  Volumetric L3/L4 attacks (SYN flood, UDP amplification, DNS reflection) are automatically deflected and filtered across global Anycast BGP scrubbing points before entering physical ISP uplinks.
                 </p>
               </div>
               <div className="pt-4 border-t border-[var(--border-subtle)] text-xs font-mono text-[var(--text-secondary)] flex items-center justify-between">
-                <span>Mitigasi:</span>
+                <span>Mitigation:</span>
                 <span className="font-semibold text-cyan-600 dark:text-cyan-400">Zero Downtime SLA</span>
               </div>
             </div>
 
             {/* Stage 02 */}
-            <div className={cn(
-              "p-6 sm:p-7 rounded-2xl border border-[var(--border-primary)] transition-all duration-300 relative group flex flex-col justify-between",
-              isDark ? "bg-[var(--surface)] hover:border-cyan-500/40" : "bg-white hover:border-cyan-500/50 shadow-sm"
-            )}>
+            <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 p-6 sm:p-7 shadow-sm transition-all duration-300 relative group flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-5">
-                  <div className="w-12 h-12 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
-                    <Layers className="w-6 h-6" />
+                  <div className="w-11 h-11 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
+                    <Layers className="w-5 h-5" />
                   </div>
-                  <span className="text-xs font-mono font-bold text-cyan-500 dark:text-cyan-400 px-2.5 py-1 rounded-md bg-cyan-500/10 border border-cyan-500/20">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20">
                     STAGE 02
                   </span>
                 </div>
-                <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2.5">
+                <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] mb-2.5">
                   L7 WAF &amp; Rate Limiting
                 </h3>
                 <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-6 font-normal">
-                  Traefik reverse proxy dan edge firewall menganalisis header HTTP/HTTPS. Eksploitasi OWASP Top 10, SQL injection, crawler bot jahat, dan burst traffic otomatis terkena HTTP 429 &amp; 403.
+                  Edge reverse proxies inspect HTTP/HTTPS payloads. OWASP Top 10 exploits, SQL injections, malicious crawlers, and abnormal traffic bursts are automatically blocked via HTTP 429 and 403.
                 </p>
               </div>
               <div className="pt-4 border-t border-[var(--border-subtle)] text-xs font-mono text-[var(--text-secondary)] flex items-center justify-between">
@@ -1266,55 +1255,49 @@ export default function ThreatMapPage() {
             </div>
 
             {/* Stage 03 */}
-            <div className={cn(
-              "p-6 sm:p-7 rounded-2xl border border-[var(--border-primary)] transition-all duration-300 relative group flex flex-col justify-between",
-              isDark ? "bg-[var(--surface)] hover:border-cyan-500/40" : "bg-white hover:border-cyan-500/50 shadow-sm"
-            )}>
+            <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 p-6 sm:p-7 shadow-sm transition-all duration-300 relative group flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-5">
-                  <div className="w-12 h-12 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
-                    <Lock className="w-6 h-6" />
+                  <div className="w-11 h-11 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
+                    <Lock className="w-5 h-5" />
                   </div>
-                  <span className="text-xs font-mono font-bold text-cyan-500 dark:text-cyan-400 px-2.5 py-1 rounded-md bg-cyan-500/10 border border-cyan-500/20">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20">
                     STAGE 03
                   </span>
                 </div>
-                <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2.5">
+                <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] mb-2.5">
                   Anti-Brute-Force Shield
                 </h3>
                 <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-6 font-normal">
-                  Setiap kegagalan autentikasi dicatat seketika di database. 5 kali percobaan gagal berturut-turut langsung memicu karantina IP permanen ke blacklist firewall tanpa memberi celah kamus kata sandi.
+                  Every authentication anomaly is correlated in real time. 5 consecutive failed attempts trigger an automated firewall quarantine, neutralizing credential stuffing and dictionary attacks at the perimeter.
                 </p>
               </div>
               <div className="pt-4 border-t border-[var(--border-subtle)] text-xs font-mono text-[var(--text-secondary)] flex items-center justify-between">
-                <span>Karantina:</span>
-                <span className="font-semibold text-cyan-600 dark:text-cyan-400">Auto IP Blacklist</span>
+                <span>Quarantine:</span>
+                <span className="font-semibold text-cyan-600 dark:text-cyan-400">Automated IP Blacklist</span>
               </div>
             </div>
 
             {/* Stage 04 */}
-            <div className={cn(
-              "p-6 sm:p-7 rounded-2xl border border-[var(--border-primary)] transition-all duration-300 relative group flex flex-col justify-between",
-              isDark ? "bg-[var(--surface)] hover:border-cyan-500/40" : "bg-white hover:border-cyan-500/50 shadow-sm"
-            )}>
+            <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 p-6 sm:p-7 shadow-sm transition-all duration-300 relative group flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-5">
-                  <div className="w-12 h-12 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
-                    <Activity className="w-6 h-6" />
+                  <div className="w-11 h-11 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
+                    <Activity className="w-5 h-5" />
                   </div>
-                  <span className="text-xs font-mono font-bold text-cyan-500 dark:text-cyan-400 px-2.5 py-1 rounded-md bg-cyan-500/10 border border-cyan-500/20">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20">
                     STAGE 04
                   </span>
                 </div>
-                <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2.5">
-                  Promtail Host Audit &amp; SOC
+                <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] mb-2.5">
+                  Host Telemetry &amp; SOC Audit
                 </h3>
                 <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-6 font-normal">
-                  Log sistem Linux (`auth.log`) di-stream secara non-stop oleh Promtail ke Loki dan Prometheus. Percobaan akses SSH dan audit sudo langsung dikorelasikan ke peta radar secara real-time.
+                  Host system logs are continuously streamed via Promtail into Loki and Prometheus. Unauthorized SSH login attempts and sudo audits are correlated directly to our live radar telemetry.
                 </p>
               </div>
               <div className="pt-4 border-t border-[var(--border-subtle)] text-xs font-mono text-[var(--text-secondary)] flex items-center justify-between">
-                <span>Observabilitas:</span>
+                <span>Observability:</span>
                 <span className="font-semibold text-cyan-600 dark:text-cyan-400">Prometheus + Loki</span>
               </div>
             </div>
@@ -1322,20 +1305,17 @@ export default function ThreatMapPage() {
           </div>
 
           {/* Infrastructure Guarantee Banner */}
-          <div className={cn(
-            "mt-10 p-6 sm:p-8 rounded-2xl border border-[var(--border-primary)] transition-colors duration-200 flex flex-col md:flex-row items-center justify-between gap-6",
-            isDark ? "bg-[var(--surface)]" : "bg-white shadow-sm"
-          )}>
+          <div className="mt-10 p-6 sm:p-8 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] shadow-sm transition-colors duration-200 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
                 <ShieldCheck className="w-6 h-6" />
               </div>
               <div>
-                <h4 className="text-base font-bold text-[var(--text-primary)]">
-                  Transparansi Telemetri Tanpa Kompromi
+                <h4 className="text-base font-bold text-[var(--text-primary)] mb-1">
+                  Zero-Compromise Telemetry Transparency
                 </h4>
                 <p className="text-sm text-[var(--text-secondary)] font-normal leading-relaxed">
-                  Semua insiden yang Anda lihat di radar ini adalah telemetri pertahanan aktif yang sukses diredam oleh shield Masdika tanpa insiden kebocoran data.
+                  All incidents displayed on this radar represent active security telemetry neutralized by Masdika defense shields without customer data compromise or service disruption.
                 </p>
               </div>
             </div>
@@ -1347,7 +1327,7 @@ export default function ThreatMapPage() {
                 href="/lg"
                 className="font-mono text-xs"
               >
-                Uji Latensi Looking Glass
+                Benchmark Looking Glass
               </Button>
             </div>
           </div>
