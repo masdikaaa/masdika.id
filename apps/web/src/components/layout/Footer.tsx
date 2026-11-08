@@ -95,7 +95,6 @@ export function Footer({ socialLinks }: { socialLinks?: any }) {
                 { name: 'Services', path: '/services' },
                 { name: 'Portfolio', path: '/portfolio' },
                 { name: 'Blog Post', path: '/blog' },
-                { name: 'Looking Glass', path: '/lg' },
                 { name: 'Contact Me', path: '/contact' }
               ].map((link, idx) => (
                 <li key={idx}>
@@ -110,44 +109,70 @@ export function Footer({ socialLinks }: { socialLinks?: any }) {
             </ul>
           </div>
 
-          {/* Column 3: Legal */}
+          {/* Column 3: Network & Security */}
           <div className="lg:col-span-2">
-            <h3 className="text-sm font-semibold mb-5 text-[var(--text-primary)]">Legal</h3>
+            <h3 className="text-sm font-semibold mb-5 text-[var(--text-primary)]">Network &amp; Security</h3>
             <ul className="space-y-3">
               {[
-                { name: 'Terms & Conditions', path: '/terms' },
-                { name: 'Privacy Policy', path: '/privacy' },
-                { name: 'SLA Agreement', path: '/sla' }
+                { name: 'Looking Glass', path: '/lg', badge: null },
+                { name: 'Threat Map', path: '/threat-map', badge: 'Live' }
               ].map((link, idx) => (
                 <li key={idx}>
                   <Link
                     href={link.path}
-                    className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-500 rounded"
+                    className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-500 rounded flex items-center gap-2"
                   >
-                    {link.name}
+                    <span>{link.name}</span>
+                    {link.badge && (
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                        {link.badge}
+                      </span>
+                    )}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Column 4: Contact */}
-          <div className="lg:col-span-2">
-            <h3 className="text-sm font-semibold mb-5 text-[var(--text-primary)]">Contact</h3>
-            <ul className="space-y-4">
-              <li className="flex items-start gap-3">
-                <Mail className="w-4 h-4 mt-0.5 shrink-0 text-cyan-600 dark:text-cyan-400" />
-                <span className="text-sm break-all text-[var(--text-secondary)]">{socialLinks?.contact_email || process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'me@masdika.id'}</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-cyan-600 dark:text-cyan-400" />
-                <span className="text-sm text-[var(--text-secondary)]">{socialLinks?.contact_location || 'Surabaya, Indonesia'}</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <Phone className="w-4 h-4 mt-0.5 shrink-0 text-cyan-600 dark:text-cyan-400" />
-                <span className="text-sm text-[var(--text-secondary)]">{socialLinks?.contact_phone || '+62 823 3162 3374'}</span>
-              </li>
-            </ul>
+          {/* Column 4: Legal & Contact */}
+          <div className="lg:col-span-2 space-y-6">
+            <div>
+              <h3 className="text-sm font-semibold mb-4 text-[var(--text-primary)]">Legal</h3>
+              <ul className="space-y-2.5">
+                {[
+                  { name: 'Terms & Conditions', path: '/terms' },
+                  { name: 'Privacy Policy', path: '/privacy' },
+                  { name: 'SLA Agreement', path: '/sla' }
+                ].map((link, idx) => (
+                  <li key={idx}>
+                    <Link
+                      href={link.path}
+                      className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-500 rounded"
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-semibold mb-3 text-[var(--text-primary)]">Contact</h3>
+              <ul className="space-y-2.5 text-xs text-[var(--text-secondary)]">
+                <li className="flex items-center gap-2">
+                  <Mail className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400 shrink-0" />
+                  <span className="truncate">{socialLinks?.contact_email || process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'me@masdika.id'}</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <MapPin className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400 shrink-0" />
+                  <span>Sidoarjo, Jawa Timur</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Phone className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400 shrink-0" />
+                  <span>{socialLinks?.contact_phone || '+62 823 3162 3374'}</span>
+                </li>
+              </ul>
+            </div>
           </div>
 
           {/* Column 5: Newsletter */}
