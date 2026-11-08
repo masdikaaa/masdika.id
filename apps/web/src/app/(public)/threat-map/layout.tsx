@@ -1,29 +1,38 @@
 import { Metadata } from 'next';
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.masdika.id';
+const rawSiteUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://www.masdika.id';
+const siteUrl = rawSiteUrl.replace(/^["']|["']$/g, '').trim();
 
 export const metadata: Metadata = {
   title: {
     absolute: 'Live Cyber Threat Map - Real-Time Attack Intelligence',
   },
   description:
-    'Real-time interactive cyber threat intelligence map. Monitor live DDoS attacks, vulnerability probes, and malicious exploit vectors mitigated across Masdika Sidoarjo Edge Datacenter and global upstream networks.',
+    'Monitor real-time cyber attacks, DDoS mitigations, and automated security probe incidents targeting Masdika Sidoarjo Edge Datacenter and global infrastructure in real-time.',
   alternates: {
     canonical: `${siteUrl}/threat-map`,
   },
   openGraph: {
-    title: 'Live Cyber Threat Map - Real-Time Attack Intelligence | Masdika',
+    title: 'Live Cyber Threat Map - Real-Time Attack Intelligence',
     description:
-      'Monitor real-time cyber attacks, automated exploit probes, and global threat vectors mitigated by Masdika Edge Datacenter infrastructure.',
+      'Monitor real-time cyber attacks, DDoS mitigations, and automated security probe incidents targeting Masdika Sidoarjo Edge Datacenter and global infrastructure in real-time.',
     url: `${siteUrl}/threat-map`,
     siteName: 'Masdika',
-    images: ['/images/brand/og-image.webp'],
+    images: [
+      {
+        url: '/images/brand/og-image.webp',
+        width: 1200,
+        height: 630,
+        alt: 'Live Cyber Threat Map - Real-Time Attack Intelligence',
+      },
+    ],
+    type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Live Cyber Threat Map - Real-Time Attack Intelligence | Masdika',
+    title: 'Live Cyber Threat Map - Real-Time Attack Intelligence',
     description:
-      'Monitor real-time cyber attacks, automated exploit probes, and global threat vectors mitigated by Masdika Edge Datacenter infrastructure.',
+      'Monitor real-time cyber attacks, DDoS mitigations, and automated security probe incidents targeting Masdika Sidoarjo Edge Datacenter and global infrastructure in real-time.',
     images: ['/images/brand/og-image.webp'],
   },
 };
@@ -34,7 +43,7 @@ export default function ThreatMapLayout({ children }: { children: React.ReactNod
     '@type': 'WebPage',
     '@id': `${siteUrl}/threat-map#webpage`,
     url: `${siteUrl}/threat-map`,
-    name: 'Live Cyber Threat Map | Masdika',
+    name: 'Live Cyber Threat Map - Real-Time Attack Intelligence',
     description:
       'Real-time interactive cyber threat intelligence map visualizing incoming security probes and DDoS mitigation across Masdika infrastructure.',
     isPartOf: {
@@ -74,4 +83,3 @@ export default function ThreatMapLayout({ children }: { children: React.ReactNod
     </>
   );
 }
-
