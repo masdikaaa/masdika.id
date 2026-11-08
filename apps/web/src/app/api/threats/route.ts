@@ -40,6 +40,33 @@ function isPrivateIp(ip: string): boolean {
   return false;
 }
 
+// Privacy Sanitizer: Heavily mask target emails/usernames to prevent exposing full names
+function maskTarget(raw: string): string {
+  if (!raw || raw.trim() === '') return 'usr_***';
+  const clean = raw.trim().toLowerCase();
+  const username = clean.includes('@') ? clean.split('@')[0] : clean;
+  if (username.length <= 2) return `${username[0]}***`;
+  if (username.length <= 4) return `${username.slice(0, 1)}***${username.slice(-1)}`;
+  return `${username.slice(0, 2)}***${username.slice(-2)}`;
+}
+
+// IP Masking: Mask the last octet / host portion for visitor privacy & compliance
+function maskIp(ip: string): string {
+  if (!ip || ip === 'unknown') return '***.***.***.***';
+  if (isPrivateIp(ip)) return '127.0.0.***';
+  if (ip.includes('.')) {
+    const parts = ip.split('.');
+    if (parts.length === 4) {
+      return `${parts[0]}.${parts[1]}.${parts[2]}.***`;
+    }
+  }
+  if (ip.includes(':')) {
+    const parts = ip.split(':');
+    return `${parts.slice(0, 2).join(':')}:****:****`;
+  }
+  return '***.***.***.***';
+}
+
 // Fast Geolocation Lookup with timeout & fallback
 async function resolveIpGeo(ip: string): Promise<{ city: string; country: string; code: string; coords: [number, number] }> {
   if (geoCache.has(ip)) {
@@ -171,7 +198,8 @@ export async function GET(request: Request) {
       const minutes = String(logDate.getMinutes()).padStart(2, '0');
       const seconds = String(logDate.getSeconds()).padStart(2, '0');
 
-      const maskedTarget = log.emailAttempt ? log.emailAttempt.split('@')[0] : 'admin';
+      const maskedTarget = maskTarget(log.emailAttempt);
+      const maskedIp = maskIp(log.ipAddress);
 
       events.push({
         id: `real-login-${log.id}`,
@@ -180,7 +208,7 @@ export async function GET(request: Request) {
         sourceCity: geo.city,
         sourceCountry: geo.country,
         sourceCode: geo.code,
-        sourceIp: log.ipAddress,
+        sourceIp: maskedIp,
         sourceCoords: geo.coords,
         targetCity: 'Sidoarjo (Primary Datacenter)',
         targetCountry: 'Indonesia',
@@ -198,8 +226,9 @@ export async function GET(request: Request) {
     // Process real permanently blocked IPs
     for (const blocked of realBlockedUsers) {
       if (blocked.type === 'IP' || (blocked.value && !blocked.value.includes('@'))) {
-        const ip = blocked.value;
-        const geo = await resolveIpGeo(ip);
+        const rawIp = blocked.value;
+        const geo = await resolveIpGeo(rawIp);
+        const maskedIp = maskIp(rawIp);
         const blockDate = new Date(blocked.createdAt);
         const hours = String(blockDate.getHours()).padStart(2, '0');
         const minutes = String(blockDate.getMinutes()).padStart(2, '0');
@@ -212,7 +241,7 @@ export async function GET(request: Request) {
           sourceCity: geo.city,
           sourceCountry: geo.country,
           sourceCode: geo.code,
-          sourceIp: ip,
+          sourceIp: maskedIp,
           sourceCoords: geo.coords,
           targetCity: 'Sidoarjo (Primary Datacenter)',
           targetCountry: 'Indonesia',
