@@ -104,7 +104,24 @@ export default async function VpsLandingPage() {
           "reviewCount": "128",
           "bestRating": "5",
           "worstRating": "1"
-        }
+        },
+        "review": [
+          {
+            "@type": "Review",
+            "author": {
+              "@type": "Person",
+              "name": "David Chen"
+            },
+            "datePublished": "2026-06-14",
+            "reviewBody": "Salah satu VPS lokal dengan sistem pay-as-you-go yang harganya terjangkau, tapi kualitasnya tetap oke, uptime mencapai 99%, dan fiturnya cukup lengkap.",
+            "reviewRating": {
+              "@type": "Rating",
+              "ratingValue": "5",
+              "bestRating": "5",
+              "worstRating": "1"
+            }
+          }
+        ]
       },
       {
         "@type": "FAQPage",

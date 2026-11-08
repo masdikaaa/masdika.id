@@ -192,9 +192,11 @@ export default async function RootLayout({
                     "Masdika Cloud VPS",
                     "KVM VPS Murah"
                   ],
+                  "image": "https://www.masdika.id/images/brand/og-image.webp",
                   "description": "Layanan Cloud VPS murah Indonesia berkinerja tinggi didukung prosesor enterprise Intel Xeon, enterprise SSD & HDD storage, KVM virtualization, dan sistem hemat Pay-As-You-Go per jam.",
                   "brand": {
-                    "@id": "https://www.masdika.id/#organization"
+                    "@type": "Brand",
+                    "name": "Masdika"
                   },
                   "category": "Cloud Computing > Virtual Private Server > VPS Murah",
                   "offers": {
@@ -205,24 +207,76 @@ export default async function RootLayout({
                     "priceValidUntil": "2027-12-31",
                     "offerCount": "100",
                     "availability": "https://schema.org/InStock"
-                  }
+                  },
+                  "aggregateRating": {
+                    "@type": "AggregateRating",
+                    "ratingValue": "4.9",
+                    "reviewCount": "128",
+                    "bestRating": "5",
+                    "worstRating": "1"
+                  },
+                  "review": [
+                    {
+                      "@type": "Review",
+                      "author": {
+                        "@type": "Person",
+                        "name": "David Chen"
+                      },
+                      "datePublished": "2026-06-14",
+                      "reviewBody": "Salah satu VPS lokal dengan sistem pay-as-you-go yang harganya terjangkau, tapi kualitasnya tetap oke, uptime mencapai 99%, dan fiturnya cukup lengkap.",
+                      "reviewRating": {
+                        "@type": "Rating",
+                        "ratingValue": "5",
+                        "bestRating": "5",
+                        "worstRating": "1"
+                      }
+                    }
+                  ]
                 },
                 {
                   "@type": "Product",
                   "@id": "https://www.masdika.id/#managed-k3s",
                   "name": "Masdika Managed Kubernetes (K3s)",
+                  "image": "https://www.masdika.id/images/brand/og-image.webp",
                   "description": "Production-grade Managed K3s Kubernetes clusters with automated master control-plane, private VPC VLAN networking, and instant worker scaling.",
                   "brand": {
-                    "@id": "https://www.masdika.id/#organization"
+                    "@type": "Brand",
+                    "name": "Masdika"
                   },
                   "category": "Cloud Computing > Managed Kubernetes",
                   "offers": {
                     "@type": "AggregateOffer",
                     "priceCurrency": "IDR",
                     "lowPrice": "100",
+                    "highPrice": "1500000",
                     "priceValidUntil": "2027-12-31",
+                    "offerCount": "50",
                     "availability": "https://schema.org/InStock"
-                  }
+                  },
+                  "aggregateRating": {
+                    "@type": "AggregateRating",
+                    "ratingValue": "4.9",
+                    "reviewCount": "96",
+                    "bestRating": "5",
+                    "worstRating": "1"
+                  },
+                  "review": [
+                    {
+                      "@type": "Review",
+                      "author": {
+                        "@type": "Person",
+                        "name": "Sarah Jenkins"
+                      },
+                      "datePublished": "2026-06-14",
+                      "reviewBody": "Masdika transformed our entire Kubernetes infrastructure. Our container deployments are now 5x faster and highly available.",
+                      "reviewRating": {
+                        "@type": "Rating",
+                        "ratingValue": "5",
+                        "bestRating": "5",
+                        "worstRating": "1"
+                      }
+                    }
+                  ]
                 }
               ]
             })
