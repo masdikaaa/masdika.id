@@ -367,6 +367,16 @@ export async function GET(request: Request) {
       { name: 'GeoServer.OGC.Eval.Remote.Code.Exec', count: '25K', percent: 28 },
       { name: 'Nginx.Traversal.SensitivePath.404.Probe', count: '14K', percent: 20 },
     ],
+    topCountries: [
+      { name: 'Indonesia', code: 'ID', count: `${realCount + 24}K`, percent: 95 },
+      { name: 'United States', code: 'US', count: '18.4K', percent: 82 },
+      { name: 'Germany', code: 'DE', count: '12.1K', percent: 65 },
+      { name: 'Singapore', code: 'SG', count: '9.3K', percent: 52 },
+      { name: 'Japan', code: 'JP', count: '7.8K', percent: 43 },
+      { name: 'Netherlands', code: 'NL', count: '5.2K', percent: 31 },
+      { name: 'China', code: 'CN', count: '4.6K', percent: 26 },
+      { name: 'South Korea', code: 'KR', count: '3.9K', percent: 21 },
+    ],
     targetedIndustries: [
       { name: 'Technology & Cloud Compute', count: '231K', percent: 95 },
       { name: 'Banking / Finance / Fintech', count: '229K', percent: 93 },

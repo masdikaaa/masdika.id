@@ -25,10 +25,9 @@ import {
   Maximize2,
   Terminal,
   ArrowRight,
-  Cpu,
-  Network,
-  Eye,
-  Shield,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
@@ -85,6 +84,36 @@ interface ImpactRipple {
   opacity: number;
 }
 
+// Crisp, standardized rectangular country flag (FortiGuard Threat Map style)
+function CountryFlag({ code, className }: { code: string; className?: string }) {
+  const safeCode = (code || 'ID').toLowerCase().trim();
+  if (safeCode === 'sec' || safeCode === 'gl' || safeCode.length !== 2) {
+    return (
+      <span className={cn("inline-flex items-center justify-center px-1 py-0.5 rounded-[2px] bg-cyan-950/60 border border-cyan-500/30 text-[8px] font-mono font-bold text-cyan-400", className)}>
+        {code ? code.slice(0, 2).toUpperCase() : 'ID'}
+      </span>
+    );
+  }
+
+  return (
+    <img
+      src={`https://flagcdn.com/24x18/${safeCode}.png`}
+      srcSet={`https://flagcdn.com/48x36/${safeCode}.png 2x`}
+      width={16}
+      height={12}
+      alt={code}
+      loading="lazy"
+      className={cn(
+        "inline-block w-4 h-3 rounded-[2px] object-cover border border-slate-300 dark:border-slate-700 shadow-sm shrink-0",
+        className
+      )}
+      onError={(e) => {
+        (e.target as HTMLElement).style.display = 'none';
+      }}
+    />
+  );
+}
+
 // Convert real [lat, lng] to tactical 1000x500 canvas coordinates matching the geo dataset
 function projectCoords(lat: number, lng: number, mode: 'world' | 'indonesia'): [number, number] {
   if (mode === 'indonesia') {
@@ -126,6 +155,12 @@ export default function ThreatMapPage() {
   const [impacts, setImpacts] = useState<ImpactRipple[]>([]);
   const [recentLiveAlert, setRecentLiveAlert] = useState<AttackEvent | null>(null);
 
+  // Interactive Zoom & Pan State
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef({ x: 0, y: 0 });
+
   const [stats, setStats] = useState({
     attacksPerSecond: 16,
     blockedIn24h: 854120,
@@ -135,7 +170,7 @@ export default function ThreatMapPage() {
     edgeStatus: "100% OPERATIONAL",
   });
   const [topThreats, setTopThreats] = useState<any[]>([]);
-  const [targetedIndustries, setTargetedIndustries] = useState<any[]>([]);
+  const [topCountries, setTopCountries] = useState<any[]>([]);
 
   // Sequential counters to guarantee 100% unique React keys
   const impactSeqRef = useRef(0);
@@ -160,6 +195,46 @@ export default function ThreatMapPage() {
     return () => clearInterval(timer);
   }, []);
 
+  // Zoom handlers
+  const handleZoomIn = () => setZoom(z => Math.min(3.5, Math.round((z + 0.3) * 10) / 10));
+  const handleZoomOut = () => setZoom(z => Math.max(0.7, Math.round((z - 0.3) * 10) / 10));
+  const handleResetZoom = () => {
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  };
+
+  // Reset zoom & pan when switching between regional and global view
+  useEffect(() => {
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  }, [region]);
+
+  // Pan / Drag handlers
+  const onMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    dragStartRef.current = { x: e.clientX - pan.x, y: e.clientY - pan.y };
+  };
+
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    setPan({
+      x: e.clientX - dragStartRef.current.x,
+      y: e.clientY - dragStartRef.current.y,
+    });
+  };
+
+  const onMouseUp = () => setIsDragging(false);
+
+  // Wheel zoom handler
+  const onWheel = (e: React.WheelEvent) => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.deltaY < 0) {
+      setZoom(z => Math.min(3.5, Math.round((z + 0.15) * 10) / 10));
+    } else {
+      setZoom(z => Math.max(0.7, Math.round((z - 0.15) * 10) / 10));
+    }
+  };
+
   // Fire laser projectile helper (FortiGuard parabolic trajectory)
   const spawnLaser = (atk: AttackEvent) => {
     const [x1, y1] = projectCoords(atk.sourceCoords[0], atk.sourceCoords[1], region);
@@ -173,7 +248,7 @@ export default function ThreatMapPage() {
 
     // Professional, elegant colors (subtle rose coral for real, amber for high, cyan for medium)
     const color = atk.isReal
-      ? '#f43f5e' // Elegant rose coral for verified live attacks
+      ? '#f43f5e'
       : atk.severity === 'Critical'
       ? '#fb7185'
       : atk.severity === 'High'
@@ -217,7 +292,9 @@ export default function ThreatMapPage() {
           setAttacks(fetchedEvents);
           setStats(data.stats);
           setTopThreats(data.topThreats || []);
-          setTargetedIndustries(data.targetedIndustries || []);
+          if (data.topCountries) {
+            setTopCountries(data.topCountries);
+          }
 
           fetchedEvents.forEach(e => seenEventIdsRef.current.add(e.id));
 
@@ -587,20 +664,59 @@ export default function ThreatMapPage() {
                     </div>
                   )}
 
-                  {/* Sleek, Non-Intrusive Live Telemetry Ticker Ribbon */}
+                  {/* Sleek, Non-Intrusive Live Telemetry Ticker Ribbon with Country Flag */}
                   {recentLiveAlert && (
                     <div className="px-3 py-1 rounded-full border border-cyan-500/30 bg-cyan-950/40 text-cyan-300 text-xs font-mono font-bold flex items-center gap-1.5 backdrop-blur-md">
-                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
+                      <CountryFlag code={recentLiveAlert.sourceCode} />
                       <span>LIVE PROBE: {recentLiveAlert.sourceCity} [{recentLiveAlert.sourceCode}]</span>
                     </div>
                   )}
                 </div>
 
-                {/* SVG Tactical Vector Map with Real GIS Coastlines */}
-                <div className="w-full h-full flex items-center justify-center relative py-6">
+                {/* Floating Tactical Zoom & Pan Controls (FortiGuard Style) */}
+                <div className="absolute top-5 right-5 z-20 flex items-center gap-1 p-1 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface)]/90 backdrop-blur-md shadow-sm">
+                  <button
+                    type="button"
+                    onClick={handleZoomIn}
+                    title="Zoom In (+)"
+                    className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-cyan-500 hover:bg-[var(--surface-secondary)] transition-colors"
+                  >
+                    <ZoomIn className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleZoomOut}
+                    title="Zoom Out (-)"
+                    className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-cyan-500 hover:bg-[var(--surface-secondary)] transition-colors"
+                  >
+                    <ZoomOut className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleResetZoom}
+                    title="Reset Zoom"
+                    className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-cyan-500 hover:bg-[var(--surface-secondary)] transition-colors"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                  </button>
+                  <span className="px-2 py-0.5 text-[10px] font-mono font-bold text-cyan-600 dark:text-cyan-400 border-l border-[var(--border-subtle)]">
+                    {Math.round(zoom * 100)}%
+                  </span>
+                </div>
+
+                {/* SVG Tactical Vector Map with Real GIS Coastlines & Zoom/Pan */}
+                <div className="w-full h-full flex items-center justify-center relative py-6 overflow-hidden">
                   <svg
                     viewBox="0 0 1000 500"
-                    className="w-full h-auto max-h-[520px] select-none"
+                    className={cn(
+                      "w-full h-auto max-h-[520px] select-none",
+                      zoom > 1 ? "cursor-grab active:cursor-grabbing" : "cursor-default"
+                    )}
+                    onMouseDown={onMouseDown}
+                    onMouseMove={onMouseMove}
+                    onMouseUp={onMouseUp}
+                    onMouseLeave={onMouseUp}
+                    onWheel={onWheel}
                   >
                     <defs>
                       <filter id="laser-glow" x="-25%" y="-25%" width="150%" height="150%">
@@ -618,172 +734,181 @@ export default function ThreatMapPage() {
                       </radialGradient>
                     </defs>
 
-                    {/* Radar Coordinate Grid & Concentric Scanning Rings */}
-                    <circle cx="500" cy="250" r="140" fill="none" stroke={isDark ? "#06b6d4" : "#0284c7"} strokeWidth="0.5" strokeDasharray="3,3" opacity="0.22" />
-                    <circle cx="500" cy="250" r="260" fill="none" stroke={isDark ? "#06b6d4" : "#0284c7"} strokeWidth="0.5" strokeDasharray="4,4" opacity="0.16" />
-                    <circle cx="500" cy="250" r="380" fill="none" stroke={isDark ? "#06b6d4" : "#0284c7"} strokeWidth="0.5" strokeDasharray="5,5" opacity="0.1" />
+                    {/* Transform Group for Zoom & Pan */}
+                    <g
+                      transform={`translate(${pan.x}, ${pan.y}) scale(${zoom})`}
+                      style={{
+                        transformOrigin: '500px 250px',
+                        transition: isDragging ? 'none' : 'transform 0.15s ease-out',
+                      }}
+                    >
+                      {/* Radar Coordinate Grid & Concentric Scanning Rings */}
+                      <circle cx="500" cy="250" r="140" fill="none" stroke={isDark ? "#06b6d4" : "#0284c7"} strokeWidth="0.5" strokeDasharray="3,3" opacity="0.22" />
+                      <circle cx="500" cy="250" r="260" fill="none" stroke={isDark ? "#06b6d4" : "#0284c7"} strokeWidth="0.5" strokeDasharray="4,4" opacity="0.16" />
+                      <circle cx="500" cy="250" r="380" fill="none" stroke={isDark ? "#06b6d4" : "#0284c7"} strokeWidth="0.5" strokeDasharray="5,5" opacity="0.1" />
 
-                    {/* Map Coordinate Parallels & Meridians */}
-                    <line x1="40" y1="250" x2="960" y2="250" stroke={isDark ? "#0ea5e9" : "#0284c7"} strokeWidth="0.5" strokeDasharray="2,4" opacity="0.2" />
-                    <line x1="500" y1="20" x2="500" y2="480" stroke={isDark ? "#0ea5e9" : "#0284c7"} strokeWidth="0.5" strokeDasharray="2,4" opacity="0.2" />
+                      {/* Map Coordinate Parallels & Meridians */}
+                      <line x1="40" y1="250" x2="960" y2="250" stroke={isDark ? "#0ea5e9" : "#0284c7"} strokeWidth="0.5" strokeDasharray="2,4" opacity="0.2" />
+                      <line x1="500" y1="20" x2="500" y2="480" stroke={isDark ? "#0ea5e9" : "#0284c7"} strokeWidth="0.5" strokeDasharray="2,4" opacity="0.2" />
 
-                    {/* Real Geographic Vector Map Outlines */}
-                    {region === 'indonesia' ? (
-                      /* Indonesia Region: High-Fidelity GIS Archipelago + Neighbors */
-                      <g className="transition-all duration-700 ease-in-out">
-                        {indonesiaRegionPaths.map((poly) => {
-                          const isID = poly.isIndonesia;
-                          return (
-                            <path
-                              key={poly.id}
-                              d={poly.d}
-                              fill={
-                                isID
-                                  ? isDark ? "#102a4e" : "#cbd5e1"
-                                  : isDark ? "#071628" : "#f1f5f9"
-                              }
-                              stroke={
-                                isID
-                                  ? isDark ? "#00f0ff" : "#0284c7"
-                                  : isDark ? "#1b3860" : "#94a3b8"
-                              }
-                              strokeWidth={isID ? "1.8" : "0.8"}
-                              opacity={isID ? 0.95 : 0.45}
-                              className="transition-colors duration-300"
-                            />
-                          );
-                        })}
-
-                        {/* Secondary Core Node: Jakarta Gateway */}
-                        <g transform={`translate(${jakartaCoords[0]}, ${jakartaCoords[1]})`}>
-                          <circle r="3.5" fill={isDark ? "#38bdf8" : "#0284c7"} stroke="#ffffff" strokeWidth="1" />
-                          <text x="-80" y="-8" fill={isDark ? "#7dd3fc" : "#475569"} fontSize="9" fontFamily="monospace">
-                            Jakarta Core [ID]
-                          </text>
-                        </g>
-
-                        {/* Primary Target Beacon: Masdika Sidoarjo Datacenter Hub */}
-                        <g transform={`translate(${targetHubCoords[0]}, ${targetHubCoords[1]})`}>
-                          <circle r="26" fill="url(#target-beacon)" className="animate-ping" opacity="0.85" />
-                          <circle r="14" fill={isDark ? "#06b6d4" : "#0284c7"} opacity="0.3" />
-                          <circle r="5" fill={isDark ? "#06b6d4" : "#0284c7"} stroke="#ffffff" strokeWidth="1.8" />
-                          
-                          {/* Staggered Leader Label below node to avoid overlaps */}
-                          <line x1="0" y1="8" x2="0" y2="24" stroke={isDark ? "#38bdf8" : "#0284c7"} strokeWidth="1" strokeDasharray="2,2" />
-                          <line x1="0" y1="24" x2="30" y2="24" stroke={isDark ? "#38bdf8" : "#0284c7"} strokeWidth="1" />
-                          <text x="36" y="22" fill={isDark ? "#38bdf8" : "#0369a1"} fontSize="11" fontWeight="bold" fontFamily="monospace">
-                            MASDIKA SIDOARJO HUB [ID]
-                          </text>
-                          <text x="36" y="34" fill={isDark ? "#7dd3fc" : "#0284c7"} fontSize="9" fontFamily="monospace">
-                            AS63859 [PRIMARY DATACENTER]
-                          </text>
-                        </g>
-                      </g>
-                    ) : (
-                      /* World View: Real Natural Earth GIS Countries */
-                      <g className="transition-all duration-700 ease-in-out">
-                        {worldPaths.map((country) => {
-                          const isID = country.id === 'IDN';
-                          return (
-                            <path
-                              key={country.id}
-                              d={country.d}
-                              fill={
-                                isID
-                                  ? isDark ? "#00f0ff30" : "#0284c730"
-                                  : isDark ? "#0c233f" : "#cbd5e1"
-                              }
-                              stroke={
-                                isID
-                                  ? isDark ? "#00f0ff" : "#0284c7"
-                                  : isDark ? "#0ea5e9" : "#0284c7"
-                              }
-                              strokeWidth={isID ? "1.8" : "0.7"}
-                              opacity={isID ? 1 : 0.8}
-                              className="transition-colors duration-300"
-                            />
-                          );
-                        })}
-
-                        {/* Target Node: Indonesia Masdika Hub */}
-                        <g transform={`translate(${targetHubCoords[0]}, ${targetHubCoords[1]})`}>
-                          <circle r="22" fill="url(#target-beacon)" className="animate-ping" opacity="0.85" />
-                          <circle r="5.5" fill={isDark ? "#06b6d4" : "#0284c7"} stroke="#ffffff" strokeWidth="1.5" />
-                          <text x="12" y="-6" fill={isDark ? "#38bdf8" : "#0369a1"} fontSize="10" fontWeight="bold" fontFamily="monospace">
-                            Masdika Edge [ID]
-                          </text>
-                        </g>
-                      </g>
-                    )}
-
-                    {/* Animated FortiGuard Parabolic Laser Arcs */}
-                    {lasers.map(laser => {
-                      const t = laser.progress;
-                      const currentX = (1 - t) * (1 - t) * laser.x1 + 2 * (1 - t) * t * laser.cx + t * t * laser.x2;
-                      const currentY = (1 - t) * (1 - t) * laser.y1 + 2 * (1 - t) * t * laser.cy + t * t * laser.y2;
-
-                      return (
-                        <g key={laser.id} filter="url(#laser-glow)">
-                          {/* Trajectory Guide Arc */}
-                          <path
-                            d={`M ${laser.x1},${laser.y1} Q ${laser.cx},${laser.cy} ${laser.x2},${laser.y2}`}
-                            fill="none"
-                            stroke={laser.color}
-                            strokeWidth={laser.isReal ? "2.4" : "1.2"}
-                            strokeDasharray={laser.isReal ? "6,3" : "4,4"}
-                            opacity={laser.isReal ? "0.95" : "0.45"}
-                          />
-
-                          {/* Source Origin Beacon */}
-                          <circle cx={laser.x1} cy={laser.y1} r={laser.isReal ? "4.5" : "3"} fill={laser.color} opacity="0.95" />
-
-                          {/* Missile / Laser Head Projectile */}
-                          <circle cx={currentX} cy={currentY} r={laser.isReal ? "5.5" : "4"} fill="#ffffff" stroke={laser.color} strokeWidth={laser.isReal ? "2.5" : "1.8"} />
-                          <circle cx={currentX} cy={currentY} r={laser.isReal ? "12" : "7"} fill={laser.color} opacity={laser.isReal ? "0.45" : "0.25"} />
-
-                          {/* Refined Glass HUD Callout for Laser */}
-                          {laser.isReal && (
-                            <g transform={`translate(${currentX}, ${currentY - 18})`}>
-                              <rect
-                                x="-65"
-                                y="-10"
-                                width="130"
-                                height="20"
-                                rx="4"
-                                fill={isDark ? "rgba(8, 23, 44, 0.9)" : "rgba(255, 255, 255, 0.95)"}
-                                stroke="rgba(244, 63, 94, 0.6)"
-                                strokeWidth="1"
+                      {/* Real Geographic Vector Map Outlines */}
+                      {region === 'indonesia' ? (
+                        /* Indonesia Region: High-Fidelity GIS Archipelago + Neighbors */
+                        <g className="transition-all duration-700 ease-in-out">
+                          {indonesiaRegionPaths.map((poly) => {
+                            const isID = poly.isIndonesia;
+                            return (
+                              <path
+                                key={poly.id}
+                                d={poly.d}
+                                fill={
+                                  isID
+                                    ? isDark ? "#102a4e" : "#cbd5e1"
+                                    : isDark ? "#071628" : "#f1f5f9"
+                                }
+                                stroke={
+                                  isID
+                                    ? isDark ? "#00f0ff" : "#0284c7"
+                                    : isDark ? "#1b3860" : "#94a3b8"
+                                }
+                                strokeWidth={isID ? "1.8" : "0.8"}
+                                opacity={isID ? 0.95 : 0.45}
+                                className="transition-colors duration-300"
                               />
-                              <text
-                                x="0"
-                                y="3"
-                                textAnchor="middle"
-                                fill={isDark ? "#f43f5e" : "#e11d48"}
-                                fontSize="9"
-                                fontWeight="bold"
-                                fontFamily="monospace"
-                              >
-                                {laser.sourceCity} [{laser.sourceCode}]
-                              </text>
-                            </g>
-                          )}
-                        </g>
-                      );
-                    })}
+                            );
+                          })}
 
-                    {/* Impact Shockwaves on Target Hit (Guaranteed Unique Keys) */}
-                    {impacts.map(impact => (
-                      <circle
-                        key={impact.id}
-                        cx={impact.x}
-                        cy={impact.y}
-                        r={impact.radius}
-                        fill="none"
-                        stroke={impact.color}
-                        strokeWidth="2"
-                        opacity={impact.opacity}
-                      />
-                    ))}
+                          {/* Secondary Core Node: Jakarta Gateway */}
+                          <g transform={`translate(${jakartaCoords[0]}, ${jakartaCoords[1]})`}>
+                            <circle r="3.5" fill={isDark ? "#38bdf8" : "#0284c7"} stroke="#ffffff" strokeWidth="1" />
+                            <text x="-80" y="-8" fill={isDark ? "#7dd3fc" : "#475569"} fontSize="9" fontFamily="monospace">
+                              Jakarta Core [ID]
+                            </text>
+                          </g>
+
+                          {/* Primary Target Beacon: Masdika Sidoarjo Datacenter Hub */}
+                          <g transform={`translate(${targetHubCoords[0]}, ${targetHubCoords[1]})`}>
+                            <circle r="26" fill="url(#target-beacon)" className="animate-ping" opacity="0.85" />
+                            <circle r="14" fill={isDark ? "#06b6d4" : "#0284c7"} opacity="0.3" />
+                            <circle r="5" fill={isDark ? "#06b6d4" : "#0284c7"} stroke="#ffffff" strokeWidth="1.8" />
+                            
+                            {/* Staggered Leader Label below node to avoid overlaps */}
+                            <line x1="0" y1="8" x2="0" y2="24" stroke={isDark ? "#38bdf8" : "#0284c7"} strokeWidth="1" strokeDasharray="2,2" />
+                            <line x1="0" y1="24" x2="30" y2="24" stroke={isDark ? "#38bdf8" : "#0284c7"} strokeWidth="1" />
+                            <text x="36" y="22" fill={isDark ? "#38bdf8" : "#0369a1"} fontSize="11" fontWeight="bold" fontFamily="monospace">
+                              MASDIKA SIDOARJO HUB [ID]
+                            </text>
+                            <text x="36" y="34" fill={isDark ? "#7dd3fc" : "#0284c7"} fontSize="9" fontFamily="monospace">
+                              AS63859 [PRIMARY DATACENTER]
+                            </text>
+                          </g>
+                        </g>
+                      ) : (
+                        /* World View: Real Natural Earth GIS Countries */
+                        <g className="transition-all duration-700 ease-in-out">
+                          {worldPaths.map((country) => {
+                            const isID = country.id === 'IDN';
+                            return (
+                              <path
+                                key={country.id}
+                                d={country.d}
+                                fill={
+                                  isID
+                                    ? isDark ? "#00f0ff30" : "#0284c730"
+                                    : isDark ? "#0c233f" : "#cbd5e1"
+                                }
+                                stroke={
+                                  isID
+                                    ? isDark ? "#00f0ff" : "#0284c7"
+                                    : isDark ? "#0ea5e9" : "#0284c7"
+                                }
+                                strokeWidth={isID ? "1.8" : "0.7"}
+                                opacity={isID ? 1 : 0.8}
+                                className="transition-colors duration-300"
+                              />
+                            );
+                          })}
+
+                          {/* Target Node: Indonesia Masdika Hub */}
+                          <g transform={`translate(${targetHubCoords[0]}, ${targetHubCoords[1]})`}>
+                            <circle r="22" fill="url(#target-beacon)" className="animate-ping" opacity="0.85" />
+                            <circle r="5.5" fill={isDark ? "#06b6d4" : "#0284c7"} stroke="#ffffff" strokeWidth="1.5" />
+                            <text x="12" y="-6" fill={isDark ? "#38bdf8" : "#0369a1"} fontSize="10" fontWeight="bold" fontFamily="monospace">
+                              Masdika Edge [ID]
+                            </text>
+                          </g>
+                        </g>
+                      )}
+
+                      {/* Animated FortiGuard Parabolic Laser Arcs */}
+                      {lasers.map(laser => {
+                        const t = laser.progress;
+                        const currentX = (1 - t) * (1 - t) * laser.x1 + 2 * (1 - t) * t * laser.cx + t * t * laser.x2;
+                        const currentY = (1 - t) * (1 - t) * laser.y1 + 2 * (1 - t) * t * laser.cy + t * t * laser.y2;
+
+                        return (
+                          <g key={laser.id} filter="url(#laser-glow)">
+                            {/* Trajectory Guide Arc */}
+                            <path
+                              d={`M ${laser.x1},${laser.y1} Q ${laser.cx},${laser.cy} ${laser.x2},${laser.y2}`}
+                              fill="none"
+                              stroke={laser.color}
+                              strokeWidth={laser.isReal ? "2.4" : "1.2"}
+                              strokeDasharray={laser.isReal ? "6,3" : "4,4"}
+                              opacity={laser.isReal ? "0.95" : "0.45"}
+                            />
+
+                            {/* Source Origin Beacon */}
+                            <circle cx={laser.x1} cy={laser.y1} r={laser.isReal ? "4.5" : "3"} fill={laser.color} opacity="0.95" />
+
+                            {/* Missile / Laser Head Projectile */}
+                            <circle cx={currentX} cy={currentY} r={laser.isReal ? "5.5" : "4"} fill="#ffffff" stroke={laser.color} strokeWidth={laser.isReal ? "2.5" : "1.8"} />
+                            <circle cx={currentX} cy={currentY} r={laser.isReal ? "12" : "7"} fill={laser.color} opacity={laser.isReal ? "0.45" : "0.25"} />
+
+                            {/* Refined Glass HUD Callout for Laser */}
+                            {laser.isReal && (
+                              <g transform={`translate(${currentX}, ${currentY - 18})`}>
+                                <rect
+                                  x="-65"
+                                  y="-10"
+                                  width="130"
+                                  height="20"
+                                  rx="4"
+                                  fill={isDark ? "rgba(8, 23, 44, 0.9)" : "rgba(255, 255, 255, 0.95)"}
+                                  stroke="rgba(244, 63, 94, 0.6)"
+                                  strokeWidth="1"
+                                />
+                                <text
+                                  x="0"
+                                  y="3"
+                                  textAnchor="middle"
+                                  fill={isDark ? "#f43f5e" : "#e11d48"}
+                                  fontSize="9"
+                                  fontWeight="bold"
+                                  fontFamily="monospace"
+                                >
+                                  {laser.sourceCity} [{laser.sourceCode}]
+                                </text>
+                              </g>
+                            )}
+                          </g>
+                        );
+                      })}
+
+                      {/* Impact Shockwaves on Target Hit (Guaranteed Unique Keys) */}
+                      {impacts.map(impact => (
+                        <circle
+                          key={impact.id}
+                          cx={impact.x}
+                          cy={impact.y}
+                          r={impact.radius}
+                          fill="none"
+                          stroke={impact.color}
+                          strokeWidth="2"
+                          opacity={impact.opacity}
+                        />
+                      ))}
+                    </g>
                   </svg>
                 </div>
 
@@ -811,12 +936,50 @@ export default function ThreatMapPage() {
 
               </div>
 
-              {/* Right Sidebars: Top Threats & Targeted Sectors (4 Cols) */}
+              {/* Right Sidebars: Top Attack Origins (FlagCDN) & Top Threats (4 Cols) */}
               <div className={cn(
                 "lg:col-span-4 p-4 sm:p-6 space-y-6 transition-colors duration-200",
                 isDark ? "bg-[#061222]/95" : "bg-white"
               )}>
                 
+                {/* Top Countries / Attack Origins (FortiGuard Threat Map Style) */}
+                <div>
+                  <div className="flex items-center justify-between mb-3 border-b border-[var(--border-subtle)] pb-2">
+                    <span className="font-mono text-xs font-bold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-1.5">
+                      <Globe className="w-3.5 h-3.5 text-cyan-500" />
+                      Top Attack Origins
+                    </span>
+                    <span className="text-[10px] font-mono text-[var(--text-secondary)]">Last 24 Hours</span>
+                  </div>
+
+                  <div className="space-y-2.5">
+                    {topCountries.map((c, idx) => (
+                      <div key={idx} className="group cursor-default">
+                        <div className="flex items-center justify-between text-xs font-mono mb-1">
+                          <span className="flex items-center gap-2 truncate max-w-[210px] text-[var(--text-secondary)] group-hover:text-cyan-500 transition-colors">
+                            <CountryFlag code={c.code} />
+                            <span className="truncate">{c.name}</span>
+                          </span>
+                          <span className="font-bold text-cyan-600 dark:text-cyan-400 shrink-0 ml-2">
+                            {c.count}
+                          </span>
+                        </div>
+                        <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                          <div
+                            className={cn(
+                              "h-full rounded-full transition-all duration-500",
+                              idx === 0
+                                ? "bg-gradient-to-r from-cyan-500 to-emerald-400"
+                                : "bg-gradient-to-r from-cyan-600 to-cyan-400"
+                            )}
+                            style={{ width: `${c.percent}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Top Threats Widget */}
                 <div>
                   <div className="flex items-center justify-between mb-3 border-b border-[var(--border-subtle)] pb-2">
@@ -828,7 +991,7 @@ export default function ThreatMapPage() {
                   </div>
 
                   <div className="space-y-2.5">
-                    {topThreats.map((threat, idx) => (
+                    {topThreats.slice(0, 6).map((threat, idx) => (
                       <div key={idx} className="group cursor-default">
                         <div className="flex items-center justify-between text-xs font-mono mb-1">
                           <span className="truncate max-w-[210px] text-[var(--text-secondary)] group-hover:text-cyan-500 transition-colors">
@@ -847,38 +1010,6 @@ export default function ThreatMapPage() {
                                 : "bg-gradient-to-r from-cyan-500 to-cyan-300"
                             )}
                             style={{ width: `${threat.percent}%` }}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Top Targeted Industries */}
-                <div>
-                  <div className="flex items-center justify-between mb-3 border-b border-[var(--border-subtle)] pb-2">
-                    <span className="font-mono text-xs font-bold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-1.5">
-                      <Layers className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
-                      Top Targeted Sectors
-                    </span>
-                    <span className="text-[10px] font-mono text-[var(--text-secondary)]">Telemetry</span>
-                  </div>
-
-                  <div className="space-y-2.5">
-                    {targetedIndustries.map((ind, idx) => (
-                      <div key={idx} className="group cursor-default">
-                        <div className="flex items-center justify-between text-xs font-mono mb-1">
-                          <span className="truncate max-w-[210px] text-[var(--text-secondary)] group-hover:text-cyan-500 transition-colors">
-                            {ind.name}
-                          </span>
-                          <span className="font-bold text-cyan-600 dark:text-cyan-400 shrink-0 ml-2">
-                            {ind.count}
-                          </span>
-                        </div>
-                        <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-                          <div
-                            className="h-full rounded-full bg-gradient-to-r from-cyan-600 to-cyan-400 transition-all duration-500"
-                            style={{ width: `${ind.percent}%` }}
                           />
                         </div>
                       </div>
@@ -962,7 +1093,7 @@ export default function ThreatMapPage() {
                 </div>
               </div>
 
-              {/* Live Streaming Table (Clean, Non-Garish Enterprise Style) */}
+              {/* Live Streaming Table with Original Country Flags (FortiGuard Style) */}
               <div className="overflow-x-auto rounded-xl border border-[var(--border-primary)] bg-[var(--surface)]">
                 <table className="w-full text-left font-mono text-xs text-[var(--text-primary)]">
                   <thead className={cn(
@@ -1009,29 +1140,23 @@ export default function ThreatMapPage() {
                             </div>
                           </td>
                           <td className="py-2.5 px-4 whitespace-nowrap">
-                            <div className="flex flex-col">
-                              <span className="flex items-center gap-1.5 font-bold">
-                                <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30">
-                                  {atk.sourceCode}
-                                </span>
-                                <span className="text-[var(--text-primary)]">
-                                  {atk.sourceCity}
-                                </span>
-                              </span>
+                            <div className="flex items-center gap-2">
+                              <CountryFlag code={atk.sourceCode} />
+                              <span className="text-[var(--text-primary)] font-bold">{atk.sourceCity}</span>
+                              <span className="text-[10px] text-cyan-600 dark:text-cyan-400 font-mono">[{atk.sourceCode}]</span>
                               {atk.sourceIp && (
-                                <span className="text-[10px] text-[var(--text-secondary)] font-mono">
-                                  IP: {atk.sourceIp}
+                                <span className="text-[10px] text-[var(--text-secondary)] font-mono ml-1">
+                                  ({atk.sourceIp})
                                 </span>
                               )}
                             </div>
                           </td>
                           <td className="py-2.5 px-4 whitespace-nowrap">
-                            <span className="flex items-center gap-1.5 text-cyan-600 dark:text-cyan-300">
-                              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30">
-                                {atk.targetCode}
-                              </span>
+                            <div className="flex items-center gap-2 text-cyan-600 dark:text-cyan-300">
+                              <CountryFlag code={atk.targetCode} />
                               <span>{atk.targetCity}</span>
-                            </span>
+                              <span className="text-[10px] text-cyan-500 font-mono">[{atk.targetCode}]</span>
+                            </div>
                           </td>
                           <td className="py-2.5 px-4 whitespace-nowrap">
                             <span
