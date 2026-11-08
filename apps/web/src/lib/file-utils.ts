@@ -40,9 +40,9 @@ export function deleteLocalFile(fileUrl: string | null | undefined) {
     const baseDir = getUploadsDir();
     const filePath = path.resolve(baseDir, filename);
 
-    // Bulletproof Path Traversal prevention
-    // Ensure the resolved absolute path still resides within our base uploads directory
-    if (!filePath.toLowerCase().startsWith(baseDir.toLowerCase())) {
+    // Bulletproof Path Traversal prevention (including sibling-directory prefix check)
+    const normalizedBase = path.resolve(baseDir) + path.sep;
+    if (!filePath.toLowerCase().startsWith(normalizedBase.toLowerCase())) {
       console.warn('[deleteLocalFile] Aborting: Path traversal detected or mismatch');
       return;
     }

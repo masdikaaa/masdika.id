@@ -5,6 +5,8 @@ import { prisma } from '@/lib/prisma';
 import { v4 as uuidv4 } from 'uuid';
 import { sendChatVerificationEmail } from '@/lib/email';
 import { isIpBlocked } from '@/lib/ip-check';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { encryptDeterministic } from '@/lib/encryption';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_REGEX = /^(\+62|62|0)8[1-9][0-9]{6,11}$/;
@@ -24,6 +26,14 @@ export async function POST(req: Request) {
       }
     } catch {
       // Non-fatal
+    }
+
+    // Rate limit session creation per IP (max 5 per 10 minutes)
+    if (!(await checkRateLimit('CHAT_SESSION_IP', ip, 5, 600))) {
+      return NextResponse.json(
+        { error: 'Too many chat session requests. Please wait a few minutes.' },
+        { status: 429 }
+      );
     }
 
     let body: Record<string, unknown>;
@@ -58,10 +68,14 @@ export async function POST(req: Request) {
       );
     }
 
-    // Check if email is blocked
+    const cleanName = name.toString().trim().substring(0, 100);
+    const cleanEmailStr = email.toString().trim().toLowerCase().substring(0, 254);
+
+    // Check if email is blocked (plaintext or deterministic-encrypted)
     try {
+      const encryptedEmail = encryptDeterministic(cleanEmailStr);
       const blockedEmail = await prisma.blockedUser.findFirst({
-        where: { type: 'EMAIL', value: email.toString().trim().toLowerCase() },
+        where: { type: 'EMAIL', value: { in: [cleanEmailStr, encryptedEmail] } },
       });
       if (blockedEmail) {
         return NextResponse.json(
@@ -73,14 +87,19 @@ export async function POST(req: Request) {
       // Non-fatal
     }
 
+    // Rate limit verification emails per target address (max 3 per 10 minutes)
+    if (!(await checkRateLimit('CHAT_SESSION_EMAIL', cleanEmailStr, 3, 600))) {
+      return NextResponse.json(
+        { error: 'Too many verification codes sent to this email. Please check your inbox.' },
+        { status: 429 }
+      );
+    }
+
     const sessionId = uuidv4();
     // Generate 6-digit OTP
     const otp = crypto.randomInt(100000, 1000000).toString();
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + 10); // 10 minutes expiry
-
-    const cleanName = name.toString().trim().substring(0, 100);
-    const cleanEmailStr = email.toString().trim().toLowerCase().substring(0, 254);
 
     const session = await prisma.chatSession.create({
       data: {

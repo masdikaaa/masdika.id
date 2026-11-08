@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth-middleware';
 import { promises as fs } from 'fs';
+import path from 'path';
 import { getTicketAttachmentStreamFromRustFS, downloadTicketAttachmentFromRustFS } from '@/lib/rustfs';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ filename: string }> }) {
@@ -12,7 +13,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ file
     const user = auth.user!;
     const resolvedParams = await params;
 
-    const filename = resolvedParams.filename;
+    const rawFilename = resolvedParams.filename || '';
+    const filename = path.basename(rawFilename);
+    if (!filename || filename !== rawFilename || filename.includes('\0') || filename === '.' || filename === '..') {
+      return new NextResponse('Invalid filename', { status: 400 });
+    }
 
     const attachment = await prisma.ticketAttachment.findFirst({
       where: { filename },
@@ -27,8 +32,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ file
       return new NextResponse('Not found', { status: 404 });
     }
 
-    // Check permissions
-    if (user.role !== 'ADMIN' && attachment.message.ticket.userId !== user.id) {
+    // Check permissions (ticket owner or admin/super_admin)
+    if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN' && attachment.message.ticket.userId !== user.id) {
       return new NextResponse('Forbidden', { status: 403 });
     }
 
@@ -59,13 +64,25 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ file
       });
     }
 
-    const filePath = attachment.path;
     let fileBuffer: Buffer | null = await downloadTicketAttachmentFromRustFS(filename);
     
     if (!fileBuffer) {
-      try {
-        fileBuffer = await fs.readFile(filePath);
-      } catch (e) {
+      const candidateDirs = [
+        path.resolve(process.cwd(), 'storage', 'tickets'),
+        path.resolve(process.cwd(), 'apps', 'web', 'storage', 'tickets'),
+        '/app/apps/web/storage/tickets',
+      ];
+      for (const dir of candidateDirs) {
+        const normalizedBase = path.resolve(dir) + path.sep;
+        const candidatePath = path.resolve(dir, filename);
+        if (candidatePath.toLowerCase().startsWith(normalizedBase.toLowerCase())) {
+          try {
+            fileBuffer = await fs.readFile(candidatePath);
+            break;
+          } catch {}
+        }
+      }
+      if (!fileBuffer) {
         return new NextResponse('File not found', { status: 404 });
       }
     }

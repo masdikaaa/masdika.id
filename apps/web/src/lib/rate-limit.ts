@@ -13,7 +13,8 @@
 
 import { redis } from './redis';
 
-/** In-memory fallback store */
+/** In-memory fallback store (bounded to prevent OOM DoS if Redis is unreachable) */
+const MAX_MEMORY_ENTRIES = 10_000;
 const memoryStore = new Map<string, { count: number; resetTime: number }>();
 
 /**
@@ -31,14 +32,16 @@ export async function checkRateLimit(
   maxHits: number,
   windowSec: number
 ): Promise<boolean> {
-  const redisKey = `rl:${prefix}:${key}`;
+  const safeKey = String(key || 'unknown').slice(0, 200);
+  const redisKey = `rl:${prefix}:${safeKey}`;
 
-  // ── Redis path ──────────────────────────────────────────────────────────────
+  // ── Redis path (atomic MULTI INCR + TTL with self-healing EXPIRE) ───────────
   if (redis) {
     try {
-      const current = await redis.incr(redisKey);
-      if (current === 1) {
-        // First hit in this window — set expiry
+      const txResult = await redis.multi().incr(redisKey).ttl(redisKey).exec();
+      const current = Number(txResult?.[0]?.[1] ?? 1);
+      const ttl = Number(txResult?.[1]?.[1] ?? -1);
+      if (current === 1 || ttl < 0) {
         await redis.expire(redisKey, windowSec);
       }
       return current <= maxHits;
@@ -56,9 +59,19 @@ export async function checkRateLimit(
   if (entry && now < entry.resetTime) {
     if (entry.count >= maxHits) return false;
     entry.count++;
-  } else {
-    memoryStore.set(redisKey, { count: 1, resetTime: now + windowMs });
+    return true;
   }
 
+  if (memoryStore.size >= MAX_MEMORY_ENTRIES) {
+    for (const [k, v] of memoryStore.entries()) {
+      if (now >= v.resetTime) memoryStore.delete(k);
+    }
+    if (memoryStore.size >= MAX_MEMORY_ENTRIES) {
+      const oldestKey = memoryStore.keys().next().value;
+      if (oldestKey) memoryStore.delete(oldestKey);
+    }
+  }
+
+  memoryStore.set(redisKey, { count: 1, resetTime: now + windowMs });
   return true;
 }

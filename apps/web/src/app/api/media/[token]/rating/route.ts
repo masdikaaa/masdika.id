@@ -3,8 +3,7 @@ import { getClientIp, getIpVariants } from "@/lib/get-ip";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { sendAdminMediaNotificationEmail } from "@/lib/email";
-import { cookies } from "next/headers";
-import { verifySessionToken } from "@/lib/session";
+import { requireAuth } from "@/lib/auth-middleware";
 import { decryptDeterministic } from "@/lib/encryption";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -21,37 +20,34 @@ export async function GET(
 
     const media = await prisma.secureMedia.findUnique({
       where: { token },
-      select: { id: true },
+      select: { id: true, isPublic: true, userId: true, expiresAt: true },
     });
     if (!media) return new NextResponse("Not Found", { status: 404 });
+    if (media.expiresAt && media.expiresAt < new Date()) {
+      return new NextResponse("Link has expired", { status: 410 });
+    }
+
+    const sessionAuth = await requireAuth({ allowedRoles: ["ADMIN", "USER"] });
+    if (!media.isPublic) {
+      const isAuthorized =
+        !sessionAuth.error &&
+        sessionAuth.user &&
+        (sessionAuth.user.role === "ADMIN" || sessionAuth.user.role === "SUPER_ADMIN" || sessionAuth.user.id === media.userId);
+      if (!isAuthorized) {
+        return new NextResponse("Forbidden: This file is private", { status: 403 });
+      }
+    }
 
     const ip = getClientIp(req);
     const ipVariants = getIpVariants(ip);
     let emailParam = req.nextUrl.searchParams.get("email");
 
-    // Auto-detect logged-in customer session for GET if emailParam not provided
-    if (!emailParam) {
+    // Auto-detect logged-in active customer session for GET if emailParam not provided
+    if (!emailParam && !sessionAuth.error && sessionAuth.user?.email) {
       try {
-        const cookieStore = await cookies();
-        const tokenCookie = cookieStore.get("admin_session")?.value;
-        if (tokenCookie) {
-          const userId = verifySessionToken(tokenCookie);
-          if (userId) {
-            const user = await prisma.user.findUnique({
-              where: { id: userId },
-              select: { email: true },
-            });
-            if (user?.email) {
-              try {
-                emailParam = (decryptDeterministic(user.email) || user.email).toLowerCase().trim();
-              } catch {
-                emailParam = user.email.toLowerCase().trim();
-              }
-            }
-          }
-        }
+        emailParam = (decryptDeterministic(sessionAuth.user.email) || sessionAuth.user.email).toLowerCase().trim();
       } catch {
-        // ignore
+        emailParam = sessionAuth.user.email.toLowerCase().trim();
       }
     }
 
@@ -134,6 +130,8 @@ export async function POST(
         id: true,
         originalName: true,
         token: true,
+        isPublic: true,
+        expiresAt: true,
         userId: true,
         user: {
           select: {
@@ -145,54 +143,37 @@ export async function POST(
       },
     });
     if (!media) return new NextResponse("Not Found", { status: 404 });
+    if (media.expiresAt && media.expiresAt < new Date()) {
+      return new NextResponse("Link has expired", { status: 410 });
+    }
+
+    const sessionAuth = await requireAuth({ allowedRoles: ["ADMIN", "USER"] });
+    if (!media.isPublic) {
+      const isAuthorized =
+        !sessionAuth.error &&
+        sessionAuth.user &&
+        (sessionAuth.user.role === "ADMIN" || sessionAuth.user.role === "SUPER_ADMIN" || sessionAuth.user.id === media.userId);
+      if (!isAuthorized) {
+        return NextResponse.json({ error: "Forbidden: This file is private" }, { status: 403 });
+      }
+    }
 
     const body = await req.json().catch(() => null);
     const ratingVal = Number(body?.rating);
-    let email = body?.email ? String(body.email).trim().toLowerCase() : null;
 
-    // 1. Auto-detect logged-in customer session
-    if (!email) {
+    // SECURITY: Only associate an email with a rating from an authenticated active session.
+    // Never accept unverified body.email or guess identity from global LoginLog IPs.
+    let email: string | null = null;
+    if (!sessionAuth.error && sessionAuth.user?.email) {
       try {
-        const cookieStore = await cookies();
-        const tokenCookie = cookieStore.get("admin_session")?.value;
-        if (tokenCookie) {
-          const userId = verifySessionToken(tokenCookie);
-          if (userId) {
-            const user = await prisma.user.findUnique({
-              where: { id: userId },
-              select: { email: true },
-            });
-            if (user?.email) {
-              try {
-                email = (decryptDeterministic(user.email) || user.email).toLowerCase().trim();
-              } catch {
-                email = user.email.toLowerCase().trim();
-              }
-            }
-          }
-        }
+        email = (decryptDeterministic(sessionAuth.user.email) || sessionAuth.user.email).toLowerCase().trim();
       } catch {
-        // ignore
+        email = sessionAuth.user.email.toLowerCase().trim();
       }
     }
 
-    // 2. Fallback: Auto-associate with customer from loginLog if IP matches a known login
-    if (!email && ip !== "unknown") {
-      try {
-        const recentLogin = await prisma.loginLog.findFirst({
-          where: { ipAddress: ip, success: true },
-          orderBy: { createdAt: "desc" },
-        });
-        if (recentLogin?.emailAttempt && recentLogin.emailAttempt !== "unknown") {
-          email = recentLogin.emailAttempt.toLowerCase().trim();
-        }
-      } catch {
-        // ignore
-      }
-    }
-
-    if (!ratingVal || ratingVal < 1 || ratingVal > 5) {
-      return NextResponse.json({ error: "Rating must be between 1 and 5" }, { status: 400 });
+    if (!Number.isInteger(ratingVal) || ratingVal < 1 || ratingVal > 5) {
+      return NextResponse.json({ error: "Rating must be an integer between 1 and 5" }, { status: 400 });
     }
 
     // Strict Anti-Abuse: Check if rating already exists by email or IP variants

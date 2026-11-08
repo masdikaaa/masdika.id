@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
@@ -10,7 +11,7 @@ import {
 
 function generateOrderId(prefix: string = 'INV') {
   const timestamp = Date.now().toString();
-  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+  const random = crypto.randomBytes(4).toString('hex').toUpperCase();
   return `${prefix}-${timestamp}-${random}`;
 }
 
@@ -126,11 +127,37 @@ export async function POST(req: NextRequest) {
     try {
       await prisma.$transaction(async (tx) => {
         if (initialStatus === 'ACTIVE' && currentSub) {
-          await tx.subscription.update({ where: { id: currentSub.id }, data: { status: 'UPGRADED' } });
+          const upgraded = await tx.subscription.updateMany({
+            where: { id: currentSub.id, userId, status: 'ACTIVE' },
+            data: { status: 'UPGRADED' }
+          });
+          if (upgraded.count === 0) {
+            throw new Error("SUB_ALREADY_UPGRADED");
+          }
         }
 
         if (initialStatus === 'ACTIVE' && suspendedSub) {
-          await tx.subscription.update({ where: { id: suspendedSub.id }, data: { status: 'RECOVERED' } });
+          const recovered = await tx.subscription.updateMany({
+            where: { id: suspendedSub.id, userId, status: 'SUSPENDED' },
+            data: { status: 'RECOVERED' }
+          });
+          if (recovered.count === 0) {
+            throw new Error("SUB_ALREADY_UPGRADED");
+          }
+        }
+
+        // Enforce 730h requiredBalance atomically inside transaction even when credit reduces totalAmount to 0!
+        if (isBalancePayment) {
+          const updateResult = await tx.user.updateMany({
+            where: { id: userId, balance: { gte: requiredBalance } },
+            data: {
+              ...(totalAmount > 0 ? { balance: { decrement: totalAmount } } : {})
+            }
+          });
+
+          if (updateResult.count === 0) {
+            throw new Error("INSUFFICIENT_BALANCE");
+          }
         }
 
         const subscription = await tx.subscription.create({
@@ -147,12 +174,12 @@ export async function POST(req: NextRequest) {
 
         if (initialStatus === 'ACTIVE' && upgradeSubscriptionId) {
           await tx.vpsService.updateMany({
-            where: { subscriptionId: upgradeSubscriptionId },
+            where: { subscriptionId: upgradeSubscriptionId, userId },
             data: { subscriptionId: subscription.id }
           });
         }
 
-        const invoice = await tx.invoice.create({
+        await tx.invoice.create({
           data: {
             invoiceNumber: merchantOrderId,
             userId,
@@ -184,23 +211,13 @@ export async function POST(req: NextRequest) {
             }
           });
         }
-
-        if (isBalancePayment && totalAmount > 0) {
-          const updateResult = await tx.user.updateMany({
-            where: { id: userId, balance: { gte: totalAmount } },
-            data: { balance: { decrement: totalAmount } }
-          });
-
-          if (updateResult.count === 0) {
-            throw new Error("INSUFFICIENT_BALANCE");
-          }
-        }
-
-
       });
     } catch (txError: any) {
       if (txError.message === "INSUFFICIENT_BALANCE") {
-        return NextResponse.json({ error: "Insufficient account balance" }, { status: 400 });
+        return NextResponse.json({ error: `A minimum balance of Rp ${requiredBalance.toLocaleString('id-ID')} is required.` }, { status: 400 });
+      }
+      if (txError.message === "SUB_ALREADY_UPGRADED") {
+        return NextResponse.json({ error: "Subscription was already upgraded concurrently." }, { status: 409 });
       }
 
       throw txError;

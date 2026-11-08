@@ -33,15 +33,10 @@ export default function LoginPage() {
   }, []);
 
   useEffect(() => {
-    const pending = sessionStorage.getItem("pending2FA");
-    if (pending) {
-      try {
-        const data = JSON.parse(pending);
-        setEmail(data.email);
-        setPassword(data.password);
-        setRememberMe(data.rememberMe);
-        setShow2FA(true);
-      } catch (e) { }
+    sessionStorage.removeItem("pending2FA");
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("requires2fa") === "1") {
+      setShow2FA(true);
     }
   }, []);
 
@@ -49,34 +44,40 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
+      const payload = show2FA
+        ? { twoFactorCode }
+        : {
+            email,
+            password,
+            rememberMe,
+            turnstileToken,
+            _hp: "",
+            _ts: formLoadTimeRef.current,
+          };
+
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          password,
-          rememberMe,
-          twoFactorCode: show2FA ? twoFactorCode : undefined,
-          turnstileToken,
-          _hp: "",
-          _ts: formLoadTimeRef.current,
-        }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (res.ok) {
         if (data.requires2FA) {
-          sessionStorage.setItem("pending2FA", JSON.stringify({ email, password, rememberMe }));
+          setPassword("");
           setShow2FA(true);
           setLoading(false);
           toast.info("Please enter your 2FA code");
           return;
         }
-        sessionStorage.removeItem("pending2FA");
         toast.success("Login successful! Redirecting...");
-        if (data.user?.role === "ADMIN") router.push("/admin");
+        if (data.user?.role === "ADMIN" || data.user?.role === "SUPER_ADMIN") router.push("/admin");
         else router.push("/dashboard");
         router.refresh();
       } else {
+        if (res.status === 401 && show2FA) {
+          setShow2FA(false);
+          setTwoFactorCode("");
+        }
         toast.error(data.error || "Invalid email or password!");
         setLoading(false);
       }
@@ -315,17 +316,19 @@ export default function LoginPage() {
               )}
 
               {/* Turnstile */}
-              <div className="pt-1 w-full min-w-0 flex justify-center px-px">
-                {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
-                  <Turnstile
-                    siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
-                    onSuccess={(token) => setTurnstileToken(token)}
-                    options={{ theme: isDark ? "dark" : "light", size: "flexible" }}
-                    className="w-full"
-                    style={{ width: "100%" }}
-                  />
-                )}
-              </div>
+              {!show2FA && (
+                <div className="pt-1 w-full min-w-0 flex justify-center px-px">
+                  {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+                    <Turnstile
+                      siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+                      onSuccess={(token) => setTurnstileToken(token)}
+                      options={{ theme: isDark ? "dark" : "light", size: "flexible" }}
+                      className="w-full"
+                      style={{ width: "100%" }}
+                    />
+                  )}
+                </div>
+              )}
 
               {/* Primary Submit Button */}
               <button

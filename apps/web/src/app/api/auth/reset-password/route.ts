@@ -9,7 +9,7 @@ export async function POST(req: Request) {
   try {
     const { token, password } = await req.json();
 
-    if (!token || !password) {
+    if (!token || !password || typeof token !== 'string' || typeof password !== 'string') {
       return NextResponse.json({ error: 'Token and new password are required' }, { status: 400 });
     }
 
@@ -21,8 +21,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Too many attempts. Please try again later.' }, { status: 429 });
     }
 
-    if (password.length < 8) {
-      return NextResponse.json({ error: 'Password must be at least 8 characters long' }, { status: 400 });
+    if (password.length < 8 || password.length > 128) {
+      return NextResponse.json({ error: 'Password must be between 8 and 128 characters long' }, { status: 400 });
     }
 
     // Hash the incoming token to compare with stored hash
@@ -40,8 +40,7 @@ export async function POST(req: Request) {
 
     // Check if token is expired
     if (resetToken.expiresAt < new Date()) {
-      // Clean up expired token
-      await prisma.resetToken.delete({ where: { id: resetToken.id } });
+      await prisma.resetToken.delete({ where: { id: resetToken.id } }).catch(() => {});
       return NextResponse.json({ error: 'Reset link has expired. Please request a new one.' }, { status: 400 });
     }
 
@@ -53,25 +52,47 @@ export async function POST(req: Request) {
     // Hash the new password
     const hashedPassword = hashPassword(password);
 
-    // Update password and mark token as used in a transaction
-    await prisma.$transaction([
-      prisma.user.update({
-        where: { id: resetToken.userId },
-        data: { password: hashedPassword }
-      }),
-      prisma.resetToken.update({
-        where: { id: resetToken.id },
-        data: { usedAt: new Date() }
-      })
-    ]);
+    // Atomically claim token, update password, and revoke all existing sessions
+    try {
+      await prisma.$transaction(async (tx) => {
+        const claimed = await tx.resetToken.updateMany({
+          where: {
+            id: resetToken.id,
+            usedAt: null,
+            expiresAt: { gt: new Date() },
+          },
+          data: { usedAt: new Date() },
+        });
 
-    // Clean up all tokens for this user (invalidate any other pending resets)
-    await prisma.resetToken.deleteMany({
-      where: { 
-        userId: resetToken.userId,
-        id: { not: resetToken.id }
+        if (claimed.count === 0) {
+          throw new Error('TOKEN_ALREADY_USED');
+        }
+
+        await tx.user.update({
+          where: { id: resetToken.userId },
+          data: { password: hashedPassword },
+        });
+
+        // Revoke all active login sessions so compromised sessions are immediately invalidated
+        await tx.loginLog.updateMany({
+          where: { userId: resetToken.userId, isRevoked: false },
+          data: { isRevoked: true },
+        });
+
+        // Clean up any other pending reset tokens for this user
+        await tx.resetToken.deleteMany({
+          where: {
+            userId: resetToken.userId,
+            id: { not: resetToken.id },
+          },
+        });
+      });
+    } catch (txErr: any) {
+      if (txErr?.message === 'TOKEN_ALREADY_USED') {
+        return NextResponse.json({ error: 'This reset link has already been used' }, { status: 400 });
       }
-    });
+      throw txErr;
+    }
 
     return NextResponse.json({ success: true, message: 'Password has been reset successfully' });
   } catch (error) {

@@ -1,32 +1,36 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit } from "@/lib/rate-limit";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    const ip =
+      req.headers.get("cf-connecting-ip") ||
+      req.headers.get("x-real-ip") ||
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      "unknown";
+    const allowed = await checkRateLimit("PUBLIC_VOUCHER_VALIDATE", ip, 10, 300);
+    if (!allowed) {
+      return NextResponse.json({ success: false, error: "Too many attempts. Please try again later." }, { status: 429 });
+    }
+
     const { code } = await req.json();
 
-    if (!code || typeof code !== "string") {
+    if (!code || typeof code !== "string" || code.trim().length > 64) {
       return NextResponse.json({ success: false, error: "Voucher code is required" }, { status: 400 });
     }
 
     const voucher = await prisma.voucher.findUnique({
-      where: { code: code.toUpperCase() }
+      where: { code: code.trim().toUpperCase() }
     });
 
-    if (!voucher) {
-      return NextResponse.json({ success: false, error: "Invalid voucher code" }, { status: 404 });
-    }
-
-    if (!voucher.isActive) {
-      return NextResponse.json({ success: false, error: "Voucher code is inactive" }, { status: 400 });
-    }
-
-    if (voucher.validUntil && new Date(voucher.validUntil) < new Date()) {
-      return NextResponse.json({ success: false, error: "Voucher code has expired" }, { status: 400 });
-    }
-
-    if (voucher.maxUses > 0 && voucher.currentUses >= voucher.maxUses) {
-      return NextResponse.json({ success: false, error: "Voucher usage limit reached" }, { status: 400 });
+    if (
+      !voucher ||
+      !voucher.isActive ||
+      (voucher.validUntil && new Date(voucher.validUntil) < new Date()) ||
+      (voucher.maxUses > 0 && voucher.currentUses >= voucher.maxUses)
+    ) {
+      return NextResponse.json({ success: false, error: "Invalid or expired voucher code" }, { status: 400 });
     }
 
     return NextResponse.json({
@@ -37,7 +41,7 @@ export async function POST(req: Request) {
       }
     });
 
-  } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+  } catch {
+    return NextResponse.json({ success: false, error: "Failed to validate voucher" }, { status: 500 });
   }
 }

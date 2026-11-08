@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { ProxmoxClient } from "@/lib/proxmox";
+import { verifyCronSecret } from "@/lib/cron-auth";
+import { requireAuth } from "@/lib/auth-middleware";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +19,14 @@ export const dynamic = "force-dynamic";
  * - Proxmox Hypervisor Tasks (vzdump, qmrestore, qmsnapshot, qmrollback, qmdelsnapshot, qmclone)
  * are NEVER interrupted mid-flight by a container restart.
  */
-export async function GET() {
+export async function GET(req: Request) {
+  if (!verifyCronSecret(req)) {
+    const authResult = await requireAuth({ allowedRoles: ["ADMIN"] });
+    if (authResult.error) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+  }
+
   try {
     const STALE_THRESHOLD_MS = 15 * 60 * 1000; // 15 mins cutoff for stale operations
     const activeCutoff = new Date(Date.now() - STALE_THRESHOLD_MS);

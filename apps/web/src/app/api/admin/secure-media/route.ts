@@ -6,6 +6,17 @@ import { requireAuth } from '@/lib/auth-middleware';
 import { v4 as uuidv4 } from "uuid";
 import { searchMediaElastic, syncMediaToElastic } from "@/lib/sync-elasticsearch";
 import { deleteFromRustFS } from "@/lib/rustfs";
+import { hasForbiddenExtension } from "@/lib/upload-security";
+
+function sanitizeFolderPath(raw: unknown): string | null {
+  if (typeof raw !== "string") return null;
+  const trimmed = raw.trim();
+  if (!trimmed || trimmed.includes("\0") || trimmed.includes("\\")) return null;
+  const normalized = ("/" + trimmed).replace(/\/+/g, "/").replace(/\/+$/, "") || "/";
+  const segments = normalized.split("/").filter(Boolean);
+  if (segments.some((s) => s === "." || s === "..")) return null;
+  return normalized.slice(0, 500);
+}
 
 export async function GET(req: NextRequest) {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
@@ -131,21 +142,29 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
+  if (auth.impersonatedBy) return NextResponse.json({ error: "Forbidden while impersonating" }, { status: 403 });
 
   try {
-    const adminUser = auth.user!;
-
     const body = await req.json();
     const { action } = body;
 
     if (action === 'mkdir') {
       const { currentFolder, folderName } = body;
-      const sanitizedName = folderName.replace(/[/\\]/g, "").trim();
-      if (!sanitizedName) return NextResponse.json({ error: "Invalid folder name" }, { status: 400 });
+      const safeFolder = sanitizeFolderPath(currentFolder || '/');
+      if (!safeFolder) return NextResponse.json({ error: "Invalid parent folder path" }, { status: 400 });
+      const sanitizedName = typeof folderName === "string" ? folderName.replace(/[/\\\0]/g, "").trim().slice(0, 120) : "";
+      if (!sanitizedName || sanitizedName === "." || sanitizedName === "..") {
+        return NextResponse.json({ error: "Invalid folder name" }, { status: 400 });
+      }
 
       // Check if exists
       const existing = await prisma.secureMedia.findFirst({
-        where: { folderPath: currentFolder, originalName: sanitizedName, isFolder: true }
+        where: {
+          folderPath: safeFolder,
+          originalName: sanitizedName,
+          isFolder: true,
+          OR: [{ userId: null }, { user: { role: { in: ['ADMIN', 'SUPER_ADMIN'] } } }],
+        }
       });
       if (existing) return NextResponse.json({ error: "Folder already exists" }, { status: 400 });
 
@@ -155,7 +174,7 @@ export async function POST(req: NextRequest) {
           originalName: sanitizedName,
           mimeType: "inode/directory",
           size: 0,
-          folderPath: currentFolder,
+          folderPath: safeFolder,
           isFolder: true,
           token: uuidv4()
         }
@@ -166,11 +185,30 @@ export async function POST(req: NextRequest) {
 
     if (action === 'rename') {
       const { id, newName } = body;
-      const sanitizedName = newName.replace(/[/\\]/g, "").trim();
-      if (!sanitizedName) return NextResponse.json({ error: "Invalid name" }, { status: 400 });
+      const mediaId = parseInt(String(id), 10);
+      if (isNaN(mediaId)) return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+      const sanitizedName = typeof newName === "string" ? newName.replace(/[/\\\0]/g, "").trim().slice(0, 255) : "";
+      if (!sanitizedName || sanitizedName === "." || sanitizedName === "..") {
+        return NextResponse.json({ error: "Invalid name" }, { status: 400 });
+      }
+
+      const target = await prisma.secureMedia.findUnique({
+        where: { id: mediaId },
+        include: { user: { select: { role: true } } },
+      });
+      if (!target) return NextResponse.json({ error: "Media not found" }, { status: 404 });
+      if (target.userId !== null && target.user?.role !== 'ADMIN' && target.user?.role !== 'SUPER_ADMIN') {
+        return NextResponse.json({ error: "Cannot modify customer files from admin media route" }, { status: 403 });
+      }
+      if (!target.isFolder) {
+        const extCheck = hasForbiddenExtension(sanitizedName);
+        if (extCheck.forbidden) {
+          return NextResponse.json({ error: extCheck.reason || "Forbidden file extension" }, { status: 400 });
+        }
+      }
 
       const updated = await prisma.secureMedia.update({
-        where: { id: parseInt(id) },
+        where: { id: mediaId },
         data: { originalName: sanitizedName }
       });
       
@@ -181,9 +219,23 @@ export async function POST(req: NextRequest) {
 
     if (action === 'move') {
       const { id, newFolderPath } = body;
+      const mediaId = parseInt(String(id), 10);
+      if (isNaN(mediaId)) return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+      const safeFolderPath = sanitizeFolderPath(newFolderPath);
+      if (!safeFolderPath) return NextResponse.json({ error: "Invalid destination folder path" }, { status: 400 });
+
+      const target = await prisma.secureMedia.findUnique({
+        where: { id: mediaId },
+        include: { user: { select: { role: true } } },
+      });
+      if (!target) return NextResponse.json({ error: "Media not found" }, { status: 404 });
+      if (target.userId !== null && target.user?.role !== 'ADMIN' && target.user?.role !== 'SUPER_ADMIN') {
+        return NextResponse.json({ error: "Cannot modify customer files from admin media route" }, { status: 403 });
+      }
+
       const updated = await prisma.secureMedia.update({
-        where: { id: parseInt(id) },
-        data: { folderPath: newFolderPath }
+        where: { id: mediaId },
+        data: { folderPath: safeFolderPath }
       });
       syncMediaToElastic(updated.id).catch(err => console.error('Failed to sync move to elastic:', err));
       return NextResponse.json({ success: true, media: updated });
@@ -191,8 +243,20 @@ export async function POST(req: NextRequest) {
 
     if (action === 'togglePin') {
       const { id, isPinned } = body;
+      const mediaId = parseInt(String(id), 10);
+      if (isNaN(mediaId)) return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+
+      const target = await prisma.secureMedia.findUnique({
+        where: { id: mediaId },
+        include: { user: { select: { role: true } } },
+      });
+      if (!target) return NextResponse.json({ error: "Media not found" }, { status: 404 });
+      if (target.userId !== null && target.user?.role !== 'ADMIN' && target.user?.role !== 'SUPER_ADMIN') {
+        return NextResponse.json({ error: "Cannot modify customer files from admin media route" }, { status: 403 });
+      }
+
       const updated = await prisma.secureMedia.update({
-        where: { id: parseInt(id) },
+        where: { id: mediaId },
         data: { isPinned: Boolean(isPinned) }
       });
       syncMediaToElastic(updated.id).catch(err => console.error('Failed to sync pin to elastic:', err));
@@ -201,12 +265,20 @@ export async function POST(req: NextRequest) {
 
     if (action === 'toggleVisibility') {
       const { id, isPublic } = body;
-      const target = await prisma.secureMedia.findUnique({ where: { id: parseInt(id) } });
+      const mediaId = parseInt(String(id), 10);
+      if (isNaN(mediaId)) return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+      const target = await prisma.secureMedia.findUnique({
+        where: { id: mediaId },
+        include: { user: { select: { role: true } } },
+      });
       if (!target) return NextResponse.json({ error: "Media not found" }, { status: 404 });
+      if (target.userId !== null && target.user?.role !== 'ADMIN' && target.user?.role !== 'SUPER_ADMIN') {
+        return NextResponse.json({ error: "Cannot modify customer files from admin media route" }, { status: 403 });
+      }
       
       const nextPublic = typeof isPublic === 'boolean' ? isPublic : !target.isPublic;
       const updated = await prisma.secureMedia.update({
-        where: { id: parseInt(id) },
+        where: { id: mediaId },
         data: { isPublic: nextPublic }
       });
       syncMediaToElastic(updated.id).catch(err => console.error('Failed to sync visibility to elastic:', err));
@@ -223,6 +295,7 @@ export async function POST(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
+  if (auth.impersonatedBy) return NextResponse.json({ error: "Forbidden while impersonating" }, { status: 403 });
 
   try {
     const { searchParams } = new URL(req.url);
@@ -231,12 +304,12 @@ export async function DELETE(req: NextRequest) {
     if (!id) return NextResponse.json({ error: "ID is required" }, { status: 400 });
 
     const media = await prisma.secureMedia.findUnique({
-      where: { id: parseInt(id) },
+      where: { id: parseInt(id, 10) },
       include: { user: true },
     });
 
     if (!media) return NextResponse.json({ error: "Media not found" }, { status: 404 });
-    if (media.userId !== null && media.user?.role !== 'ADMIN') {
+    if (media.userId !== null && media.user?.role !== 'ADMIN' && media.user?.role !== 'SUPER_ADMIN') {
       return NextResponse.json({ error: "Cannot delete customer files from this route" }, { status: 403 });
     }
 

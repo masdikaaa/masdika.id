@@ -11,7 +11,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const user = authResult.user!;
 
     const { id } = await params;
-    const reservedIpId = parseInt(id);
+    const reservedIpId = Number(id);
+    if (!Number.isSafeInteger(reservedIpId) || reservedIpId <= 0) {
+      return NextResponse.json({ error: "Invalid Reserved IP ID" }, { status: 400 });
+    }
 
     // 1. Verify Reserved IP
     const reservedIp = await prisma.reservedIp.findFirst({
@@ -30,23 +33,27 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     if (!vps) {
        // Just detach it if VPS is already deleted
-       await prisma.reservedIp.update({
-         where: { id: reservedIp.id },
+       await prisma.reservedIp.updateMany({
+         where: { id: reservedIp.id, userId: user.id, isAttached: true },
          data: { isAttached: false, vpsId: null }
        });
        return NextResponse.json({ success: true, message: "IP detached successfully." });
     }
 
+    if (vps.isReseller) {
+      return NextResponse.json({ error: "Detaching Reserved IPs is not supported on fixed-plan Reseller instances" }, { status: 403 });
+    }
+
     if (vps.status === "TERMINATED") {
-       await prisma.reservedIp.update({
-         where: { id: reservedIp.id },
+       await prisma.reservedIp.updateMany({
+         where: { id: reservedIp.id, userId: user.id, isAttached: true },
          data: { isAttached: false, vpsId: null }
        });
        return NextResponse.json({ success: true, message: "IP detached from terminated VPS." });
     }
 
-    if (vps.status === "SUSPENDED") {
-      return NextResponse.json({ error: "Cannot detach IP from a suspended VPS" }, { status: 400 });
+    if (vps.status === "SUSPENDED" || vps.status === "PROVISIONING") {
+      return NextResponse.json({ error: `Cannot detach IP while VPS is ${vps.status}` }, { status: 400 });
     }
 
     const oldIpAssignment = vps.assignedIps.find(a => a.ipAddress === reservedIp.ipAddress);
@@ -74,42 +81,51 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "Failed to allocate new standard IP for the VPS." }, { status: 500 });
     }
 
-    // Run transaction
-    await prisma.$transaction(async (tx) => {
-      if (oldIpAssignment) {
-        await tx.vpsIpAssignment.delete({
-          where: { id: oldIpAssignment.id }
-        });
-      }
-
-      await tx.vpsIpAssignment.create({
-        data: {
-          vpsId: vps.id,
-          ipPoolId: pool.id,
-          ipAddress: newIpAddress,
-          isPrimary: true
-        }
-      });
-
-      await tx.reservedIp.update({
-        where: { id: reservedIp.id },
-        data: {
-          isAttached: false,
-          vpsId: null
-        }
-      });
-
-      // We add the cost of the new standard IP to the VPS billing
-      if (pricePerHour > 0) {
-        await tx.vpsService.update({
-          where: { id: vps.id },
+    // Run atomic transaction gated by isAttached: true
+    try {
+      await prisma.$transaction(async (tx) => {
+        const detached = await tx.reservedIp.updateMany({
+          where: { id: reservedIp.id, userId: user.id, isAttached: true },
           data: {
-            hourlyRate: { increment: pricePerHour },
-            stoppedRate: { increment: pricePerHour }
+            isAttached: false,
+            vpsId: null
           }
         });
+        if (detached.count === 0) {
+          throw new Error("ALREADY_DETACHED");
+        }
+
+        if (oldIpAssignment) {
+          await tx.vpsIpAssignment.deleteMany({
+            where: { id: oldIpAssignment.id, vpsId: vps.id }
+          });
+        }
+
+        await tx.vpsIpAssignment.create({
+          data: {
+            vpsId: vps.id,
+            ipPoolId: pool.id,
+            ipAddress: newIpAddress,
+            isPrimary: true
+          }
+        });
+
+        if (pricePerHour > 0) {
+          await tx.vpsService.update({
+            where: { id: vps.id },
+            data: {
+              hourlyRate: { increment: pricePerHour },
+              stoppedRate: { increment: pricePerHour }
+            }
+          });
+        }
+      });
+    } catch (txErr: any) {
+      if (txErr.message === "ALREADY_DETACHED") {
+        return NextResponse.json({ error: "Reserved IP was already detached concurrently" }, { status: 409 });
       }
-    });
+      throw txErr;
+    }
 
     // Proxmox config
     const server = await prisma.proxmoxServer.findFirst({ where: { isActive: true } });
@@ -121,7 +137,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         let targetNetIndex = -1;
         for (let i = 0; i <= 31; i++) {
            const ipconfig = vmConfig[`ipconfig${i}`];
-           if (ipconfig && ipconfig.includes(`ip=${reservedIp.ipAddress}/`)) {
+           if (
+             typeof ipconfig === "string" &&
+             (ipconfig.includes(`ip=${reservedIp.ipAddress}/`) || ipconfig.includes(`ip6=${reservedIp.ipAddress}/`))
+           ) {
               targetNetIndex = i;
               break;
            }
@@ -131,14 +150,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
            const cidrSuffix = pool.network.split('/')[1] || (ipVersion === 4 ? '24' : '64');
            const ipKey = ipVersion === 4 ? 'ip' : 'ip6';
            const gwKey = ipVersion === 4 ? 'gw' : 'gw6';
+           const mask = ipVersion === 4 ? '32' : '128';
+           const ipSetName = `ipfilter-net${targetNetIndex}`;
            
            await proxmox.configVm(vps.node, vps.vmid, {
               [`ipconfig${targetNetIndex}`]: `${ipKey}=${newIpAddress}/${cidrSuffix},${gwKey}=${pool.gateway}`
            });
+           await proxmox.createFirewallIpSet(vps.node, vps.vmid, ipSetName, `Allowed IPs for net${targetNetIndex}`).catch(() => {});
+           await proxmox.addIpToFirewallIpSet(vps.node, vps.vmid, `${newIpAddress}/${mask}`, ipSetName, "Replacement Primary IP").catch(() => {});
         }
       } catch (proxmoxError) {
          console.error("Proxmox detached IP assignment failed:", proxmoxError);
-         // Don't fail the request since DB is already updated
       }
     }
 

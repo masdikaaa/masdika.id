@@ -94,6 +94,24 @@ export async function attemptAutoUnsuspendVps(vpsId: number) {
       }
 
       await prisma.$transaction(async (tx) => {
+        const newExpires = new Date(now);
+        newExpires.setMonth(newExpires.getMonth() + 1);
+
+        // Atomically claim SUSPENDED -> RUNNING transition first to prevent concurrent double-deduction
+        const lockedVps = await tx.vpsService.updateMany({
+          where: { id: vps.id, status: 'SUSPENDED' },
+          data: {
+            status: 'RUNNING',
+            suspendReason: null,
+            terminationDate: null,
+            expiresAt: newExpires,
+            accumulatedCost: 0
+          }
+        });
+        if (lockedVps.count === 0) {
+          throw new Error('ALREADY_UNSUSPENDED');
+        }
+
         if (monthlyCost > 0) {
           const updateResult = await tx.user.updateMany({
             where: { id: user.id, balance: { gte: monthlyCost } },
@@ -111,20 +129,6 @@ export async function attemptAutoUnsuspendVps(vpsId: number) {
             data: { reference: 'PAYG_COMPLETED' }
           });
         }
-
-        const newExpires = new Date(now);
-        newExpires.setMonth(newExpires.getMonth() + 1);
-
-        await tx.vpsService.update({
-          where: { id: vps.id },
-          data: {
-            status: 'RUNNING',
-            suspendReason: null,
-            terminationDate: null,
-            expiresAt: newExpires,
-            accumulatedCost: 0
-          }
-        });
 
         const merchantOrderId = generateOrderId('INV-PAYG');
         await tx.invoice.create({
@@ -144,14 +148,15 @@ export async function attemptAutoUnsuspendVps(vpsId: number) {
         });
       });
     } else {
-      // Regular PAYG VPS
-      const hourlyRate = vps.hourlyRate || 0;
-      if (user.balance < hourlyRate || user.balance <= 0) {
+      // Regular PAYG VPS — charge 1st hour upfront on unsuspend to prevent free inter-cron bounce
+      const hourlyRate = Math.max(0, vps.hourlyRate || 0);
+      const minRequired = Math.max(hourlyRate, 1);
+      if (user.balance < minRequired) {
         return {
           success: false,
           unsuspended: false,
           reason: 'INSUFFICIENT_BALANCE',
-          requiredBalance: Math.max(hourlyRate, 1),
+          requiredBalance: minRequired,
           currentBalance: user.balance,
           message: 'Insufficient balance for Pay as You Go billing'
         };
@@ -161,6 +166,34 @@ export async function attemptAutoUnsuspendVps(vpsId: number) {
         const isCycleExpired = !vps.expiresAt || new Date(vps.expiresAt) <= now;
 
         if (isCycleExpired) {
+          const newExpires = new Date(now);
+          newExpires.setMonth(newExpires.getMonth() + 1);
+
+          const lockedVps = await tx.vpsService.updateMany({
+            where: { id: vps.id, status: 'SUSPENDED' },
+            data: {
+              status: 'RUNNING',
+              suspendReason: null,
+              terminationDate: null,
+              expiresAt: newExpires,
+              accumulatedCost: hourlyRate,
+              autoRenew: true
+            }
+          });
+          if (lockedVps.count === 0) {
+            throw new Error('ALREADY_UNSUSPENDED');
+          }
+
+          if (hourlyRate > 0) {
+            const deduct = await tx.user.updateMany({
+              where: { id: user.id, balance: { gte: hourlyRate } },
+              data: { balance: { decrement: hourlyRate } }
+            });
+            if (deduct.count === 0) {
+              throw new Error('INSUFFICIENT_BALANCE');
+            }
+          }
+
           const runningInvoice = vps.invoices[0];
           if (runningInvoice) {
             await tx.invoice.update({
@@ -169,28 +202,13 @@ export async function attemptAutoUnsuspendVps(vpsId: number) {
             });
           }
 
-          const newExpires = new Date(now);
-          newExpires.setMonth(newExpires.getMonth() + 1);
-
-          await tx.vpsService.update({
-            where: { id: vps.id },
-            data: {
-              status: 'RUNNING',
-              suspendReason: null,
-              terminationDate: null,
-              expiresAt: newExpires,
-              accumulatedCost: 0,
-              autoRenew: true
-            }
-          });
-
           const merchantOrderId = generateOrderId('INV-PAYG');
           await tx.invoice.create({
             data: {
               invoiceNumber: merchantOrderId,
               userId: user.id,
               vpsServiceId: vps.id,
-              amount: 0,
+              amount: hourlyRate,
               status: 'PAID',
               paymentMethod: 'Account Balance',
               merchantOrderId,
@@ -201,16 +219,38 @@ export async function attemptAutoUnsuspendVps(vpsId: number) {
             }
           });
         } else {
-          // Mid-cycle reactivated: cycle is still valid. Resume service and preserve current running invoice.
-          await tx.vpsService.update({
-            where: { id: vps.id },
+          // Mid-cycle reactivated: lock SUSPENDED -> RUNNING and deduct 1 hour upfront
+          const lockedVps = await tx.vpsService.updateMany({
+            where: { id: vps.id, status: 'SUSPENDED' },
             data: {
               status: 'RUNNING',
               suspendReason: null,
               terminationDate: null,
-              autoRenew: true
+              autoRenew: true,
+              ...(hourlyRate > 0 ? { accumulatedCost: { increment: hourlyRate } } : {})
             }
           });
+          if (lockedVps.count === 0) {
+            throw new Error('ALREADY_UNSUSPENDED');
+          }
+
+          if (hourlyRate > 0) {
+            const deduct = await tx.user.updateMany({
+              where: { id: user.id, balance: { gte: hourlyRate } },
+              data: { balance: { decrement: hourlyRate } }
+            });
+            if (deduct.count === 0) {
+              throw new Error('INSUFFICIENT_BALANCE');
+            }
+
+            const runningInvoice = vps.invoices[0];
+            if (runningInvoice) {
+              await tx.invoice.update({
+                where: { id: runningInvoice.id },
+                data: { amount: { increment: hourlyRate } }
+              });
+            }
+          }
         }
       });
     }
@@ -233,6 +273,9 @@ export async function attemptAutoUnsuspendVps(vpsId: number) {
     };
   } catch (err: any) {
     console.error(`[Auto-Unsuspend] Error unsuspending VPS ${vpsId}:`, err);
+    if (err.message === 'ALREADY_UNSUSPENDED') {
+      return { success: true, unsuspended: false, message: 'VPS was already unsuspended concurrently' };
+    }
     if (err.message === 'INSUFFICIENT_BALANCE') {
       return { success: false, unsuspended: false, reason: 'INSUFFICIENT_BALANCE', message: 'Insufficient balance' };
     }
@@ -293,6 +336,27 @@ export async function attemptAutoUnsuspendSubscription(subscriptionId: number) {
     }
 
     await prisma.$transaction(async (tx) => {
+      const newExpires = new Date(sub.expiresAt || now);
+      if (newExpires < now) newExpires.setTime(now.getTime());
+      if (isHourly) {
+        newExpires.setTime(newExpires.getTime() + 60 * 60 * 1000);
+      } else {
+        newExpires.setMonth(newExpires.getMonth() + 1);
+      }
+
+      const lockedSub = await tx.subscription.updateMany({
+        where: { id: sub.id, status: 'SUSPENDED' },
+        data: {
+          status: 'ACTIVE',
+          suspendReason: null,
+          terminationDate: null,
+          expiresAt: newExpires
+        }
+      });
+      if (lockedSub.count === 0) {
+        throw new Error('ALREADY_UNSUSPENDED');
+      }
+
       if (requiredAmount > 0) {
         const updateResult = await tx.user.updateMany({
           where: { id: user.id, balance: { gte: requiredAmount } },
@@ -332,24 +396,6 @@ export async function attemptAutoUnsuspendSubscription(subscriptionId: number) {
           }
         });
       }
-
-      const newExpires = new Date(sub.expiresAt || now);
-      if (newExpires < now) newExpires.setTime(now.getTime());
-      if (isHourly) {
-        newExpires.setTime(newExpires.getTime() + 60 * 60 * 1000);
-      } else {
-        newExpires.setMonth(newExpires.getMonth() + 1);
-      }
-
-      await tx.subscription.update({
-        where: { id: sub.id },
-        data: {
-          status: 'ACTIVE',
-          suspendReason: null,
-          terminationDate: null,
-          expiresAt: newExpires
-        }
-      });
     });
 
     // Send notifications
@@ -366,6 +412,9 @@ export async function attemptAutoUnsuspendSubscription(subscriptionId: number) {
       message: 'Subscription unsuspend successfully'
     };
   } catch (err: any) {
+    if (err.message === 'ALREADY_UNSUSPENDED') {
+      return { success: true, unsuspended: false, message: 'Subscription was already unsuspended concurrently' };
+    }
     console.error(`[Auto-Unsuspend] Error unsuspending Subscription ${subscriptionId}:`, err);
     if (err.message === 'INSUFFICIENT_BALANCE') {
       return { success: false, unsuspended: false, reason: 'INSUFFICIENT_BALANCE', message: 'Insufficient balance' };

@@ -10,8 +10,29 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       return NextResponse.json({ error: auth.error }, { status: auth.status });
     }
 
+    if (auth.impersonatedBy) {
+      return NextResponse.json({ error: "Invoice deletion is not permitted during impersonation" }, { status: 403 });
+    }
+
     const { id } = await params;
-    const invoiceId = parseInt(id);
+    const invoiceId = Number(id);
+    if (!Number.isSafeInteger(invoiceId) || invoiceId <= 0) {
+      return NextResponse.json({ error: "Invalid invoice ID" }, { status: 400 });
+    }
+
+    const existing = await prisma.invoice.findUnique({
+      where: { id: invoiceId },
+      select: { id: true, status: true }
+    });
+    if (!existing) {
+      return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
+    }
+    if (existing.status === "PAID" || existing.status === "PAYG_RUNNING") {
+      return NextResponse.json(
+        { error: "Paid or active PAYG ledger invoices cannot be deleted for financial audit compliance" },
+        { status: 400 }
+      );
+    }
 
     await prisma.invoice.delete({
       where: { id: invoiceId }

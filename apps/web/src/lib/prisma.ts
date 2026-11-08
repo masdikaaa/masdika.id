@@ -41,6 +41,24 @@ const pool = globalForPrisma3.pool ?? new Pool({
 
 const adapter = new PrismaPg(pool);
 
+const SAFE_PUBLIC_FALLBACK_MODELS = new Set([
+  'BlogPost',
+  'BlogCategory',
+  'BlogTag',
+  'Project',
+  'Experience',
+  'Education',
+  'Certification',
+  'Skill',
+  'Testimonial',
+  'Opportunity',
+  'CommunityGroup',
+  'Series',
+  'Episode',
+  'Announcement',
+  'Banner',
+]);
+
 export const prisma = (
   globalForPrisma3.prisma ??
   new PrismaClient({
@@ -60,10 +78,15 @@ export const prisma = (
           return dbCircuitBreaker.execute(
             () => query(args),
             (err) => {
-              console.warn(`[Prisma:CircuitBreaker] DB degraded on ${String(model)}.${operation}: ${err.message}`);
-              if (operation === 'findMany') return [] as any;
-              if (operation === 'findUnique' || operation === 'findFirst') return null as any;
-              if (operation === 'count') return 0 as any;
+              const modelName = String(model || '');
+              console.warn(`[Prisma:CircuitBreaker] DB degraded on ${modelName}.${operation}: ${err.message}`);
+              // SECURITY: Never fail-open (returning 0 / null / []) for auth, session revocation,
+              // blocked-user checks, quotas, billing, or infrastructure models.
+              if (SAFE_PUBLIC_FALLBACK_MODELS.has(modelName)) {
+                if (operation === 'findMany') return [] as any;
+                if (operation === 'findUnique' || operation === 'findFirst') return null as any;
+                if (operation === 'count') return 0 as any;
+              }
               throw err;
             }
           );

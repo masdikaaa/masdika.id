@@ -5,13 +5,12 @@ import { decryptDeterministic } from "@/lib/encryption";
 import { ProxmoxClient } from "@/lib/proxmox";
 import { logger } from "@/lib/logger";
 import { getEffectiveHourlyRate } from "@/lib/vps-billing-rate";
+import { verifyCronSecret } from "@/lib/cron-auth";
 
 export async function GET(req: Request) {
   try {
-    // Security: Fail-closed auth via Authorization header (never URL params to prevent log leakage)
-    const authHeader = req.headers.get('authorization');
-    const cronSecret = process.env.CRON_SECRET;
-    if (!cronSecret || !authHeader || authHeader !== `Bearer ${cronSecret}`) {
+    // Security: Constant-time fail-closed auth via Authorization header
+    if (!verifyCronSecret(req)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -24,6 +23,24 @@ export async function GET(req: Request) {
 
     if (interval === 'hourly' && now.getMinutes() !== 0) {
       return NextResponse.json({ success: true, message: "Skipped (Runs hourly at minute 0)" });
+    }
+
+    // Atomic idempotency bucket lock so overlapping cron executions within the same window NEVER double-bill PAYG VMs/IPs!
+    const currentBucket = interval === 'hourly'
+      ? `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}-${String(now.getUTCDate()).padStart(2, '0')}-${String(now.getUTCHours()).padStart(2, '0')}`
+      : `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}-${String(now.getUTCDate()).padStart(2, '0')}-${String(now.getUTCHours()).padStart(2, '0')}-${String(now.getUTCMinutes()).padStart(2, '0')}`;
+
+    await prisma.setting.upsert({
+      where: { key: 'hourly_billing_last_bucket' },
+      update: {},
+      create: { key: 'hourly_billing_last_bucket', value: '' }
+    });
+    const bucketLock = await prisma.setting.updateMany({
+      where: { key: 'hourly_billing_last_bucket', value: { not: currentBucket } },
+      data: { value: currentBucket }
+    });
+    if (bucketLock.count === 0) {
+      return NextResponse.json({ success: true, message: `Skipped (Bucket ${currentBucket} already billed)` });
     }
 
     // Auto-unsuspend any eligible suspended services with sufficient balance
@@ -495,6 +512,21 @@ export async function GET(req: Request) {
                   await proxmox.stopVm(vps.node, vps.vmid).catch(err => console.error(`Failed to stop VM for reserved IP suspension:`, err));
                 }
               }
+            } else {
+              // Detached Reserved IP whose owner has insufficient balance: finalize invoice and release back to pool
+              const runningInvoices = await prisma.invoice.findMany({
+                where: { userId: ip.userId, reference: 'PAYG_RUNNING', type: 'IP_RESERVATION' }
+              });
+              const targetInvoice = runningInvoices.find(inv => inv.details?.includes(`"reservedIpId":${ip.id}`));
+              if (targetInvoice) {
+                await prisma.invoice.update({
+                  where: { id: targetInvoice.id },
+                  data: { reference: 'PAYG_COMPLETED' }
+                }).catch(() => {});
+              }
+              await prisma.reservedIp.deleteMany({
+                where: { id: ip.id, isAttached: false }
+              }).catch(() => {});
             }
           } catch (suspendErr) {
             console.error(`Failed to suspend VPS for reserved IP ${ip.id} billing failure:`, suspendErr);

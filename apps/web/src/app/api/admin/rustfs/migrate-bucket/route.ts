@@ -10,6 +10,9 @@ export async function POST(req: NextRequest) {
   if (auth.error) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
+  if (auth.impersonatedBy) {
+    return NextResponse.json({ error: "Forbidden while impersonating" }, { status: 403 });
+  }
 
   try {
     const body = await req.json();

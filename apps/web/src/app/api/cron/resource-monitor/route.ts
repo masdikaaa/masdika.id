@@ -2,14 +2,12 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { ProxmoxClient } from '@/lib/proxmox';
 import { sendResourceAlertEmail } from '@/lib/email';
+import { verifyCronSecret } from '@/lib/cron-auth';
 
 export async function GET(req: Request) {
   try {
-    // Authenticate cron requests via secret header
-    const authHeader = req.headers.get('authorization');
-    const cronSecret = process.env.CRON_SECRET;
-    
-    if (!cronSecret || !authHeader || authHeader !== `Bearer ${cronSecret}`) {
+    // Authenticate cron requests via constant-time secret header check
+    if (!verifyCronSecret(req)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

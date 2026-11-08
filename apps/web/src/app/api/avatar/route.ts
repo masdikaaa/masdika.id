@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { prisma } from '@/lib/prisma';
 import { encryptDeterministic } from '@/lib/encryption';
+import { getClientIp } from '@/lib/get-ip';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 // Exact Google Material Account palette (matching Customer page avatars: Guardian Marx #004d40, finger red #ab47bc)
 const GOOGLE_COLORS = [
@@ -17,6 +19,44 @@ const GOOGLE_COLORS = [
   '#f29900', // Google Amber
 ];
 
+function escapeXml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function isTrustedAvatarUrl(rawImage: string, requestUrl: string): string | null {
+  if (rawImage.startsWith('/') && !rawImage.startsWith('//')) {
+    return new URL(rawImage, requestUrl).toString();
+  }
+  if (!rawImage.startsWith('https://')) return null;
+  try {
+    const parsed = new URL(rawImage);
+    if (parsed.protocol !== 'https:' || parsed.username || parsed.password) return null;
+    const host = parsed.hostname.toLowerCase();
+    const reqHost = new URL(requestUrl).hostname.toLowerCase();
+    const appHost = process.env.NEXT_PUBLIC_APP_URL
+      ? new URL(process.env.NEXT_PUBLIC_APP_URL).hostname.toLowerCase()
+      : '';
+    if (
+      host === reqHost ||
+      (appHost && host === appHost) ||
+      host === 'avatars.githubusercontent.com' ||
+      host === 'www.gravatar.com' ||
+      host === 'secure.gravatar.com' ||
+      host.endsWith('.googleusercontent.com')
+    ) {
+      return parsed.toString();
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 function getColor(seed: string): string {
   let hash = 0;
   for (let i = 0; i < seed.length; i++) {
@@ -28,7 +68,7 @@ function getColor(seed: string): string {
 function getInitial(name: string): string {
   const clean = (name || '').trim();
   if (!clean) return 'U';
-  return clean.charAt(0).toUpperCase();
+  return escapeXml(clean.charAt(0).toUpperCase());
 }
 
 function generateGoogleFlatAvatar(name: string, seed: string): string {
@@ -51,9 +91,16 @@ function generateGoogleFlatAvatar(name: string, seed: string): string {
 }
 
 export async function GET(req: Request) {
+  const ip = getClientIp(req);
+  if (!(await checkRateLimit('AVATAR', ip, 120, 60))) {
+    return new Response('Too Many Requests', { status: 429 });
+  }
+
   const { searchParams } = new URL(req.url);
-  const rawEmail = (searchParams.get('email') || '').trim().toLowerCase();
-  const name = searchParams.get('name') || 'User';
+  const rawEmail = (searchParams.get('email') || '').trim().toLowerCase().slice(0, 254);
+  const rawHash = (searchParams.get('hash') || '').trim().toLowerCase();
+  const validHash = /^[0-9a-f]{32}$/.test(rawHash) ? rawHash : '';
+  const name = (searchParams.get('name') || 'User').slice(0, 100);
 
   // 1. Check if user has a profile image in Masdika DB (e.g. Google OAuth image or custom upload)
   if (rawEmail) {
@@ -70,18 +117,20 @@ export async function GET(req: Request) {
       });
 
       if (user?.image) {
-        const redirectUrl = user.image.startsWith('http') ? user.image : new URL(user.image, req.url).toString();
-        return NextResponse.redirect(redirectUrl);
+        const safeRedirectUrl = isTrustedAvatarUrl(user.image, req.url);
+        if (safeRedirectUrl) {
+          return NextResponse.redirect(safeRedirectUrl);
+        }
       }
     } catch {
       // ignore db error
     }
   }
 
-  // 2. Check Gravatar
-  if (rawEmail) {
-    const hash = crypto.createHash('md5').update(rawEmail).digest('hex');
-    const gravatarUrl = `https://www.gravatar.com/avatar/${hash}?d=404&s=160`;
+  // 2. Check Gravatar (supports either rawEmail or pre-hashed MD5 from public comment avatars)
+  const gravatarHash = validHash || (rawEmail ? crypto.createHash('md5').update(rawEmail).digest('hex') : '');
+  if (gravatarHash) {
+    const gravatarUrl = `https://www.gravatar.com/avatar/${gravatarHash}?d=404&s=160`;
 
     try {
       const controller = new AbortController();
@@ -97,11 +146,13 @@ export async function GET(req: Request) {
   }
 
   // 3. Fallback: Return flat Google-style avatar matching Customer page exactly
-  const svg = generateGoogleFlatAvatar(name, rawEmail || name);
+  const svg = generateGoogleFlatAvatar(name, rawEmail || validHash || name);
   return new Response(svg, {
     status: 200,
     headers: {
       'Content-Type': 'image/svg+xml; charset=utf-8',
+      'Content-Security-Policy': "default-src 'none'; sandbox",
+      'X-Content-Type-Options': 'nosniff',
       'Cache-Control': 'no-cache, no-store, must-revalidate',
       'Pragma': 'no-cache',
       'Expires': '0',

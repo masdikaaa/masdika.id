@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     // Rate Limit: Max 5 VPC creations per 10 minutes per IP
-    const ip = req.headers.get("x-forwarded-for") || req.headers.get("cf-connecting-ip") || "unknown";
+    const ip = req.headers.get("cf-connecting-ip") || req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
     const allowed = await checkRateLimit("VPC_CREATE", ip, 5, 600);
     if (!allowed) {
       return NextResponse.json({ error: "Too many VPC creations. Please try again later." }, { status: 429 });
@@ -65,10 +65,21 @@ export async function POST(req: NextRequest) {
     if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
     const body = await req.json();
-    const { name, description, cidr, routerId, isNatEnabled } = body;
+    const { routerId, isNatEnabled } = body;
+    const name = typeof body.name === "string" ? body.name.trim() : "";
+    const description = typeof body.description === "string" ? body.description.trim().slice(0, 200) : undefined;
+    const rawCidr = typeof body.cidr === "string" ? body.cidr.trim() : "";
 
-    if (!name || !cidr) {
+    if (!name || !rawCidr) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    if (!/^[a-zA-Z0-9 _-]{2,40}$/.test(name)) {
+      return NextResponse.json({ error: "VPC name must be 2-40 characters and contain only letters, numbers, spaces, hyphens, or underscores." }, { status: 400 });
+    }
+
+    if (!rawCidr.includes("/")) {
+      return NextResponse.json({ error: "CIDR must include a subnet prefix (e.g. 10.0.0.0/24)." }, { status: 400 });
     }
 
     // Quota Limit: Max 5 VPCs per User Account (except Admin)
@@ -86,13 +97,17 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    if (!isPrivateIp(cidr)) {
+    if (!isPrivateIp(rawCidr)) {
       return NextResponse.json({ error: "Invalid CIDR. Only Private IP ranges (RFC 1918) are allowed (e.g. 10.x.x.x, 172.16-31.x.x, 192.168.x.x)" }, { status: 400 });
     }
 
     let parsedCidr;
     try {
-      parsedCidr = new Address4(cidr);
+      parsedCidr = new Address4(rawCidr);
+
+      if (parsedCidr.subnetMask < 16 || parsedCidr.subnetMask > 28) {
+        return NextResponse.json({ error: "CIDR prefix length must be between /16 and /28." }, { status: 400 });
+      }
 
       // Ensure the CIDR provided is a network address (e.g. 192.168.1.0) and not a host/gateway (e.g. 192.168.1.1)
       if (parsedCidr.addressMinusSuffix !== parsedCidr.startAddress().addressMinusSuffix) {
@@ -101,6 +116,8 @@ export async function POST(req: NextRequest) {
     } catch {
       return NextResponse.json({ error: "Invalid CIDR format" }, { status: 400 });
     }
+
+    const cidr = `${parsedCidr.addressMinusSuffix}/${parsedCidr.subnetMask}`;
 
     // Prevent overlapping CIDR within the same user account
     const userVpcs = await prisma.vpcNetwork.findMany({

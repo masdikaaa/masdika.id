@@ -20,6 +20,9 @@ function parseJson(val: string | null, fallback: any) {
 }
 
 export async function GET() {
+  const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
+  if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
+
   try {
     const [orderSetting, badgesSetting, devOrderSetting, devBadgesSetting, companyOrderSetting, companyBadgesSetting] = await Promise.all([
       prisma.setting.findUnique({ where: { key: ORDER_KEY } }),
@@ -72,6 +75,10 @@ export async function GET() {
 export async function PUT(req: Request) {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
+
+  if (auth.impersonatedBy) {
+    return NextResponse.json({ error: 'Cannot modify menu order during impersonation.' }, { status: 403 });
+  }
 
   try {
     const { order, badges, devOrder, devBadges, companyOrder, companyBadges } = await req.json();

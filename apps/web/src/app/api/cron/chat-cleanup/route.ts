@@ -1,15 +1,13 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { sendChatTranscriptEmail } from '@/lib/email';
+import { verifyCronSecret } from '@/lib/cron-auth';
 
 const IDLE_TIMEOUT_MS = 60 * 60 * 1000; // 1 hour
 
 export async function GET(req: Request) {
-  // Verify cron secret via Authorization header (NOT URL param to prevent log leakage)
-  const authHeader = req.headers.get('authorization');
-  const cronSecret = process.env.CRON_SECRET;
-
-  if (!cronSecret || !authHeader || authHeader !== `Bearer ${cronSecret}`) {
+  // Verify cron secret via Authorization header in constant time
+  if (!verifyCronSecret(req)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

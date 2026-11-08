@@ -22,21 +22,85 @@ export async function POST(
       include: { subscription: { include: { plan: true } }, vpsService: true }
     });
 
+    if (auth.impersonatedBy) {
+      return NextResponse.json({ error: 'Manual invoice validation is not permitted during impersonation' }, { status: 403 });
+    }
+
     if (!invoice) {
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
     }
 
-    if (invoice.status === 'PAID') {
-      return NextResponse.json({ error: 'Invoice already paid' }, { status: 400 });
+    if (invoice.status !== 'PENDING') {
+      return NextResponse.json({ error: `Only PENDING invoices can be validated (current status: ${invoice.status})` }, { status: 400 });
     }
 
-    // SECURITY: Use atomic updateMany to prevent Race Condition with incoming Webhooks
+    if (invoice.type === 'TOP_UP') {
+      let fee = 0;
+      if (invoice.paymentMethod) {
+        const pm = await prisma.paymentMethod.findFirst({ where: { name: invoice.paymentMethod } });
+        if (pm) fee = Math.max(0, pm.fee || 0);
+      }
+
+      let parsedDiscount = 0;
+      if (invoice.details) {
+        try {
+          const parsed = JSON.parse(invoice.details);
+          if (typeof parsed?.discountAmount === 'number' && parsed.discountAmount > 0) {
+            parsedDiscount = Math.floor(parsed.discountAmount);
+          }
+        } catch { /* ignore */ }
+      }
+
+      const netAmount = invoice.subtotal > 0
+        ? Math.max(0, invoice.subtotal - parsedDiscount)
+        : Math.max(0, invoice.amount - (invoice.taxAmount || 0) - fee);
+
+      const credited = await prisma.$transaction(async (tx) => {
+        const updatedInvoice = await tx.invoice.updateMany({
+          where: { id, status: 'PENDING' },
+          data: {
+            status: 'PAID',
+            paidAt: new Date(),
+            reference: `MANUAL_VALIDATION_BY_ADMIN_${auth.userId}`
+          }
+        });
+        if (updatedInvoice.count === 0) return false;
+
+        const currentUser = await tx.user.findUnique({
+          where: { id: invoice.userId },
+          select: { balance: true }
+        });
+        const safeIncrement = Math.max(
+          0,
+          Math.min(netAmount, 2_000_000_000 - (currentUser?.balance || 0))
+        );
+
+        await tx.user.update({
+          where: { id: invoice.userId },
+          data: { balance: { increment: safeIncrement } }
+        });
+        return true;
+      });
+
+      if (!credited) {
+        return NextResponse.json({ error: 'Invoice already paid or processed concurrently' }, { status: 400 });
+      }
+
+      syncInvoiceToElastic(id).catch(err => console.debug("ES sync validate:", err));
+
+      // Auto-unsuspend any suspended services (VPS, Subscriptions) if balance is now sufficient
+      const { attemptAutoUnsuspendAllForUser } = await import('@/lib/auto-unsuspend');
+      await attemptAutoUnsuspendAllForUser(invoice.userId).catch(console.error);
+      return NextResponse.json({ success: true });
+    }
+
+    // SECURITY: Use atomic updateMany strictly from PENDING to prevent Race Condition with incoming Webhooks
     const updatedInvoice = await prisma.invoice.updateMany({
-      where: { id, status: { not: 'PAID' } },
+      where: { id, status: 'PENDING' },
       data: {
         status: 'PAID',
         paidAt: new Date(),
-        reference: 'MANUAL_VALIDATION'
+        reference: `MANUAL_VALIDATION_BY_ADMIN_${auth.userId}`
       }
     });
 
@@ -47,23 +111,7 @@ export async function POST(
     // Sync to Elasticsearch
     syncInvoiceToElastic(id).catch(err => console.debug("ES sync validate:", err));
 
-    if (invoice.type === 'TOP_UP') {
-      let fee = 0;
-      if (invoice.paymentMethod) {
-        const pm = await prisma.paymentMethod.findFirst({ where: { name: invoice.paymentMethod } });
-        if (pm) fee = pm.fee;
-      }
-      const netAmount = Math.max(0, invoice.amount - fee);
-      
-      await prisma.user.update({
-        where: { id: invoice.userId },
-        data: { balance: { increment: netAmount } }
-      });
-
-      // Auto-unsuspend any suspended services (VPS, Subscriptions) if balance is now sufficient
-      const { attemptAutoUnsuspendAllForUser } = await import('@/lib/auto-unsuspend');
-      await attemptAutoUnsuspendAllForUser(invoice.userId).catch(console.error);
-    } else if (invoice.subscriptionId && invoice.subscription) {
+    if (invoice.subscriptionId && invoice.subscription) {
       await prisma.subscription.update({
         where: { id: invoice.subscriptionId },
         data: { status: 'ACTIVE' }

@@ -1,10 +1,25 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth-middleware";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
 const MAX_DOMAINS = 5;
+
+function isReservedPlatformDomain(domain: string): boolean {
+  const lower = domain.toLowerCase();
+  if (lower === "masdika.id" || lower.endsWith(".masdika.id")) return true;
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    try {
+      const appHost = new URL(process.env.NEXT_PUBLIC_APP_URL).hostname.toLowerCase().replace(/^www\./, "");
+      if (appHost && (lower === appHost || lower.endsWith(`.${appHost}`))) {
+        return true;
+      }
+    } catch {}
+  }
+  return false;
+}
 
 // GET: List user's domains with live status from Cloudflare
 export async function GET() {
@@ -90,19 +105,33 @@ export async function POST(req: Request) {
     if (auth.error) {
       return NextResponse.json({ error: auth.error }, { status: auth.status });
     }
+    if (auth.impersonatedBy) {
+      return NextResponse.json({ error: "Cannot add domains while impersonating a user" }, { status: 403 });
+    }
     const user = auth.user!;
 
-    const { domain } = await req.json();
+    const allowed = await checkRateLimit("CF_DOMAIN_ADD", String(user.id), 10, 3600);
+    if (!allowed) {
+      return NextResponse.json({ error: "Too many domain requests. Please try again later." }, { status: 429 });
+    }
 
-    if (!domain) {
+    const body = await req.json();
+    const rawDomain = typeof body?.domain === "string" ? body.domain.trim().toLowerCase() : "";
+
+    if (!rawDomain || rawDomain.length > 253) {
       return NextResponse.json({ error: "Domain name is required" }, { status: 400 });
     }
 
     // Validate domain format
     const domainRegex = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
-    if (!domainRegex.test(domain)) {
+    if (!domainRegex.test(rawDomain)) {
       return NextResponse.json({ error: "Invalid domain format" }, { status: 400 });
     }
+
+    if (isReservedPlatformDomain(rawDomain)) {
+      return NextResponse.json({ error: "This domain is reserved and cannot be added." }, { status: 400 });
+    }
+    const domain = rawDomain;
 
     const cfToken = process.env.CLOUDFLARE_API_TOKEN;
     const cfAccountId = process.env.CLOUDFLARE_ACCOUNT_ID;
@@ -172,38 +201,19 @@ export async function POST(req: Request) {
       nameServers = createData.result.name_servers || [];
       status = createData.result.status || "pending";
     } else {
-      // Check if zone already exists in Cloudflare (error code 1061)
+      // SECURITY: Never adopt pre-existing Cloudflare zones on error 1061.
+      // Doing so would allow an attacker to hijack platform-owned or unlinked zones in the Cloudflare account.
       const alreadyExists = createData.errors?.some((e: any) => e.code === 1061);
-
       if (alreadyExists) {
-        // Try to find the existing zone
-        const searchRes = await fetch(
-          `https://api.cloudflare.com/client/v4/zones?name=${encodeURIComponent(domain.toLowerCase())}`,
-          {
-            headers: {
-              'Authorization': `Bearer ${cfToken}`,
-              'Content-Type': 'application/json'
-            }
-          }
-        );
-        const searchData = await searchRes.json();
-
-        if (searchData.success && searchData.result?.length > 0) {
-          const zone = searchData.result[0];
-          zoneId = zone.id;
-          nameServers = zone.name_servers || [];
-          status = zone.status || "pending";
-        } else {
-          return NextResponse.json({ 
-            error: "This domain is already registered in another Cloudflare account. Please remove it from the other account first." 
-          }, { status: 400 });
-        }
-      } else {
-        console.error("Cloudflare API Error (Create Zone):", createData.errors);
-        return NextResponse.json({ 
-          error: createData.errors?.[0]?.message || "Failed to add domain to Cloudflare" 
+        return NextResponse.json({
+          error: "This domain is already registered on Cloudflare and cannot be claimed automatically. Please remove it from the existing Cloudflare account first."
         }, { status: 400 });
       }
+
+      console.error("Cloudflare API Error (Create Zone):", createData.errors);
+      return NextResponse.json({ 
+        error: createData.errors?.[0]?.message || "Failed to add domain to Cloudflare" 
+      }, { status: 400 });
     }
 
     // Save to database

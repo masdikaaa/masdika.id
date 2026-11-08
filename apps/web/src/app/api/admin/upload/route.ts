@@ -17,6 +17,7 @@ const ALL_ALLOWED_EXTENSIONS = new Set([...ALLOWED_IMAGE_EXTENSIONS, ...ALLOWED_
 export async function POST(req: Request) {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
+  if (auth.impersonatedBy) return NextResponse.json({ error: 'Forbidden while impersonating' }, { status: 403 });
 
   try {
     const formData = await req.formData();
@@ -135,6 +136,7 @@ export async function POST(req: Request) {
 export async function DELETE(req: Request) {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
+  if (auth.impersonatedBy) return NextResponse.json({ error: 'Forbidden while impersonating' }, { status: 403 });
 
   try {
     const { url } = await req.json();
@@ -155,12 +157,13 @@ export async function DELETE(req: Request) {
     if (uploadPath.startsWith('/uploads/')) {
       const filename = uploadPath.replace(/^\/uploads\//, '');
 
-      // Bulletproof path traversal prevention (same pattern as file-utils.ts)
+      // Bulletproof path traversal prevention (including sibling-directory prefix check)
       const baseDir = getUploadsDir();
+      const normalizedBase = path.resolve(baseDir) + path.sep;
       const filePath = path.resolve(baseDir, filename);
 
-      // Ensure the resolved path is still within the uploads directory
-      if (!filePath.toLowerCase().startsWith(baseDir.toLowerCase())) {
+      // Ensure the resolved path is strictly inside the uploads directory
+      if (!filePath.toLowerCase().startsWith(normalizedBase.toLowerCase())) {
         return NextResponse.json({ error: 'Invalid file path' }, { status: 400 });
       }
 

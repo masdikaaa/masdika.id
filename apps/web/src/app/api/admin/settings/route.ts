@@ -9,6 +9,9 @@ import { getUploadsDir } from '@/lib/file-utils';
 import { invalidateRustFSCache } from '@/lib/rustfs';
 import { invalidatePublicSettingsCache } from '@/lib/settings';
 import { revalidatePath } from 'next/cache';
+import { checkRateLimit } from '@/lib/rate-limit';
+
+const MASKED_SECRET = '••••••••';
 
 export async function GET() {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
@@ -24,9 +27,15 @@ export async function GET() {
       return acc;
     }, {});
 
+    // Never expose raw secrets in settings responses
+    settingsObj['twoFactorEnabled'] = settingsObj['twoFactorEnabled'] === 'true' ? 'true' : 'false';
+    delete settingsObj['twoFactorSecret'];
+    delete settingsObj['email_blast_smtp_pass'];
+
+    const hasRustFsSecret = Boolean(settingsObj['rustfs_secret_key'] || process.env.RUSTFS_SECRET_KEY);
     settingsObj['rustfs_endpoint'] = settingsObj['rustfs_endpoint'] || process.env.RUSTFS_ENDPOINT || '';
     settingsObj['rustfs_access_key'] = settingsObj['rustfs_access_key'] || process.env.RUSTFS_ACCESS_KEY || '';
-    settingsObj['rustfs_secret_key'] = settingsObj['rustfs_secret_key'] || process.env.RUSTFS_SECRET_KEY || '';
+    settingsObj['rustfs_secret_key'] = hasRustFsSecret ? MASKED_SECRET : '';
     settingsObj['rustfs_bucket'] = settingsObj['rustfs_bucket'] || process.env.RUSTFS_BUCKET || 'masdika-cdn';
     settingsObj['rustfs_media_bucket'] = settingsObj['rustfs_media_bucket'] || process.env.RUSTFS_MEDIA_BUCKET || 'masdika-media';
     settingsObj['rustfs_ticket_bucket'] = settingsObj['rustfs_ticket_bucket'] || process.env.RUSTFS_TICKET_BUCKET || 'masdika-ticket';
@@ -49,18 +58,43 @@ export async function PUT(req: Request) {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
+  if (auth.impersonatedBy) {
+    return NextResponse.json({ error: 'System settings cannot be modified during an impersonation session.' }, { status: 403 });
+  }
+
   try {
     const body = await req.json();
-    const { name, email, bio, twoFactorEnabled, profileImage, cv_url, setup2FA, verify2FA, social_facebook, social_twitter, social_linkedin, social_instagram, social_github, contact_email, contact_location, contact_phone, hero_title, hero_description, hero_typing_text, meta_description, meta_description_blog, meta_description_portfolio, meta_description_services, meta_description_opportunities, meta_description_resume, meta_description_contact, meta_description_community, meta_description_events, meta_description_vacancies, maintenance_mode, maintenance_message, vps_enabled, k3s_enabled, cdn_enabled, promo_banner_image, promo_banner_url, promo_banner_active, tax_rate, rustfs_endpoint, rustfs_access_key, rustfs_secret_key, rustfs_bucket, rustfs_media_bucket, rustfs_ticket_bucket, rustfs_enabled } = body;
+    const { name, email, bio, twoFactorEnabled, disable2FACode, profileImage, cv_url, setup2FA, verify2FA, social_facebook, social_twitter, social_linkedin, social_instagram, social_github, contact_email, contact_location, contact_phone, hero_title, hero_description, hero_typing_text, meta_description, meta_description_blog, meta_description_portfolio, meta_description_services, meta_description_opportunities, meta_description_resume, meta_description_contact, meta_description_community, meta_description_events, meta_description_vacancies, maintenance_mode, maintenance_message, vps_enabled, k3s_enabled, cdn_enabled, promo_banner_image, promo_banner_url, promo_banner_active, tax_rate, rustfs_endpoint, rustfs_access_key, rustfs_secret_key, rustfs_bucket, rustfs_media_bucket, rustfs_ticket_bucket, rustfs_enabled } = body;
+
+    if (tax_rate !== undefined) {
+      const parsedTax = Number(tax_rate);
+      if (!Number.isFinite(parsedTax) || parsedTax < 0 || parsedTax > 100) {
+        return NextResponse.json({ error: 'Tax rate must be between 0 and 100.' }, { status: 400 });
+      }
+    }
 
     // Update user
     const user = await prisma.user.findUnique({ where: { id: auth.userId } });
-    if (user) {
+    if (user && (name !== undefined || email !== undefined)) {
+      let nextEncryptedEmail: string | undefined;
+      if (email !== undefined) {
+        const normalizedEmail = String(email).toLowerCase().trim();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+          return NextResponse.json({ error: 'Invalid email address format.' }, { status: 400 });
+        }
+        nextEncryptedEmail = encryptDeterministic(normalizedEmail);
+        if (nextEncryptedEmail !== user.email) {
+          const emailTaken = await prisma.user.findUnique({ where: { email: nextEncryptedEmail } });
+          if (emailTaken && emailTaken.id !== user.id) {
+            return NextResponse.json({ error: 'Email is already in use by another account.' }, { status: 400 });
+          }
+        }
+      }
       await prisma.user.update({
         where: { id: user.id },
         data: {
-          ...(name !== undefined && { name: encryptDeterministic(name) }),
-          ...(email !== undefined && { email: encryptDeterministic(email.toLowerCase().trim()) }),
+          ...(name !== undefined && { name: encryptDeterministic(String(name).trim()) }),
+          ...(nextEncryptedEmail !== undefined && { email: nextEncryptedEmail }),
         }
       });
     }
@@ -101,7 +135,9 @@ export async function PUT(req: Request) {
     if (tax_rate !== undefined) settingsToUpdate.push({ key: 'tax_rate', value: String(tax_rate) });
     if (rustfs_endpoint !== undefined) settingsToUpdate.push({ key: 'rustfs_endpoint', value: String(rustfs_endpoint) });
     if (rustfs_access_key !== undefined) settingsToUpdate.push({ key: 'rustfs_access_key', value: String(rustfs_access_key) });
-    if (rustfs_secret_key !== undefined) settingsToUpdate.push({ key: 'rustfs_secret_key', value: String(rustfs_secret_key) });
+    if (rustfs_secret_key !== undefined && rustfs_secret_key !== MASKED_SECRET) {
+      settingsToUpdate.push({ key: 'rustfs_secret_key', value: String(rustfs_secret_key) });
+    }
     if (rustfs_bucket !== undefined) settingsToUpdate.push({ key: 'rustfs_bucket', value: String(rustfs_bucket) });
     if (rustfs_media_bucket !== undefined) settingsToUpdate.push({ key: 'rustfs_media_bucket', value: String(rustfs_media_bucket) });
     if (rustfs_ticket_bucket !== undefined) settingsToUpdate.push({ key: 'rustfs_ticket_bucket', value: String(rustfs_ticket_bucket) });
@@ -206,6 +242,10 @@ export async function PUT(req: Request) {
 
     // Handle 2FA Setup
     if (setup2FA) {
+      const existingEnabled = await prisma.setting.findUnique({ where: { key: 'twoFactorEnabled' } });
+      if (existingEnabled?.value === 'true') {
+        return NextResponse.json({ error: '2FA is already enabled. Disable it first before generating a new secret.' }, { status: 400 });
+      }
       const secret = generateSecret();
       await prisma.setting.upsert({
         where: { key: 'twoFactorSecret' },
@@ -213,7 +253,7 @@ export async function PUT(req: Request) {
         create: { key: 'twoFactorSecret', value: secret }
       });
       const issuer = `${process.env.SMTP_FROM_NAME || 'Masdika.ID'} Admin`;
-      const accountName = email || user?.email || 'admin@masdika.dev';
+      const accountName = email || decryptDeterministic(user?.email) || 'admin@masdika.dev';
       const otpauthUrl = generateURI({
         issuer,
         label: accountName,
@@ -224,11 +264,17 @@ export async function PUT(req: Request) {
 
     // Handle 2FA Verify
     if (verify2FA) {
+      if (!(await checkRateLimit('ADMIN_2FA_SETTINGS', String(auth.userId), 8, 300))) {
+        return NextResponse.json({ error: 'Too many verification attempts. Please wait a few minutes.' }, { status: 429 });
+      }
       const secretSetting = await prisma.setting.findUnique({ where: { key: 'twoFactorSecret' } });
       if (!secretSetting) return NextResponse.json({ error: 'No secret found' }, { status: 400 });
       
       try {
         const tokenString = String(verify2FA).trim();
+        if (!/^\d{6}$/.test(tokenString)) {
+          return NextResponse.json({ error: 'Invalid verification code' }, { status: 400 });
+        }
         const result = await verify({ token: tokenString, secret: secretSetting.value });
         if (result.valid) {
           await prisma.setting.upsert({
@@ -245,14 +291,32 @@ export async function PUT(req: Request) {
       }
     }
 
-    // Handle 2FA Disable
+    // Handle 2FA Disable (requires valid TOTP code if 2FA is currently active)
     if (twoFactorEnabled === false) {
-      await prisma.setting.upsert({
-        where: { key: 'twoFactorEnabled' },
-        update: { value: 'false' },
-        create: { key: 'twoFactorEnabled', value: 'false' }
-      });
-      await prisma.setting.deleteMany({ where: { key: 'twoFactorSecret' }});
+      const existingEnabled = await prisma.setting.findUnique({ where: { key: 'twoFactorEnabled' } });
+      if (existingEnabled?.value === 'true') {
+        if (!(await checkRateLimit('ADMIN_2FA_SETTINGS', String(auth.userId), 8, 300))) {
+          return NextResponse.json({ error: 'Too many verification attempts. Please wait a few minutes.' }, { status: 429 });
+        }
+        const tokenString = typeof disable2FACode === 'string' || typeof disable2FACode === 'number' ? String(disable2FACode).trim() : '';
+        if (!/^\d{6}$/.test(tokenString)) {
+          return NextResponse.json({ error: 'A valid 6-digit authenticator code is required to disable 2FA.' }, { status: 400 });
+        }
+        const secretSetting = await prisma.setting.findUnique({ where: { key: 'twoFactorSecret' } });
+        if (!secretSetting?.value) {
+          return NextResponse.json({ error: '2FA secret not found.' }, { status: 400 });
+        }
+        const verifyRes = await verify({ token: tokenString, secret: secretSetting.value });
+        if (!verifyRes.valid) {
+          return NextResponse.json({ error: 'Invalid 2FA verification code.' }, { status: 400 });
+        }
+        await prisma.setting.upsert({
+          where: { key: 'twoFactorEnabled' },
+          update: { value: 'false' },
+          create: { key: 'twoFactorEnabled', value: 'false' }
+        });
+        await prisma.setting.deleteMany({ where: { key: 'twoFactorSecret' } });
+      }
     }
 
     return NextResponse.json({ success: true });

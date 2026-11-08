@@ -1,11 +1,15 @@
 import crypto from 'crypto';
 
-const DUITKU_MERCHANT_CODE = process.env.DUITKU_MERCHANT_CODE || '';
-const DUITKU_API_KEY = process.env.DUITKU_API_KEY || '';
-const DUITKU_ENV = process.env.DUITKU_ENV || 'sandbox';
+const getDuitkuConfig = () => {
+  const merchantCode = (process.env.DUITKU_MERCHANT_CODE || '').trim();
+  const apiKey = (process.env.DUITKU_API_KEY || '').trim();
+  const env = (process.env.DUITKU_ENV || 'sandbox').trim();
+  return { merchantCode, apiKey, env };
+};
 
 const getBaseUrl = () => {
-  return DUITKU_ENV === 'sandbox' 
+  const { env } = getDuitkuConfig();
+  return env === 'sandbox' 
     ? 'https://sandbox.duitku.com/webapi'
     : 'https://passport.duitku.com/webapi';
 };
@@ -15,7 +19,11 @@ const getBaseUrl = () => {
  * Format: MD5(merchantCode + merchantOrderId + paymentAmount + apiKey)
  */
 export const generateInquirySignature = (merchantOrderId: string, paymentAmount: number) => {
-  const str = `${DUITKU_MERCHANT_CODE}${merchantOrderId}${paymentAmount}${DUITKU_API_KEY}`;
+  const { merchantCode, apiKey } = getDuitkuConfig();
+  if (!merchantCode || !apiKey) {
+    throw new Error('[SECURITY] DUITKU_MERCHANT_CODE and DUITKU_API_KEY must be configured');
+  }
+  const str = `${merchantCode}${merchantOrderId}${paymentAmount}${apiKey}`;
   return crypto.createHash('md5').update(str).digest('hex');
 };
 
@@ -24,11 +32,25 @@ export const generateInquirySignature = (merchantOrderId: string, paymentAmount:
  * Format: MD5(merchantCode + amount + merchantOrderId + apiKey)
  */
 export const validateCallbackSignature = (amount: string | number, merchantOrderId: string, signature: string) => {
-  const str = `${DUITKU_MERCHANT_CODE}${amount}${merchantOrderId}${DUITKU_API_KEY}`;
-  const generated = crypto.createHash('md5').update(str).digest('hex');
-  
-  if (generated.length !== signature.length) return false;
-  return crypto.timingSafeEqual(Buffer.from(generated), Buffer.from(signature));
+  const { merchantCode, apiKey } = getDuitkuConfig();
+  if (!merchantCode || !apiKey) {
+    return false;
+  }
+  if (!signature || typeof signature !== 'string' || !merchantOrderId || typeof merchantOrderId !== 'string') {
+    return false;
+  }
+  const normalizedSig = signature.trim().toLowerCase();
+  if (!/^[0-9a-f]{32}$/.test(normalizedSig)) {
+    return false;
+  }
+
+  const str = `${merchantCode}${amount}${merchantOrderId}${apiKey}`;
+  const generated = crypto.createHash('md5').update(str).digest('hex').toLowerCase();
+
+  const genBuf = Buffer.from(generated, 'utf8');
+  const sigBuf = Buffer.from(normalizedSig, 'utf8');
+  if (genBuf.length !== sigBuf.length) return false;
+  return crypto.timingSafeEqual(genBuf, sigBuf);
 };
 
 /**
@@ -36,7 +58,11 @@ export const validateCallbackSignature = (amount: string | number, merchantOrder
  * Format: MD5(merchantCode + merchantOrderId + apiKey)
  */
 export const generateCheckSignature = (merchantOrderId: string) => {
-  const str = `${DUITKU_MERCHANT_CODE}${merchantOrderId}${DUITKU_API_KEY}`;
+  const { merchantCode, apiKey } = getDuitkuConfig();
+  if (!merchantCode || !apiKey) {
+    throw new Error('[SECURITY] DUITKU_MERCHANT_CODE and DUITKU_API_KEY must be configured');
+  }
+  const str = `${merchantCode}${merchantOrderId}${apiKey}`;
   return crypto.createHash('md5').update(str).digest('hex');
 };
 
@@ -63,10 +89,14 @@ export interface CreateTransactionParams {
 }
 
 export const createDuitkuTransaction = async (params: CreateTransactionParams) => {
+  const { merchantCode } = getDuitkuConfig();
+  if (!merchantCode) {
+    throw new Error('[SECURITY] DUITKU_MERCHANT_CODE is not configured');
+  }
   const url = `${getBaseUrl()}/api/merchant/v2/inquiry`;
   
   const payload = {
-    merchantCode: DUITKU_MERCHANT_CODE,
+    merchantCode,
     paymentAmount: params.paymentAmount,
     paymentMethod: params.paymentMethod,
     merchantOrderId: params.merchantOrderId,
@@ -125,10 +155,14 @@ export const createDuitkuTransaction = async (params: CreateTransactionParams) =
 };
 
 export const checkDuitkuTransaction = async (merchantOrderId: string) => {
+  const { merchantCode } = getDuitkuConfig();
+  if (!merchantCode) {
+    throw new Error('[SECURITY] DUITKU_MERCHANT_CODE is not configured');
+  }
   const url = `${getBaseUrl()}/api/merchant/transactionStatus`;
   
   const payload = {
-    merchantCode: DUITKU_MERCHANT_CODE,
+    merchantCode,
     merchantOrderId,
     signature: generateCheckSignature(merchantOrderId),
   };

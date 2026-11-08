@@ -68,16 +68,17 @@ const renderer = new marked.Renderer();
 renderer.code = function ({ text, lang, escaped }) {
   // Use a safer default for escaped text if not already escaped by marked
   const escapedText = escaped ? text : text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const safeLang = (lang || '').replace(/[^a-zA-Z0-9_+-]/g, '').slice(0, 32);
   return `
     <div class="relative group mt-4 mb-4 rounded-lg bg-[#0d1117] border border-cyan-500/20 overflow-hidden">
       <div class="flex items-center justify-between px-3 py-1.5 bg-[#011627] border-b border-cyan-500/20">
-        <span class="text-xs text-cyan-400 font-mono">${lang || 'code'}</span>
+        <span class="text-xs text-cyan-400 font-mono">${safeLang || 'code'}</span>
         <button class="copy-code-btn text-xs text-gray-400 hover:text-white transition-colors focus:outline-none flex items-center gap-1">
           Copy
         </button>
       </div>
       <div class="overflow-x-auto p-3 scrollbar-thin scrollbar-thumb-cyan-500/30 scrollbar-track-transparent">
-        <pre class="!m-0 !p-0 !bg-transparent"><code class="language-${lang || ''}">${escapedText}</code></pre>
+        <pre class="!m-0 !p-0 !bg-transparent"><code class="language-${safeLang}">${escapedText}</code></pre>
       </div>
     </div>
   `;
@@ -574,6 +575,9 @@ export function AIChat() {
         try {
           const formData = new FormData();
           formData.append('file', audioBlob, 'recording.webm');
+          if (sessionInfo?.sessionId) {
+            formData.append('sessionId', sessionInfo.sessionId);
+          }
           
           const res = await fetch('/api/chat/transcribe', {
             method: 'POST',

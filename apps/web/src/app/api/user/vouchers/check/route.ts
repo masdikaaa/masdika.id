@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
   try {
@@ -9,14 +10,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: auth.error }, { status: auth.status });
     }
 
+    const allowed = await checkRateLimit("USER_VOUCHER_CHECK", String(auth.userId), 10, 300);
+    if (!allowed) {
+      return NextResponse.json({ success: false, error: "Too many voucher check attempts. Please try again later." }, { status: 429 });
+    }
+
     const { code } = await req.json();
 
-    if (!code) {
+    if (!code || typeof code !== "string" || code.trim().length > 64) {
       return NextResponse.json({ success: false, error: "Voucher code is required" }, { status: 400 });
     }
 
     const voucher = await prisma.voucher.findUnique({ 
-      where: { code: code.toUpperCase() } 
+      where: { code: code.trim().toUpperCase() } 
     });
 
     if (!voucher || !voucher.isActive) {
@@ -47,7 +53,7 @@ export async function POST(req: NextRequest) {
         discountPercent: voucher.discountPercent
       } 
     });
-  } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message || "An error occurred" }, { status: 500 });
+  } catch {
+    return NextResponse.json({ success: false, error: "Failed to check voucher" }, { status: 500 });
   }
 }

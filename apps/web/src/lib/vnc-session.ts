@@ -1,4 +1,4 @@
-import { encryptDeterministic, decryptDeterministic } from './encryption';
+import { encryptAuthenticated, decryptAuthenticated } from './encryption';
 
 interface VncSession {
   proxmoxHost: string;
@@ -12,27 +12,38 @@ interface VncSession {
   createdAt: number;
 }
 
-const SESSION_TTL_MS = 30 * 60 * 1000; // 30 minutes
+const SESSION_TTL_MS = 5 * 60 * 1000; // 5 minutes (aligned with Proxmox VNC ticket window)
 
 export function createVncSession(data: Omit<VncSession, 'createdAt'>): string {
   const payload: VncSession = { ...data, createdAt: Date.now() };
-  return encryptDeterministic(JSON.stringify(payload));
+  return encryptAuthenticated(JSON.stringify(payload), 'vnc-session');
 }
 
 export function consumeVncSession(sessionId: string): VncSession | null {
   try {
-    const jsonStr = decryptDeterministic(sessionId);
-    if (!jsonStr || jsonStr === sessionId) return null;
-    
+    const jsonStr = decryptAuthenticated(sessionId, 'vnc-session');
+    if (!jsonStr) return null;
+
     const session: VncSession = JSON.parse(jsonStr);
-    
-    if (Date.now() - session.createdAt > SESSION_TTL_MS) {
+
+    if (
+      typeof session.createdAt !== 'number' ||
+      Date.now() - session.createdAt > SESSION_TTL_MS ||
+      !Number.isSafeInteger(session.userId) ||
+      session.userId <= 0 ||
+      !Number.isSafeInteger(session.vmid) ||
+      session.vmid <= 0 ||
+      !Number.isSafeInteger(session.port) ||
+      session.port < 5900 ||
+      session.port > 65535 ||
+      !/^[a-zA-Z0-9_-]{1,64}$/.test(String(session.node || ''))
+    ) {
       return null;
     }
-    
+
     return session;
   } catch (error) {
-    console.error("Failed to parse VNC session:", error);
+    console.error('Failed to parse VNC session:', error);
     return null;
   }
 }

@@ -35,6 +35,9 @@ export default function SettingsPage() {
   const [setup2FAData, setSetup2FAData] = useState<{ url: string, secret: string } | null>(null);
   const [verifyCode, setVerifyCode] = useState("");
   const [verifying2FA, setVerifying2FA] = useState(false);
+  const [showDisable2FA, setShowDisable2FA] = useState(false);
+  const [disable2FACode, setDisable2FACode] = useState("");
+  const [disabling2FA, setDisabling2FA] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [passwordSaving, setPasswordSaving] = useState(false);
@@ -204,10 +207,11 @@ export default function SettingsPage() {
     setIsDeletingProfile(true);
     try {
       // Send empty profileImage to API — this deletes the old file from disk + clears DB
+      const { twoFactorEnabled: _ignore2FA, ...safePayload } = formData;
       const res = await fetch('/api/admin/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, profileImage: '' })
+        body: JSON.stringify({ ...safePayload, profileImage: '' })
       });
 
       if (res.ok) {
@@ -491,19 +495,9 @@ export default function SettingsPage() {
 
   const handleToggle2FA = async () => {
     if (formData.twoFactorEnabled) {
-      // It's ON, user wants to turn it OFF
-      setFormData(prev => ({ ...prev, twoFactorEnabled: false }));
-      try {
-        await fetch('/api/admin/settings', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ twoFactorEnabled: false })
-        });
-        toast.success("2FA has been disabled.");
-      } catch (err) {
-        toast.error("An error occurred");
-        setFormData(prev => ({ ...prev, twoFactorEnabled: true }));
-      }
+      // Require 6-digit TOTP confirmation before disabling 2FA
+      setShowDisable2FA(prev => !prev);
+      setDisable2FACode("");
     } else {
       // It's OFF, start setup
       try {
@@ -524,11 +518,39 @@ export default function SettingsPage() {
             });
           });
         } else {
-          toast.error("Failed to start 2FA setup");
+          toast.error(data.error || "Failed to start 2FA setup");
         }
       } catch (err) {
         toast.error("An error occurred");
       }
+    }
+  };
+
+  const handleConfirmDisable2FA = async () => {
+    if (disable2FACode.length !== 6) {
+      toast.error("Please enter your 6-digit authenticator code.");
+      return;
+    }
+    setDisabling2FA(true);
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ twoFactorEnabled: false, disable2FACode })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setFormData(prev => ({ ...prev, twoFactorEnabled: false }));
+        setShowDisable2FA(false);
+        setDisable2FACode("");
+        toast.success("2FA has been disabled.");
+      } else {
+        toast.error(data.error || "Invalid 2FA verification code.");
+      }
+    } catch {
+      toast.error("An error occurred while disabling 2FA.");
+    } finally {
+      setDisabling2FA(false);
     }
   };
 
@@ -564,10 +586,11 @@ export default function SettingsPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
+      const { twoFactorEnabled: _ignore2FA, ...safePayload } = formData;
       const res = await fetch('/api/admin/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(safePayload)
       });
 
       if (res.ok) {
@@ -1076,6 +1099,43 @@ export default function SettingsPage() {
                       </div>
 
                       <AnimatePresence>
+                        {showDisable2FA && formData.twoFactorEnabled && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="overflow-hidden"
+                          >
+                            <div className={cn("p-6 rounded-2xl border flex flex-col items-center gap-4 text-center", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
+                              <p className={cn("text-sm font-semibold", isDark ? "text-zinc-300" : "text-slate-600")}>Enter your 6-digit Authenticator code to disable Two-Factor Authentication</p>
+                              <div className="w-full max-w-sm space-y-4">
+                                <input
+                                  type="text"
+                                  maxLength={6}
+                                  value={disable2FACode}
+                                  onChange={(e) => setDisable2FACode(e.target.value.replace(/\D/g, ''))}
+                                  placeholder="123456"
+                                  className={cn("w-full px-5 py-3.5 border rounded-xl text-center tracking-[0.5em] text-xl font-bold focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
+                                />
+                                <div className="flex gap-3">
+                                  <button
+                                    onClick={() => { setShowDisable2FA(false); setDisable2FACode(""); }}
+                                    className={cn("flex-1 py-2.5 font-semibold text-xs rounded-lg transition-colors border", isDark ? "text-slate-300 border-white/[0.08] bg-[#0a0a0c] hover:bg-slate-800" : "text-slate-700 border-slate-200 bg-white hover:bg-slate-50")}
+                                  >
+                                    Cancel
+                                  </button>
+                                  <button
+                                    onClick={handleConfirmDisable2FA}
+                                    disabled={disable2FACode.length !== 6 || disabling2FA}
+                                    className="flex-1 py-2.5 px-3.5 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 bg-red-500 hover:bg-red-400 active:bg-red-600 text-white shadow-sm"
+                                  >
+                                    {disabling2FA ? "Disabling..." : "Confirm Disable 2FA"}
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
                         {setup2FAData && !formData.twoFactorEnabled && (
                           <motion.div
                             initial={{ opacity: 0, height: 0 }}

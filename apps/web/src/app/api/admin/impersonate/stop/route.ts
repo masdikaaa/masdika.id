@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifySessionToken } from '@/lib/session';
+import { getSessionPayload } from '@/lib/session';
 import { logClientActivity } from '@/lib/activity-log';
 import { getClientIp } from '@/lib/get-ip';
 import { decryptDeterministic } from '@/lib/encryption';
@@ -17,8 +17,11 @@ export async function POST(req: NextRequest) {
     if (infoRaw) {
       try {
         const parsed = JSON.parse(infoRaw);
-        targetId = parsed.targetId;
-        targetName = parsed.targetName || 'User';
+        const parsedId = Number(parsed?.targetId);
+        if (Number.isSafeInteger(parsedId) && parsedId > 0) {
+          targetId = parsedId;
+        }
+        targetName = typeof parsed?.targetName === 'string' ? parsed.targetName.slice(0, 100) : 'User';
       } catch {}
     }
 
@@ -26,17 +29,37 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No active impersonation session found' }, { status: 400 });
     }
 
-    const adminId = verifySessionToken(impersonatorToken);
-    if (!adminId) {
-      return NextResponse.json({ error: 'Invalid or expired admin session' }, { status: 401 });
+    const adminPayload = getSessionPayload(impersonatorToken);
+    if (!adminPayload || adminPayload.impersonatedBy) {
+      const invalidRes = NextResponse.json({ error: 'Invalid or expired admin session' }, { status: 401 });
+      invalidRes.cookies.delete('masdika_impersonator_token');
+      invalidRes.cookies.delete('masdika_impersonating_info');
+      return invalidRes;
+    }
+
+    if (adminPayload.sessionId) {
+      const sessionLog = await prisma.loginLog.findFirst({
+        where: { sessionId: adminPayload.sessionId }
+      });
+      if (sessionLog?.isRevoked) {
+        const revRes = NextResponse.json({ error: 'Admin session has been revoked. Please sign in again.' }, { status: 401 });
+        revRes.cookies.delete('admin_session');
+        revRes.cookies.delete('masdika_impersonator_token');
+        revRes.cookies.delete('masdika_impersonating_info');
+        return revRes;
+      }
     }
 
     const adminUser = await prisma.user.findUnique({
-      where: { id: adminId }
+      where: { id: adminPayload.userId }
     });
 
-    if (!adminUser || adminUser.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Forbidden: Insufficient privileges' }, { status: 403 });
+    if (!adminUser || adminUser.isSuspended || !['ADMIN', 'SUPER_ADMIN'].includes(adminUser.role)) {
+      const forbRes = NextResponse.json({ error: 'Forbidden: Insufficient privileges' }, { status: 403 });
+      forbRes.cookies.delete('admin_session');
+      forbRes.cookies.delete('masdika_impersonator_token');
+      forbRes.cookies.delete('masdika_impersonating_info');
+      return forbRes;
     }
 
     const adminName = adminUser.name ? decryptDeterministic(adminUser.name) : 'Admin';
@@ -61,13 +84,15 @@ export async function POST(req: NextRequest) {
       redirectUrl
     });
 
-    // 1. Restore original admin token as active session
+    const remainingMaxAge = Math.max(60, adminPayload.exp - Math.floor(Date.now() / 1000));
+
+    // 1. Restore original admin token as active session without extending token lifetime
     response.cookies.set('admin_session', impersonatorToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: 60 * 60 * 24, // 24 hours
+      maxAge: remainingMaxAge,
     });
 
     // 2. Clear impersonation cookies

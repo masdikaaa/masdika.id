@@ -36,9 +36,14 @@ const nextConfig: NextConfig = {
     deviceSizes: [360, 480, 640, 750, 828, 1080, 1200],
     imageSizes: [32, 48, 64, 96, 128, 256, 384],
     remotePatterns: [
-      { protocol: "https", hostname: "**" },
-      { protocol: "http", hostname: "**" },
+      { protocol: "https", hostname: "**", port: "" },
     ],
+    // Block SSRF against private/loopback/metadata IPs & redirect chains in Next.js 16 Image Optimizer
+    dangerouslyAllowLocalIP: false,
+    maximumRedirects: 0,
+    maximumResponseBody: 10_000_000,
+    contentDispositionType: "attachment",
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     // Use WebP format for ultra-fast server Sharp compression (~5ms vs 2000ms AVIF)
     formats: ["image/webp"],
     minimumCacheTTL: 31536000,
@@ -73,9 +78,9 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
-      // ── Aggressive static-asset caching (images, fonts, icons) ──
+      // ── Aggressive static-asset caching (public images, fonts, icons — never /api/*) ──
       {
-        source: "/:path*.(webp|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)",
+        source: "/((?!api/).*)\\.(webp|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)",
         headers: [
           { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
           { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },

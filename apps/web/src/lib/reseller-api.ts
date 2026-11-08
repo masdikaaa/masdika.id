@@ -16,9 +16,13 @@ export function apiError(message: string, status: number) {
 }
 
 function clientIp(req: NextRequest): string {
+  const cfIp = req.headers.get("cf-connecting-ip");
+  if (cfIp) return cfIp.trim();
+  const realIp = req.headers.get("x-real-ip");
+  if (realIp) return realIp.trim();
   const fwd = req.headers.get("x-forwarded-for");
   if (fwd) return fwd.split(",")[0].trim();
-  return req.headers.get("x-real-ip") || "unknown";
+  return "unknown";
 }
 
 type RateConfig = { name: string; max: number; windowSec: number };
@@ -28,7 +32,7 @@ type RateConfig = { name: string; max: number; windowSec: number };
  *
  * Checks (in order): Bearer header format, per-IP brute-force limit for failed attempts,
  * key exists, key ACTIVE, key bound to RESELLER service, owner not suspended,
- * then the per-key rate limit. Returns either a ready-to-return error response or the key + user.
+ * then the per-user rate limit. Returns either a ready-to-return error response or the key + user.
  */
 export async function authenticateReseller(req: NextRequest, rate: RateConfig) {
   const authHeader = req.headers.get("authorization");
@@ -37,7 +41,10 @@ export async function authenticateReseller(req: NextRequest, rate: RateConfig) {
   const ip = clientIp(req);
 
   if (!match) {
-    await checkRateLimit("RESELLER_API_BAD_AUTH", ip, 30, 60);
+    const allowed = await checkRateLimit("RESELLER_API_BAD_AUTH", ip, 30, 60);
+    if (!allowed) {
+      return { error: apiError("Too many failed authentication attempts. Please try again later.", 429) };
+    }
     return { error: apiError("Missing or invalid API Key. Use header: Authorization: Bearer masdika_...", 401) };
   }
 
@@ -64,7 +71,7 @@ export async function authenticateReseller(req: NextRequest, rate: RateConfig) {
     return { error: apiError("Your account is suspended", 403) };
   }
 
-  const allowed = await checkRateLimit(rate.name, apiKey.id.toString(), rate.max, rate.windowSec);
+  const allowed = await checkRateLimit(rate.name, apiKey.userId.toString(), rate.max, rate.windowSec);
   if (!allowed) {
     return { error: apiError("Too many requests. Please try again later.", 429) };
   }

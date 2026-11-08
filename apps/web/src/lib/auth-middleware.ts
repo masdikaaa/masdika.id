@@ -28,6 +28,17 @@ export async function requireAuth(options?: { allowedRoles?: string[] }) {
     }
   }
 
+  // If this is an admin impersonation session, also verify the impersonating admin is still active
+  if (payload?.impersonatedBy) {
+    const adminUser = await prisma.user.findUnique({
+      where: { id: payload.impersonatedBy },
+      select: { id: true, role: true, isSuspended: true }
+    });
+    if (!adminUser || adminUser.isSuspended || !['ADMIN', 'SUPER_ADMIN'].includes(adminUser.role)) {
+      return { error: 'Impersonation session is no longer valid.', status: 401 };
+    }
+  }
+
   const user = await prisma.user.findUnique({
     where: { id: userId }
   });
@@ -40,10 +51,13 @@ export async function requireAuth(options?: { allowedRoles?: string[] }) {
     return { error: user.suspendReason || 'Account suspended', status: 403, isSuspended: true, userId, user };
   }
 
-  const allowedRoles = options?.allowedRoles || ['ADMIN'];
+  const rawAllowedRoles = options?.allowedRoles || ['ADMIN'];
+  const allowedRoles = rawAllowedRoles.includes('ADMIN') && !rawAllowedRoles.includes('SUPER_ADMIN')
+    ? [...rawAllowedRoles, 'SUPER_ADMIN']
+    : rawAllowedRoles;
   if (!allowedRoles.includes(user.role)) {
     return { error: 'Forbidden: Insufficient role', status: 403 };
   }
 
-  return { userId, user, sessionId: payload?.sessionId };
+  return { userId, user, sessionId: payload?.sessionId, impersonatedBy: payload?.impersonatedBy };
 }

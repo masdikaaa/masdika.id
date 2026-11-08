@@ -34,3 +34,28 @@ export function getEffectiveHourlyRate(vps: VpsRateInput, pricing?: Record<strin
   }
   return 0;
 }
+
+/**
+ * Computes the unbreakable minimum hourly rate floor for a PAYG VPS based on its
+ * core allocated hardware (CPU, RAM, primary OS disk, and backup quota).
+ * Detaching optional add-on disks or secondary/reserved IPs must NEVER reduce
+ * `vps.hourlyRate` below this floor.
+ */
+export function calculateMinimumBaseVpsRate(
+  vps: {
+    cpuCores?: number | null;
+    ramGb?: number | null;
+    diskGb?: number | null;
+    diskType?: string | null;
+    backupGb?: number | null;
+  },
+  pricing: Record<string, number>
+): number {
+  const isSsd = (vps.diskType || "").toUpperCase() === "SSD";
+  const diskUnitRate = isSsd ? (pricing.diskSsd ?? pricing.disk ?? 0) : (pricing.disk ?? 0);
+  const cpuCost = Math.max(0, vps.cpuCores || 0) * Math.max(0, pricing.vcpu || 0);
+  const ramCost = Math.max(0, vps.ramGb || 0) * Math.max(0, pricing.ram || 0);
+  const diskCost = Math.max(0, vps.diskGb || 0) * Math.max(0, diskUnitRate);
+  const backupCost = Math.max(0, vps.backupGb || 0) * Math.max(0, pricing.backup || 0);
+  return cpuCost + ramCost + diskCost + backupCost;
+}

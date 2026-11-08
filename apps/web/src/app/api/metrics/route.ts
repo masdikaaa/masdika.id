@@ -1,9 +1,23 @@
 import { NextResponse } from 'next/server';
 import { circuitBreakerRegistry } from '@/lib/circuit-breaker';
+import { verifyCronSecret } from '@/lib/cron-auth';
+import { requireAuth } from '@/lib/auth-middleware';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(req: Request) {
+  // Allow internal K3s cluster Prometheus scrapes (no Cloudflare edge headers),
+  // while requiring CRON_SECRET or ADMIN authentication for external requests.
+  const isExternalEdgeRequest = Boolean(
+    req.headers.get('cf-connecting-ip') || req.headers.get('cf-ray')
+  );
+  if (isExternalEdgeRequest && !verifyCronSecret(req)) {
+    const authResult = await requireAuth({ allowedRoles: ['ADMIN'] });
+    if (authResult.error) {
+      return new NextResponse('Forbidden', { status: 403 });
+    }
+  }
+
   const mem = process.memoryUsage();
   const uptime = Math.floor(process.uptime());
   const cpu = process.cpuUsage();

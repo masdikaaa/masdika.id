@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth-middleware";
 import { prisma } from "@/lib/prisma";
+import { decryptDeterministic } from "@/lib/encryption";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -9,7 +11,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const user = authResult.user!;
 
     const { id } = await params;
-    const clusterId = parseInt(id);
+    const clusterId = parseInt(id, 10);
+    if (isNaN(clusterId) || clusterId <= 0) {
+      return NextResponse.json({ error: "Invalid cluster ID" }, { status: 400 });
+    }
 
     const cluster = await prisma.kubernetesCluster.findFirst({
       where: { id: clusterId, userId: user.id },
@@ -55,8 +60,15 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (authResult.error) return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     const user = authResult.user!;
 
+    if (!(await checkRateLimit("K3S_ALERTS_UPDATE", String(user.id), 15, 60))) {
+      return NextResponse.json({ error: "Too many alert configuration updates. Please wait a minute." }, { status: 429 });
+    }
+
     const { id } = await params;
-    const clusterId = parseInt(id);
+    const clusterId = parseInt(id, 10);
+    if (isNaN(clusterId) || clusterId <= 0) {
+      return NextResponse.json({ error: "Invalid cluster ID" }, { status: 400 });
+    }
     const body = await req.json();
     const { rules } = body;
 
@@ -73,23 +85,30 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "Cluster not found" }, { status: 404 });
     }
 
+    const ownerEmail = (decryptDeterministic(user.email) || user.email).toLowerCase().trim();
+
     // VALIDATE RULES
     for (const rule of rules) {
-      if (typeof rule.threshold !== 'number' || rule.threshold < 1 || rule.threshold > 100) {
+      if (typeof rule.threshold !== 'number' || !Number.isFinite(rule.threshold) || rule.threshold < 1 || rule.threshold > 100) {
         return NextResponse.json({ error: "Threshold must be between 1 and 100" }, { status: 400 });
+      }
+      if (typeof rule.isEnabled !== 'boolean') {
+        return NextResponse.json({ error: "Invalid isEnabled flag" }, { status: 400 });
+      }
+      if (rule.notifyEmails !== undefined && typeof rule.notifyEmails !== 'string') {
+        return NextResponse.json({ error: "Invalid notifyEmails format" }, { status: 400 });
       }
       if (rule.notifyEmails && rule.notifyEmails.length > 255) {
         return NextResponse.json({ error: "Emails string too long" }, { status: 400 });
       }
       if (rule.notifyEmails) {
-        const emails = rule.notifyEmails.split(',').map((e: string) => e.trim()).filter((e: string) => e);
-        if (emails.length > 5) {
-          return NextResponse.json({ error: "Maximum 5 email addresses allowed" }, { status: 400 });
-        }
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const emails = rule.notifyEmails.split(',').map((e: string) => e.trim().toLowerCase()).filter((e: string) => e);
         for (const email of emails) {
-          if (!emailRegex.test(email)) {
-            return NextResponse.json({ error: `Invalid email address: ${email}` }, { status: 400 });
+          if (email !== ownerEmail) {
+            return NextResponse.json(
+              { error: "Alert notifications can only be sent to your verified account email" },
+              { status: 400 }
+            );
           }
         }
       }
@@ -101,10 +120,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         for (const rule of rules) {
           if (!["CPU", "RAM", "DISK"].includes(rule.metric)) continue;
 
-          let emailsStr = "";
-          if (rule.notifyEmails) {
-            emailsStr = rule.notifyEmails.split(',').map((e: string) => e.trim()).filter((e: string) => e).join(',');
-          }
+          const emailsStr = ownerEmail;
 
           await tx.vpsAlertRule.upsert({
             where: {
@@ -117,7 +133,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
               threshold: rule.threshold,
               isEnabled: rule.isEnabled,
               notifyEmails: emailsStr,
-              lastTriggeredAt: null 
             },
             create: {
               vpsId: node.id,

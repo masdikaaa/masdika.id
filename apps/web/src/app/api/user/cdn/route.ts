@@ -6,6 +6,17 @@ import { requireAuth } from '@/lib/auth-middleware';
 import { v4 as uuidv4 } from "uuid";
 import { hasActiveSubscription } from "@/lib/subscription";
 import { deleteFromRustFS } from "@/lib/rustfs";
+import { hasForbiddenExtension } from "@/lib/upload-security";
+
+function sanitizeCdnFolderPath(raw: unknown): string | null {
+  if (typeof raw !== "string") return null;
+  const trimmed = raw.trim();
+  if (!trimmed || trimmed.includes("\0") || trimmed.includes("\\")) return null;
+  const normalized = ("/" + trimmed).replace(/\/+/g, "/").replace(/\/+$/, "") || "/";
+  const segments = normalized.split("/").filter(Boolean);
+  if (segments.some((s) => s === "." || s === "..")) return null;
+  return normalized.slice(0, 500);
+}
 
 export async function GET(req: NextRequest) {
   const auth = await requireAuth({ allowedRoles: ['ADMIN', 'USER'] });
@@ -16,7 +27,8 @@ export async function GET(req: NextRequest) {
     
     // Check if user has active CDN subscription
     let isSuspended = false;
-    if (auth.user?.role !== 'ADMIN') {
+    const isAdmin = auth.user?.role === 'ADMIN' || auth.user?.role === 'SUPER_ADMIN';
+    if (!isAdmin) {
       const { getSubscriptionInfo } = await import('@/lib/subscription');
       const subInfo = await getSubscriptionInfo(userId, "CDN");
       if (!subInfo.hasSubscription) {
@@ -26,7 +38,10 @@ export async function GET(req: NextRequest) {
     }
 
     const { searchParams } = new URL(req.url);
-    const folderPath = searchParams.get('folder') || '/';
+    const folderPath = sanitizeCdnFolderPath(searchParams.get('folder') || '/');
+    if (!folderPath) {
+      return NextResponse.json({ error: "Invalid folder path" }, { status: 400 });
+    }
 
     // Lazy Cleanup: Delete expired media for this user
     const now = new Date();
@@ -36,8 +51,9 @@ export async function GET(req: NextRequest) {
 
     for (const em of expiredMedia) {
       if (!em.isFolder) {
+        deleteFromRustFS(em.filename).catch(() => {});
         const secureDir = path.join(process.cwd(), "storage", "secure-media");
-        const filePath = path.join(secureDir, em.filename);
+        const filePath = path.join(secureDir, path.basename(em.filename));
         if (fs.existsSync(filePath)) {
           fs.unlinkSync(filePath);
         }
@@ -98,7 +114,8 @@ export async function POST(req: NextRequest) {
     
     // Check if user has active CDN subscription
     const hasCdn = await hasActiveSubscription(userId, "CDN");
-    if (!hasCdn && auth.user?.role !== 'ADMIN') {
+    const isAdmin = auth.user?.role === 'ADMIN' || auth.user?.role === 'SUPER_ADMIN';
+    if (!hasCdn && !isAdmin) {
       return NextResponse.json({ error: "You don't have an active File CDN subscription." }, { status: 403 });
     }
 
@@ -107,12 +124,16 @@ export async function POST(req: NextRequest) {
 
     if (action === 'mkdir') {
       const { currentFolder, folderName } = body;
-      const sanitizedName = folderName.replace(/[/\\]/g, "").trim();
-      if (!sanitizedName) return NextResponse.json({ error: "Invalid folder name" }, { status: 400 });
+      const safeFolder = sanitizeCdnFolderPath(currentFolder || '/');
+      if (!safeFolder) return NextResponse.json({ error: "Invalid parent folder path" }, { status: 400 });
+      const sanitizedName = typeof folderName === "string" ? folderName.replace(/[/\\\0]/g, "").trim().slice(0, 120) : "";
+      if (!sanitizedName || sanitizedName === "." || sanitizedName === "..") {
+        return NextResponse.json({ error: "Invalid folder name" }, { status: 400 });
+      }
 
       // Check if exists
       const existing = await prisma.secureMedia.findFirst({
-        where: { userId, folderPath: currentFolder, originalName: sanitizedName, isFolder: true }
+        where: { userId, folderPath: safeFolder, originalName: sanitizedName, isFolder: true }
       });
       if (existing) return NextResponse.json({ error: "Folder already exists" }, { status: 400 });
 
@@ -122,7 +143,7 @@ export async function POST(req: NextRequest) {
           originalName: sanitizedName,
           mimeType: "inode/directory",
           size: 0,
-          folderPath: currentFolder,
+          folderPath: safeFolder,
           isFolder: true,
           token: uuidv4(),
           userId
@@ -140,17 +161,28 @@ export async function POST(req: NextRequest) {
 
     if (action === 'rename') {
       const { id, newName } = body;
-      const sanitizedName = newName.replace(/[/\\]/g, "").trim();
-      if (!sanitizedName) return NextResponse.json({ error: "Invalid name" }, { status: 400 });
+      const mediaId = parseInt(String(id), 10);
+      if (isNaN(mediaId)) return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+      const sanitizedName = typeof newName === "string" ? newName.replace(/[/\\\0]/g, "").trim().slice(0, 255) : "";
+      if (!sanitizedName || sanitizedName === "." || sanitizedName === "..") {
+        return NextResponse.json({ error: "Invalid name" }, { status: 400 });
+      }
 
       // Check ownership
       const existing = await prisma.secureMedia.findFirst({
-        where: { id: parseInt(id), userId }
+        where: { id: mediaId, userId }
       });
       if (!existing) return NextResponse.json({ error: "Media not found" }, { status: 404 });
 
+      if (!existing.isFolder) {
+        const extCheck = hasForbiddenExtension(sanitizedName);
+        if (extCheck.forbidden) {
+          return NextResponse.json({ error: extCheck.reason || "Forbidden file extension" }, { status: 400 });
+        }
+      }
+
       const updated = await prisma.secureMedia.update({
-        where: { id: parseInt(id) },
+        where: { id: mediaId },
         data: { originalName: sanitizedName }
       });
       
@@ -168,16 +200,20 @@ export async function POST(req: NextRequest) {
 
     if (action === 'move') {
       const { id, newFolderPath } = body;
+      const mediaId = parseInt(String(id), 10);
+      if (isNaN(mediaId)) return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+      const safeFolderPath = sanitizeCdnFolderPath(newFolderPath);
+      if (!safeFolderPath) return NextResponse.json({ error: "Invalid destination folder path" }, { status: 400 });
       
       // Check ownership
       const existing = await prisma.secureMedia.findFirst({
-        where: { id: parseInt(id), userId }
+        where: { id: mediaId, userId }
       });
       if (!existing) return NextResponse.json({ error: "Media not found" }, { status: 404 });
       
       const updated = await prisma.secureMedia.update({
-        where: { id: parseInt(id) },
-        data: { folderPath: newFolderPath }
+        where: { id: mediaId },
+        data: { folderPath: safeFolderPath }
       });
       
       return NextResponse.json({ 

@@ -13,6 +13,9 @@ export async function GET(req: Request) {
     const limit = Math.min(200, Math.max(1, parseInt(searchParams.get('limit') || '50', 10)));
     
     const logs = await prisma.loginLog.findMany({
+      where: {
+        NOT: { emailAttempt: '[revoked-tombstone]' }
+      },
       orderBy: { createdAt: 'desc' },
       take: limit,
     });
@@ -31,16 +34,18 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    if (auth.impersonatedBy) {
+      return NextResponse.json({ error: 'Cannot modify login logs during impersonation' }, { status: 403 });
+    }
+
     const body = await req.json();
     const { ids, ipAddress } = body;
 
-    if (ipAddress) {
+    if (ipAddress && typeof ipAddress === 'string') {
       // Unban IP if requested
       await prisma.blockedUser.deleteMany({
         where: { type: 'IP', value: ipAddress }
       });
-      // Optionally update the logs to reflect it's no longer banned?
-      // Since it's a historical log, we can just leave it or update it.
       await prisma.loginLog.updateMany({
         where: { ipAddress: ipAddress, isBanned: true },
         data: { isBanned: false }
@@ -49,8 +54,32 @@ export async function DELETE(req: Request) {
     }
 
     if (ids && Array.isArray(ids)) {
+      const safeIds = ids.map(Number).filter(n => Number.isSafeInteger(n) && n > 0);
+      const retentionCutoff = new Date(Date.now() - 31 * 24 * 60 * 60 * 1000);
+
+      // Tombstone recent revoked session logs so revoked tokens cannot be replayed
+      await prisma.loginLog.updateMany({
+        where: {
+          id: { in: safeIds },
+          isRevoked: true,
+          sessionId: { not: null },
+          createdAt: { gte: retentionCutoff }
+        },
+        data: {
+          userId: null,
+          emailAttempt: '[revoked-tombstone]'
+        }
+      });
+
       await prisma.loginLog.deleteMany({
-        where: { id: { in: ids } }
+        where: {
+          id: { in: safeIds },
+          OR: [
+            { isRevoked: false },
+            { sessionId: null },
+            { createdAt: { lt: retentionCutoff } }
+          ]
+        }
       });
       return NextResponse.json({ success: true, message: 'Logs deleted' });
     }

@@ -1,13 +1,19 @@
 import dns from 'dns';
 import net from 'net';
+import { Address6 } from 'ip-address';
 
 /**
  * Checks whether an IP address belongs to a private, loopback, link-local,
  * cloud metadata (169.254.169.254), or reserved internal address space.
  */
-export function isPrivateIp(ip: string): boolean {
-  // Normalize IPv4-mapped IPv6 addresses (e.g. ::ffff:127.0.0.1 or ::ffff:7f00:1)
-  if (ip.startsWith('::ffff:')) {
+export function isPrivateIp(rawInput: string): boolean {
+  if (!rawInput || typeof rawInput !== 'string') return true;
+  // Strip IPv6 brackets and zone index if present
+  const ip = rawInput.trim().replace(/^\[|\]$/g, '').split('%')[0];
+  if (!ip) return true;
+
+  // Normalize case-insensitive IPv4-mapped IPv6 dotted form (e.g. ::ffff:127.0.0.1 or ::FFFF:127.0.0.1)
+  if (ip.toLowerCase().startsWith('::ffff:')) {
     const rawIpv4 = ip.substring(7);
     if (net.isIPv4(rawIpv4)) {
       return isPrivateIp(rawIpv4);
@@ -69,33 +75,53 @@ export function isPrivateIp(ip: string): boolean {
     return false;
   }
 
-  // IPv6 Checks
+  // IPv6 Checks (canonicalized across expanded, hex-mapped ::ffff:7f00:1, NAT64, 6to4, ULA, Link-Local)
   if (net.isIPv6(ip)) {
-    const normalized = ip.toLowerCase();
+    try {
+      const addr6 = new Address6(ip);
+      const groups = addr6.parsedAddress.map((g) => parseInt(g, 16));
+      if (groups.length !== 8 || groups.some(isNaN)) return true;
 
-    // ::1 (Loopback)
-    if (normalized === '::1') return true;
+      // :: (Unspecified) or ::1 (Loopback) including 0:0:0:0:0:0:0:1
+      const allFirst7Zero = groups.slice(0, 7).every((g) => g === 0);
+      if (allFirst7Zero && (groups[7] === 0 || groups[7] === 1)) return true;
 
-    // :: (Unspecified)
-    if (normalized === '::') return true;
+      // IPv4-compatible ::w.x.y.z or IPv4-mapped ::ffff:w.x.y.z (including ::ffff:7f00:1)
+      const first5Zero = groups.slice(0, 5).every((g) => g === 0);
+      if (first5Zero && (groups[5] === 0 || groups[5] === 0xffff)) {
+        const ipv4 = `${(groups[6] >> 8) & 0xff}.${groups[6] & 0xff}.${(groups[7] >> 8) & 0xff}.${groups[7] & 0xff}`;
+        return isPrivateIp(ipv4);
+      }
 
-    // fc00::/7 (Unique Local Address - RFC 4193)
-    if (normalized.startsWith('fc') || normalized.startsWith('fd')) return true;
+      // NAT64 well-known prefix 64:ff9b::/96 & 64:ff9b:1::/48
+      if (groups[0] === 0x0064 && groups[1] === 0xff9b) {
+        const ipv4 = `${(groups[6] >> 8) & 0xff}.${groups[6] & 0xff}.${(groups[7] >> 8) & 0xff}.${groups[7] & 0xff}`;
+        return isPrivateIp(ipv4);
+      }
 
-    // fe80::/10 (Link-Local - RFC 4291)
-    if (
-      normalized.startsWith('fe8') ||
-      normalized.startsWith('fe9') ||
-      normalized.startsWith('fea') ||
-      normalized.startsWith('feb')
-    ) {
+      // 6to4 2002::/16 embeds IPv4 in groups[1..2]
+      if (groups[0] === 0x2002) {
+        const ipv4 = `${(groups[1] >> 8) & 0xff}.${groups[1] & 0xff}.${(groups[2] >> 8) & 0xff}.${groups[2] & 0xff}`;
+        return isPrivateIp(ipv4);
+      }
+
+      // Teredo 2001:0000::/32, Benchmarking 2001:0002::/48, Documentation 2001:db8::/32, Discard 100::/64
+      if (groups[0] === 0x2001 && (groups[1] === 0x0000 || groups[1] === 0x0002 || groups[1] === 0x0db8)) return true;
+      if (groups[0] === 0x0100 && groups[1] === 0 && groups[2] === 0 && groups[3] === 0) return true;
+
+      // fc00::/7 (Unique Local Address - RFC 4193)
+      if ((groups[0] & 0xfe00) === 0xfc00) return true;
+
+      // fe80::/10 (Link-Local - RFC 4291) & fec0::/10 (Site-Local)
+      if ((groups[0] & 0xffc0) === 0xfe80 || (groups[0] & 0xffc0) === 0xfec0) return true;
+
+      // ff00::/8 (Multicast)
+      if ((groups[0] & 0xff00) === 0xff00) return true;
+
+      return false;
+    } catch {
       return true;
     }
-
-    // ff00::/8 (Multicast)
-    if (normalized.startsWith('ff')) return true;
-
-    return false;
   }
 
   // Unparseable string as IP: treat as unsafe
@@ -128,6 +154,10 @@ export async function validateSafeUrl(
       return { safe: false, reason: `Protocol '${url.protocol}' is not permitted.` };
     }
 
+    if (url.username || url.password) {
+      return { safe: false, reason: 'Embedded URL credentials are not permitted.' };
+    }
+
     // Validate port
     const defaultPort = url.protocol === 'https:' ? 443 : 80;
     const port = url.port ? parseInt(url.port, 10) : defaultPort;
@@ -137,10 +167,12 @@ export async function validateSafeUrl(
       return { safe: false, reason: `Port '${port}' is not permitted.` };
     }
 
-    const hostname = url.hostname.toLowerCase();
+    // Strip IPv6 brackets from WHATWG URL hostname (e.g. "[::1]" -> "::1") and trailing dot
+    const hostname = url.hostname.toLowerCase().replace(/^\[|\]$/g, '').replace(/\.$/, '');
 
     // Block obvious local hostnames immediately
     if (
+      !hostname ||
       hostname === 'localhost' ||
       hostname.endsWith('.localhost') ||
       hostname.endsWith('.local') ||
@@ -175,6 +207,9 @@ export async function validateSafeUrl(
     if (!options.allowPrivate) {
       try {
         const addresses = await dns.promises.lookup(hostname, { all: true });
+        if (!addresses || addresses.length === 0) {
+          return { safe: false, reason: `Unable to resolve host '${hostname}'.` };
+        }
         for (const addr of addresses) {
           if (isPrivateIp(addr.address)) {
             return {

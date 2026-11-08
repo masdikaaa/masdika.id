@@ -11,13 +11,6 @@ export const revalidate = 0;
 export async function GET() {
   return NextResponse.json({
     status: 'ok',
-    runtime: {
-      node: process.version,
-      platform: process.platform,
-      arch: process.arch,
-      env: process.env.NODE_ENV,
-      uptime: Math.floor(process.uptime()),
-    },
     timestamp: new Date().toISOString(),
   }, { status: 200 });
 }

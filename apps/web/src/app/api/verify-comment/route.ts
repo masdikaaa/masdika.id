@@ -3,6 +3,15 @@ import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
 import { encryptDeterministic, decryptDeterministic } from '@/lib/encryption';
 import { sendCommentReplyEmail } from '@/lib/email';
+import { verifyDomainToken } from '@/lib/session';
+import { getClientIp } from '@/lib/get-ip';
+import { checkRateLimit } from '@/lib/rate-limit';
+
+const HTML_SECURITY_HEADERS = {
+  'Content-Type': 'text/html; charset=utf-8',
+  'X-Content-Type-Options': 'nosniff',
+  'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'",
+};
 
 /** Escape HTML special characters to prevent XSS */
 function escapeHtml(str: string): string {
@@ -15,10 +24,15 @@ function escapeHtml(str: string): string {
 }
 
 export async function GET(request: Request) {
+  const ip = getClientIp(request);
+  if (!(await checkRateLimit('VERIFY_COMMENT', ip, 20, 60))) {
+    return invalidTokenResponse('Too many verification attempts. Please wait a minute.');
+  }
+
   const { searchParams } = new URL(request.url);
   const token = searchParams.get('token');
 
-  if (!token) {
+  if (!token || token.length > 8192) {
     return new NextResponse('Invalid or missing verification token.', { status: 400 });
   }
 
@@ -29,28 +43,8 @@ export async function GET(request: Request) {
 
   const [payloadBase64, signature] = parts;
 
-  const secret = process.env.SESSION_SECRET || 'default_secret';
-  if (process.env.NODE_ENV === 'production' && (!process.env.SESSION_SECRET || secret === 'default_secret')) {
-    throw new Error('CRITICAL SECURITY ERROR: SESSION_SECRET is missing in production.');
-  }
-
-  // Verify signature using timing-safe comparison
-  const expectedSignature = crypto.createHmac('sha256', secret)
-                                  .update(payloadBase64)
-                                  .digest('hex');
-
-  if (signature.length !== expectedSignature.length) {
-    return invalidTokenResponse();
-  }
-
-  try {
-    const sigBuffer = Buffer.from(signature, 'hex');
-    const expectedBuffer = Buffer.from(expectedSignature, 'hex');
-    
-    if (sigBuffer.length !== expectedBuffer.length || !crypto.timingSafeEqual(sigBuffer, expectedBuffer)) {
-      return invalidTokenResponse();
-    }
-  } catch {
+  // Verify domain-separated HMAC signature using timing-safe comparison
+  if (!verifyDomainToken('comment-verify', payloadBase64, signature)) {
     return invalidTokenResponse();
   }
 
@@ -58,67 +52,90 @@ export async function GET(request: Request) {
     const payloadJson = Buffer.from(payloadBase64, 'base64url').toString('utf-8');
     const payload = JSON.parse(payloadJson);
 
+    if (
+      !payload ||
+      typeof payload.name !== 'string' ||
+      typeof payload.email !== 'string' ||
+      typeof payload.content !== 'string' ||
+      !Number.isInteger(payload.blogPostId)
+    ) {
+      return invalidTokenResponse();
+    }
+
     // Check expiration
-    if (payload.exp && Date.now() > payload.exp) {
+    if (typeof payload.exp !== 'number' || Date.now() > payload.exp) {
       return invalidTokenResponse("The verification link has expired.");
     }
 
-    // Replay attack prevention: generate a unique hash for this token and check if already used
+    // Replay attack prevention: generate a unique hash for this token and atomically claim it
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
-    const usedTokenKey = `USED_COMMENT_TOKEN_${tokenHash.substring(0, 16)}`;
+    const usedTokenKey = `USED_COMMENT_TOKEN_${tokenHash.substring(0, 32)}`;
     
     const alreadyUsed = await prisma.setting.findUnique({ where: { key: usedTokenKey } });
     if (alreadyUsed) {
       return invalidTokenResponse("This verification link has already been used.");
     }
 
-    // Check if post exists
+    // Check if published post exists
     const post = await prisma.blogPost.findUnique({
       where: { id: payload.blogPostId }
     });
 
-    if (!post) {
+    if (!post || !post.published) {
       return invalidTokenResponse("The associated blog post no longer exists.");
     }
 
+    let validParentComment: { id: number; email: string | null; name: string | null } | null = null;
+    if (payload.parentId) {
+      validParentComment = await prisma.comment.findFirst({
+        where: { id: Number(payload.parentId), blogPostId: post.id, isVerified: true },
+        select: { id: true, email: true, name: true },
+      });
+      if (!validParentComment) {
+        return invalidTokenResponse("The parent comment no longer exists.");
+      }
+    }
+
     // Mark token as used BEFORE creating the comment to prevent race conditions
-    await prisma.setting.create({
-      data: { key: usedTokenKey, value: new Date().toISOString() }
-    });
+    try {
+      await prisma.setting.create({
+        data: { key: usedTokenKey, value: new Date().toISOString() }
+      });
+    } catch (claimErr: any) {
+      if (claimErr?.code === 'P2002') {
+        return invalidTokenResponse("This verification link has already been used.");
+      }
+      throw claimErr;
+    }
 
     // Since token is stateless and valid, insert the verified comment
-    const comment = await prisma.comment.create({
+    await prisma.comment.create({
       data: {
         name: encryptDeterministic(payload.name),
         email: encryptDeterministic(payload.email.toLowerCase().trim()),
         content: encryptDeterministic(payload.content),
         blogPostId: payload.blogPostId,
-        parentId: payload.parentId || null,
+        parentId: validParentComment ? validParentComment.id : null,
         ipAddress: payload.ipAddress,
         isVerified: true
       }
     });
 
     // Notify Parent Commenter if it's a reply
-    if (payload.parentId) {
+    if (validParentComment && validParentComment.email && validParentComment.name) {
       try {
-        const parentComment = await prisma.comment.findUnique({
-          where: { id: payload.parentId }
-        });
-        if (parentComment && parentComment.email && parentComment.name) {
-          const toEmail = decryptDeterministic(parentComment.email);
-          const toName = decryptDeterministic(parentComment.name);
-          // Don't send email if they are replying to themselves
-          if (toEmail !== payload.email.toLowerCase().trim()) {
-            await sendCommentReplyEmail(
-              toEmail,
-              toName,
-              payload.name,
-              post.title,
-              post.slug,
-              payload.content
-            );
-          }
+        const toEmail = decryptDeterministic(validParentComment.email);
+        const toName = decryptDeterministic(validParentComment.name);
+        // Don't send email if they are replying to themselves
+        if (toEmail && toEmail !== payload.email.toLowerCase().trim()) {
+          await sendCommentReplyEmail(
+            toEmail,
+            toName,
+            payload.name,
+            post.title,
+            post.slug,
+            payload.content
+          );
         }
       } catch (err) {
         console.error("Error sending reply notification:", err);
@@ -152,7 +169,7 @@ export async function GET(request: Request) {
           </div>
         </body>
       </html>
-    `, { headers: { 'Content-Type': 'text/html' } });
+    `, { headers: HTML_SECURITY_HEADERS });
 
   } catch (error) {
     console.error('Error verifying comment:', error);
@@ -172,6 +189,6 @@ function invalidTokenResponse(message = "The verification link is invalid, expir
         </div>
       </body>
     </html>
-  `, { headers: { 'Content-Type': 'text/html' }, status: 400 });
+  `, { headers: HTML_SECURITY_HEADERS, status: 400 });
 }
 

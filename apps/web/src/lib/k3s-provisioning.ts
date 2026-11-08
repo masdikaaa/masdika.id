@@ -3,6 +3,45 @@ import { encryptDeterministic, decryptDeterministic } from "@/lib/encryption";
 import { ProxmoxClient } from "./proxmox";
 
 export class K3sProvisioningService {
+  static sanitizeK3sChannel(raw?: string | null): string {
+    if (!raw || typeof raw !== "string") return "v1.31";
+    const trimmed = raw.trim();
+    if (/^(v1\.\d{1,2}(?:\.\d{1,2}(?:\+k3s\d+)?)?|stable|latest)$/.test(trimmed)) {
+      return trimmed;
+    }
+    const extracted = trimmed.match(/\b(v1\.\d{1,2}(?:\.\d{1,2}(?:\+k3s\d+)?)?)\b/);
+    if (extracted) return extracted[1];
+    return "v1.31";
+  }
+
+  static sanitizeHostname(raw: string | null | undefined, fallback: string): string {
+    const candidate = (raw || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9-]/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 63);
+    return candidate || fallback;
+  }
+
+  static validateIpv4OrThrow(ip: string, label = "IP address"): string {
+    const trimmed = (ip || "").trim();
+    if (!/^(?:\d{1,3}\.){3}\d{1,3}$/.test(trimmed)) {
+      throw new Error(`Invalid ${label} format`);
+    }
+    const octets = trimmed.split(".").map(Number);
+    if (octets.some((o) => isNaN(o) || o < 0 || o > 255)) {
+      throw new Error(`Invalid ${label} octets`);
+    }
+    return trimmed;
+  }
+
+  static validateNodeTokenOrThrow(token: string | null | undefined): string {
+    const trimmed = (token || "").trim();
+    if (!trimmed || trimmed.length > 512 || !/^[a-zA-Z0-9:._-]+$/.test(trimmed)) {
+      throw new Error("Invalid K3s node token format");
+    }
+    return trimmed;
+  }
   /**
    * Append a log message to the cluster's installLog in the database for realtime display.
    */
@@ -211,13 +250,15 @@ export class K3sProvisioningService {
 
       const proxmox = new ProxmoxClient(server.host, server.tokenId, decryptDeterministic(server.tokenSecret));
 
-      const vpcIp = vps.vpcIp;
+      const vpcIp = vps.vpcIp ? this.validateIpv4OrThrow(vps.vpcIp, "VPC IP") : null;
       if (!vpcIp) {
         await K3sProvisioningService.appendLog(clusterId, `Notice: No VPC IP found for node ${vpsId}. Cluster communication will use primary IP.`);
       }
 
-      // Extract version channel (e.g. "v1.31")
-      const k3sChannel = cluster.version || "v1.31";
+      const safeIpAddress = ipAddress ? this.validateIpv4OrThrow(ipAddress, "Node IP") : "";
+
+      // Extract & sanitize version channel (e.g. "v1.31")
+      const k3sChannel = this.sanitizeK3sChannel(cluster.version);
 
       if (role === "MASTER") {
         await prisma.kubernetesCluster.update({
@@ -239,19 +280,22 @@ export class K3sProvisioningService {
       await K3sProvisioningService.appendLog(clusterId, `Installing K3s ${k3sChannel} as ${role} via Cloud-Init...`);
 
       if (role === "MASTER") {
-        const masterHostname = vps.hostname || `master-${vps.vmid}`;
+        if (!safeIpAddress) {
+          throw new Error("Master node requires a valid IPv4 address");
+        }
+        const masterHostname = this.sanitizeHostname(vps.hostname, `master-${vps.vmid}`);
         await this.runGuestCommand(
           proxmox,
           vps.node,
           vps.vmid,
-          `hostnamectl set-hostname ${masterHostname}`,
+          `hostnamectl set-hostname '${masterHostname}'`,
           clusterId,
           `Configuring master hostname (${masterHostname})`,
           30
         );
 
         const nodeIpArg = vpcIp ? `--node-ip ${vpcIp} --flannel-iface eth1` : '';
-        const masterInstallCmd = `curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL='${k3sChannel}' INSTALL_K3S_EXEC='server --tls-san ${ipAddress} ${nodeIpArg} --disable traefik --disable servicelb --write-kubeconfig-mode 644' sh -`;
+        const masterInstallCmd = `curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL='${k3sChannel}' INSTALL_K3S_EXEC='server --tls-san ${safeIpAddress} ${nodeIpArg} --disable traefik --disable servicelb --write-kubeconfig-mode 644' sh -`;
 
         await this.runGuestCommand(
           proxmox,
@@ -313,6 +357,7 @@ export class K3sProvisioningService {
         if (!masterNodeToken) {
           throw new Error("Failed to read node token from master node.");
         }
+        masterNodeToken = this.validateNodeTokenOrThrow(masterNodeToken);
 
         const safeClusterName = cluster.name.replace(/[^a-zA-Z0-9-]/g, '-').toLowerCase();
         let kubeconfig = kubeconfigRaw;
@@ -320,8 +365,8 @@ export class K3sProvisioningService {
         kubeconfig = kubeconfig.replace(/cluster: default/g, `cluster: ${safeClusterName}`);
         kubeconfig = kubeconfig.replace(/user: default/g, `user: ${safeClusterName}`);
         kubeconfig = kubeconfig.replace(/current-context: default/g, `current-context: ${safeClusterName}`);
-        const kubeconfigToSave = kubeconfig.replace(/127\.0\.0\.1/g, ipAddress);
-        const endpointToSave = `https://${ipAddress}:6443`;
+        const kubeconfigToSave = kubeconfig.replace(/127\.0\.0\.1/g, safeIpAddress);
+        const endpointToSave = `https://${safeIpAddress}:6443`;
 
         await prisma.kubernetesCluster.update({
           where: { id: clusterId },
@@ -367,20 +412,22 @@ export class K3sProvisioningService {
           });
         }
 
-        const workerHostname = vps.hostname || `worker-${vps.vmid}`;
+        const workerHostname = this.sanitizeHostname(vps.hostname, `worker-${vps.vmid}`);
         await this.runGuestCommand(
           proxmox,
           vps.node,
           vps.vmid,
-          `hostnamectl set-hostname ${workerHostname} && (systemctl stop k3s-agent 2>/dev/null || true) && rm -rf /etc/rancher/node/password /var/lib/rancher/k3s/agent`,
+          `hostnamectl set-hostname '${workerHostname}' && (systemctl stop k3s-agent 2>/dev/null || true) && rm -rf /etc/rancher/node/password /var/lib/rancher/k3s/agent`,
           clusterId,
           `Preparing worker node identity (${workerHostname})`,
           60
         );
 
-        const joinIp = masterVpcIp || masterEndpoint.replace("https://", "").replace(":6443", "");
+        const rawJoinIp = masterVpcIp || masterEndpoint.replace("https://", "").replace(":6443", "");
+        const joinIp = this.validateIpv4OrThrow(rawJoinIp, "Master join IP");
+        const safeWorkerToken = this.validateNodeTokenOrThrow(masterNodeToken);
         const nodeIpArg = vpcIp ? `--node-ip ${vpcIp} --flannel-iface eth1` : '';
-        const workerJoinCmd = `curl -sfL https://get.k3s.io | K3S_URL=https://${joinIp}:6443 K3S_TOKEN=${masterNodeToken} INSTALL_K3S_CHANNEL='${k3sChannel}' INSTALL_K3S_EXEC='agent ${nodeIpArg} --node-name ${workerHostname} --with-node-id' sh -`;
+        const workerJoinCmd = `curl -sfL https://get.k3s.io | K3S_URL='https://${joinIp}:6443' K3S_TOKEN='${safeWorkerToken}' INSTALL_K3S_CHANNEL='${k3sChannel}' INSTALL_K3S_EXEC='agent ${nodeIpArg} --node-name ${workerHostname} --with-node-id' sh -`;
 
         await this.runGuestCommand(
           proxmox,

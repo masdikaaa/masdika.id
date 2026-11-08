@@ -76,14 +76,45 @@ app.prepare().then(async () => {
 
         const targetPath = normalizedPathname.replace(/\/upload-raw$/, "/upload");
 
-        // Strict Auth Check - require valid authenticated session before touching disk
+        // Strict Auth Check - require valid authenticated session (and DB revocation/role check) before touching disk
         const cookieHeader = req.headers.cookie || "";
         const cookies = parseCookie(cookieHeader);
         const sessionToken = cookies["admin_session"] || cookies["user_session"];
+        const { getSessionPayload } = await import("./lib/session");
+        const { prisma } = await import("./lib/prisma");
 
-        if (!sessionToken || !verifySessionToken(sessionToken)) {
+        const payload = sessionToken ? getSessionPayload(sessionToken) : null;
+        if (!payload?.userId) {
           res.statusCode = 401;
           res.end(JSON.stringify({ error: "Unauthorized" }));
+          return;
+        }
+
+        if (payload.sessionId) {
+          const sessionLog = await prisma.loginLog.findFirst({
+            where: { sessionId: payload.sessionId },
+            select: { isRevoked: true }
+          });
+          if (sessionLog?.isRevoked) {
+            res.statusCode = 401;
+            res.end(JSON.stringify({ error: "Session has been revoked" }));
+            return;
+          }
+        }
+
+        const dbUser = await prisma.user.findUnique({
+          where: { id: payload.userId },
+          select: { id: true, role: true, isSuspended: true }
+        });
+        if (!dbUser || dbUser.isSuspended) {
+          res.statusCode = 403;
+          res.end(JSON.stringify({ error: "Forbidden" }));
+          return;
+        }
+
+        if (normalizedPathname === "/api/admin/secure-media/upload-raw" && !["ADMIN", "SUPER_ADMIN"].includes(dbUser.role)) {
+          res.statusCode = 403;
+          res.end(JSON.stringify({ error: "Forbidden: Admin access required" }));
           return;
         }
 
@@ -302,10 +333,31 @@ app.prepare().then(async () => {
   // ========================================
   // CRON JOBS SETUP
   // ========================================
-  const cronSecret = process.env.CRON_SECRET || 'secret';
+  const cronSecret = process.env.CRON_SECRET?.trim();
+  if (!cronSecret) {
+    console.warn("> [CRON] WARNING: CRON_SECRET is not set. Internal HTTP cron triggers will be skipped until CRON_SECRET is configured.");
+  }
+
+  // Sweep orphaned upload buffers older than 1 hour every 15 minutes to prevent disk exhaustion
+  cron.schedule('*/15 * * * *', async () => {
+    try {
+      const fsPromises = await import("fs/promises");
+      const bufferDir = path.join(process.cwd(), "storage", "upload-buffers");
+      const entries = await fsPromises.readdir(bufferDir).catch(() => []);
+      const cutoff = Date.now() - 60 * 60 * 1000;
+      for (const name of entries) {
+        const fullPath = path.join(bufferDir, name);
+        const st = await fsPromises.stat(fullPath).catch(() => null);
+        if (st && st.isFile() && st.mtimeMs < cutoff) {
+          await fsPromises.unlink(fullPath).catch(() => {});
+        }
+      }
+    } catch {}
+  });
 
   const setupCronJob = (schedule: string, endpoint: string) => {
     cron.schedule(schedule, async () => {
+      if (!cronSecret) return;
       try {
         const res = await fetch(`http://localhost:${port}/api/cron/${endpoint}`, {
           headers: {

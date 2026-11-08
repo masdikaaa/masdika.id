@@ -3,57 +3,81 @@ import { requireAuth } from "@/lib/auth-middleware";
 import { prisma } from "@/lib/prisma";
 import { ProxmoxClient } from "@/lib/proxmox";
 
+const TIME_24H_REGEX = /^([01]\d|2[0-3]):[0-5]\d$/;
+const NON_SCHEDULABLE_STATUSES = new Set(["SUSPENDED", "TERMINATED", "TERMINATING", "PROVISIONING"]);
+
 export async function POST(req: Request) {
   try {
     const auth = await requireAuth({ allowedRoles: ["USER", "ADMIN"] });
     if (auth.error) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { vpsId, schedule } = await req.json();
+    const numericVpsId = Number(vpsId);
 
-    if (!vpsId || !schedule) {
+    if (!Number.isSafeInteger(numericVpsId) || numericVpsId <= 0 || !schedule || typeof schedule !== "object") {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    const startTimeStr = String(schedule.startTime || "");
+    const stopTimeStr = String(schedule.stopTime || "");
+    if (!TIME_24H_REGEX.test(startTimeStr) || !TIME_24H_REGEX.test(stopTimeStr)) {
+      return NextResponse.json({ error: "Invalid startTime or stopTime format (expected HH:MM)" }, { status: 400 });
+    }
+
+    const tzStr = typeof schedule.timezone === "string" && schedule.timezone.trim() ? schedule.timezone.trim() : "Asia/Jakarta";
+    try {
+      new Intl.DateTimeFormat("en-US", { timeZone: tzStr });
+    } catch {
+      return NextResponse.json({ error: "Invalid timezone identifier" }, { status: 400 });
     }
 
     // Verify ownership
     const vps = await prisma.vpsService.findFirst({
-      where: { id: vpsId, userId: auth.userId }
+      where: { id: numericVpsId, userId: auth.userId }
     });
 
     if (!vps) {
       return NextResponse.json({ error: "VPS not found" }, { status: 404 });
     }
 
-    console.log(`[Scheduler] Saving schedule for VPS ${vps.id} (VMID: ${vps.vmid}), enabled: ${schedule.enabled}`);
+    if (NON_SCHEDULABLE_STATUSES.has(vps.status)) {
+      return NextResponse.json(
+        { error: `Cannot configure or trigger scheduler while VPS is ${vps.status}.` },
+        { status: 403 }
+      );
+    }
+
+    console.log(`[Scheduler] Saving schedule for VPS ${vps.id} (VMID: ${vps.vmid}), enabled: ${Boolean(schedule.enabled)}`);
 
     // Upsert schedule
     const updatedSchedule = await prisma.vpsSchedule.upsert({
       where: { vpsId: vps.id },
       update: {
-        enabled: schedule.enabled,
-        monday: schedule.monday,
-        tuesday: schedule.tuesday,
-        wednesday: schedule.wednesday,
-        thursday: schedule.thursday,
-        friday: schedule.friday,
-        saturday: schedule.saturday,
-        sunday: schedule.sunday,
-        startTime: schedule.startTime,
-        stopTime: schedule.stopTime,
-        timezone: schedule.timezone || "Asia/Jakarta"
+        enabled: Boolean(schedule.enabled),
+        monday: Boolean(schedule.monday),
+        tuesday: Boolean(schedule.tuesday),
+        wednesday: Boolean(schedule.wednesday),
+        thursday: Boolean(schedule.thursday),
+        friday: Boolean(schedule.friday),
+        saturday: Boolean(schedule.saturday),
+        sunday: Boolean(schedule.sunday),
+        startTime: startTimeStr,
+        stopTime: stopTimeStr,
+        timezone: tzStr
       },
       create: {
         vpsId: vps.id,
-        enabled: schedule.enabled,
-        monday: schedule.monday,
-        tuesday: schedule.tuesday,
-        wednesday: schedule.wednesday,
-        thursday: schedule.thursday,
-        friday: schedule.friday,
-        saturday: schedule.saturday,
-        sunday: schedule.sunday,
-        startTime: schedule.startTime,
-        stopTime: schedule.stopTime,
-        timezone: schedule.timezone || "Asia/Jakarta"
+        enabled: Boolean(schedule.enabled),
+        monday: Boolean(schedule.monday),
+        tuesday: Boolean(schedule.tuesday),
+        wednesday: Boolean(schedule.wednesday),
+        thursday: Boolean(schedule.thursday),
+        friday: Boolean(schedule.friday),
+        saturday: Boolean(schedule.saturday),
+        sunday: Boolean(schedule.sunday),
+        startTime: startTimeStr,
+        stopTime: stopTimeStr,
+        timezone: tzStr
       }
     });
 

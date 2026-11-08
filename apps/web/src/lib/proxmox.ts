@@ -1,22 +1,29 @@
+import http from "http";
 import https from "https";
+import { Readable } from "stream";
 
-// Allow self-signed certificates for Proxmox API calls using native fetch
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+function encodeSegment(val: string | number): string {
+  return encodeURIComponent(String(val));
+}
 
 export class ProxmoxClient {
   private host: string;
   private tokenId: string;
   private tokenSecret: string;
   private httpsAgent: https.Agent;
+  private httpAgent: http.Agent;
 
   constructor(host: string, tokenId: string, tokenSecret: string) {
     this.host = host.replace(/\/$/, ""); // Remove trailing slash
     this.tokenId = tokenId;
     this.tokenSecret = tokenSecret;
-    // Proxmox usually has self-signed certs, ignore for API calls
+    // Scoped agent for self-signed Proxmox VE certificates (never disable global NODE_TLS_REJECT_UNAUTHORIZED!)
     // Force IPv4 to prevent ticket IP mismatch if server has dual-stack (IPv6/IPv4)
     this.httpsAgent = new https.Agent({
       rejectUnauthorized: false,
+      family: 4,
+    });
+    this.httpAgent = new http.Agent({
       family: 4,
     });
   }
@@ -29,59 +36,130 @@ export class ProxmoxClient {
   }
 
   private async request<T>(method: string, path: string, data?: any, rawBody?: string): Promise<T> {
-    const url = `${this.host}/api2/json${path}`;
-    
+    const targetUrl = new URL(`${this.host}/api2/json${path}`);
+    const isHttps = targetUrl.protocol === "https:";
+
     const headers: Record<string, string> = {
       Authorization: `PVEAPIToken=${this.tokenId}=${this.tokenSecret}`,
     };
 
-    const options: RequestInit = {
-      method,
-      // @ts-expect-error - Next.js/Node fetch supports agent
-      agent: this.httpsAgent,
-    };
-
+    let bodyBuffer: Buffer | undefined;
     if (rawBody && (method === "POST" || method === "PUT")) {
       headers["Content-Type"] = "application/x-www-form-urlencoded";
-      options.body = rawBody;
+      bodyBuffer = Buffer.from(rawBody, "utf8");
+      headers["Content-Length"] = String(bodyBuffer.byteLength);
     } else if (data && (method === "POST" || method === "PUT")) {
       headers["Content-Type"] = "application/json";
-      options.body = JSON.stringify(data);
+      bodyBuffer = Buffer.from(JSON.stringify(data), "utf8");
+      headers["Content-Length"] = String(bodyBuffer.byteLength);
     }
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout
-
-    options.headers = headers;
-    options.signal = controller.signal;
-
-    try {
-      const response = await fetch(url, options);
-      const text = await response.text();
-      
-      let result;
-      try {
-        result = text ? JSON.parse(text) : {};
-      } catch (e) {
-        if (!response.ok) {
-          throw new Error(text || response.statusText);
+    const { statusCode, statusMessage, text } = await new Promise<{
+      statusCode: number;
+      statusMessage: string;
+      text: string;
+    }>((resolve, reject) => {
+      const transport = isHttps ? https : http;
+      const req = transport.request(
+        targetUrl,
+        {
+          method,
+          headers,
+          agent: isHttps ? this.httpsAgent : this.httpAgent,
+        },
+        (res) => {
+          const chunks: Buffer[] = [];
+          res.on("data", (chunk: Buffer) => chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)));
+          res.on("end", () => {
+            resolve({
+              statusCode: res.statusCode || 500,
+              statusMessage: res.statusMessage || "Error",
+              text: Buffer.concat(chunks).toString("utf8"),
+            });
+          });
+          res.on("error", reject);
         }
-        return text as unknown as T; // Return raw text if not JSON but OK
+      );
+
+      req.setTimeout(15000, () => {
+        req.destroy(new Error(`Connection timed out fetching Proxmox API (${method} ${path})`));
+      });
+      req.on("error", reject);
+
+      if (bodyBuffer) {
+        req.write(bodyBuffer);
       }
-      
-      if (!response.ok) {
-        throw new Error(result.errors ? JSON.stringify(result.errors) : (result.message || response.statusText));
+      req.end();
+    });
+
+    const ok = statusCode >= 200 && statusCode < 300;
+    let result: any;
+    try {
+      result = text ? JSON.parse(text) : {};
+    } catch {
+      if (!ok) {
+        throw new Error(text || statusMessage);
       }
-      
-      return result.data;
-    } catch (error: any) {
-      if (error.name === 'AbortError') {
-        throw new Error(`Connection timed out fetching Proxmox API (${method} ${path})`);
-      }
-      throw error;
-    } finally {
-      clearTimeout(timeout);
+      return text as unknown as T;
     }
+
+    if (!ok) {
+      throw new Error(result.errors ? JSON.stringify(result.errors) : (result.message || statusMessage));
+    }
+
+    return result.data;
+  }
+
+  /**
+   * Stream a raw response from Proxmox (used for large backup archive downloads)
+   * using the scoped self-signed TLS agent without disabling global Node TLS verification.
+   */
+  async streamRawPath(rawApiPath: string): Promise<{
+    status: number;
+    headers: Record<string, string | string[] | undefined>;
+    stream: ReadableStream<Uint8Array>;
+    readErrorText: () => Promise<string>;
+  }> {
+    const targetUrl = new URL(`${this.host}${rawApiPath}`);
+    const isHttps = targetUrl.protocol === "https:";
+    const transport = isHttps ? https : http;
+
+    return new Promise((resolve, reject) => {
+      const req = transport.request(
+        targetUrl,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `PVEAPIToken=${this.tokenId}=${this.tokenSecret}`,
+            Cookie: "PVEAuthCookie=",
+          },
+          agent: isHttps ? this.httpsAgent : this.httpAgent,
+        },
+        (res) => {
+          const status = res.statusCode || 500;
+          const readErrorText = () =>
+            new Promise<string>((resText) => {
+              const chunks: Buffer[] = [];
+              res.on("data", (c: Buffer) => chunks.push(Buffer.isBuffer(c) ? c : Buffer.from(c)));
+              res.on("end", () => resText(Buffer.concat(chunks).toString("utf8")));
+              res.on("error", () => resText("Stream error"));
+            });
+
+          resolve({
+            status,
+            headers: res.headers,
+            stream: Readable.toWeb(res) as ReadableStream<Uint8Array>,
+            readErrorText,
+          });
+        }
+      );
+
+      req.setTimeout(60000, () => {
+        req.destroy(new Error("Connection timed out streaming from Proxmox"));
+      });
+      req.on("error", reject);
+      req.end();
+    });
   }
 
   // --- Nodes ---
@@ -219,11 +297,11 @@ export class ProxmoxClient {
 
   // --- Tasks ---
   async getTaskStatus(node: string, upid: string) {
-    return this.request<any>("GET", `/nodes/${node}/tasks/${upid}/status`);
+    return this.request<any>("GET", `/nodes/${encodeSegment(node)}/tasks/${encodeSegment(upid)}/status`);
   }
 
   async getTaskLog(node: string, upid: string, start: number = 0, limit: number = 500) {
-    return this.request<any>("GET", `/nodes/${node}/tasks/${encodeURIComponent(upid)}/log?start=${start}&limit=${limit}`);
+    return this.request<any>("GET", `/nodes/${encodeSegment(node)}/tasks/${encodeSegment(upid)}/log?start=${Number(start) || 0}&limit=${Number(limit) || 500}`);
   }
   
 
@@ -253,11 +331,11 @@ export class ProxmoxClient {
 
   // --- Backups ---
   async getBackups(node: string, storage: string, vmid: number) {
-    return this.request<any>("GET", `/nodes/${node}/storage/${storage}/content?content=backup&vmid=${vmid}`);
+    return this.request<any>("GET", `/nodes/${encodeSegment(node)}/storage/${encodeSegment(storage)}/content?content=backup&vmid=${Number(vmid)}`);
   }
 
   async createBackup(node: string, vmid: number, storage: string) {
-    return this.request<any>("POST", `/nodes/${node}/vzdump`, {
+    return this.request<any>("POST", `/nodes/${encodeSegment(node)}/vzdump`, {
       vmid: vmid.toString(),
       storage: storage,
       mode: "snapshot",
@@ -266,7 +344,7 @@ export class ProxmoxClient {
   }
 
   async restoreBackup(node: string, vmid: number, archive: string) {
-    return this.request<any>("POST", `/nodes/${node}/qemu`, {
+    return this.request<any>("POST", `/nodes/${encodeSegment(node)}/qemu`, {
       vmid: vmid,
       archive: archive,
       force: 1
@@ -274,31 +352,31 @@ export class ProxmoxClient {
   }
 
   async deleteBackup(node: string, storage: string, volume: string) {
-    return this.request<any>("DELETE", `/nodes/${node}/storage/${storage}/content/${volume}`);
+    return this.request<any>("DELETE", `/nodes/${encodeSegment(node)}/storage/${encodeSegment(storage)}/content/${encodeSegment(volume)}`);
   }
 
   // --- Snapshots ---
   async getVMSnapshots(node: string, vmid: number) {
-    return this.request<any>("GET", `/nodes/${node}/qemu/${vmid}/snapshot`);
+    return this.request<any>("GET", `/nodes/${encodeSegment(node)}/qemu/${Number(vmid)}/snapshot`);
   }
 
   async createVMSnapshot(node: string, vmid: number, snapname: string, description?: string, vmstate: boolean = false) {
     const payload: any = { snapname };
     if (description) payload.description = description;
     if (vmstate) payload.vmstate = 1;
-    return this.request<any>("POST", `/nodes/${node}/qemu/${vmid}/snapshot`, payload);
+    return this.request<any>("POST", `/nodes/${encodeSegment(node)}/qemu/${Number(vmid)}/snapshot`, payload);
   }
 
   async rollbackVMSnapshot(node: string, vmid: number, snapname: string) {
-    return this.request<any>("POST", `/nodes/${node}/qemu/${vmid}/snapshot/${snapname}/rollback`);
+    return this.request<any>("POST", `/nodes/${encodeSegment(node)}/qemu/${Number(vmid)}/snapshot/${encodeSegment(snapname)}/rollback`);
   }
 
   async deleteVMSnapshot(node: string, vmid: number, snapname: string) {
-    return this.request<any>("DELETE", `/nodes/${node}/qemu/${vmid}/snapshot/${snapname}`);
+    return this.request<any>("DELETE", `/nodes/${encodeSegment(node)}/qemu/${Number(vmid)}/snapshot/${encodeSegment(snapname)}`);
   }
 
   async updateVMSnapshot(node: string, vmid: number, snapname: string, description: string) {
-    return this.request<any>("PUT", `/nodes/${node}/qemu/${vmid}/snapshot/${snapname}/config`, { description });
+    return this.request<any>("PUT", `/nodes/${encodeSegment(node)}/qemu/${Number(vmid)}/snapshot/${encodeSegment(snapname)}/config`, { description });
   }
 
 

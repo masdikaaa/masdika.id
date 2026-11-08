@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth-middleware";
 import { prisma } from "@/lib/prisma";
-import { VpsProvisioningService } from "@/lib/vps-provisioning";
+import { bandwidthToProxmoxRate, BASE_BANDWIDTH_MBPS } from "@/lib/vps-bandwidth";
+
+const CANONICAL_IPV4_REGEX = /^(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/;
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -10,7 +12,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const user = authResult.user!;
 
     const { id } = await params;
-    const vpsId = parseInt(id);
+    const vpsId = Number(id);
+    if (!Number.isSafeInteger(vpsId) || vpsId <= 0) {
+      return NextResponse.json({ error: "Invalid VPS ID" }, { status: 400 });
+    }
 
     const vps = await prisma.vpsService.findFirst({
       where: { id: vpsId, userId: user.id },
@@ -20,26 +25,32 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (!vps) {
       return NextResponse.json({ error: "VPS not found" }, { status: 404 });
     }
-    
-    if (vps.status === 'SUSPENDED' || vps.status === 'TERMINATED') {
-      return NextResponse.json({ error: "VPS is suspended or terminated. Reserving an IP is not allowed." }, { status: 403 });
+
+    if (vps.isReseller) {
+      return NextResponse.json({ error: "Reserving additional IPs is not supported on fixed-plan Reseller instances." }, { status: 403 });
     }
 
-    // Get IP pricing
+    if (vps.status === "SUSPENDED" || vps.status === "TERMINATED" || vps.status === "PROVISIONING") {
+      return NextResponse.json({ error: `Cannot reserve IP while VPS is ${vps.status}.` }, { status: 403 });
+    }
+
+    if (vps.assignedIps.length >= 5) {
+      return NextResponse.json({ error: "Maximum of 5 IP addresses per VPS reached." }, { status: 400 });
+    }
+
+    // Get IP pricing (fail closed if unconfigured)
     const pricingItems = await prisma.vpsPricing.findMany();
-    let ipPricePerHour = 0;
-    const ipPricing = pricingItems.find(p => p.key === 'ipv4');
-    if (ipPricing) {
-      ipPricePerHour = ipPricing.pricePerHour;
+    const ipPricing = pricingItems.find(p => p.key === "ipv4");
+    if (!ipPricing || !Number.isSafeInteger(ipPricing.pricePerHour) || ipPricing.pricePerHour <= 0) {
+      return NextResponse.json({ error: "IPv4 pricing is not configured." }, { status: 503 });
     }
-
-
+    const ipPricePerHour = ipPricing.pricePerHour;
 
     const body = await req.json().catch(() => ({}));
-    const { ipAddress } = body;
+    const ipAddress = typeof body?.ipAddress === "string" ? body.ipAddress.trim() : "";
 
-    if (!ipAddress) {
-      return NextResponse.json({ error: "No IP address selected." }, { status: 400 });
+    if (!ipAddress || !CANONICAL_IPV4_REGEX.test(ipAddress)) {
+      return NextResponse.json({ error: "Invalid canonical IPv4 address." }, { status: 400 });
     }
 
     // Verify IP is in a public IPv4 pool
@@ -48,26 +59,25 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     });
 
     let targetPoolId: number | null = null;
-    const ipToNum = (parts: number[]) => 
-      (parts[0] * Math.pow(2, 24)) + 
-      (parts[1] * Math.pow(2, 16)) + 
-      (parts[2] * Math.pow(2, 8)) + 
+    const ipToNum = (parts: number[]) =>
+      (parts[0] * Math.pow(2, 24)) +
+      (parts[1] * Math.pow(2, 16)) +
+      (parts[2] * Math.pow(2, 8)) +
       parts[3];
-    const candidateParts = ipAddress.split('.').map(Number);
-    if (candidateParts.length === 4) {
-      const candidateNum = ipToNum(candidateParts);
 
-      for (const pool of pools) {
-        if (!pool.startIp || !pool.endIp) continue;
-        if (ipAddress === pool.gateway) continue;
+    const candidateParts = ipAddress.split(".").map(Number);
+    const candidateNum = ipToNum(candidateParts);
 
-        const startNum = ipToNum(pool.startIp.split('.').map(Number));
-        const endNum = ipToNum(pool.endIp.split('.').map(Number));
+    for (const pool of pools) {
+      if (!pool.startIp || !pool.endIp || !CANONICAL_IPV4_REGEX.test(pool.startIp) || !CANONICAL_IPV4_REGEX.test(pool.endIp)) continue;
+      if (ipAddress === pool.gateway) continue;
 
-        if (candidateNum >= startNum && candidateNum <= endNum) {
-          targetPoolId = pool.id;
-          break;
-        }
+      const startNum = ipToNum(pool.startIp.split(".").map(Number));
+      const endNum = ipToNum(pool.endIp.split(".").map(Number));
+
+      if (candidateNum >= startNum && candidateNum <= endNum) {
+        targetPoolId = pool.id;
+        break;
       }
     }
 
@@ -75,59 +85,92 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "Invalid IP address or out of range." }, { status: 400 });
     }
 
-    // Prevent abuse: require at least enough balance to cover the first hour of the new IP
-    if (user.balance < ipPricePerHour) {
-      return NextResponse.json({ error: "Insufficient balance to reserve this IP. Please top up your account." }, { status: 400 });
+    const requiredBalance = (vps.hourlyRate + ipPricePerHour) * 730;
+    if (user.balance < requiredBalance) {
+      return NextResponse.json(
+        { error: `A minimum balance of Rp ${requiredBalance.toLocaleString("id-ID")} (1 month estimation) is required to reserve this IP.` },
+        { status: 400 }
+      );
     }
 
-    // Transaction to assign IP and deduct balance
+    // Transaction to serialize pool allocation, verify ReservedIp & VpsIpAssignment, lock VPS, and deduct 1st hour upfront
     try {
       await prisma.$transaction(async (tx) => {
-        // SECURITY: Lock VPS state atomically to prevent concurrent Proxmox network reconfigurations
-        const lockResult = await tx.vpsService.updateMany({
-          where: { id: vps.id, status: vps.status },
-          data: { status: 'PROVISIONING' }
+        // 1. Serialize pool allocation
+        await tx.ipPool.update({
+          where: { id: targetPoolId! },
+          data: { updatedAt: new Date() }
         });
 
+        // 2. Block hijacking any customer's ReservedIp (attached or detached!) or VpsIpAssignment
+        const [existingAssignment, existingReserved] = await Promise.all([
+          tx.vpsIpAssignment.findFirst({ where: { ipPoolId: targetPoolId!, ipAddress } }),
+          tx.reservedIp.findFirst({ where: { ipPoolId: targetPoolId!, ipAddress } })
+        ]);
+        if (existingAssignment || existingReserved) {
+          throw new Error("IP_ALREADY_TAKEN");
+        }
+
+        // 3. Lock VPS state atomically
+        const lockResult = await tx.vpsService.updateMany({
+          where: { id: vps.id, userId: user.id, status: vps.status },
+          data: { status: "PROVISIONING" }
+        });
         if (lockResult.count === 0) {
           throw new Error("VPS_LOCKED");
         }
 
-        // 1. Assign IP
-        // If someone else already assigned this IP, this create will throw a Unique Constraint error 
-        // due to @@unique([ipPoolId, ipAddress]) in schema.prisma.
+        // 4. Deduct 1st hour upfront while verifying 730h minimum balance
+        const deductResult = await tx.user.updateMany({
+          where: { id: user.id, balance: { gte: requiredBalance } },
+          data: { balance: { decrement: ipPricePerHour } }
+        });
+        if (deductResult.count === 0) {
+          throw new Error("INSUFFICIENT_BALANCE");
+        }
+
+        // 5. Assign IP
         await tx.vpsIpAssignment.create({
           data: {
             vpsId: vps.id,
-            ipPoolId: targetPoolId,
+            ipPoolId: targetPoolId!,
             ipAddress: ipAddress,
             isPrimary: vps.assignedIps.length === 0
           }
         });
 
-      // 2. Update VPS Pricing to include the new IP
-      await tx.vpsService.update({
-        where: { id: vps.id },
-        data: {
-          hourlyRate: { increment: ipPricePerHour },
-          stoppedRate: { increment: ipPricePerHour }
-        }
-      });
-    });
-    } catch (e: any) {
-      if (e.message !== 'VPS_LOCKED') {
-        // Unlock VPS state on failure
-        await prisma.vpsService.update({
-          where: { id: vps.id },
-          data: { status: vps.status }
+        // 6. Update VPS Pricing + running PAYG invoice
+        const runningInvoice = await tx.invoice.findFirst({
+          where: { vpsServiceId: vps.id, reference: "PAYG_RUNNING" },
+          orderBy: { createdAt: "desc" }
         });
-      }
+        if (runningInvoice) {
+          await tx.invoice.update({
+            where: { id: runningInvoice.id },
+            data: { amount: { increment: ipPricePerHour } }
+          });
+        }
 
-      if (e.message === 'VPS_LOCKED') {
+        await tx.vpsService.update({
+          where: { id: vps.id },
+          data: {
+            hourlyRate: { increment: ipPricePerHour },
+            stoppedRate: { increment: ipPricePerHour },
+            accumulatedCost: { increment: ipPricePerHour }
+          }
+        });
+      });
+    } catch (e: any) {
+      if (e.message === "VPS_LOCKED") {
         return NextResponse.json({ error: "VPS is currently being modified by another process. Please wait." }, { status: 409 });
       }
-
-      if (e.code === 'P2002') {
+      if (e.message === "INSUFFICIENT_BALANCE") {
+        return NextResponse.json(
+          { error: `A minimum balance of Rp ${requiredBalance.toLocaleString("id-ID")} (1 month estimation) is required.` },
+          { status: 400 }
+        );
+      }
+      if (e.message === "IP_ALREADY_TAKEN" || e.code === "P2002") {
         return NextResponse.json({ error: "The selected IP has already been reserved by someone else. Please choose another one." }, { status: 409 });
       }
       throw e;
@@ -142,40 +185,39 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
           const proxmox = new ProxmoxClient(server.host, server.tokenId, server.tokenSecret);
           const vmConfig = await proxmox.getVmConfig(vps.node, vps.vmid);
 
-          // Find the lowest available net interface
           const getNextAvailableNetIndex = () => {
-              for (let i = 0; i < 32; i++) {
-                  if (i === 1) continue; // Reserved strictly for VPC
-                  if (vmConfig[`net${i}`] === undefined) {
-                      return i;
-                  }
+            for (let i = 0; i < 32; i++) {
+              if (i === 1) continue; // Reserved strictly for VPC
+              if (vmConfig[`net${i}`] === undefined) {
+                return i;
               }
-              return 31; // Fallback
+            }
+            return -1;
           };
           const netIndex = getNextAvailableNetIndex();
 
-          const pool = pools.find(p => p.id === targetPoolId);
-          const cidrSuffix = pool?.network.split('/')[1] || '24';
+          if (netIndex >= 0) {
+            const pool = pools.find(p => p.id === targetPoolId);
+            const cidrSuffix = pool?.network.split("/")[1] || "24";
+            const bridgeToUse = pool?.type === "PUBLIC" && server.publicNetworkBridge
+              ? server.publicNetworkBridge
+              : vps.networkBridge;
+            const rateMBs = bandwidthToProxmoxRate(vps.bandwidthMbps || BASE_BANDWIDTH_MBPS);
 
-          const bridgeToUse = pool?.type === 'PUBLIC' && server.publicNetworkBridge
-            ? server.publicNetworkBridge
-            : vps.networkBridge;
+            const configToSet: Record<string, string> = {};
+            configToSet[`net${netIndex}`] = `model=virtio,bridge=${bridgeToUse},rate=${rateMBs}`;
+            configToSet[`ipconfig${netIndex}`] = `ip=${ipAddress}/${cidrSuffix},gw=${pool?.gateway}`;
 
-          const configToSet: any = {};
-          configToSet[`net${netIndex}`] = `model=virtio,bridge=${bridgeToUse}`;
-          configToSet[`ipconfig${netIndex}`] = `ip=${ipAddress}/${cidrSuffix},gw=${pool?.gateway}`;
+            await proxmox.configVm(vps.node, vps.vmid, configToSet);
 
-          console.log(`Attaching net${netIndex} to VMID ${vps.vmid}`);
-          await proxmox.configVm(vps.node, vps.vmid, configToSet);
-
-          // Set up IP Filter
-          const ipSetName = `ipfilter-net${netIndex}`;
-          await proxmox.createFirewallIpSet(vps.node, vps.vmid, ipSetName, `Allowed IPs for net${netIndex}`);
-          await proxmox.addIpToFirewallIpSet(vps.node, vps.vmid, `${ipAddress}/32`, ipSetName, `Secondary IP`);
+            // Set up IP Filter
+            const ipSetName = `ipfilter-net${netIndex}`;
+            await proxmox.createFirewallIpSet(vps.node, vps.vmid, ipSetName, `Allowed IPs for net${netIndex}`);
+            await proxmox.addIpToFirewallIpSet(vps.node, vps.vmid, `${ipAddress}/32`, ipSetName, `Secondary IP`);
+          }
         }
       } catch (proxmoxErr) {
         console.error("Failed to attach IP to Proxmox VM:", proxmoxErr);
-        // We log the error but don't fail the request since DB is updated.
       }
     }
 

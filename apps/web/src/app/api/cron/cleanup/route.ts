@@ -5,14 +5,12 @@ import { userHasActiveVps, userVpsGracePeriodExpired } from '@/lib/cloudflare-cl
 import fs from 'fs';
 import path from 'path';
 import { deleteFromRustFS } from '@/lib/rustfs';
+import { verifyCronSecret } from '@/lib/cron-auth';
 
 export async function GET(req: Request) {
   try {
-    // Authenticate cron requests via secret header
-    const authHeader = req.headers.get('authorization');
-    const cronSecret = process.env.CRON_SECRET;
-    
-    if (!cronSecret || !authHeader || authHeader !== `Bearer ${cronSecret}`) {
+    // Authenticate cron requests via constant-time secret header check
+    if (!verifyCronSecret(req)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     const now = new Date();
@@ -25,15 +23,18 @@ export async function GET(req: Request) {
     let deletedCount = 0;
 
     for (const em of expiredMedia) {
-      deleteFromRustFS(em.filename).catch(() => {});
-      const candidateDirs = [
-        path.join(process.cwd(), "storage", "secure-media"),
-        path.join(process.cwd(), "apps", "web", "storage", "secure-media")
-      ];
-      for (const dir of candidateDirs) {
-        const filePath = path.join(dir, em.filename);
-        if (fs.existsSync(filePath)) {
-          try { fs.unlinkSync(filePath); } catch {}
+      if (em.filename) {
+        deleteFromRustFS(em.filename).catch(() => {});
+        const safeName = path.basename(em.filename);
+        const candidateDirs = [
+          path.join(process.cwd(), "storage", "secure-media"),
+          path.join(process.cwd(), "apps", "web", "storage", "secure-media")
+        ];
+        for (const dir of candidateDirs) {
+          const filePath = path.join(dir, safeName);
+          if (fs.existsSync(filePath)) {
+            try { fs.unlinkSync(filePath); } catch {}
+          }
         }
       }
       await prisma.secureMedia.delete({ where: { id: em.id } });

@@ -46,6 +46,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Session already ended.' }, { status: 400 });
     }
 
+    if (!session.isVerified) {
+      return NextResponse.json({ error: 'Session is not verified.' }, { status: 403 });
+    }
+
     // Verify IP ownership: only the session creator can end it
     if (session.ipAddress && session.ipAddress !== ip) {
       return NextResponse.json({ error: 'Unauthorized to end this session.' }, { status: 403 });

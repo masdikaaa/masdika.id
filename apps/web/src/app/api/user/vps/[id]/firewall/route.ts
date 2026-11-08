@@ -49,7 +49,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const ALLOWED_FIREWALL_FIELDS = ['action', 'type', 'dport', 'sport', 'proto', 'source', 'dest', 'comment', 'enable', 'log', 'macro', 'iface'] as const;
     const VALID_ACTIONS = ['ACCEPT', 'DROP', 'REJECT'] as const;
     const VALID_PROTOS = ['tcp', 'udp', 'icmp', 'any', 'igmp'] as const;
-    const VALID_TYPES = ['in', 'out', 'group'] as const;
+    const isAdmin = auth.user?.role === 'ADMIN' || auth.user?.role === 'SUPER_ADMIN';
+    const VALID_TYPES = isAdmin ? (['in', 'out', 'group'] as const) : (['in', 'out'] as const);
 
     const body: Record<string, any> = {};
     for (const field of ALLOWED_FIREWALL_FIELDS) {

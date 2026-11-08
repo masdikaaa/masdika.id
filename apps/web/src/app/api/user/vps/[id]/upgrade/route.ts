@@ -13,26 +13,38 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const user = authResult.user!;
 
     const { id } = await params;
-    const vpsId = parseInt(id);
-    const body = await req.json();
-    const { cpuCores, ramGb, diskGb, backupGb, bandwidthMbps, addIpv4Count = 0, addIpv6Count = 0, paymentMethodCode } = body;
+    const vpsId = Number(id);
+    if (!Number.isSafeInteger(vpsId) || vpsId <= 0) {
+      return NextResponse.json({ error: "Invalid VPS ID" }, { status: 400 });
+    }
 
-    const safeAddIpv4 = Math.max(0, Math.floor(Number(addIpv4Count)));
-    const safeAddIpv6 = Math.max(0, Math.floor(Number(addIpv6Count)));
+    const body = await req.json();
+    const { cpuCores, ramGb, diskGb, backupGb, bandwidthMbps, addIpv4Count = 0, addIpv6Count = 0 } = body;
+
+    const rawAddIpv4 = Number(addIpv4Count ?? 0);
+    const rawAddIpv6 = Number(addIpv6Count ?? 0);
+    if (!Number.isSafeInteger(rawAddIpv4) || rawAddIpv4 < 0 || rawAddIpv4 > 5 || !Number.isSafeInteger(rawAddIpv6) || rawAddIpv6 < 0 || rawAddIpv6 > 5) {
+      return NextResponse.json({ error: "Invalid IP addition count (must be an integer between 0 and 5)." }, { status: 400 });
+    }
+
+    const safeAddIpv4 = rawAddIpv4;
+    const safeAddIpv6 = rawAddIpv6;
 
     const vps = await prisma.vpsService.findFirst({
       where: { id: vpsId, userId: user.id },
     });
 
     if (!vps) {
-      console.log(`[VPS Upgrade] 404 Error: vpsId=${vpsId}, userId=${user.id}`);
       return NextResponse.json({ error: "VPS not found" }, { status: 404 });
     }
     if (!vps.vmid) return NextResponse.json({ error: "VPS not provisioned yet" }, { status: 400 });
+    if (vps.isReseller) {
+      return NextResponse.json({ error: "PAYG hardware upgrades are not supported on fixed-plan Reseller instances." }, { status: 403 });
+    }
 
-    // Security: Block upgrades on suspended/terminated VPS
-    if (vps.status === 'SUSPENDED' || vps.status === 'TERMINATED') {
-      return NextResponse.json({ error: "VPS is suspended or terminated. Upgrade is not allowed." }, { status: 403 });
+    // Security: Block upgrades on suspended/terminated/provisioning VPS
+    if (vps.status === 'SUSPENDED' || vps.status === 'TERMINATED' || vps.status === 'PROVISIONING') {
+      return NextResponse.json({ error: `VPS is ${vps.status}. Upgrade is not allowed.` }, { status: 403 });
     }
 
     // Security: Validate and sanitize resource inputs
@@ -112,14 +124,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       additionalHourlyRate += addedBandwidthHourly;
       additionalStorageRate += addedBandwidthHourly;
     }
-    if (safeAddIpv4 > 0) {
-      if (safeAddIpv4 > 8) {
-        return NextResponse.json({ error: "Maksimal penambahan 8 IP publik dalam satu kali upgrade." }, { status: 400 });
-      }
+    if (safeAddIpv4 > 0 || safeAddIpv6 > 0) {
       const existingIpsCount = await prisma.vpsIpAssignment.count({ where: { vpsId: vps.id } });
-      if (existingIpsCount + safeAddIpv4 > 10) {
-        return NextResponse.json({ error: "Total alamat IP pada satu VPS tidak boleh melebihi 10." }, { status: 400 });
+      if (existingIpsCount + safeAddIpv4 + safeAddIpv6 > 8) {
+        return NextResponse.json({ error: "Total alamat IP pada satu VPS tidak boleh melebihi 8." }, { status: 400 });
       }
+    }
+    if (safeAddIpv4 > 0) {
       const ipv4Pool = await prisma.ipPool.findFirst({ where: { version: 4, type: 'PUBLIC' } });
       if (!ipv4Pool) {
         return NextResponse.json({ error: "Pool IP Publik IPv4 belum tersedia di datacenter." }, { status: 400 });
@@ -132,30 +143,65 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       additionalStorageRate += addedIpv4Hourly;
     }
     if (safeAddIpv6 > 0) {
-      additionalHourlyRate += safeAddIpv6 * (pricing.ipv6 || 0);
-      additionalStorageRate += safeAddIpv6 * (pricing.ipv6 || 0);
+      const ipv6Pool = await prisma.ipPool.findFirst({ where: { version: 6, type: 'PUBLIC' } });
+      if (!ipv6Pool) {
+        return NextResponse.json({ error: "Pool IP Publik IPv6 belum tersedia di datacenter." }, { status: 400 });
+      }
+      const ipv6Hourly = Math.max(1, pricing.ipv6 || Math.ceil(10000 / 730));
+      additionalHourlyRate += safeAddIpv6 * ipv6Hourly;
+      additionalStorageRate += safeAddIpv6 * ipv6Hourly;
     }
 
     const newHourlyRate = vps.hourlyRate + additionalHourlyRate;
     const newStoppedRate = newHourlyRate;
-    
-    // Security: Prevent abuse by requiring 1 month equivalent balance of the new rate
     const requiredBalance = newHourlyRate * 730;
-    if (user.balance < requiredBalance) {
-      return NextResponse.json({ error: `A minimum balance of Rp ${requiredBalance.toLocaleString('id-ID')} (1 month estimation) is required to upgrade to this specification to prevent abuse. Please top up first.` }, { status: 400 });
-    }
 
-    // Lock the VPS state before modifying
-    const lockResult = await prisma.vpsService.updateMany({
-      where: { id: vpsId, status: vps.status },
-      data: { status: 'PROVISIONING' }
-    });
-    if (lockResult.count === 0) {
-      return NextResponse.json({ error: "VPS is currently being modified by another process. Please wait." }, { status: 409 });
+    if (!Number.isSafeInteger(newHourlyRate) || !Number.isSafeInteger(requiredBalance) || additionalHourlyRate < 0) {
+      return NextResponse.json({ error: "Invalid upgrade billing calculation." }, { status: 400 });
     }
 
     const server = await prisma.proxmoxServer.findFirst({ where: { isActive: true } });
     if (!server) return NextResponse.json({ error: "No active Proxmox server configured" }, { status: 500 });
+
+    // Atomically lock VPS AND verify 730h balance + deduct initial hour BEFORE touching Proxmox hypervisor!
+    try {
+      await prisma.$transaction(async (tx) => {
+        const lockResult = await tx.vpsService.updateMany({
+          where: { id: vpsId, userId: user.id, status: vps.status },
+          data: { status: 'PROVISIONING' }
+        });
+        if (lockResult.count === 0) {
+          throw new Error("VPS_LOCKED");
+        }
+
+        const deductResult = await tx.user.updateMany({
+          where: { id: user.id, balance: { gte: requiredBalance } },
+          data: {
+            ...(additionalHourlyRate > 0 ? { balance: { decrement: additionalHourlyRate } } : {})
+          }
+        });
+        if (deductResult.count === 0) {
+          throw new Error("INSUFFICIENT_BALANCE");
+        }
+      });
+    } catch (lockErr: any) {
+      if (lockErr.message === "VPS_LOCKED") {
+        return NextResponse.json({ error: "VPS is currently being modified by another process. Please wait." }, { status: 409 });
+      }
+      if (lockErr.message === "INSUFFICIENT_BALANCE") {
+        return NextResponse.json({ error: `A minimum balance of Rp ${requiredBalance.toLocaleString('id-ID')} (1 month estimation) is required to upgrade to this specification to prevent abuse. Please top up first.` }, { status: 400 });
+      }
+      throw lockErr;
+    }
+
+    const refundAndUnlock = async () => {
+      await prisma.$transaction([
+        ...(additionalHourlyRate > 0
+          ? [prisma.user.update({ where: { id: user.id }, data: { balance: { increment: additionalHourlyRate } } })]
+          : []),
+        prisma.vpsService.update({ where: { id: vpsId }, data: { status: vps.status } })
+      ]).catch((rbErr) => console.error("[VPS Upgrade] Rollback error:", rbErr));
+    };
 
     const proxmox = new ProxmoxClient(server.host, server.tokenId, server.tokenSecret);
 
@@ -201,10 +247,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         if (targetStorage && typeof targetStorage.avail === 'number') {
           const neededBytes = addedGb * 1024 * 1024 * 1024;
           if (neededBytes > targetStorage.avail) {
-            await prisma.vpsService.update({
-              where: { id: vpsId },
-              data: { status: vps.status }
-            });
+            await refundAndUnlock();
             return NextResponse.json({
               error: `Insufficient storage space on node. Available: ${Math.floor(targetStorage.avail / (1024 * 1024 * 1024))} GB, requested: ${addedGb} GB.`
             }, { status: 400 });
@@ -275,26 +318,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       }
     }
     } catch (proxmoxErr: any) {
-
-      
-      // Unlock VPS state on failure
-      await prisma.vpsService.update({
-        where: { id: vpsId },
-        data: { status: vps.status }
-      });
+      // Refund upfront charge & unlock VPS state on failure
+      await refundAndUnlock();
       throw new Error(proxmoxErr.message || "Failed to upgrade VPS in Proxmox");
     }
 
-    // Update Database and unlock VPS state atomically
+    // Update Database and unlock VPS state atomically (balance was already deducted upfront)
     const updatedVps = await prisma.$transaction(async (tx) => {
       if (additionalHourlyRate > 0) {
-        // Deduct initial hour of the upgraded rate
-        await tx.user.updateMany({
-          where: { id: user.id, balance: { gte: additionalHourlyRate } },
-          data: { balance: { decrement: additionalHourlyRate } }
-        });
-
-        // Update running invoice
         const runningInvoice = await tx.invoice.findFirst({
           where: { vpsServiceId: vps.id, reference: 'PAYG_RUNNING' },
           orderBy: { createdAt: 'desc' }

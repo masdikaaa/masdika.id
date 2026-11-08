@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { sendAdminMediaNotificationEmail } from "@/lib/email";
 import { encryptDeterministic, decryptDeterministic } from "@/lib/encryption";
+import { requireAuth } from "@/lib/auth-middleware";
 import crypto from "crypto";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -21,9 +22,22 @@ export async function GET(
 
     const media = await prisma.secureMedia.findUnique({
       where: { token },
-      select: { id: true },
+      select: { id: true, isPublic: true, userId: true, expiresAt: true },
     });
     if (!media) return new NextResponse("Not Found", { status: 404 });
+    if (media.expiresAt && media.expiresAt < new Date()) {
+      return new NextResponse("Link has expired", { status: 410 });
+    }
+    if (!media.isPublic) {
+      const auth = await requireAuth({ allowedRoles: ["ADMIN", "USER"] });
+      const isAuthorized =
+        !auth.error &&
+        auth.user &&
+        (auth.user.role === "ADMIN" || auth.user.role === "SUPER_ADMIN" || auth.user.id === media.userId);
+      if (!isAuthorized) {
+        return new NextResponse("Forbidden: This file is private", { status: 403 });
+      }
+    }
 
     const ip = getClientIp(req);
     const ipVariants = getIpVariants(ip);
@@ -90,7 +104,8 @@ export async function GET(
       const lower = c.email.toLowerCase().trim();
       const encEmail = encryptDeterministic(lower);
       const customAvatar = userImageMap.get(encEmail) || userImageMap.get(lower);
-      const avatar = customAvatar || `/api/avatar?email=${encodeURIComponent(c.email)}&name=${encodeURIComponent(c.name)}&v=4`;
+      const emailMd5 = crypto.createHash("md5").update(lower).digest("hex");
+      const avatar = customAvatar || `/api/avatar?hash=${emailMd5}&name=${encodeURIComponent(c.name)}&v=4`;
 
       return {
         id: c.id,
@@ -156,6 +171,8 @@ export async function POST(
         id: true,
         originalName: true,
         token: true,
+        isPublic: true,
+        expiresAt: true,
         userId: true,
         user: {
           select: {
@@ -167,6 +184,19 @@ export async function POST(
       },
     });
     if (!media) return new NextResponse("Not Found", { status: 404 });
+    if (media.expiresAt && media.expiresAt < new Date()) {
+      return new NextResponse("Link has expired", { status: 410 });
+    }
+    if (!media.isPublic) {
+      const auth = await requireAuth({ allowedRoles: ["ADMIN", "USER"] });
+      const isAuthorized =
+        !auth.error &&
+        auth.user &&
+        (auth.user.role === "ADMIN" || auth.user.role === "SUPER_ADMIN" || auth.user.id === media.userId);
+      if (!isAuthorized) {
+        return NextResponse.json({ error: "Forbidden: This file is private" }, { status: 403 });
+      }
+    }
 
     const body = await req.json().catch(() => null);
     const name = String(body?.name || "").trim();
@@ -216,33 +246,51 @@ export async function POST(
     const cleanName = name.replace(/[<>]/g, "");
     const cleanContent = content.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-    if (!otp || otp.length !== 6) {
+    if (!otp || !/^\d{6}$/.test(otp)) {
       return NextResponse.json({ error: "A 6-digit OTP code is required for email verification." }, { status: 400 });
     }
 
-    // Verify OTP in MediaOtp table
+    const otpAttemptAllowed = await checkRateLimit("MEDIA_OTP_VERIFY", email, 5, 600);
+    if (!otpAttemptAllowed) {
+      return NextResponse.json(
+        { error: "Too many invalid OTP attempts. Please request a new code later." },
+        { status: 429 }
+      );
+    }
+
+    // Verify OTP in MediaOtp table using constant-time comparison + atomic consumption
     const otpRecord = await prisma.mediaOtp.findFirst({
       where: {
         email,
-        code: otp,
         used: false,
         expiresAt: { gt: new Date() },
       },
       orderBy: { createdAt: "desc" },
     });
 
-    if (!otpRecord) {
+    const otpMatches =
+      otpRecord !== null &&
+      otpRecord.code.length === otp.length &&
+      crypto.timingSafeEqual(Buffer.from(otpRecord.code, "utf8"), Buffer.from(otp, "utf8"));
+
+    if (!otpRecord || !otpMatches) {
       return NextResponse.json(
         { error: "Invalid or expired OTP code. Please request a new code." },
         { status: 400 }
       );
     }
 
-    // Mark OTP as used
-    await prisma.mediaOtp.update({
-      where: { id: otpRecord.id },
+    // Atomically mark OTP as used to prevent concurrent replay
+    const consumed = await prisma.mediaOtp.updateMany({
+      where: { id: otpRecord.id, used: false },
       data: { used: true },
     });
+    if (consumed.count === 0) {
+      return NextResponse.json(
+        { error: "Invalid or expired OTP code. Please request a new code." },
+        { status: 400 }
+      );
+    }
 
     // Strict 1 rating rule: Check if rating already exists by email or IP variants
     let finalRating: number | null = null;
@@ -340,7 +388,8 @@ export async function POST(
       },
       select: { image: true },
     });
-    const avatar = existingUser?.image || `/api/avatar?email=${encodeURIComponent(cleanEmail)}&name=${encodeURIComponent(cleanName)}&v=4`;
+    const emailMd5 = crypto.createHash("md5").update(cleanEmail).digest("hex");
+    const avatar = existingUser?.image || `/api/avatar?hash=${emailMd5}&name=${encodeURIComponent(cleanName)}&v=4`;
 
     return NextResponse.json({
       success: true,

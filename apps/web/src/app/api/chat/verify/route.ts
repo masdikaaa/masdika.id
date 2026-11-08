@@ -1,16 +1,39 @@
 import { NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { prisma } from '@/lib/prisma';
+import { getClientIp } from '@/lib/get-ip';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 export async function POST(req: Request) {
   try {
-    const { sessionId, otp } = await req.json();
+    const ip = getClientIp(req);
+    if (!(await checkRateLimit('CHAT_VERIFY_IP', ip, 10, 600))) {
+      return NextResponse.json(
+        { error: 'Too many verification attempts. Please wait a few minutes.' },
+        { status: 429 }
+      );
+    }
 
-    if (!sessionId || !otp) {
+    const body = await req.json().catch(() => null);
+    const sessionId = body?.sessionId;
+    const otp = body?.otp;
+
+    if (typeof sessionId !== 'string' || !sessionId.trim() || typeof otp !== 'string' || !otp.trim()) {
       return NextResponse.json({ error: 'Session ID and Verification Code are required.' }, { status: 400 });
     }
 
+    const cleanSessionId = sessionId.trim();
+    const cleanOtp = otp.trim();
+
+    if (!(await checkRateLimit('CHAT_VERIFY_SID', cleanSessionId, 5, 600))) {
+      return NextResponse.json(
+        { error: 'Too many failed code attempts for this session. Please start a new session.' },
+        { status: 429 }
+      );
+    }
+
     const session = await prisma.chatSession.findUnique({
-      where: { sessionId },
+      where: { sessionId: cleanSessionId },
     });
 
     if (!session) {
@@ -21,17 +44,23 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'Session is already verified.' });
     }
 
-    if (session.verificationOtp !== otp.trim()) {
-      return NextResponse.json({ error: 'Invalid verification code. Please check your email.' }, { status: 400 });
-    }
-
     if (session.otpExpiresAt && new Date() > session.otpExpiresAt) {
       return NextResponse.json({ error: 'Verification code has expired. Please refresh the page and start over.' }, { status: 400 });
     }
 
-    // Mark as verified
-    await prisma.chatSession.update({
-      where: { id: session.id },
+    if (!session.verificationOtp) {
+      return NextResponse.json({ error: 'Invalid verification code. Please check your email.' }, { status: 400 });
+    }
+
+    const expectedBuf = Buffer.from(session.verificationOtp, 'utf8');
+    const providedBuf = Buffer.from(cleanOtp, 'utf8');
+    if (expectedBuf.length !== providedBuf.length || !crypto.timingSafeEqual(expectedBuf, providedBuf)) {
+      return NextResponse.json({ error: 'Invalid verification code. Please check your email.' }, { status: 400 });
+    }
+
+    // Atomically mark as verified once
+    const updated = await prisma.chatSession.updateMany({
+      where: { id: session.id, isVerified: false },
       data: {
         isVerified: true,
         status: 'ACTIVE',
@@ -39,6 +68,10 @@ export async function POST(req: Request) {
         otpExpiresAt: null,
       },
     });
+
+    if (updated.count === 0) {
+      return NextResponse.json({ message: 'Session is already verified.' });
+    }
 
     // Send Admin Notification Email
     const { sendAdminNotificationEmail } = await import('@/lib/email');

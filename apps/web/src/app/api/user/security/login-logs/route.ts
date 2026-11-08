@@ -155,9 +155,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: auth.error || 'Unauthorized' }, { status: auth.status || 401 });
     }
 
+    if (auth.impersonatedBy) {
+      return NextResponse.json({ error: 'Session security logs cannot be modified during impersonation.' }, { status: 403 });
+    }
+
     const body = await req.json().catch(() => ({}));
     const { action, logId } = body;
     const plainEmail = (decryptDeterministic(auth.user.email) || auth.user.email || '').toLowerCase().trim();
+    const retentionCutoff = new Date(Date.now() - 31 * 24 * 60 * 60 * 1000);
 
     // Revoke a single session
     if (action === 'revoke') {
@@ -237,7 +242,10 @@ export async function POST(req: NextRequest) {
         });
       } else {
         const id = Number(String(logId).replace('login-', ''));
-        await prisma.loginLog.deleteMany({
+        if (!Number.isSafeInteger(id) || id <= 0) {
+          return NextResponse.json({ error: 'Invalid log ID' }, { status: 400 });
+        }
+        const targetLog = await prisma.loginLog.findFirst({
           where: {
             id,
             OR: [
@@ -247,6 +255,22 @@ export async function POST(req: NextRequest) {
             ]
           }
         });
+
+        if (targetLog) {
+          if (targetLog.sessionId && targetLog.createdAt >= retentionCutoff) {
+            // Preserve sessionId tombstone for 31 days so revoked/removed sessions cannot be replayed
+            await prisma.loginLog.update({
+              where: { id: targetLog.id },
+              data: {
+                isRevoked: targetLog.sessionId === auth.sessionId ? targetLog.isRevoked : true,
+                userId: targetLog.sessionId === auth.sessionId ? targetLog.userId : null,
+                emailAttempt: targetLog.sessionId === auth.sessionId ? targetLog.emailAttempt : '[revoked-tombstone]'
+              }
+            });
+          } else {
+            await prisma.loginLog.delete({ where: { id: targetLog.id } });
+          }
+        }
       }
 
       return NextResponse.json({
@@ -257,14 +281,37 @@ export async function POST(req: NextRequest) {
 
     // Clear all login history (except current active session)
     if (action === 'clear_history') {
+      const ownerFilter = {
+        OR: [
+          { userId: auth.user.id },
+          { emailAttempt: plainEmail },
+          { emailAttempt: auth.user.email }
+        ],
+        ...(auth.sessionId ? { NOT: { sessionId: auth.sessionId } } : {})
+      };
+
+      // Tombstone recent session-bearing rows so revoked tokens stay blocked until natural expiry
+      await prisma.loginLog.updateMany({
+        where: {
+          ...ownerFilter,
+          sessionId: { not: null },
+          createdAt: { gte: retentionCutoff }
+        },
+        data: {
+          isRevoked: true,
+          userId: null,
+          emailAttempt: '[revoked-tombstone]'
+        }
+      });
+
+      // Safe to hard-delete non-session or >31-day-old records
       await prisma.loginLog.deleteMany({
         where: {
+          ...ownerFilter,
           OR: [
-            { userId: auth.user.id },
-            { emailAttempt: plainEmail },
-            { emailAttempt: auth.user.email }
-          ],
-          ...(auth.sessionId ? { NOT: { sessionId: auth.sessionId } } : {})
+            { sessionId: null },
+            { createdAt: { lt: retentionCutoff } }
+          ]
         }
       });
 

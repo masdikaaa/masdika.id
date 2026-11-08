@@ -1,6 +1,10 @@
+import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
+import { checkRateLimit } from "@/lib/rate-limit";
+
+const MAX_WALLET_BALANCE = 2_000_000_000;
 
 export async function POST(req: NextRequest) {
   try {
@@ -8,11 +12,20 @@ export async function POST(req: NextRequest) {
     if (auth.error || !auth.user) {
       return NextResponse.json({ success: false, error: auth.error || "Unauthorized" }, { status: auth.status || 401 });
     }
+    if (auth.impersonatedBy) {
+      return NextResponse.json({ success: false, error: "Promo claims are disabled during impersonation" }, { status: 403 });
+    }
 
-    const { promoId } = await req.json();
+    const allowed = await checkRateLimit("PROMO_CLAIM", String(auth.user.id), 10, 60);
+    if (!allowed) {
+      return NextResponse.json({ success: false, error: "Too many attempts. Please wait a minute." }, { status: 429 });
+    }
 
-    if (!promoId) {
-      return NextResponse.json({ success: false, error: "Promo ID is required" }, { status: 400 });
+    const body = await req.json();
+    const promoId = Number(body?.promoId);
+
+    if (!Number.isSafeInteger(promoId) || promoId <= 0) {
+      return NextResponse.json({ success: false, error: "Valid Promo ID is required" }, { status: 400 });
     }
 
     // Wrap the claim process in a transaction to prevent race conditions
@@ -88,7 +101,16 @@ export async function POST(req: NextRequest) {
         }
       });
 
-      // 5. Add balance to user
+      if (!Number.isSafeInteger(promo.rewardAmount) || promo.rewardAmount <= 0) {
+        throw new Error("Invalid promo reward configuration");
+      }
+
+      // 5. Add balance to user (guarded against 32-bit INT overflow)
+      const currentUser = await tx.user.findUnique({ where: { id: auth.user.id }, select: { balance: true } });
+      if ((currentUser?.balance || 0) + promo.rewardAmount > MAX_WALLET_BALANCE) {
+        throw new Error("Maximum wallet balance limit reached");
+      }
+
       await tx.user.update({
         where: { id: auth.user.id },
         data: {
@@ -96,17 +118,17 @@ export async function POST(req: NextRequest) {
         }
       });
 
-      // Optional: Log an invoice for top-up to keep billing records clean
+      const rewardInvoiceId = `RWD-${Date.now()}-${auth.user.id}-${crypto.randomBytes(2).toString("hex").toUpperCase()}`;
       await tx.invoice.create({
         data: {
-          invoiceNumber: `RWD-${Date.now()}-${auth.user.id}`,
+          invoiceNumber: rewardInvoiceId,
           userId: auth.user.id,
           amount: promo.rewardAmount,
           subtotal: promo.rewardAmount,
           status: "PAID",
           type: "TOP_UP",
           paymentMethod: "REWARD",
-          merchantOrderId: `RWD-${Date.now()}-${auth.user.id}`,
+          merchantOrderId: rewardInvoiceId,
           paidAt: new Date(),
           details: JSON.stringify({ description: `Reward claim for promo: ${promo.title}` })
         }
@@ -118,6 +140,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(result);
 
   } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 400 });
+    if (err?.code === "P2002") {
+      return NextResponse.json({ success: false, error: "You have already claimed this reward" }, { status: 400 });
+    }
+    const safeMessages = new Set([
+      "Promo not found",
+      "Promo is not active",
+      "This promo is not a claimable reward",
+      "This promo has expired",
+      "You have already claimed this reward",
+      "This reward has been fully claimed",
+      "Invalid promo reward configuration",
+      "Maximum wallet balance limit reached",
+    ]);
+    const message = safeMessages.has(err?.message) ? err.message : "Failed to claim promo reward";
+    return NextResponse.json({ success: false, error: message }, { status: 400 });
   }
 }

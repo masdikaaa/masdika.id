@@ -48,10 +48,14 @@ export async function GET(req: Request, props: { params: Promise<{ id: string }>
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    user.email = decryptDeterministic(user.email);
-    if (user.name) user.name = decryptDeterministic(user.name);
+    const { password: _pw, twoFactorSecret: _tfa, ...safeUser } = user as any;
+    safeUser.email = decryptDeterministic(user.email);
+    if (user.name) safeUser.name = decryptDeterministic(user.name);
+    if (Array.isArray(safeUser.apiKeys)) {
+      safeUser.apiKeys = safeUser.apiKeys.map(({ keyHash: _kh, ...rest }: any) => rest);
+    }
 
-    return NextResponse.json({ success: true, data: user });
+    return NextResponse.json({ success: true, data: safeUser });
   } catch (error) {
     console.error("Get User Error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
@@ -63,8 +67,15 @@ export async function DELETE(req: Request, props: { params: Promise<{ id: string
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
+  if (auth.impersonatedBy) {
+    return NextResponse.json({ error: 'Cannot delete users during an impersonation session.' }, { status: 403 });
+  }
+
   try {
-    const userId = parseInt(params.id);
+    const userId = parseInt(params.id, 10);
+    if (!Number.isSafeInteger(userId) || userId <= 0) {
+      return NextResponse.json({ error: 'Invalid user ID' }, { status: 400 });
+    }
 
     const user = await prisma.user.findUnique({
       where: { id: userId, role: 'USER' }
@@ -149,7 +160,11 @@ export async function DELETE(req: Request, props: { params: Promise<{ id: string
       }
     }
     
-    // Auth dependencies
+    // Auth dependencies & revoke/tombstone active login sessions
+    await prisma.loginLog.updateMany({
+      where: { userId: user.id },
+      data: { isRevoked: true, userId: null, emailAttempt: '[revoked-tombstone]' }
+    });
     await prisma.userVerificationOtp.deleteMany({ where: { userId: user.id } });
     await prisma.resetToken.deleteMany({ where: { userId: user.id } });
 

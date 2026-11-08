@@ -3,12 +3,14 @@ import type { NextRequest } from 'next/server';
 import crypto from 'crypto';
 import { logger } from './lib/logger';
 
-// In-memory store for rate limiting
+// In-memory store for rate limiting (bounded to prevent memory exhaustion DoS)
+const MAX_RATE_MAP_SIZE = 10_000;
 const ipRequestCounts = new Map<string, { count: number; resetTime: number }>();
 const criticalRequestCounts = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 const MAX_REQUESTS = 300; // 300 requests per minute for normal routes
 const MAX_CRITICAL_REQUESTS = 10; // 10 requests per minute for auth/billing
+const ADMIN_ROLES = new Set(['ADMIN', 'SUPER_ADMIN']);
 
 // Known bot/scraper user agents
 const BLOCKED_USER_AGENTS = [
@@ -20,18 +22,60 @@ const BLOCKED_USER_AGENTS = [
   'insomnia'
 ];
 
+function extractClientIp(request: NextRequest): string {
+  const cfIp = request.headers.get('cf-connecting-ip');
+  if (cfIp && cfIp.trim() && cfIp !== 'unknown') return cfIp.trim();
+
+  const trueClientIp = request.headers.get('true-client-ip');
+  if (trueClientIp && trueClientIp.trim() && trueClientIp !== 'unknown') return trueClientIp.trim();
+
+  if ('ip' in request && typeof (request as any).ip === 'string' && (request as any).ip.trim()) {
+    return (request as any).ip.trim();
+  }
+
+  const realIp = request.headers.get('x-real-ip');
+  if (realIp && realIp.trim() && realIp !== 'unknown') return realIp.trim();
+
+  const forwarded = request.headers.get('x-forwarded-for');
+  if (forwarded) {
+    const first = forwarded.split(',')[0].trim();
+    if (first && first !== 'unknown') return first;
+  }
+
+  return 'unknown-ip';
+}
+
+function setBoundedRateEntry(
+  store: Map<string, { count: number; resetTime: number }>,
+  key: string,
+  value: { count: number; resetTime: number },
+  now: number
+) {
+  if (!store.has(key) && store.size >= MAX_RATE_MAP_SIZE) {
+    for (const [k, v] of store.entries()) {
+      if (now > v.resetTime) store.delete(k);
+    }
+    if (store.size >= MAX_RATE_MAP_SIZE) {
+      const oldest = store.keys().next().value;
+      if (oldest) store.delete(oldest);
+    }
+  }
+  store.set(key, value);
+}
+
 /**
  * Verify session token in middleware (Edge-compatible).
  * We inline the verification logic here because middleware runs in the Edge runtime
  * and we want to keep the session.ts lib usable in both environments.
  */
 function verifySessionTokenEdge(token: string | undefined | null, secret: string): { userId: number, role: string } | null {
-  if (!token) return null;
+  if (!token || typeof token !== 'string') return null;
 
   const parts = token.split('.');
   if (parts.length !== 2) return null;
 
   const [payloadBase64, signature] = parts;
+  if (!/^[0-9a-f]{64}$/i.test(signature)) return null;
 
   // Verify HMAC signature
   const expectedSignature = crypto
@@ -42,7 +86,7 @@ function verifySessionTokenEdge(token: string | undefined | null, secret: string
   // Constant-length check before timing-safe compare
   if (signature.length !== expectedSignature.length) return null;
 
-  const sigBuffer = Buffer.from(signature, 'hex');
+  const sigBuffer = Buffer.from(signature.toLowerCase(), 'hex');
   const expectedBuffer = Buffer.from(expectedSignature, 'hex');
 
   if (sigBuffer.length !== expectedBuffer.length) return null;
@@ -52,12 +96,15 @@ function verifySessionTokenEdge(token: string | undefined | null, secret: string
     const payloadJson = Buffer.from(payloadBase64, 'base64url').toString('utf-8');
     const payload = JSON.parse(payloadJson);
 
+    if (!payload || typeof payload !== 'object' || payload.purpose) return null;
+
     // Check expiration
     const now = Math.floor(Date.now() / 1000);
-    if (payload.exp && now > payload.exp) return null;
+    if (typeof payload.exp !== 'number' || typeof payload.iat !== 'number') return null;
+    if (now > payload.exp) return null;
 
     // Validate userId
-    if (!payload.userId || typeof payload.userId !== 'number') return null;
+    if (!Number.isSafeInteger(payload.userId) || payload.userId <= 0) return null;
 
     return { userId: payload.userId, role: payload.role || 'USER' };
   } catch {
@@ -69,45 +116,62 @@ const SESSION_SECRET = process.env.SESSION_SECRET || 'dev_fallback_session_secre
 
 export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const ip = extractClientIp(request);
 
-  // 0. Allow health check endpoint to bypass all middleware checks (Docker health probes)
+  // 0. Allow health check endpoint to bypass all middleware checks (Docker/K8s/Heartbeat probes)
   if (pathname === '/api/health') {
     return new NextResponse('OK', { status: 200 });
-  }
-  if (pathname.startsWith('/api/health/')) {
-    return NextResponse.next();
   }
 
   // Log incoming requests for ELK
   if (pathname.startsWith('/api')) {
     logger.info(`Incoming API Request: ${request.method} ${pathname}`, {
-      ip: (request as any).ip || request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown-ip',
+      ip,
       method: request.method,
       url: pathname,
       user_agent: request.headers.get('user-agent') || 'unknown'
     });
   }
 
-  // 1. User Agent Filtering
+  // 1. User Agent Filtering (exempt machine-to-machine endpoints: Reseller API, Duitku Webhook, Cron, Internal Metrics)
   const userAgent = request.headers.get('user-agent') || '';
-  const isResellerApi = pathname.startsWith('/api/v1');
+  const isMachineApi =
+    pathname.startsWith('/api/v1') ||
+    pathname === '/api/payment/callback' ||
+    pathname.startsWith('/api/cron/') ||
+    pathname === '/api/metrics' ||
+    pathname === '/api/health/deploy-readiness';
   
-  if (!isResellerApi && (!userAgent || BLOCKED_USER_AGENTS.some(ua => userAgent.toLowerCase().includes(ua)))) {
+  if (!isMachineApi && (!userAgent || BLOCKED_USER_AGENTS.some(ua => userAgent.toLowerCase().includes(ua)))) {
     return new NextResponse('Forbidden: Access denied for your client.', { status: 403 });
   }
 
-  // 2. IP Rate Limiting
-  let ip = (request as any).ip || request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown-ip';
-  if (ip.includes(',')) {
-    ip = ip.split(',')[0].trim();
+  // 1b. Cross-Site Request Forgery (CSRF) Origin Validation for Cookie-Authenticated Mutations
+  const isMutatingMethod = request.method === 'POST' || request.method === 'PUT' || request.method === 'PATCH' || request.method === 'DELETE';
+  if (isMutatingMethod && pathname.startsWith('/api/') && !isMachineApi) {
+    const originHeader = request.headers.get('origin');
+    if (originHeader) {
+      try {
+        const originHost = new URL(originHeader).host.toLowerCase();
+        const forwardedHost = request.headers.get('x-forwarded-host')?.split(',')[0]?.trim().toLowerCase();
+        const directHost = request.headers.get('host')?.trim().toLowerCase();
+        const appHost = process.env.NEXT_PUBLIC_APP_URL ? new URL(process.env.NEXT_PUBLIC_APP_URL).host.toLowerCase() : null;
+        if (originHost !== forwardedHost && originHost !== directHost && (!appHost || originHost !== appHost)) {
+          return NextResponse.json({ error: 'Forbidden: Cross-origin request blocked' }, { status: 403 });
+        }
+      } catch {
+        return NextResponse.json({ error: 'Forbidden: Invalid Origin header' }, { status: 403 });
+      }
+    }
   }
 
+  // 2. IP Rate Limiting
   const now = Date.now();
-  if (ip !== 'unknown-ip' && !request.nextUrl.pathname.startsWith('/_next') && !request.nextUrl.pathname.startsWith('/favicon.ico')) {
+  if (ip !== 'unknown-ip' && !pathname.startsWith('/_next') && !pathname.startsWith('/favicon.ico') && !pathname.startsWith('/api/cron/') && pathname !== '/api/metrics') {
     const isCriticalRoute = 
-      request.nextUrl.pathname.startsWith('/api/auth') || 
-      request.nextUrl.pathname.startsWith('/api/user/topup') ||
-      request.nextUrl.pathname.startsWith('/api/user/checkout');
+      pathname.startsWith('/api/auth') || 
+      pathname.startsWith('/api/user/topup') ||
+      pathname.startsWith('/api/user/checkout');
 
     const store = isCriticalRoute ? criticalRequestCounts : ipRequestCounts;
     const limit = isCriticalRoute ? MAX_CRITICAL_REQUESTS : MAX_REQUESTS;
@@ -116,7 +180,7 @@ export default function proxy(request: NextRequest) {
     
     if (record) {
       if (now > record.resetTime) {
-        store.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+        setBoundedRateEntry(store, ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW }, now);
       } else {
         record.count++;
         if (record.count > limit) {
@@ -127,7 +191,7 @@ export default function proxy(request: NextRequest) {
         }
       }
     } else {
-      store.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+      setBoundedRateEntry(store, ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW }, now);
     }
   }
 
@@ -141,15 +205,19 @@ export default function proxy(request: NextRequest) {
   }
 
 
-  const isAdminPath = pathname.startsWith('/admin');
-  const isAdminApi = pathname.startsWith('/api/admin');
+  const isAdminPath = pathname === '/admin' || pathname.startsWith('/admin/');
+  const isAdminApi = pathname === '/api/admin' || pathname.startsWith('/api/admin/');
   const isProtectedApi =
-    pathname.startsWith('/api/admin') ||
-    pathname.startsWith('/api/user') ||
-    pathname.startsWith('/api/dashboard') ||
-    pathname.startsWith('/api/tickets') ||
-    pathname.startsWith('/api/tunnels');
-  const isProtectedUi = pathname.startsWith('/admin') || pathname.startsWith('/dashboard');
+    isAdminApi ||
+    pathname === '/api/user' ||
+    pathname.startsWith('/api/user/') ||
+    pathname === '/api/dashboard' ||
+    pathname.startsWith('/api/dashboard/') ||
+    pathname === '/api/tickets' ||
+    pathname.startsWith('/api/tickets/') ||
+    pathname === '/api/tunnels' ||
+    pathname.startsWith('/api/tunnels/');
+  const isProtectedUi = isAdminPath || pathname === '/dashboard' || pathname.startsWith('/dashboard/');
 
   let response: NextResponse | undefined;
 
@@ -160,7 +228,7 @@ export default function proxy(request: NextRequest) {
   }
 
   // Check authentication for protected paths
-  if (isProtectedUi || isProtectedApi) {
+  if ((isProtectedUi || isProtectedApi) && !isStopImpersonate) {
     // STRICT RUNTIME SECURITY CHECK
     if (process.env.NODE_ENV === 'production' && (!process.env.SESSION_SECRET || SESSION_SECRET === 'dev_fallback_session_secret_do_not_use_in_production')) {
       throw new Error('CRITICAL SECURITY ERROR: SESSION_SECRET is missing. Middleware cannot safely verify sessions.');
@@ -179,8 +247,8 @@ export default function proxy(request: NextRequest) {
       }
     }
 
-    // For admin paths/APIs, also enforce ADMIN role (not just authenticated), except when stopping impersonation
-    if (!response && (isAdminPath || isAdminApi) && session?.role !== 'ADMIN' && !isStopImpersonate) {
+    // For admin paths/APIs, also enforce ADMIN / SUPER_ADMIN role (not just authenticated)
+    if (!response && (isAdminPath || isAdminApi) && (!session?.role || !ADMIN_ROLES.has(session.role))) {
       if (isAdminApi) {
         response = NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
       } else {
@@ -189,12 +257,12 @@ export default function proxy(request: NextRequest) {
     }
   }
 
-  // Prevent logged in users from accessing the login page
-  if (!response && pathname === '/login') {
+  // Prevent logged in users from accessing the login page (unless completing 2FA challenge)
+  if (!response && pathname === '/login' && !request.nextUrl.searchParams.has('requires2fa')) {
     const sessionCookie = request.cookies.get('admin_session');
     const session = verifySessionTokenEdge(sessionCookie?.value, SESSION_SECRET);
     if (session?.userId) {
-      if (session.role === 'ADMIN') {
+      if (session.role && ADMIN_ROLES.has(session.role)) {
         response = NextResponse.redirect(new URL('/admin', request.url));
       } else {
         response = NextResponse.redirect(new URL('/dashboard', request.url));
@@ -230,13 +298,17 @@ export default function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
+    // Always run proxy on all API, Admin, and Dashboard routes regardless of file extension suffixes
+    '/api/:path*',
+    '/admin/:path*',
+    '/dashboard/:path*',
     /*
-     * Match all request paths except for the ones starting with:
+     * Match all other request paths except for static assets:
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico, sitemap.xml, robots.txt (metadata files)
-     * - static files (.webp, .png, .jpg, .svg, .woff2, etc.)
+     * - public static files (.webp, .png, .jpg, .svg, .woff2, etc.)
      */
-    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff|woff2|ttf|eot)).*)',
+    '/((?!api/|admin/|dashboard/|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff|woff2|ttf|eot)$).*)',
   ],
 };

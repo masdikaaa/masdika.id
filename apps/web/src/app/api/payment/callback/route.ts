@@ -38,11 +38,17 @@ export async function POST(req: NextRequest) {
     // Strict Type Checking to prevent Prisma injection and unexpected behavior
     if (
       !merchantCode || typeof merchantCode !== 'string' ||
-      !amount || (typeof amount !== 'string' && typeof amount !== 'number') ||
+      amount === undefined || amount === null || (typeof amount !== 'string' && typeof amount !== 'number') ||
       !merchantOrderId || typeof merchantOrderId !== 'string' ||
       !signature || typeof signature !== 'string'
     ) {
       return NextResponse.json({ error: 'Bad Request: Invalid parameter types' }, { status: 400 });
+    }
+
+    const expectedMerchantCode = (process.env.DUITKU_MERCHANT_CODE || '').trim();
+    if (!expectedMerchantCode || merchantCode !== expectedMerchantCode) {
+      console.error('[SECURITY] Duitku callback merchantCode mismatch');
+      return NextResponse.json({ error: 'Invalid Merchant Code' }, { status: 401 });
     }
 
     const isValid = validateCallbackSignature(amount, merchantOrderId, signature);
@@ -64,32 +70,15 @@ export async function POST(req: NextRequest) {
     // SECURITY: Strictly verify that the paid amount from gateway matches the generated invoice amount!
     // This prevents partial payment exploits where a user tricks the gateway into accepting less,
     // but gets full balance/services activated.
-    if (Number(amount) !== invoice.amount) {
+    const numericAmount = Number(amount);
+    if (!Number.isSafeInteger(numericAmount) || numericAmount !== invoice.amount) {
       console.error(`[SECURITY] Amount mismatch for ${merchantOrderId}: Expected ${invoice.amount}, got ${amount}`);
       return NextResponse.json({ error: 'Amount Mismatch' }, { status: 400 });
     }
 
     // resultCode "00" means Success in Duitku
     if (resultCode === '00') {
-      // SECURITY: Atomic Update to prevent High-Concurrency Race Conditions.
-      // We use updateMany with 'status: PENDING' so the database itself guarantees
-      // that only ONE thread can ever successfully change the status to PAID.
-      const updatedInvoice = await prisma.invoice.updateMany({
-        where: { id: invoice.id, status: { not: 'PAID' } },
-        data: {
-          status: 'PAID',
-          reference,
-          paidAt: new Date()
-        }
-      });
-
-      if (updatedInvoice.count === 0) {
-        // Another thread already processed this invoice
-        return NextResponse.json({ success: true, message: 'Invoice already processed concurrently' });
-      }
-
-      // Sync updated invoice to Elasticsearch
-      syncInvoiceToElastic(invoice.id).catch(e => console.debug("ES sync callback:", e));
+      const safeReference = typeof reference === 'string' ? reference.slice(0, 255) : invoice.reference;
 
       // Decrypt user info for emails
       let customerName = 'Customer';
@@ -103,14 +92,55 @@ export async function POST(req: NextRequest) {
         let fee = 0;
         if (invoice.paymentMethod) {
           const pm = await prisma.paymentMethod.findFirst({ where: { name: invoice.paymentMethod } });
-          if (pm) fee = pm.fee;
+          if (pm) fee = Math.max(0, pm.fee || 0);
         }
-        const netAmount = invoice.subtotal > 0 ? invoice.subtotal : Math.max(0, invoice.amount - fee);
-        
-        await prisma.user.update({
-          where: { id: invoice.userId },
-          data: { balance: { increment: netAmount } }
+
+        let parsedDiscount = 0;
+        if (invoice.details) {
+          try {
+            const parsed = JSON.parse(invoice.details);
+            if (typeof parsed?.discountAmount === 'number' && parsed.discountAmount > 0) {
+              parsedDiscount = Math.floor(parsed.discountAmount);
+            }
+          } catch { /* ignore */ }
+        }
+
+        const netAmount = invoice.subtotal > 0
+          ? Math.max(0, invoice.subtotal - parsedDiscount)
+          : Math.max(0, invoice.amount - (invoice.taxAmount || 0) - fee);
+
+        const credited = await prisma.$transaction(async (tx) => {
+          const updatedInvoice = await tx.invoice.updateMany({
+            where: { id: invoice.id, status: 'PENDING' },
+            data: {
+              status: 'PAID',
+              reference: safeReference,
+              paidAt: new Date()
+            }
+          });
+          if (updatedInvoice.count === 0) return false;
+
+          const currentUser = await tx.user.findUnique({
+            where: { id: invoice.userId },
+            select: { balance: true }
+          });
+          const safeIncrement = Math.max(
+            0,
+            Math.min(netAmount, 2_000_000_000 - (currentUser?.balance || 0))
+          );
+
+          await tx.user.update({
+            where: { id: invoice.userId },
+            data: { balance: { increment: safeIncrement } }
+          });
+          return true;
         });
+
+        if (!credited) {
+          return NextResponse.json({ success: true, message: 'Invoice already processed concurrently' });
+        }
+
+        syncInvoiceToElastic(invoice.id).catch(e => console.debug("ES sync callback:", e));
 
 
 
@@ -140,7 +170,24 @@ export async function POST(req: NextRequest) {
           invoiceNumber: invoice.invoiceNumber,
         }).catch(e => console.error('Email error:', e));
 
-      } else if (invoice.type === 'SUBSCRIPTION') {
+      } else {
+        // Non-TOP_UP invoice: strictly transition from PENDING -> PAID once
+        const updatedInvoice = await prisma.invoice.updateMany({
+          where: { id: invoice.id, status: 'PENDING' },
+          data: {
+            status: 'PAID',
+            reference: safeReference,
+            paidAt: new Date()
+          }
+        });
+
+        if (updatedInvoice.count === 0) {
+          return NextResponse.json({ success: true, message: 'Invoice already processed concurrently' });
+        }
+
+        syncInvoiceToElastic(invoice.id).catch(e => console.debug("ES sync callback:", e));
+
+        if (invoice.type === 'SUBSCRIPTION') {
         // Update Subscription to ACTIVE
         if (invoice.subscriptionId) {
           const updatedSub = await prisma.subscription.update({
@@ -468,6 +515,7 @@ export async function POST(req: NextRequest) {
           }
         }
       }
+      }
 
 
       // Create admin notification Message (shows in bell icon)
@@ -500,36 +548,46 @@ export async function POST(req: NextRequest) {
         console.error('Failed to create admin notification:', notifErr);
       }
     } else {
-      // Failed or Canceled
-      await prisma.invoice.update({
-        where: { id: invoice.id },
+      // Failed or Canceled — strictly transition ONLY from PENDING so a PAID invoice can never be reverted to FAILED
+      const safeReference = typeof reference === 'string' ? reference.slice(0, 255) : invoice.reference;
+      const failedUpdate = await prisma.invoice.updateMany({
+        where: { id: invoice.id, status: 'PENDING' },
         data: {
           status: 'FAILED',
-          reference
+          reference: safeReference
         }
       });
-      syncInvoiceToElastic(invoice.id).catch(e => console.debug("ES sync callback failed:", e));
-      
-      if (invoice.subscriptionId) {
-        await prisma.subscription.update({
-          where: { id: invoice.subscriptionId },
-          data: {
-            status: 'CANCELED'
-          }
-        });
-      }
 
-      if (invoice.details) {
-        try {
-          const details = JSON.parse(invoice.details);
-          if (details.voucherCode) {
-            await prisma.voucher.update({
-              where: { code: details.voucherCode },
-              data: { currentUses: { decrement: 1 } }
-            }).catch(e => console.error("Failed to decrement voucher", e));
+      if (failedUpdate.count === 1) {
+        syncInvoiceToElastic(invoice.id).catch(e => console.debug("ES sync callback failed:", e));
+        
+        if (invoice.subscriptionId) {
+          await prisma.subscription.updateMany({
+            where: { id: invoice.subscriptionId, status: 'PENDING' },
+            data: {
+              status: 'CANCELED'
+            }
+          });
+        }
+
+        if (invoice.details) {
+          try {
+            const details = JSON.parse(invoice.details);
+            if (details.voucherCode && typeof details.voucherCode === 'string') {
+              const voucher = await prisma.voucher.findUnique({ where: { code: details.voucherCode } });
+              if (voucher) {
+                await prisma.voucher.updateMany({
+                  where: { id: voucher.id, currentUses: { gt: 0 } },
+                  data: { currentUses: { decrement: 1 } }
+                }).catch(e => console.error("Failed to decrement voucher", e));
+                await prisma.voucherUsage.deleteMany({
+                  where: { userId: invoice.userId, voucherId: voucher.id }
+                }).catch(() => {});
+              }
+            }
+          } catch (e) {
+            console.error("Failed to parse invoice details for voucher decrement", e);
           }
-        } catch (e) {
-          console.error("Failed to parse invoice details for voucher decrement", e);
         }
       }
     }

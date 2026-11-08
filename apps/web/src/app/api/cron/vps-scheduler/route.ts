@@ -1,18 +1,25 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { ProxmoxClient } from '@/lib/proxmox';
+import { verifyCronSecret } from '@/lib/cron-auth';
+
+const NON_SCHEDULABLE_STATUSES = new Set(['SUSPENDED', 'TERMINATED', 'TERMINATING', 'PROVISIONING']);
 
 export async function GET(req: Request) {
   try {
-    const authHeader = req.headers.get('authorization');
-    const cronSecret = process.env.CRON_SECRET;
-    if (!cronSecret || !authHeader || authHeader !== `Bearer ${cronSecret}`) {
+    if (!verifyCronSecret(req)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const schedules = await prisma.vpsSchedule.findMany({
       where: { enabled: true },
-      include: { vps: true }
+      include: {
+        vps: {
+          include: {
+            user: { select: { isSuspended: true } }
+          }
+        }
+      }
     });
 
     if (schedules.length === 0) {
@@ -34,7 +41,10 @@ export async function GET(req: Request) {
       
       await Promise.allSettled(chunk.map(async (schedule) => {
         const vps = schedule.vps;
-        if (!vps || !vps.vmid) return;
+        // CRITICAL: Never start or mutate status of suspended, terminated, or provisioning VMs
+        if (!vps || !vps.vmid || vps.user?.isSuspended || NON_SCHEDULABLE_STATUSES.has(vps.status)) {
+          return;
+        }
         
         try {
           // Get localized time based on user's timezone settings

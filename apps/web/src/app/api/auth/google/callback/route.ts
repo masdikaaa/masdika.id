@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { prisma } from '@/lib/prisma';
 import { encryptDeterministic, hashPassword } from '@/lib/encryption';
-import { createSessionToken } from '@/lib/session';
+import { create2FAChallengeToken, createSessionToken } from '@/lib/session';
 import crypto from 'crypto';
 import { getClientIp } from '@/lib/get-ip';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { isIpBlocked } from '@/lib/ip-check';
 import { parseUserAgent } from '@/lib/device';
 import { syncCustomerToElastic } from '@/lib/sync-elasticsearch';
 import { notifyUserPresencePing } from '@/lib/presence-emitter';
@@ -14,39 +16,43 @@ export async function GET(req: Request) {
   const code = searchParams.get('code');
   const error = searchParams.get('error');
   const state = searchParams.get('state');
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || req.url;
+  const rawOrigin = process.env.NEXT_PUBLIC_APP_URL || new URL(req.url).origin;
+  const normalizedBase = rawOrigin.replace(/\/+$/, '');
 
   const ip = getClientIp(req);
   if (!(await checkRateLimit('GOOGLE_CALLBACK', ip, 15, 900))) {
-    return NextResponse.redirect(new URL('/login?error=RateLimited', baseUrl));
+    return NextResponse.redirect(new URL('/login?error=RateLimited', normalizedBase));
   }
 
-  if (error || !code) {
-    if (state && state.startsWith('gdrive_')) {
-      return NextResponse.redirect(new URL('/dashboard/services?error=GoogleAuthFailed', baseUrl));
-    }
-    return NextResponse.redirect(new URL('/login?error=GoogleAuthFailed', baseUrl));
+  if (await isIpBlocked(ip)) {
+    return NextResponse.redirect(new URL('/login?error=Blocked', normalizedBase));
+  }
+
+  // Enforce CSRF state verification via HttpOnly cookie
+  const cookieStore = await cookies();
+  const expectedState = cookieStore.get('google_oauth_state')?.value;
+  const isStateValid = (() => {
+    if (!state || !expectedState) return false;
+    const stateBuf = Buffer.from(state, 'utf8');
+    const expBuf = Buffer.from(expectedState, 'utf8');
+    if (stateBuf.length !== expBuf.length) return false;
+    return crypto.timingSafeEqual(stateBuf, expBuf);
+  })();
+
+  if (!isStateValid || error || !code) {
+    const failRes = NextResponse.redirect(new URL('/login?error=GoogleAuthFailed', normalizedBase));
+    failRes.cookies.delete('google_oauth_state');
+    return failRes;
   }
 
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const rawOrigin = process.env.NEXT_PUBLIC_APP_URL || new URL(req.url).origin;
-  const normalizedBase = rawOrigin.replace(/\/+$/, "");
-  let redirectUri = `${normalizedBase}/api/auth/google/callback`;
-
-  // If this is a GDrive OAuth flow and specified its exact redirectUri in state, match it
-  if (state && state.startsWith('gdrive_')) {
-    try {
-      const rawState = state.replace('gdrive_', '');
-      const stateData = JSON.parse(Buffer.from(rawState, 'base64url').toString('utf-8'));
-      if (stateData.redirectUri) {
-        redirectUri = stateData.redirectUri;
-      }
-    } catch {}
-  }
+  const redirectUri = `${normalizedBase}/api/auth/google/callback`;
 
   if (!clientId || !clientSecret) {
-    return NextResponse.redirect(new URL('/login?error=ConfigurationError', baseUrl));
+    const cfgRes = NextResponse.redirect(new URL('/login?error=ConfigurationError', normalizedBase));
+    cfgRes.cookies.delete('google_oauth_state');
+    return cfgRes;
   }
 
   try {
@@ -66,10 +72,9 @@ export async function GET(req: Request) {
     const tokenData = await tokenRes.json();
     if (!tokenRes.ok) {
       console.error('Google token error:', tokenData);
-      if (state && state.startsWith('gdrive_')) {
-        return NextResponse.redirect(new URL('/dashboard/services?error=GoogleTokenFailed', baseUrl));
-      }
-      return NextResponse.redirect(new URL('/login?error=GoogleAuthFailed', baseUrl));
+      const tokenErrRes = NextResponse.redirect(new URL('/login?error=GoogleAuthFailed', normalizedBase));
+      tokenErrRes.cookies.delete('google_oauth_state');
+      return tokenErrRes;
     }
 
     // 2. Fetch user profile
@@ -78,13 +83,16 @@ export async function GET(req: Request) {
     });
 
     const profileData = await profileRes.json();
-    if (!profileRes.ok || !profileData.email) {
-      console.error('Google profile error:', profileData);
-      return NextResponse.redirect(new URL('/login?error=GoogleProfileFailed', baseUrl));
+    if (!profileRes.ok || !profileData.email || profileData.verified_email !== true) {
+      console.error('Google profile error or unverified email:', profileData);
+      const profErrRes = NextResponse.redirect(new URL('/login?error=GoogleProfileFailed', normalizedBase));
+      profErrRes.cookies.delete('google_oauth_state');
+      return profErrRes;
     }
 
     const { email, name, picture } = profileData;
-    const encryptedEmail = encryptDeterministic(email.toLowerCase().trim());
+    const normalizedEmail = String(email).toLowerCase().trim();
+    const encryptedEmail = encryptDeterministic(normalizedEmail);
 
     // 3. Find or create user
     let user = await prisma.user.findUnique({
@@ -100,7 +108,7 @@ export async function GET(req: Request) {
         data: {
           email: encryptedEmail,
           password: hashedPassword,
-          name: name || 'Google User',
+          name: encryptDeterministic(name || 'Google User'),
           image: picture || null,
           role: 'USER',
           balance: 0,
@@ -108,68 +116,62 @@ export async function GET(req: Request) {
       });
 
       // Sync newly created user to Elasticsearch
-      syncCustomerToElastic(user.id).catch(err => console.debug("ES syncCustomer error:", err));
+      syncCustomerToElastic(user.id).catch(err => console.debug('ES syncCustomer error:', err));
     }
 
     if (user.isSuspended) {
-      return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(user.suspendReason || 'Account suspended')}`, baseUrl));
+      const suspRes = NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(user.suspendReason || 'Account suspended')}`, normalizedBase));
+      suspRes.cookies.delete('google_oauth_state');
+      return suspRes;
+    }
+
+    // Enforce 2FA on Google OAuth sign-in when enabled for this user or Admin
+    let requires2FA = Boolean(user.twoFactorEnabled);
+    if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+      const admin2FA = await prisma.setting.findUnique({ where: { key: 'twoFactorEnabled' } });
+      if (admin2FA?.value === 'true') {
+        requires2FA = true;
+      }
+    }
+
+    if (requires2FA) {
+      const challengeToken = create2FAChallengeToken(user.id, true);
+      const challengeRes = NextResponse.redirect(new URL('/login?requires2fa=1', normalizedBase));
+      challengeRes.cookies.delete('google_oauth_state');
+      challengeRes.cookies.set('masdika_2fa_challenge', challengeToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 300,
+      });
+      return challengeRes;
     }
 
     // 4. Generate session token
     // Set rememberMe to true for Google logins by default
     const { token, maxAge, sessionId } = createSessionToken(user.id, user.role, true);
 
-    // Record login log with device info and deduplication
+    // Record immutable login log row (never overwrite or un-revoke prior sessions)
     try {
       const userAgent = req.headers.get('user-agent') || '';
       const deviceInfo = parseUserAgent(userAgent);
-      const normalizedEmail = String(email).trim().toLowerCase();
 
-      const existingLog = await prisma.loginLog.findFirst({
-        where: {
-          success: true,
+      await prisma.loginLog.create({
+        data: {
+          userId: user.id,
+          sessionId,
           ipAddress: ip,
-          OR: [
-            { userId: user.id },
-            { emailAttempt: normalizedEmail }
-          ],
+          emailAttempt: normalizedEmail,
           device: deviceInfo.device,
           browser: deviceInfo.browser,
-          os: deviceInfo.os
-        },
-        orderBy: { createdAt: 'desc' }
+          os: deviceInfo.os,
+          userAgent,
+          success: true,
+          isBanned: false,
+          isRevoked: false
+        }
       });
-
-      if (existingLog) {
-        await prisma.loginLog.update({
-          where: { id: existingLog.id },
-          data: {
-            sessionId,
-            userId: user.id,
-            emailAttempt: normalizedEmail,
-            userAgent,
-            isRevoked: false,
-            createdAt: new Date(),
-            updatedAt: new Date()
-          }
-        });
-      } else {
-        await prisma.loginLog.create({
-          data: {
-            userId: user.id,
-            sessionId,
-            ipAddress: ip,
-            emailAttempt: normalizedEmail,
-            device: deviceInfo.device,
-            browser: deviceInfo.browser,
-            os: deviceInfo.os,
-            userAgent,
-            success: true,
-            isBanned: false,
-            isRevoked: false
-          }
-        });
-      }
     } catch (logErr) {
       console.error('Failed to record Google login log:', logErr);
     }
@@ -179,7 +181,7 @@ export async function GET(req: Request) {
     await prisma.user.update({
       where: { id: user.id },
       data: { lastActive: now },
-    }).catch(err => console.debug("google login lastActive update error:", err));
+    }).catch(err => console.debug('google login lastActive update error:', err));
 
     notifyUserPresencePing({
       id: user.id,
@@ -190,9 +192,9 @@ export async function GET(req: Request) {
       lastActive: now,
     });
 
-    const redirectUrl = new URL(user.role === 'ADMIN' ? '/admin' : '/dashboard', baseUrl);
+    const redirectUrl = new URL(user.role === 'ADMIN' || user.role === 'SUPER_ADMIN' ? '/admin' : '/dashboard', normalizedBase);
     const response = NextResponse.redirect(redirectUrl);
-
+    response.cookies.delete('google_oauth_state');
     response.cookies.set('admin_session', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -204,6 +206,8 @@ export async function GET(req: Request) {
     return response;
   } catch (error) {
     console.error('Google callback error:', error);
-    return NextResponse.redirect(new URL('/login?error=InternalError', baseUrl));
+    const errRes = NextResponse.redirect(new URL('/login?error=InternalError', normalizedBase));
+    errRes.cookies.delete('google_oauth_state');
+    return errRes;
   }
 }

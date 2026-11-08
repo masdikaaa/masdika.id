@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 import { getClientIp, getIpVariants } from "@/lib/get-ip";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { sendMediaCommentOtpEmail } from "@/lib/email";
+import { requireAuth } from "@/lib/auth-middleware";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -31,8 +33,16 @@ export async function POST(
     const body = await req.json().catch(() => null);
     const email = body?.email ? String(body.email).trim().toLowerCase() : "";
 
-    if (!email || !EMAIL_RE.test(email)) {
+    if (!email || email.length > 254 || !EMAIL_RE.test(email)) {
       return NextResponse.json({ error: "Invalid email address format." }, { status: 400 });
+    }
+
+    const emailAllowed = await checkRateLimit("MEDIA_OTP_EMAIL", email, 3, 600);
+    if (!emailAllowed) {
+      return NextResponse.json(
+        { error: "Too many OTP requests for this email. Please wait before trying again." },
+        { status: 429 }
+      );
     }
 
     // Anti-spoofing guard: Disallow using official domain for public comments
@@ -43,12 +53,25 @@ export async function POST(
       );
     }
 
-    // Verify media exists
+    // Verify media exists, is not expired, and is accessible
     const media = await prisma.secureMedia.findUnique({
       where: { token },
-      select: { id: true, originalName: true },
+      select: { id: true, originalName: true, isPublic: true, userId: true, expiresAt: true },
     });
     if (!media) return new NextResponse("Not Found", { status: 404 });
+    if (media.expiresAt && media.expiresAt < new Date()) {
+      return new NextResponse("Link has expired", { status: 410 });
+    }
+    if (!media.isPublic) {
+      const auth = await requireAuth({ allowedRoles: ["ADMIN", "USER"] });
+      const isAuthorized =
+        !auth.error &&
+        auth.user &&
+        (auth.user.role === "ADMIN" || auth.user.role === "SUPER_ADMIN" || auth.user.id === media.userId);
+      if (!isAuthorized) {
+        return NextResponse.json({ error: "Forbidden: This file is private" }, { status: 403 });
+      }
+    }
 
     // Strict Anti-Spam: 1 comment per person/IP per media
     const existingComment = await prisma.mediaComment.findFirst({
@@ -67,8 +90,8 @@ export async function POST(
       );
     }
 
-    // Generate secure 6-digit OTP code
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    // Generate cryptographically secure 6-digit OTP code
+    const otpCode = crypto.randomInt(100000, 1000000).toString();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
     // Invalidate any older unused OTPs for this email

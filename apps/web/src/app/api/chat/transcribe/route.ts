@@ -3,6 +3,7 @@ import { getClientIp } from '@/lib/get-ip';
 import OpenAI from "openai";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { isIpBlocked } from "@/lib/ip-check";
+import { prisma } from "@/lib/prisma";
 import * as fs from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from "uuid";
@@ -30,8 +31,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Too many voice requests. Please try again in a minute.' }, { status: 429 });
     }
 
-    // 3. Parse FormData
+    // 3. Parse FormData & require a verified active chat session (prevents free Whisper API proxy abuse)
     const formData = await req.formData();
+    const sessionId = formData.get("sessionId");
+    if (typeof sessionId !== "string" || !sessionId.trim()) {
+      return NextResponse.json({ error: "Active verified chat session required." }, { status: 401 });
+    }
+
+    const chatSession = await prisma.chatSession.findUnique({
+      where: { sessionId: sessionId.trim() },
+      select: { id: true, isVerified: true, status: true },
+    });
+    if (!chatSession || !chatSession.isVerified || chatSession.status !== "ACTIVE") {
+      return NextResponse.json({ error: "Active verified chat session required." }, { status: 403 });
+    }
+
     const file = formData.get("file") as File | null;
 
     if (!file) {

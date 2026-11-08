@@ -18,9 +18,13 @@ export async function POST(req: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: auth.error || 'Unauthorized' }, { status: auth.status || 401 });
     }
 
+    if (auth.impersonatedBy) {
+      return NextResponse.json({ error: 'Nested impersonation is not permitted. Exit your current impersonation session first.' }, { status: 400 });
+    }
+
     const { id } = await context.params;
     const targetUserId = parseInt(id, 10);
-    if (isNaN(targetUserId)) {
+    if (!Number.isSafeInteger(targetUserId) || targetUserId <= 0) {
       return NextResponse.json({ error: 'Invalid user ID' }, { status: 400 });
     }
 
@@ -36,14 +40,21 @@ export async function POST(req: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'Target user not found' }, { status: 404 });
     }
 
+    if (targetUser.role !== 'USER') {
+      return NextResponse.json({ error: 'Impersonation of administrator accounts is forbidden' }, { status: 403 });
+    }
+
     const cookieStore = await cookies();
     const adminToken = cookieStore.get('admin_session')?.value;
     if (!adminToken) {
       return NextResponse.json({ error: 'Admin session token not found' }, { status: 401 });
     }
 
-    // Generate signed session token for target user (valid for 2 hours during impersonation)
-    const { token: clientToken } = createSessionToken(targetUser.id, targetUser.role, false);
+    // Generate short-lived (2h) signed session token bound to impersonator admin ID
+    const { token: clientToken } = createSessionToken(targetUser.id, targetUser.role, false, undefined, {
+      customMaxAgeSec: 7200,
+      impersonatedBy: auth.user.id,
+    });
     const adminName = auth.user.name ? decryptDeterministic(auth.user.name) : 'Admin';
     const targetName = decryptDeterministic(targetUser.name) || targetUser.name || 'User';
     const targetEmail = decryptDeterministic(targetUser.email) || targetUser.email || '';

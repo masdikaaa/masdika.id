@@ -28,13 +28,41 @@ vncProxy.on("error", (err: any, req: any, socket: any) => {
 export async function handleVncUpgrade(req: any, socket: any, head: any): Promise<void> {
   try {
     const reqUrl = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
-    
+
+    // ── CSWSH Origin validation when Origin header is present ───────────────
+    const originHeader = req.headers.origin;
+    if (originHeader) {
+      let originHost = "";
+      try {
+        originHost = new URL(originHeader).host.toLowerCase();
+      } catch {
+        socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");
+        socket.destroy();
+        return;
+      }
+      const allowedHosts = new Set<string>();
+      const reqHost = String(req.headers["x-forwarded-host"] || req.headers.host || "").split(",")[0].trim().toLowerCase();
+      if (reqHost) allowedHosts.add(reqHost);
+      if (process.env.NEXT_PUBLIC_APP_URL) {
+        try {
+          allowedHosts.add(new URL(process.env.NEXT_PUBLIC_APP_URL).host.toLowerCase());
+        } catch {}
+      }
+      if (allowedHosts.size > 0 && !allowedHosts.has(originHost)) {
+        socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");
+        socket.destroy();
+        return;
+      }
+    }
+
     // ── Auth & session validation ───────────────────────────────────────────
     const cookieHeader = req.headers.cookie || "";
     const cookies = parseCookie(cookieHeader);
     const sessionToken = cookies["admin_session"];
 
-    const vncSessionId = cookies["VNC_SESSION_TOKEN"] || reqUrl.searchParams.get("session");
+    const querySession = reqUrl.searchParams.get("session");
+    const cookieSession = cookies["VNC_SESSION_TOKEN"];
+    const vncSessionId = querySession || cookieSession;
     if (!vncSessionId) {
       socket.write("HTTP/1.1 400 Bad Request\r\n\r\n");
       socket.destroy();
@@ -48,10 +76,17 @@ export async function handleVncUpgrade(req: any, socket: any, head: any): Promis
       return;
     }
 
-    // Verify session token if present; if from browser, ensure token belongs to the same user
-    if (sessionToken) {
-      const userId = verifySessionToken(sessionToken);
+    // When using browser cookie VNC_SESSION_TOKEN (not reseller ?session= token), require active admin_session matching vncSession.userId
+    if (!querySession) {
+      const userId = sessionToken ? verifySessionToken(sessionToken) : null;
       if (!userId || vncSession.userId !== userId) {
+        socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");
+        socket.destroy();
+        return;
+      }
+    } else if (sessionToken) {
+      const userId = verifySessionToken(sessionToken);
+      if (userId && vncSession.userId !== userId) {
         socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");
         socket.destroy();
         return;
@@ -77,8 +112,8 @@ export async function handleVncUpgrade(req: any, socket: any, head: any): Promis
 
     console.log(`[VNC] Upgrading via http-proxy VMID:${vmid}...`);
 
-    // Rewrite URL to target Proxmox endpoint
-    req.url = `/api2/json/nodes/${node}/qemu/${vmid}/vncwebsocket?port=${vncPort}&vncticket=${encodeURIComponent(ticket)}`;
+    // Rewrite URL to target Proxmox endpoint (strictly encoded)
+    req.url = `/api2/json/nodes/${encodeURIComponent(node)}/qemu/${Number(vmid)}/vncwebsocket?port=${Number(vncPort)}&vncticket=${encodeURIComponent(ticket)}`;
     
     // Proxmox expects authorization in headers
     req.headers["Authorization"] = apiTokenAuth;

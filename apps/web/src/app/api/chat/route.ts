@@ -90,35 +90,6 @@ function sanitizeInput(input: unknown): SanitizeResult {
   return { clean, injectionDetected: false, matchedPattern: null };
 }
 
-/**
- * Validate and sanitize the conversation history sent by the client.
- * Only 'user' and 'model' roles are allowed; content is capped.
- */
-type HistoryItem = { role: 'user' | 'model'; content: string };
-
-function validateHistory(raw: unknown): HistoryItem[] {
-  if (!Array.isArray(raw)) return [];
-
-  const valid: HistoryItem[] = [];
-  for (const item of raw.slice(-MAX_HISTORY_ITEMS)) {
-    if (typeof item !== 'object' || item === null) continue;
-    const { role, content } = item as Record<string, unknown>;
-
-    if (role !== 'user' && role !== 'model') continue;
-    if (typeof content !== 'string') continue;
-
-     
-    const cleanContent = content.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').trim();
-    if (cleanContent.length === 0) continue;
-
-    valid.push({
-      role,
-      content: cleanContent.substring(0, MAX_HISTORY_CONTENT_LENGTH),
-    });
-  }
-  return valid;
-}
-
 // ─── Shared security response headers ────────────────────────────────────────
 const SECURITY_HEADERS = {
   'Content-Type': 'application/json',
@@ -171,7 +142,7 @@ export async function POST(req: Request): Promise<Response> {
       return jsonResponse({ error: 'Invalid request body.' }, 400);
     }
 
-    const { message, history, sessionId } = body;
+    const { message, sessionId } = body;
 
     if (!message) {
       return jsonResponse({ error: 'Message is required.' }, 400);
@@ -182,12 +153,20 @@ export async function POST(req: Request): Promise<Response> {
       return jsonResponse({ error: 'Session ID is required. Please start a new chat session.' }, 400);
     }
 
-    // 4.2. Verify session exists and is active
-    let chatSession: { id: number; status: string } | null = null;
+    const cleanSessionId = sessionId.trim();
+    if (!(await checkRateLimit('CHAT_SESSION_MSG', cleanSessionId, RATE_LIMIT_MAX, RATE_LIMIT_WINDOW))) {
+      return jsonResponse(
+        { error: 'Too many messages in this session. Please wait a moment.' },
+        429
+      );
+    }
+
+    // 4.2. Verify session exists, is email-verified, and is active
+    let chatSession: { id: number; status: string; isVerified: boolean } | null = null;
     try {
       chatSession = await prisma.chatSession.findUnique({
-        where: { sessionId: sessionId.trim() },
-        select: { id: true, status: true },
+        where: { sessionId: cleanSessionId },
+        select: { id: true, status: true, isVerified: true },
       });
     } catch {
       // Non-fatal
@@ -199,6 +178,13 @@ export async function POST(req: Request): Promise<Response> {
 
     if (chatSession.status === 'ENDED') {
       return jsonResponse({ error: 'The chat session has ended. Please start a new session.', sessionExpired: true }, 400);
+    }
+
+    if (!chatSession.isVerified || chatSession.status !== 'ACTIVE') {
+      return jsonResponse(
+        { error: 'Please verify your email address before sending chat messages.', requiresVerification: true },
+        403
+      );
     }
 
     // 5. Sanitize message
@@ -261,7 +247,32 @@ export async function POST(req: Request): Promise<Response> {
       );
     }
 
-    // 6.1 Log user message to DB
+    // 6.1 Load trusted server-side conversation history BEFORE inserting current user turn
+    // (Prevents client-forged 'assistant'/'model' history prompt poisoning)
+    let cleanHistory: Array<{ role: 'user' | 'model'; content: string }> = [];
+    try {
+      const dbHistory = await prisma.chatMessage.findMany({
+        where: {
+          sessionId: chatSession.id,
+          isInjectionAttempt: false,
+          isOutputBlocked: false,
+        },
+        orderBy: { createdAt: 'desc' },
+        take: MAX_HISTORY_ITEMS,
+        select: { role: true, content: true },
+      });
+      cleanHistory = dbHistory
+        .reverse()
+        .filter((m) => (m.role === 'user' || m.role === 'model') && typeof m.content === 'string' && m.content.trim().length > 0)
+        .map((m) => ({
+          role: m.role === 'user' ? 'user' : 'model',
+          content: m.content.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').trim().substring(0, MAX_HISTORY_CONTENT_LENGTH),
+        }));
+    } catch {
+      // Non-fatal fallback to empty history
+    }
+
+    // 6.2 Log user message to DB
     try {
       await prisma.chatMessage.create({
         data: {
@@ -278,9 +289,6 @@ export async function POST(req: Request): Promise<Response> {
     } catch (logErr) {
       console.error('Failed to log user message:', logErr);
     }
-
-    // 7. Validate conversation history from client
-    const cleanHistory = validateHistory(history);
 
     // 8. Build / serve cached system prompt
     if (!cachedStaticDataStr || Date.now() - lastCacheTime > CACHE_TTL) {

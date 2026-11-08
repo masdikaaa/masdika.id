@@ -22,9 +22,16 @@ export async function POST(req: NextRequest) {
 
     const { vpsId } = await req.json();
 
+    const isAdmin = user.role === "ADMIN" || user.role === "SUPER_ADMIN";
+
     // Admin can access any VPS, users can only access their own
-    const whereClause: any = { id: Number(vpsId) };
-    if (user.role !== "ADMIN") {
+    const numericVpsId = Number(vpsId);
+    if (!Number.isSafeInteger(numericVpsId) || numericVpsId <= 0) {
+      return NextResponse.json({ error: "Invalid VPS ID" }, { status: 400 });
+    }
+
+    const whereClause: any = { id: numericVpsId };
+    if (!isAdmin) {
       whereClause.userId = Number(user.id);
     }
 
@@ -34,6 +41,10 @@ export async function POST(req: NextRequest) {
 
     if (!vps || !vps.vmid) {
       return NextResponse.json({ error: "VPS not found or not provisioned" }, { status: 404 });
+    }
+
+    if (!isAdmin && (vps.status === "SUSPENDED" || vps.status === "TERMINATED")) {
+      return NextResponse.json({ error: "Console access is disabled while VPS is suspended or terminated" }, { status: 403 });
     }
 
     const server = await prisma.proxmoxServer.findFirst({ where: { isActive: true } });

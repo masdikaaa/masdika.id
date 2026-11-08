@@ -212,6 +212,44 @@ export async function ensureBucketExists(client: S3Client, bucket: string): Prom
   }
 }
 
+const MASKED_SECRET_PLACEHOLDER = '••••••••';
+
+function validateRustFSEndpoint(endpoint: string): void {
+  let parsed: URL;
+  try {
+    parsed = new URL(endpoint);
+  } catch {
+    throw new Error('Invalid RustFS endpoint URL format.');
+  }
+
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    throw new Error('RustFS endpoint must use http:// or https:// protocol.');
+  }
+
+  if (parsed.username || parsed.password) {
+    throw new Error('RustFS endpoint URL must not embed credentials.');
+  }
+
+  const host = parsed.hostname.replace(/^\[|\]$/g, '').toLowerCase();
+  if (
+    !host ||
+    host === 'localhost' ||
+    host.endsWith('.localhost') ||
+    host === '0.0.0.0' ||
+    host === '::' ||
+    host === '::1' ||
+    host === '0:0:0:0:0:0:0:1' ||
+    host.startsWith('127.') ||
+    host.startsWith('169.254.') ||
+    host.startsWith('::ffff:127.') ||
+    host.startsWith('::ffff:169.254.') ||
+    host.startsWith('fe80:') ||
+    host === 'metadata.google.internal'
+  ) {
+    throw new Error('RustFS endpoint cannot target loopback or cloud metadata addresses.');
+  }
+}
+
 /**
  * Tests the connection to RustFS using current or custom configuration
  */
@@ -221,7 +259,31 @@ export async function testRustFSConnection(customConfig?: Partial<RustFSConfig>)
   bucket: string;
 }> {
   try {
-    const config = customConfig ? { ...(await getRustFSConfig()), ...customConfig } : await getRustFSConfig();
+    const storedConfig = await getRustFSConfig();
+    const normalizedCustomEndpoint = customConfig?.endpoint?.trim().replace(/\/+$/, '');
+    let resolvedSecretKey = customConfig?.secretKey !== undefined ? customConfig.secretKey.trim() : storedConfig.secretKey;
+
+    if (resolvedSecretKey === MASKED_SECRET_PLACEHOLDER) {
+      if (!normalizedCustomEndpoint || normalizedCustomEndpoint === storedConfig.endpoint) {
+        resolvedSecretKey = storedConfig.secretKey;
+      } else {
+        return {
+          success: false,
+          message: 'Please enter the Secret Key explicitly when testing a different endpoint URL.',
+          bucket: customConfig?.bucket || storedConfig.bucket || 'masdika-cdn'
+        };
+      }
+    }
+
+    const config: RustFSConfig = customConfig
+      ? {
+          ...storedConfig,
+          ...customConfig,
+          endpoint: normalizedCustomEndpoint || storedConfig.endpoint,
+          accessKey: (customConfig.accessKey ?? storedConfig.accessKey).trim(),
+          secretKey: resolvedSecretKey,
+        }
+      : storedConfig;
 
     if (!config.endpoint || !config.accessKey || !config.secretKey) {
       return {
@@ -230,6 +292,8 @@ export async function testRustFSConnection(customConfig?: Partial<RustFSConfig>)
         bucket: config.bucket || 'masdika-media'
       };
     }
+
+    validateRustFSEndpoint(config.endpoint);
 
     const client = new S3Client({
       endpoint: config.endpoint,
@@ -1400,7 +1464,15 @@ export async function migrateBucketToBucket(params: BucketMigrationParams): Prom
   const activeConfig = await getRustFSConfig();
   const sourceEndpoint = (params.source?.endpoint || activeConfig.endpoint).trim().replace(/\/+$/, '');
   const sourceAccessKey = (params.source?.accessKey || activeConfig.accessKey).trim();
-  const sourceSecretKey = (params.source?.secretKey || activeConfig.secretKey).trim();
+  const rawSourceSecret = (params.source?.secretKey || activeConfig.secretKey).trim();
+  let sourceSecretKey = rawSourceSecret;
+  if (rawSourceSecret === MASKED_SECRET_PLACEHOLDER) {
+    if (sourceEndpoint === activeConfig.endpoint) {
+      sourceSecretKey = activeConfig.secretKey;
+    } else {
+      throw new Error('Explicit source Secret Key is required when specifying a custom source endpoint.');
+    }
+  }
   const sourceCdnBucket = (params.source?.cdnBucket || params.source?.bucket || activeConfig.cdnBucket || 'masdika-cdn').trim();
   const sourceMediaBucket = (params.source?.mediaBucket || activeConfig.mediaBucket || 'masdika-media').trim();
   const sourceTicketBucket = (params.source?.ticketBucket || activeConfig.ticketBucket || 'masdika-ticket').trim();
@@ -1408,7 +1480,15 @@ export async function migrateBucketToBucket(params: BucketMigrationParams): Prom
   // 2. Resolve target config
   const targetEndpoint = params.target.endpoint.trim().replace(/\/+$/, '');
   const targetAccessKey = params.target.accessKey.trim();
-  const targetSecretKey = params.target.secretKey.trim();
+  const rawTargetSecret = params.target.secretKey.trim();
+  let targetSecretKey = rawTargetSecret;
+  if (rawTargetSecret === MASKED_SECRET_PLACEHOLDER) {
+    if (targetEndpoint === activeConfig.endpoint) {
+      targetSecretKey = activeConfig.secretKey;
+    } else {
+      throw new Error('Explicit target Secret Key is required when migrating to a new endpoint.');
+    }
+  }
   const targetCdnBucket = (params.target.cdnBucket || params.target.bucket || 'masdika-cdn').trim();
   const targetMediaBucket = (params.target.mediaBucket || 'masdika-media').trim();
   const targetTicketBucket = (params.target.ticketBucket || 'masdika-ticket').trim();
@@ -1416,6 +1496,9 @@ export async function migrateBucketToBucket(params: BucketMigrationParams): Prom
   if (!targetEndpoint || !targetAccessKey || !targetSecretKey) {
     throw new Error('All target destination fields (endpoint, accessKey, secretKey) are required.');
   }
+
+  validateRustFSEndpoint(sourceEndpoint);
+  validateRustFSEndpoint(targetEndpoint);
 
   const sourceClient = new S3Client({
     endpoint: sourceEndpoint,

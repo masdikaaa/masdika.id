@@ -4,10 +4,19 @@ import { requireAuth } from '@/lib/auth-middleware';
 import { generateSecret, generateURI, verify } from 'otplib';
 import QRCode from 'qrcode';
 import { decryptDeterministic } from '@/lib/encryption';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 export async function POST(req: Request) {
   const auth = await requireAuth({ allowedRoles: ['USER', 'ADMIN'] });
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
+
+  if (auth.impersonatedBy) {
+    return NextResponse.json({ error: '2FA settings cannot be modified during an impersonation session.' }, { status: 403 });
+  }
+
+  if (!(await checkRateLimit('USER_2FA_SETTINGS', String(auth.userId), 8, 300))) {
+    return NextResponse.json({ error: 'Too many 2FA attempts. Please wait a few minutes and try again.' }, { status: 429 });
+  }
 
   try {
     const { action, code } = await req.json();
@@ -18,6 +27,10 @@ export async function POST(req: Request) {
     const email = decryptDeterministic(user.email);
 
     if (action === 'generate') {
+      if (user.twoFactorEnabled) {
+        return NextResponse.json({ error: '2FA is already enabled. Disable 2FA first before generating a new secret.' }, { status: 400 });
+      }
+
       const secret = generateSecret();
       const otpauthUrl = generateURI({ issuer: 'Masdika', label: email, secret });
       const qrCodeUrl = await QRCode.toDataURL(otpauthUrl);
@@ -31,11 +44,14 @@ export async function POST(req: Request) {
     }
 
     if (action === 'verify_enable') {
-      if (!code) return NextResponse.json({ error: 'Code is required' }, { status: 400 });
+      const tokenString = typeof code === 'string' || typeof code === 'number' ? String(code).trim() : '';
+      if (!/^\d{6}$/.test(tokenString)) {
+        return NextResponse.json({ error: 'A valid 6-digit verification code is required' }, { status: 400 });
+      }
       if (!user.twoFactorSecret) return NextResponse.json({ error: '2FA setup not initiated' }, { status: 400 });
 
-      const isValid = verify({ token: code, secret: user.twoFactorSecret });
-      if (!isValid) return NextResponse.json({ error: 'Invalid verification code' }, { status: 400 });
+      const verifyRes = await verify({ token: tokenString, secret: user.twoFactorSecret });
+      if (!verifyRes.valid) return NextResponse.json({ error: 'Invalid verification code' }, { status: 400 });
 
       await prisma.user.update({
         where: { id: user.id },
@@ -46,13 +62,16 @@ export async function POST(req: Request) {
     }
 
     if (action === 'disable') {
-      if (!code) return NextResponse.json({ error: 'Code is required to disable 2FA' }, { status: 400 });
+      const tokenString = typeof code === 'string' || typeof code === 'number' ? String(code).trim() : '';
+      if (!/^\d{6}$/.test(tokenString)) {
+        return NextResponse.json({ error: 'A valid 6-digit verification code is required to disable 2FA' }, { status: 400 });
+      }
       if (!user.twoFactorSecret || !user.twoFactorEnabled) {
-         return NextResponse.json({ error: '2FA is not enabled' }, { status: 400 });
+        return NextResponse.json({ error: '2FA is not enabled' }, { status: 400 });
       }
 
-      const isValid = verify({ token: code, secret: user.twoFactorSecret });
-      if (!isValid) return NextResponse.json({ error: 'Invalid verification code' }, { status: 400 });
+      const verifyRes = await verify({ token: tokenString, secret: user.twoFactorSecret });
+      if (!verifyRes.valid) return NextResponse.json({ error: 'Invalid verification code' }, { status: 400 });
 
       await prisma.user.update({
         where: { id: user.id },

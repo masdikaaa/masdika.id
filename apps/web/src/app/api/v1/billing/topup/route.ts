@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { authenticateReseller, apiError } from "@/lib/reseller-api";
@@ -7,9 +8,11 @@ import { decryptDeterministic } from "@/lib/encryption";
 
 export const dynamic = "force-dynamic";
 
+const MAX_WALLET_BALANCE = 2_000_000_000;
+
 function generateOrderId() {
   const timestamp = Date.now().toString();
-  const random = Math.random().toString(36).substring(2, 7).toUpperCase();
+  const random = crypto.randomBytes(4).toString("hex").toUpperCase();
   return `TOPUP-${timestamp}-${random}`;
 }
 
@@ -130,11 +133,12 @@ export async function POST(req: NextRequest) {
     const MAX_TOPUP = 50000000; // Rp 50.000.000
     const MIN_TOPUP = 50000;    // Rp 50.000
 
+    if (body.voucherCode && String(body.voucherCode).trim().length > 0) {
+      return apiError("Discount vouchers cannot be applied to wallet top-ups.", 400);
+    }
+
     if (
-      !amount ||
-      isNaN(amount) ||
-      !Number.isFinite(amount) ||
-      Math.floor(amount) !== amount ||
+      !Number.isSafeInteger(amount) ||
       amount < MIN_TOPUP ||
       amount > MAX_TOPUP
     ) {
@@ -142,6 +146,10 @@ export async function POST(req: NextRequest) {
         `Invalid amount. Minimum top up is Rp ${MIN_TOPUP.toLocaleString("id-ID")} and maximum is Rp ${MAX_TOPUP.toLocaleString("id-ID")} (must be an integer).`,
         400
       );
+    }
+
+    if ((user.balance || 0) + amount > MAX_WALLET_BALANCE) {
+      return apiError("Maximum wallet balance limit (Rp 2.000.000.000) exceeded.", 400);
     }
 
     const rawCode = String(body.paymentMethodCode || "").trim();
@@ -174,68 +182,18 @@ export async function POST(req: NextRequest) {
     const taxRateSetting = await prisma.setting.findUnique({ where: { key: "tax_rate" } });
     const taxRate = taxRateSetting && !isNaN(Number(taxRateSetting.value)) ? Math.max(0, Number(taxRateSetting.value)) : 0;
 
-    let discountAmount = 0;
-    let appliedVoucherCode: string | null = null;
-    let voucherRecordId: number | null = null;
-
-    const voucherCode = typeof body.voucherCode === "string" ? body.voucherCode.trim().toUpperCase() : null;
-
-    if (voucherCode) {
-      try {
-        await prisma.$transaction(async (tx) => {
-          const voucher = await tx.voucher.findUnique({ where: { code: voucherCode } });
-          if (!voucher || !voucher.isActive) throw new Error("INVALID");
-          if (voucher.validUntil && voucher.validUntil < new Date()) throw new Error("EXPIRED");
-
-          const usageCount = await tx.voucherUsage.count({
-            where: { userId: user.id, voucherId: voucher.id },
-          });
-          if (usageCount > 0) throw new Error("ALREADY_USED");
-
-          if (voucher.maxUses > 0) {
-            const updated = await tx.voucher.updateMany({
-              where: { id: voucher.id, currentUses: { lt: voucher.maxUses } },
-              data: { currentUses: { increment: 1 } },
-            });
-            if (updated.count === 0) throw new Error("LIMIT_REACHED");
-          } else {
-            await tx.voucher.update({
-              where: { id: voucher.id },
-              data: { currentUses: { increment: 1 } },
-            });
-          }
-
-          await tx.voucherUsage.create({
-            data: {
-              userId: user.id,
-              voucherId: voucher.id,
-            },
-          });
-
-          discountAmount = Math.floor(amount * (voucher.discountPercent / 100));
-          appliedVoucherCode = voucher.code;
-          voucherRecordId = voucher.id;
-        });
-      } catch (err: any) {
-        let errorMsg = "Voucher has been fully claimed or is no longer valid.";
-        if (err.message === "ALREADY_USED") errorMsg = "You have already used this voucher code.";
-        if (err.message === "EXPIRED") errorMsg = "Voucher code has expired.";
-        return apiError(errorMsg, 400);
-      }
-    }
-
-    const fee = paymentMethod.fee || 0;
+    const discountAmount = 0;
+    const fee = Math.max(0, paymentMethod.fee || 0);
     const subtotal = amount;
-    const paymentSubtotal = Math.max(0, amount - discountAmount);
+    const paymentSubtotal = amount;
     const taxAmount = Math.floor(paymentSubtotal * (taxRate / 100));
     const totalAmount = paymentSubtotal + taxAmount + fee;
 
-    const merchantOrderId = generateOrderId();
-
-    let detailsJson: string | null = null;
-    if (appliedVoucherCode) {
-      detailsJson = JSON.stringify({ voucherCode: appliedVoucherCode, discountAmount });
+    if (!Number.isSafeInteger(totalAmount) || totalAmount <= 0 || totalAmount > MAX_WALLET_BALANCE) {
+      return apiError("Calculated invoice total is out of range.", 400);
     }
+
+    const merchantOrderId = generateOrderId();
 
     const invoice = await prisma.invoice.create({
       data: {
@@ -249,7 +207,7 @@ export async function POST(req: NextRequest) {
         paymentMethod: paymentMethod.name,
         merchantOrderId,
         type: "TOP_UP",
-        details: detailsJson,
+        details: null,
       },
     });
 
@@ -286,15 +244,6 @@ export async function POST(req: NextRequest) {
             price: amount,
             quantity: 1,
           },
-          ...(discountAmount > 0 && appliedVoucherCode
-            ? [
-                {
-                  name: `Voucher Discount (${appliedVoucherCode})`,
-                  price: -discountAmount,
-                  quantity: 1,
-                },
-              ]
-            : []),
           ...(taxAmount > 0
             ? [
                 {
@@ -317,30 +266,12 @@ export async function POST(req: NextRequest) {
       });
     } catch (duitkuError) {
       console.error("[RESELLER_TOPUP] Duitku error:", duitkuError);
-      // Clean rollback of draft invoice
       await prisma.invoice.delete({ where: { id: invoice.id } }).catch(() => {});
-      // Rollback voucher usage if applied
-      if (voucherRecordId) {
-        await prisma.voucherUsage
-          .deleteMany({ where: { userId: user.id, voucherId: voucherRecordId } })
-          .catch(() => {});
-        await prisma.voucher
-          .update({ where: { id: voucherRecordId }, data: { currentUses: { decrement: 1 } } })
-          .catch(() => {});
-      }
       return apiError("Failed to connect to payment gateway. Please check your payment method and try again.", 500);
     }
 
     if (!transaction || !transaction.paymentUrl) {
       await prisma.invoice.delete({ where: { id: invoice.id } }).catch(() => {});
-      if (voucherRecordId) {
-        await prisma.voucherUsage
-          .deleteMany({ where: { userId: user.id, voucherId: voucherRecordId } })
-          .catch(() => {});
-        await prisma.voucher
-          .update({ where: { id: voucherRecordId }, data: { currentUses: { decrement: 1 } } })
-          .catch(() => {});
-      }
       return apiError("Payment gateway did not return a valid payment URL", 500);
     }
 

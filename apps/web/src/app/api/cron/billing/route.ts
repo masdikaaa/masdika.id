@@ -6,6 +6,7 @@ import { ProxmoxClient } from '@/lib/proxmox';
 import { createDuitkuTransaction } from '@/lib/duitku';
 import { attemptAutoUnsuspendAll } from '@/lib/auto-unsuspend';
 import { cleanupUserCloudflareResourcesIfNoActiveVps } from '@/lib/cloudflare-cleanup';
+import { verifyCronSecret } from '@/lib/cron-auth';
 
 
 function generateOrderId(prefix: string = 'INV') {
@@ -16,11 +17,9 @@ function generateOrderId(prefix: string = 'INV') {
 
 export const dynamic = 'force-dynamic';
 
-// This endpoint should ONLY be called by the internal Docker cron job with the CRON_SECRET header.
+// This endpoint should ONLY be called by the internal cron job with the CRON_SECRET header.
 export async function GET(req: Request) {
-  const authHeader = req.headers.get('authorization');
-  const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret || !authHeader || authHeader !== `Bearer ${cronSecret}`) {
+  if (!verifyCronSecret(req)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -382,22 +381,37 @@ export async function GET(req: Request) {
         // and keep running smoothly as an existing customer!
         if (vps.autoRenew || (!vps.isReseller && hasSufficientBalance)) {
           let paymentSuccess = true;
-          
-          if (vps.isReseller) {
-            const monthlyCost = (vps.hourlyRate || 0) * 730;
-            if (monthlyCost > 0) {
-              const updateResult = await prisma.user.updateMany({
-                where: { id: vps.userId, balance: { gte: monthlyCost } },
-                data: { balance: { decrement: monthlyCost } }
-              });
-              if (updateResult.count === 0) {
-                paymentSuccess = false;
-              }
-            }
-          }
+          const monthlyCost = vps.isReseller ? (vps.hourlyRate || 0) * 730 : 0;
 
-          if (paymentSuccess) {
+          try {
             await prisma.$transaction(async (tx) => {
+              // Extend the billing cycle by 1 month (atomic optimistic lock on expiresAt prevents overlap double-charge!)
+              const newExpires = new Date(vps.expiresAt || now);
+              if (newExpires < now) newExpires.setTime(now.getTime());
+              newExpires.setMonth(newExpires.getMonth() + 1);
+
+              const lockedVps = await tx.vpsService.updateMany({
+                where: { id: vps.id, expiresAt: vps.expiresAt, status: { in: ['RUNNING', 'STOPPED'] } },
+                data: {
+                  expiresAt: newExpires,
+                  accumulatedCost: 0,
+                  autoRenew: true
+                }
+              });
+              if (lockedVps.count === 0) {
+                throw new Error('ALREADY_PROCESSED');
+              }
+
+              if (vps.isReseller && monthlyCost > 0) {
+                const updateResult = await tx.user.updateMany({
+                  where: { id: vps.userId, balance: { gte: monthlyCost } },
+                  data: { balance: { decrement: monthlyCost } }
+                });
+                if (updateResult.count === 0) {
+                  throw new Error('INSUFFICIENT_BALANCE');
+                }
+              }
+
               // Finalize the current running invoice
               const runningInvoice = vps.invoices[0];
               if (runningInvoice) {
@@ -406,21 +420,7 @@ export async function GET(req: Request) {
                   data: { reference: 'PAYG_COMPLETED' }
                 });
               }
-  
-              // Extend the billing cycle by 1 month
-              const newExpires = new Date(vps.expiresAt || now);
-              if (newExpires < now) newExpires.setTime(now.getTime());
-              newExpires.setMonth(newExpires.getMonth() + 1);
-  
-              await tx.vpsService.update({
-                where: { id: vps.id },
-                data: { 
-                  expiresAt: newExpires,
-                  accumulatedCost: 0,
-                  autoRenew: true
-                }
-              });
-  
+
               // Track attached Reserved IPs baseline so hourly additions in the new cycle are exact
               const attachedIps = await tx.reservedIp.findMany({
                 where: { vpsId: vps.id, isAttached: true }
@@ -432,7 +432,7 @@ export async function GET(req: Request) {
 
               // Create a new running invoice for the next billing cycle
               const merchantOrderId = generateOrderId('INV-PAYG');
-              const invoiceAmount = vps.isReseller ? (vps.hourlyRate || 0) * 730 : 0;
+              const invoiceAmount = vps.isReseller ? monthlyCost : 0;
               await tx.invoice.create({
                 data: {
                   invoiceNumber: merchantOrderId,
@@ -453,7 +453,17 @@ export async function GET(req: Request) {
                 }
               });
             });
-          } else {
+          } catch (renewErr: any) {
+            if (renewErr.message === 'ALREADY_PROCESSED') {
+              paymentSuccess = true;
+            } else if (renewErr.message === 'INSUFFICIENT_BALANCE') {
+              paymentSuccess = false;
+            } else {
+              throw renewErr;
+            }
+          }
+
+          if (!paymentSuccess) {
             // Insufficient balance for reseller upfront payment -> suspend
             const defaultTermination = new Date(now);
             defaultTermination.setDate(defaultTermination.getDate() + 3);

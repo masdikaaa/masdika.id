@@ -48,59 +48,10 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     });
 
-    // Cross-reference IP with LoginLog to match reviewer identity if userEmail is null
-    const loginLogs = await prisma.loginLog.findMany({
-      where: { success: true },
-      orderBy: { createdAt: "desc" },
-      take: 500,
-    });
-
-    const ipToEmailMap = new Map<string, string>();
-    const subnetToEmailMap = new Map<string, string>();
-    for (const log of loginLogs) {
-      if (log.emailAttempt && log.emailAttempt !== "unknown") {
-        const ip = log.ipAddress.trim();
-        const email = log.emailAttempt.toLowerCase().trim();
-        if (!ipToEmailMap.has(ip)) {
-          ipToEmailMap.set(ip, email);
-        }
-        if (ip.includes(".") && ip.split(".").length === 4) {
-          const prefix = ip.substring(0, ip.lastIndexOf(".") + 1);
-          if (!subnetToEmailMap.has(prefix)) {
-            subnetToEmailMap.set(prefix, email);
-          }
-        } else if (ip.includes(":")) {
-          const prefix = ip.split(":").slice(0, 4).join(":");
-          if (!subnetToEmailMap.has(prefix)) {
-            subnetToEmailMap.set(prefix, email);
-          }
-        }
-      }
-    }
-
-    const resolvedRatings = ratings.map((r) => {
-      let email = r.userEmail?.toLowerCase().trim() || "";
-      if (!email && r.ipAddress) {
-        const ip = r.ipAddress.trim();
-        email = ipToEmailMap.get(ip) || "";
-        if (!email) {
-          if (ip.includes(".") && ip.split(".").length === 4) {
-            const prefix = ip.substring(0, ip.lastIndexOf(".") + 1);
-            email = subnetToEmailMap.get(prefix) || "";
-          } else if (ip.includes(":")) {
-            const prefix = ip.split(":").slice(0, 4).join(":");
-            email = subnetToEmailMap.get(prefix) || "";
-          }
-        }
-        if (email) {
-          prisma.mediaRating.update({
-            where: { id: r.id },
-            data: { userEmail: email },
-          }).catch(() => {});
-        }
-      }
-      return { ...r, userEmail: email || null };
-    });
+    const resolvedRatings = ratings.map((r) => ({
+      ...r,
+      userEmail: r.userEmail?.toLowerCase().trim() || null,
+    }));
 
     // Pre-resolve avatars and names for registered users
     const plainEmails = [

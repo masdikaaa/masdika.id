@@ -1,21 +1,27 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getClientIp } from '@/lib/get-ip';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 export async function GET(req: Request) {
   try {
+    const ip = getClientIp(req);
+    if (!(await checkRateLimit('CHAT_SYNC', ip, 60, 60))) {
+      return NextResponse.json({ error: 'Too many sync requests' }, { status: 429 });
+    }
+
     const { searchParams } = new URL(req.url);
     const sessionId = searchParams.get('sessionId');
     const sinceTimestamp = searchParams.get('since');
 
-    if (!sessionId) {
+    if (!sessionId || sessionId.length > 128) {
       return NextResponse.json({ error: 'Session ID required' }, { status: 400 });
     }
 
     // Verify session
     const chatSession = await prisma.chatSession.findUnique({
-      where: { sessionId: sessionId },
-      select: { id: true, status: true },
+      where: { sessionId: sessionId.trim() },
+      select: { id: true, status: true, isVerified: true },
     });
 
     if (!chatSession) {
@@ -24,6 +30,10 @@ export async function GET(req: Request) {
 
     if (chatSession.status === 'ENDED') {
       return NextResponse.json({ error: 'Session ended', sessionExpired: true }, { status: 400 });
+    }
+
+    if (!chatSession.isVerified || chatSession.status !== 'ACTIVE') {
+      return NextResponse.json({ error: 'Session not verified' }, { status: 403 });
     }
 
     let dateFilter = undefined;

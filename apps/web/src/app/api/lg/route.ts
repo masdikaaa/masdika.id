@@ -40,18 +40,24 @@ export async function POST(req: NextRequest) {
       return new Response("Invalid hostname or IP address format\n", { status: 400 });
     }
 
-    // SSRF / Network Isolation Protection: Block private, loopback, or internal addresses
+    // SSRF / Network Isolation Protection: Resolve ALL records and block private, loopback, or internal addresses.
+    // Pass the verified IP literal directly to ping/traceroute/mtr to prevent TOCTOU DNS rebinding.
     let resolvedIp = cleanHost;
     if (!net.isIP(cleanHost)) {
       try {
-        const lookupResult = await dns.promises.lookup(cleanHost);
-        resolvedIp = lookupResult.address;
+        const lookupResults = await dns.promises.lookup(cleanHost, { all: true });
+        if (!lookupResults || lookupResults.length === 0) {
+          return new Response("Unable to resolve destination hostname\n", { status: 400 });
+        }
+        if (lookupResults.some((entry) => isPrivateIp(entry.address))) {
+          return new Response("Forbidden: Probing private, loopback, or internal networks is not permitted.\n", { status: 403 });
+        }
+        const preferred = lookupResults.find((entry) => entry.family === 4) || lookupResults[0];
+        resolvedIp = preferred.address;
       } catch {
         return new Response("Unable to resolve destination hostname\n", { status: 400 });
       }
-    }
-
-    if (isPrivateIp(resolvedIp)) {
+    } else if (isPrivateIp(resolvedIp)) {
       return new Response("Forbidden: Probing private, loopback, or internal networks is not permitted.\n", { status: 403 });
     }
 
@@ -63,11 +69,11 @@ export async function POST(req: NextRequest) {
     switch (type) {
       case "ping":
         command = "ping";
-        args = isWin ? ["-n", "4", cleanHost] : ["-c", "4", "--", cleanHost];
+        args = isWin ? ["-n", "4", resolvedIp] : ["-c", "4", "--", resolvedIp];
         break;
       case "traceroute":
         command = isWin ? "tracert" : "traceroute";
-        args = isWin ? ["-d", "-h", "15", cleanHost] : ["-m", "15", "-n", "--", cleanHost];
+        args = isWin ? ["-d", "-h", "15", resolvedIp] : ["-m", "15", "-n", "--", resolvedIp];
         break;
       case "mtr":
         if (isWin) {
@@ -87,45 +93,69 @@ export async function POST(req: NextRequest) {
           return new Response(stream, { headers: { "Content-Type": "text/plain" } });
         }
         command = "mtr";
-        args = ["-r", "-w", "-c", "4", "--", cleanHost];
+        args = ["-r", "-w", "-n", "-c", "4", "--", resolvedIp];
         break;
       default:
         return new Response("Invalid test type\n", { status: 400 });
     }
 
     // Create a ReadableStream to stream the stdout/stderr in real-time
+    let childProcess: ReturnType<typeof spawn> | null = null;
     const stream = new ReadableStream({
       start(controller) {
+        let closed = false;
+        const safeEnqueue = (chunk: Uint8Array) => {
+          if (closed) return;
+          try {
+            controller.enqueue(chunk);
+          } catch {
+            closed = true;
+          }
+        };
+        const safeClose = () => {
+          if (closed) return;
+          closed = true;
+          try {
+            controller.close();
+          } catch {}
+        };
+
         const child = spawn(command, args);
+        childProcess = child;
 
         // Security watchdog: Terminate child process after 15 seconds to prevent hanging
         const timeout = setTimeout(() => {
           try {
             child.kill("SIGKILL");
-            controller.enqueue(new TextEncoder().encode("\n[Execution Timeout: Process terminated after 15 seconds]\n"));
-            controller.close();
+            safeEnqueue(new TextEncoder().encode("\n[Execution Timeout: Process terminated after 15 seconds]\n"));
+            safeClose();
           } catch {}
         }, 15000);
 
         child.stdout.on("data", (data) => {
-          controller.enqueue(data);
+          safeEnqueue(data);
         });
 
         child.stderr.on("data", (data) => {
-          controller.enqueue(data);
+          safeEnqueue(data);
         });
 
         child.on("close", (code) => {
           clearTimeout(timeout);
-          controller.enqueue(new TextEncoder().encode(`\n[Process completed with code ${code}]\n`));
-          controller.close();
+          safeEnqueue(new TextEncoder().encode(`\n[Process completed with code ${code}]\n`));
+          safeClose();
         });
 
         child.on("error", (err) => {
           clearTimeout(timeout);
-          controller.enqueue(new TextEncoder().encode(`\n[Execution Error]: ${err.message}\n`));
-          controller.close();
+          safeEnqueue(new TextEncoder().encode(`\n[Execution Error]: ${err.message}\n`));
+          safeClose();
         });
+      },
+      cancel() {
+        try {
+          childProcess?.kill("SIGKILL");
+        } catch {}
       },
     });
 

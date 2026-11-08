@@ -6,7 +6,7 @@ import path from "path";
 import * as crypto from "crypto";
 import { Readable } from "stream";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { verifySessionToken } from "@/lib/session";
+import { requireAuth } from "@/lib/auth-middleware";
 import {
   downloadBufferFromRustFS,
   getObjectStreamFromRustFS,
@@ -46,22 +46,13 @@ export async function GET(
     const media = await prisma.secureMedia.findUnique({ where: { token } });
     if (!media) return new NextResponse("Not Found", { status: 404 });
 
-    // Privacy guard: If file is private, only owner or admin can stream/download
+    // Privacy guard: If file is private, only active unrevoked owner or admin can stream/download
     if (!media.isPublic) {
-      let isAuthorized = false;
-      const sessionToken = req.cookies.get("admin_session")?.value;
-      if (sessionToken) {
-        const userId = verifySessionToken(sessionToken);
-        if (userId) {
-          const user = await prisma.user.findUnique({
-            where: { id: userId },
-            select: { id: true, role: true }
-          });
-          if (user && (user.role === "ADMIN" || user.id === media.userId)) {
-            isAuthorized = true;
-          }
-        }
-      }
+      const auth = await requireAuth({ allowedRoles: ["ADMIN", "USER"] });
+      const isAuthorized =
+        !auth.error &&
+        auth.user &&
+        (auth.user.role === "ADMIN" || auth.user.role === "SUPER_ADMIN" || auth.user.id === media.userId);
 
       if (!isAuthorized) {
         return new NextResponse("Forbidden: This file is private", { status: 403 });
@@ -112,8 +103,8 @@ export async function GET(
     const isMov = media.mimeType === "video/quicktime" || media.originalName.toLowerCase().endsWith(".mov");
     const streamMime = canInline && isMov ? "video/mp4" : media.mimeType;
 
-    const requestOrigin = req.headers.get("origin");
     const allowedOrigin = process.env.NEXT_PUBLIC_APP_URL || "https://masdika.id";
+    const corsOrigin = media.isPublic ? "*" : allowedOrigin;
 
     const securityHeaders: Record<string, string> = {
       "Content-Type": streamMime,
@@ -127,7 +118,7 @@ export async function GET(
           : "private, max-age=3600"
         : "private, no-store",
       "Accept-Ranges": "bytes",
-      "Access-Control-Allow-Origin": requestOrigin || allowedOrigin,
+      "Access-Control-Allow-Origin": corsOrigin,
       "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
       "Access-Control-Allow-Headers": "Range, Origin, Content-Type, Accept",
       "Access-Control-Expose-Headers": "Content-Range, Content-Length, Accept-Ranges",
@@ -303,10 +294,11 @@ export async function GET(
 }
 
 export async function OPTIONS() {
+  const allowedOrigin = process.env.NEXT_PUBLIC_APP_URL || "https://masdika.id";
   return new NextResponse(null, {
     status: 204,
     headers: {
-      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Origin": allowedOrigin,
       "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
       "Access-Control-Allow-Headers": "Range, Origin, Content-Type, Accept",
       "Access-Control-Max-Age": "86400",

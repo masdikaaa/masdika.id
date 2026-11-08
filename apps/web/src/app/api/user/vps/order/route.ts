@@ -27,8 +27,12 @@ export async function POST(req: NextRequest) {
     // Support both rootPassword and password for backward compatibility
     const finalPassword = rootPassword || password;
 
-    // Rate Limit: Max 5 orders per 10 minutes per IP
-    const ip = req.headers.get("x-forwarded-for") || req.headers.get("cf-connecting-ip") || "unknown";
+    // Rate Limit: Max 5 orders per 10 minutes per unspoofable client IP
+    const ip =
+      req.headers.get("cf-connecting-ip") ||
+      req.headers.get("x-real-ip") ||
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      "unknown";
     const allowed = await checkRateLimit("VPS_ORDER", ip, 5, 600);
     if (!allowed) {
       return NextResponse.json({ error: "Too many orders. Please try again later." }, { status: 429 });
@@ -41,7 +45,7 @@ export async function POST(req: NextRequest) {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-    if (!hostname || !finalPassword || !templateId) {
+    if (!hostname || typeof hostname !== "string" || !finalPassword || typeof finalPassword !== "string" || !templateId) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -50,19 +54,38 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid hostname. Use only letters, numbers, and hyphens (max 63 chars)." }, { status: 400 });
     }
 
-    // Security: Enforce minimum password strength
-    if (finalPassword.length < 8) {
-      return NextResponse.json({ error: "Password must be at least 8 characters long." }, { status: 400 });
+    // Security: Enforce password length & strength bounds
+    if (finalPassword.length < 8 || finalPassword.length > 128) {
+      return NextResponse.json({ error: "Password must be between 8 and 128 characters long." }, { status: 400 });
     }
     if (!/[a-zA-Z]/.test(finalPassword) || !/[0-9]/.test(finalPassword)) {
       return NextResponse.json({ error: "Password must contain both letters and numbers." }, { status: 400 });
+    }
+
+    if (sshKey !== undefined && sshKey !== null && sshKey !== "") {
+      if (typeof sshKey !== "string" || sshKey.length > 4096 || /[\r\n]/.test(sshKey.trim())) {
+        return NextResponse.json({ error: "Invalid SSH public key format." }, { status: 400 });
+      }
+    }
+
+    const validatedNode = typeof targetNode === "string" && targetNode.trim() ? targetNode.trim() : "proxmox";
+    if (!/^[a-zA-Z0-9-]+$/.test(validatedNode) || validatedNode.length > 63) {
+      return NextResponse.json({ error: "Invalid target region/node identifier." }, { status: 400 });
+    }
+    targetNode = validatedNode;
+
+    if (kubernetesVersion !== undefined && kubernetesVersion !== null && kubernetesVersion !== "") {
+      if (typeof kubernetesVersion !== "string" || !/^[a-zA-Z0-9.+ _-]{1,40}$/.test(kubernetesVersion.trim())) {
+        return NextResponse.json({ error: "Invalid Kubernetes version format." }, { status: 400 });
+      }
+      kubernetesVersion = kubernetesVersion.trim();
     }
     
     if (useIpv4 !== undefined) ipv4Count = useIpv4 ? 1 : 0;
     if (useIpv6 !== undefined) ipv6Count = useIpv6 ? 1 : 0;
 
-    ipv4Count = Math.max(0, Math.floor(Number(ipv4Count) || 0));
-    ipv6Count = Math.max(0, Math.floor(Number(ipv6Count) || 0));
+    ipv4Count = Math.min(5, Math.max(0, Math.floor(Number(ipv4Count) || 0)));
+    ipv6Count = Math.min(5, Math.max(0, Math.floor(Number(ipv6Count) || 0)));
 
     let template = await prisma.vpsTemplate.findUnique({ where: { id: templateId } });
 
@@ -191,10 +214,15 @@ export async function POST(req: NextRequest) {
       const safeDisk = Math.min(Math.max(Math.floor(Number(diskGb) || 10), 10), 2000);
       // safeBackup is already defined and validated earlier
 
-      // --- Node Capacity Check ---
+      // --- Node Capacity & Allowlist Check ---
       try {
         const proxmox = new ProxmoxClient(serverConfig.host, serverConfig.tokenId, decryptDeterministic(serverConfig.tokenSecret));
         const activeNode = targetNode || "proxmox";
+
+        const clusterNodes = await proxmox.getNodes();
+        if (Array.isArray(clusterNodes) && clusterNodes.length > 0 && !clusterNodes.some((n: any) => n.node === activeNode)) {
+          return NextResponse.json({ error: "Selected region/node does not exist in cluster." }, { status: 400 });
+        }
         
         const nodeStatus = await proxmox.getNodeStatus(activeNode);
         if (nodeStatus && nodeStatus.memory && nodeStatus.cpuinfo) {
@@ -296,8 +324,9 @@ export async function POST(req: NextRequest) {
 
       try {
         await prisma.$transaction(async (tx) => {
+          // SECURITY: Enforce full 730h minimum balance requirement atomically inside transaction
           const updateResult = await tx.user.updateMany({
-            where: { id: userId, balance: { gte: vpsData.hourlyRate } },
+            where: { id: userId, balance: { gte: requiredBalance } },
             data: { balance: { decrement: vpsData.hourlyRate } }
           });
 
@@ -305,7 +334,7 @@ export async function POST(req: NextRequest) {
             throw new Error("INSUFFICIENT_BALANCE");
           }
 
-          const invoiceNumber = `INV-PAYG-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+          const invoiceNumber = `INV-PAYG-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
           // Create the running invoice — this single invoice will be updated every hour by the cron
           await tx.invoice.create({
             data: {
@@ -323,24 +352,35 @@ export async function POST(req: NextRequest) {
           });
         });
       } catch (txError: any) {
-        await prisma.vpsService.delete({ where: { id: vpsService.id } });
+        await prisma.vpsService.delete({ where: { id: vpsService.id } }).catch(() => {});
         if (k3sClusterId && action !== "add_node") {
-          await prisma.kubernetesCluster.delete({ where: { id: k3sClusterId } });
+          await prisma.kubernetesCluster.delete({ where: { id: k3sClusterId } }).catch(() => {});
         }
         if (txError.message === "INSUFFICIENT_BALANCE") {
-          return NextResponse.json({ error: "Insufficient account balance for PAYG initialization" }, { status: 400 });
+          return NextResponse.json(
+            { error: `A minimum balance of Rp ${requiredBalance.toLocaleString("id-ID")} (1 month estimation) is required.` },
+            { status: 400 }
+          );
         }
         throw txError;
       }
 
-      // Process affiliate commission if applicable
+      // Process affiliate commission ONLY if referred user has completed at least one real PAID TOP_UP (blocks sybil free-promo farming!)
       if (auth.user?.referredById) {
         try {
-          const existingEarning = await prisma.affiliateEarning.findUnique({
-            where: { referredId: userId }
-          });
+          const [existingEarning, paidTopupCount] = await Promise.all([
+            prisma.affiliateEarning.findUnique({ where: { referredId: userId } }),
+            prisma.invoice.count({
+              where: {
+                userId,
+                type: "TOP_UP",
+                status: "PAID",
+                paymentMethod: { notIn: ["REWARD", "ADMIN_CREDIT", "ADMIN_DEBIT"] }
+              }
+            })
+          ]);
           
-          if (!existingEarning) {
+          if (!existingEarning && paidTopupCount > 0) {
             await prisma.$transaction([
               prisma.affiliateEarning.create({
                 data: {

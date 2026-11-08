@@ -15,8 +15,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     if (isNaN(clusterId)) return NextResponse.json({ error: "Invalid cluster ID" }, { status: 400 });
 
     const body = await req.json();
-    const { nodeName, roleName } = body;
+    const nodeName = typeof body?.nodeName === "string" ? body.nodeName.trim() : "";
+    const roleName = typeof body?.roleName === "string" ? body.roleName : "";
     if (!nodeName) return NextResponse.json({ error: "Node name is required" }, { status: 400 });
+
+    const newRole = roleName.trim().toLowerCase();
+    if (newRole && newRole !== "none") {
+      if (newRole.length > 63 || !/^[a-z0-9]([a-z0-9-_.]*[a-z0-9])?$/.test(newRole)) {
+        return NextResponse.json({ error: "Invalid Kubernetes role label format." }, { status: 400 });
+      }
+    }
 
     const cluster = await prisma.kubernetesCluster.findFirst({
       where: { id: clusterId, userId: auth.userId },
@@ -32,8 +40,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     }
 
     const targetNode = cluster.nodes?.find(n => n.hostname?.toLowerCase() === nodeName.toLowerCase());
-    if (targetNode && (targetNode.status === "SUSPENDED" || targetNode.status === "TERMINATED")) {
+    if (!targetNode) {
+      return NextResponse.json({ error: "Node not found in this cluster" }, { status: 404 });
+    }
+    if (targetNode.status === "SUSPENDED" || targetNode.status === "TERMINATED") {
        return NextResponse.json({ error: "Cannot modify roles on a suspended or terminated node" }, { status: 403 });
+    }
+    if (targetNode.kubernetesRole === "WORKER" && ["control-plane", "master", "etcd"].includes(newRole)) {
+      return NextResponse.json({ error: "Worker nodes cannot be assigned reserved control-plane roles." }, { status: 400 });
     }
 
     const decryptedKubeconfig = decryptDeterministic(cluster.kubeconfig);
@@ -56,7 +70,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     }
     
     // Set new role if provided
-    const newRole = roleName?.trim().toLowerCase();
     if (newRole && newRole !== 'none') {
       patch.push({ op: "add", path: `/metadata/labels/node-role.kubernetes.io~1${newRole}`, value: "true" });
     }

@@ -17,15 +17,22 @@ export async function POST(req: Request) {
       );
     }
 
-    const { email } = await req.json();
-    if (!email) return NextResponse.json({ error: 'Email is required' }, { status: 400 });
-
-    const encryptedEmail = encryptDeterministic(email.toLowerCase().trim());
-
-    const subscriber = await prisma.subscriber.findUnique({ where: { email: encryptedEmail } });
-    if (subscriber) {
-      await prisma.subscriber.delete({ where: { email: encryptedEmail } });
+    const body = await req.json().catch(() => null);
+    const email = body?.email;
+    if (typeof email !== 'string' || !email.trim()) {
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
+
+    const cleanEmail = email.toLowerCase().trim();
+    if (cleanEmail.length < 5 || cleanEmail.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
+    }
+
+    const encryptedEmail = encryptDeterministic(cleanEmail);
+
+    await prisma.subscriber.deleteMany({
+      where: { email: { in: [encryptedEmail, cleanEmail] } },
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

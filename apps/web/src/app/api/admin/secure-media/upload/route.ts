@@ -41,21 +41,35 @@ function sanitizeFilename(name: string): string {
   return safe.replace(/^\.+/, "").slice(0, 255) || "upload";
 }
 
+function sanitizeFolderPath(raw: string): string {
+  const trimmed = (raw || "/").trim();
+  if (!trimmed || trimmed.includes("\0") || trimmed.includes("\\")) return "/";
+  const normalized = ("/" + trimmed).replace(/\/+/g, "/").replace(/\/+$/, "") || "/";
+  const segments = normalized.split("/").filter(Boolean);
+  if (segments.some((s) => s === "." || s === "..")) return "/";
+  return normalized.slice(0, 500);
+}
+
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
+  if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
+  if (auth.impersonatedBy) return NextResponse.json({ error: "Forbidden while impersonating" }, { status: 403 });
+
   const uploadToken = req.headers.get("x-upload-token");
   let tempPath: string | null = null;
   
   if (uploadToken) {
     const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     if (UUID_REGEX.test(uploadToken)) {
-      tempPath = path.join(process.cwd(), "storage", "upload-buffers", uploadToken);
+      const buffersRoot = path.resolve(process.cwd(), "storage", "upload-buffers");
+      const resolvedTemp = path.resolve(buffersRoot, uploadToken);
+      if (resolvedTemp.startsWith(buffersRoot + path.sep)) {
+        tempPath = resolvedTemp;
+      }
     }
   }
 
   try {
-    const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
-    if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
-
     // ── Large-file path (pre-processed by custom server) ──────────────────────
     if (uploadToken) {
       if (!tempPath) {
@@ -65,7 +79,7 @@ export async function POST(req: NextRequest) {
       const rawNameBase64 = req.headers.get("x-upload-original-name") || "";
       const rawName = decodeURIComponent(Buffer.from(rawNameBase64, "base64").toString());
       const folderPathBase64 = req.headers.get("x-upload-folder-path") || "Lw==";
-      const folderPath = decodeURIComponent(Buffer.from(folderPathBase64, "base64").toString());
+      const folderPath = sanitizeFolderPath(decodeURIComponent(Buffer.from(folderPathBase64, "base64").toString()));
       const expiresIn = req.headers.get("x-upload-expires-in") || "permanent";
       const isPublicHeader = req.headers.get("x-upload-is-public");
       const isPublic = isPublicHeader === null ? true : isPublicHeader === "true";
@@ -202,7 +216,7 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const file = formData.get("file") as File;
     const expiresIn = (formData.get("expiresIn") as string) || "permanent";
-    const folderPath = (formData.get("folderPath") as string) || "/";
+    const folderPath = sanitizeFolderPath((formData.get("folderPath") as string) || "/");
     const isPublicField = formData.get("isPublic");
     const isPublic = isPublicField === null ? true : isPublicField === "true";
 

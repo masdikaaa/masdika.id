@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { validateSafeUrl } from '@/lib/ssrf';
+import { getClientIp } from '@/lib/get-ip';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 // Whitelist of allowed domains for image proxying
 const ALLOWED_DOMAINS = [
@@ -9,13 +11,27 @@ const ALLOWED_DOMAINS = [
   'static.whatsapp.net',
 ];
 
+// Strict raster-only MIME allowlist (blocks image/svg+xml XSS)
+const ALLOWED_IMAGE_MIMES = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+  'image/avif',
+]);
+
 export async function GET(req: Request) {
   try {
+    const ip = getClientIp(req);
+    if (!(await checkRateLimit('PROXY_IMAGE', ip, 60, 60))) {
+      return new NextResponse('Too many requests', { status: 429 });
+    }
+
     const { searchParams } = new URL(req.url);
     const url = searchParams.get('url');
 
-    if (!url) {
-      return new NextResponse('Missing url parameter', { status: 400 });
+    if (!url || url.length > 2048) {
+      return new NextResponse('Missing or invalid url parameter', { status: 400 });
     }
 
     // Enterprise SSRF Mitigation:
@@ -39,7 +55,7 @@ export async function GET(req: Request) {
       redirect: 'error', // Crucial SSRF mitigation: refuse HTTP redirects to prevent redirecting to internal IPs
       headers: {
         'User-Agent': 'WhatsApp/2.21.12.21 A',
-        'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8'
+        'Accept': 'image/webp,image/apng,image/jpeg,image/png,*/*;q=0.8'
       },
       signal: AbortSignal.timeout(10000), // 10 second timeout
     });
@@ -48,11 +64,11 @@ export async function GET(req: Request) {
       return new NextResponse('Failed to fetch image', { status: res.status });
     }
 
-    const contentType = res.headers.get('content-type');
-    
-    // Validate that the response is actually an image
-    if (contentType && !contentType.startsWith('image/')) {
-      return new NextResponse('Response is not an image', { status: 400 });
+    const rawMime = (res.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
+
+    // Validate that the response is strictly a safe raster image (blocks SVG/HTML XSS)
+    if (!ALLOWED_IMAGE_MIMES.has(rawMime)) {
+      return new NextResponse('Unsupported image MIME type', { status: 400 });
     }
 
     const arrayBuffer = await res.arrayBuffer();
@@ -64,7 +80,9 @@ export async function GET(req: Request) {
 
     return new NextResponse(arrayBuffer, {
       headers: {
-        'Content-Type': contentType || 'image/jpeg',
+        'Content-Type': rawMime,
+        'Content-Security-Policy': "default-src 'none'; sandbox",
+        'X-Content-Type-Options': 'nosniff',
         'Cache-Control': 'public, max-age=86400, stale-while-revalidate=43200',
       },
     });

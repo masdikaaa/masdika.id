@@ -45,25 +45,26 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Please slow down.' }, { status: 400 });
     }
 
-    if (!name || !email || !password) {
+    if (!name || !email || !password || typeof name !== 'string' || typeof email !== 'string' || typeof password !== 'string') {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    if (name.length < 3 || name.length > 50) {
+    const trimmedName = name.trim();
+    if (trimmedName.length < 3 || trimmedName.length > 50) {
       return NextResponse.json({ error: "Name must be between 3 and 50 characters" }, { status: 400 });
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(email) || email.length > 254) {
       return NextResponse.json({ error: "Invalid email format" }, { status: 400 });
     }
 
-    if (password.length < 8) {
-      return NextResponse.json({ error: "Password must be at least 8 characters long" }, { status: 400 });
+    if (password.length < 8 || password.length > 128) {
+      return NextResponse.json({ error: "Password must be between 8 and 128 characters long" }, { status: 400 });
     }
 
     // Validate required billing fields
-    if (!phone || !address1 || !city || !state || !postalCode || !country) {
+    if (!phone || !address1 || !city || !state || !postalCode || !country || typeof phone !== 'string') {
       return NextResponse.json({ error: "Please complete all required billing information." }, { status: 400 });
     }
 
@@ -73,6 +74,10 @@ export async function POST(req: NextRequest) {
     }
 
     const encryptedEmail = encryptDeterministic(email.toLowerCase().trim());
+
+    if (!(await checkRateLimit('REGISTER_EMAIL', encryptedEmail, 3, 900))) {
+      return NextResponse.json({ error: 'Too many OTP requests for this email. Please wait 15 minutes.' }, { status: 429 });
+    }
 
     const existingUser = await prisma.user.findUnique({ where: { email: encryptedEmail } });
     if (existingUser) {
@@ -85,44 +90,46 @@ export async function POST(req: NextRequest) {
 
     const hashedPassword = hashPassword(password);
 
-    // Save pending registration
+    // Save pending registration (reset attempts counter on fresh registration)
     await prisma.registrationOtp.upsert({
       where: { email: encryptedEmail },
       update: {
-        name,
+        name: trimmedName,
         password: hashedPassword,
         code: otpCode,
-        referralCode: ref || null,
+        attempts: 0,
+        referralCode: ref ? String(ref).slice(0, 32) : null,
         expiresAt,
-        companyName: companyName || null,
-        phone,
-        address1,
-        address2: address2 || null,
-        city,
-        state,
-        postalCode,
-        country,
+        companyName: companyName ? String(companyName).slice(0, 100) : null,
+        phone: String(phone).slice(0, 25),
+        address1: String(address1).slice(0, 200),
+        address2: address2 ? String(address2).slice(0, 200) : null,
+        city: String(city).slice(0, 100),
+        state: String(state).slice(0, 100),
+        postalCode: String(postalCode).slice(0, 30),
+        country: String(country).slice(0, 100),
       },
       create: {
         email: encryptedEmail,
-        name,
+        name: trimmedName,
         password: hashedPassword,
         code: otpCode,
-        referralCode: ref || null,
+        attempts: 0,
+        referralCode: ref ? String(ref).slice(0, 32) : null,
         expiresAt,
-        companyName: companyName || null,
-        phone,
-        address1,
-        address2: address2 || null,
-        city,
-        state,
-        postalCode,
-        country,
+        companyName: companyName ? String(companyName).slice(0, 100) : null,
+        phone: String(phone).slice(0, 25),
+        address1: String(address1).slice(0, 200),
+        address2: address2 ? String(address2).slice(0, 200) : null,
+        city: String(city).slice(0, 100),
+        state: String(state).slice(0, 100),
+        postalCode: String(postalCode).slice(0, 30),
+        country: String(country).slice(0, 100),
       }
     });
 
     // Send OTP email
-    await sendRegistrationOtpEmail(email, name, otpCode);
+    await sendRegistrationOtpEmail(email, trimmedName, otpCode);
 
     return NextResponse.json({ success: true, requiresOtp: true, message: "OTP sent to email" });
   } catch (error) {

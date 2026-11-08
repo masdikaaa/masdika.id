@@ -2,19 +2,31 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
 import { JobQueueService } from "@/lib/job-queue";
+import { checkRateLimit } from "@/lib/rate-limit";
+
+const K3S_VERSION_REGEX = /^(v1\.\d{1,2}(?:\.\d{1,2}(?:\+k3s\d+)?)?|stable|latest)$/;
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const auth = await requireAuth({ allowedRoles: ['USER', 'ADMIN'] });
     if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
-    let body;
+    const allowed = await checkRateLimit("K3S_REINSTALL", String(auth.userId), 5, 900);
+    if (!allowed) {
+      return NextResponse.json({ error: "Too many cluster reinstall requests. Please wait 15 minutes." }, { status: 429 });
+    }
+
+    let body: any;
     try {
       body = await req.json();
     } catch (e) {
       body = {};
     }
-    const version = body.version || "v1.31";
+    const rawVersion = body?.version ? String(body.version).trim() : "v1.31";
+    if (!K3S_VERSION_REGEX.test(rawVersion)) {
+      return NextResponse.json({ error: "Invalid Kubernetes version channel format." }, { status: 400 });
+    }
+    const version = rawVersion;
 
     const resolvedParams = await params;
     const clusterId = parseInt(resolvedParams.id);
@@ -34,6 +46,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     if (!cluster) {
       return NextResponse.json({ error: "Cluster not found" }, { status: 404 });
+    }
+
+    if (cluster.status === "TERMINATED" || cluster.status === "INSTALLING_K3S" || cluster.status === "PROVISIONING") {
+      return NextResponse.json({ error: `Cannot reinstall cluster while status is ${cluster.status}.` }, { status: 400 });
     }
 
     const masterNode = cluster.nodes.find(n => n.kubernetesRole === "MASTER" || !n.kubernetesRole);

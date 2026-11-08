@@ -61,8 +61,8 @@ export async function POST(
       userId: apiKey.userId,
     });
 
-    // Build the noVNC console URL  
-    const proxyPath = `/api/ws/vnc`;
+    // Build the noVNC console URL with authenticated session token
+    const proxyPath = `/api/ws/vnc?session=${encodeURIComponent(vncSessionId)}`;
     const consoleUrl = `/novnc-ui/vnc.html?path=${encodeURIComponent(proxyPath)}&password=${encodeURIComponent(vncData.ticket)}&title=${encodeURIComponent(vps.hostname + " Console")}&resize=remote&autoconnect=true&vpsId=${vps.id}`;
 
     return NextResponse.json({
@@ -72,7 +72,7 @@ export async function POST(
         ticket: vncData.ticket,
         port: vncData.port,
         sessionToken: vncSessionId,
-        expiresIn: 1800 // 30 minutes
+        expiresIn: 300 // 5 minutes
       }
     });
 

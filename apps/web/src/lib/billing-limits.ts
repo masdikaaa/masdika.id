@@ -24,21 +24,30 @@ export async function enforceApiLimit(userId: number, service: string) {
   const requestLimit = limits.requests;
 
   if (requestLimit !== 'unlimited') {
-    const limitNum = parseInt(requestLimit);
-    if (isNaN(limitNum)) {
+    const limitNum = parseInt(requestLimit, 10);
+    if (isNaN(limitNum) || limitNum < 0) {
       throw new Error('Invalid plan limits configuration');
     }
 
-    if (sub.usageCount >= limitNum) {
+    // Atomically check AND increment usageCount to prevent concurrent quota bypass
+    const updated = await prisma.subscription.updateMany({
+      where: { id: sub.id, status: 'ACTIVE', usageCount: { lt: limitNum } },
+      data: { usageCount: { increment: 1 } }
+    });
+    if (updated.count === 0) {
       throw new Error(`Usage limit exceeded for ${service} (${limitNum} requests). Please upgrade your plan.`);
     }
+    return true;
   }
 
-  // Increment usage count
-  await prisma.subscription.update({
-    where: { id: sub.id },
+  // Unlimited plan: still track usage count atomically on active subscription
+  const updated = await prisma.subscription.updateMany({
+    where: { id: sub.id, status: 'ACTIVE' },
     data: { usageCount: { increment: 1 } }
   });
+  if (updated.count === 0) {
+    throw new Error(`Active ${service} subscription required`);
+  }
 
   return true;
 }
@@ -104,6 +113,9 @@ export async function getStorageUsage(userId: number) {
  * Throws an error if exceeded.
  */
 export async function enforceStorageLimit(userId: number, additionalBytes: number) {
+  if (!Number.isFinite(additionalBytes) || additionalBytes < 0) {
+    throw new Error('Invalid upload file size');
+  }
   const usage = await getStorageUsage(userId);
   
   if (usage.storageLimitString === 'No Active Subscription' || usage.isSuspended) {

@@ -2,7 +2,7 @@ import { getClientIp } from '@/lib/get-ip';
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { verifySessionToken } from "@/lib/session";
+import { requireAuth } from "@/lib/auth-middleware";
 
 export async function GET(
   req: NextRequest,
@@ -41,22 +41,13 @@ export async function GET(
 
     if (!media) return new NextResponse("Not Found", { status: 404 });
 
-    // Privacy guard: If file is private, only owner or admin can view
+    // Privacy guard: If file is private, only active unrevoked owner or admin can view
     if (!media.isPublic) {
-      let isAuthorized = false;
-      const sessionToken = req.cookies.get("admin_session")?.value;
-      if (sessionToken) {
-        const userId = verifySessionToken(sessionToken);
-        if (userId) {
-          const user = await prisma.user.findUnique({
-            where: { id: userId },
-            select: { id: true, role: true }
-          });
-          if (user && (user.role === "ADMIN" || user.id === media.userId)) {
-            isAuthorized = true;
-          }
-        }
-      }
+      const auth = await requireAuth({ allowedRoles: ["ADMIN", "USER"] });
+      const isAuthorized =
+        !auth.error &&
+        auth.user &&
+        (auth.user.role === "ADMIN" || auth.user.role === "SUPER_ADMIN" || auth.user.id === media.userId);
 
       if (!isAuthorized) {
         return NextResponse.json(
@@ -70,7 +61,8 @@ export async function GET(
       return new NextResponse("Link has expired", { status: 410 });
     }
 
-    return NextResponse.json(media, {
+    const { userId: _internalUserId, ...safeMediaInfo } = media;
+    return NextResponse.json(safeMediaInfo, {
       headers: {
         "Cache-Control": "no-store",
         "X-Content-Type-Options": "nosniff",

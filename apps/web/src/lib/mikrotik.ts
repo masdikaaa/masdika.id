@@ -190,7 +190,9 @@ export async function createVpcOnMikrotik(router: VpcRouter, vpc: VpcNetwork, us
       }
 
       // 1. Create VLAN Interface
-      let comment = `VLAN VPC ${vpc.name.toUpperCase()}`;
+      const safeVpcName = vpc.name.replace(/[\r\n]/g, ' ').trim().toUpperCase();
+      const vlanTag = `[VLAN:${vpc.vlanId}]`;
+      let comment = `VLAN VPC ${vlanTag} ${safeVpcName}`;
       if (user) {
         let decodedName = user.name;
         try {
@@ -199,7 +201,7 @@ export async function createVpcOnMikrotik(router: VpcRouter, vpc: VpcNetwork, us
         } catch (e) {
           console.error("Failed to decrypt user name for Mikrotik comment", e);
         }
-        comment += ` - CUSTOMER: ${decodedName.toUpperCase()} (ID: ${user.id})`;
+        comment += ` - CUSTOMER: ${decodedName.replace(/[\r\n]/g, ' ').toUpperCase()} (ID: ${user.id})`;
       }
 
       await client.api().menu('/interface/vlan').add({
@@ -268,7 +270,7 @@ export async function createVpcOnMikrotik(router: VpcRouter, vpc: VpcNetwork, us
         await client.api().menu('/ip/firewall/address-list').add({
           list: 'VPC_SUBNETS',
           address: vpc.cidr,
-          comment: `VPC CIDR - ${vpc.name.toUpperCase()}`
+          comment: `VPC CIDR ${vlanTag} - ${safeVpcName}`
         });
       } catch (e: any) {
         if (!e?.message?.includes('already have such entry')) {
@@ -284,7 +286,7 @@ export async function createVpcOnMikrotik(router: VpcRouter, vpc: VpcNetwork, us
         'dst-address-list': 'VPC_SUBNETS',
         action: 'jump',
         'jump-target': 'vpc-peering',
-        comment: `VPC ISOLATION JUMP - ${vpc.name.toUpperCase()}`
+        comment: `VPC ISOLATION JUMP ${vlanTag} - ${safeVpcName}`
       });
 
       await client.api().menu('/ip/firewall/filter').add({
@@ -292,7 +294,7 @@ export async function createVpcOnMikrotik(router: VpcRouter, vpc: VpcNetwork, us
         'src-address': vpc.cidr,
         'dst-address-list': 'VPC_SUBNETS',
         action: 'drop',
-        comment: `VPC ISOLATION DROP - ${vpc.name.toUpperCase()}`
+        comment: `VPC ISOLATION DROP ${vlanTag} - ${safeVpcName}`
       });
 
       // 5. NAT Gateway (Internet Access)
@@ -315,7 +317,7 @@ export async function createVpcOnMikrotik(router: VpcRouter, vpc: VpcNetwork, us
           'dst-address': '0.0.0.0/0',
           gateway: `${wanGateway}@main`,
           'routing-table': `vrf-vpc-${vpc.vlanId}`,
-          comment: `VPC NAT GATEWAY - ${vpc.name.toUpperCase()}`
+          comment: `VPC NAT GATEWAY ${vlanTag} - ${safeVpcName}`
         });
 
         // Router's master masquerade rule handles NAT. We only need route leaking.
@@ -328,7 +330,7 @@ export async function createVpcOnMikrotik(router: VpcRouter, vpc: VpcNetwork, us
           action: 'mark-connection',
           'new-connection-mark': `conn-${vlanName}`,
           passthrough: 'yes',
-          comment: `VPC NAT CONN - ${vpc.name.toUpperCase()}`
+          comment: `VPC NAT CONN ${vlanTag} - ${safeVpcName}`
         });
 
         // 2. Mark routing for reply traffic coming back from the internet
@@ -339,7 +341,7 @@ export async function createVpcOnMikrotik(router: VpcRouter, vpc: VpcNetwork, us
           action: 'mark-routing',
           'new-routing-mark': `vrf-vpc-${vpc.vlanId}`,
           passthrough: 'no',
-          comment: `VPC NAT ROUTE - ${vpc.name.toUpperCase()}`
+          comment: `VPC NAT ROUTE ${vlanTag} - ${safeVpcName}`
         });
 
       }
@@ -364,7 +366,11 @@ export async function toggleVpcNatOnMikrotik(router: VpcRouter, vpc: VpcNetwork,
     const client = await getMikrotikClient(router);
     try {
       const configuredWan = ((router as any).wanInterface || 'ether1').trim();
-      const commentSuffix = `VPC NAT GATEWAY - ${vpc.name.toUpperCase()}`;
+      const safeVpcName = vpc.name.replace(/[\r\n]/g, ' ').trim().toUpperCase();
+      const vlanTag = `[VLAN:${vpc.vlanId}]`;
+      const commentSuffix = `VPC NAT GATEWAY ${vlanTag} - ${safeVpcName}`;
+      const legacyCommentSuffix = `VPC NAT GATEWAY - ${safeVpcName}`;
+      const vrfName = `vrf-vpc-${vpc.vlanId}`;
 
       if (enable) {
         try {
@@ -381,10 +387,13 @@ export async function toggleVpcNatOnMikrotik(router: VpcRouter, vpc: VpcNetwork,
             wanGateway = defaultRoute.gateway;
           }
 
-          // Try to remove old first just in case
+          // Try to remove old first strictly scoped to this VRF
           try {
             const routeList = await safeGet(client.api().menu('/ip/route'));
-            const oldRoutes = routeList.filter((r: any) => r.comment === commentSuffix || r.comment === `VPC RETURN ROUTE - ${vpc.name.toUpperCase()}`);
+            const oldRoutes = routeList.filter((r: any) =>
+              (r['routing-table'] === vrfName || r.routingTable === vrfName) &&
+              (r.comment === commentSuffix || r.comment === legacyCommentSuffix || r.comment === `VPC RETURN ROUTE - ${safeVpcName}`)
+            );
             for (const r of oldRoutes) await safeRemove(client.api().menu('/ip/route'), r['.id'] || r.id);
           } catch (e) { }
 
@@ -393,7 +402,7 @@ export async function toggleVpcNatOnMikrotik(router: VpcRouter, vpc: VpcNetwork,
           await client.api().menu('/ip/route').add({
             'dst-address': '0.0.0.0/0',
             gateway: defaultGateway,
-            'routing-table': `vrf-vpc-${vpc.vlanId}`,
+            'routing-table': vrfName,
             comment: commentSuffix
           });
 
@@ -407,7 +416,7 @@ export async function toggleVpcNatOnMikrotik(router: VpcRouter, vpc: VpcNetwork,
             action: 'mark-connection',
             'new-connection-mark': `conn-${vlanName}`,
             passthrough: 'yes',
-            comment: `VPC NAT CONN - ${vpc.name.toUpperCase()}`
+            comment: `VPC NAT CONN ${vlanTag} - ${safeVpcName}`
           });
 
           await client.api().menu('/ip/firewall/mangle').add({
@@ -415,9 +424,9 @@ export async function toggleVpcNatOnMikrotik(router: VpcRouter, vpc: VpcNetwork,
             'in-interface': configuredWan,
             'connection-mark': `conn-vlan${vpc.vlanId}`,
             action: 'mark-routing',
-            'new-routing-mark': `vrf-vpc-${vpc.vlanId}`,
+            'new-routing-mark': vrfName,
             passthrough: 'no',
-            comment: `VPC NAT ROUTE - ${vpc.name.toUpperCase()}`
+            comment: `VPC NAT ROUTE ${vlanTag} - ${safeVpcName}`
           });
         } catch (e: any) {
           console.error('[Mikrotik] Failed to enable VPC NAT, rolling back partial changes...', e?.message);
@@ -440,14 +449,17 @@ export async function toggleVpcNatOnMikrotik(router: VpcRouter, vpc: VpcNetwork,
 }
 
 async function _disableVpcNatOnMikrotik(client: any, vpc: VpcNetwork) {
-  const commentSuffix = `VPC NAT GATEWAY - ${vpc.name.toUpperCase()}`;
+  const safeVpcName = vpc.name.replace(/[\r\n]/g, ' ').trim().toUpperCase();
+  const vlanTag = `[VLAN:${vpc.vlanId}]`;
+  const commentSuffix = `VPC NAT GATEWAY ${vlanTag} - ${safeVpcName}`;
+  const legacyCommentSuffix = `VPC NAT GATEWAY - ${safeVpcName}`;
   const vrfName = `vrf-vpc-${vpc.vlanId}`;
 
   try {
     const routeList = await safeGet(client.api().menu('/ip/route'));
     const routesToDelete = routeList.filter((r: any) =>
-      (r.comment === commentSuffix && (r['routing-table'] === vrfName || r.routingTable === vrfName)) ||
-      (r.gateway && r.gateway.includes(`@${vrfName}`))
+      ((r.comment === commentSuffix || r.comment === legacyCommentSuffix) && (r['routing-table'] === vrfName || r.routingTable === vrfName)) ||
+      (r.gateway && r.gateway.includes(`@${vrfName}`) && (r['dst-address'] === '0.0.0.0/0' || r.dstAddress === '0.0.0.0/0'))
     );
 
     for (const route of routesToDelete) {
@@ -459,8 +471,11 @@ async function _disableVpcNatOnMikrotik(client: any, vpc: VpcNetwork) {
     const mangleList = await safeGet(client.api().menu('/ip/firewall/mangle'));
     const manglesToDelete = mangleList.filter((r: any) =>
       r['new-connection-mark'] === `conn-vlan${vpc.vlanId}` ||
+      r.newConnectionMark === `conn-vlan${vpc.vlanId}` ||
       r['connection-mark'] === `conn-vlan${vpc.vlanId}` ||
-      r['new-routing-mark'] === vrfName
+      r.connectionMark === `conn-vlan${vpc.vlanId}` ||
+      r['new-routing-mark'] === vrfName ||
+      r.newRoutingMark === vrfName
     );
     for (const m of manglesToDelete) {
       await safeRemove(client.api().menu('/ip/firewall/mangle'), m['.id'] || m.id);
@@ -471,7 +486,10 @@ async function _disableVpcNatOnMikrotik(client: any, vpc: VpcNetwork) {
 
   try {
     const natList = await safeGet(client.api().menu('/ip/firewall/nat'));
-    const natsToDelete = natList.filter((r: any) => r.comment === commentSuffix);
+    const natsToDelete = natList.filter((r: any) =>
+      r.comment === commentSuffix ||
+      (r.comment === legacyCommentSuffix && (r['src-address'] === vpc.cidr || r.srcAddress === vpc.cidr || r['in-interface'] === `vlan${vpc.vlanId}`))
+    );
     for (const nat of natsToDelete) {
       await safeRemove(client.api().menu('/ip/firewall/nat'), nat['.id'] || nat.id);
     }
@@ -495,32 +513,55 @@ export async function deleteVpcFromMikrotik(router: VpcRouter, vpc: VpcNetwork) 
 async function _deleteVpcFromMikrotik(client: any, vpc: VpcNetwork) {
   try {
     const vlanName = `vlan${vpc.vlanId}`;
-    const vpcNameUpper = vpc.name.toUpperCase();
-    const baseComment = `VPC: ${vpcNameUpper} - CIDR:`;
+    const vpcNameUpper = vpc.name.replace(/[\r\n]/g, ' ').trim().toUpperCase();
+    const vlanTag = `[VLAN:${vpc.vlanId}]`;
+    const baseComment = `VPC: ${vpcNameUpper} - CIDR: ${vpc.cidr}`;
 
-    // 0. Remove VPC Isolation Firewall Filters and Address List
-    try {
-      const addressLists = await safeGet(client.api().menu('/ip/firewall/address-list'));
-      const targetLists = addressLists.filter((i: any) =>
-        i.list === 'VPC_SUBNETS' && i.comment === `VPC CIDR - ${vpcNameUpper}`
-      );
-      for (const al of targetLists) {
-        await safeRemove(client.api().menu('/ip/firewall/address-list'), al['.id'] || al.id);
-      }
-    } catch (e: any) { console.error('[Mikrotik] Error removing Address List:', e?.message); }
-
+    // 0. Remove VPC Isolation Firewall Filters first, scoped strictly to this VLAN/CIDR
     try {
       const filters = await safeGet(client.api().menu('/ip/firewall/filter'));
-      const targetFilters = filters.filter((i: any) =>
-        i.comment === `VPC ISOLATION JUMP - ${vpcNameUpper}` ||
-        i.comment === `VPC ISOLATION DROP - ${vpcNameUpper}`
+      const taggedFilters = filters.filter((i: any) =>
+        typeof i.comment === 'string' && i.comment.includes(vlanTag) &&
+        (i.comment.startsWith('VPC ISOLATION JUMP') || i.comment.startsWith('VPC ISOLATION DROP'))
       );
-      for (const filter of targetFilters) {
-        await safeRemove(client.api().menu('/ip/firewall/filter'), filter['.id'] || filter.id);
+
+      if (taggedFilters.length > 0) {
+        for (const filter of taggedFilters) {
+          await safeRemove(client.api().menu('/ip/firewall/filter'), filter['.id'] || filter.id);
+        }
+      } else {
+        // Legacy fallback: match BOTH comment AND src-address, removing at most 1 JUMP and 1 DROP rule
+        const legacyJump = filters.find((i: any) =>
+          i.comment === `VPC ISOLATION JUMP - ${vpcNameUpper}` &&
+          (i['src-address'] === vpc.cidr || i.srcAddress === vpc.cidr)
+        );
+        const legacyDrop = filters.find((i: any) =>
+          i.comment === `VPC ISOLATION DROP - ${vpcNameUpper}` &&
+          (i['src-address'] === vpc.cidr || i.srcAddress === vpc.cidr)
+        );
+        if (legacyJump) await safeRemove(client.api().menu('/ip/firewall/filter'), legacyJump['.id'] || legacyJump.id);
+        if (legacyDrop) await safeRemove(client.api().menu('/ip/firewall/filter'), legacyDrop['.id'] || legacyDrop.id);
       }
     } catch (e: any) { console.error('[Mikrotik] Error removing Isolation Filter:', e?.message); }
 
+    // 0.5 Remove VPC_SUBNETS address-list entry ONLY if no other VPC isolation rule still uses this CIDR
+    try {
+      const remainingFilters = await safeGet(client.api().menu('/ip/firewall/filter'));
+      const cidrStillInUse = remainingFilters.some((f: any) =>
+        (f['dst-address-list'] === 'VPC_SUBNETS' || f.dstAddressList === 'VPC_SUBNETS') &&
+        (f['src-address'] === vpc.cidr || f.srcAddress === vpc.cidr)
+      );
 
+      if (!cidrStillInUse) {
+        const addressLists = await safeGet(client.api().menu('/ip/firewall/address-list'));
+        const targetLists = addressLists.filter((i: any) =>
+          i.list === 'VPC_SUBNETS' && i.address === vpc.cidr
+        );
+        for (const al of targetLists) {
+          await safeRemove(client.api().menu('/ip/firewall/address-list'), al['.id'] || al.id);
+        }
+      }
+    } catch (e: any) { console.error('[Mikrotik] Error removing Address List:', e?.message); }
 
     // 1. Remove all routes referencing this VRF (including NAT and Peering routes)
     try {
@@ -535,7 +576,7 @@ async function _deleteVpcFromMikrotik(client: any, vpc: VpcNetwork) {
       }
     } catch (e: any) { console.error('[Mikrotik] Error removing Route:', e?.message); }
 
-    // 2. Remove Mangle Rules safely using unique connection/routing marks or exact comments
+    // 2. Remove Mangle Rules safely using unique VLAN connection/routing marks
     try {
       const vrfName = `vrf-vpc-${vpc.vlanId}`;
       const mangleList = await safeGet(client.api().menu('/ip/firewall/mangle'));
@@ -543,20 +584,20 @@ async function _deleteVpcFromMikrotik(client: any, vpc: VpcNetwork) {
         r['new-connection-mark'] === `conn-vlan${vpc.vlanId}` || r.newConnectionMark === `conn-vlan${vpc.vlanId}` ||
         r['connection-mark'] === `conn-vlan${vpc.vlanId}` || r.connectionMark === `conn-vlan${vpc.vlanId}` ||
         r['new-routing-mark'] === vrfName || r.newRoutingMark === vrfName ||
-        r.comment === `VPC NAT CONN - ${vpcNameUpper}` ||
-        r.comment === `VPC NAT ROUTE - ${vpcNameUpper}`
+        (typeof r.comment === 'string' && r.comment.includes(vlanTag))
       );
       for (const m of manglesToDelete) {
         await safeRemove(client.api().menu('/ip/firewall/mangle'), m['.id'] || m.id);
       }
     } catch (e: any) { console.error('[Mikrotik] Error removing Mangle Rule:', e?.message); }
 
-    // 2.5 Remove NAT Rules (legacy cleanup)
+    // 2.5 Remove NAT Rules (legacy cleanup scoped by VLAN tag or CIDR/interface)
     try {
       const natList = await safeGet(client.api().menu('/ip/firewall/nat'));
       const natsToDelete = natList.filter((r: any) =>
-        r.comment === `VPC NAT GATEWAY - ${vpcNameUpper}` ||
-        r.comment === `VPC RETURN ROUTE - ${vpcNameUpper}`
+        (typeof r.comment === 'string' && r.comment.includes(vlanTag)) ||
+        ((r.comment === `VPC NAT GATEWAY - ${vpcNameUpper}` || r.comment === `VPC RETURN ROUTE - ${vpcNameUpper}`) &&
+          (r['src-address'] === vpc.cidr || r.srcAddress === vpc.cidr || r['in-interface'] === vlanName))
       );
       for (const nat of natsToDelete) {
         await safeRemove(client.api().menu('/ip/firewall/nat'), nat['.id'] || nat.id);

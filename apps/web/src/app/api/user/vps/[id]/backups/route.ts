@@ -24,7 +24,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     if (!backupStorage) return NextResponse.json({ error: "Backup storage is not configured by the administrator." }, { status: 500 });
 
     const proxmox = new ProxmoxClient(server.host, server.tokenId, server.tokenSecret);
-    const backupList = await proxmox.getBackups(vps.node, backupStorage, vps.vmid);
+    const rawBackupList = await proxmox.getBackups(vps.node, backupStorage, vps.vmid);
+    const minCtime = Math.floor(vps.createdAt.getTime() / 1000) - 60;
+    const backupList = (rawBackupList || []).filter((b: any) => !b.ctime || b.ctime >= minCtime);
 
     let totalBytes = 0;
     const backups = (backupList || []).map((b: any) => {
@@ -76,8 +78,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     const proxmox = new ProxmoxClient(server.host, server.tokenId, server.tokenSecret);
     
-    // Check quota
-    const backupList = await proxmox.getBackups(vps.node, backupStorage, vps.vmid);
+    // Check quota (only count backups created for this VPS instance)
+    const rawBackupList = await proxmox.getBackups(vps.node, backupStorage, vps.vmid);
+    const minCtime = Math.floor(vps.createdAt.getTime() / 1000) - 60;
+    const backupList = (rawBackupList || []).filter((b: any) => !b.ctime || b.ctime >= minCtime);
     let totalBytes = 0;
     (backupList || []).forEach((b: any) => { totalBytes += b.size || 0; });
     
@@ -130,10 +134,12 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
     const proxmox = new ProxmoxClient(server.host, server.tokenId, server.tokenSecret);
 
-    // Security: Verify the requested volume actually belongs to this VPS (VMID-based ownership check)
-    // This prevents a user from crafting a volume string to delete backups from another VM
+    // Security: Verify the requested volume belongs to this VPS AND was created after this VPS was provisioned
     const existingBackups = await proxmox.getBackups(vps.node, backupStorage, vps.vmid);
-    const backupBelongsToVps = (existingBackups || []).some((b: any) => b.volid === volume);
+    const minCtime = Math.floor(vps.createdAt.getTime() / 1000) - 60;
+    const backupBelongsToVps = (existingBackups || []).some(
+      (b: any) => b.volid === volume && (!b.ctime || b.ctime >= minCtime)
+    );
     if (!backupBelongsToVps) {
       return NextResponse.json({ error: "Backup not found or does not belong to this VPS" }, { status: 403 });
     }
