@@ -490,21 +490,21 @@ export async function GET(request: Request) {
   const globalEvents: AttackEvent[] = [];
   const regionalEvents: AttackEvent[] = [];
 
-  // Generate worldwide cross-border attacks
+  // Generate worldwide cross-border attacks with stable IDs
   WORLDWIDE_OUTBREAKS.forEach((item, idx) => {
-    const eventTime = new Date(now.getTime() - idx * (Math.floor(Math.random() * 2000) + 1200));
+    const eventTime = new Date(now.getTime() - (idx + 1) * 3200);
     const hours = String(eventTime.getHours()).padStart(2, '0');
     const minutes = String(eventTime.getMinutes()).padStart(2, '0');
     const seconds = String(eventTime.getSeconds()).padStart(2, '0');
 
     globalEvents.push({
-      id: `global-outbreak-${idx}-${Date.now()}`,
+      id: `global-outbreak-${idx}`,
       timestamp: `${hours}:${minutes}:${seconds}`,
       attackName: item.attack,
       sourceCity: item.source.city,
       sourceCountry: item.source.country,
       sourceCode: item.source.code,
-      sourceIp: `${Math.floor(Math.random() * 180) + 20}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.***`,
+      sourceIp: `${180 - idx}.${Math.floor(idx * 17) % 255}.14.***`,
       sourceCoords: item.source.coords,
       targetCity: item.target.city,
       targetCountry: item.target.country,
@@ -518,21 +518,21 @@ export async function GET(request: Request) {
     });
   });
 
-  // Generate Indonesia inbound & domestic attacks
+  // Generate Indonesia inbound & domestic attacks with stable IDs
   INDONESIA_INCIDENTS.forEach((item, idx) => {
-    const eventTime = new Date(now.getTime() - (idx * 1600 + 800));
+    const eventTime = new Date(now.getTime() - (idx + 2) * 2800);
     const hours = String(eventTime.getHours()).padStart(2, '0');
     const minutes = String(eventTime.getMinutes()).padStart(2, '0');
     const seconds = String(eventTime.getSeconds()).padStart(2, '0');
 
     regionalEvents.push({
-      id: `indo-incident-${idx}-${Date.now()}`,
+      id: `indo-incident-${idx}`,
       timestamp: `${hours}:${minutes}:${seconds}`,
       attackName: item.attack,
       sourceCity: item.source.city,
       sourceCountry: item.source.country,
       sourceCode: item.source.code,
-      sourceIp: `${Math.floor(Math.random() * 180) + 20}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.***`,
+      sourceIp: `${103 + (idx % 15)}.${(idx * 23) % 255}.88.***`,
       sourceCoords: item.source.coords,
       targetCity: item.target.city,
       targetCountry: item.target.country,
@@ -547,37 +547,24 @@ export async function GET(request: Request) {
   });
 
   // =========================================================================
-  // 4. INTERLEAVE EVENTS FOR A DYNAMIC, DIVERSE REAL-TIME ATTACK STREAM
+  // 4. COMBINE & ALWAYS PRIORITIZE REAL ATTACKS AGAINST MASDIKA
   // =========================================================================
-  const interleaved: AttackEvent[] = [];
-  const maxLen = Math.max(realEvents.length, globalEvents.length, regionalEvents.length);
+  let combinedEvents: AttackEvent[] = [];
 
-  for (let i = 0; i < maxLen; i++) {
-    // 1. Interleave verified real DB attack
-    if (i < realEvents.length) {
-      interleaved.push(realEvents[i]);
-    }
-    // 2. Interleave international worldwide outbreak
-    if (i < globalEvents.length) {
-      interleaved.push(globalEvents[i]);
-    }
-    // 3. Interleave Indonesia inbound / regional incident
-    if (i < regionalEvents.length) {
-      interleaved.push(regionalEvents[i]);
-    }
-  }
-
-  // Filter based on requested parameters
-  let filteredList = interleaved;
   if (filterParam === 'real') {
-    filteredList = realEvents;
+    combinedEvents = realEvents;
   } else if (regionParam === 'indonesia') {
-    filteredList = interleaved.filter(e => e.targetCode === 'ID' || e.sourceCode === 'ID' || e.isReal);
+    // In Indonesia view: real Masdika attacks come first, followed by regional & inbound probes
+    combinedEvents = [...realEvents, ...regionalEvents, ...globalEvents.filter(e => e.targetCode === 'ID')];
   } else if (regionParam === 'world') {
-    filteredList = interleaved.filter(e => e.targetCode !== 'ID' || e.isReal);
+    // In World view: real Masdika attacks plus worldwide cross-border outbreaks
+    combinedEvents = [...realEvents, ...globalEvents, ...regionalEvents];
+  } else {
+    // All vectors: real Masdika attacks at the top, interleaved with global & regional
+    combinedEvents = [...realEvents, ...globalEvents, ...regionalEvents];
   }
 
-  const finalEvents = filteredList.slice(0, Math.max(count, 20));
+  const finalEvents = combinedEvents.slice(0, Math.max(count, 30));
 
   // Query database real security counts for industry and country telemetry
   let dbFailedLoginsCount = 0;

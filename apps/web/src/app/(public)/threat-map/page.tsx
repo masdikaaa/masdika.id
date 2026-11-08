@@ -497,17 +497,12 @@ export default function ThreatMapPage() {
           if (data.events && data.events.length > 0) {
             const incoming: AttackEvent[] = data.events;
 
-            // Check if any brand-new events arrived
-            const newEvents = incoming.filter(e => !seenEventIdsRef.current.has(e.id));
-            if (newEvents.length > 0) {
-              newEvents.forEach(e => seenEventIdsRef.current.add(e.id));
-              setAttacks(prev => [...newEvents, ...prev.slice(0, 45)]);
+            // Directly update attacks stream with database real attacks at the top
+            setAttacks(incoming);
 
-              // Immediately spawn laser for the brand new event
-              spawnLaser(newEvents[0]);
-            } else {
-              // Continuously cycle through events
-              const randomPick = incoming[Math.floor(Math.random() * incoming.length)];
+            // Periodically fire projectile laser
+            const randomPick = incoming[Math.floor(Math.random() * incoming.length)];
+            if (randomPick) {
               spawnLaser(randomPick);
             }
 
@@ -527,13 +522,26 @@ export default function ThreatMapPage() {
     return () => clearInterval(streamInterval);
   }, [isLiveStreaming, region]);
 
-  // Filtered attacks list for table
+  // Filtered attacks list for table (Always pin real attacks targeting Masdika first!)
   const filteredAttacks = useMemo(() => {
-    if (filterSeverity === 'all') return attacks;
-    if (filterSeverity === 'real') return attacks.filter(a => a.isReal);
-    if (filterSeverity === 'indonesia') return attacks.filter(a => a.targetCode === 'ID' || a.sourceCode === 'ID' || a.isReal);
-    if (filterSeverity === 'world') return attacks.filter(a => a.targetCode !== 'ID' || a.isReal);
-    return attacks.filter(a => a.severity.toLowerCase() === filterSeverity.toLowerCase());
+    let list = attacks;
+    if (filterSeverity === 'real') {
+      return list.filter(a => a.isReal);
+    }
+    if (filterSeverity === 'indonesia') {
+      list = list.filter(a => a.targetCode === 'ID' || a.sourceCode === 'ID' || a.isReal);
+    } else if (filterSeverity === 'world') {
+      list = list.filter(a => a.targetCode !== 'ID' || a.isReal);
+    } else if (filterSeverity !== 'all') {
+      list = list.filter(a => a.severity.toLowerCase() === filterSeverity.toLowerCase());
+    }
+
+    // Always sort verified real attacks targeting Masdika at the very top!
+    return [...list].sort((a, b) => {
+      if (a.isReal && !b.isReal) return -1;
+      if (!a.isReal && b.isReal) return 1;
+      return 0;
+    });
   }, [attacks, filterSeverity]);
 
   // Datacenter Target Coordinates for SVG
@@ -771,29 +779,31 @@ export default function ThreatMapPage() {
                   )}
                 </div>
 
-                {/* Top-Center: Dedicated Region Pill (Matches FortiGuard Image 2 - Zero Overlap) */}
+                {/* Top-Center: Dedicated Region Pill (Matches FortiGuard Image 2 - Flat Matte, Zero Glow in Dark Mode) */}
                 <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
                   <div className={cn(
-                    "px-3.5 py-1.5 rounded-full border shadow-lg backdrop-blur-md flex items-center gap-2 transition-all whitespace-nowrap",
+                    "px-3.5 py-1.5 rounded-full border flex items-center gap-2 transition-all whitespace-nowrap",
                     isDark
-                      ? "bg-[#04111d]/90 border-cyan-500/40 text-slate-100 shadow-[0_0_15px_rgba(6,182,212,0.15)]"
+                      ? region === 'indonesia'
+                        ? "bg-[#091813] border-[#1b3d30] text-slate-100 shadow-none"
+                        : "bg-[#081523] border-[#1b354d] text-slate-100 shadow-none"
                       : "bg-white/95 border-slate-300 text-slate-900 shadow-sm"
                   )}>
                     {region === 'indonesia' ? (
                       <>
-                        <CountryFlag code="ID" className="w-4 h-3 shadow-sm" />
-                        <span className="text-xs font-black font-mono tracking-wide">
+                        <CountryFlag code="ID" className="w-4 h-3 rounded-[2px]" />
+                        <span className="text-xs font-bold font-mono tracking-wide text-slate-200">
                           Indonesia Focus
                         </span>
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                       </>
                     ) : (
                       <>
                         <Globe className="w-3.5 h-3.5 text-cyan-400" />
-                        <span className="text-xs font-black font-mono tracking-wide">
+                        <span className="text-xs font-bold font-mono tracking-wide text-slate-200">
                           Worldwide Threat Outbreaks
                         </span>
-                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
                       </>
                     )}
                   </div>
@@ -860,9 +870,9 @@ export default function ThreatMapPage() {
                     }}
                   >
                     <div className={cn(
-                      "px-3 py-1.5 rounded-lg border shadow-xl backdrop-blur-md flex items-center gap-2 select-none",
+                      "px-3 py-1.5 rounded-lg border backdrop-blur-md flex items-center gap-2 select-none",
                       isDark
-                        ? "bg-[#051322]/95 border-cyan-500/60 text-slate-100 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
+                        ? "bg-[#0c1824] border-slate-700 text-slate-100 shadow-md"
                         : "bg-white/95 border-slate-300 text-slate-900 shadow-md"
                     )}>
                       <CountryFlag code={hoveredCountry.code} className="w-4 h-3 shadow-sm" />
