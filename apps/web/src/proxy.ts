@@ -152,11 +152,35 @@ export default function proxy(request: NextRequest) {
     const originHeader = request.headers.get('origin');
     if (originHeader) {
       try {
-        const originHost = new URL(originHeader).host.toLowerCase();
+        const originUrl = new URL(originHeader);
+        const originHost = originUrl.host.toLowerCase();
+        const originHostname = originUrl.hostname.toLowerCase();
+
+        // 1. Whitelist production domain and subdomains (e.g. masdika.id, www.masdika.id)
+        const isProductionDomain = originHostname === 'masdika.id' || originHostname.endsWith('.masdika.id');
+
+        // 2. Whitelist local loopback
+        const isLocalDomain = originHostname === 'localhost' || originHostname === '127.0.0.1' || originHostname === '0.0.0.0';
+
+        // 3. Whitelist matching APP_URL or NEXT_PUBLIC_APP_URL
+        const configuredUrls = [process.env.APP_URL, process.env.NEXT_PUBLIC_APP_URL].filter(Boolean) as string[];
+        const matchesConfigured = configuredUrls.some((u) => {
+          try {
+            const parsed = new URL(u);
+            return originHost === parsed.host.toLowerCase() || originHostname === parsed.hostname.toLowerCase();
+          } catch {
+            return false;
+          }
+        });
+
+        // 4. Whitelist matching Host or X-Forwarded-Host header
         const forwardedHost = request.headers.get('x-forwarded-host')?.split(',')[0]?.trim().toLowerCase();
         const directHost = request.headers.get('host')?.trim().toLowerCase();
-        const appHost = process.env.NEXT_PUBLIC_APP_URL ? new URL(process.env.NEXT_PUBLIC_APP_URL).host.toLowerCase() : null;
-        if (originHost !== forwardedHost && originHost !== directHost && (!appHost || originHost !== appHost)) {
+        const matchesHost =
+          (forwardedHost && (originHost === forwardedHost || originHostname === forwardedHost.split(':')[0])) ||
+          (directHost && (originHost === directHost || originHostname === directHost.split(':')[0]));
+
+        if (!isProductionDomain && !isLocalDomain && !matchesConfigured && !matchesHost) {
           return NextResponse.json({ error: 'Forbidden: Cross-origin request blocked' }, { status: 403 });
         }
       } catch {

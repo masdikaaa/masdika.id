@@ -192,6 +192,8 @@ export default async function RootLayout({
                     "Masdika Cloud VPS",
                     "KVM VPS Murah"
                   ],
+                  "sku": "MASDIKA-VPS-ID",
+                  "mpn": "VPS-ID-01",
                   "image": "https://www.masdika.id/images/brand/og-image.webp",
                   "description": "Layanan Cloud VPS murah Indonesia berkinerja tinggi didukung prosesor enterprise Intel Xeon, enterprise SSD & HDD storage, KVM virtualization, dan sistem hemat Pay-As-You-Go per jam.",
                   "brand": {
@@ -205,7 +207,7 @@ export default async function RootLayout({
                     "lowPrice": "100",
                     "highPrice": "500000",
                     "priceValidUntil": "2027-12-31",
-                    "offerCount": "100",
+                    "offerCount": 100,
                     "availability": "https://schema.org/InStock"
                   },
                   "aggregateRating": {
@@ -237,6 +239,8 @@ export default async function RootLayout({
                   "@type": "Product",
                   "@id": "https://www.masdika.id/#managed-k3s",
                   "name": "Masdika Managed Kubernetes (K3s)",
+                  "sku": "MASDIKA-K3S-ID",
+                  "mpn": "K3S-ID-01",
                   "image": "https://www.masdika.id/images/brand/og-image.webp",
                   "description": "Production-grade Managed K3s Kubernetes clusters with automated master control-plane, private VPC VLAN networking, and instant worker scaling.",
                   "brand": {
@@ -250,7 +254,7 @@ export default async function RootLayout({
                     "lowPrice": "100",
                     "highPrice": "1500000",
                     "priceValidUntil": "2027-12-31",
-                    "offerCount": "50",
+                    "offerCount": 50,
                     "availability": "https://schema.org/InStock"
                   },
                   "aggregateRating": {

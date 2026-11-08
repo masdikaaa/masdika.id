@@ -7,11 +7,9 @@ import { Address4 } from "ip-address";
 
 function isPrivateIp(cidr: string) {
   try {
-    const address = new Address4(cidr);
-    // Address4 considers 10.x, 172.16-31.x, 192.168.x as private
-    // Actually, let's just check the starting octets for RFC 1918
-    const ip = cidr.split('/')[0];
+    const ip = cidr.trim().split('/')[0];
     const parts = ip.split('.').map(Number);
+    if (parts.length !== 4 || parts.some(n => isNaN(n) || n < 0 || n > 255)) return false;
     if (parts[0] === 10) return true;
     if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return true;
     if (parts[0] === 192 && parts[1] === 168) return true;
@@ -101,18 +99,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid CIDR. Only Private IP ranges (RFC 1918) are allowed (e.g. 10.x.x.x, 172.16-31.x.x, 192.168.x.x)" }, { status: 400 });
     }
 
-    let parsedCidr;
+    let parsedCidr: Address4;
     try {
-      parsedCidr = new Address4(rawCidr);
+      parsedCidr = new Address4(rawCidr.trim());
 
       if (parsedCidr.subnetMask < 16 || parsedCidr.subnetMask > 28) {
         return NextResponse.json({ error: "CIDR prefix length must be between /16 and /28." }, { status: 400 });
       }
 
-      // Ensure the CIDR provided is a network address (e.g. 192.168.1.0) and not a host/gateway (e.g. 192.168.1.1)
-      if (parsedCidr.addressMinusSuffix !== parsedCidr.startAddress().addressMinusSuffix) {
-        return NextResponse.json({ error: `CIDR must be a network address (e.g. ${parsedCidr.startAddress().addressMinusSuffix}/${parsedCidr.subnetMask}), not a host or gateway IP.` }, { status: 400 });
-      }
+      // Automatically normalize host/gateway IPs (e.g. 192.168.1.1/24) to canonical network base (192.168.1.0/24)
+      const baseNetwork = parsedCidr.startAddress().addressMinusSuffix;
+      parsedCidr = new Address4(`${baseNetwork}/${parsedCidr.subnetMask}`);
     } catch {
       return NextResponse.json({ error: "Invalid CIDR format" }, { status: 400 });
     }

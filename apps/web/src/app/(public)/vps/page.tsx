@@ -82,6 +82,8 @@ export default async function VpsLandingPage() {
         "@type": "Product",
         "@id": "https://www.masdika.id/vps#product",
         "name": "Cloud VPS - High Performance Compute",
+        "sku": "MASDIKA-VPS-ID",
+        "mpn": "VPS-ID-01",
         "description": "High-Performance Cloud Virtual Private Servers powered by enterprise Intel Xeon, high-speed Enterprise SSD & SAS HDD storage, isolated KVM virtualization, and flexible hourly Pay-As-You-Go billing.",
         "category": "Cloud Computing > Virtual Private Server",
         "image": "https://www.masdika.id/images/brand/og-image.webp",
@@ -96,7 +98,7 @@ export default async function VpsLandingPage() {
           "highPrice": "500000",
           "priceValidUntil": "2027-12-31",
           "availability": "https://schema.org/InStock",
-          "offerCount": "100"
+          "offerCount": 100
         },
         "aggregateRating": {
           "@type": "AggregateRating",

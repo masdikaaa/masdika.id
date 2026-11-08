@@ -273,8 +273,9 @@ export async function createVpcOnMikrotik(router: VpcRouter, vpc: VpcNetwork, us
           comment: `VPC CIDR ${vlanTag} - ${safeVpcName}`
         });
       } catch (e: any) {
-        if (!e?.message?.includes('already have such entry')) {
-          throw e;
+        const msg = (e?.message || '').toLowerCase();
+        if (!msg.includes('already have') && !msg.includes('already exist') && !msg.includes('duplicate')) {
+          console.warn('[Mikrotik] Non-fatal address-list add warning:', e?.message);
         }
       }
 
