@@ -70,6 +70,8 @@ interface ActiveLaser {
   severity: string;
   sourceCity: string;
   sourceCode: string;
+  targetCity: string;
+  targetCode: string;
   attackName: string;
   isReal: boolean;
   sourceIp?: string;
@@ -146,7 +148,8 @@ export default function ThreatMapPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
-  const [region, setRegion] = useState<'indonesia' | 'world'>('indonesia');
+  // Default to 'world' so users immediately see global attacks across countries (FortiGuard style)
+  const [region, setRegion] = useState<'indonesia' | 'world'>('world');
   const [filterSeverity, setFilterSeverity] = useState<string>('all');
   const [isLiveStreaming, setIsLiveStreaming] = useState(true);
   const [currentTime, setCurrentTime] = useState("");
@@ -155,7 +158,8 @@ export default function ThreatMapPage() {
   const [impacts, setImpacts] = useState<ImpactRipple[]>([]);
   const [recentLiveAlert, setRecentLiveAlert] = useState<AttackEvent | null>(null);
 
-  // Interactive Zoom & Pan State
+  // Interactive Zoom & Pan State with non-passive wheel prevention
+  const mapContainerRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -164,13 +168,14 @@ export default function ThreatMapPage() {
   const [stats, setStats] = useState({
     attacksPerSecond: 16,
     blockedIn24h: 854120,
-    activeOutbreaks: 142,
+    activeOutbreaks: 140,
     realIncidentsCount: 0,
     threatPosture: "SECURE / PROTECTED",
     edgeStatus: "100% OPERATIONAL",
   });
   const [topThreats, setTopThreats] = useState<any[]>([]);
   const [topCountries, setTopCountries] = useState<any[]>([]);
+  const [targetedIndustries, setTargetedIndustries] = useState<any[]>([]);
 
   // Sequential counters to guarantee 100% unique React keys
   const impactSeqRef = useRef(0);
@@ -196,7 +201,7 @@ export default function ThreatMapPage() {
   }, []);
 
   // Zoom handlers
-  const handleZoomIn = () => setZoom(z => Math.min(3.5, Math.round((z + 0.3) * 10) / 10));
+  const handleZoomIn = () => setZoom(z => Math.min(4.0, Math.round((z + 0.3) * 10) / 10));
   const handleZoomOut = () => setZoom(z => Math.max(0.7, Math.round((z - 0.3) * 10) / 10));
   const handleResetZoom = () => {
     setZoom(1);
@@ -208,6 +213,30 @@ export default function ThreatMapPage() {
     setZoom(1);
     setPan({ x: 0, y: 0 });
   }, [region]);
+
+  // Native Non-Passive Wheel Event Listener on Map to prevent window scroll
+  useEffect(() => {
+    const el = mapContainerRef.current;
+    if (!el) return;
+
+    const handleNativeWheel = (e: WheelEvent) => {
+      // PREVENT BROWSER WINDOW FROM SCROLLING WHEN CURSOR IS OVER THE MAP
+      e.preventDefault();
+      e.stopPropagation();
+
+      const delta = e.deltaY;
+      setZoom(prev => {
+        const step = delta < 0 ? 0.2 : -0.2;
+        const next = Math.round((prev + step) * 10) / 10;
+        return Math.min(4.0, Math.max(0.7, next));
+      });
+    };
+
+    el.addEventListener('wheel', handleNativeWheel, { passive: false });
+    return () => {
+      el.removeEventListener('wheel', handleNativeWheel);
+    };
+  }, []);
 
   // Pan / Drag handlers
   const onMouseDown = (e: React.MouseEvent) => {
@@ -224,16 +253,6 @@ export default function ThreatMapPage() {
   };
 
   const onMouseUp = () => setIsDragging(false);
-
-  // Wheel zoom handler
-  const onWheel = (e: React.WheelEvent) => {
-    if (e.ctrlKey || e.metaKey || e.altKey) return;
-    if (e.deltaY < 0) {
-      setZoom(z => Math.min(3.5, Math.round((z + 0.15) * 10) / 10));
-    } else {
-      setZoom(z => Math.max(0.7, Math.round((z - 0.15) * 10) / 10));
-    }
-  };
 
   // Fire laser projectile helper (FortiGuard parabolic trajectory)
   const spawnLaser = (atk: AttackEvent) => {
@@ -269,6 +288,8 @@ export default function ThreatMapPage() {
       severity: atk.severity,
       sourceCity: atk.sourceCity,
       sourceCode: atk.sourceCode,
+      targetCity: atk.targetCity,
+      targetCode: atk.targetCode,
       attackName: atk.attackName,
       isReal: atk.isReal,
       sourceIp: atk.sourceIp,
@@ -294,6 +315,9 @@ export default function ThreatMapPage() {
           setTopThreats(data.topThreats || []);
           if (data.topCountries) {
             setTopCountries(data.topCountries);
+          }
+          if (data.targetedIndustries) {
+            setTargetedIndustries(data.targetedIndustries);
           }
 
           fetchedEvents.forEach(e => seenEventIdsRef.current.add(e.id));
@@ -567,19 +591,6 @@ export default function ThreatMapPage() {
                 )}>
                   <button
                     type="button"
-                    onClick={() => setRegion('indonesia')}
-                    className={cn(
-                      "px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5",
-                      region === 'indonesia'
-                        ? "bg-cyan-500 text-slate-950 shadow-sm"
-                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                    )}
-                  >
-                    <Compass className="w-3.5 h-3.5" />
-                    <span>Indonesia Focus</span>
-                  </button>
-                  <button
-                    type="button"
                     onClick={() => setRegion('world')}
                     className={cn(
                       "px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5",
@@ -590,6 +601,19 @@ export default function ThreatMapPage() {
                   >
                     <Globe className="w-3.5 h-3.5" />
                     <span>Worldwide</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRegion('indonesia')}
+                    className={cn(
+                      "px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5",
+                      region === 'indonesia'
+                        ? "bg-cyan-500 text-slate-950 shadow-sm"
+                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                    )}
+                  >
+                    <Compass className="w-3.5 h-3.5" />
+                    <span>Indonesia Focus</span>
                   </button>
                 </div>
 
@@ -705,7 +729,7 @@ export default function ThreatMapPage() {
                 </div>
 
                 {/* SVG Tactical Vector Map with Real GIS Coastlines & Zoom/Pan */}
-                <div className="w-full h-full flex items-center justify-center relative py-6 overflow-hidden">
+                <div ref={mapContainerRef} className="w-full h-full flex items-center justify-center relative py-6 overflow-hidden">
                   <svg
                     viewBox="0 0 1000 500"
                     className={cn(
@@ -716,7 +740,6 @@ export default function ThreatMapPage() {
                     onMouseMove={onMouseMove}
                     onMouseUp={onMouseUp}
                     onMouseLeave={onMouseUp}
-                    onWheel={onWheel}
                   >
                     <defs>
                       <filter id="laser-glow" x="-25%" y="-25%" width="150%" height="150%">
@@ -840,7 +863,7 @@ export default function ThreatMapPage() {
                         </g>
                       )}
 
-                      {/* Animated FortiGuard Parabolic Laser Arcs */}
+                      {/* Animated FortiGuard Parabolic Laser Arcs & Node Callouts */}
                       {lasers.map(laser => {
                         const t = laser.progress;
                         const currentX = (1 - t) * (1 - t) * laser.x1 + 2 * (1 - t) * t * laser.cx + t * t * laser.x2;
@@ -853,44 +876,71 @@ export default function ThreatMapPage() {
                               d={`M ${laser.x1},${laser.y1} Q ${laser.cx},${laser.cy} ${laser.x2},${laser.y2}`}
                               fill="none"
                               stroke={laser.color}
-                              strokeWidth={laser.isReal ? "2.4" : "1.2"}
-                              strokeDasharray={laser.isReal ? "6,3" : "4,4"}
-                              opacity={laser.isReal ? "0.95" : "0.45"}
+                              strokeWidth={laser.isReal ? "2.2" : "1.2"}
+                              strokeDasharray={laser.isReal ? "5,3" : "4,4"}
+                              opacity={laser.isReal ? "0.95" : "0.5"}
                             />
 
-                            {/* Source Origin Beacon */}
-                            <circle cx={laser.x1} cy={laser.y1} r={laser.isReal ? "4.5" : "3"} fill={laser.color} opacity="0.95" />
-
-                            {/* Missile / Laser Head Projectile */}
-                            <circle cx={currentX} cy={currentY} r={laser.isReal ? "5.5" : "4"} fill="#ffffff" stroke={laser.color} strokeWidth={laser.isReal ? "2.5" : "1.8"} />
-                            <circle cx={currentX} cy={currentY} r={laser.isReal ? "12" : "7"} fill={laser.color} opacity={laser.isReal ? "0.45" : "0.25"} />
-
-                            {/* Refined Glass HUD Callout for Laser */}
-                            {laser.isReal && (
-                              <g transform={`translate(${currentX}, ${currentY - 18})`}>
+                            {/* Source Origin Node & Callout Label (FortiGuard Style) */}
+                            <g transform={`translate(${laser.x1}, ${laser.y1})`}>
+                              <circle r={laser.isReal ? "4.5" : "3"} fill={laser.color} opacity="0.95" />
+                              <g transform="translate(0, -9)">
                                 <rect
-                                  x="-65"
+                                  x="-34"
                                   y="-10"
-                                  width="130"
-                                  height="20"
-                                  rx="4"
-                                  fill={isDark ? "rgba(8, 23, 44, 0.9)" : "rgba(255, 255, 255, 0.95)"}
-                                  stroke="rgba(244, 63, 94, 0.6)"
-                                  strokeWidth="1"
+                                  width="68"
+                                  height="13"
+                                  rx="2"
+                                  fill={isDark ? "rgba(4, 11, 23, 0.9)" : "rgba(255, 255, 255, 0.95)"}
+                                  stroke={isDark ? "rgba(14, 165, 233, 0.5)" : "rgba(148, 163, 184, 0.7)"}
+                                  strokeWidth="0.7"
                                 />
                                 <text
                                   x="0"
-                                  y="3"
+                                  y="-1"
                                   textAnchor="middle"
-                                  fill={isDark ? "#f43f5e" : "#e11d48"}
-                                  fontSize="9"
+                                  fill={isDark ? "#e2e8f0" : "#1e293b"}
+                                  fontSize="7"
                                   fontWeight="bold"
                                   fontFamily="monospace"
                                 >
-                                  {laser.sourceCity} [{laser.sourceCode}]
+                                  {laser.sourceCity} {laser.sourceCode}
                                 </text>
                               </g>
-                            )}
+                            </g>
+
+                            {/* Target Destination Node & Callout Label */}
+                            <g transform={`translate(${laser.x2}, ${laser.y2})`}>
+                              <circle r="7" fill="none" stroke={laser.color} strokeWidth="1" opacity="0.75" />
+                              <circle r="2.5" fill={laser.color} />
+                              <g transform="translate(0, -9)">
+                                <rect
+                                  x="-36"
+                                  y="-10"
+                                  width="72"
+                                  height="13"
+                                  rx="2"
+                                  fill={isDark ? "rgba(4, 11, 23, 0.9)" : "rgba(255, 255, 255, 0.95)"}
+                                  stroke={laser.color}
+                                  strokeWidth="0.8"
+                                />
+                                <text
+                                  x="0"
+                                  y="-1"
+                                  textAnchor="middle"
+                                  fill={laser.color}
+                                  fontSize="7"
+                                  fontWeight="bold"
+                                  fontFamily="monospace"
+                                >
+                                  {laser.targetCity} {laser.targetCode}
+                                </text>
+                              </g>
+                            </g>
+
+                            {/* Missile / Laser Head Projectile */}
+                            <circle cx={currentX} cy={currentY} r={laser.isReal ? "5.5" : "3.8"} fill="#ffffff" stroke={laser.color} strokeWidth={laser.isReal ? "2.5" : "1.8"} />
+                            <circle cx={currentX} cy={currentY} r={laser.isReal ? "12" : "7"} fill={laser.color} opacity={laser.isReal ? "0.45" : "0.25"} />
                           </g>
                         );
                       })}
@@ -973,6 +1023,43 @@ export default function ThreatMapPage() {
                                 : "bg-cyan-600/70 dark:bg-cyan-500/60"
                             )}
                             style={{ width: `${c.percent}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Top Targeted Industries (Real Telemetry & DB Aggregations) */}
+                <div>
+                  <div className="flex items-center justify-between mb-3 border-b border-[var(--border-subtle)] pb-2">
+                    <span className="font-mono text-xs font-bold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-1.5">
+                      <Layers className="w-3.5 h-3.5 text-cyan-500" />
+                      Top Targeted Industries
+                    </span>
+                    <span className="text-[10px] font-mono text-[var(--text-secondary)]">Last 24 Hours</span>
+                  </div>
+
+                  <div className="space-y-2.5">
+                    {targetedIndustries.map((ind, idx) => (
+                      <div key={idx} className="group cursor-default">
+                        <div className="flex items-center justify-between text-xs font-mono mb-1">
+                          <span className="truncate max-w-[210px] text-[var(--text-secondary)] group-hover:text-cyan-500 transition-colors">
+                            {ind.name}
+                          </span>
+                          <span className="font-bold text-cyan-600 dark:text-cyan-400 shrink-0 ml-2">
+                            {ind.count}
+                          </span>
+                        </div>
+                        <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                          <div
+                            className={cn(
+                              "h-full rounded-full transition-all duration-500",
+                              idx === 0
+                                ? "bg-cyan-500 dark:bg-cyan-400"
+                                : "bg-cyan-600/70 dark:bg-cyan-500/60"
+                            )}
+                            style={{ width: `${ind.percent}%` }}
                           />
                         </div>
                       </div>
