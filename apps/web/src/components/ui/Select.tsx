@@ -86,12 +86,12 @@ export function Select({
           className
         )}
       >
-        <span className={cn("block truncate", !selectedOption && (isDark ? "text-zinc-500" : "text-slate-400"))}>
+        <span className={cn("block truncate flex-1 min-w-0 mr-2", !selectedOption && (isDark ? "text-zinc-500" : "text-slate-400"))}>
           {selectedOption ? selectedOption.label : placeholder}
         </span>
         <ChevronDown
           className={cn(
-            "w-4 h-4 transition-transform duration-200",
+            "w-4 h-4 transition-transform duration-200 shrink-0",
             isDark ? "text-zinc-400" : "text-slate-500",
             isOpen && "rotate-180 text-cyan-500"
           )}
@@ -140,8 +140,8 @@ export function Select({
                           )
                     )}
                   >
-                    <span>{opt.label}</span>
-                    {value === opt.value && <Check className="w-4 h-4 text-cyan-500" />}
+                    <span className="flex-1 min-w-0 truncate mr-2">{opt.label}</span>
+                    {value === opt.value && <Check className="w-4 h-4 text-cyan-500 shrink-0" />}
                   </button>
                 ))
               )}

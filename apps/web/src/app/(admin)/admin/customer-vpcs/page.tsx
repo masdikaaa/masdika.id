@@ -485,19 +485,31 @@ export default function AdminCustomerVpcsPage() {
     const list = [
       {
         value: "all",
-        label: "🌐 All Customers (Platform Global View)",
+        label: (
+          <span className="inline-flex items-center gap-2">
+            <Globe className={cn("w-4 h-4 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
+            <span>All Customers (Platform Global View)</span>
+          </span>
+        ),
       },
     ];
 
     customers.forEach((c) => {
       list.push({
         value: String(c.id),
-        label: `👤 ${c.name} (${c.email}) • ${c.vpcCount || 0} VPCs, ${c.vpsCount || 0} VMs`,
+        label: (
+          <span className="inline-flex items-center gap-2 truncate">
+            <User className={cn("w-4 h-4 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
+            <span className={cn("font-medium", isDark ? "text-white" : "text-slate-900")}>{c.name}</span>
+            <span className={cn("text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>({c.email})</span>
+            <span className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-400")}>• {c.vpcCount || 0} VPCs, {c.vpsCount || 0} VMs</span>
+          </span>
+        ),
       });
     });
 
     return list;
-  }, [customers]);
+  }, [customers, isDark]);
 
   // All connected VMs across VPCs (for Tab 3)
   const allConnectedVms = useMemo(() => {
