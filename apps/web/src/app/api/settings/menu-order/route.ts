@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { getCachedData } from '@/lib/cache';
 
 const VALID_KEYS = ['events', 'vacancies', 'community', 'blog', 'series'];
-const DEV_VALID_KEYS = ['api-hub', 'upload', 'storage', 'vps', 'k3s'];
+const DEV_VALID_KEYS = ['api-hub', 'reseller-api', 'upload', 'vps', 'k3s'];
 const COMPANY_VALID_KEYS = ['about', 'services', 'portfolio', 'skills'];
 
 function parseJson(val: string | null, fallback: any) {

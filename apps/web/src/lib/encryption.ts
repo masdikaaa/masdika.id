@@ -40,7 +40,7 @@ const deriveContextKey = (context: string): Buffer => {
 export function encryptAuthenticated(text: string, context: string = 'default'): string {
   const key = deriveContextKey(context);
   const iv = crypto.randomBytes(12);
-  const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+  const cipher = crypto.createCipheriv('aes-256-gcm', key, iv, { authTagLength: 16 });
   const encrypted = Buffer.concat([cipher.update(text, 'utf8'), cipher.final()]);
   const tag = cipher.getAuthTag();
   return `gcm:${iv.toString('hex')}:${tag.toString('hex')}:${encrypted.toString('hex')}`;
@@ -55,7 +55,7 @@ export function decryptAuthenticated(payload: string | null | undefined, context
     const tag = Buffer.from(parts[2], 'hex');
     const ciphertext = Buffer.from(parts[3], 'hex');
     if (iv.length !== 12 || tag.length !== 16) return null;
-    const decipher = crypto.createDecipheriv('aes-256-gcm', deriveContextKey(context), iv);
+    const decipher = crypto.createDecipheriv('aes-256-gcm', deriveContextKey(context), iv, { authTagLength: 16 });
     decipher.setAuthTag(tag);
     const decrypted = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
     return decrypted.toString('utf8');

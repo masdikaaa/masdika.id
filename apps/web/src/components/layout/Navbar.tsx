@@ -509,8 +509,13 @@ export function Navbar({ socialLinks }: { socialLinks?: any }) {
 
               {/* Right Panel - Grid */}
               <div className="flex-1 p-6 lg:p-7 flex flex-col justify-center">
-                <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-                  {(activeMenu === "Explore" ? exploreItems : activeMenu === "Profile" ? companyItems : devItems).map((item) => (
+                {(() => {
+                  const currentItems = activeMenu === "Explore" ? exploreItems : activeMenu === "Profile" ? companyItems : devItems;
+                  const mid = Math.ceil(currentItems.length / 2);
+                  const leftCol = currentItems.slice(0, mid);
+                  const rightCol = currentItems.slice(mid);
+
+                  const renderMenuItem = (item: (typeof currentItems)[0]) => (
                     <Link
                       key={item.title}
                       href={item.href}
@@ -539,8 +544,19 @@ export function Navbar({ socialLinks }: { socialLinks?: any }) {
                         </p>
                       </div>
                     </Link>
-                  ))}
-                </div>
+                  );
+
+                  return (
+                    <div className="grid grid-cols-2 gap-x-6">
+                      <div className="flex flex-col gap-y-3">
+                        {leftCol.map(renderMenuItem)}
+                      </div>
+                      <div className="flex flex-col gap-y-3">
+                        {rightCol.map(renderMenuItem)}
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           </div>
