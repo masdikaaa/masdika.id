@@ -1702,27 +1702,29 @@ data:
           "fieldConfig": {
             "defaults": {
               "unit": "short",
+              "noValue": "0",
               "custom": {
                 "drawStyle": "line",
                 "lineInterpolation": "smooth",
-                "fillOpacity": 15
+                "fillOpacity": 15,
+                "spanNulls": true
               }
             },
             "overrides": []
           },
           "targets": [
             {
-              "expr": "rate(promtail_custom_ssh_accepted_logins_total[2m])",
+              "expr": "(sum(rate(promtail_custom_ssh_accepted_logins_total[2m]))) or (0 * count(up))",
               "legendFormat": "Successful SSH Logins/s",
               "refId": "A"
             },
             {
-              "expr": "rate(promtail_custom_ssh_failed_logins_total[2m])",
+              "expr": "(sum(rate(promtail_custom_ssh_failed_logins_total[2m]))) or (0 * count(up))",
               "legendFormat": "Failed SSH Attempts/s",
               "refId": "B"
             },
             {
-              "expr": "rate(promtail_custom_sudo_executions_total[2m])",
+              "expr": "(sum(rate(promtail_custom_sudo_executions_total[2m]))) or (0 * count(up))",
               "legendFormat": "Sudo Escalations/s",
               "refId": "C"
             }
@@ -1745,32 +1747,34 @@ data:
           "fieldConfig": {
             "defaults": {
               "unit": "reqps",
+              "noValue": "0",
               "custom": {
                 "drawStyle": "line",
                 "lineInterpolation": "smooth",
-                "fillOpacity": 20
+                "fillOpacity": 20,
+                "spanNulls": true
               }
             },
             "overrides": []
           },
           "targets": [
             {
-              "expr": "sum(rate(traefik_entrypoint_requests_total{code=\"429\"}[1m]))",
+              "expr": "(sum(rate(traefik_entrypoint_requests_total{code=\"429\"}[1m]))) or (0 * count(up))",
               "legendFormat": "Rate-Limited (429)",
               "refId": "A"
             },
             {
-              "expr": "sum(rate(traefik_entrypoint_requests_total{code=\"403\"}[1m]))",
+              "expr": "(sum(rate(traefik_entrypoint_requests_total{code=\"403\"}[1m]))) or (0 * count(up))",
               "legendFormat": "Forbidden (403)",
               "refId": "B"
             },
             {
-              "expr": "sum(rate(traefik_entrypoint_requests_total{code=\"404\"}[1m]))",
+              "expr": "(sum(rate(traefik_entrypoint_requests_total{code=\"404\"}[1m]))) or (0 * count(up))",
               "legendFormat": "Path Probes (404)",
               "refId": "C"
             },
             {
-              "expr": "sum(rate(traefik_entrypoint_requests_total{code=\"401\"}[1m]))",
+              "expr": "(sum(rate(traefik_entrypoint_requests_total{code=\"401\"}[1m]))) or (0 * count(up))",
               "legendFormat": "Unauthorized (401)",
               "refId": "D"
             }
