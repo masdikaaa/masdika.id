@@ -1702,30 +1702,81 @@ data:
           "fieldConfig": {
             "defaults": {
               "unit": "short",
+              "min": 0,
+              "softMax": 5,
+              "decimals": 0,
               "noValue": "0",
               "custom": {
                 "drawStyle": "line",
                 "lineInterpolation": "smooth",
-                "fillOpacity": 15,
+                "fillOpacity": 25,
+                "pointSize": 6,
+                "showPoints": "auto",
                 "spanNulls": true
               }
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Failed SSH Attempts (events/min)"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "red",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Successful SSH Logins (events/min)"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "blue",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Sudo Escalations (events/min)"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "purple",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              }
+            ]
           },
           "targets": [
             {
-              "expr": "(sum(rate(promtail_custom_ssh_accepted_logins_total[2m]))) or (0 * count(up))",
-              "legendFormat": "Successful SSH Logins/s",
+              "expr": "(round(sum(increase(promtail_custom_ssh_accepted_logins_total[1m])))) or (0 * count(up))",
+              "legendFormat": "Successful SSH Logins (events/min)",
               "refId": "A"
             },
             {
-              "expr": "(sum(rate(promtail_custom_ssh_failed_logins_total[2m]))) or (0 * count(up))",
-              "legendFormat": "Failed SSH Attempts/s",
+              "expr": "(round(sum(increase(promtail_custom_ssh_failed_logins_total[1m])))) or (0 * count(up))",
+              "legendFormat": "Failed SSH Attempts (events/min)",
               "refId": "B"
             },
             {
-              "expr": "(sum(rate(promtail_custom_sudo_executions_total[2m]))) or (0 * count(up))",
-              "legendFormat": "Sudo Escalations/s",
+              "expr": "(round(sum(increase(promtail_custom_sudo_executions_total[1m])))) or (0 * count(up))",
+              "legendFormat": "Sudo Escalations (events/min)",
               "refId": "C"
             }
           ]
@@ -1747,11 +1798,15 @@ data:
           "fieldConfig": {
             "defaults": {
               "unit": "reqps",
+              "min": 0,
+              "softMax": 5,
               "noValue": "0",
               "custom": {
                 "drawStyle": "line",
                 "lineInterpolation": "smooth",
                 "fillOpacity": 20,
+                "pointSize": 5,
+                "showPoints": "auto",
                 "spanNulls": true
               }
             },
