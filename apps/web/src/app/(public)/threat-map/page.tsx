@@ -751,48 +751,30 @@ export default function ThreatMapPage() {
               {/* Map Canvas Visualizer (8 Cols) */}
               <div className="lg:col-span-8 p-4 sm:p-6 lg:border-r border-b lg:border-b-0 border-[var(--border-subtle)] flex flex-col justify-between min-h-[500px] sm:min-h-[590px] relative">
                 
-                {/* HUD Overlay Badges & Telemetry Ribbon */}
-                <div className="absolute top-5 left-5 z-20 flex flex-wrap items-center gap-2">
+                {/* Top-Left: Compact Defense & Incident Radar Status */}
+                <div className="absolute top-4 left-4 z-20 flex items-center gap-2 pointer-events-none">
                   <div className={cn(
-                    "px-3 py-1 rounded-full border text-xs font-mono font-bold flex items-center gap-1.5 shadow-sm backdrop-blur-md",
+                    "px-2.5 py-1 rounded-full border text-[11px] font-mono font-bold flex items-center gap-1.5 shadow-sm backdrop-blur-md",
                     isDark
                       ? "bg-[#08172c]/90 border-cyan-500/40 text-cyan-300"
                       : "bg-white/95 border-cyan-200 text-cyan-700"
                   )}>
-                    <Radio className="w-3.5 h-3.5 text-cyan-500 animate-pulse" />
-                    <span>DEFENSE RADAR ONLINE</span>
-                  </div>
-
-                  <div className={cn(
-                    "px-3 py-1 rounded-full border text-xs font-mono font-bold flex items-center gap-1.5 shadow-sm backdrop-blur-md",
-                    isDark
-                      ? "bg-[#08172c]/90 border-cyan-500/40 text-cyan-300"
-                      : "bg-white/95 border-cyan-200 text-cyan-700"
-                  )}>
-                    <Crosshair className="w-3.5 h-3.5 text-cyan-500" />
-                    <span>TARGET: MASDIKA SIDOARJO EDGE</span>
+                    <Radio className="w-3 h-3 text-cyan-500 animate-pulse" />
+                    <span>DEFENSE RADAR</span>
                   </div>
 
                   {stats.realIncidentsCount > 0 && (
-                    <div className="px-3 py-1 rounded-full border border-rose-500/30 bg-rose-500/10 text-rose-500 dark:text-rose-400 text-xs font-mono font-bold flex items-center gap-1.5 shadow-sm backdrop-blur-md">
-                      <ShieldAlert className="w-3.5 h-3.5 text-rose-500" />
-                      <span>{stats.realIncidentsCount} VERIFIED REAL INCIDENTS</span>
-                    </div>
-                  )}
-
-                  {/* Live Telemetry Ticker Ribbon with Country Flag */}
-                  {recentLiveAlert && (
-                    <div className="px-3 py-1 rounded-full border border-cyan-500/30 bg-cyan-950/40 text-cyan-300 text-xs font-mono font-bold flex items-center gap-1.5 backdrop-blur-md">
-                      <CountryFlag code={recentLiveAlert.sourceCode} />
-                      <span>LIVE PROBE: {recentLiveAlert.sourceCity} [{recentLiveAlert.sourceCode}]</span>
+                    <div className="px-2.5 py-1 rounded-full border border-rose-500/30 bg-rose-500/10 text-rose-500 dark:text-rose-400 text-[11px] font-mono font-bold flex items-center gap-1 shadow-sm backdrop-blur-md">
+                      <ShieldAlert className="w-3 h-3 text-rose-500" />
+                      <span>{stats.realIncidentsCount} REAL</span>
                     </div>
                   )}
                 </div>
 
-                {/* Top-Center Persistent Region Pill (Matches FortiGuard Image 2: [Flag] Indonesia) */}
-                <div className="absolute top-5 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+                {/* Top-Center: Dedicated Region Pill (Matches FortiGuard Image 2 - Zero Overlap) */}
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
                   <div className={cn(
-                    "px-4 py-1.5 rounded-full border shadow-lg backdrop-blur-md flex items-center gap-2.5 transition-all",
+                    "px-3.5 py-1.5 rounded-full border shadow-lg backdrop-blur-md flex items-center gap-2 transition-all whitespace-nowrap",
                     isDark
                       ? "bg-[#04111d]/90 border-cyan-500/40 text-slate-100 shadow-[0_0_15px_rgba(6,182,212,0.15)]"
                       : "bg-white/95 border-slate-300 text-slate-900 shadow-sm"
@@ -800,15 +782,15 @@ export default function ThreatMapPage() {
                     {region === 'indonesia' ? (
                       <>
                         <CountryFlag code="ID" className="w-4 h-3 shadow-sm" />
-                        <span className="text-xs sm:text-sm font-black font-mono tracking-wide">
+                        <span className="text-xs font-black font-mono tracking-wide">
                           Indonesia Focus
                         </span>
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                       </>
                     ) : (
                       <>
-                        <Globe className="w-4 h-4 text-cyan-400" />
-                        <span className="text-xs sm:text-sm font-black font-mono tracking-wide">
+                        <Globe className="w-3.5 h-3.5 text-cyan-400" />
+                        <span className="text-xs font-black font-mono tracking-wide">
                           Worldwide Threat Outbreaks
                         </span>
                         <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
@@ -817,15 +799,15 @@ export default function ThreatMapPage() {
                   </div>
                 </div>
 
-                {/* Floating Tactical Zoom & Pan Controls */}
-                <div className="absolute top-5 right-5 z-20 flex items-center gap-1 p-1 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface)]/90 backdrop-blur-md shadow-sm">
+                {/* Top-Right: Floating Tactical Zoom & Pan Controls */}
+                <div className="absolute top-4 right-4 z-20 flex items-center gap-1 p-1 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface)]/90 backdrop-blur-md shadow-sm">
                   <button
                     type="button"
                     onClick={handleZoomIn}
                     title="Zoom In (+)"
                     className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-cyan-500 hover:bg-[var(--surface-secondary)] transition-colors"
                   >
-                    <ZoomIn className="w-4 h-4" />
+                    <ZoomIn className="w-3.5 h-3.5" />
                   </button>
                   <button
                     type="button"
@@ -833,7 +815,7 @@ export default function ThreatMapPage() {
                     title="Zoom Out (-)"
                     className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-cyan-500 hover:bg-[var(--surface-secondary)] transition-colors"
                   >
-                    <ZoomOut className="w-4 h-4" />
+                    <ZoomOut className="w-3.5 h-3.5" />
                   </button>
                   <button
                     type="button"
@@ -841,12 +823,32 @@ export default function ThreatMapPage() {
                     title="Reset Zoom"
                     className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-cyan-500 hover:bg-[var(--surface-secondary)] transition-colors"
                   >
-                    <RotateCcw className="w-3.5 h-3.5" />
+                    <RotateCcw className="w-3 h-3" />
                   </button>
                   <span className="px-2 py-0.5 text-[10px] font-mono font-bold text-cyan-600 dark:text-cyan-400 border-l border-[var(--border-subtle)]">
                     {Math.round(zoom * 100)}%
                   </span>
                 </div>
+
+                {/* Bottom-Left: Sleek Live Probe / Alert Toast (No collision with top headers) */}
+                {recentLiveAlert && (
+                  <div className="absolute bottom-16 left-4 z-20 pointer-events-none animate-in fade-in slide-in-from-bottom-2 duration-200">
+                    <div className={cn(
+                      "px-3 py-1.5 rounded-lg border shadow-lg backdrop-blur-md flex items-center gap-2",
+                      recentLiveAlert.isReal
+                        ? "border-rose-500/40 bg-rose-950/85 text-rose-300"
+                        : "border-cyan-500/40 bg-[#061222]/90 text-cyan-300"
+                    )}>
+                      <CountryFlag code={recentLiveAlert.sourceCode} className="w-3.5 h-2.5" />
+                      <span className="text-[11px] font-mono font-bold">
+                        LIVE PROBE: {recentLiveAlert.sourceCity} [{recentLiveAlert.sourceCode}]
+                      </span>
+                      <span className="text-[10px] font-mono text-cyan-400">
+                        &rarr; {recentLiveAlert.targetCity}
+                      </span>
+                    </div>
+                  </div>
+                )}
 
                 {/* Floating Hover Country Tooltip (Matches FortiGuard Image 3) */}
                 {hoveredCountry && (
