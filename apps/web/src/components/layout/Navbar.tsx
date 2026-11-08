@@ -151,6 +151,7 @@ const DEV_MENU_ITEMS: MenuItem[] = [
     description: "Inspect network routing paths, BGP, and ping tests.",
     href: "/lg",
     icon: Compass,
+    badge: "Live",
   },
   {
     title: "Threat Map",
@@ -548,8 +549,19 @@ export function Navbar({ socialLinks }: { socialLinks?: any }) {
                             {item.title}
                           </h4>
                           {"badge" in item && item.badge && (
-                            <span className="px-1.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider shrink-0 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border border-cyan-500/20">
-                              {item.badge}
+                            <span className={cn(
+                              "px-1.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider shrink-0 flex items-center gap-1",
+                              item.badge === "Live"
+                                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25"
+                                : "bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border border-cyan-500/20"
+                            )}>
+                              {item.badge === "Live" && (
+                                <span className="relative flex h-1.5 w-1.5">
+                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+                                </span>
+                              )}
+                              <span>{item.badge}</span>
                             </span>
                           )}
                         </div>
@@ -637,8 +649,19 @@ export function Navbar({ socialLinks }: { socialLinks?: any }) {
                                     {item.title}
                                   </span>
                                   {"badge" in item && item.badge && (
-                                    <span className="px-1 py-0.2 rounded-full text-[8px] font-semibold uppercase bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border border-cyan-500/20">
-                                      {item.badge}
+                                    <span className={cn(
+                                      "px-1.5 py-0.5 rounded-full text-[8px] font-semibold uppercase shrink-0 flex items-center gap-1",
+                                      item.badge === "Live"
+                                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25"
+                                        : "bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border border-cyan-500/20"
+                                    )}>
+                                      {item.badge === "Live" && (
+                                        <span className="relative flex h-1 w-1">
+                                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                                          <span className="relative inline-flex rounded-full h-1 w-1 bg-emerald-500" />
+                                        </span>
+                                      )}
+                                      <span>{item.badge}</span>
                                     </span>
                                   )}
                                 </div>

@@ -114,7 +114,7 @@ export function Footer({ socialLinks }: { socialLinks?: any }) {
             <h3 className="text-sm font-semibold mb-5 text-[var(--text-primary)]">Network &amp; Security</h3>
             <ul className="space-y-3">
               {[
-                { name: 'Looking Glass', path: '/lg', badge: null },
+                { name: 'Looking Glass', path: '/lg', badge: 'Live' },
                 { name: 'Threat Map', path: '/threat-map', badge: 'Live' }
               ].map((link, idx) => (
                 <li key={idx}>
@@ -124,8 +124,12 @@ export function Footer({ socialLinks }: { socialLinks?: any }) {
                   >
                     <span>{link.name}</span>
                     {link.badge && (
-                      <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
-                        {link.badge}
+                      <span className="px-1.5 py-0.5 rounded-[3px] text-[9px] font-mono font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
+                        <span className="relative flex h-1.5 w-1.5">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+                        </span>
+                        <span>{link.badge}</span>
                       </span>
                     )}
                   </Link>
