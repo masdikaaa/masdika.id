@@ -23,10 +23,11 @@ export function useRealtimePresence() {
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) {
-          setOnlineUsers(data);
+          const filtered = data.filter((u: RealtimeOnlineUser) => u.role !== "ADMIN" && u.role !== "SUPER_ADMIN");
+          setOnlineUsers(filtered);
           window.dispatchEvent(
             new CustomEvent("presence_sync", {
-              detail: data,
+              detail: filtered,
             })
           );
         }
@@ -65,7 +66,8 @@ export function useRealtimePresence() {
           try {
             const data: RealtimeOnlineUser[] = JSON.parse(event.data);
             if (Array.isArray(data)) {
-              setOnlineUsers(data);
+              const filtered = data.filter((u) => u.role !== "ADMIN" && u.role !== "SUPER_ADMIN");
+              setOnlineUsers(filtered);
             }
           } catch (e) {
             console.error("Failed to parse presence init:", e);
@@ -76,6 +78,10 @@ export function useRealtimePresence() {
           if (!isSubscribed) return;
           try {
             const pingUser: RealtimeOnlineUser = JSON.parse(event.data);
+            if (pingUser.role === "ADMIN" || pingUser.role === "SUPER_ADMIN") {
+              return;
+            }
+
             setOnlineUsers((prev) => {
               const existingIdx = prev.findIndex((u) => u.id === pingUser.id);
               if (existingIdx !== -1) {
@@ -103,10 +109,11 @@ export function useRealtimePresence() {
           try {
             const data: RealtimeOnlineUser[] = JSON.parse(event.data);
             if (Array.isArray(data)) {
-              setOnlineUsers(data);
+              const filtered = data.filter((u) => u.role !== "ADMIN" && u.role !== "SUPER_ADMIN");
+              setOnlineUsers(filtered);
               window.dispatchEvent(
                 new CustomEvent("presence_sync", {
-                  detail: data,
+                  detail: filtered,
                 })
               );
             }
