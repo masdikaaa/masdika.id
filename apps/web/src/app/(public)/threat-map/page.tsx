@@ -24,6 +24,7 @@ import {
   RefreshCw,
   Maximize2,
   Terminal,
+  ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
@@ -354,63 +355,59 @@ export default function ThreatMapPage() {
     <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-20 lg:pb-28 font-sans bg-[var(--background)] text-[var(--text-primary)] transition-colors duration-200">
       <main className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
 
-        {/* ── 0. HERO SECTION (Consistent with Looking Glass, Contact & VPS) ── */}
-        <section className="relative mb-10 sm:mb-14">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-8 sm:gap-12">
-            
-            {/* Left Column: Heading & Technical Badges */}
-            <div className="flex-1 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 mb-4">
-                <Badge variant="brand" className="px-3 py-1 text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-1.5">
-                  <Radar className="w-3.5 h-3.5 text-cyan-400 animate-spin" style={{ animationDuration: '4s' }} />
-                  Global Threat Intelligence Radar
+        {/* ── 0. HERO (Identik Patokan Looking Glass, SLA, Terms, Privacy & design.md) ── */}
+        <section className="relative pt-8 sm:pt-12 pb-16 lg:pb-24 flex items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
+
+            {/* Left – Text & Actions */}
+            <div className="max-w-2xl relative z-30">
+              {/* Status pill using shared Badge */}
+              <div className="mb-8">
+                <Badge variant="brand" dot dotColor="bg-cyan-400" size="md" className="font-mono uppercase">
+                  CYBER THREAT INTELLIGENCE &amp; SOC
                 </Badge>
-                <span className="hidden sm:inline-flex items-center gap-1 text-xs font-mono text-emerald-600 dark:text-emerald-400 font-bold">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                  Live SOC Telemetry
-                </span>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[var(--text-primary)] tracking-tight leading-[1.1] mb-6">
-                Cyber Threat Intelligence <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 via-sky-400 to-blue-600">
-                  Global Attack Radar
+              {/* Headline H1 (Ukuran sama persis Looking Glass, Home Page, SLA, Privacy) */}
+              <h1 className="text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-4 text-[var(--text-primary)]">
+                Cyber Threat <br />
+                Intelligence &amp; <br />
+                <span className="bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent">
+                  Attack Radar.
                 </span>
               </h1>
 
-              <p className="text-base sm:text-lg text-[var(--text-secondary)] font-normal max-w-2xl mx-auto lg:mx-0 leading-relaxed mb-8">
+              {/* Subtitle / Lead (Ukuran sama persis Looking Glass) */}
+              <p className="text-lg md:text-xl mb-10 max-w-xl leading-relaxed text-[var(--text-secondary)] font-normal">
                 Visualizing incoming exploit vectors, DDoS floods, and credential brute-force attacks mitigated in real-time across Masdika Sidoarjo Edge Datacenter and global upstream networks.
               </p>
 
-              {/* Action Buttons & Navigation */}
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
+              {/* Action Buttons (size="lg" sama persis Looking Glass) */}
+              <div className="flex flex-wrap items-center gap-4">
                 <Button
                   variant="primary"
-                  className="gap-2 font-mono text-sm px-6 py-2.5 h-auto"
-                  onClick={() => {
-                    const el = document.getElementById("radar-cockpit");
-                    el?.scrollIntoView({ behavior: "smooth" });
-                  }}
+                  size="lg"
+                  href="#radar-cockpit"
+                  rightIcon={<ArrowRight className="w-4 h-4" />}
                 >
-                  <Crosshair className="w-4 h-4 text-slate-950" />
                   Inspect Threat Radar
                 </Button>
                 <Button
                   variant="secondary"
+                  size="lg"
                   href="/lg"
-                  className="gap-2 font-mono text-sm px-6 py-2.5 h-auto border-[var(--border-primary)]"
+                  leftIcon={<Globe className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />}
                 >
-                  <Globe className="w-4 h-4 text-cyan-500" />
                   Route Looking Glass
                 </Button>
               </div>
             </div>
 
-            {/* Right Column: Hero Mascot Avatar Frame */}
-            <div className="relative flex items-center justify-center mt-6 lg:mt-0 w-full max-w-[420px] lg:max-w-[480px]">
+            {/* Right – Hero Avatar (threat-map.webp) with Floating Badges */}
+            <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
                 imageSrc="/images/mascots/threat-map.webp"
-                imageAlt="Masdika - Cyber Threat Intelligence Radar"
+                imageAlt="Masdika – Cyber Threat Intelligence Radar"
                 imageWidth={1536}
                 imageHeight={1024}
                 badges={[
@@ -421,6 +418,7 @@ export default function ThreatMapPage() {
                 ]}
               />
             </div>
+
           </div>
         </section>
 
