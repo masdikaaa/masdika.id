@@ -23,6 +23,7 @@ import {
 import { verifyCronSecret } from '../cron-auth';
 import { calculateMinimumBaseVpsRate } from '../vps-billing-rate';
 import { K3sProvisioningService } from '../k3s-provisioning';
+import { createVncSession, consumeVncSession } from '../vnc-session';
 
 describe('Bank-Grade Security Hardening Regression Suite', () => {
   const originalEnv = { ...process.env };
@@ -198,6 +199,37 @@ describe('Bank-Grade Security Hardening Regression Suite', () => {
       expect(
         K3sProvisioningService.validateNodeTokenOrThrow('K10abcdef123456::server:9876543210')
       ).toBe('K10abcdef123456::server:9876543210');
+    });
+  });
+
+  describe('6. Hypervisor VNC Session Serialization & Authenticated Tokens', () => {
+    it('creates and consumes VNC session with string port from Proxmox and ensures numeric normalization', () => {
+      const token = createVncSession({
+        proxmoxHost: 'https://192.168.77.2:8006',
+        node: 'proxmox',
+        vmid: 113,
+        port: '5900', // Proxmox VE returns port as string
+        ticket: 'PVEVNC:test-ticket',
+        tokenId: 'root@pam!token',
+        tokenSecret: 'secret-uuid',
+        userId: 42,
+      });
+
+      expect(typeof token).toBe('string');
+      expect(token.startsWith('gcm:')).toBe(true);
+
+      const consumed = consumeVncSession(token);
+      expect(consumed).not.toBeNull();
+      expect(consumed?.port).toBe(5900);
+      expect(typeof consumed?.port).toBe('number');
+      expect(consumed?.vmid).toBe(113);
+      expect(consumed?.userId).toBe(42);
+      expect(consumed?.node).toBe('proxmox');
+    });
+
+    it('rejects tampered or forged VNC session tokens', () => {
+      expect(consumeVncSession('invalid-token')).toBeNull();
+      expect(consumeVncSession('gcm:bad:bad:bad')).toBeNull();
     });
   });
 });

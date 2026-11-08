@@ -1,6 +1,6 @@
 import httpProxy from "http-proxy";
 import { consumeVncSession } from "./vnc-session";
-import { verifySessionToken } from "./session";
+import { verifySessionToken, getSessionPayload } from "./session";
 
 export const parseCookie = (str: string): Record<string, string> => {
   if (!str) return {};
@@ -13,7 +13,7 @@ export const parseCookie = (str: string): Record<string, string> => {
 
 export const vncProxy = httpProxy.createProxyServer({
   ws: true,
-  secure: false, // rejectUnauthorized: false equivalent
+  secure: false, // rejectUnauthorized: false equivalent for Proxmox self-signed certificates
   changeOrigin: true
 });
 
@@ -40,15 +40,38 @@ export async function handleVncUpgrade(req: any, socket: any, head: any): Promis
         socket.destroy();
         return;
       }
-      const allowedHosts = new Set<string>();
+      const originDomain = originHost.split(":")[0];
+
+      const allowedHosts = new Set<string>([
+        "masdika.id",
+        "www.masdika.id",
+        "localhost",
+        "127.0.0.1",
+      ]);
+
       const reqHost = String(req.headers["x-forwarded-host"] || req.headers.host || "").split(",")[0].trim().toLowerCase();
-      if (reqHost) allowedHosts.add(reqHost);
+      if (reqHost) {
+        allowedHosts.add(reqHost);
+        allowedHosts.add(reqHost.split(":")[0]);
+      }
       if (process.env.NEXT_PUBLIC_APP_URL) {
         try {
-          allowedHosts.add(new URL(process.env.NEXT_PUBLIC_APP_URL).host.toLowerCase());
+          const appUrlHost = new URL(process.env.NEXT_PUBLIC_APP_URL).host.toLowerCase();
+          allowedHosts.add(appUrlHost);
+          allowedHosts.add(appUrlHost.split(":")[0]);
         } catch {}
       }
-      if (allowedHosts.size > 0 && !allowedHosts.has(originHost)) {
+      if (process.env.APP_URL) {
+        try {
+          const appUrlHost = new URL(process.env.APP_URL).host.toLowerCase();
+          allowedHosts.add(appUrlHost);
+          allowedHosts.add(appUrlHost.split(":")[0]);
+        } catch {}
+      }
+
+      const isAllowed = allowedHosts.has(originHost) || allowedHosts.has(originDomain);
+      if (!isAllowed) {
+        console.warn(`[VNC] Origin rejected: ${originHost}. Allowed:`, Array.from(allowedHosts));
         socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");
         socket.destroy();
         return;
@@ -58,7 +81,7 @@ export async function handleVncUpgrade(req: any, socket: any, head: any): Promis
     // ── Auth & session validation ───────────────────────────────────────────
     const cookieHeader = req.headers.cookie || "";
     const cookies = parseCookie(cookieHeader);
-    const sessionToken = cookies["admin_session"];
+    const sessionToken = cookies["admin_session"] || cookies["user_session"];
 
     const querySession = reqUrl.searchParams.get("session");
     const cookieSession = cookies["VNC_SESSION_TOKEN"];
@@ -76,20 +99,17 @@ export async function handleVncUpgrade(req: any, socket: any, head: any): Promis
       return;
     }
 
-    // When using browser cookie VNC_SESSION_TOKEN (not reseller ?session= token), require active admin_session matching vncSession.userId
-    if (!querySession) {
-      const userId = sessionToken ? verifySessionToken(sessionToken) : null;
-      if (!userId || vncSession.userId !== userId) {
-        socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");
-        socket.destroy();
-        return;
-      }
-    } else if (sessionToken) {
-      const userId = verifySessionToken(sessionToken);
-      if (userId && vncSession.userId !== userId) {
-        socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");
-        socket.destroy();
-        return;
+    // If an active session cookie is present, verify the user is either the owner or an admin
+    if (sessionToken) {
+      const authUserId = verifySessionToken(sessionToken);
+      if (authUserId) {
+        const payload = getSessionPayload(sessionToken);
+        const isAdmin = payload?.role === "ADMIN" || payload?.role === "SUPER_ADMIN";
+        if (!isAdmin && vncSession.userId !== authUserId) {
+          socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");
+          socket.destroy();
+          return;
+        }
       }
     }
 
@@ -110,7 +130,7 @@ export async function handleVncUpgrade(req: any, socket: any, head: any): Promis
     // Build API token auth header: PVEAPIToken=user@realm!tokenname=secret
     const apiTokenAuth = `PVEAPIToken=${tokenId}=${tokenSecret}`;
 
-    console.log(`[VNC] Upgrading via http-proxy VMID:${vmid}...`);
+    console.log(`[VNC] Upgrading via http-proxy VMID:${vmid} port:${vncPort}...`);
 
     // Rewrite URL to target Proxmox endpoint (strictly encoded)
     req.url = `/api2/json/nodes/${encodeURIComponent(node)}/qemu/${Number(vmid)}/vncwebsocket?port=${Number(vncPort)}&vncticket=${encodeURIComponent(ticket)}`;

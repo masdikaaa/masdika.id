@@ -80,9 +80,8 @@ export async function POST(req: NextRequest) {
     });
 
     // 3. Build noVNC URL
-    // Remove the session from query string since it's in the cookie
-    // We pass the ticket as the 'password' parameter so noVNC uses it for Proxmox VNC Auth
-    const proxyPath = `/api/ws/vnc`;
+    // Pass session in query string AND set cookie for resilient popup & cross-context support
+    const proxyPath = `/api/ws/vnc?session=${encodeURIComponent(vncSessionId)}`;
     const consolePageUrl = `/novnc-ui/vnc.html?path=${encodeURIComponent(proxyPath)}&password=${encodeURIComponent(vncData.ticket)}&title=${encodeURIComponent(vps.hostname + " Console")}&resize=remote&autoconnect=true&vpsId=${vps.id}`;
 
     return NextResponse.json({ 
