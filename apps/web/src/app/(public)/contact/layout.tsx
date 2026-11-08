@@ -35,13 +35,15 @@ export async function generateMetadata(): Promise<Metadata> {
   const title = 'Contact';
 
   return {
-    title,
+    title: {
+      absolute: title,
+    },
     description,
     alternates: {
       canonical: `${siteUrl}/contact`,
     },
     openGraph: {
-      title: `${title} | Masdika`,
+      title,
       description,
       url: `${siteUrl}/contact`,
       siteName: 'Masdika',
@@ -49,7 +51,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${title} | Masdika`,
+      title,
       description,
       images: ['/images/brand/og-image.webp'],
     },
@@ -64,7 +66,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
     '@type': 'ContactPage',
     '@id': `${siteUrl}/contact#webpage`,
     url: `${siteUrl}/contact`,
-    name: 'Contact | Masdika',
+    name: 'Contact',
     description,
     isPartOf: {
       '@type': 'WebSite',
