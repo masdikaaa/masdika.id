@@ -81,102 +81,122 @@ export async function PUT(req: Request) {
   }
 
   try {
-    const { order, badges, devOrder, devBadges, companyOrder, companyBadges } = await req.json();
-
-    // Validate Explore Menu
-    if (order !== undefined) {
-      if (!Array.isArray(order) || !order.every(k => typeof k === 'string' && VALID_KEYS.includes(k))) {
-        return NextResponse.json({ error: 'Invalid explore menu order' }, { status: 400 });
-      }
-      if (badges !== undefined && (typeof badges !== 'object' || Array.isArray(badges))) {
-        return NextResponse.json({ error: 'Invalid explore badges' }, { status: 400 });
-      }
-      if (badges) {
-        for (const [k, v] of Object.entries(badges)) {
-          if (!VALID_KEYS.includes(k)) return NextResponse.json({ error: `Invalid key: ${k}` }, { status: 400 });
-          if (v !== null && v !== false && (typeof v !== 'string' || (v as string).length > 20)) {
-            return NextResponse.json({ error: `Invalid badge value for ${k}` }, { status: 400 });
-          }
-        }
-      }
-    }
-
-    // Validate Developers Menu
-    if (devOrder !== undefined) {
-      if (!Array.isArray(devOrder) || !devOrder.every(k => typeof k === 'string' && DEV_VALID_KEYS.includes(k))) {
-        return NextResponse.json({ error: 'Invalid developers menu order' }, { status: 400 });
-      }
-      if (devBadges !== undefined && (typeof devBadges !== 'object' || Array.isArray(devBadges))) {
-        return NextResponse.json({ error: 'Invalid developers badges' }, { status: 400 });
-      }
-      if (devBadges) {
-        for (const [k, v] of Object.entries(devBadges)) {
-          if (!DEV_VALID_KEYS.includes(k)) return NextResponse.json({ error: `Invalid key: ${k}` }, { status: 400 });
-          if (v !== null && v !== false && (typeof v !== 'string' || (v as string).length > 20)) {
-            return NextResponse.json({ error: `Invalid badge value for ${k}` }, { status: 400 });
-          }
-        }
-      }
-    }
-    // Validate Company Menu
-    if (companyOrder !== undefined) {
-      if (!Array.isArray(companyOrder) || !companyOrder.every(k => typeof k === 'string' && COMPANY_VALID_KEYS.includes(k))) {
-        return NextResponse.json({ error: 'Invalid company menu order' }, { status: 400 });
-      }
-      if (companyBadges !== undefined && (typeof companyBadges !== 'object' || Array.isArray(companyBadges))) {
-        return NextResponse.json({ error: 'Invalid company badges' }, { status: 400 });
-      }
-      if (companyBadges) {
-        for (const [k, v] of Object.entries(companyBadges)) {
-          if (!COMPANY_VALID_KEYS.includes(k)) return NextResponse.json({ error: `Invalid key: ${k}` }, { status: 400 });
-          if (v !== null && v !== false && (typeof v !== 'string' || (v as string).length > 20)) {
-            return NextResponse.json({ error: `Invalid badge value for ${k}` }, { status: 400 });
-          }
-        }
-      }
-    }
+    const body = await req.json().catch(() => ({}));
+    const { order, badges, devOrder, devBadges, companyOrder, companyBadges } = body;
 
     const updates = [];
-    if (order !== undefined) {
-      updates.push(prisma.setting.upsert({
-        where: { key: ORDER_KEY },
-        update: { value: JSON.stringify(order) },
-        create: { key: ORDER_KEY, value: JSON.stringify(order) },
-      }));
-      updates.push(prisma.setting.upsert({
-        where: { key: BADGES_KEY },
-        update: { value: JSON.stringify(badges ?? {}) },
-        create: { key: BADGES_KEY, value: JSON.stringify(badges ?? {}) },
-      }));
+
+    // 1. Explore Menu
+    if (order !== undefined || badges !== undefined) {
+      const cleanOrder = Array.isArray(order)
+        ? [
+            ...order.filter((k): k is string => typeof k === 'string' && VALID_KEYS.includes(k)),
+            ...VALID_KEYS.filter(k => !order.includes(k)),
+          ]
+        : VALID_KEYS;
+
+      const cleanBadges: Record<string, string | false> = {};
+      if (badges && typeof badges === 'object' && !Array.isArray(badges)) {
+        for (const [k, v] of Object.entries(badges)) {
+          if (VALID_KEYS.includes(k)) {
+            if (v === false || v === null || v === '') {
+              cleanBadges[k] = false;
+            } else if (typeof v === 'string') {
+              cleanBadges[k] = v.trim().slice(0, 20);
+            }
+          }
+        }
+      }
+
+      updates.push(
+        prisma.setting.upsert({
+          where: { key: ORDER_KEY },
+          update: { value: JSON.stringify(cleanOrder) },
+          create: { key: ORDER_KEY, value: JSON.stringify(cleanOrder) },
+        }),
+        prisma.setting.upsert({
+          where: { key: BADGES_KEY },
+          update: { value: JSON.stringify(cleanBadges) },
+          create: { key: BADGES_KEY, value: JSON.stringify(cleanBadges) },
+        })
+      );
     }
 
-    if (devOrder !== undefined) {
-      updates.push(prisma.setting.upsert({
-        where: { key: DEV_ORDER_KEY },
-        update: { value: JSON.stringify(devOrder) },
-        create: { key: DEV_ORDER_KEY, value: JSON.stringify(devOrder) },
-      }));
-      updates.push(prisma.setting.upsert({
-        where: { key: DEV_BADGES_KEY },
-        update: { value: JSON.stringify(devBadges ?? {}) },
-        create: { key: DEV_BADGES_KEY, value: JSON.stringify(devBadges ?? {}) },
-      }));
+    // 2. Developers Menu
+    if (devOrder !== undefined || devBadges !== undefined) {
+      const cleanDevOrder = Array.isArray(devOrder)
+        ? [
+            ...devOrder.filter((k): k is string => typeof k === 'string' && DEV_VALID_KEYS.includes(k)),
+            ...DEV_VALID_KEYS.filter(k => !devOrder.includes(k)),
+          ]
+        : DEV_VALID_KEYS;
+
+      const cleanDevBadges: Record<string, string | false> = {};
+      if (devBadges && typeof devBadges === 'object' && !Array.isArray(devBadges)) {
+        for (const [k, v] of Object.entries(devBadges)) {
+          if (DEV_VALID_KEYS.includes(k)) {
+            if (v === false || v === null || v === '') {
+              cleanDevBadges[k] = false;
+            } else if (typeof v === 'string') {
+              cleanDevBadges[k] = v.trim().slice(0, 20);
+            }
+          }
+        }
+      }
+
+      updates.push(
+        prisma.setting.upsert({
+          where: { key: DEV_ORDER_KEY },
+          update: { value: JSON.stringify(cleanDevOrder) },
+          create: { key: DEV_ORDER_KEY, value: JSON.stringify(cleanDevOrder) },
+        }),
+        prisma.setting.upsert({
+          where: { key: DEV_BADGES_KEY },
+          update: { value: JSON.stringify(cleanDevBadges) },
+          create: { key: DEV_BADGES_KEY, value: JSON.stringify(cleanDevBadges) },
+        })
+      );
     }
 
-    if (companyOrder !== undefined) {
-      updates.push(prisma.setting.upsert({
-        where: { key: COMPANY_ORDER_KEY },
-        update: { value: JSON.stringify(companyOrder) },
-        create: { key: COMPANY_ORDER_KEY, value: JSON.stringify(companyOrder) },
-      }));
-      updates.push(prisma.setting.upsert({
-        where: { key: COMPANY_BADGES_KEY },
-        update: { value: JSON.stringify(companyBadges ?? {}) },
-        create: { key: COMPANY_BADGES_KEY, value: JSON.stringify(companyBadges ?? {}) },
-      }));
+    // 3. Company Menu
+    if (companyOrder !== undefined || companyBadges !== undefined) {
+      const cleanCompanyOrder = Array.isArray(companyOrder)
+        ? [
+            ...companyOrder.filter((k): k is string => typeof k === 'string' && COMPANY_VALID_KEYS.includes(k)),
+            ...COMPANY_VALID_KEYS.filter(k => !companyOrder.includes(k)),
+          ]
+        : COMPANY_VALID_KEYS;
+
+      const cleanCompanyBadges: Record<string, string | false> = {};
+      if (companyBadges && typeof companyBadges === 'object' && !Array.isArray(companyBadges)) {
+        for (const [k, v] of Object.entries(companyBadges)) {
+          if (COMPANY_VALID_KEYS.includes(k)) {
+            if (v === false || v === null || v === '') {
+              cleanCompanyBadges[k] = false;
+            } else if (typeof v === 'string') {
+              cleanCompanyBadges[k] = v.trim().slice(0, 20);
+            }
+          }
+        }
+      }
+
+      updates.push(
+        prisma.setting.upsert({
+          where: { key: COMPANY_ORDER_KEY },
+          update: { value: JSON.stringify(cleanCompanyOrder) },
+          create: { key: COMPANY_ORDER_KEY, value: JSON.stringify(cleanCompanyOrder) },
+        }),
+        prisma.setting.upsert({
+          where: { key: COMPANY_BADGES_KEY },
+          update: { value: JSON.stringify(cleanCompanyBadges) },
+          create: { key: COMPANY_BADGES_KEY, value: JSON.stringify(cleanCompanyBadges) },
+        })
+      );
     }
 
-    await prisma.$transaction(updates);
+    if (updates.length > 0) {
+      await prisma.$transaction(updates);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

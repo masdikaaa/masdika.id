@@ -53,19 +53,44 @@ export default function MenuOrderPage() {
     fetch('/api/admin/settings/menu-order')
       .then(r => r.json())
       .then(data => {
-        if (Array.isArray(data.order)) setOrder(data.order);
-        if (data.badges && typeof data.badges === 'object') setBadges(prev => ({ ...prev, ...data.badges }));
+        if (Array.isArray(data.order)) {
+          const validOrder = data.order.filter((k: string) => DEFAULT_ORDER.includes(k));
+          const missing = DEFAULT_ORDER.filter(k => !validOrder.includes(k));
+          setOrder([...validOrder, ...missing]);
+        }
+        if (data.badges && typeof data.badges === 'object') {
+          const clean: Record<string, string | false> = {};
+          for (const k of DEFAULT_ORDER) {
+            if (data.badges[k] !== undefined) clean[k] = data.badges[k];
+          }
+          setBadges(prev => ({ ...prev, ...clean }));
+        }
         
         if (Array.isArray(data.devOrder)) {
-          // ensure new items are added if not present in saved order
-          const savedDevOrder = data.devOrder;
-          const missingItems = DEFAULT_DEV_ORDER.filter(id => !savedDevOrder.includes(id));
-          setDevOrder([...savedDevOrder, ...missingItems]);
+          const validDevOrder = data.devOrder.filter((k: string) => DEFAULT_DEV_ORDER.includes(k));
+          const missingItems = DEFAULT_DEV_ORDER.filter(id => !validDevOrder.includes(id));
+          setDevOrder([...validDevOrder, ...missingItems]);
         }
-        if (data.devBadges && typeof data.devBadges === 'object') setDevBadges(prev => ({ ...DEFAULT_DEV_BADGES, ...prev, ...data.devBadges }));
+        if (data.devBadges && typeof data.devBadges === 'object') {
+          const cleanDev: Record<string, string | false> = {};
+          for (const k of DEFAULT_DEV_ORDER) {
+            if (data.devBadges[k] !== undefined) cleanDev[k] = data.devBadges[k];
+          }
+          setDevBadges(prev => ({ ...DEFAULT_DEV_BADGES, ...prev, ...cleanDev }));
+        }
         
-        if (Array.isArray(data.companyOrder)) setCompanyOrder(data.companyOrder);
-        if (data.companyBadges && typeof data.companyBadges === 'object') setCompanyBadges(prev => ({ ...prev, ...data.companyBadges }));
+        if (Array.isArray(data.companyOrder)) {
+          const validCompanyOrder = data.companyOrder.filter((k: string) => DEFAULT_COMPANY_ORDER.includes(k));
+          const missingCompany = DEFAULT_COMPANY_ORDER.filter(id => !validCompanyOrder.includes(id));
+          setCompanyOrder([...validCompanyOrder, ...missingCompany]);
+        }
+        if (data.companyBadges && typeof data.companyBadges === 'object') {
+          const cleanCompany: Record<string, string | false> = {};
+          for (const k of DEFAULT_COMPANY_ORDER) {
+            if (data.companyBadges[k] !== undefined) cleanCompany[k] = data.companyBadges[k];
+          }
+          setCompanyBadges(prev => ({ ...prev, ...cleanCompany }));
+        }
         
         setLoading(false);
       })
@@ -105,7 +130,8 @@ export default function MenuOrderPage() {
       if (res.ok) {
         toast.success('Menu config saved! Changes appear on the navbar.');
       } else {
-        toast.error('Failed to save');
+        const errData = await res.json().catch(() => null);
+        toast.error(errData?.error || 'Failed to save');
       }
     } catch {
       toast.error('Something went wrong');
@@ -174,7 +200,7 @@ export default function MenuOrderPage() {
                 {hasBadge && (
                   <input
                     type="text"
-                    value={currentBadges[key] as string}
+                    value={typeof currentBadges[key] === 'string' ? (currentBadges[key] as string) : 'New'}
                     onChange={(e) => updateBadgeText(key, listType, e.target.value)}
                     onPointerDown={(e) => e.stopPropagation()}
                     className={cn("px-2 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-[10px] font-bold uppercase tracking-wider shrink-0 w-16 sm:w-24 outline-none focus:border-cyan-400/50 focus:bg-cyan-500/20 transition-colors text-center", isDark ? "text-cyan-400" : "text-cyan-700")}
