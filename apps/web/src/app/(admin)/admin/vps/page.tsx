@@ -3247,7 +3247,7 @@ export default function VpsManagementPage() {
               <div className={cn("p-3 rounded-xl border text-xs flex items-start gap-2.5", isDark ? "bg-cyan-950/20 border-cyan-800/30 text-cyan-300" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
                 <Info className="w-4 h-4 shrink-0 mt-0.5 text-cyan-400" />
                 <span>
-                  Mengubah template OS ini akan otomatis mengganti logo distro dan nama OS di <strong>Admin Panel</strong> dan <strong>Customer Panel Dashboard</strong> client secara real-time.
+                  Changing this OS template will automatically update the distribution logo and OS name across both the <strong>Admin Panel</strong> and the customer's <strong>Dashboard</strong> in real-time.
                 </span>
               </div>
 
@@ -3292,7 +3292,7 @@ export default function VpsManagementPage() {
               {/* OS Presets Grid */}
               <div>
                 <label className={cn("text-xs font-bold uppercase tracking-wider block mb-2.5", isDark ? "text-zinc-300" : "text-slate-700")}>
-                  Pilih Distro OS Populer (Presets)
+                  Select Popular OS Distribution (Presets)
                 </label>
                 <div className="space-y-3">
                   {OS_GROUPS.map((group) => (
@@ -3335,7 +3335,7 @@ export default function VpsManagementPage() {
               {templates.length > 0 && (
                 <div>
                   <label className={cn("text-xs font-bold uppercase tracking-wider block mb-1.5", isDark ? "text-zinc-300" : "text-slate-700")}>
-                    Atau Pilih dari Template Proxmox ({templates.length})
+                    Or Choose from Synced Proxmox Templates ({templates.length})
                   </label>
                   <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-2 rounded-xl border scrollbar-thin" style={{ borderColor: isDark ? "rgba(255,255,255,0.06)" : "#e2e8f0" }}>
                     {templates.map((tpl) => (
@@ -3365,13 +3365,13 @@ export default function VpsManagementPage() {
               {/* Custom Input */}
               <div>
                 <label className={cn("text-xs font-bold uppercase tracking-wider block mb-1.5", isDark ? "text-zinc-300" : "text-slate-700")}>
-                  Atau Input Custom OS Template
+                  Or Enter Custom OS Template Name
                 </label>
                 <input
                   type="text"
                   value={customOsInput}
                   onChange={(e) => setCustomOsInput(e.target.value)}
-                  placeholder="Contoh: Debian-12, Ubuntu-25.04, AlmaLinux-10.2..."
+                  placeholder="e.g., Debian-12, Ubuntu-25.04, AlmaLinux-10.2..."
                   className={cn(
                     "w-full border rounded-xl px-3.5 py-2 text-xs font-mono outline-none transition-colors",
                     isDark
