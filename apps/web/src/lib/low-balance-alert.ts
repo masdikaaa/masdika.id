@@ -153,23 +153,17 @@ export async function checkAndSendLowBalanceAlerts(): Promise<LowBalanceCheckRes
       if (isLowBalance) {
         result.lowBalanceCount++;
 
-        // Check cooldown from Setting table
+        // Check if an alert was already sent for this low-balance cycle.
+        // SMART SYSTEM RULE: Exactly ONE email per incident — no spam / duplicate emails
+        // whether automated by cron or triggered manually by admin, until the customer tops up!
         const existingAlertSetting = await prisma.setting.findUnique({
           where: { key: settingKey },
         });
 
         let canSend = true;
         if (existingAlertSetting?.value) {
-          try {
-            const data = JSON.parse(existingAlertSetting.value);
-            const lastSentAt = new Date(data.sentAt).getTime();
-            if (now - lastSentAt < COOLDOWN_MS) {
-              canSend = false;
-              result.skippedCooldown++;
-            }
-          } catch {
-            canSend = true;
-          }
+          canSend = false;
+          result.skippedCooldown++;
         }
 
         if (canSend) {
@@ -231,6 +225,68 @@ export async function checkAndSendLowBalanceAlerts(): Promise<LowBalanceCheckRes
   }
 
   return result;
+}
+
+/**
+ * Manually dispatches a low balance alert for a single customer.
+ * Strictly verifies that the customer has NOT already received an alert for this low balance incident.
+ * If already alerted, duplicate sending is strictly blocked (smart anti-spam).
+ */
+export async function sendSingleLowBalanceAlert(userId: number): Promise<{
+  success: boolean;
+  alreadySent?: boolean;
+  message: string;
+}> {
+  try {
+    const settingKey = `LOW_BALANCE_ALERT_${userId}`;
+
+    // 1. Check if an alert was already sent for this low-balance period
+    const existing = await prisma.setting.findUnique({ where: { key: settingKey } });
+    if (existing?.value) {
+      try {
+        const data = JSON.parse(existing.value);
+        const sentDate = new Date(data.sentAt).toLocaleString("en-US", { dateStyle: "short", timeStyle: "short" });
+        return {
+          success: false,
+          alreadySent: true,
+          message: `An alert email has already been sent to this customer (${sentDate}). To prevent spam, only 1 email is sent per low-balance incident.`,
+        };
+      } catch {
+        return {
+          success: false,
+          alreadySent: true,
+          message: "An alert email has already been sent to this customer. Only 1 email is sent per low-balance incident.",
+        };
+      }
+    }
+
+    // 2. Run full evaluation across services to send to this customer
+    const checkResult = await checkAndSendLowBalanceAlerts();
+    if (checkResult.alertsSent > 0) {
+      return {
+        success: true,
+        message: "Warning email sent successfully to customer.",
+      };
+    }
+
+    if (checkResult.skippedCooldown > 0) {
+      return {
+        success: false,
+        alreadySent: true,
+        message: "Customer has already received a warning email for this low-balance incident.",
+      };
+    }
+
+    return {
+      success: false,
+      message: "Customer balance is currently sufficient or customer has no active hourly services.",
+    };
+  } catch (err: any) {
+    return {
+      success: false,
+      message: err.message || "Failed to process low balance alert.",
+    };
+  }
 }
 
 /**

@@ -353,21 +353,21 @@ export default function PaygMonitorPage() {
           <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap w-full sm:w-auto">
             <button
               onClick={handleTriggerAlerts}
-              disabled={triggeringAlerts || loading}
+              disabled={triggeringAlerts || loading || unsentLowCount === 0}
               className={cn(
-                "px-3.5 py-2 rounded-xl font-bold text-xs border transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 whitespace-nowrap shadow-xs",
+                "px-3.5 py-2 rounded-xl font-bold text-xs border transition-all flex items-center gap-1.5 whitespace-nowrap shadow-xs",
                 unsentLowCount > 0
-                  ? (isDark ? "bg-amber-500/20 border-amber-500/40 text-amber-300 hover:bg-amber-500/30" : "bg-amber-50 border-amber-300 text-amber-800 hover:bg-amber-100")
+                  ? (isDark ? "bg-amber-500/20 border-amber-500/40 text-amber-300 hover:bg-amber-500/30 cursor-pointer" : "bg-amber-50 border-amber-300 text-amber-800 hover:bg-amber-100 cursor-pointer")
                   : sentLowCount > 0
-                    ? (isDark ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25" : "bg-emerald-50 border-emerald-300 text-emerald-800 hover:bg-emerald-100")
-                    : (isDark ? "bg-white/5 border-white/[0.08] text-zinc-300 hover:bg-white/10" : "bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200")
+                    ? (isDark ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-400 cursor-default" : "bg-emerald-50 border-emerald-200 text-emerald-800 cursor-default")
+                    : (isDark ? "bg-white/5 border-white/[0.08] text-zinc-400 cursor-default" : "bg-slate-100 border-slate-200 text-slate-600 cursor-default")
               )}
               title={
                 unsentLowCount > 0
                   ? `Send warning email to ${unsentLowCount} customer(s) with low balance`
                   : sentLowCount > 0
-                    ? `All ${sentLowCount} low balance customer(s) have received an email in the last 24h (Cooldown active, no spam)`
-                    : "Check customer balance status"
+                    ? `All ${sentLowCount} low balance customer(s) have already received an email. Anti-spam strictly prevents duplicate emails.`
+                    : "No customers currently require low balance warnings"
               }
             >
               {triggeringAlerts ? (
@@ -383,8 +383,8 @@ export default function PaygMonitorPage() {
                 {unsentLowCount > 0
                   ? `Send Low Balance Alerts (${unsentLowCount})`
                   : sentLowCount > 0
-                    ? `Alerts Sent (${sentLowCount} in Cooldown)`
-                    : `Check Low Balance Alerts`}
+                    ? `All Alerts Sent (${sentLowCount} Notified)`
+                    : `No Pending Alerts`}
               </span>
             </button>
             <div className="relative w-full sm:w-64 shrink-0">
@@ -623,18 +623,33 @@ export default function PaygMonitorPage() {
                                     Remaining balance is <strong>{formatRupiah(cust.balance)}</strong>, sufficient for only <strong>~{cust.remainingHours} hrs</strong> at <strong>{formatRupiah(cust.totalHourlyBurn)}/hr</strong> burn rate. Recommend customer to top up soon to prevent service suspension.
                                   </p>
                                   <div className="mt-3 flex items-center gap-2">
-                                    <button
-                                      type="button"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleSendSingleAlert(cust.id);
-                                      }}
-                                      disabled={sendingAlert === cust.id}
-                                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-slate-950 transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-xs"
-                                    >
-                                      {sendingAlert === cust.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
-                                      <span>{cust.lowBalanceAlert ? 'Resend Warning Email' : 'Send Warning Email Now'}</span>
-                                    </button>
+                                    {cust.lowBalanceAlert ? (
+                                      <div
+                                        className={cn(
+                                          "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border select-none",
+                                          isDark
+                                            ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-400"
+                                            : "bg-emerald-50 border-emerald-200 text-emerald-800"
+                                        )}
+                                        title="Warning email has already been sent to this customer. Exactly 1 email is sent per low-balance incident to prevent spam."
+                                      >
+                                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                                        <span>Alert Already Sent &bull; Anti-Spam Lock Active</span>
+                                      </div>
+                                    ) : (
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleSendSingleAlert(cust.id);
+                                        }}
+                                        disabled={sendingAlert === cust.id}
+                                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-slate-950 transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-xs"
+                                      >
+                                        {sendingAlert === cust.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
+                                        <span>Send Warning Email Now</span>
+                                      </button>
+                                    )}
                                   </div>
                                 </div>
                               </div>

@@ -231,16 +231,18 @@ export async function POST(req: NextRequest) {
     }
 
     if (body.action === 'send-single-alert' && body.userId) {
-      const { checkAndSendLowBalanceAlerts } = await import('@/lib/low-balance-alert');
-      // Force send by temporarily clearing cooldown and running
-      await prisma.setting.deleteMany({
-        where: { key: `LOW_BALANCE_ALERT_${body.userId}` }
-      });
-      const alertResult = await checkAndSendLowBalanceAlerts();
+      const { sendSingleLowBalanceAlert } = await import('@/lib/low-balance-alert');
+      const result = await sendSingleLowBalanceAlert(Number(body.userId));
+      if (!result.success) {
+        return NextResponse.json({
+          success: false,
+          error: result.message,
+          alreadySent: result.alreadySent,
+        }, { status: 400 });
+      }
       return NextResponse.json({
         success: true,
-        message: `Low balance warning alert processed for client ID ${body.userId}`,
-        data: alertResult,
+        message: result.message,
       });
     }
 
