@@ -44,6 +44,8 @@ export async function checkAndSendLowBalanceAlerts(): Promise<LowBalanceCheckRes
       },
       include: {
         user: { select: { id: true, name: true, email: true, balance: true } },
+        assignedIps: true,
+        reservedIps: true,
       },
     });
 
@@ -55,6 +57,7 @@ export async function checkAndSendLowBalanceAlerts(): Promise<LowBalanceCheckRes
       },
       include: {
         user: { select: { id: true, name: true, email: true, balance: true } },
+        vps: { select: { hostname: true } },
       },
     });
 
@@ -87,13 +90,27 @@ export async function checkAndSendLowBalanceAlerts(): Promise<LowBalanceCheckRes
         email: string;
         balance: number;
         totalHourlyBurn: number;
-        services: { name: string; type: string; hourlyRate: number }[];
+        services: {
+          name: string;
+          type: string;
+          hourlyRate: number;
+          ipAddress?: string | null;
+          publicIp?: string | null;
+          vpsHostname?: string | null;
+        }[];
       }
     >();
 
     const addService = (
       user: { id: number; name: string; email: string; balance: number },
-      service: { name: string; type: string; hourlyRate: number }
+      service: {
+        name: string;
+        type: string;
+        hourlyRate: number;
+        ipAddress?: string | null;
+        publicIp?: string | null;
+        vpsHostname?: string | null;
+      }
     ) => {
       if (!customersMap.has(user.id)) {
         customersMap.set(user.id, {
@@ -111,10 +128,17 @@ export async function checkAndSendLowBalanceAlerts(): Promise<LowBalanceCheckRes
     };
 
     for (const vps of activeVps) {
+      const primaryAssigned = vps.assignedIps?.find((ip) => ip.isPrimary) || vps.assignedIps?.[0];
+      const attachedReserved = vps.reservedIps?.[0];
+      const localIp = primaryAssigned?.ipAddress || attachedReserved?.ipAddress || null;
+      const publicIp = primaryAssigned?.publicIp || attachedReserved?.publicIp || null;
+
       addService(vps.user, {
         name: vps.hostname || `VPS #${vps.id}`,
         type: "VPS",
         hourlyRate: getEffectiveHourlyRate(vps, pricing),
+        ipAddress: localIp,
+        publicIp: publicIp || null,
       });
     }
 
@@ -123,6 +147,9 @@ export async function checkAndSendLowBalanceAlerts(): Promise<LowBalanceCheckRes
         name: ip.ipAddress || `IP #${ip.id}`,
         type: "Reserved IP",
         hourlyRate: ip.hourlyRate,
+        ipAddress: ip.ipAddress,
+        publicIp: ip.publicIp || null,
+        vpsHostname: ip.vps?.hostname || null,
       });
     }
 

@@ -3,7 +3,7 @@ import { useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 import React, { useState, useEffect, Fragment } from "react";
 import { toast } from "sonner";
-import { Activity, Clock, Loader2, Save, RefreshCw, Terminal, Network, Package, Info, Users, Layers, Wallet, CheckCircle2, AlertTriangle, XCircle, AlertCircle, ChevronDown, Zap, Mail, Send } from "lucide-react";
+import { Activity, Clock, Loader2, Save, RefreshCw, Terminal, Network, Globe, Package, Info, Users, Layers, Wallet, CheckCircle2, AlertTriangle, XCircle, AlertCircle, ChevronDown, Zap, Mail, Send } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { formatRupiah } from "@/lib/billing";
 import { Pagination } from "@/components/ui/Pagination";
@@ -14,6 +14,9 @@ interface ServiceInfo {
   id: string;
   type: string;
   name: string;
+  ipAddress?: string | null;
+  publicIp?: string | null;
+  vpsHostname?: string | null;
   hourlyRate: number;
   fullHourlyRate?: number;
   accumulatedCost: number;
@@ -688,9 +691,39 @@ export default function PaygMonitorPage() {
                                     .slice(((servicePageMap[cust.id] || 1) - 1) * servicesPerPage, (servicePageMap[cust.id] || 1) * servicesPerPage)
                                     .map((svc) => (
                                     <tr key={svc.id} className={cn("transition-colors", isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80")}>
-                                      <td className={cn("py-2.5 px-3 font-medium flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                                        {getIcon(svc.type)}
-                                        <span className="truncate">{svc.name}</span>
+                                      <td className={cn("py-2.5 px-3 font-medium flex items-center gap-2 flex-wrap", isDark ? "text-white" : "text-slate-900")}>
+                                        <div className="flex items-center gap-2">
+                                          {getIcon(svc.type)}
+                                          <span className="truncate">{svc.name}</span>
+                                        </div>
+                                        {svc.type === 'VPS' && svc.ipAddress && (
+                                          <span className={cn(
+                                            "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-mono border shrink-0",
+                                            isDark ? "bg-zinc-900/80 border-white/10 text-zinc-300" : "bg-slate-100 border-slate-200 text-slate-700"
+                                          )} title="Local IP">
+                                            <Network className="w-3 h-3 text-zinc-400" />
+                                            {svc.ipAddress}
+                                          </span>
+                                        )}
+                                        {svc.publicIp && (
+                                          <span className={cn(
+                                            "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-mono border font-semibold shrink-0",
+                                            isDark
+                                              ? "bg-cyan-950/40 border-cyan-800/50 text-cyan-400"
+                                              : "bg-cyan-50 border-cyan-200 text-cyan-700"
+                                          )} title="Public IP">
+                                            <Globe className="w-3 h-3" />
+                                            {svc.publicIp}
+                                          </span>
+                                        )}
+                                        {svc.type === 'Reserved IP' && svc.vpsHostname && (
+                                          <span className={cn(
+                                            "text-[10px] font-normal px-1.5 py-0.5 rounded border shrink-0",
+                                            isDark ? "bg-white/[0.04] border-white/10 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-500"
+                                          )} title={`Attached to ${svc.vpsHostname}`}>
+                                            → {svc.vpsHostname}
+                                          </span>
+                                        )}
                                       </td>
                                       <td className={cn("py-2.5 px-3", isDark ? "text-zinc-400" : "text-slate-500")}>{svc.type}</td>
                                       <td className={cn("py-2.5 px-3 text-right font-medium whitespace-nowrap", isDark ? "text-cyan-400" : "text-cyan-700")}>

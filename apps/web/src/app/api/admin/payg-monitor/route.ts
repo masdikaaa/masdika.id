@@ -25,12 +25,19 @@ export async function GET(req: NextRequest) {
         status: { in: ['RUNNING', 'STOPPED'] },
         hourlyRate: { gt: 0 }
       },
-      include: { user: { select: { id: true, name: true, email: true, image: true, balance: true } } }
+      include: {
+        user: { select: { id: true, name: true, email: true, image: true, balance: true } },
+        assignedIps: true,
+        reservedIps: true
+      }
     });
 
     const activeIps = await prisma.reservedIp.findMany({
       where: { hourlyRate: { gt: 0 } },
-      include: { user: { select: { id: true, name: true, email: true, image: true, balance: true } } }
+      include: {
+        user: { select: { id: true, name: true, email: true, image: true, balance: true } },
+        vps: { select: { hostname: true } }
+      }
     });
 
     const activeSubscriptions = await prisma.subscription.findMany({
@@ -77,10 +84,17 @@ export async function GET(req: NextRequest) {
     pricingItems.forEach(item => { pricing[item.key] = item.pricePerHour; });
 
     for (const vps of activeVps) {
+      const primaryAssigned = vps.assignedIps?.find(ip => ip.isPrimary) || vps.assignedIps?.[0];
+      const attachedReserved = vps.reservedIps?.[0];
+      const localIp = primaryAssigned?.ipAddress || attachedReserved?.ipAddress || null;
+      const publicIp = primaryAssigned?.publicIp || attachedReserved?.publicIp || null;
+
       addServiceToCustomer(vps.user.id, vps.user, {
         id: `vps-${vps.id}`,
         type: 'VPS',
         name: vps.hostname,
+        ipAddress: localIp,
+        publicIp: publicIp || null,
         // Rate actually charged right now (STOPPED => storage only)
         hourlyRate: getEffectiveHourlyRate(vps, pricing),
         fullHourlyRate: vps.hourlyRate,
@@ -95,6 +109,9 @@ export async function GET(req: NextRequest) {
         id: `ip-${ip.id}`,
         type: 'Reserved IP',
         name: ip.ipAddress,
+        ipAddress: ip.ipAddress,
+        publicIp: ip.publicIp || null,
+        vpsHostname: ip.vps?.hostname || null,
         hourlyRate: ip.hourlyRate,
         accumulatedCost: ip.accumulatedCost,
         status: ip.isAttached ? 'ATTACHED' : 'UNATTACHED',

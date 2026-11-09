@@ -270,7 +270,14 @@ export const sendLowBalanceAlertEmail = async ({
   totalHourlyBurn: number;
   remainingHours: number;
   remainingDays: number;
-  services: { name: string; type: string; hourlyRate: number }[];
+  services: {
+    name: string;
+    type: string;
+    hourlyRate: number;
+    ipAddress?: string | null;
+    publicIp?: string | null;
+    vpsHostname?: string | null;
+  }[];
 }) => {
   const formattedBalance = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(balance);
   const formattedBurn = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(totalHourlyBurn);
@@ -281,12 +288,31 @@ export const sendLowBalanceAlertEmail = async ({
 
   const servicesRowsHtml = services.map(s => {
     const rate = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(s.hourlyRate);
+
+    let ipBadgesHtml = '';
+    if (s.type === 'VPS') {
+      if (s.ipAddress) {
+        ipBadgesHtml += `<span style="display: inline-block; font-family: monospace; font-size: 11px; padding: 1px 6px; border-radius: 4px; background: #1e293b; color: #94a3b8; border: 1px solid #334155; margin-left: 6px;">${s.ipAddress}</span>`;
+      }
+      if (s.publicIp) {
+        ipBadgesHtml += `<span style="display: inline-block; font-family: monospace; font-size: 11px; padding: 1px 6px; border-radius: 4px; background: rgba(6, 182, 212, 0.15); color: #22d3ee; border: 1px solid rgba(6, 182, 212, 0.3); font-weight: 600; margin-left: 6px;">🌐 ${s.publicIp}</span>`;
+      }
+    } else if (s.type === 'Reserved IP') {
+      if (s.publicIp) {
+        ipBadgesHtml += `<span style="display: inline-block; font-family: monospace; font-size: 11px; padding: 1px 6px; border-radius: 4px; background: rgba(6, 182, 212, 0.15); color: #22d3ee; border: 1px solid rgba(6, 182, 212, 0.3); font-weight: 600; margin-left: 6px;">🌐 ${s.publicIp}</span>`;
+      }
+      if (s.vpsHostname) {
+        ipBadgesHtml += `<span style="display: inline-block; font-size: 11px; padding: 1px 6px; border-radius: 4px; background: #1e293b; color: #94a3b8; margin-left: 6px;">→ ${s.vpsHostname}</span>`;
+      }
+    }
+
     return `<tr>
       <td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #e2e8f0;">
         <span style="display: inline-block; font-size: 11px; padding: 2px 6px; border-radius: 4px; background: #0e3b52; color: #38bdf8; font-weight: 600; margin-right: 6px;">${s.type}</span>
         <strong>${s.name}</strong>
+        ${ipBadgesHtml}
       </td>
-      <td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #f59e0b; font-weight: 700; text-align: right; font-family: monospace;">
+      <td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #f59e0b; font-weight: 700; text-align: right; font-family: monospace; white-space: nowrap;">
         ${rate}/hr
       </td>
     </tr>`;
