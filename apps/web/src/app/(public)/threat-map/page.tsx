@@ -1343,6 +1343,15 @@ export default function ThreatMapPage() {
                           const currentX = (1 - t) * (1 - t) * laser.x1 + 2 * (1 - t) * t * laser.cx + t * t * laser.x2;
                           const currentY = (1 - t) * (1 - t) * laser.y1 + 2 * (1 - t) * t * laser.cy + t * t * laser.y2;
 
+                          // Clean, dynamic card width computation so labels ALWAYS fit the card cleanly with zero overflow
+                          const sourceLabel = `${laser.sourceCity} ${laser.sourceCode}`;
+                          const sourceWidth = Math.max(54, Math.round(sourceLabel.length * 5.2 + 16));
+                          const sourceX = -sourceWidth / 2;
+
+                          const targetLabel = `${laser.targetCity} ${laser.targetCode}`;
+                          const targetWidth = Math.max(54, Math.round(targetLabel.length * 5.2 + 16));
+                          const targetX = -targetWidth / 2;
+
                           return (
                             <g key={laser.id} filter="url(#laser-glow)">
                               {/* Trajectory Guide Arc */}
@@ -1355,59 +1364,61 @@ export default function ThreatMapPage() {
                                 opacity={laser.isReal ? "0.95" : "0.55"}
                               />
 
-                              {/* Source Origin Node & Callout Label (FortiGuard Style) */}
+                              {/* Source Origin Node & Callout Label (FortiGuard Style - Fits Text Snugly) */}
                               <g transform={`translate(${laser.x1}, ${laser.y1})`}>
                                 <circle r={laser.isReal ? "4.5" : "3"} fill={laser.color} opacity="0.95" />
                                 <g transform="translate(0, -9)">
                                   <rect
-                                    x="-36"
-                                    y="-10"
-                                    width="72"
-                                    height="13"
-                                    rx="2"
-                                    fill={isDark ? "rgba(4, 11, 23, 0.9)" : "rgba(255, 255, 255, 0.95)"}
-                                    stroke={isDark ? "rgba(14, 165, 233, 0.5)" : "rgba(148, 163, 184, 0.7)"}
-                                    strokeWidth="0.7"
+                                    x={sourceX}
+                                    y="-11"
+                                    width={sourceWidth}
+                                    height="15"
+                                    rx="3"
+                                    fill={isDark ? "rgba(4, 11, 23, 0.94)" : "rgba(255, 255, 255, 0.96)"}
+                                    stroke={isDark ? "rgba(14, 165, 233, 0.6)" : "rgba(148, 163, 184, 0.8)"}
+                                    strokeWidth="0.8"
                                   />
                                   <text
                                     x="0"
-                                    y="-1"
+                                    y="-3.5"
                                     textAnchor="middle"
+                                    dominantBaseline="central"
                                     fill={isDark ? "#e2e8f0" : "#1e293b"}
                                     fontSize="7"
                                     fontWeight="bold"
-                                    fontFamily="monospace"
+                                    fontFamily="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
                                   >
-                                    {laser.sourceCity} {laser.sourceCode}
+                                    {sourceLabel}
                                   </text>
                                 </g>
                               </g>
 
-                              {/* Target Destination Node & Callout Label */}
+                              {/* Target Destination Node & Callout Label (FortiGuard Style - Fits Text Snugly) */}
                               <g transform={`translate(${laser.x2}, ${laser.y2})`}>
                                 <circle r="7" fill="none" stroke={laser.color} strokeWidth="1" opacity="0.75" />
                                 <circle r="2.5" fill={laser.color} />
                                 <g transform="translate(0, -9)">
                                   <rect
-                                    x="-38"
-                                    y="-10"
-                                    width="76"
-                                    height="13"
-                                    rx="2"
-                                    fill={isDark ? "rgba(4, 11, 23, 0.9)" : "rgba(255, 255, 255, 0.95)"}
+                                    x={targetX}
+                                    y="-11"
+                                    width={targetWidth}
+                                    height="15"
+                                    rx="3"
+                                    fill={isDark ? "rgba(4, 11, 23, 0.94)" : "rgba(255, 255, 255, 0.96)"}
                                     stroke={laser.color}
-                                    strokeWidth="0.8"
+                                    strokeWidth="0.9"
                                   />
                                   <text
                                     x="0"
-                                    y="-1"
+                                    y="-3.5"
                                     textAnchor="middle"
+                                    dominantBaseline="central"
                                     fill={laser.color}
                                     fontSize="7"
                                     fontWeight="bold"
-                                    fontFamily="monospace"
+                                    fontFamily="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
                                   >
-                                    {laser.targetCity} {laser.targetCode}
+                                    {targetLabel}
                                   </text>
                                 </g>
                               </g>
