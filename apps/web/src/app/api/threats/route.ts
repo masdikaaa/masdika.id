@@ -24,6 +24,24 @@ export interface AttackEvent {
 // In-memory cache for resolved IP geolocation to prevent external API spam
 const geoCache = new Map<string, { city: string; country: string; code: string; coords: [number, number] }>();
 
+// Unified Indonesia Asia/Jakarta (WIB - UTC+7) Formatter
+function formatWibTime(date: Date = new Date()): string {
+  try {
+    return new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Asia/Jakarta',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    }).format(date);
+  } catch {
+    const hours = String((date.getUTCHours() + 7) % 24).padStart(2, '0');
+    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+    const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+    return `${hours}:${minutes}:${seconds}`;
+  }
+}
+
 // Check if IP is private, loopback, or local test
 function isPrivateIp(ip: string): boolean {
   if (!ip || ip === 'unknown' || ip === 'localhost' || ip === '::1') return true;
@@ -378,16 +396,12 @@ export async function GET(request: Request) {
 
       const geo = await resolveIpGeo(log.ipAddress);
       const logDate = new Date(log.createdAt);
-      const hours = String(logDate.getHours()).padStart(2, '0');
-      const minutes = String(logDate.getMinutes()).padStart(2, '0');
-      const seconds = String(logDate.getSeconds()).padStart(2, '0');
-
       const maskedTarget = maskTarget(log.emailAttempt);
       const maskedIp = maskIp(log.ipAddress);
 
       realEvents.push({
         id: `real-login-${log.id}`,
-        timestamp: `${hours}:${minutes}:${seconds}`,
+        timestamp: formatWibTime(logDate),
         attackName: `Auth.BruteForce.CredentialStuffing (Target: ${maskedTarget})`,
         sourceCity: geo.city,
         sourceCountry: geo.country,
@@ -414,13 +428,10 @@ export async function GET(request: Request) {
         const geo = await resolveIpGeo(rawIp);
         const maskedIp = maskIp(rawIp);
         const blockDate = new Date(blocked.createdAt);
-        const hours = String(blockDate.getHours()).padStart(2, '0');
-        const minutes = String(blockDate.getMinutes()).padStart(2, '0');
-        const seconds = String(blockDate.getSeconds()).padStart(2, '0');
 
         realEvents.push({
           id: `real-blocked-${blocked.id}`,
-          timestamp: `${hours}:${minutes}:${seconds}`,
+          timestamp: formatWibTime(blockDate),
           attackName: `Permanent.WAF.Drop (${blocked.reason || 'Malicious Traffic Detected'})`,
           sourceCity: geo.city,
           sourceCountry: geo.country,
@@ -471,7 +482,7 @@ export async function GET(request: Request) {
   if (realSshFailedCount > 0) {
     realEvents.unshift({
       id: `real-ssh-${Date.now()}`,
-      timestamp: `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`,
+      timestamp: formatWibTime(now),
       attackName: `Host.SSH.FailedAuth (Total Host Incidents: ${realSshFailedCount})`,
       sourceCity: 'Host Audit Sensor',
       sourceCountry: 'Incoming SSH Probe',
@@ -500,13 +511,10 @@ export async function GET(request: Request) {
   // Generate worldwide cross-border attacks with stable IDs
   WORLDWIDE_OUTBREAKS.forEach((item, idx) => {
     const eventTime = new Date(now.getTime() - (idx + 1) * 3200);
-    const hours = String(eventTime.getHours()).padStart(2, '0');
-    const minutes = String(eventTime.getMinutes()).padStart(2, '0');
-    const seconds = String(eventTime.getSeconds()).padStart(2, '0');
 
     globalEvents.push({
       id: `global-outbreak-${idx}`,
-      timestamp: `${hours}:${minutes}:${seconds}`,
+      timestamp: formatWibTime(eventTime),
       attackName: item.attack,
       sourceCity: item.source.city,
       sourceCountry: item.source.country,
@@ -528,13 +536,10 @@ export async function GET(request: Request) {
   // Generate Indonesia inbound & domestic attacks with stable IDs
   INDONESIA_INCIDENTS.forEach((item, idx) => {
     const eventTime = new Date(now.getTime() - (idx + 2) * 2800);
-    const hours = String(eventTime.getHours()).padStart(2, '0');
-    const minutes = String(eventTime.getMinutes()).padStart(2, '0');
-    const seconds = String(eventTime.getSeconds()).padStart(2, '0');
 
     regionalEvents.push({
       id: `indo-incident-${idx}`,
-      timestamp: `${hours}:${minutes}:${seconds}`,
+      timestamp: formatWibTime(eventTime),
       attackName: item.attack,
       sourceCity: item.source.city,
       sourceCountry: item.source.country,
@@ -560,18 +565,40 @@ export async function GET(request: Request) {
 
   if (filterParam === 'real') {
     combinedEvents = realEvents;
-  } else if (regionParam === 'indonesia') {
-    // In Indonesia view: real Masdika attacks come first, followed by regional & inbound probes
-    combinedEvents = [...realEvents, ...regionalEvents, ...globalEvents.filter(e => e.targetCode === 'ID')];
-  } else if (regionParam === 'world') {
-    // In World view: real Masdika attacks plus worldwide cross-border outbreaks
-    combinedEvents = [...realEvents, ...globalEvents, ...regionalEvents];
   } else {
-    // All vectors: real Masdika attacks at the top, interleaved with global & regional
-    combinedEvents = [...realEvents, ...globalEvents, ...regionalEvents];
+    // Interleave real database incidents into the active live stream with current rolling WIB timestamps
+    const interleavedLiveEvents: AttackEvent[] = [];
+    const maxPool = Math.max(realEvents.length, regionalEvents.length, globalEvents.length);
+    for (let i = 0; i < maxPool; i++) {
+      if (i < realEvents.length) {
+        const eventTime = new Date(now.getTime() - (interleavedLiveEvents.length * 2400));
+        interleavedLiveEvents.push({
+          ...realEvents[i],
+          id: `live-real-${realEvents[i].id}-${i}`,
+          timestamp: formatWibTime(eventTime),
+        });
+      }
+      if (regionParam !== 'world' && i < regionalEvents.length) {
+        const eventTime = new Date(now.getTime() - (interleavedLiveEvents.length * 2400));
+        interleavedLiveEvents.push({
+          ...regionalEvents[i],
+          id: `live-indo-${i}-${regionalEvents[i].id}`,
+          timestamp: formatWibTime(eventTime),
+        });
+      }
+      if (regionParam !== 'indonesia' && i < globalEvents.length) {
+        const eventTime = new Date(now.getTime() - (interleavedLiveEvents.length * 2400));
+        interleavedLiveEvents.push({
+          ...globalEvents[i],
+          id: `live-global-${i}-${globalEvents[i].id}`,
+          timestamp: formatWibTime(eventTime),
+        });
+      }
+    }
+    combinedEvents = interleavedLiveEvents;
   }
 
-  const finalEvents = combinedEvents.slice(0, Math.max(count, 30));
+  const finalEvents = combinedEvents.slice(0, Math.max(count, 35));
 
   // Query database real security counts for industry and country telemetry
   let dbFailedLoginsCount = 0;
@@ -634,6 +661,7 @@ export async function GET(request: Request) {
       { name: 'Education & Research', count: '38.6K', percent: 35 },
       { name: 'Telecommunication / Carrier', count: '19.8K', percent: 18 },
     ],
+    realEvents, // Authentic historical DB records formatted in Asia/Jakarta (WIB)
     events: finalEvents,
   });
 }

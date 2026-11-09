@@ -292,18 +292,29 @@ export default function ThreatMapPage() {
     );
   }, []);
 
+  // Real database incidents cache and live pool refs
+  const realDbEventsRef = useRef<AttackEvent[]>([]);
+  const eventPoolRef = useRef<AttackEvent[]>([]);
+
   // Live real-time clock (UTC and Asia/Jakarta WIB)
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
-      const options: Intl.DateTimeFormatOptions = {
-        timeZone: "Asia/Jakarta",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false,
-      };
-      setCurrentTime(`${now.toLocaleTimeString("id-ID", options)} WIB (UTC+7)`);
+      try {
+        const timeStr = new Intl.DateTimeFormat('en-GB', {
+          timeZone: 'Asia/Jakarta',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false,
+        }).format(now);
+        setCurrentTime(`${timeStr} WIB (UTC+7)`);
+      } catch {
+        const hours = String((now.getUTCHours() + 7) % 24).padStart(2, '0');
+        const minutes = String(now.getUTCMinutes()).padStart(2, '0');
+        const seconds = String(now.getUTCSeconds()).padStart(2, '0');
+        setCurrentTime(`${hours}:${minutes}:${seconds} WIB (UTC+7)`);
+      }
     };
     updateTime();
     const timer = setInterval(updateTime, 1000);
@@ -666,11 +677,15 @@ export default function ThreatMapPage() {
 
   // Initial fetch from /api/threats
   useEffect(() => {
-    fetch(`/api/threats?count=30&region=${region}`)
+    fetch(`/api/threats?count=35&region=${region}`)
       .then(res => res.json())
       .then(data => {
         if (data.status === 'success') {
           const fetchedEvents: AttackEvent[] = data.events || [];
+          if (data.realEvents && data.realEvents.length > 0) {
+            realDbEventsRef.current = data.realEvents;
+          }
+          eventPoolRef.current = fetchedEvents;
           setAttacks(fetchedEvents);
           setStats(data.stats);
           setTopThreats(data.topThreats || []);
@@ -764,81 +779,105 @@ export default function ThreatMapPage() {
     return () => cancelAnimationFrame(animFrame);
   }, [region]);
 
-  // Real-time live polling & projectile stream
+  // Real-time dynamic live stream & projectile laser engine
   useEffect(() => {
     if (!isLiveStreaming) return;
 
+    // Helper to get formatted current Asia/Jakarta time (WIB - UTC+7)
+    const getWibNow = () => {
+      try {
+        return new Intl.DateTimeFormat('en-GB', {
+          timeZone: 'Asia/Jakarta',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false,
+        }).format(new Date());
+      } catch {
+        const d = new Date();
+        const hours = String((d.getUTCHours() + 7) % 24).padStart(2, '0');
+        const minutes = String(d.getUTCMinutes()).padStart(2, '0');
+        const seconds = String(d.getUTCSeconds()).padStart(2, '0');
+        return `${hours}:${minutes}:${seconds}`;
+      }
+    };
+
+    // 1. Live Stream Interval: every 2400ms, prepend a fresh attack event with current WIB time!
     const streamInterval = setInterval(() => {
-      fetch(`/api/threats?count=25&region=${region}`)
+      const pool = eventPoolRef.current;
+      if (!pool || pool.length === 0) return;
+
+      streamTickRef.current++;
+      const tick = streamTickRef.current;
+      const baseEvent = pool[tick % pool.length];
+      const nowWib = getWibNow();
+
+      const liveEvent: AttackEvent = {
+        ...baseEvent,
+        id: `stream-live-${tick}-${Date.now()}`,
+        timestamp: nowWib,
+      };
+
+      // Prepend to attacks stream (keeps table rolling smoothly)
+      setAttacks(prev => [liveEvent, ...prev.slice(0, 34)]);
+
+      // Fire projectile laser on the map
+      spawnLaser(liveEvent);
+
+      // Increment stats blocked counter smoothly
+      setStats(prev => ({
+        ...prev,
+        blockedIn24h: prev.blockedIn24h + 1,
+        attacksPerSecond: Math.floor(Math.random() * 6) + 16,
+      }));
+    }, 2400);
+
+    // 2. Background polling: every 8s, refresh DB counts, real events, and threat intelligence
+    const pollInterval = setInterval(() => {
+      fetch(`/api/threats?count=35&region=${region}`)
         .then(res => res.json())
         .then(data => {
-          if (data.events && data.events.length > 0) {
-            const incoming: AttackEvent[] = data.events;
-
-            // Directly update attacks stream with database real attacks at the top
-            setAttacks(incoming);
-
-            // Prioritize Masdika Sidoarjo Edge DC hits on every tick, and interleave global outbreaks
-            streamTickRef.current++;
-            const tick = streamTickRef.current;
-
-            const masdikaTargets = incoming.filter(e => e.isReal || e.targetCity.includes('Sidoarjo') || e.targetCode === 'ID');
-            const globalOutbreaks = incoming.filter(e => !e.isReal && !e.targetCity.includes('Sidoarjo'));
-
-            // 1. ALWAYS fire an attack targeting Masdika Sidoarjo Edge Datacenter!
-            if (masdikaTargets.length > 0) {
-              const realOnly = masdikaTargets.filter(e => e.isReal);
-              const chosenMasdika = realOnly.length > 0 && tick % 2 === 0
-                ? realOnly[tick % realOnly.length]
-                : masdikaTargets[tick % masdikaTargets.length];
-              spawnLaser(chosenMasdika);
+          if (data.status === 'success') {
+            if (data.realEvents && data.realEvents.length > 0) {
+              realDbEventsRef.current = data.realEvents;
             }
-
-            // 2. In World view, also spawn a worldwide outbreak laser offset by 900ms
-            if (region === 'world' && globalOutbreaks.length > 0) {
-              const chosenGlobal = globalOutbreaks[tick % globalOutbreaks.length];
-              setTimeout(() => spawnLaser(chosenGlobal), 900);
-            } else if (region === 'indonesia' && masdikaTargets.length > 1) {
-              const secondPick = masdikaTargets[(tick + 1) % masdikaTargets.length];
-              setTimeout(() => spawnLaser(secondPick), 1000);
+            if (data.events && data.events.length > 0) {
+              eventPoolRef.current = data.events;
             }
-
             if (data.stats) {
               setStats(prev => ({
                 ...prev,
-                attacksPerSecond: data.stats.attacksPerSecond || Math.floor(Math.random() * 8) + 14,
-                blockedIn24h: data.stats.blockedIn24h || prev.blockedIn24h + 1,
                 realIncidentsCount: data.stats.realIncidentsCount,
               }));
             }
+            if (data.topThreats) setTopThreats(data.topThreats);
+            if (data.topCountries) setTopCountries(data.topCountries);
+            if (data.targetedIndustries) setTargetedIndustries(data.targetedIndustries);
           }
         })
         .catch(() => {});
-    }, 2200);
+    }, 8000);
 
-    return () => clearInterval(streamInterval);
+    return () => {
+      clearInterval(streamInterval);
+      clearInterval(pollInterval);
+    };
   }, [isLiveStreaming, region]);
 
-  // Filtered attacks list for table (Always pin real attacks targeting Masdika first!)
+  // Filtered attacks list for table
   const filteredAttacks = useMemo(() => {
-    let list = attacks;
     if (filterSeverity === 'real') {
-      return list.filter(a => a.isReal);
+      return realDbEventsRef.current.length > 0 ? realDbEventsRef.current : attacks.filter(a => a.isReal);
     }
+    let list = attacks;
     if (filterSeverity === 'indonesia') {
       list = list.filter(a => a.targetCode === 'ID' || a.sourceCode === 'ID' || a.isReal);
     } else if (filterSeverity === 'world') {
-      list = list.filter(a => a.targetCode !== 'ID' || a.isReal);
+      list = list.filter(a => a.targetCode !== 'ID');
     } else if (filterSeverity !== 'all') {
       list = list.filter(a => a.severity.toLowerCase() === filterSeverity.toLowerCase());
     }
-
-    // Always sort verified real attacks targeting Masdika at the very top!
-    return [...list].sort((a, b) => {
-      if (a.isReal && !b.isReal) return -1;
-      if (!a.isReal && b.isReal) return 1;
-      return 0;
-    });
+    return list;
   }, [attacks, filterSeverity]);
 
   // Datacenter Target Coordinates for SVG
@@ -1678,7 +1717,7 @@ export default function ThreatMapPage() {
                     isDark ? "bg-[var(--surface-secondary)]" : "bg-slate-100"
                   )}>
                     <tr>
-                      <th className="py-2.5 px-4">Timestamp</th>
+                      <th className="py-2.5 px-4">Timestamp (WIB)</th>
                       <th className="py-2.5 px-4">Threat Signature / Vector</th>
                       <th className="py-2.5 px-4">Source Origin &amp; IP</th>
                       <th className="py-2.5 px-4">Target Node</th>
