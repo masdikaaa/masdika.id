@@ -3,17 +3,14 @@
 import { motion } from "framer-motion";
 import { Home, Zap } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { PremiumBackground, SectionOrnaments } from "@/components/ui/PremiumBackground";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-[#000000] flex items-center justify-center relative overflow-hidden px-6 py-12 md:py-20 font-sans selection:bg-cyan-500/30 text-white">
-      {/* Clean atmospheric cyan background matching frontend */}
-      <div 
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: "radial-gradient(ellipse 70% 60% at 80% 10%, rgba(6,182,212,0.18) 0%, rgba(6,182,212,0.05) 45%, transparent 75%), radial-gradient(ellipse 55% 45% at 20% 85%, rgba(6,182,212,0.10) 0%, transparent 65%)"
-        }}
-      />
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden px-6 py-12 md:py-20 font-sans selection:bg-cyan-500/30 text-slate-900 dark:text-white transition-colors duration-500">
+      {/* Premium Base Canvas & Architectural Ornaments (zero blur haze, zero light bleed) */}
+      <PremiumBackground />
+      <SectionOrnaments variant="center" />
 
       <div className="max-w-4xl w-full relative z-10 flex flex-col items-center text-center">
         
@@ -96,10 +93,10 @@ export default function NotFound() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          <h2 className="text-3xl md:text-5xl font-black text-white mb-6 tracking-tight drop-shadow-md">
+          <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-6 tracking-tight">
             Oops! Connection Lost.
           </h2>
-          <p className="text-lg text-zinc-400 mb-12 max-w-xl mx-auto leading-relaxed">
+          <p className="text-lg text-slate-600 dark:text-zinc-400 mb-12 max-w-xl mx-auto leading-relaxed">
             It looks like this page has been unplugged from the matrix. The link might be broken, or the page may have been removed. Let's plug you back in.
           </p>
 
