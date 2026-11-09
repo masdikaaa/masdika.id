@@ -236,7 +236,6 @@ export default function ThreatMapPage() {
   const [attacks, setAttacks] = useState<AttackEvent[]>([]);
   const [lasers, setLasers] = useState<ActiveLaser[]>([]);
   const [impacts, setImpacts] = useState<ImpactRipple[]>([]);
-  const [recentLiveAlert, setRecentLiveAlert] = useState<AttackEvent | null>(null);
 
   // Country Vector Hover State (FortiGuard Style Country Highlight & Tooltip)
   const [hoveredCountry, setHoveredCountry] = useState<HoveredCountryInfo | null>(null);
@@ -663,11 +662,6 @@ export default function ThreatMapPage() {
     };
 
     setLasers(prev => [...prev.slice(-20), newLaser]);
-
-    if (atk.isReal) {
-      setRecentLiveAlert(atk);
-      setTimeout(() => setRecentLiveAlert(null), 3500);
-    }
   };
 
   // Initial fetch from /api/threats
@@ -942,96 +936,101 @@ export default function ThreatMapPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               
               {/* Defense & Sensor Status */}
-              <div className="flex items-center gap-3">
-                <div className="w-3.5 h-3.5 rounded-full bg-emerald-500 relative flex items-center justify-center">
+              <div className="flex items-start sm:items-center gap-2.5 sm:gap-3">
+                <div className="w-3 h-3 rounded-full bg-emerald-500 relative flex items-center justify-center shrink-0 mt-1 sm:mt-0">
                   <span className="w-full h-full rounded-full bg-emerald-400 animate-ping absolute opacity-75" />
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-base sm:text-lg font-black font-mono tracking-tight text-[var(--text-primary)]">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-0.5">
+                    <h2 className="text-sm sm:text-base md:text-lg font-black font-mono tracking-tight text-[var(--text-primary)]">
                       SOC ATTACK DEFENSE MATRIX
                     </h2>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold whitespace-nowrap bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30">
                       AUTONOMOUS WAF ACTIVE
                     </span>
                   </div>
-                  <p className="text-xs font-mono text-[var(--text-secondary)]">
-                    Primary Target Node: Sidoarjo Edge Datacenter (AS63859) | {currentTime || "Synchronizing..."}
+                  <p className="text-[11px] sm:text-xs font-mono text-[var(--text-secondary)] leading-relaxed">
+                    Primary Target Node: Sidoarjo Edge Datacenter (AS63859) <span className="hidden sm:inline">|</span> <span className="block sm:inline">{currentTime || "Synchronizing..."}</span>
                   </p>
                 </div>
               </div>
 
               {/* Right Toolbar Controls */}
-              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3 w-full md:w-auto">
                 
-                {/* Attack Rate Widget */}
-                <div className={cn(
-                  "px-3.5 py-2 rounded-xl border border-[var(--border-primary)] flex flex-col items-center",
-                  isDark ? "bg-[var(--surface-secondary)]" : "bg-slate-50 border-slate-200"
-                )}>
-                  <span className="text-[10px] font-mono uppercase text-[var(--text-secondary)] font-bold">ATTACKS / SEC</span>
-                  <span className="text-base sm:text-lg font-mono font-black text-cyan-600 dark:text-cyan-400 flex items-center gap-1">
-                    <Zap className="w-3.5 h-3.5 text-cyan-500 animate-bounce" />
-                    {stats.attacksPerSecond}
-                  </span>
-                </div>
+                {/* Stats Row on Mobile */}
+                <div className="grid grid-cols-2 sm:flex items-center gap-2 sm:gap-3">
+                  {/* Attack Rate Widget */}
+                  <div className={cn(
+                    "px-3 py-2 rounded-xl border border-[var(--border-primary)] flex flex-col items-center justify-center text-center",
+                    isDark ? "bg-[var(--surface-secondary)]" : "bg-slate-50 border-slate-200"
+                  )}>
+                    <span className="text-[9px] sm:text-[10px] font-mono uppercase text-[var(--text-secondary)] font-bold">ATTACKS / SEC</span>
+                    <span className="text-base sm:text-lg font-mono font-black text-cyan-600 dark:text-cyan-400 flex items-center gap-1">
+                      <Zap className="w-3.5 h-3.5 text-cyan-500 animate-bounce" />
+                      {stats.attacksPerSecond}
+                    </span>
+                  </div>
 
-                {/* Blocked in 24h Widget */}
-                <div className={cn(
-                  "px-3.5 py-2 rounded-xl border border-[var(--border-primary)] flex flex-col items-center",
-                  isDark ? "bg-[var(--surface-secondary)]" : "bg-slate-50 border-slate-200"
-                )}>
-                  <span className="text-[10px] font-mono uppercase text-[var(--text-secondary)] font-bold">BLOCKED IN 24H</span>
-                  <span className="text-base sm:text-lg font-mono font-black text-[var(--text-primary)]">
-                    {stats.blockedIn24h.toLocaleString()}
-                  </span>
+                  {/* Blocked in 24h Widget */}
+                  <div className={cn(
+                    "px-3 py-2 rounded-xl border border-[var(--border-primary)] flex flex-col items-center justify-center text-center",
+                    isDark ? "bg-[var(--surface-secondary)]" : "bg-slate-50 border-slate-200"
+                  )}>
+                    <span className="text-[9px] sm:text-[10px] font-mono uppercase text-[var(--text-secondary)] font-bold">BLOCKED IN 24H</span>
+                    <span className="text-base sm:text-lg font-mono font-black text-[var(--text-primary)]">
+                      {stats.blockedIn24h.toLocaleString()}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Region Switcher: Indonesia is First/Primary on the Left (User Request) */}
-                <div className={cn(
-                  "flex items-center p-1 rounded-xl border border-[var(--border-primary)]",
-                  isDark ? "bg-[var(--surface-secondary)]" : "bg-slate-100 border-slate-200"
-                )}>
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <div className={cn(
+                    "flex-1 sm:flex-initial flex items-center p-1 rounded-xl border border-[var(--border-primary)]",
+                    isDark ? "bg-[var(--surface-secondary)]" : "bg-slate-100 border-slate-200"
+                  )}>
+                    <button
+                      type="button"
+                      onClick={() => setRegion('indonesia')}
+                      className={cn(
+                        "flex-1 sm:flex-initial px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap",
+                        region === 'indonesia'
+                          ? "bg-cyan-500 text-slate-950 shadow-sm"
+                          : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                      )}
+                    >
+                      <CountryFlag code="ID" className="w-3.5 h-2.5" />
+                      <span>Indonesia Focus</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRegion('world')}
+                      className={cn(
+                        "flex-1 sm:flex-initial px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap",
+                        region === 'world'
+                          ? "bg-cyan-500 text-slate-950 shadow-sm"
+                          : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                      )}
+                    >
+                      <Globe className="w-3.5 h-3.5" />
+                      <span>Worldwide</span>
+                    </button>
+                  </div>
+
+                  {/* Live Stream Pause/Resume Toggle */}
                   <button
                     type="button"
-                    onClick={() => setRegion('indonesia')}
+                    onClick={() => setIsLiveStreaming(prev => !prev)}
+                    title={isLiveStreaming ? "Pause radar stream" : "Resume radar stream"}
                     className={cn(
-                      "px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5",
-                      region === 'indonesia'
-                        ? "bg-cyan-500 text-slate-950 shadow-sm"
-                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                      "p-2 rounded-xl border border-[var(--border-primary)] text-cyan-600 dark:text-cyan-400 hover:text-cyan-500 transition-colors shrink-0",
+                      isDark ? "bg-[var(--surface-secondary)]" : "bg-slate-50 border-slate-200"
                     )}
                   >
-                    <CountryFlag code="ID" className="w-3.5 h-2.5" />
-                    <span>Indonesia Focus</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setRegion('world')}
-                    className={cn(
-                      "px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5",
-                      region === 'world'
-                        ? "bg-cyan-500 text-slate-950 shadow-sm"
-                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                    )}
-                  >
-                    <Globe className="w-3.5 h-3.5" />
-                    <span>Worldwide</span>
+                    {isLiveStreaming ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                   </button>
                 </div>
-
-                {/* Live Stream Pause/Resume Toggle */}
-                <button
-                  type="button"
-                  onClick={() => setIsLiveStreaming(prev => !prev)}
-                  title={isLiveStreaming ? "Pause radar stream" : "Resume radar stream"}
-                  className={cn(
-                    "p-2 rounded-xl border border-[var(--border-primary)] text-cyan-600 dark:text-cyan-400 hover:text-cyan-500 transition-colors",
-                    isDark ? "bg-[var(--surface-secondary)]" : "bg-slate-50 border-slate-200"
-                  )}
-                >
-                  {isLiveStreaming ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                </button>
 
               </div>
             </div>
@@ -1063,9 +1062,9 @@ export default function ThreatMapPage() {
               <div className="lg:col-span-8 p-3 sm:p-5 lg:border-r border-b lg:border-b-0 border-[var(--border-subtle)] flex flex-col justify-between relative overflow-hidden">
                 
                 {/* Top HUD Controls */}
-                <div className="relative z-20 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 mb-3">
+                <div className="relative z-20 flex items-center justify-between gap-2 mb-3">
                   {/* Top-Left: Defense & Incident Radar Status */}
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 shrink-0">
                     <div className={cn(
                       "px-2.5 py-1 rounded-full border text-[11px] font-mono font-bold flex items-center gap-1.5 shadow-sm backdrop-blur-md",
                       isDark
@@ -1078,15 +1077,15 @@ export default function ThreatMapPage() {
                     </div>
 
                     {stats.realIncidentsCount > 0 && (
-                      <div className="px-2.5 py-1 rounded-full border border-rose-500/30 bg-rose-500/10 text-rose-500 dark:text-rose-400 text-[11px] font-mono font-bold flex items-center gap-1 shadow-sm backdrop-blur-md">
+                      <div className="px-2 py-1 sm:px-2.5 rounded-full border border-rose-500/30 bg-rose-500/10 text-rose-500 dark:text-rose-400 text-[10px] sm:text-[11px] font-mono font-bold flex items-center gap-1 shadow-sm backdrop-blur-md whitespace-nowrap">
                         <ShieldAlert className="w-3 h-3 text-rose-500" />
                         <span>{stats.realIncidentsCount} REAL</span>
                       </div>
                     )}
                   </div>
 
-                  {/* Top-Center: Dedicated Region Pill */}
-                  <div>
+                  {/* Top-Center: Dedicated Region Pill (Shown on md+ screens to keep mobile single-line) */}
+                  <div className="hidden md:block">
                     <div className={cn(
                       "px-3 py-1.5 rounded-full border flex items-center gap-2 transition-all whitespace-nowrap",
                       isDark
@@ -1447,51 +1446,24 @@ export default function ThreatMapPage() {
                     </svg>
                   </div>
 
-                {/* Live Probe Alert (Cleanly docked in normal layout flow ABOVE the Legend - NEVER overlapping!) */}
-                <div className="min-h-[34px] my-2.5 flex items-center justify-between">
-                  {recentLiveAlert ? (
-                    <div className="animate-in fade-in slide-in-from-bottom-1 duration-200">
-                      <div className={cn(
-                        "inline-flex items-center gap-2 px-2.5 py-1 rounded-md border text-[11px] font-mono font-bold shadow-sm backdrop-blur-md",
-                        recentLiveAlert.isReal
-                          ? "border-rose-500/50 bg-rose-950/90 text-rose-300"
-                          : "border-cyan-500/40 bg-[#061222]/90 text-cyan-300"
-                      )}>
-                        <CountryFlag code={recentLiveAlert.sourceCode} className="w-3.5 h-2.5" />
-                        <span>LIVE PROBE: {recentLiveAlert.sourceCity} [{recentLiveAlert.sourceCode}]</span>
-                        <span className="text-cyan-400">&rarr; {recentLiveAlert.targetCity}</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-[10px] font-mono text-[var(--text-secondary)] opacity-60 flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      <span>RADAR ACTIVE &bull; 2-FINGER PINCH / WHEEL ON MAP TO ZOOM &bull; DRAG TO PAN</span>
-                    </div>
-                  )}
-
-                  <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-mono text-[var(--text-secondary)] opacity-70">
-                    <span>Touch: 2-Finger Pinch Map to Zoom</span>
-                  </div>
-                </div>
-
-                {/* ── LEGEND BAR (COMPLETELY BELOW LIVE ALERT; ZERO OVERLAP) ── */}
-                <div className="pt-3 border-t border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
-                  <div className="flex flex-wrap items-center gap-4">
+                {/* ── LEGEND BAR (COMPLETELY STABLE; ZERO LAYOUT SHIFT) ── */}
+                <div className="mt-3.5 pt-3 border-t border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+                  <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                     <span className="flex items-center gap-1.5 text-rose-500 font-bold">
-                      <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-rose-500 shrink-0" />
                       Verified Real Attack (Live DB/Sensor)
                     </span>
                     <span className="flex items-center gap-1.5 text-cyan-600 dark:text-cyan-400 font-bold">
-                      <span className="w-2.5 h-2.5 rounded-full bg-cyan-500" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-cyan-500 shrink-0" />
                       Target (Masdika Sidoarjo Edge DC)
                     </span>
                     <span className="flex items-center gap-1.5 text-amber-500 font-bold">
-                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0" />
                       High / Volumetric DDoS Vector
                     </span>
                   </div>
 
-                  <div className="text-[var(--text-secondary)] text-[11px]">
+                  <div className="text-[var(--text-secondary)] text-[11px] font-mono">
                     Direct SOC Telemetry: Sidoarjo Edge Datacenter (AS63859)
                   </div>
                 </div>
