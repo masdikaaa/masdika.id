@@ -269,9 +269,9 @@ export default function ThreatMapPage() {
   }, [zoom, pan]);
 
   const [stats, setStats] = useState({
-    attacksPerSecond: 18,
-    blockedIn24h: 854120,
-    activeOutbreaks: 140,
+    attacksPerSecond: 1,
+    blockedIn24h: 0,
+    activeOutbreaks: 0,
     realIncidentsCount: 0,
     threatPosture: "SECURE / PROTECTED",
     edgeStatus: "100% OPERATIONAL",
@@ -828,7 +828,7 @@ export default function ThreatMapPage() {
       setStats(prev => ({
         ...prev,
         blockedIn24h: prev.blockedIn24h + 1,
-        attacksPerSecond: Math.floor(Math.random() * 6) + 16,
+        attacksPerSecond: 1,
       }));
     }, 2400);
 
@@ -847,6 +847,8 @@ export default function ThreatMapPage() {
             if (data.stats) {
               setStats(prev => ({
                 ...prev,
+                blockedIn24h: data.stats.blockedIn24h || prev.blockedIn24h,
+                attacksPerSecond: data.stats.attacksPerSecond ?? 1,
                 realIncidentsCount: data.stats.realIncidentsCount,
               }));
             }
@@ -1558,14 +1560,14 @@ export default function ThreatMapPage() {
                   </div>
                 </div>
 
-                {/* Top Targeted Industries (Real Telemetry & DB Aggregations) */}
+                {/* Top Targeted Services (Real Telemetry & DB Aggregations) */}
                 <div>
                   <div className="flex items-center justify-between mb-3 border-b border-[var(--border-subtle)] pb-2">
                     <span className="font-mono text-xs font-bold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-1.5">
                       <Layers className="w-3.5 h-3.5 text-cyan-500" />
-                      Top Targeted Industries
+                      Targeted Endpoints & Services
                     </span>
-                    <span className="text-[10px] font-mono text-[var(--text-secondary)]">Last 24 Hours</span>
+                    <span className="text-[10px] font-mono text-[var(--text-secondary)]">Masdika Infrastructure</span>
                   </div>
 
                   <div className="space-y-2.5">
