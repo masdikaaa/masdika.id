@@ -22,7 +22,6 @@ import {
   Code,
   CodeXml,
   Terminal,
-  ShieldAlert,
   Sun,
   Moon,
 } from "lucide-react";
@@ -145,20 +144,6 @@ const DEV_MENU_ITEMS: MenuItem[] = [
     href: "/k3s",
     icon: SiKubernetes,
     badge: "Premium",
-  },
-  {
-    title: "Looking Glass",
-    description: "Inspect network routing paths, BGP, and ping tests.",
-    href: "/lg",
-    icon: Compass,
-    badge: "Live",
-  },
-  {
-    title: "Threat Map",
-    description: "Real-time cyber attack and exploit telemetry radar.",
-    href: "/threat-map",
-    icon: ShieldAlert,
-    badge: "Live",
   },
 ];
 
