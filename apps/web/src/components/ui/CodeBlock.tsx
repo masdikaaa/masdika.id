@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Copy, Check, Code } from "lucide-react";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { cn } from "@/lib/utils";
 
 interface CodeBlockProps {
   code: string;
@@ -69,6 +68,9 @@ const getLanguageIconUrl = (lang: string) => {
     case "jenkins":
     case "jenkinsfile":
       return "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/jenkins/jenkins-original.svg";
+    case "text":
+    case "txt":
+      return "https://cdn.jsdelivr.net/gh/vscode-icons/vscode-icons@master/icons/file_type_text.svg";
     default:
       return null;
   }
@@ -91,47 +93,64 @@ export function CodeBlock({
   const getLanguageIcon = () => {
     const iconUrl = getLanguageIconUrl(language);
     if (iconUrl) {
-      return <img referrerPolicy="no-referrer" src={iconUrl} alt={language} className="w-5 h-5 object-contain" loading="lazy" decoding="async" />;
+      return (
+        <img
+          referrerPolicy="no-referrer"
+          src={iconUrl}
+          alt={language}
+          className="w-4 h-4 sm:w-5 sm:h-5 object-contain shrink-0"
+          loading="lazy"
+          decoding="async"
+        />
+      );
     }
-    return <Code className="w-5 h-5 text-zinc-400" />;
+    return <Code className="w-4 h-4 sm:w-5 sm:h-5 text-zinc-400 shrink-0" />;
   };
 
-  // Syntax highlighting is now handled by react-syntax-highlighter
+  const displayTitle = title || language;
 
   return (
-    <div className="rounded-xl overflow-hidden bg-[var(--surface)] border border-[var(--border-primary)] shadow-2xl my-8">
-      {/* Tab Style Header like the screenshot */}
-      <div className="flex items-end justify-between px-4 pt-3 bg-[var(--surface-secondary)] border-b border-[var(--border-primary)]">
+    <div className="rounded-xl overflow-hidden shadow-2xl my-8 bg-[#0c1017] border border-slate-700/60 dark:border-white/10 transition-colors">
+      {/* Tab Style Header - Dedicated high-contrast dark terminal header */}
+      <div className="flex items-end justify-between px-3 sm:px-4 pt-2.5 sm:pt-3 bg-[#080c14] border-b border-slate-800/80">
         <div className="flex items-center min-w-0 flex-1 mr-4">
-          {/* macOS buttons */}
-          <div className="flex gap-2 pb-3 mr-6 shrink-0">
-            <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
-            <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
-            <div className="w-3 h-3 rounded-full bg-[#27c93f]" />
+          {/* macOS traffic light buttons */}
+          <div className="flex gap-1.5 sm:gap-2 pb-2.5 sm:pb-3 mr-4 sm:mr-6 shrink-0">
+            <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#ff5f56]" />
+            <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#ffbd2e]" />
+            <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#27c93f]" />
           </div>
           
           {/* The Tab */}
-          <div className="flex items-center gap-2 bg-[var(--surface)] px-4 py-2.5 rounded-t-lg border-x border-t border-[var(--border-primary)] shadow-[0_-2px_10px_rgba(0,0,0,0.2)] min-w-0">
+          <div className="flex items-center gap-2 bg-[#0c1017] px-3 sm:px-4 py-2 sm:py-2.5 rounded-t-lg border-x border-t border-slate-800/90 shadow-[0_-2px_10px_rgba(0,0,0,0.3)] min-w-0">
             <div className="shrink-0">{getLanguageIcon()}</div>
-            <span className="text-sm font-semibold text-white tracking-wide truncate">
-              {title || language}
+            <span className="text-xs sm:text-sm font-semibold text-slate-200 tracking-wide font-mono truncate">
+              {displayTitle}
             </span>
           </div>
         </div>
 
         <button
           onClick={copyToClipboard}
-          className="text-zinc-500 hover:text-white transition-colors pb-3 px-2"
+          className="text-zinc-400 hover:text-white transition-colors pb-2.5 sm:pb-3 px-2 flex items-center justify-center shrink-0"
           aria-label="Copy code"
         >
-          {copied ? <Check className="w-4 h-4 text-cyan-500" /> : <Copy className="w-4 h-4" />}
+          {copied ? (
+            <Check className="w-4 h-4 text-cyan-400" />
+          ) : (
+            <Copy className="w-4 h-4" />
+          )}
         </button>
       </div>
 
       {/* Code Content */}
-      <div className="bg-[var(--surface)] overflow-x-auto hide-scrollbar">
+      <div className="bg-[#0c1017] overflow-x-auto hide-scrollbar">
         <SyntaxHighlighter
-          language={language.toLowerCase() === 'sh' ? 'bash' : (language.toLowerCase() === 'yml' ? 'yaml' : language.toLowerCase())}
+          language={
+            language.toLowerCase() === 'sh' ? 'bash' : 
+            (language.toLowerCase() === 'yml' ? 'yaml' : 
+            (language.toLowerCase() === 'text' || language.toLowerCase() === 'txt' ? 'text' : language.toLowerCase()))
+          }
           style={vscDarkPlus}
           showLineNumbers={showLineNumbers}
           wrapLines={false}
@@ -139,16 +158,23 @@ export function CodeBlock({
           customStyle={{
             margin: 0,
             padding: '1.25rem',
-            background: 'transparent',
-            fontSize: '14px',
-            lineHeight: '1.6',
+            backgroundColor: '#0c1017',
+            color: '#e2e8f0',
+            fontSize: '13.5px',
+            lineHeight: '1.65',
             whiteSpace: 'pre',
             wordBreak: 'normal',
             overflowWrap: 'normal',
           }}
           codeTagProps={{
-            className: "font-mono",
-            style: { fontFamily: 'inherit', whiteSpace: 'pre', wordBreak: 'normal', overflowWrap: 'normal' }
+            className: "font-mono text-slate-200",
+            style: { 
+              fontFamily: 'var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+              whiteSpace: 'pre', 
+              wordBreak: 'normal', 
+              overflowWrap: 'normal',
+              color: '#e2e8f0'
+            }
           }}
         >
           {code}
