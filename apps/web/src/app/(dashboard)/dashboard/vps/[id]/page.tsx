@@ -3008,6 +3008,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                       activeOsFamily?.toLowerCase().includes("windows") ||
                       selectedTemplate?.toLowerCase().includes("windows")
                     );
+                    const defaultUser = isWindowsReinstall ? "Administrator" : (vps?.username || "root");
                     return (
                       <div className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
                         <div className={cn("border-b", isDark ? "border-white/[0.08] bg-black/20" : "border-slate-200/90 bg-slate-50", "px-3.5 py-2 flex items-center justify-between")}>
@@ -3016,7 +3017,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                             "text-xs px-2.5 py-1 rounded font-bold",
                             isDark ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30" : "bg-cyan-100 text-cyan-950 border border-cyan-300"
                           )}>
-                            Default user: <b>{isWindowsReinstall ? "Administrator" : "root"}</b>
+                            Default user: <b>{defaultUser}</b>
                           </span>
                         </div>
                         <div className="p-6 space-y-4 max-w-md">
@@ -3036,7 +3037,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                               <div>
                                 <p className={cn("font-bold mb-0.5", isDark ? "text-cyan-400" : "text-cyan-950")}>Linux Access Note:</p>
                                 <p className={cn("leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-800 font-medium")}>
-                                  The default user after reinstallation is <strong>root</strong>. This new password will be used to log in as root via SSH or Web Console.
+                                  The default user after reinstallation remains <strong>{defaultUser}</strong> (the same username sent in your setup email). This new password will be used to log in as {defaultUser} via SSH or Web Console.
                                 </p>
                               </div>
                             </div>
@@ -3812,7 +3813,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
         onClose={() => setShowReinstallModal(false)}
         onConfirm={executeReinstall}
         title="Reinstall Operating System"
-        description={`This action will completely format the disk and rebuild the server using the "${selectedTemplate}" template. All existing data will be permanently destroyed.${selectedTemplate?.toLowerCase().includes("windows") || activeOsFamily?.toLowerCase().includes("windows") ? " The default user after reinstallation is Administrator." : " The default user after reinstallation is root."} Are you absolutely sure?`}
+        description={`This action will completely format the disk and rebuild the server using the "${selectedTemplate}" template. All existing data will be permanently destroyed. The default user after reinstallation is ${selectedTemplate?.toLowerCase().includes("windows") || activeOsFamily?.toLowerCase().includes("windows") ? "Administrator" : (vps?.username || "root")}. Are you absolutely sure?`}
         confirmText="Rebuild"
         cancelText="Cancel"
         variant="danger"
