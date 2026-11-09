@@ -364,10 +364,10 @@ export default function PaygMonitorPage() {
               )}
               title={
                 unsentLowCount > 0
-                  ? `Kirim email peringatan ke ${unsentLowCount} customer dengan saldo menipis`
+                  ? `Send warning email to ${unsentLowCount} customer(s) with low balance`
                   : sentLowCount > 0
-                    ? `Semua ${sentLowCount} customer bersaldo menipis sudah menerima email dalam 24 jam terakhir (Cooldown aktif, tidak akan spam)`
-                    : "Periksa status saldo customer"
+                    ? `All ${sentLowCount} low balance customer(s) have received an email in the last 24h (Cooldown active, no spam)`
+                    : "Check customer balance status"
               }
             >
               {triggeringAlerts ? (
@@ -559,7 +559,7 @@ export default function PaygMonitorPage() {
                               ~{cust.remainingHours} hrs left
                             </span>
                             {cust.lowBalanceAlert && (
-                              <span className="text-[9px] text-amber-500/90 flex items-center gap-0.5 mt-0.5 font-medium" title={`Email peringatan terkirim pada ${new Date(cust.lowBalanceAlert.sentAt).toLocaleString('id-ID')}`}>
+                              <span className="text-[9px] text-amber-500/90 flex items-center gap-0.5 mt-0.5 font-medium" title={`Warning email sent on ${new Date(cust.lowBalanceAlert.sentAt).toLocaleString('en-US')}`}>
                                 <Mail className="w-2.5 h-2.5" /> Email Sent
                               </span>
                             )}
@@ -611,11 +611,11 @@ export default function PaygMonitorPage() {
                                     {cust.lowBalanceAlert ? (
                                       <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
                                         <Mail className="w-3 h-3 text-amber-400" />
-                                        Email Peringatan Terkirim ({new Date(cust.lowBalanceAlert.sentAt).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' })})
+                                        Warning Email Sent ({new Date(cust.lowBalanceAlert.sentAt).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' })})
                                       </span>
                                     ) : (
                                       <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700">
-                                        Belum Dikirim Email
+                                        Email Not Sent Yet
                                       </span>
                                     )}
                                   </div>
@@ -633,7 +633,7 @@ export default function PaygMonitorPage() {
                                       className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-slate-950 transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-xs"
                                     >
                                       {sendingAlert === cust.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
-                                      <span>{cust.lowBalanceAlert ? 'Kirim Ulang Email Peringatan' : 'Kirim Email Peringatan Sekarang'}</span>
+                                      <span>{cust.lowBalanceAlert ? 'Resend Warning Email' : 'Send Warning Email Now'}</span>
                                     </button>
                                   </div>
                                 </div>

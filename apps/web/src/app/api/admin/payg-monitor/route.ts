@@ -225,7 +225,7 @@ export async function POST(req: NextRequest) {
       const alertResult = await checkAndSendLowBalanceAlerts();
       return NextResponse.json({
         success: true,
-        message: `Pemeriksaan selesai. ${alertResult.alertsSent} email peringatan dikirim, ${alertResult.skippedCooldown} dalam cooldown 24 jam.`,
+        message: `Check completed. ${alertResult.alertsSent} warning email(s) sent, ${alertResult.skippedCooldown} in 24h cooldown.`,
         data: alertResult,
       });
     }
@@ -239,7 +239,7 @@ export async function POST(req: NextRequest) {
       const alertResult = await checkAndSendLowBalanceAlerts();
       return NextResponse.json({
         success: true,
-        message: `Peringatan saldo menipis berhasil diproses untuk client ID ${body.userId}`,
+        message: `Low balance warning alert processed for client ID ${body.userId}`,
         data: alertResult,
       });
     }

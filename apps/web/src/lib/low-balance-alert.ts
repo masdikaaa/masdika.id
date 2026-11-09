@@ -202,7 +202,7 @@ export async function checkAndSendLowBalanceAlerts(): Promise<LowBalanceCheckRes
             await prisma.clientActivityLog.create({
               data: {
                 userId: customer.id,
-                description: `Peringatan saldo menipis dikirim ke ${customer.email} (Sisa saldo: Rp ${customer.balance.toLocaleString("id-ID")}, ~${remainingHours} jam tersisa untuk ${customer.services.length} layanan)`,
+                description: `Low balance warning alert sent to ${customer.email} (Remaining balance: Rp ${customer.balance.toLocaleString("id-ID")}, ~${remainingHours}h remaining for ${customer.services.length} active service(s))`,
                 username: "System",
                 ipAddress: "127.0.0.1",
                 category: "billing",
