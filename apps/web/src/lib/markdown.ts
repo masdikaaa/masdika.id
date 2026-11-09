@@ -13,6 +13,26 @@ DOMPurify.addHook('uponSanitizeElement', (node, data) => {
   }
 });
 
+/**
+ * Cleans heading text for Table of Contents display by stripping Markdown formatting
+ * and any redundant leading numbering (e.g. "1. ", "2.1. ", "2.1 ", "1) ", "1 - ")
+ * so the TOC numbering is never duplicated and always clean.
+ */
+export function cleanHeadingTitle(rawText: string): string {
+  if (!rawText) return '';
+  const text = rawText
+    .replace(/!?\[([^\]]*)\]\([^)]+\)/g, '$1')
+    .replace(/<[^>]*>?/gm, '')
+    .replace(/[*`_~]/g, '')
+    .trim();
+
+  // Strip hierarchical numbering (e.g. "2.1 ", "2.1. ", "2.1.3 ")
+  // OR single number with punctuation/delimiter (e.g. "1. ", "1) ", "1: ", "1 - ")
+  return text
+    .replace(/^(\d+(\.\d+)+[\.\)\:\-]?|\d+[\.\)\:\-]|\d+\s*[-–—])\s+/, '')
+    .trim();
+}
+
 export function renderMarkdown(md: string): string {
   if (!md) return '';
 

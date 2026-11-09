@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import { CodeBlock, resolveCodeBlockMeta } from "@/components/ui/CodeBlock";
 import { Calendar, Clock, ChevronLeft, Heart, Share2, MessageCircle, ArrowRight } from "lucide-react";
 import Link from "next/link";
@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 import { ImageZoom } from "@/components/ui/ImageZoom";
 import { Button } from "@/components/ui/Button";
 
-import { renderMarkdown } from "@/lib/markdown";
+import { renderMarkdown, cleanHeadingTitle } from "@/lib/markdown";
 import { toast } from "sonner";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
@@ -61,23 +61,20 @@ export function BlogPostClient({ initialPost, initialRecentPosts, slug }: BlogPo
   const [post, setPost] = useState<any>(initialPost);
   const [recentPosts] = useState<any[]>(initialRecentPosts);
 
-  // Compute TOC immediately from initial content so it never flickers
-  const [toc] = useState<{ id: string, text: string, level: number, displayNumber?: string }[]>(() => {
-    if (!initialPost?.content) return [];
+  // Compute TOC from content, stripping redundant heading numbering so TOC is always clean and consistent
+  const toc = useMemo<{ id: string; text: string; level: number; displayNumber?: string }[]>(() => {
+    const content = post?.content || initialPost?.content;
+    if (!content) return [];
     const headings = [];
     const regex = /^(#{2,3})\s+(.*)$/gm;
     let match;
     let h2Count = 0;
     let h3Count = 0;
-    while ((match = regex.exec(initialPost.content)) !== null) {
+    while ((match = regex.exec(content)) !== null) {
       const level = match[1].length;
       const text = match[2].trim();
 
-      const displayText = text
-        .replace(/!?\[([^\]]*)\]\([^)]+\)/g, '$1')
-        .replace(/<[^>]*>?/gm, '')
-        .replace(/[*`_~]/g, '')
-        .trim();
+      const displayText = cleanHeadingTitle(text);
 
       const idText = text
         .replace(/!\[[^\]]*\]\([^)]+\)/g, '')
@@ -94,14 +91,14 @@ export function BlogPostClient({ initialPost, initialRecentPosts, slug }: BlogPo
         displayNumber = `${h2Count}`;
       } else if (level === 3) {
         h3Count++;
-        displayNumber = `${h2Count}.${h3Count}`;
+        displayNumber = h2Count > 0 ? `${h2Count}.${h3Count}` : `${h3Count}`;
       } else {
         displayNumber = "*";
       }
       headings.push({ id, text: displayText, level, displayNumber });
     }
     return headings;
-  });
+  }, [post?.content, initialPost?.content]);
 
   // Reaction State
   const [reactionCount, setReactionCount] = useState(initialPost?.reactionsCount || 0);
@@ -305,10 +302,28 @@ export function BlogPostClient({ initialPost, initialRecentPosts, slug }: BlogPo
             <div className={cn("mt-5 pt-4 border-t", isDark ? "border-slate-700/80" : "border-black/5")}>
               <ul className="space-y-3">
                 {toc.map((heading, idx) => (
-                  <li key={idx} className={heading.level === 3 ? "ml-4" : ""}>
-                    <a href={`#${heading.id}`} className={cn("transition-colors flex items-start gap-2 break-words min-w-0 w-full", isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-600 hover:text-cyan-600")}>
-                      <span className={cn("font-mono text-sm shrink-0 pt-0.5", isDark ? "text-zinc-600" : "text-slate-400")}>{heading.displayNumber}</span>
-                      <span className="leading-snug">{heading.text}</span>
+                  <li key={idx} className={heading.level === 3 ? "ml-5 sm:ml-6" : ""}>
+                    <a
+                      href={`#${heading.id}`}
+                      className={cn(
+                        "group/item transition-colors flex items-start gap-2.5 sm:gap-3 break-words min-w-0 w-full",
+                        isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-600 hover:text-cyan-600"
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "font-mono text-sm shrink-0 pt-0.5 tabular-nums select-none",
+                          heading.level === 3
+                            ? "min-w-[2rem] sm:min-w-[2.25rem] text-left"
+                            : "min-w-[1.25rem] sm:min-w-[1.5rem] text-left",
+                          isDark
+                            ? "text-zinc-600 group-hover/item:text-cyan-400/80"
+                            : "text-slate-400 group-hover/item:text-cyan-600/80"
+                        )}
+                      >
+                        {heading.displayNumber}
+                      </span>
+                      <span className="leading-snug flex-1 min-w-0">{heading.text}</span>
                     </a>
                   </li>
                 ))}

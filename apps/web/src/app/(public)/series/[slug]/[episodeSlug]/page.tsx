@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { ChevronLeft, ChevronRight, Calendar, BookOpen, CheckCircle } from "lucide-react";
 import Link from "next/link";
-import { renderMarkdown } from "@/lib/markdown";
+import { renderMarkdown, cleanHeadingTitle } from "@/lib/markdown";
 import { CodeBlock, resolveCodeBlockMeta } from "@/components/ui/CodeBlock";
 import { prisma } from "@/lib/prisma";
 import { getCachedData } from "@/lib/cache";
@@ -159,14 +159,26 @@ export default async function EpisodePage({
   const { episode, series, prev, next, totalEpisodes, adminName, adminImage } = data;
   const ytId = episode.videoUrl ? getYouTubeId(episode.videoUrl) : null;
 
-  const headings: { id: string; text: string; level: number }[] = [];
+  const headings: { id: string; text: string; level: number; displayNumber?: string }[] = [];
   const regex = /^(#{2,3})\s+(.*)$/gm;
   let m;
+  let h2Count = 0;
+  let h3Count = 0;
   while ((m = regex.exec(episode.content)) !== null) {
     const level = m[1].length;
-    const text = m[2].trim().replace(/[*`_~]/g, "");
-    const id = text.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-    headings.push({ id, text, level });
+    const text = m[2].trim();
+    const displayText = cleanHeadingTitle(text);
+    const id = text.replace(/[*`_~]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    let displayNumber = "";
+    if (level === 2) {
+      h2Count++;
+      h3Count = 0;
+      displayNumber = `${h2Count}`;
+    } else if (level === 3) {
+      h3Count++;
+      displayNumber = h2Count > 0 ? `${h2Count}.${h3Count}` : `${h3Count}`;
+    }
+    headings.push({ id, text: displayText, level, displayNumber });
   }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.masdika.id";
@@ -305,14 +317,25 @@ export default async function EpisodePage({
                   </svg>
                 </span>
               </summary>
-              <ul className="mt-4 pt-4 border-t space-y-2 border-[var(--border-primary)]">
+              <ul className="mt-4 pt-4 border-t space-y-3 border-[var(--border-primary)]">
                 {headings.map((h, i) => (
-                  <li key={i} className={h.level === 3 ? "ml-4" : ""}>
+                  <li key={i} className={h.level === 3 ? "ml-5 sm:ml-6" : ""}>
                     <a
                       href={`#${h.id}`}
-                      className="text-sm transition-colors text-[var(--text-secondary)] hover:text-cyan-600 dark:hover:text-cyan-400"
+                      className="group/item transition-colors flex items-start gap-2.5 sm:gap-3 break-words min-w-0 w-full text-sm text-[var(--text-secondary)] hover:text-cyan-600 dark:hover:text-cyan-400"
                     >
-                      {h.text}
+                      {h.displayNumber && (
+                        <span
+                          className={`font-mono text-sm shrink-0 pt-0.5 tabular-nums select-none ${
+                            h.level === 3
+                              ? "min-w-[2rem] sm:min-w-[2.25rem] text-left"
+                              : "min-w-[1.25rem] sm:min-w-[1.5rem] text-left"
+                          } text-[var(--text-muted)] group-hover/item:text-cyan-600/80 dark:group-hover/item:text-cyan-400/80`}
+                        >
+                          {h.displayNumber}
+                        </span>
+                      )}
+                      <span className="leading-snug flex-1 min-w-0">{h.text}</span>
                     </a>
                   </li>
                 ))}
