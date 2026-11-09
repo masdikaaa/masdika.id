@@ -186,10 +186,10 @@ export function ResumeContent({ experiences, educations, cvUrl }: ResumeContentP
             {/* Right – Hero Avatar */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
-                imageSrc="/images/mascots/about.webp"
+                imageSrc="/images/mascots/about-hero.webp"
                 imageAlt="Masdika – About Me"
-                imageWidth={1180}
-                imageHeight={1060}
+                imageWidth={1238}
+                imageHeight={1271}
                 badges={[
                   { icon: Cloud, label: "AWS Certified", value: "Cloud Expert" },
                   { icon: Database, label: "High Availability", value: "DB Architect" },
