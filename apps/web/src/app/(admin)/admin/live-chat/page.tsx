@@ -8,6 +8,7 @@ import { Bot, User, Send, Loader2, RefreshCw, Power, ArrowLeft, MessageSquare } 
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from 'sonner';
 import { Pagination } from "@/components/ui/Pagination";
+import { parseChatMarkdown } from "@/lib/render-chat-markdown";
 
 type ChatSession = {
   id: number;
@@ -257,7 +258,17 @@ export default function AdminLiveChat() {
                           )}
                         </div>
                       )}
-                      <div className="whitespace-pre-wrap">{msg.content}</div>
+                      {msg.role === 'user' ? (
+                        <div className="whitespace-pre-wrap break-words">{msg.content}</div>
+                      ) : (
+                        <div
+                          className={cn(
+                            "prose prose-sm max-w-none min-w-0 break-words leading-relaxed [&>p]:mb-2 [&>p:last-child]:mb-0 [&>ul]:my-2 [&>ul]:list-disc [&>ul]:pl-4 [&>ol]:my-2 [&>ol]:list-decimal [&>ol]:pl-4",
+                            isDark ? "prose-invert text-zinc-200" : "text-slate-800"
+                          )}
+                          dangerouslySetInnerHTML={{ __html: parseChatMarkdown(msg.content) }}
+                        />
+                      )}
                     </div>
                   </div>
                 ))}

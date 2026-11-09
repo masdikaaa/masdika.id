@@ -9,6 +9,7 @@ import DOMPurify from 'isomorphic-dompurify';
 import { toast } from 'sonner';
 import { useTheme } from '@/components/ThemeProvider';
 import { cn } from '@/lib/utils';
+import { parseChatMarkdown } from '@/lib/render-chat-markdown';
 
 // ─── Client-side constants ────────────────────────────────────────────────────
 const MAX_INPUT_LENGTH = 1000;
@@ -816,12 +817,7 @@ export function AIChat() {
   };
 
   const parseMarkdown = (text: string) => {
-    marked.setOptions({
-      gfm: true,
-      breaks: true,
-    });
-    const rawMarkup = marked.parse(text) as string;
-    return DOMPurify.sanitize(rawMarkup, { ADD_ATTR: ['target'] });
+    return parseChatMarkdown(text);
   };
 
   if (pathname && (pathname.startsWith('/admin') || pathname.startsWith('/dashboard/tickets'))) {

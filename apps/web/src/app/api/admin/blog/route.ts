@@ -7,6 +7,7 @@ import { sendNewsletterEmail } from '@/lib/email';
 import { decryptDeterministic } from '@/lib/encryption';
 import { requireAuth } from '@/lib/auth-middleware';
 import { slugify } from '@/lib/slugify';
+import { invalidateAiChatKnowledgeCache } from '@/app/api/chat/route';
 
 export async function GET() {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
@@ -81,6 +82,7 @@ export async function POST(req: Request) {
     await invalidateCache('posts:*');
     await invalidateCache('recent-posts:*');
     await invalidateCache('post:*');
+    invalidateAiChatKnowledgeCache();
 
     revalidatePath('/', 'layout');
     revalidatePath('/blog');

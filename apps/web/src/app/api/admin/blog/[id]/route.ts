@@ -7,6 +7,7 @@ import fs from 'fs';
 import path from 'path';
 import { requireAuth } from '@/lib/auth-middleware';
 import { slugify } from '@/lib/slugify';
+import { invalidateAiChatKnowledgeCache } from '@/app/api/chat/route';
 
 export async function GET(
   req: Request,
@@ -99,6 +100,7 @@ export async function PUT(
     await invalidateCache('posts:*');
     await invalidateCache('recent-posts:*');
     await invalidateCache('post:*');
+    invalidateAiChatKnowledgeCache();
 
     revalidatePath('/', 'layout');
     revalidatePath('/blog');
@@ -141,6 +143,7 @@ export async function DELETE(
     await invalidateCache('posts:*');
     await invalidateCache('recent-posts:*');
     await invalidateCache('post:*');
+    invalidateAiChatKnowledgeCache();
 
     revalidatePath('/', 'layout');
     revalidatePath('/blog');

@@ -4,10 +4,15 @@ import OpenAI from 'openai';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { buildMemoryContext } from '@/lib/ai-memory';
 
-// ─── Cache static portfolio data (1 hour TTL) ────────────────────────────────
+// ─── Cache static portfolio data (2 minutes TTL for freshness) ────────────────
 let cachedStaticDataStr: string | null = null;
 let lastCacheTime: number = 0;
-const CACHE_TTL = 1000 * 60 * 60; // 1 hour
+const CACHE_TTL = 1000 * 60 * 2; // 2 minutes
+
+export function invalidateAiChatKnowledgeCache(): void {
+  cachedStaticDataStr = null;
+  lastCacheTime = 0;
+}
 
 // ─── Rate limit constants ─────────────────────────────────────────────────────
 const RATE_LIMIT_MAX = 15;  // max messages per window
@@ -47,9 +52,11 @@ const INJECTION_PATTERNS: RegExp[] = [
   // OS / shell command EXECUTION triggers (tightened to only catch forced execution requests, not questions about commands)
   /\b(simulasikan|tampilkan\s+output|jalankan|eksekusi)\s+(perintah|command|kode|script)\s+(bash|shell|terminal|system)/i,
   
-  // High-risk data exfiltration simulation
+  // High-risk data exfiltration simulation & database manipulation triggers
   /\bcat\s+\/etc\/(passwd|shadow|sudoers)/i,
   /\b(bash|sh|zsh|ksh)\s+(-c|-i)/i,
+  /\b(union\s+select|select\s+.*\s+from\s+(users?|admin|password|accounts?)|drop\s+database|drop\s+table|delete\s+from\s+users?|dump\s+database|show\s+databases)\b/i,
+  /\b(bocorkan|tampilkan|dump|ekspor)\s+(database|tabel\s+user|isi\s+database|kredensial|password\s+user|api[_-]?keys?)\b/i,
 
   // Note: We deliberately DO NOT block common words like "dan", "id", "whoami", "ls", "sudo", 
   // or questions about hackers/commands because this AI might be used to answer technical IT questions.
@@ -324,7 +331,15 @@ export async function POST(req: Request): Promise<Response> {
         }),
         prisma.blogPost.findMany({
           where: { published: true },
-          select: { title: true, excerpt: true, slug: true },
+          select: {
+            id: true,
+            title: true,
+            excerpt: true,
+            slug: true,
+            createdAt: true,
+            category: { select: { name: true } },
+            tags: { select: { tag: { select: { name: true } } } },
+          },
           orderBy: { createdAt: 'desc' },
           take: 50,
         }),
@@ -432,6 +447,20 @@ Your sole purpose is to assist users with inquiries regarding Masdika's backgrou
 11. DATE/TIME: Do NOT mention the current time/date unless the user explicitly asks (e.g., "jam berapa?", "hari apa?"). For greetings like "pagi"/"siang"/"malam", just respond with a matching greeting without stating the time.
 12. CONTEXT AWARENESS: Read the full conversation history before responding. Do not repeat information you already provided. Do not contradict your previous answers.
 13. WHEN UNSURE: If the user's question is ambiguous, ask a clarifying question instead of guessing. It is better to ask than to give a wrong answer.
+14. ARTIKEL BLOG & KONTEN TERBARU (SANGAT PENTING & WAJIB AKURAT):
+    - Bagian <blog_posts> di bawah ini SUDAH DIURUTKAN SECARA KRONOLOGIS dari yang PALING BARU (nomor 1 paling atas) ke yang lebih lama berdasarkan tanggal rilis publikasinya (createdAt).
+    - Artikel nomor 1 bertanda [⭐ ARTIKEL PALING BARU / TERAKHIR DITERBITKAN ⭐] adalah ARTIKEL TERBARU yang dipublikasikan di Masdika.id!
+    - Jika pengguna menanyakan "apa artikel terbaru", "artikel paling baru", "update artikel terakhir", "ada artikel apa yang baru", atau pertanyaan sejenis:
+      * SEGERA sebutkan artikel nomor 1 tersebut sebagai artikel terbaru Masdika.id saat ini.
+      * Tampilkan judul lengkapnya beserta link markdown yang rapi: [Judul](https://masdika.id/blog/slug).
+      * Sebutkan tanggal rilis publikasinya (misal: "9 November 2026") dan ringkasan singkat isi pembahasannya.
+      * JANGAN PERNAH MENJAWAB "Data tanggal publikasi tidak tersedia" atau "urutan terbaru tidak bisa dipastikan" karena data tanggal publikasi dan urutan artikel sudah terverifikasi dan tercantum secara lengkap di <blog_posts>!
+15. KEAMANAN DATABASE & PRIVASI SISTEM (STRICT SECURITY):
+    - Anda HANYA memiliki akses READ-ONLY terhadap data publik yang tercantum dalam knowledge base ini.
+    - Anda TIDAK MEMILIKI kemampuan ataupun izin untuk menjalankan perintah SQL, mengubah, memperbarui, atau menghapus data database (TIDAK BISA DROP, UPDATE, INSERT, DELETE, dsb).
+    - JANGAN PERNAH membocorkan data sensitif pengguna (password, hash password, token sesi, OTP, API key rahasia, connection string database, environment variables .env, atau credential server).
+    - JANGAN PERNAH membocorkan struktur skema database internal atau mensimulasikan database dump.
+    - Jika ada yang meminta SQL query, dump tabel, data user, atau manipulasi data, tolak dengan tegas: "Mohon maaf, demi keamanan dan privasi sistem Masdika.id, saya tidak memiliki akses ke database internal atau data sensitif pengguna."
 </instructions>
 
 <security_rules>
@@ -495,7 +524,19 @@ ${projects.length > 0 ? projects.map(p => `- ${p.title}: ${p.description}. Tech 
 </portfolio>
 
 <blog_posts>
-${posts.map(p => `- [${p.title}](https://masdika.id/blog/${p.slug}): ${p.excerpt}`).join('\n')}
+${posts.length > 0 ? posts.map((p, idx) => {
+  const dateFormatted = new Date(p.createdAt).toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'Asia/Jakarta'
+  });
+  const cat = p.category?.name ? ` | Kategori: ${p.category.name}` : '';
+  const tagList = p.tags?.map((t: any) => t.tag?.name).filter(Boolean).join(', ');
+  const tags = tagList ? ` | Tag: ${tagList}` : '';
+  const rank = idx === 0 ? ' [⭐ ARTIKEL PALING BARU / TERAKHIR DITERBITKAN ⭐]' : ` [Urutan #${idx + 1}]`;
+  return `${idx + 1}. [${p.title}](https://masdika.id/blog/${p.slug})${rank}\n   - Tanggal Publikasi: ${dateFormatted} (${p.createdAt.toISOString()})${cat}${tags}\n   - Ringkasan: ${p.excerpt}`;
+}).join('\n\n') : 'Belum ada artikel publikasi.'}
 </blog_posts>
 
 <opportunities>

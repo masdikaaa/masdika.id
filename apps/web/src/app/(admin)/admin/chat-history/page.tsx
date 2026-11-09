@@ -8,6 +8,7 @@ import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { AdminLoader } from "@/components/admin/AdminLoader";
+import { parseChatMarkdown } from "@/lib/render-chat-markdown";
 
 type ChatSessionItem = {
   id: number;
@@ -578,7 +579,17 @@ export default function AdminChatHistoryPage() {
                           </div>
                         )}
                         <div className={cn("relative max-w-[85%] sm:max-w-[75%] px-3.5 py-2 text-sm", msg.role === "user" ? (msg.isInjectionAttempt ? "bg-red-950/80 border-red-500/30 text-white rounded-2xl rounded-tr-sm border" : "bg-gradient-to-br from-cyan-600 to-cyan-600 border-cyan-400/20 text-white rounded-2xl rounded-tr-sm border") : (isDark ? "bg-[#0c0c0e] border border-white/[0.08] text-gray-200 rounded-2xl rounded-tl-sm " + (msg.isOutputBlocked ? "border-orange-500/30" : "") : "bg-white border border-slate-200 text-slate-700 rounded-2xl rounded-tl-sm" + (msg.isOutputBlocked ? "border-orange-500" : "")))}>
-                          <p className="break-words whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                          {msg.role === 'user' ? (
+                            <p className="break-words whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                          ) : (
+                            <div
+                              className={cn(
+                                "prose prose-sm max-w-none min-w-0 break-words leading-relaxed [&>p]:mb-2 [&>p:last-child]:mb-0 [&>ul]:my-2 [&>ul]:list-disc [&>ul]:pl-4 [&>ol]:my-2 [&>ol]:list-decimal [&>ol]:pl-4",
+                                isDark ? "prose-invert text-zinc-200" : "text-slate-800"
+                              )}
+                              dangerouslySetInnerHTML={{ __html: parseChatMarkdown(msg.content) }}
+                            />
+                          )}
                         </div>
                         <span className="text-[10px] text-zinc-500 mt-1.5 px-1 font-medium">
                           {new Date(msg.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
