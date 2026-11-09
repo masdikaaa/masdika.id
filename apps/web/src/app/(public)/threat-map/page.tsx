@@ -243,7 +243,11 @@ export default function ThreatMapPage() {
 
   // Interactive Zoom & Pan State with non-passive wheel prevention on full card
   const visualizerCardRef = useRef<HTMLDivElement>(null);
+  const mapFrameRef = useRef<HTMLDivElement>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
+  const pinchStartDistRef = useRef(0);
+  const pinchStartZoomRef = useRef(1);
+  const touchStartPosRef = useRef({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -308,13 +312,13 @@ export default function ThreatMapPage() {
     setHoveredCountry(null);
   }, [region]);
 
-  // Native Non-Passive Wheel Event Listener on Card to 100% prevent browser window scroll
+  // Native Non-Passive Wheel Event Listener on Map Viewport to zoom map & prevent window scroll
   useEffect(() => {
-    const el = visualizerCardRef.current;
+    const el = mapFrameRef.current;
     if (!el) return;
 
     const handleNativeWheel = (e: WheelEvent) => {
-      // PREVENT BROWSER WINDOW FROM SCROLLING WHEN CURSOR IS ANYWHERE OVER MAP COCKPIT
+      // PREVENT BROWSER WINDOW FROM SCROLLING WHEN CURSOR IS OVER THE MAP VIEWPORT
       e.preventDefault();
       e.stopPropagation();
 
@@ -337,6 +341,113 @@ export default function ThreatMapPage() {
     el.addEventListener('wheel', handleNativeWheel, { passive: false });
     return () => {
       el.removeEventListener('wheel', handleNativeWheel);
+    };
+  }, []);
+
+  // Mobile 2-Finger Pinch-to-Zoom & Pan Gesture Listener on Map Frame
+  useEffect(() => {
+    const el = mapFrameRef.current;
+    if (!el) return;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        // 2-Finger Pinch Started on Map
+        e.preventDefault();
+        const dist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        pinchStartDistRef.current = dist;
+        pinchStartZoomRef.current = zoom;
+      } else if (e.touches.length === 1) {
+        touchStartPosRef.current = {
+          x: e.touches[0].clientX - pan.x,
+          y: e.touches[0].clientY - pan.y,
+        };
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        // 2-Finger Pinch Move: Smoothly zoom map in/out!
+        e.preventDefault();
+        e.stopPropagation();
+        const dist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        if (pinchStartDistRef.current > 0) {
+          const factor = dist / pinchStartDistRef.current;
+          const nextZoom = Math.min(4.0, Math.max(0.7, Math.round(pinchStartZoomRef.current * factor * 10) / 10));
+          setZoom(nextZoom);
+          if (nextZoom <= 1) {
+            setPan({ x: 0, y: 0 });
+          } else {
+            setPan(p => ({
+              x: Math.max(-450 * nextZoom, Math.min(450 * nextZoom, p.x)),
+              y: Math.max(-450 * nextZoom, Math.min(450 * nextZoom, p.y)),
+            }));
+          }
+        }
+      } else if (e.touches.length === 1 && zoom > 1) {
+        // 1-Finger Pan only when zoomed into the map
+        e.preventDefault();
+        const maxPan = 450 * zoom;
+        const newX = Math.max(-maxPan, Math.min(maxPan, e.touches[0].clientX - touchStartPosRef.current.x));
+        const newY = Math.max(-maxPan, Math.min(maxPan, e.touches[0].clientY - touchStartPosRef.current.y));
+        setPan({ x: newX, y: newY });
+      }
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (e.touches.length < 2) {
+        pinchStartDistRef.current = 0;
+      }
+    };
+
+    el.addEventListener('touchstart', handleTouchStart, { passive: false });
+    el.addEventListener('touchmove', handleTouchMove, { passive: false });
+    el.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      el.removeEventListener('touchstart', handleTouchStart);
+      el.removeEventListener('touchmove', handleTouchMove);
+      el.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [zoom, pan]);
+
+  // Prevent mobile browser page-level zoom outside the map frame (preserves clean 1:1 mobile layout)
+  useEffect(() => {
+    const handleGlobalTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 1) {
+        const mapEl = mapFrameRef.current;
+        if (mapEl && mapEl.contains(e.target as Node)) {
+          // Inside map: handled by map pinch handler
+          return;
+        }
+        // Outside map: PREVENT mobile browser whole-page pinch zoom
+        e.preventDefault();
+      }
+    };
+
+    let lastTouchEnd = 0;
+    const handleGlobalTouchEnd = (e: TouchEvent) => {
+      const now = Date.now();
+      const mapEl = mapFrameRef.current;
+      const isInside = mapEl && mapEl.contains(e.target as Node);
+      if (!isInside && now - lastTouchEnd <= 300) {
+        // Prevent double-tap page zoom outside the map
+        e.preventDefault();
+      }
+      lastTouchEnd = now;
+    };
+
+    document.addEventListener('touchmove', handleGlobalTouchMove, { passive: false });
+    document.addEventListener('touchend', handleGlobalTouchEnd, { passive: false });
+
+    return () => {
+      document.removeEventListener('touchmove', handleGlobalTouchMove);
+      document.removeEventListener('touchend', handleGlobalTouchEnd);
     };
   }, []);
 
@@ -888,402 +999,427 @@ export default function ThreatMapPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 relative z-10">
               
               {/* Map Canvas Visualizer (8 Cols) */}
-              <div
-                ref={visualizerCardRef}
-                style={{ overscrollBehavior: 'contain', touchAction: 'none' }}
-                className="lg:col-span-8 p-4 sm:p-6 lg:border-r border-b lg:border-b-0 border-[var(--border-subtle)] flex flex-col justify-between min-h-[500px] sm:min-h-[590px] relative"
-              >
+              <div className="lg:col-span-8 p-3 sm:p-5 lg:border-r border-b lg:border-b-0 border-[var(--border-subtle)] flex flex-col justify-between relative">
                 
-                {/* Top-Left: Compact Defense & Incident Radar Status */}
-                <div className="absolute top-4 left-4 z-20 flex items-center gap-2 pointer-events-none">
-                  <div className={cn(
-                    "px-2.5 py-1 rounded-full border text-[11px] font-mono font-bold flex items-center gap-1.5 shadow-sm backdrop-blur-md",
-                    isDark
-                      ? "bg-[#08172c]/90 border-cyan-500/40 text-cyan-300"
-                      : "bg-white/95 border-cyan-200 text-cyan-700"
-                  )}>
-                    <Radio className="w-3 h-3 text-cyan-500 animate-pulse" />
-                    <span>DEFENSE RADAR</span>
-                  </div>
-
-                  {stats.realIncidentsCount > 0 && (
-                    <div className="px-2.5 py-1 rounded-full border border-rose-500/30 bg-rose-500/10 text-rose-500 dark:text-rose-400 text-[11px] font-mono font-bold flex items-center gap-1 shadow-sm backdrop-blur-md">
-                      <ShieldAlert className="w-3 h-3 text-rose-500" />
-                      <span>{stats.realIncidentsCount} REAL</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Top-Center: Dedicated Region Pill (Matches FortiGuard Image 2 - Flat Matte, Zero Glow in Dark Mode) */}
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
-                  <div className={cn(
-                    "px-3.5 py-1.5 rounded-full border flex items-center gap-2 transition-all whitespace-nowrap",
-                    isDark
-                      ? region === 'indonesia'
-                        ? "bg-[#091813] border-[#1b3d30] text-slate-100 shadow-none"
-                        : "bg-[#081523] border-[#1b354d] text-slate-100 shadow-none"
-                      : "bg-white/95 border-slate-300 text-slate-900 shadow-sm"
-                  )}>
-                    {region === 'indonesia' ? (
-                      <>
-                        <CountryFlag code="ID" className="w-4 h-3 rounded-[2px]" />
-                        <span className="text-xs font-bold font-mono tracking-wide text-slate-200">
-                          Indonesia Focus
-                        </span>
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                      </>
-                    ) : (
-                      <>
-                        <Globe className="w-3.5 h-3.5 text-cyan-400" />
-                        <span className="text-xs font-bold font-mono tracking-wide text-slate-200">
-                          Worldwide Threat Outbreaks
-                        </span>
-                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                {/* Top-Right: Floating Tactical Zoom & Pan Controls */}
-                <div className="absolute top-4 right-4 z-20 flex items-center gap-1 p-1 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface)]/90 backdrop-blur-md shadow-sm">
-                  <button
-                    type="button"
-                    onClick={handleZoomIn}
-                    title="Zoom In (+)"
-                    className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-cyan-500 hover:bg-[var(--surface-secondary)] transition-colors"
-                  >
-                    <ZoomIn className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleZoomOut}
-                    title="Zoom Out (-)"
-                    className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-cyan-500 hover:bg-[var(--surface-secondary)] transition-colors"
-                  >
-                    <ZoomOut className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleResetZoom}
-                    title="Reset Zoom"
-                    className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-cyan-500 hover:bg-[var(--surface-secondary)] transition-colors"
-                  >
-                    <RotateCcw className="w-3 h-3" />
-                  </button>
-                  <span className="px-2 py-0.5 text-[10px] font-mono font-bold text-cyan-600 dark:text-cyan-400 border-l border-[var(--border-subtle)]">
-                    {Math.round(zoom * 100)}%
-                  </span>
-                </div>
-
-                {/* Bottom-Left: Sleek Live Probe / Alert Toast (No collision with top headers) */}
-                {recentLiveAlert && (
-                  <div className="absolute bottom-16 left-4 z-20 pointer-events-none animate-in fade-in slide-in-from-bottom-2 duration-200">
-                    <div className={cn(
-                      "px-3 py-1.5 rounded-lg border shadow-lg backdrop-blur-md flex items-center gap-2",
-                      recentLiveAlert.isReal
-                        ? "border-rose-500/40 bg-rose-950/85 text-rose-300"
-                        : "border-cyan-500/40 bg-[#061222]/90 text-cyan-300"
-                    )}>
-                      <CountryFlag code={recentLiveAlert.sourceCode} className="w-3.5 h-2.5" />
-                      <span className="text-[11px] font-mono font-bold">
-                        LIVE PROBE: {recentLiveAlert.sourceCity} [{recentLiveAlert.sourceCode}]
-                      </span>
-                      <span className="text-[10px] font-mono text-cyan-400">
-                        &rarr; {recentLiveAlert.targetCity}
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Floating Hover Country Tooltip (Matches FortiGuard Image 3) */}
-                {hoveredCountry && (
-                  <div
-                    className="absolute z-30 pointer-events-none transform -translate-x-1/2 -translate-y-full mb-3 transition-transform duration-75 ease-out"
-                    style={{
-                      left: `${hoveredCountry.x}px`,
-                      top: `${hoveredCountry.y}px`,
-                    }}
-                  >
-                    <div className={cn(
-                      "px-3 py-1.5 rounded-lg border backdrop-blur-md flex items-center gap-2 select-none",
-                      isDark
-                        ? "bg-[#0c1824] border-slate-700 text-slate-100 shadow-md"
-                        : "bg-white/95 border-slate-300 text-slate-900 shadow-md"
-                    )}>
-                      <CountryFlag code={hoveredCountry.code} className="w-4 h-3 shadow-sm" />
-                      <span className="text-xs font-mono font-bold tracking-tight">
-                        {hoveredCountry.name}
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {/* SVG Tactical Vector Map with Real GIS Coastlines & Zoom/Pan */}
+                {/* ── MAP VIEWPORT WITH TACTICAL BORDER (Matches User Request: "KASIH BORDER MAP NYA BIAR TAU BATAS") ── */}
                 <div
-                  ref={mapContainerRef}
-                  className="w-full h-full flex items-center justify-center relative py-6 overflow-hidden"
+                  ref={mapFrameRef}
                   style={{ overscrollBehavior: 'contain', touchAction: 'none' }}
-                  onMouseMove={handleCountryMove}
+                  className={cn(
+                    "relative w-full rounded-2xl border transition-all duration-200 overflow-hidden select-none flex-1 flex flex-col justify-between min-h-[480px] sm:min-h-[530px]",
+                    isDark
+                      ? "bg-[#030814]/90 border-slate-800 dark:border-cyan-500/25 shadow-[inset_0_1px_3px_rgba(0,0,0,0.5)]"
+                      : "bg-white/95 border-slate-300 shadow-sm"
+                  )}
                 >
-                  <svg
-                    viewBox="0 0 1000 500"
-                    className={cn(
-                      "w-full h-auto max-h-[520px] select-none",
-                      zoom > 1 ? "cursor-grab active:cursor-grabbing" : "cursor-default"
-                    )}
-                    onMouseDown={onMouseDown}
-                    onMouseMove={onMouseMove}
-                    onMouseUp={onMouseUp}
-                    onMouseLeave={() => {
-                      onMouseUp();
-                      setHoveredCountry(null);
-                    }}
-                  >
-                    <defs>
-                      <clipPath id="map-clip">
-                        <rect x="0" y="0" width="1000" height="500" />
-                      </clipPath>
+                  {/* Tactical Corner Accent Brackets on the Map Viewport */}
+                  <div className="absolute top-2.5 left-2.5 w-4 h-4 border-t-2 border-l-2 border-cyan-500/60 pointer-events-none z-20" />
+                  <div className="absolute top-2.5 right-2.5 w-4 h-4 border-t-2 border-r-2 border-cyan-500/60 pointer-events-none z-20" />
+                  <div className="absolute bottom-2.5 left-2.5 w-4 h-4 border-b-2 border-l-2 border-cyan-500/60 pointer-events-none z-20" />
+                  <div className="absolute bottom-2.5 right-2.5 w-4 h-4 border-b-2 border-r-2 border-cyan-500/60 pointer-events-none z-20" />
 
-                      <filter id="laser-glow" x="-25%" y="-25%" width="150%" height="150%">
-                        <feGaussianBlur stdDeviation="3" result="blur" />
-                        <feMerge>
-                          <feMergeNode in="blur" />
-                          <feMergeNode in="SourceGraphic" />
-                        </feMerge>
-                      </filter>
+                  {/* Top HUD Controls (INSIDE the map frame) */}
+                  <div className="relative z-20 flex items-center justify-between p-3 pointer-events-none">
+                    {/* Top-Left: Defense & Incident Radar Status */}
+                    <div className="flex items-center gap-1.5 pointer-events-auto">
+                      <div className={cn(
+                        "px-2.5 py-1 rounded-full border text-[11px] font-mono font-bold flex items-center gap-1.5 shadow-sm backdrop-blur-md",
+                        isDark
+                          ? "bg-[#08172c]/90 border-cyan-500/40 text-cyan-300"
+                          : "bg-white/95 border-cyan-200 text-cyan-700"
+                      )}>
+                        <Radio className="w-3 h-3 text-cyan-500 animate-pulse" />
+                        <span className="hidden sm:inline">DEFENSE RADAR</span>
+                        <span className="sm:hidden">RADAR</span>
+                      </div>
 
-                      <radialGradient id="target-beacon" cx="50%" cy="50%" r="50%">
-                        <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.8" />
-                        <stop offset="40%" stopColor="#0284c7" stopOpacity="0.35" />
-                        <stop offset="100%" stopColor={isDark ? "#040b17" : "#f8fafc"} stopOpacity="0" />
-                      </radialGradient>
-                    </defs>
+                      {stats.realIncidentsCount > 0 && (
+                        <div className="px-2.5 py-1 rounded-full border border-rose-500/30 bg-rose-500/10 text-rose-500 dark:text-rose-400 text-[11px] font-mono font-bold flex items-center gap-1 shadow-sm backdrop-blur-md">
+                          <ShieldAlert className="w-3 h-3 text-rose-500" />
+                          <span>{stats.realIncidentsCount} REAL</span>
+                        </div>
+                      )}
+                    </div>
 
-                    {/* Transform Group for Zoom & Pan */}
-                    <g
-                      clipPath="url(#map-clip)"
-                      transform={`translate(${500 + pan.x}, ${250 + pan.y}) scale(${zoom}) translate(-500, -250)`}
+                    {/* Top-Center: Dedicated Region Pill */}
+                    <div className="pointer-events-auto">
+                      <div className={cn(
+                        "px-3 py-1.5 rounded-full border flex items-center gap-2 transition-all whitespace-nowrap",
+                        isDark
+                          ? region === 'indonesia'
+                            ? "bg-[#091813] border-[#1b3d30] text-slate-100 shadow-none"
+                            : "bg-[#081523] border-[#1b354d] text-slate-100 shadow-none"
+                          : "bg-white/95 border-slate-300 text-slate-900 shadow-sm"
+                      )}>
+                        {region === 'indonesia' ? (
+                          <>
+                            <CountryFlag code="ID" className="w-4 h-3 rounded-[2px]" />
+                            <span className="text-xs font-bold font-mono tracking-wide text-slate-200">
+                              Indonesia Focus
+                            </span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                          </>
+                        ) : (
+                          <>
+                            <Globe className="w-3.5 h-3.5 text-cyan-400" />
+                            <span className="text-xs font-bold font-mono tracking-wide text-slate-200">
+                              Worldwide Threat Outbreaks
+                            </span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Top-Right: Floating Tactical Zoom & Pan Controls */}
+                    <div className="pointer-events-auto flex items-center gap-1 p-1 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface)]/90 backdrop-blur-md shadow-sm">
+                      <button
+                        type="button"
+                        onClick={handleZoomIn}
+                        title="Zoom In (+)"
+                        className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-cyan-500 hover:bg-[var(--surface-secondary)] transition-colors"
+                      >
+                        <ZoomIn className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleZoomOut}
+                        title="Zoom Out (-)"
+                        className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-cyan-500 hover:bg-[var(--surface-secondary)] transition-colors"
+                      >
+                        <ZoomOut className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleResetZoom}
+                        title="Reset Zoom"
+                        className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-cyan-500 hover:bg-[var(--surface-secondary)] transition-colors"
+                      >
+                        <RotateCcw className="w-3 h-3" />
+                      </button>
+                      <span className="px-2 py-0.5 text-[10px] font-mono font-bold text-cyan-600 dark:text-cyan-400 border-l border-[var(--border-subtle)]">
+                        {Math.round(zoom * 100)}%
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Floating Hover Country Tooltip */}
+                  {hoveredCountry && (
+                    <div
+                      className="absolute z-30 pointer-events-none transform -translate-x-1/2 -translate-y-full mb-3 transition-transform duration-75 ease-out"
                       style={{
-                        transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+                        left: `${hoveredCountry.x}px`,
+                        top: `${hoveredCountry.y}px`,
                       }}
                     >
-                      {/* Radar Coordinate Grid & Concentric Scanning Rings */}
-                      <circle cx="500" cy="250" r="140" fill="none" stroke={isDark ? "#06b6d4" : "#0284c7"} strokeWidth="0.5" strokeDasharray="3,3" opacity="0.22" />
-                      <circle cx="500" cy="250" r="260" fill="none" stroke={isDark ? "#06b6d4" : "#0284c7"} strokeWidth="0.5" strokeDasharray="4,4" opacity="0.16" />
-                      <circle cx="500" cy="250" r="380" fill="none" stroke={isDark ? "#06b6d4" : "#0284c7"} strokeWidth="0.5" strokeDasharray="5,5" opacity="0.1" />
+                      <div className={cn(
+                        "px-3 py-1.5 rounded-lg border backdrop-blur-md flex items-center gap-2 select-none",
+                        isDark
+                          ? "bg-[#0c1824] border-slate-700 text-slate-100 shadow-md"
+                          : "bg-white/95 border-slate-300 text-slate-900 shadow-md"
+                      )}>
+                        <CountryFlag code={hoveredCountry.code} className="w-4 h-3 shadow-sm" />
+                        <span className="text-xs font-mono font-bold tracking-tight">
+                          {hoveredCountry.name}
+                        </span>
+                      </div>
+                    </div>
+                  )}
 
-                      {/* Map Coordinate Parallels & Meridians */}
-                      <line x1="40" y1="250" x2="960" y2="250" stroke={isDark ? "#0ea5e9" : "#0284c7"} strokeWidth="0.5" strokeDasharray="2,4" opacity="0.2" />
-                      <line x1="500" y1="20" x2="500" y2="480" stroke={isDark ? "#0ea5e9" : "#0284c7"} strokeWidth="0.5" strokeDasharray="2,4" opacity="0.2" />
-
-                      {/* Real Geographic Vector Map Outlines */}
-                      {region === 'indonesia' ? (
-                        /* Indonesia Region: High-Fidelity Archipelago (Matches FortiGuard Image 2) */
-                        <g className="transition-all duration-500 ease-in-out">
-                          {regionalCleanPaths.map((poly) => {
-                            const isID = poly.isIndonesia;
-                            const isHovered = hoveredCountry?.id === poly.id;
-
-                            return (
-                              <path
-                                key={poly.id}
-                                d={poly.d}
-                                onClick={(e) => handleCountryClick({ id: poly.id, name: poly.name }, e)}
-                                onMouseEnter={(e) => handleCountryHover({ id: poly.id, name: poly.name }, e)}
-                                onMouseLeave={() => setHoveredCountry(null)}
-                                fill={
-                                  isHovered
-                                    ? isDark ? "#00f0ff40" : "#0284c740"
-                                    : isID
-                                    ? isDark ? "#0c2820" : "#cbd5e1"
-                                    : isDark ? "#061524" : "#f1f5f9"
-                                }
-                                stroke={
-                                  isHovered
-                                    ? isDark ? "#00f0ff" : "#0284c7"
-                                    : isID
-                                    ? isDark ? "#10b981" : "#0284c7"
-                                    : isDark ? "#16304d" : "#94a3b8"
-                                }
-                                strokeWidth={isHovered ? "2.2" : isID ? "1.6" : "0.7"}
-                                opacity={isID ? 0.98 : 0.4}
-                                className="cursor-pointer transition-colors duration-200"
-                              />
-                            );
-                          })}
-
-                          {/* Secondary Core Node: Jakarta Gateway */}
-                          <g transform={`translate(${jakartaCoords[0]}, ${jakartaCoords[1]})`}>
-                            <circle r="3.5" fill={isDark ? "#38bdf8" : "#0284c7"} stroke="#ffffff" strokeWidth="1" />
-                            <text x="-80" y="-8" fill={isDark ? "#7dd3fc" : "#475569"} fontSize="9" fontFamily="monospace">
-                              Jakarta Core [ID]
-                            </text>
-                          </g>
-
-                          {/* Primary Target Beacon: Masdika Sidoarjo Datacenter Hub */}
-                          <g transform={`translate(${targetHubCoords[0]}, ${targetHubCoords[1]})`}>
-                            <circle r="26" fill="url(#target-beacon)" className="animate-ping" opacity="0.85" />
-                            <circle r="14" fill={isDark ? "#06b6d4" : "#0284c7"} opacity="0.3" />
-                            <circle r="5" fill={isDark ? "#06b6d4" : "#0284c7"} stroke="#ffffff" strokeWidth="1.8" />
-                            
-                            {/* Staggered Leader Label below node */}
-                            <line x1="0" y1="8" x2="0" y2="24" stroke={isDark ? "#38bdf8" : "#0284c7"} strokeWidth="1" strokeDasharray="2,2" />
-                            <line x1="0" y1="24" x2="30" y2="24" stroke={isDark ? "#38bdf8" : "#0284c7"} strokeWidth="1" />
-                            <text x="36" y="22" fill={isDark ? "#38bdf8" : "#0369a1"} fontSize="11" fontWeight="bold" fontFamily="monospace">
-                              MASDIKA SIDOARJO HUB [ID]
-                            </text>
-                            <text x="36" y="34" fill={isDark ? "#7dd3fc" : "#0284c7"} fontSize="9" fontFamily="monospace">
-                              AS63859 [PRIMARY DATACENTER]
-                            </text>
-                          </g>
-                        </g>
-                      ) : (
-                        /* World View: Real Natural Earth GIS Countries (Matches FortiGuard Image 4) */
-                        <g className="transition-all duration-500 ease-in-out">
-                          {worldPaths.map((country) => {
-                            const isID = country.id === 'IDN';
-                            const isHovered = hoveredCountry?.id === country.id;
-
-                            return (
-                              <path
-                                key={country.id}
-                                d={country.d}
-                                onClick={(e) => handleCountryClick(country, e)}
-                                onMouseEnter={(e) => handleCountryHover(country, e)}
-                                onMouseLeave={() => setHoveredCountry(null)}
-                                fill={
-                                  isHovered
-                                    ? isDark ? "#00f0ff40" : "#0284c740"
-                                    : isID
-                                    ? isDark ? "#00f0ff30" : "#0284c730"
-                                    : isDark ? "#0b2034" : "#cbd5e1"
-                                }
-                                stroke={
-                                  isHovered
-                                    ? isDark ? "#00f0ff" : "#0284c7"
-                                    : isID
-                                    ? isDark ? "#00f0ff" : "#0284c7"
-                                    : isDark ? "#163858" : "#94a3b8"
-                                }
-                                strokeWidth={isHovered ? "2.2" : isID ? "1.8" : "0.7"}
-                                opacity={isID ? 1 : 0.85}
-                                className="cursor-pointer transition-colors duration-200"
-                              />
-                            );
-                          })}
-
-                          {/* Target Node: Indonesia Masdika Hub */}
-                          <g transform={`translate(${targetHubCoords[0]}, ${targetHubCoords[1]})`}>
-                            <circle r="22" fill="url(#target-beacon)" className="animate-ping" opacity="0.85" />
-                            <circle r="5.5" fill={isDark ? "#06b6d4" : "#0284c7"} stroke="#ffffff" strokeWidth="1.5" />
-                            <text x="12" y="-6" fill={isDark ? "#38bdf8" : "#0369a1"} fontSize="10" fontWeight="bold" fontFamily="monospace">
-                              Masdika Edge [ID]
-                            </text>
-                          </g>
-                        </g>
+                  {/* SVG Tactical Vector Map with Real GIS Coastlines & Zoom/Pan */}
+                  <div
+                    ref={mapContainerRef}
+                    className="w-full flex-1 flex items-center justify-center relative py-2 overflow-hidden touch-none"
+                    onMouseMove={handleCountryMove}
+                  >
+                    <svg
+                      viewBox="0 0 1000 500"
+                      className={cn(
+                        "w-full h-auto max-h-[500px] select-none",
+                        zoom > 1 ? "cursor-grab active:cursor-grabbing" : "cursor-default"
                       )}
+                      onMouseDown={onMouseDown}
+                      onMouseMove={onMouseMove}
+                      onMouseUp={onMouseUp}
+                      onMouseLeave={() => {
+                        onMouseUp();
+                        setHoveredCountry(null);
+                      }}
+                    >
+                      <defs>
+                        <clipPath id="map-clip">
+                          <rect x="0" y="0" width="1000" height="500" />
+                        </clipPath>
 
-                      {/* Animated FortiGuard Parabolic Laser Arcs & Node Callouts */}
-                      {lasers.map(laser => {
-                        const t = laser.progress;
-                        const currentX = (1 - t) * (1 - t) * laser.x1 + 2 * (1 - t) * t * laser.cx + t * t * laser.x2;
-                        const currentY = (1 - t) * (1 - t) * laser.y1 + 2 * (1 - t) * t * laser.cy + t * t * laser.y2;
+                        <filter id="laser-glow" x="-25%" y="-25%" width="150%" height="150%">
+                          <feGaussianBlur stdDeviation="3" result="blur" />
+                          <feMerge>
+                            <feMergeNode in="blur" />
+                            <feMergeNode in="SourceGraphic" />
+                          </feMerge>
+                        </filter>
 
-                        return (
-                          <g key={laser.id} filter="url(#laser-glow)">
-                            {/* Trajectory Guide Arc */}
-                            <path
-                              d={`M ${laser.x1},${laser.y1} Q ${laser.cx},${laser.cy} ${laser.x2},${laser.y2}`}
-                              fill="none"
-                              stroke={laser.color}
-                              strokeWidth={laser.isReal ? "2.2" : "1.2"}
-                              strokeDasharray={laser.isReal ? "5,3" : "4,4"}
-                              opacity={laser.isReal ? "0.95" : "0.55"}
-                            />
+                        <radialGradient id="target-beacon" cx="50%" cy="50%" r="50%">
+                          <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.8" />
+                          <stop offset="40%" stopColor="#0284c7" stopOpacity="0.35" />
+                          <stop offset="100%" stopColor={isDark ? "#040b17" : "#f8fafc"} stopOpacity="0" />
+                        </radialGradient>
+                      </defs>
 
-                            {/* Source Origin Node & Callout Label (FortiGuard Style) */}
-                            <g transform={`translate(${laser.x1}, ${laser.y1})`}>
-                              <circle r={laser.isReal ? "4.5" : "3"} fill={laser.color} opacity="0.95" />
-                              <g transform="translate(0, -9)">
-                                <rect
-                                  x="-36"
-                                  y="-10"
-                                  width="72"
-                                  height="13"
-                                  rx="2"
-                                  fill={isDark ? "rgba(4, 11, 23, 0.9)" : "rgba(255, 255, 255, 0.95)"}
-                                  stroke={isDark ? "rgba(14, 165, 233, 0.5)" : "rgba(148, 163, 184, 0.7)"}
-                                  strokeWidth="0.7"
+                      {/* Transform Group for Zoom & Pan */}
+                      <g
+                        clipPath="url(#map-clip)"
+                        transform={`translate(${500 + pan.x}, ${250 + pan.y}) scale(${zoom}) translate(-500, -250)`}
+                        style={{
+                          transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+                        }}
+                      >
+                        {/* Radar Coordinate Grid & Concentric Scanning Rings */}
+                        <circle cx="500" cy="250" r="140" fill="none" stroke={isDark ? "#06b6d4" : "#0284c7"} strokeWidth="0.5" strokeDasharray="3,3" opacity="0.22" />
+                        <circle cx="500" cy="250" r="260" fill="none" stroke={isDark ? "#06b6d4" : "#0284c7"} strokeWidth="0.5" strokeDasharray="4,4" opacity="0.16" />
+                        <circle cx="500" cy="250" r="380" fill="none" stroke={isDark ? "#06b6d4" : "#0284c7"} strokeWidth="0.5" strokeDasharray="5,5" opacity="0.1" />
+
+                        {/* Map Coordinate Parallels & Meridians */}
+                        <line x1="40" y1="250" x2="960" y2="250" stroke={isDark ? "#0ea5e9" : "#0284c7"} strokeWidth="0.5" strokeDasharray="2,4" opacity="0.2" />
+                        <line x1="500" y1="20" x2="500" y2="480" stroke={isDark ? "#0ea5e9" : "#0284c7"} strokeWidth="0.5" strokeDasharray="2,4" opacity="0.2" />
+
+                        {/* Real Geographic Vector Map Outlines */}
+                        {region === 'indonesia' ? (
+                          /* Indonesia Region: High-Fidelity Archipelago (Matches FortiGuard Image 2) */
+                          <g className="transition-all duration-500 ease-in-out">
+                            {regionalCleanPaths.map((poly) => {
+                              const isID = poly.isIndonesia;
+                              const isHovered = hoveredCountry?.id === poly.id;
+
+                              return (
+                                <path
+                                  key={poly.id}
+                                  d={poly.d}
+                                  onClick={(e) => handleCountryClick({ id: poly.id, name: poly.name }, e)}
+                                  onMouseEnter={(e) => handleCountryHover({ id: poly.id, name: poly.name }, e)}
+                                  onMouseLeave={() => setHoveredCountry(null)}
+                                  fill={
+                                    isHovered
+                                      ? isDark ? "#00f0ff40" : "#0284c740"
+                                      : isID
+                                      ? isDark ? "#0c2820" : "#cbd5e1"
+                                      : isDark ? "#061524" : "#f1f5f9"
+                                  }
+                                  stroke={
+                                    isHovered
+                                      ? isDark ? "#00f0ff" : "#0284c7"
+                                      : isID
+                                      ? isDark ? "#10b981" : "#0284c7"
+                                      : isDark ? "#16304d" : "#94a3b8"
+                                  }
+                                  strokeWidth={isHovered ? "2.2" : isID ? "1.6" : "0.7"}
+                                  opacity={isID ? 0.98 : 0.4}
+                                  className="cursor-pointer transition-colors duration-200"
                                 />
-                                <text
-                                  x="0"
-                                  y="-1"
-                                  textAnchor="middle"
-                                  fill={isDark ? "#e2e8f0" : "#1e293b"}
-                                  fontSize="7"
-                                  fontWeight="bold"
-                                  fontFamily="monospace"
-                                >
-                                  {laser.sourceCity} {laser.sourceCode}
-                                </text>
-                              </g>
+                              );
+                            })}
+
+                            {/* Secondary Core Node: Jakarta Gateway */}
+                            <g transform={`translate(${jakartaCoords[0]}, ${jakartaCoords[1]})`}>
+                              <circle r="3.5" fill={isDark ? "#38bdf8" : "#0284c7"} stroke="#ffffff" strokeWidth="1" />
+                              <text x="-80" y="-8" fill={isDark ? "#7dd3fc" : "#475569"} fontSize="9" fontFamily="monospace">
+                                Jakarta Core [ID]
+                              </text>
                             </g>
 
-                            {/* Target Destination Node & Callout Label */}
-                            <g transform={`translate(${laser.x2}, ${laser.y2})`}>
-                              <circle r="7" fill="none" stroke={laser.color} strokeWidth="1" opacity="0.75" />
-                              <circle r="2.5" fill={laser.color} />
-                              <g transform="translate(0, -9)">
-                                <rect
-                                  x="-38"
-                                  y="-10"
-                                  width="76"
-                                  height="13"
-                                  rx="2"
-                                  fill={isDark ? "rgba(4, 11, 23, 0.9)" : "rgba(255, 255, 255, 0.95)"}
-                                  stroke={laser.color}
-                                  strokeWidth="0.8"
-                                />
-                                <text
-                                  x="0"
-                                  y="-1"
-                                  textAnchor="middle"
-                                  fill={laser.color}
-                                  fontSize="7"
-                                  fontWeight="bold"
-                                  fontFamily="monospace"
-                                >
-                                  {laser.targetCity} {laser.targetCode}
-                                </text>
-                              </g>
+                            {/* Primary Target Beacon: Masdika Sidoarjo Datacenter Hub */}
+                            <g transform={`translate(${targetHubCoords[0]}, ${targetHubCoords[1]})`}>
+                              <circle r="26" fill="url(#target-beacon)" className="animate-ping" opacity="0.85" />
+                              <circle r="14" fill={isDark ? "#06b6d4" : "#0284c7"} opacity="0.3" />
+                              <circle r="5" fill={isDark ? "#06b6d4" : "#0284c7"} stroke="#ffffff" strokeWidth="1.8" />
+                              
+                              {/* Staggered Leader Label below node */}
+                              <line x1="0" y1="8" x2="0" y2="24" stroke={isDark ? "#38bdf8" : "#0284c7"} strokeWidth="1" strokeDasharray="2,2" />
+                              <line x1="0" y1="24" x2="30" y2="24" stroke={isDark ? "#38bdf8" : "#0284c7"} strokeWidth="1" />
+                              <text x="36" y="22" fill={isDark ? "#38bdf8" : "#0369a1"} fontSize="11" fontWeight="bold" fontFamily="monospace">
+                                MASDIKA SIDOARJO HUB [ID]
+                              </text>
+                              <text x="36" y="34" fill={isDark ? "#7dd3fc" : "#0284c7"} fontSize="9" fontFamily="monospace">
+                                AS63859 [PRIMARY DATACENTER]
+                              </text>
                             </g>
-
-                            {/* Missile / Laser Head Projectile */}
-                            <circle cx={currentX} cy={currentY} r={laser.isReal ? "5.5" : "3.8"} fill="#ffffff" stroke={laser.color} strokeWidth={laser.isReal ? "2.5" : "1.8"} />
-                            <circle cx={currentX} cy={currentY} r={laser.isReal ? "12" : "7"} fill={laser.color} opacity={laser.isReal ? "0.45" : "0.25"} />
                           </g>
-                        );
-                      })}
+                        ) : (
+                          /* World View: Real Natural Earth GIS Countries (Matches FortiGuard Image 4) */
+                          <g className="transition-all duration-500 ease-in-out">
+                            {worldPaths.map((country) => {
+                              const isID = country.id === 'IDN';
+                              const isHovered = hoveredCountry?.id === country.id;
 
-                      {/* Impact Shockwaves on Target Hit */}
-                      {impacts.map(impact => (
-                        <circle
-                          key={impact.id}
-                          cx={impact.x}
-                          cy={impact.y}
-                          r={impact.radius}
-                          fill="none"
-                          stroke={impact.color}
-                          strokeWidth="2"
-                          opacity={impact.opacity}
-                        />
-                      ))}
-                    </g>
-                  </svg>
+                              return (
+                                <path
+                                  key={country.id}
+                                  d={country.d}
+                                  onClick={(e) => handleCountryClick(country, e)}
+                                  onMouseEnter={(e) => handleCountryHover(country, e)}
+                                  onMouseLeave={() => setHoveredCountry(null)}
+                                  fill={
+                                    isHovered
+                                      ? isDark ? "#00f0ff40" : "#0284c740"
+                                      : isID
+                                      ? isDark ? "#00f0ff30" : "#0284c730"
+                                      : isDark ? "#0b2034" : "#cbd5e1"
+                                  }
+                                  stroke={
+                                    isHovered
+                                      ? isDark ? "#00f0ff" : "#0284c7"
+                                      : isID
+                                      ? isDark ? "#00f0ff" : "#0284c7"
+                                      : isDark ? "#163858" : "#94a3b8"
+                                  }
+                                  strokeWidth={isHovered ? "2.2" : isID ? "1.8" : "0.7"}
+                                  opacity={isID ? 1 : 0.85}
+                                  className="cursor-pointer transition-colors duration-200"
+                                />
+                              );
+                            })}
+
+                            {/* Target Node: Indonesia Masdika Hub */}
+                            <g transform={`translate(${targetHubCoords[0]}, ${targetHubCoords[1]})`}>
+                              <circle r="22" fill="url(#target-beacon)" className="animate-ping" opacity="0.85" />
+                              <circle r="5.5" fill={isDark ? "#06b6d4" : "#0284c7"} stroke="#ffffff" strokeWidth="1.5" />
+                              <text x="12" y="-6" fill={isDark ? "#38bdf8" : "#0369a1"} fontSize="10" fontWeight="bold" fontFamily="monospace">
+                                Masdika Edge [ID]
+                              </text>
+                            </g>
+                          </g>
+                        )}
+
+                        {/* Animated FortiGuard Parabolic Laser Arcs & Node Callouts */}
+                        {lasers.map(laser => {
+                          const t = laser.progress;
+                          const currentX = (1 - t) * (1 - t) * laser.x1 + 2 * (1 - t) * t * laser.cx + t * t * laser.x2;
+                          const currentY = (1 - t) * (1 - t) * laser.y1 + 2 * (1 - t) * t * laser.cy + t * t * laser.y2;
+
+                          return (
+                            <g key={laser.id} filter="url(#laser-glow)">
+                              {/* Trajectory Guide Arc */}
+                              <path
+                                d={`M ${laser.x1},${laser.y1} Q ${laser.cx},${laser.cy} ${laser.x2},${laser.y2}`}
+                                fill="none"
+                                stroke={laser.color}
+                                strokeWidth={laser.isReal ? "2.2" : "1.2"}
+                                strokeDasharray={laser.isReal ? "5,3" : "4,4"}
+                                opacity={laser.isReal ? "0.95" : "0.55"}
+                              />
+
+                              {/* Source Origin Node & Callout Label (FortiGuard Style) */}
+                              <g transform={`translate(${laser.x1}, ${laser.y1})`}>
+                                <circle r={laser.isReal ? "4.5" : "3"} fill={laser.color} opacity="0.95" />
+                                <g transform="translate(0, -9)">
+                                  <rect
+                                    x="-36"
+                                    y="-10"
+                                    width="72"
+                                    height="13"
+                                    rx="2"
+                                    fill={isDark ? "rgba(4, 11, 23, 0.9)" : "rgba(255, 255, 255, 0.95)"}
+                                    stroke={isDark ? "rgba(14, 165, 233, 0.5)" : "rgba(148, 163, 184, 0.7)"}
+                                    strokeWidth="0.7"
+                                  />
+                                  <text
+                                    x="0"
+                                    y="-1"
+                                    textAnchor="middle"
+                                    fill={isDark ? "#e2e8f0" : "#1e293b"}
+                                    fontSize="7"
+                                    fontWeight="bold"
+                                    fontFamily="monospace"
+                                  >
+                                    {laser.sourceCity} {laser.sourceCode}
+                                  </text>
+                                </g>
+                              </g>
+
+                              {/* Target Destination Node & Callout Label */}
+                              <g transform={`translate(${laser.x2}, ${laser.y2})`}>
+                                <circle r="7" fill="none" stroke={laser.color} strokeWidth="1" opacity="0.75" />
+                                <circle r="2.5" fill={laser.color} />
+                                <g transform="translate(0, -9)">
+                                  <rect
+                                    x="-38"
+                                    y="-10"
+                                    width="76"
+                                    height="13"
+                                    rx="2"
+                                    fill={isDark ? "rgba(4, 11, 23, 0.9)" : "rgba(255, 255, 255, 0.95)"}
+                                    stroke={laser.color}
+                                    strokeWidth="0.8"
+                                  />
+                                  <text
+                                    x="0"
+                                    y="-1"
+                                    textAnchor="middle"
+                                    fill={laser.color}
+                                    fontSize="7"
+                                    fontWeight="bold"
+                                    fontFamily="monospace"
+                                  >
+                                    {laser.targetCity} {laser.targetCode}
+                                  </text>
+                                </g>
+                              </g>
+
+                              {/* Missile / Laser Head Projectile */}
+                              <circle cx={currentX} cy={currentY} r={laser.isReal ? "5.5" : "3.8"} fill="#ffffff" stroke={laser.color} strokeWidth={laser.isReal ? "2.5" : "1.8"} />
+                              <circle cx={currentX} cy={currentY} r={laser.isReal ? "12" : "7"} fill={laser.color} opacity={laser.isReal ? "0.45" : "0.25"} />
+                            </g>
+                          );
+                        })}
+
+                        {/* Impact Shockwaves on Target Hit */}
+                        {impacts.map(impact => (
+                          <circle
+                            key={impact.id}
+                            cx={impact.x}
+                            cy={impact.y}
+                            r={impact.radius}
+                            fill="none"
+                            stroke={impact.color}
+                            strokeWidth="2"
+                            opacity={impact.opacity}
+                          />
+                        ))}
+                      </g>
+                    </svg>
+                  </div>
+
+                  {/* Bottom Strip inside the Map Frame: Live Probe Alert (Cleanly docked inside frame, NEVER overlapping Legend) */}
+                  <div className="relative z-20 p-2.5 flex items-center justify-between pointer-events-none min-h-[38px] bg-gradient-to-t from-[var(--surface)]/40 to-transparent">
+                    {recentLiveAlert ? (
+                      <div className="pointer-events-auto animate-in fade-in slide-in-from-bottom-1 duration-200">
+                        <div className={cn(
+                          "px-2.5 py-1 rounded-md border text-[11px] font-mono font-bold flex items-center gap-2 shadow-sm backdrop-blur-md",
+                          recentLiveAlert.isReal
+                            ? "border-rose-500/50 bg-rose-950/90 text-rose-300"
+                            : "border-cyan-500/40 bg-[#061222]/90 text-cyan-300"
+                        )}>
+                          <CountryFlag code={recentLiveAlert.sourceCode} className="w-3.5 h-2.5" />
+                          <span>LIVE PROBE: {recentLiveAlert.sourceCity} [{recentLiveAlert.sourceCode}]</span>
+                          <span className="text-cyan-400">&rarr; {recentLiveAlert.targetCity}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-[10px] font-mono text-[var(--text-secondary)] opacity-60 flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        <span>RADAR ACTIVE &bull; 2-FINGER PINCH / WHEEL TO ZOOM &bull; DRAG TO PAN</span>
+                      </div>
+                    )}
+
+                    <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-mono text-[var(--text-secondary)] opacity-70">
+                      <span>Touch: 2-Finger Pinch to Zoom</span>
+                    </div>
+                  </div>
+
                 </div>
 
-                {/* Legend Bar Bottom */}
-                <div className="pt-4 border-t border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-4 text-xs font-mono">
+                {/* ── LEGEND BAR (OUTSIDE AND COMPLETELY BELOW THE MAP VIEWPORT BOX) ── */}
+                <div className="mt-3.5 pt-3 border-t border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
                   <div className="flex flex-wrap items-center gap-4">
                     <span className="flex items-center gap-1.5 text-rose-500 font-bold">
                       <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
@@ -1299,7 +1435,7 @@ export default function ThreatMapPage() {
                     </span>
                   </div>
 
-                  <div className="text-[var(--text-secondary)]">
+                  <div className="text-[var(--text-secondary)] text-[11px]">
                     Direct SOC Telemetry: Sidoarjo Edge Datacenter (AS63859)
                   </div>
                 </div>
