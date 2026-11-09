@@ -166,6 +166,8 @@ export default function PaygMonitorPage() {
 
   const sufficientCount = customers.filter(c => c.balanceStatus === 'SUFFICIENT').length;
   const lowCount = customers.filter(c => c.balanceStatus === 'LOW').length;
+  const unsentLowCount = customers.filter(c => c.balanceStatus === 'LOW' && !c.lowBalanceAlert).length;
+  const sentLowCount = customers.filter(c => c.balanceStatus === 'LOW' && !!c.lowBalanceAlert).length;
   const exhaustedCount = customers.filter(c => c.balanceStatus === 'EXHAUSTED').length;
   const totalBurnRate = customers.reduce((acc, c) => acc + c.totalHourlyBurn, 0);
   const totalAccumulatedCost = customers.reduce((acc, c) => acc + c.totalAccumulatedCost, 0);
@@ -354,14 +356,36 @@ export default function PaygMonitorPage() {
               disabled={triggeringAlerts || loading}
               className={cn(
                 "px-3.5 py-2 rounded-xl font-bold text-xs border transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 whitespace-nowrap shadow-xs",
-                lowCount > 0
+                unsentLowCount > 0
                   ? (isDark ? "bg-amber-500/20 border-amber-500/40 text-amber-300 hover:bg-amber-500/30" : "bg-amber-50 border-amber-300 text-amber-800 hover:bg-amber-100")
-                  : (isDark ? "bg-white/5 border-white/[0.08] text-zinc-300 hover:bg-white/10" : "bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200")
+                  : sentLowCount > 0
+                    ? (isDark ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25" : "bg-emerald-50 border-emerald-300 text-emerald-800 hover:bg-emerald-100")
+                    : (isDark ? "bg-white/5 border-white/[0.08] text-zinc-300 hover:bg-white/10" : "bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200")
               )}
-              title="Check all customers and send warning email to any customer with remaining runtime <= 24 hours"
+              title={
+                unsentLowCount > 0
+                  ? `Kirim email peringatan ke ${unsentLowCount} customer dengan saldo menipis`
+                  : sentLowCount > 0
+                    ? `Semua ${sentLowCount} customer bersaldo menipis sudah menerima email dalam 24 jam terakhir (Cooldown aktif, tidak akan spam)`
+                    : "Periksa status saldo customer"
+              }
             >
-              {triggeringAlerts ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Mail className="w-3.5 h-3.5 text-amber-400" />}
-              <span>Send Low Balance Alerts {lowCount > 0 ? `(${lowCount})` : ''}</span>
+              {triggeringAlerts ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : unsentLowCount > 0 ? (
+                <Mail className="w-3.5 h-3.5 text-amber-400" />
+              ) : sentLowCount > 0 ? (
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              ) : (
+                <Mail className="w-3.5 h-3.5 text-zinc-400" />
+              )}
+              <span>
+                {unsentLowCount > 0
+                  ? `Send Low Balance Alerts (${unsentLowCount})`
+                  : sentLowCount > 0
+                    ? `Alerts Sent (${sentLowCount} in Cooldown)`
+                    : `Check Low Balance Alerts`}
+              </span>
             </button>
             <div className="relative w-full sm:w-64 shrink-0">
               <input
