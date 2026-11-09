@@ -114,8 +114,7 @@ export function Footer({ socialLinks }: { socialLinks?: any }) {
             <h3 className="text-sm font-semibold mb-5 text-[var(--text-primary)]">Network &amp; Security</h3>
             <ul className="space-y-3">
               {[
-                { name: 'Looking Glass', path: '/lg', badge: 'Live' },
-                { name: 'Threat Map', path: '/threat-map', badge: 'Live' }
+                { name: 'Looking Glass', path: '/lg', badge: 'Live' }
               ].map((link, idx) => (
                 <li key={idx}>
                   <Link
