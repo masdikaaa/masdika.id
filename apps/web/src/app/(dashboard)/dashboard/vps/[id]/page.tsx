@@ -17,22 +17,8 @@ import { useTheme } from "@/components/ThemeProvider";
 import { Pagination } from "@/components/ui/Pagination";
 import { formatRupiah } from "@/lib/billing";
 
-const getOsIcon = (osTemplate: string, isDark: boolean = false) => {
-  const os = osTemplate?.toLowerCase() || "";
-  if (os.includes("ubuntu")) return "https://cdn.simpleicons.org/ubuntu/E95420";
-  if (os.includes("debian")) return "https://cdn.simpleicons.org/debian/A81D33";
-  if (os.includes("centos")) return "https://cdn.simpleicons.org/centos/262577";
-  if (os.includes("almalinux") || os.includes("alma")) return "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/almalinux/almalinux-original.svg";
-  if (os.includes("rocky")) return "https://cdn.simpleicons.org/rockylinux/10B981";
-  if (os.includes("alpine")) return "https://www.vectorlogo.zone/logos/alpinelinux/alpinelinux-icon.svg";
-  if (os.includes("fedora")) return "https://cdn.simpleicons.org/fedora/3b82f6";
-  if (os.includes("windows")) return "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/windows11/windows11-original.svg";
-  if (os.includes("freebsd")) return "https://cdn.simpleicons.org/freebsd/AB2B28";
-  if (os.includes("mikrotik") || os.includes("chr")) {
-    return "https://cdn.worldvectorlogo.com/logos/mikrotik.svg";
-  }
-  return null;
-};
+import { getOsIconUrl, formatOsName } from "@/lib/vps-os";
+const getOsIcon = getOsIconUrl;
 
 const formatTime = (time: string) => {
   if (!time) return '';
@@ -1508,7 +1494,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                 <p className={cn("text-xs sm:text-sm mt-2 flex flex-wrap items-center gap-2 font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>
                   <span className={cn("font-mono text-xs px-2.5 py-0.5 rounded-lg border whitespace-nowrap font-bold", isDark ? "bg-black/30 border-white/[0.08] text-cyan-300" : "bg-slate-100 border-slate-200 text-slate-800")}>ID: {vps.id}</span>
                   <span>•</span>
-                  <span className={cn("whitespace-nowrap font-semibold", isDark ? "text-zinc-300" : "text-slate-800")}>{vps.osTemplate}</span>
+                  <span className={cn("whitespace-nowrap font-semibold", isDark ? "text-zinc-300" : "text-slate-800")}>{formatOsName(vps.osTemplate)}</span>
                   <span>•</span>
                   <span className={cn("whitespace-nowrap font-semibold", isDark ? "text-white" : "text-slate-900")}>
                     {vps.status === 'TERMINATED' 

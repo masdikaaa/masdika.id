@@ -54,24 +54,7 @@ const VpcIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const getOsIcon = (osTemplate: string) => {
-  const os = osTemplate?.toLowerCase() || "";
-  if (os.includes("ubuntu")) return "https://cdn.simpleicons.org/ubuntu/E95420";
-  if (os.includes("debian")) return "https://cdn.simpleicons.org/debian/A81D33";
-  if (os.includes("centos")) return "https://cdn.simpleicons.org/centos/262577";
-  if (os.includes("almalinux") || os.includes("alma"))
-    return "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/almalinux/almalinux-original.svg";
-  if (os.includes("rocky")) return "https://cdn.simpleicons.org/rockylinux/10B981";
-  if (os.includes("alpine")) return "https://www.vectorlogo.zone/logos/alpinelinux/alpinelinux-icon.svg";
-  if (os.includes("fedora")) return "https://cdn.simpleicons.org/fedora/3b82f6";
-  if (os.includes("windows"))
-    return "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/windows11/windows11-original.svg";
-  if (os.includes("freebsd")) return "https://cdn.simpleicons.org/freebsd/AB2B28";
-  if (os.includes("mikrotik") || os.includes("chr")) {
-    return "https://cdn.worldvectorlogo.com/logos/mikrotik.svg";
-  }
-  return null;
-};
+import { getOsIconUrl, formatOsName } from "@/lib/vps-os";
 
 export default function DashboardOverview() {
   const { theme } = useTheme();
@@ -1084,7 +1067,7 @@ export default function DashboardOverview() {
                 vps.assignedIps?.[0]?.publicIp ||
                 vps.assignedIps?.[0]?.ipAddress ||
                 (vps.status === "PENDING" ? "Provisioning IP" : "No IP");
-              const osIcon = getOsIcon(vps.osTemplate);
+              const osIcon = getOsIconUrl(vps.osTemplate, isDark);
 
               return (
                 <div

@@ -29,24 +29,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import Link from "next/link";
 
-const getOsIcon = (osTemplate: string) => {
-  const os = osTemplate?.toLowerCase() || "";
-  if (os.includes("ubuntu")) return "https://cdn.simpleicons.org/ubuntu/E95420";
-  if (os.includes("debian")) return "https://cdn.simpleicons.org/debian/A81D33";
-  if (os.includes("centos")) return "https://cdn.simpleicons.org/centos/262577";
-  if (os.includes("almalinux") || os.includes("alma"))
-    return "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/almalinux/almalinux-original.svg";
-  if (os.includes("rocky")) return "https://cdn.simpleicons.org/rockylinux/10B981";
-  if (os.includes("alpine")) return "https://www.vectorlogo.zone/logos/alpinelinux/alpinelinux-icon.svg";
-  if (os.includes("fedora")) return "https://cdn.simpleicons.org/fedora/3b82f6";
-  if (os.includes("windows"))
-    return "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/windows11/windows11-original.svg";
-  if (os.includes("freebsd")) return "https://cdn.simpleicons.org/freebsd/AB2B28";
-  if (os.includes("mikrotik") || os.includes("chr")) {
-    return "https://cdn.worldvectorlogo.com/logos/mikrotik.svg";
-  }
-  return null;
-};
+import { getOsIconUrl, formatOsName } from "@/lib/vps-os";
 
 export default function MyVpsPage() {
   const { theme } = useTheme();
@@ -683,10 +666,10 @@ export default function MyVpsPage() {
                             isDark ? "bg-white/[0.03] border-white/[0.08]" : "bg-slate-50 border-slate-200/80"
                           )}
                         >
-                          {getOsIcon(vps.osTemplate) ? (
+                          {getOsIconUrl(vps.osTemplate, isDark) ? (
                             <img
                               referrerPolicy="no-referrer"
-                              src={getOsIcon(vps.osTemplate)!}
+                              src={getOsIconUrl(vps.osTemplate, isDark)!}
                               alt="OS"
                               className="w-full h-full object-contain"
                               loading="lazy"
@@ -1065,10 +1048,10 @@ export default function MyVpsPage() {
                                 isDark ? "bg-white/[0.03] border-white/[0.08]" : "bg-slate-50 border-slate-200/80"
                               )}
                             >
-                              {getOsIcon(vps.osTemplate) ? (
+                              {getOsIconUrl(vps.osTemplate, isDark) ? (
                                 <img
                                   referrerPolicy="no-referrer"
-                                  src={getOsIcon(vps.osTemplate)!}
+                                  src={getOsIconUrl(vps.osTemplate, isDark)!}
                                   alt="OS"
                                   className="w-full h-full object-contain"
                                   loading="lazy"

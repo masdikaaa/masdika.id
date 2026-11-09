@@ -2,13 +2,14 @@
 
 import { useUpdateEffect, useUrlNumber, useUrlString, useUrlTab } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
-import { Plus, Server, HardDrive, Edit, Trash2, Cpu, MemoryStick, RefreshCw, Network, Search, Play, Square, RefreshCcw, Power, ShieldAlert, XCircle, AlertTriangle, Receipt, Settings, CheckCircle, Save, FileText, Globe, X, ChevronLeft, ChevronRight, Terminal, Key, Loader2, GripVertical, Gauge, Activity, Zap, Copy, Check } from "lucide-react";
+import { Plus, Server, HardDrive, Edit, Trash2, Cpu, MemoryStick, RefreshCw, Network, Search, Play, Square, RefreshCcw, Power, ShieldAlert, XCircle, AlertTriangle, Receipt, Settings, CheckCircle, Save, FileText, Globe, X, ChevronLeft, ChevronRight, Terminal, Key, Loader2, GripVertical, Gauge, Activity, Zap, Copy, Check, Info } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Reorder } from "framer-motion";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { Select } from "@/components/ui/Select";
+import { getOsIconUrl, formatOsName, OS_GROUPS } from "@/lib/vps-os";
 
 type VpsService = {
   id: number;
@@ -28,23 +29,6 @@ type VpsService = {
   assignedIps: { ipAddress: string; publicIp?: string | null }[];
   reservedIps?: { accumulatedCost?: number }[];
 };
-
-const getOsIconUrl = (name: string, isDark: boolean = false) => {
-  const lowerName = name.toLowerCase();
-  if (lowerName.includes('ubuntu')) return 'https://cdn.simpleicons.org/ubuntu/E95420';
-  if (lowerName.includes('debian')) return 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/debian/debian-original.svg';
-  if (lowerName.includes('centos')) return 'https://cdn.simpleicons.org/centos/3b82f6';
-  if (lowerName.includes('almalinux')) return 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/almalinux/almalinux-original.svg';
-  if (lowerName.includes('rocky')) return 'https://cdn.simpleicons.org/rockylinux/10B981';
-  if (lowerName.includes('windows')) return 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/windows11/windows11-original.svg';
-  if (lowerName.includes('alpine')) return 'https://www.vectorlogo.zone/logos/alpinelinux/alpinelinux-icon.svg';
-  if (lowerName.includes('fedora')) return 'https://cdn.simpleicons.org/fedora/3b82f6';
-  if (lowerName.includes('freebsd')) return 'https://cdn.simpleicons.org/freebsd/AB2B28';
-  if (lowerName.includes('mikrotik') || lowerName.includes('chr')) {
-    return 'https://cdn.worldvectorlogo.com/logos/mikrotik.svg';
-  }
-  return null;
-}
 
 export default function VpsManagementPage() {
   const { theme } = useTheme();
@@ -316,6 +300,10 @@ export default function VpsManagementPage() {
   const [showResetPasswordModal, setShowResetPasswordModal] = useState<VpsService | null>(null);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showChangeOsModal, setShowChangeOsModal] = useState<VpsService | null>(null);
+  const [selectedNewOs, setSelectedNewOs] = useState<string>("");
+  const [customOsInput, setCustomOsInput] = useState<string>("");
+  const [savingOs, setSavingOs] = useState<boolean>(false);
   const [showIpModal, setShowIpModal] = useState<any>(null);
   const [assignedIps, setAssignedIps] = useState<any[]>([]);
   const [availableIps, setAvailableIps] = useState<any[]>([]);
@@ -590,6 +578,51 @@ export default function VpsManagementPage() {
       toast.error("An error occurred");
     } finally {
       setActionLoading(null);
+    }
+  };
+
+  const handleOpenChangeOsModal = (vps: VpsService) => {
+    setShowChangeOsModal(vps);
+    setSelectedNewOs(vps.osTemplate || "Ubuntu-24.04");
+    setCustomOsInput("");
+  };
+
+  const handleSaveOs = async () => {
+    if (!showChangeOsModal) return;
+    const finalOs = customOsInput.trim() || selectedNewOs.trim();
+    if (!finalOs) {
+      toast.error("Please select or enter an OS template name");
+      return;
+    }
+
+    try {
+      setSavingOs(true);
+      const res = await fetch("/api/admin/vps/services", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: showChangeOsModal.id,
+          action: "update_os",
+          osTemplate: finalOs
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to update OS template");
+      }
+
+      toast.success(data.message || `OS template updated to ${finalOs} successfully`);
+
+      // Update in local state immediately
+      setVpsServices(prev =>
+        prev.map(v => (v.id === showChangeOsModal.id ? { ...v, osTemplate: finalOs } : v))
+      );
+      setShowChangeOsModal(null);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update OS template");
+    } finally {
+      setSavingOs(false);
     }
   };
 
@@ -2264,18 +2297,42 @@ export default function VpsManagementPage() {
                         </td>
                         <td className="px-3.5 py-2.5">
                           {vps.osTemplate ? (
-                            <div className="flex items-center gap-2.5" title={vps.osTemplate}>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenChangeOsModal(vps)}
+                              className={cn(
+                                "group/os flex items-center gap-2 px-2 py-1 -ml-2 rounded-lg border border-transparent transition-all text-left cursor-pointer",
+                                isDark
+                                  ? "hover:bg-white/[0.06] hover:border-white/10"
+                                  : "hover:bg-slate-100 hover:border-slate-200"
+                              )}
+                              title="Click to change OS template / logo"
+                            >
                               {getOsIconUrl(vps.osTemplate, isDark) ? (
-                                <img referrerPolicy="no-referrer" src={getOsIconUrl(vps.osTemplate, isDark)!} alt="OS" className="w-5 h-5 object-contain" />
+                                <img referrerPolicy="no-referrer" src={getOsIconUrl(vps.osTemplate, isDark)!} alt="OS" className="w-5 h-5 object-contain shrink-0" />
                               ) : (
-                                <HardDrive className={cn("w-4 h-4", isDark ? "text-zinc-400" : "text-slate-500")} />
+                                <HardDrive className={cn("w-4 h-4 shrink-0", isDark ? "text-zinc-400" : "text-slate-500")} />
                               )}
                               <span className={cn("text-sm font-medium whitespace-nowrap capitalize", isDark ? "text-zinc-200" : "text-slate-700")}>
-                                {vps.osTemplate.split('/').pop()?.replace(/\.tar\.(zst|gz|xz)$/, '').split('_')[0].replace(/-standard|-default|-systemd/g, '').replace(/-/g, ' ') || vps.osTemplate}
+                                {formatOsName(vps.osTemplate)}
                               </span>
-                            </div>
+                              <Edit className="w-3.5 h-3.5 text-cyan-400 opacity-0 group-hover/os:opacity-100 transition-opacity ml-0.5 shrink-0" />
+                            </button>
                           ) : (
-                            <span className="text-zinc-600 text-xs italic">Unknown</span>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenChangeOsModal(vps)}
+                              className={cn(
+                                "group/os flex items-center gap-1.5 px-2 py-1 -ml-2 rounded-lg border border-transparent transition-all text-left cursor-pointer",
+                                isDark
+                                  ? "hover:bg-white/[0.06] hover:border-white/10"
+                                  : "hover:bg-slate-100 hover:border-slate-200"
+                              )}
+                              title="Click to set OS template"
+                            >
+                              <span className="text-zinc-600 text-xs italic">Unknown</span>
+                              <Edit className="w-3.5 h-3.5 text-cyan-400 opacity-0 group-hover/os:opacity-100 transition-opacity shrink-0" />
+                            </button>
                           )}
                         </td>
                         <td className="px-3.5 py-2.5">
@@ -3147,6 +3204,204 @@ export default function VpsManagementPage() {
               >
                 {actionLoading === showResetPasswordModal.id && <RefreshCw className="w-4 h-4 animate-spin" />}
                 Reset Password
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Change OS Template Modal */}
+      {showChangeOsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className={cn(
+            "w-full max-w-2xl rounded-2xl border shadow-2xl p-6 relative max-h-[90vh] flex flex-col overflow-hidden",
+            isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200"
+          )}>
+            {/* Header */}
+            <div className="flex items-center justify-between pb-4 border-b shrink-0 mb-4" style={{ borderColor: isDark ? "rgba(255,255,255,0.08)" : "#e2e8f0" }}>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+                  <HardDrive className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className={cn("text-base font-bold", isDark ? "text-white" : "text-slate-900")}>
+                    Change OS Template & Logo
+                  </h3>
+                  <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                    Updating OS identity for <strong>{showChangeOsModal.hostname}</strong> ({showChangeOsModal.user?.name})
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => { setShowChangeOsModal(null); setCustomOsInput(""); }}
+                className={cn("p-1.5 rounded-lg transition-colors", isDark ? "text-zinc-400 hover:text-white hover:bg-white/10" : "text-slate-400 hover:text-slate-900 hover:bg-slate-100")}
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body - Scrollable */}
+            <div className="flex-1 overflow-y-auto pr-1 space-y-5 scrollbar-thin">
+              {/* Notice */}
+              <div className={cn("p-3 rounded-xl border text-xs flex items-start gap-2.5", isDark ? "bg-cyan-950/20 border-cyan-800/30 text-cyan-300" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+                <Info className="w-4 h-4 shrink-0 mt-0.5 text-cyan-400" />
+                <span>
+                  Mengubah template OS ini akan otomatis mengganti logo distro dan nama OS di <strong>Admin Panel</strong> dan <strong>Customer Panel Dashboard</strong> client secara real-time.
+                </span>
+              </div>
+
+              {/* Live Preview Comparison */}
+              <div className={cn("p-3.5 rounded-xl border", isDark ? "bg-black/30 border-white/[0.06]" : "bg-slate-50 border-slate-200")}>
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 mb-2">Live Preview</div>
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  {/* Current */}
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-xs text-zinc-500">Current:</span>
+                    <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg border" style={{ borderColor: isDark ? "rgba(255,255,255,0.08)" : "#cbd5e1" }}>
+                      {getOsIconUrl(showChangeOsModal.osTemplate, isDark) ? (
+                        <img referrerPolicy="no-referrer" src={getOsIconUrl(showChangeOsModal.osTemplate, isDark)!} alt="OS" className="w-4 h-4 object-contain" />
+                      ) : (
+                        <HardDrive className="w-4 h-4 text-zinc-400" />
+                      )}
+                      <span className={cn("text-xs font-semibold", isDark ? "text-zinc-300" : "text-slate-700")}>
+                        {formatOsName(showChangeOsModal.osTemplate)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <span className="text-zinc-500 font-bold">→</span>
+
+                  {/* New Target */}
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-xs text-cyan-400 font-medium">New OS:</span>
+                    <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg border bg-cyan-500/10 border-cyan-500/30">
+                      {getOsIconUrl(customOsInput.trim() || selectedNewOs, isDark) ? (
+                        <img referrerPolicy="no-referrer" src={getOsIconUrl(customOsInput.trim() || selectedNewOs, isDark)!} alt="OS" className="w-4 h-4 object-contain" />
+                      ) : (
+                        <HardDrive className="w-4 h-4 text-cyan-400" />
+                      )}
+                      <span className={cn("text-xs font-bold", isDark ? "text-cyan-300" : "text-cyan-800")}>
+                        {formatOsName(customOsInput.trim() || selectedNewOs || "Select OS")}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* OS Presets Grid */}
+              <div>
+                <label className={cn("text-xs font-bold uppercase tracking-wider block mb-2.5", isDark ? "text-zinc-300" : "text-slate-700")}>
+                  Pilih Distro OS Populer (Presets)
+                </label>
+                <div className="space-y-3">
+                  {OS_GROUPS.map((group) => (
+                    <div key={group.family} className={cn("p-2.5 rounded-xl border", isDark ? "bg-white/[0.02] border-white/[0.05]" : "bg-white border-slate-200")}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <img referrerPolicy="no-referrer" src={group.icon} alt={group.family} className="w-4 h-4 object-contain" />
+                        <span className={cn("text-xs font-bold", isDark ? "text-zinc-200" : "text-slate-800")}>{group.family}</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {group.presets.map((preset) => {
+                          const isSelected = (customOsInput.trim() === "" && selectedNewOs === preset.templateValue);
+                          return (
+                            <button
+                              key={preset.id}
+                              type="button"
+                              onClick={() => {
+                                setSelectedNewOs(preset.templateValue);
+                                setCustomOsInput("");
+                              }}
+                              className={cn(
+                                "px-2.5 py-1 rounded-lg text-xs font-medium border transition-all text-left",
+                                isSelected
+                                  ? "bg-cyan-500/20 border-cyan-500 text-cyan-300 font-semibold shadow-2xs"
+                                  : isDark
+                                    ? "bg-zinc-900/60 border-white/[0.06] text-zinc-400 hover:text-white hover:border-white/20"
+                                    : "bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300"
+                              )}
+                            >
+                              {preset.name}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Synced Proxmox Templates (if any) */}
+              {templates.length > 0 && (
+                <div>
+                  <label className={cn("text-xs font-bold uppercase tracking-wider block mb-1.5", isDark ? "text-zinc-300" : "text-slate-700")}>
+                    Atau Pilih dari Template Proxmox ({templates.length})
+                  </label>
+                  <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-2 rounded-xl border scrollbar-thin" style={{ borderColor: isDark ? "rgba(255,255,255,0.06)" : "#e2e8f0" }}>
+                    {templates.map((tpl) => (
+                      <button
+                        key={tpl.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedNewOs(tpl.name);
+                          setCustomOsInput("");
+                        }}
+                        className={cn(
+                          "px-2.5 py-1 rounded-lg text-xs font-medium border transition-all",
+                          customOsInput.trim() === "" && selectedNewOs === tpl.name
+                            ? "bg-cyan-500/20 border-cyan-500 text-cyan-300 font-semibold"
+                            : isDark
+                              ? "bg-zinc-900/40 border-white/[0.06] text-zinc-400 hover:text-white"
+                              : "bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900"
+                        )}
+                      >
+                        {tpl.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Custom Input */}
+              <div>
+                <label className={cn("text-xs font-bold uppercase tracking-wider block mb-1.5", isDark ? "text-zinc-300" : "text-slate-700")}>
+                  Atau Input Custom OS Template
+                </label>
+                <input
+                  type="text"
+                  value={customOsInput}
+                  onChange={(e) => setCustomOsInput(e.target.value)}
+                  placeholder="Contoh: Debian-12, Ubuntu-25.04, AlmaLinux-10.2..."
+                  className={cn(
+                    "w-full border rounded-xl px-3.5 py-2 text-xs font-mono outline-none transition-colors",
+                    isDark
+                      ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-600 focus:border-cyan-500"
+                      : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500"
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-end gap-3 pt-4 border-t shrink-0 mt-4" style={{ borderColor: isDark ? "rgba(255,255,255,0.08)" : "#e2e8f0" }}>
+              <button
+                type="button"
+                onClick={() => { setShowChangeOsModal(null); setCustomOsInput(""); }}
+                className={cn(
+                  "px-4 py-2 rounded-xl text-xs font-semibold transition-colors border",
+                  isDark ? "border-white/[0.08] text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-700 hover:bg-slate-100"
+                )}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveOs}
+                disabled={savingOs || !(customOsInput.trim() || selectedNewOs.trim())}
+                className="px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 text-slate-950 disabled:opacity-50 transition-all shadow-sm"
+              >
+                {savingOs ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                Save OS Changes
               </button>
             </div>
           </div>

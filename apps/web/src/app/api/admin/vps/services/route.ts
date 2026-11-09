@@ -182,7 +182,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, message: started ? "VPS Unsuspended and Started" : "VPS Unsuspended. Client can start it now." });
     }
 
-    if (action === "update") {
+    if (action === "update_os" || action === "update") {
+      const body = await req.json().catch(() => ({}));
       const { 
         hostname, 
         username, 
@@ -193,8 +194,9 @@ export async function POST(req: NextRequest) {
         terminationDate,
         cpuCores,
         ramGb,
-        diskGb
-      } = await req.json().catch(() => ({ hostname: undefined, username: undefined, password: undefined, status: undefined, node: undefined, expiresAt: undefined, terminationDate: undefined, cpuCores: undefined, ramGb: undefined, diskGb: undefined }));
+        diskGb,
+        osTemplate
+      } = body;
 
       const updateData: any = {};
       if (hostname !== undefined) updateData.hostname = hostname;
@@ -207,8 +209,9 @@ export async function POST(req: NextRequest) {
       if (cpuCores !== undefined) updateData.cpuCores = Number(cpuCores);
       if (ramGb !== undefined) updateData.ramGb = Number(ramGb);
       if (diskGb !== undefined) updateData.diskGb = Number(diskGb);
+      if (osTemplate !== undefined) updateData.osTemplate = String(osTemplate).trim();
 
-      await prisma.vpsService.update({
+      const updated = await prisma.vpsService.update({
         where: { id: vps.id },
         data: updateData
       });
@@ -216,7 +219,11 @@ export async function POST(req: NextRequest) {
       // Sync update to Elasticsearch
       await syncVpsToElastic(vps.id).catch(e => console.error("ES Sync error:", e));
 
-      return NextResponse.json({ success: true, message: "VPS details updated successfully" });
+      return NextResponse.json({
+        success: true,
+        message: action === "update_os" ? `OS template updated to ${updateData.osTemplate} successfully` : "VPS details updated successfully",
+        vps: updated
+      });
     }
 
     if (action === "reset_password") {
