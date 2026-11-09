@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { invalidateCache } from '@/lib/cache';
 import { cookies } from 'next/headers';
 import { sendNewsletterEmail } from '@/lib/email';
 import { decryptDeterministic } from '@/lib/encryption';
@@ -77,7 +78,13 @@ export async function POST(req: Request) {
       }
     }
 
+    await invalidateCache('posts:*');
+    await invalidateCache('recent-posts:*');
+    await invalidateCache('post:*');
+
     revalidatePath('/', 'layout');
+    revalidatePath('/blog');
+    revalidatePath(`/blog/${post.slug}`);
 
     return NextResponse.json(post);
   } catch (error) {

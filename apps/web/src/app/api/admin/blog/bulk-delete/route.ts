@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { invalidateCache } from '@/lib/cache';
 import { requireAuth } from '@/lib/auth-middleware';
 
 export async function POST(req: Request) {
@@ -27,7 +28,12 @@ export async function POST(req: Request) {
       }
     });
 
+    await invalidateCache('posts:*');
+    await invalidateCache('recent-posts:*');
+    await invalidateCache('post:*');
+
     revalidatePath('/', 'layout');
+    revalidatePath('/blog');
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { invalidateCache } from '@/lib/cache';
 import { deleteLocalFile } from '@/lib/file-utils';
 import fs from 'fs';
 import path from 'path';
@@ -95,7 +96,14 @@ export async function PUT(
       }
     });
 
+    await invalidateCache('posts:*');
+    await invalidateCache('recent-posts:*');
+    await invalidateCache('post:*');
+
     revalidatePath('/', 'layout');
+    revalidatePath('/blog');
+    if (post.slug) revalidatePath(`/blog/${post.slug}`);
+    if (oldPost?.slug && oldPost.slug !== post.slug) revalidatePath(`/blog/${oldPost.slug}`);
 
     return NextResponse.json(post);
   } catch (error) {
@@ -130,7 +138,13 @@ export async function DELETE(
       where: { id: parseInt(id) }
     });
 
+    await invalidateCache('posts:*');
+    await invalidateCache('recent-posts:*');
+    await invalidateCache('post:*');
+
     revalidatePath('/', 'layout');
+    revalidatePath('/blog');
+    if (post?.slug) revalidatePath(`/blog/${post.slug}`);
 
     return NextResponse.json({ success: true });
   } catch (error) {
