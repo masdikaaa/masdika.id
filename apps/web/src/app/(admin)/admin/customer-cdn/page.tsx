@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
 import {
   UploadCloud, Search, RefreshCw, HardDrive, Users, Globe, Lock,
   Trash2, ExternalLink, Eye, LayoutGrid, List as ListIcon,
@@ -16,6 +17,19 @@ import { Pagination } from "@/components/ui/Pagination";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { AdminLoader } from "@/components/admin/AdminLoader";
+
+// Dynamically import Video.js player to prevent SSR issues and ensure lightweight bundle
+const VideoPlayer = dynamic(
+  () => import("@/components/media/VideoPlayer").then((mod) => mod.VideoPlayer),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full max-w-4xl mx-auto aspect-video max-h-[65vh] rounded-2xl bg-[#050610] border border-white/10 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+      </div>
+    ),
+  }
+);
 
 interface CustomerInfo {
   id: number;
@@ -778,19 +792,22 @@ export default function AdminCustomerCdnPage() {
               <div className="p-4 overflow-auto flex-1 flex items-center justify-center min-h-[300px] bg-black/30">
                 {previewItem.mimeType.startsWith("image/") ? (
                   <img
-                    src={`/api/media/${previewItem.token}/stream`}
+                    src={`/api/media/${previewItem.token}?inline=true`}
                     alt={previewItem.originalName}
                     className="max-h-[65vh] max-w-full object-contain rounded-lg"
                   />
                 ) : previewItem.mimeType.startsWith("video/") ? (
-                  <video
-                    src={`/api/media/${previewItem.token}/stream`}
-                    controls
-                    className="max-h-[65vh] max-w-full rounded-lg"
-                  />
+                  <div className="w-full max-w-3xl p-2 flex items-center justify-center">
+                    <VideoPlayer
+                      src={`/api/media/${previewItem.token}?inline=true`}
+                      mimeType={previewItem.mimeType}
+                      title={previewItem.originalName}
+                      downloadUrl={`/api/media/${previewItem.token}`}
+                    />
+                  </div>
                 ) : previewItem.mimeType.startsWith("audio/") ? (
                   <audio
-                    src={`/api/media/${previewItem.token}/stream`}
+                    src={`/api/media/${previewItem.token}?inline=true`}
                     controls
                     className="w-full max-w-md"
                   />

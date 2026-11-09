@@ -2,6 +2,7 @@
 
 import { useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { useState, useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
 import { UploadCloud, Trash2, File, Link as LinkIcon, HardDrive, CheckCircle2, Eye, X, FileImage, FileVideo, FileAudio, FileText, Presentation, CheckCircle, Search, LayoutGrid, List as ListIcon, Folder, FolderPlus, Edit2, MoveRight, ChevronRight, Loader2, Cloud, RefreshCw, AlertTriangle, Lock, Globe, MessageSquareQuote } from "lucide-react";
@@ -10,6 +11,19 @@ import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { Pagination } from "@/components/ui/Pagination";
 import { motion, AnimatePresence } from "framer-motion";
+
+// Dynamically import Video.js player to prevent SSR issues and ensure lightweight bundle
+const VideoPlayer = dynamic(
+  () => import("@/components/media/VideoPlayer").then((mod) => mod.VideoPlayer),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full max-w-4xl mx-auto aspect-video max-h-[75vh] rounded-2xl bg-[#050610] border border-white/10 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+      </div>
+    ),
+  }
+);
 
 // ─── Preview helpers ──────────────────────────────────────────────────────────
 
@@ -174,10 +188,14 @@ function PreviewModal({ item, onClose, onToggleVisibility }: { item: any; onClos
           <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent pointer-events-none" />
           {type === "image" && <ImageViewer src={mediaUrl} alt={item.originalName} />}
           {type === "video" && (
-            <video controls controlsList="nodownload" className="max-w-full max-h-[75vh]" onContextMenu={(e) => e.preventDefault()} playsInline>
-              <source src={mediaUrl} type={item.mimeType === "video/quicktime" ? "video/mp4" : item.mimeType} />
-              {item.mimeType === "video/quicktime" && <source src={mediaUrl} type="video/quicktime" />}
-            </video>
+            <div className="w-full max-w-4xl p-2 sm:p-4 flex items-center justify-center">
+              <VideoPlayer
+                src={mediaUrl}
+                mimeType={item.mimeType}
+                title={item.originalName}
+                downloadUrl={`/api/media/${item.token}`}
+              />
+            </div>
           )}
           {type === "audio" && (
             <div className="p-8 flex flex-col items-center gap-6">

@@ -22,6 +22,7 @@ export function VideoPlayer({ src, mimeType, poster, title, downloadUrl }: Video
   const [playbackError, setPlaybackError] = useState(false);
   const [errorDetails, setErrorDetails] = useState<string | null>(null);
   const [isPortrait, setIsPortrait] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     // Ensure container element exists
@@ -30,6 +31,10 @@ export function VideoPlayer({ src, mimeType, poster, title, downloadUrl }: Video
     setPlaybackError(false);
     setErrorDetails(null);
     setIsPortrait(false);
+    setIsPlaying(false);
+
+    // Clean up container before appending to avoid duplicate video elements
+    videoRef.current.innerHTML = "";
 
     // Create video element dynamically for clean disposal and hot reloading in React 19
     const videoElement = document.createElement("video-js");
@@ -109,6 +114,10 @@ export function VideoPlayer({ src, mimeType, poster, title, downloadUrl }: Video
     player.on("loadeddata", checkDimensions);
     player.on("resize", checkDimensions);
 
+    player.on("play", () => setIsPlaying(true));
+    player.on("pause", () => setIsPlaying(false));
+    player.on("ended", () => setIsPlaying(false));
+
     player.on("error", () => {
       const err = player.error();
       console.warn("Video.js playback error:", err);
@@ -145,10 +154,15 @@ export function VideoPlayer({ src, mimeType, poster, title, downloadUrl }: Video
           : "border border-slate-200 shadow-[0_10px_35px_rgba(0,0,0,0.12)] bg-black"
       )}
     >
-      {/* Title watermark on top-left overlay */}
+      {/* Title watermark on top-left overlay (matching Image 2) */}
       {title && (
-        <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 max-w-[calc(100%-1.5rem)]">
-          <div className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-[11px] sm:text-xs font-medium text-zinc-200 truncate">
+        <div
+          className={cn(
+            "absolute top-3 left-3 sm:top-4 sm:left-4 z-10 pointer-events-none transition-opacity duration-300 max-w-[calc(100%-1.5rem)]",
+            !isPlaying ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+          )}
+        >
+          <div className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-[11px] sm:text-xs font-medium text-zinc-200 truncate shadow-sm">
             {title}
           </div>
         </div>
