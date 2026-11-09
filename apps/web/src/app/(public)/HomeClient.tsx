@@ -505,10 +505,10 @@ export function HomeClient({
               className="relative flex items-center justify-center mt-4 lg:mt-0 order-2"
             >
               <HeroAvatarFrame
-                imageSrc="/images/mascots/masdika.webp"
+                imageSrc="/images/mascots/hero-home.webp"
                 imageAlt="Masdika – Cloud Engineer"
-                imageWidth={720}
-                imageHeight={864}
+                imageWidth={1236}
+                imageHeight={1273}
                 isPortrait={true}
                 priority={true}
                 badges={[
