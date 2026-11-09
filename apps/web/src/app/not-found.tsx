@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowLeft, Home, Zap } from "lucide-react";
+import { Home, Zap } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 export default function NotFound() {
@@ -104,7 +103,7 @@ export default function NotFound() {
             It looks like this page has been unplugged from the matrix. The link might be broken, or the page may have been removed. Let's plug you back in.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="flex items-center justify-center">
             <Button
               variant="primary"
               size="lg"
@@ -113,16 +112,6 @@ export default function NotFound() {
               className="w-full sm:w-auto"
             >
               Back to Homepage
-            </Button>
-            
-            <Button
-              variant="secondary"
-              size="lg"
-              onClick={() => window.history.back()}
-              leftIcon={<ArrowLeft className="w-5 h-5" />}
-              className="w-full sm:w-auto"
-            >
-              Go Back
             </Button>
           </div>
         </motion.div>
