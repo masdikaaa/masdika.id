@@ -12,47 +12,40 @@ interface CodeBlockProps {
   showLineNumbers?: boolean;
 }
 
-export function resolveCodeBlockMeta(langOrTitle: string, code: string): { language: string; title: string } {
+export function resolveCodeBlockMeta(langOrTitle: string, code?: string): { language: string; title: string } {
   const trimmed = (langOrTitle || '').trim();
   const lower = trimmed.toLowerCase();
 
-  // 1. Detect if code is an ASCII diagram / architectural flow chart
-  const hasArrows = code.includes('-->') || code.includes('+---') || /\n\s*v\s*\n/.test(code) || /\|\s*\n\s*v/.test(code);
-  const isAsciiDiagram = hasArrows && (code.includes('|') || code.includes('+') || code.includes('>'));
-
-  if (isAsciiDiagram && (!trimmed || lower === 'bash' || lower === 'sh' || lower === 'shell' || lower === 'text')) {
-    return {
-      language: 'text',
-      title: trimmed && lower !== 'bash' && lower !== 'sh' && lower !== 'shell' ? trimmed : 'Architecture Diagram'
-    };
-  }
-
-  // 2. Explicit language / title mapping
-  if (lower) {
-    if (lower.includes('php') || lower.includes('laravel')) return { language: 'php', title: trimmed || 'PHP' };
-    if (lower === 'jsx' || lower.includes('reactjs')) return { language: 'jsx', title: trimmed || 'React JSX' };
-    if (lower === 'tsx' || lower.includes('reactts')) return { language: 'tsx', title: trimmed || 'React TSX' };
-    if (lower === 'ts' || lower.includes('typescript')) return { language: 'typescript', title: trimmed || 'TypeScript' };
-    if (lower === 'js' || lower.includes('javascript') || lower === 'node') return { language: 'javascript', title: trimmed || 'JavaScript' };
-    if (lower === 'py' || lower.includes('python')) return { language: 'python', title: trimmed || 'Python' };
-    if (lower === 'go' || lower.includes('golang')) return { language: 'go', title: trimmed || 'Go' };
-    if (lower === 'rs' || lower.includes('rust')) return { language: 'rust', title: trimmed || 'Rust' };
-    if (lower.includes('yaml') || lower.includes('yml')) return { language: 'yaml', title: trimmed || 'YAML' };
-    if (lower.includes('docker')) return { language: 'dockerfile', title: trimmed || 'Dockerfile' };
-    if (lower.includes('sql') || lower.includes('mysql') || lower.includes('pgsql') || lower.includes('postgres')) return { language: 'sql', title: trimmed || 'SQL' };
-    if (lower.includes('html')) return { language: 'html', title: trimmed || 'HTML' };
-    if (lower.includes('css')) return { language: 'css', title: trimmed || 'CSS' };
-    if (lower.includes('json')) return { language: 'json', title: trimmed || 'JSON' };
-    if (lower.includes('k8s') || lower.includes('kube') || lower.includes('kubernetes')) return { language: 'yaml', title: trimmed || 'Kubernetes' };
-    if (lower.includes('sh') || lower.includes('bash') || lower.includes('shell') || lower.includes('zsh')) return { language: 'bash', title: trimmed || 'Bash' };
-    if (lower.includes('text') || lower.includes('txt') || lower.includes('plain')) return { language: 'text', title: trimmed || 'Plain Text' };
+  if (trimmed) {
+    if (lower === 'bash' || lower === 'sh' || lower === 'shell' || lower === 'zsh') {
+      return { language: 'bash', title: trimmed };
+    }
+    if (lower === 'txt' || lower === 'text' || lower === 'plain' || lower === 'plaintext') {
+      return { language: 'text', title: trimmed };
+    }
+    if (lower.includes('php') || lower.includes('laravel')) return { language: 'php', title: trimmed };
+    if (lower === 'jsx' || lower.includes('reactjs')) return { language: 'jsx', title: trimmed };
+    if (lower === 'tsx' || lower.includes('reactts')) return { language: 'tsx', title: trimmed };
+    if (lower === 'ts' || lower.includes('typescript')) return { language: 'typescript', title: trimmed };
+    if (lower === 'js' || lower.includes('javascript') || lower === 'node') return { language: 'javascript', title: trimmed };
+    if (lower === 'py' || lower.includes('python')) return { language: 'python', title: trimmed };
+    if (lower === 'go' || lower.includes('golang')) return { language: 'go', title: trimmed };
+    if (lower === 'rs' || lower.includes('rust')) return { language: 'rust', title: trimmed };
+    if (lower.includes('yaml') || lower.includes('yml')) return { language: 'yaml', title: trimmed };
+    if (lower.includes('docker')) return { language: 'dockerfile', title: trimmed };
+    if (lower.includes('jenkins')) return { language: 'jenkinsfile', title: trimmed };
+    if (lower.includes('sql') || lower.includes('mysql') || lower.includes('pgsql') || lower.includes('postgres')) return { language: 'sql', title: trimmed };
+    if (lower.includes('html')) return { language: 'html', title: trimmed };
+    if (lower.includes('css')) return { language: 'css', title: trimmed };
+    if (lower.includes('json')) return { language: 'json', title: trimmed };
+    if (lower.includes('markdown') || lower === 'md') return { language: 'markdown', title: trimmed };
     return { language: lower, title: trimmed };
   }
 
-  // 3. Fallback when no language is specified
-  const hasBashCommand = /^\s*(npm|pnpm|yarn|git|docker|kubectl|curl|sudo|apt|cd|mkdir|echo|cat|export|helm)\b/m.test(code);
+  // Fallback when no language is specified
+  const hasBashCommand = code && /^\s*(npm|pnpm|yarn|git|docker|kubectl|curl|sudo|apt|cd|mkdir|echo|cat|export|helm)\b/m.test(code);
   if (hasBashCommand) {
-    return { language: 'bash', title: 'Terminal' };
+    return { language: 'bash', title: 'bash' };
   }
 
   return { language: 'text', title: 'Code' };
@@ -265,6 +258,7 @@ export function CodeBlock({
             margin: 0,
             padding: '1.25rem',
             backgroundColor: '#0c1017',
+            color: '#fde047',
             fontSize: '13.5px',
             lineHeight: '1.65',
             whiteSpace: 'pre',
@@ -272,12 +266,13 @@ export function CodeBlock({
             overflowWrap: 'normal',
           }}
           codeTagProps={{
-            className: "font-mono",
+            className: "font-mono !text-[#fde047]",
             style: { 
               fontFamily: 'var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
               whiteSpace: 'pre', 
               wordBreak: 'normal', 
               overflowWrap: 'normal',
+              color: '#fde047'
             }
           }}
         >

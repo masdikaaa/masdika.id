@@ -659,7 +659,7 @@ html.dark .prose :not(pre)>code,
   content: none !important;
 }
 
-html.dark .prose pre code,
+.prose pre code,
 .prose-invert pre code {
   background-color: transparent !important;
   color: #fde047 !important;
