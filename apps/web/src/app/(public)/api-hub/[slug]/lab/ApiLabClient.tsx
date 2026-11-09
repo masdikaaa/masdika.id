@@ -204,7 +204,7 @@ export default function ApiLabClient({ project }: { project: any }) {
 
         {/* Header */}
         <div className="mb-10">
-          <h1 className={cn("text-4xl md:text-5xl font-bold mb-4 leading-tight drop-shadow-sm inline-block", isDark ? "bg-gradient-to-br from-cyan-400 to-cyan-200 bg-clip-text text-transparent" : "text-slate-900")}>
+          <h1 className={cn("text-4xl md:text-5xl font-bold mb-4 leading-tight inline-block", isDark ? "bg-gradient-to-br from-cyan-400 to-cyan-200 bg-clip-text text-transparent drop-shadow-sm" : "text-slate-900")}>
             {project.name}
           </h1>
           <p className={cn("text-base md:text-lg leading-relaxed max-w-3xl", isDark ? "text-zinc-400" : "text-slate-600")}>
@@ -213,7 +213,7 @@ export default function ApiLabClient({ project }: { project: any }) {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-8 border-b border-white/10 mb-8">
+        <div className={cn("flex gap-8 border-b mb-8", isDark ? "border-white/10" : "border-slate-200")}>
           {["Readme", "Lab API", "Dashboards"].map(tab => (
             <button
               key={tab}
@@ -228,7 +228,7 @@ export default function ApiLabClient({ project }: { project: any }) {
             >
               {tab}
               {activeTab === tab && (
-                <motion.div layoutId="tab" className="absolute bottom-[-1px] left-0 right-0 h-0.5 bg-cyan-500 rounded-t-full shadow-[0_-2px_10px_rgba(34,211,238,0.5)]" />
+                <motion.div layoutId="tab" className={cn("absolute bottom-[-1px] left-0 right-0 h-0.5 bg-cyan-500 rounded-t-full", isDark && "shadow-[0_-2px_10px_rgba(34,211,238,0.5)]")} />
               )}
             </button>
           ))}
@@ -278,7 +278,7 @@ export default function ApiLabClient({ project }: { project: any }) {
             {/* Main Lab Area */}
             <div className="flex-1 space-y-6 min-w-0 w-full">
 
-              <div className={cn("border rounded-xl p-4", isDark ? "bg-cyan-500/10 border-cyan-500/30 shadow-[0_0_15px_rgba(34,211,238,0.05)]" : "bg-cyan-50 border-cyan-200 shadow-sm")}>
+              <div className={cn("border rounded-xl p-4", isDark ? "bg-cyan-500/10 border-cyan-500/30" : "bg-cyan-50 border-cyan-200")}>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                   <div className={cn("flex items-center gap-3", isDark ? "text-cyan-300" : "text-cyan-700")}>
                     <Key className="w-5 h-5 shrink-0" />
@@ -299,7 +299,7 @@ export default function ApiLabClient({ project }: { project: any }) {
                             <svg className={`w-4 h-4 shrink-0 transition-transform ${showKeyDropdown ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6" /></svg>
                           </button>
                           {showKeyDropdown && (
-                            <div className={cn("absolute top-full right-0 mt-2 z-50 border rounded-xl shadow-2xl overflow-hidden min-w-[280px]", isDark ? "bg-[var(--surface)] border-[var(--border-primary)]" : "bg-white border-slate-200")}>
+                            <div className={cn("absolute top-full right-0 mt-2 z-50 border rounded-xl shadow-lg overflow-hidden min-w-[280px]", isDark ? "bg-[var(--surface)] border-[var(--border-primary)]" : "bg-white border-slate-200")}>
                               {userKeys.map((k, i) => (
                                 <button
                                   key={k.id}
@@ -315,7 +315,7 @@ export default function ApiLabClient({ project }: { project: any }) {
                           )}
                         </>
                       ) : (
-                        <div className={cn("border px-4 py-2 rounded-lg text-xs font-mono truncate max-w-xs shadow-inner", isDark ? "bg-[var(--surface-secondary)] border-[var(--border-primary)] text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+                        <div className={cn("border px-4 py-2 rounded-lg text-xs font-mono truncate max-w-xs", isDark ? "bg-[var(--surface-secondary)] border-[var(--border-primary)] text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
                           {apiKey}
                         </div>
                       )}
@@ -323,7 +323,7 @@ export default function ApiLabClient({ project }: { project: any }) {
                   ) : (
                     <button
                       onClick={generateKey}
-                      className="w-full sm:w-auto bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 text-white px-6 py-2.5 rounded-lg font-bold text-sm transition-all shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2"
+                      className="w-full sm:w-auto bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 text-white px-6 py-2.5 rounded-lg font-bold text-sm transition-all flex items-center justify-center gap-2"
                     >
                       Go to Dashboard
                     </button>
@@ -332,7 +332,7 @@ export default function ApiLabClient({ project }: { project: any }) {
               </div>
 
               {/* Endpoint Area */}
-              <div className={cn("rounded-2xl overflow-hidden shadow-2xl border", isDark ? "bg-[var(--surface)] border-[var(--border-primary)]" : "bg-white border-black/5")}>
+              <div className={cn("rounded-2xl overflow-hidden border", isDark ? "bg-[var(--surface)] border-[var(--border-primary)]" : "bg-white border-slate-200")}>
                 <div className={cn("px-5 py-3 border-b flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4", isDark ? "bg-[var(--surface-secondary)] border-[var(--border-primary)]" : "bg-slate-50 border-slate-200")}>
                   <div className="flex items-center gap-3">
                     <div className="flex gap-1.5">
@@ -352,8 +352,8 @@ export default function ApiLabClient({ project }: { project: any }) {
                 </div>
                 
                 <div className="p-5 flex flex-col lg:flex-row gap-4 items-stretch lg:items-center">
-                  <div className={cn("flex-1 border rounded-xl p-3 flex items-center gap-3 overflow-x-auto font-mono text-sm shadow-inner", isDark ? "bg-black/40 border-white/10" : "bg-slate-100 border-slate-200")}>
-                    <span className={cn("font-bold px-2.5 py-1 rounded-md", isDark ? "bg-white/5 text-cyan-400" : "bg-white text-cyan-600 shadow-sm")}>
+                  <div className={cn("flex-1 border rounded-xl p-3 flex items-center gap-3 overflow-x-auto font-mono text-sm", isDark ? "bg-black/40 border-white/10" : "bg-slate-100 border-slate-200")}>
+                    <span className={cn("font-bold px-2.5 py-1 rounded-md", isDark ? "bg-white/5 text-cyan-400" : "bg-white text-cyan-600 border border-slate-200")}>
                       {selectedMethod}
                     </span>
                     <span className={cn("whitespace-nowrap", isDark ? "text-zinc-300" : "text-slate-700")}>
@@ -368,7 +368,7 @@ export default function ApiLabClient({ project }: { project: any }) {
                       "shrink-0 px-8 py-3 lg:py-0 h-full min-h-[52px] rounded-xl font-bold transition-all flex items-center justify-center gap-2",
                       (isTesting || !apiKey)
                         ? (isDark ? "bg-white/5 text-zinc-500 cursor-not-allowed" : "bg-slate-100 text-slate-400 cursor-not-allowed")
-                        : "bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 text-white shadow-[0_0_20px_rgba(34,211,238,0.2)] hover:shadow-[0_0_30px_rgba(34,211,238,0.4)]"
+                        : "bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 text-white"
                     )}
                   >
                     {isTesting ? (
@@ -445,7 +445,7 @@ export default function ApiLabClient({ project }: { project: any }) {
                       </label>
                     </div>
                   ) : (
-                    <div className={cn("rounded-2xl overflow-hidden shadow-2xl border mt-6", isDark ? "bg-[var(--surface)] border-[var(--border-primary)]" : "bg-white border-black/5")}>
+                    <div className={cn("rounded-2xl overflow-hidden border mt-6", isDark ? "bg-[var(--surface)] border-[var(--border-primary)]" : "bg-white border-slate-200")}>
                       <div className={cn("px-5 py-3 flex items-center justify-between border-b", isDark ? "bg-[var(--surface-secondary)] border-[var(--border-primary)]" : "bg-slate-50 border-slate-200")}>
                         <div className="flex gap-2 w-16">
                           <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
@@ -469,7 +469,7 @@ export default function ApiLabClient({ project }: { project: any }) {
               )}
 
               {selectedMethod === "GET" && project.slug === "cdn" && (
-                <div className={cn("rounded-xl overflow-hidden shadow-2xl border mt-4", isDark ? "bg-[var(--surface)] border-[var(--border-primary)]" : "bg-white border-black/5")}>
+                <div className={cn("rounded-xl overflow-hidden border mt-4", isDark ? "bg-[var(--surface)] border-[var(--border-primary)]" : "bg-white border-slate-200")}>
                   <div className={cn("px-4 py-3 flex items-center justify-between", isDark ? "bg-[var(--surface-secondary)]" : "bg-slate-50 border-b border-slate-200")}>
                     <span className={cn("text-xs font-mono", isDark ? "text-zinc-400" : "text-slate-500")}>Query Parameter</span>
                   </div>
@@ -492,7 +492,7 @@ export default function ApiLabClient({ project }: { project: any }) {
               )}
 
               {/* Response Area */}
-              <div className={cn("rounded-2xl overflow-hidden shadow-2xl border mt-6 relative", isDark ? "bg-[var(--surface)] border-[var(--border-primary)]" : "bg-white border-black/5")}>
+              <div className={cn("rounded-2xl overflow-hidden border mt-6 relative", isDark ? "bg-[var(--surface)] border-[var(--border-primary)]" : "bg-white border-slate-200")}>
                 <div className={cn("px-5 py-3 flex items-center justify-between border-b", isDark ? "bg-[var(--surface-secondary)] border-[var(--border-primary)]" : "bg-slate-50 border-slate-200")}>
                   <div className="flex items-center gap-3">
                     <Terminal className="w-4 h-4 text-cyan-500" />
@@ -567,9 +567,13 @@ export default function ApiLabClient({ project }: { project: any }) {
         )}
 
         {activeTab === "Readme" && (
-          <div className={cn("border rounded-[2rem] mt-8 p-8 md:p-12 shadow-[0_20px_60px_-15px_rgba(34,211,238,0.1)] relative overflow-hidden group", isDark ? "border-white/10 bg-gradient-to-b from-[#0a1f33]/40 to-black/60 backdrop-blur-sm text-white ring-1 ring-white/5" : "border-black/5 bg-white text-slate-900 ring-1 ring-black/5")}>
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none translate-x-1/3 -translate-y-1/3 group-hover:bg-cyan-500/20 transition-all duration-700" />
-            <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-cyan-600/10 rounded-full blur-[100px] pointer-events-none -translate-x-1/3 translate-y-1/3 group-hover:bg-cyan-600/20 transition-all duration-700" />
+          <div className={cn("border rounded-[2rem] mt-8 p-8 md:p-12 relative overflow-hidden group", isDark ? "border-white/10 bg-gradient-to-b from-[#0a1f33]/40 to-black/60 backdrop-blur-sm text-white ring-1 ring-white/5" : "border-slate-200 bg-white text-slate-900")}>
+            {isDark && (
+              <>
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none translate-x-1/3 -translate-y-1/3 group-hover:bg-cyan-500/20 transition-all duration-700" />
+                <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-cyan-600/10 rounded-full blur-[100px] pointer-events-none -translate-x-1/3 translate-y-1/3 group-hover:bg-cyan-600/20 transition-all duration-700" />
+              </>
+            )}
             
             <div className="relative z-10">
               <h2 className="text-3xl lg:text-4xl font-black mb-8 tracking-tight">{project.name} User Guide</h2>
@@ -699,7 +703,7 @@ export default function ApiLabClient({ project }: { project: any }) {
                         <p className={cn("text-sm leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>{snippet.desc}</p>
                       </div>
 
-                      <div className={cn("rounded-xl overflow-hidden border shadow-2xl", isDark ? "bg-[var(--surface)] border-[var(--border-primary)]" : "bg-white border-black/5")}>
+                      <div className={cn("rounded-xl overflow-hidden border", isDark ? "bg-[var(--surface)] border-[var(--border-primary)]" : "bg-white border-slate-200")}>
                         {/* Tab Style Header */}
                         <div className={cn("flex items-end justify-between px-4 pt-3 border-b", isDark ? "bg-[var(--surface-secondary)] border-[var(--border-primary)]" : "bg-slate-50 border-slate-200")}>
                           <div className="flex items-end min-w-0 flex-1 mr-4">
@@ -711,7 +715,7 @@ export default function ApiLabClient({ project }: { project: any }) {
                             </div>
 
                             {/* The Tab */}
-                            <div className={cn("flex items-center gap-2 px-4 h-9 rounded-t-lg border-x border-t min-w-0", isDark ? "bg-[var(--surface)] border-[var(--border-primary)] shadow-[0_-2px_10px_rgba(0,0,0,0.2)]" : "bg-white border-slate-200 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]")}>
+                            <div className={cn("flex items-center gap-2 px-4 h-9 rounded-t-lg border-x border-t min-w-0", isDark ? "bg-[var(--surface)] border-[var(--border-primary)]" : "bg-white border-slate-200")}>
                               <img referrerPolicy="no-referrer" src={snippet.icon} className="w-4 h-4 object-contain shrink-0" alt={snippet.name} loading="lazy" decoding="async" />
                               <span className={cn("text-sm font-semibold tracking-wide truncate leading-none", isDark ? "text-white" : "text-slate-900")}>
                                 {snippet.name}
@@ -753,7 +757,7 @@ export default function ApiLabClient({ project }: { project: any }) {
                   <p className="mb-4">Send a <em>request</em> <strong>GET</strong> to the following URL to download or view the file.</p>
 
                   {/* GET Endpoint Code Block */}
-                  <div className={cn("rounded-xl overflow-hidden shadow-2xl mb-8 border", isDark ? "bg-[var(--surface)] border-[var(--border-primary)]" : "bg-white border-black/5")}>
+                  <div className={cn("rounded-xl overflow-hidden mb-8 border", isDark ? "bg-[var(--surface)] border-[var(--border-primary)]" : "bg-white border-slate-200")}>
                     {/* Header */}
                     <div className={cn("flex items-center justify-between px-3 py-2 border-b", isDark ? "bg-[var(--surface-secondary)] border-[var(--border-primary)]" : "bg-slate-50 border-slate-200")}>
                       <div className="flex items-center gap-1.5 ml-1">
@@ -812,8 +816,10 @@ export default function ApiLabClient({ project }: { project: any }) {
 
 
         {activeTab === "Dashboards" && (
-          <div className={cn("py-32 text-center border rounded-[2rem] mt-8 shadow-[0_20px_60px_-15px_rgba(34,211,238,0.1)] relative overflow-hidden group", isDark ? "bg-gradient-to-b from-[#0a1f33]/40 to-black/60 backdrop-blur-sm border-white/10 ring-1 ring-white/5" : "bg-white border-black/5 ring-1 ring-black/5")}>
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none group-hover:bg-cyan-500/20 transition-all duration-700" />
+          <div className={cn("py-32 text-center border rounded-[2rem] mt-8 relative overflow-hidden group", isDark ? "bg-gradient-to-b from-[#0a1f33]/40 to-black/60 backdrop-blur-sm border-white/10 ring-1 ring-white/5" : "bg-white border-slate-200")}>
+            {isDark && (
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none group-hover:bg-cyan-500/20 transition-all duration-700" />
+            )}
             <div className="relative z-10 flex flex-col items-center">
               <Terminal className={cn("w-20 h-20 mb-8", isDark ? "text-cyan-500/30" : "text-cyan-500/10")} />
               <h3 className={cn("text-3xl font-black mb-4 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Dashboards Section</h3>
