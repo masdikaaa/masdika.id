@@ -3,11 +3,12 @@ import { useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 import React, { useState, useEffect, Fragment } from "react";
 import { toast } from "sonner";
-import { Activity, Clock, Loader2, Save, RefreshCw, Terminal, Network, Package, Info, Users, Layers, Wallet, CheckCircle2, AlertTriangle, XCircle, AlertCircle, ChevronDown, Zap } from "lucide-react";
+import { Activity, Clock, Loader2, Save, RefreshCw, Terminal, Network, Package, Info, Users, Layers, Wallet, CheckCircle2, AlertTriangle, XCircle, AlertCircle, ChevronDown, Zap, Mail, Send } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { formatRupiah } from "@/lib/billing";
 import { Pagination } from "@/components/ui/Pagination";
 import { Select } from "@/components/ui/Select";
+import { UserAvatar } from "@/components/ui/UserAvatar";
 
 interface ServiceInfo {
   id: string;
@@ -33,6 +34,12 @@ interface CustomerInfo {
   services: ServiceInfo[];
   totalAccumulatedCost: number;
   hasInvoiceThisMonth: boolean;
+  lowBalanceAlert?: {
+    sentAt: string;
+    remainingHours: number;
+    balance: number;
+    totalHourlyBurn: number;
+  } | null;
 }
 
 export default function PaygMonitorPage() {
@@ -50,6 +57,54 @@ export default function PaygMonitorPage() {
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [triggeringAlerts, setTriggeringAlerts] = useState(false);
+  const [sendingAlert, setSendingAlert] = useState<number | null>(null);
+
+  const handleTriggerAlerts = async () => {
+    setTriggeringAlerts(true);
+    const toastId = toast.loading("Checking & sending low balance alerts...");
+    try {
+      const res = await fetch("/api/admin/payg-monitor", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "trigger-alerts" }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(data.message, { id: toastId });
+        fetchData();
+      } else {
+        toast.error(data.error || "Failed to trigger alerts", { id: toastId });
+      }
+    } catch {
+      toast.error("Network error while sending alerts", { id: toastId });
+    } finally {
+      setTriggeringAlerts(false);
+    }
+  };
+
+  const handleSendSingleAlert = async (userId: number) => {
+    setSendingAlert(userId);
+    const toastId = toast.loading(`Sending low balance alert to client #${userId}...`);
+    try {
+      const res = await fetch("/api/admin/payg-monitor", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "send-single-alert", userId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(data.message, { id: toastId });
+        fetchData();
+      } else {
+        toast.error(data.error || "Failed to send alert", { id: toastId });
+      }
+    } catch {
+      toast.error("Network error while sending alert", { id: toastId });
+    } finally {
+      setSendingAlert(null);
+    }
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -293,14 +348,30 @@ export default function PaygMonitorPage() {
               Monitor account balances, hourly burn deductions, and service runtime
             </p>
           </div>
-          <div className="relative w-full sm:w-72 shrink-0">
-            <input
-              type="text"
-              placeholder="Search name or email..."
-              value={searchQuery}
-              onChange={(e) => { setSearchQuery(e.target.value); setCustomerPage(1); }}
-              className={cn("w-full border rounded-xl pl-3.5 pr-4 py-2 text-xs sm:text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
-            />
+          <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap w-full sm:w-auto">
+            <button
+              onClick={handleTriggerAlerts}
+              disabled={triggeringAlerts || loading}
+              className={cn(
+                "px-3.5 py-2 rounded-xl font-bold text-xs border transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 whitespace-nowrap shadow-xs",
+                lowCount > 0
+                  ? (isDark ? "bg-amber-500/20 border-amber-500/40 text-amber-300 hover:bg-amber-500/30" : "bg-amber-50 border-amber-300 text-amber-800 hover:bg-amber-100")
+                  : (isDark ? "bg-white/5 border-white/[0.08] text-zinc-300 hover:bg-white/10" : "bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200")
+              )}
+              title="Check all customers and send warning email to any customer with remaining runtime <= 24 hours"
+            >
+              {triggeringAlerts ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Mail className="w-3.5 h-3.5 text-amber-400" />}
+              <span>Send Low Balance Alerts {lowCount > 0 ? `(${lowCount})` : ''}</span>
+            </button>
+            <div className="relative w-full sm:w-64 shrink-0">
+              <input
+                type="text"
+                placeholder="Search name or email..."
+                value={searchQuery}
+                onChange={(e) => { setSearchQuery(e.target.value); setCustomerPage(1); }}
+                className={cn("w-full border rounded-xl pl-3.5 pr-4 py-2 text-xs sm:text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+              />
+            </div>
           </div>
         </div>
 
@@ -424,13 +495,13 @@ export default function PaygMonitorPage() {
                       <td className="py-3 sm:py-4 px-3 sm:px-4">
                         <div className="flex items-center gap-2.5 sm:gap-3">
                           <ChevronDown className={cn("w-4 h-4 text-zinc-500 transition-transform shrink-0", expandedCustomerId === cust.id ? "rotate-180 text-cyan-400" : "group-hover:text-zinc-300")} />
-                          <div className={cn("w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden border shrink-0 flex items-center justify-center", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
-                            <img referrerPolicy="no-referrer" 
-                              src={cust.image || `/api/avatar?email=${encodeURIComponent(cust.email || '')}&name=${encodeURIComponent(cust.name || 'User')}`} 
-                              alt={cust.name} 
-                              className="w-full h-full object-cover" 
-                            loading="lazy" decoding="async" />
-                          </div>
+                          <UserAvatar
+                            image={cust.image}
+                            email={cust.email}
+                            name={cust.name}
+                            size="md"
+                            isDark={isDark}
+                          />
                           <div className="min-w-0 flex-1">
                             <div className={cn("font-bold text-xs sm:text-sm truncate", isDark ? "text-white" : "text-slate-900")}>{cust.name}</div>
                             <div className={cn("text-[10px] sm:text-xs truncate", isDark ? "text-zinc-500" : "text-slate-500")}>{cust.email}</div>
@@ -463,6 +534,11 @@ export default function PaygMonitorPage() {
                             <span className={cn("text-[9px] sm:text-[10px] mt-0.5 whitespace-nowrap", isDark ? "text-amber-400/80" : "text-amber-700")}>
                               ~{cust.remainingHours} hrs left
                             </span>
+                            {cust.lowBalanceAlert && (
+                              <span className="text-[9px] text-amber-500/90 flex items-center gap-0.5 mt-0.5 font-medium" title={`Email peringatan terkirim pada ${new Date(cust.lowBalanceAlert.sentAt).toLocaleString('id-ID')}`}>
+                                <Mail className="w-2.5 h-2.5" /> Email Sent
+                              </span>
+                            )}
                           </div>
                         ) : (
                           <div className="inline-flex flex-col items-center">
@@ -506,10 +582,36 @@ export default function PaygMonitorPage() {
                               <div className={cn("p-3.5 sm:p-4 rounded-xl border flex items-start gap-3 mb-4 text-xs transition-all shadow-sm", isDark ? "bg-amber-500/10 border-amber-500/25 text-amber-300" : "bg-amber-50 border-amber-200 text-amber-800")}>
                                 <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 shrink-0 mt-0.5 text-amber-400" />
                                 <div className="flex-1 min-w-0">
-                                  <div className="font-bold text-amber-400 text-xs sm:text-sm mb-0.5">Warning: Critical Low Balance (&lt; 24 Hours)</div>
+                                  <div className="font-bold text-amber-400 text-xs sm:text-sm mb-1 flex items-center justify-between flex-wrap gap-2">
+                                    <span>Warning: Critical Low Balance (&lt; 24 Hours)</span>
+                                    {cust.lowBalanceAlert ? (
+                                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                                        <Mail className="w-3 h-3 text-amber-400" />
+                                        Email Peringatan Terkirim ({new Date(cust.lowBalanceAlert.sentAt).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' })})
+                                      </span>
+                                    ) : (
+                                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700">
+                                        Belum Dikirim Email
+                                      </span>
+                                    )}
+                                  </div>
                                   <p className={cn("leading-relaxed break-words whitespace-normal text-xs", isDark ? "text-amber-200/90" : "text-slate-600")}>
                                     Remaining balance is <strong>{formatRupiah(cust.balance)}</strong>, sufficient for only <strong>~{cust.remainingHours} hrs</strong> at <strong>{formatRupiah(cust.totalHourlyBurn)}/hr</strong> burn rate. Recommend customer to top up soon to prevent service suspension.
                                   </p>
+                                  <div className="mt-3 flex items-center gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleSendSingleAlert(cust.id);
+                                      }}
+                                      disabled={sendingAlert === cust.id}
+                                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-slate-950 transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-xs"
+                                    >
+                                      {sendingAlert === cust.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
+                                      <span>{cust.lowBalanceAlert ? 'Kirim Ulang Email Peringatan' : 'Kirim Email Peringatan Sekarang'}</span>
+                                    </button>
+                                  </div>
                                 </div>
                               </div>
                             )}

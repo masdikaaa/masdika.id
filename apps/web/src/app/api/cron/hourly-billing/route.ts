@@ -535,6 +535,19 @@ export async function GET(req: Request) {
       }
     }
 
+    // ----------------------------------------------------
+    // LOW BALANCE NOTIFICATIONS (ALL PAYG SERVICES)
+    // Checks all active services (VPS, IPs, Subscriptions)
+    // and sends warning email to customers with remaining runtime <= 24 hours.
+    // ----------------------------------------------------
+    let lowBalanceSummary: any = null;
+    try {
+      const { checkAndSendLowBalanceAlerts } = await import('@/lib/low-balance-alert');
+      lowBalanceSummary = await checkAndSendLowBalanceAlerts();
+    } catch (lowBalanceErr) {
+      console.error("Hourly billing low balance alert error:", lowBalanceErr);
+    }
+
     const billingSummary = {
       subscriptions: {
         processed: processedCount,
@@ -545,7 +558,8 @@ export async function GET(req: Request) {
         suspended: vpsSuspended,
         ghostErrors: typeof ghostErrors !== 'undefined' ? ghostErrors : []
       },
-      reservedIps: { processed: ipProcessed, insufficientBalance: ipReleased }
+      reservedIps: { processed: ipProcessed, insufficientBalance: ipReleased },
+      lowBalanceAlerts: lowBalanceSummary
     };
 
     logger.info('Hourly Billing Executed', {

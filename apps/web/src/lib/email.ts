@@ -255,6 +255,112 @@ export const sendRenewalInvoiceEmail = async (email: string, userName: string, p
   });
 };
 
+export const sendLowBalanceAlertEmail = async ({
+  email,
+  userName,
+  balance,
+  totalHourlyBurn,
+  remainingHours,
+  remainingDays,
+  services,
+}: {
+  email: string;
+  userName: string;
+  balance: number;
+  totalHourlyBurn: number;
+  remainingHours: number;
+  remainingDays: number;
+  services: { name: string; type: string; hourlyRate: number }[];
+}) => {
+  const formattedBalance = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(balance);
+  const formattedBurn = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(totalHourlyBurn);
+
+  const timeEstimateStr = remainingHours < 24
+    ? `~${remainingHours} jam lagi`
+    : `~${remainingDays} hari (${remainingHours} jam) lagi`;
+
+  const servicesRowsHtml = services.map(s => {
+    const rate = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(s.hourlyRate);
+    return `<tr>
+      <td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #e2e8f0;">
+        <span style="display: inline-block; font-size: 11px; padding: 2px 6px; border-radius: 4px; background: #0e3b52; color: #38bdf8; font-weight: 600; margin-right: 6px;">${s.type}</span>
+        <strong>${s.name}</strong>
+      </td>
+      <td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #f59e0b; font-weight: 700; text-align: right; font-family: monospace;">
+        ${rate}/jam
+      </td>
+    </tr>`;
+  }).join('');
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.masdika.id';
+
+  const content = `
+    <div style="margin-bottom: 20px;">
+      <span style="display: inline-block; background-color: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 700; text-transform: uppercase;">
+        ⚠️ Peringatan Saldo Menipis
+      </span>
+    </div>
+
+    <h2 style="color: #f59e0b; margin-top: 0; margin-bottom: 16px; font-size: 22px;">Saldo Akun Anda Hampir Habis</h2>
+    
+    <p style="color: #e2e8f0; font-size: 15px; line-height: 1.6;">
+      Halo <strong>${userName}</strong>,
+    </p>
+
+    <p style="color: #cbd5e1; font-size: 14px; line-height: 1.6;">
+      Sistem mendeteksi bahwa saldo akun Masdika.ID Anda saat ini tersisa <strong>${formattedBalance}</strong>. Dengan total penggunaan layanan aktif sebesar <strong>${formattedBurn}/jam</strong>, estimasi sisa waktu layanan Anda adalah <strong>${timeEstimateStr}</strong> sebelum saldo habis.
+    </p>
+
+    <div style="background-color: #030712; padding: 22px 24px; border-radius: 12px; margin: 25px 0; border: 1px solid #1e293b; border-left: 4px solid #f59e0b;">
+      <h3 style="color: #f59e0b; margin-top: 0; margin-bottom: 16px; font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Ringkasan Status Saldo</h3>
+      <table width="100%" cellpadding="0" cellspacing="0" style="color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px;">
+        <tr>
+          <td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #94a3b8;" width="180">Saldo Saat Ini:</td>
+          <td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #f59e0b; font-weight: 800; font-size: 16px; text-align: right;">${formattedBalance}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #94a3b8;">Total Burn Rate:</td>
+          <td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #38bdf8; font-weight: 700; text-align: right;">${formattedBurn}/jam</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #94a3b8;">Estimasi Sisa Waktu:</td>
+          <td style="padding: 8px 0; color: #fbbf24; font-weight: 700; text-align: right;">${timeEstimateStr}</td>
+        </tr>
+      </table>
+
+      ${services.length > 0 ? `
+        <h4 style="color: #94a3b8; margin-top: 20px; margin-bottom: 10px; font-size: 13px; font-weight: 600; text-transform: uppercase;">Layanan Aktif Berjalan:</h4>
+        <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 13px;">
+          ${servicesRowsHtml}
+        </table>
+      ` : ''}
+    </div>
+
+    <div style="background-color: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 14px 18px; margin: 20px 0;">
+      <p style="color: #fca5a5; margin: 0; font-size: 13px; line-height: 1.5;">
+        <strong>Perhatian:</strong> Jika saldo mencapai Rp 0, seluruh layanan aktif Anda akan otomatis ditangguhkan (suspend) oleh sistem pemotongan per jam untuk mencegah penumpukan tagihan.
+      </p>
+    </div>
+
+    <div style="text-align: center; margin: 35px 0;">
+      <a href="${appUrl}/dashboard/billing/topup" style="background-color: #06b6d4; background-image: linear-gradient(to right, #06b6d4, #0ea5e9); color: #030712; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 800; font-size: 16px; display: inline-block; box-shadow: 0 4px 14px rgba(6, 182, 212, 0.35);">
+        Top Up Saldo Sekarang &rarr;
+      </a>
+    </div>
+
+    <p style="color: #64748b; font-size: 13px; text-align: center; margin-top: 25px;">
+      Anda menerima email ini karena akun Anda memiliki layanan aktif di Masdika.ID dengan sisa saldo di bawah 24 jam.
+    </p>
+  `;
+
+  await getTransporter().sendMail({
+    from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
+    to: email,
+    subject: `[Peringatan] Saldo Akun Masdika Anda Menipis (${timeEstimateStr})`,
+    html: getBaseHtml(content),
+  });
+};
+
 
 export const sendSuspensionEmail = async (email: string, userName: string, planName: string, serviceName: string) => {
   const content = `

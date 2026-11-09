@@ -174,6 +174,22 @@ export async function GET(req: NextRequest) {
       customer.remainingDays = remainingDays;
     }
 
+    // 5b. Fetch low balance alert history for customers
+    const alertSettings = await prisma.setting.findMany({
+      where: { key: { startsWith: 'LOW_BALANCE_ALERT_' } }
+    });
+    const alertMap = new Map<number, any>();
+    for (const s of alertSettings) {
+      const uid = parseInt(s.key.replace('LOW_BALANCE_ALERT_', ''), 10);
+      if (!isNaN(uid)) {
+        try { alertMap.set(uid, JSON.parse(s.value)); } catch {}
+      }
+    }
+
+    for (const customer of customers) {
+      customer.lowBalanceAlert = alertMap.get(customer.id) || null;
+    }
+
     const stats = {
       totalCustomers: customers.length,
       sufficientCustomers: customers.filter(c => c.balanceStatus === 'SUFFICIENT').length,
@@ -202,19 +218,49 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: auth.error }, { status: auth.status });
     }
 
-    const { interval } = await req.json();
+    const body = await req.json();
 
-    if (!['hourly', 'minutely'].includes(interval)) {
-      return NextResponse.json({ error: "Invalid interval" }, { status: 400 });
+    if (body.action === 'trigger-alerts') {
+      const { checkAndSendLowBalanceAlerts } = await import('@/lib/low-balance-alert');
+      const alertResult = await checkAndSendLowBalanceAlerts();
+      return NextResponse.json({
+        success: true,
+        message: `Pemeriksaan selesai. ${alertResult.alertsSent} email peringatan dikirim, ${alertResult.skippedCooldown} dalam cooldown 24 jam.`,
+        data: alertResult,
+      });
     }
 
-    await prisma.setting.upsert({
-      where: { key: 'payg_billing_interval' },
-      update: { value: interval },
-      create: { key: 'payg_billing_interval', value: interval }
-    });
+    if (body.action === 'send-single-alert' && body.userId) {
+      const { checkAndSendLowBalanceAlerts } = await import('@/lib/low-balance-alert');
+      // Force send by temporarily clearing cooldown and running
+      await prisma.setting.deleteMany({
+        where: { key: `LOW_BALANCE_ALERT_${body.userId}` }
+      });
+      const alertResult = await checkAndSendLowBalanceAlerts();
+      return NextResponse.json({
+        success: true,
+        message: `Peringatan saldo menipis berhasil diproses untuk client ID ${body.userId}`,
+        data: alertResult,
+      });
+    }
 
-    return NextResponse.json({ success: true, message: `Interval updated to ${interval}` });
+    const { interval } = body;
+
+    if (interval) {
+      if (!['hourly', 'minutely'].includes(interval)) {
+        return NextResponse.json({ error: "Invalid interval" }, { status: 400 });
+      }
+
+      await prisma.setting.upsert({
+        where: { key: 'payg_billing_interval' },
+        update: { value: interval },
+        create: { key: 'payg_billing_interval', value: interval }
+      });
+
+      return NextResponse.json({ success: true, message: `Interval updated to ${interval}` });
+    }
+
+    return NextResponse.json({ error: "No valid action provided" }, { status: 400 });
   } catch (error: any) {
     console.error("POST PAYG Monitor Error:", error);
     return NextResponse.json({ error: error.message || "Internal server error" }, { status: 500 });

@@ -91,6 +91,11 @@ export async function POST(
       // Auto-unsuspend any suspended services (VPS, Subscriptions) if balance is now sufficient
       const { attemptAutoUnsuspendAllForUser } = await import('@/lib/auto-unsuspend');
       await attemptAutoUnsuspendAllForUser(invoice.userId).catch(console.error);
+
+      // Clear low balance alert cooldown
+      const { clearLowBalanceAlert } = await import('@/lib/low-balance-alert');
+      await clearLowBalanceAlert(invoice.userId).catch(console.error);
+
       return NextResponse.json({ success: true });
     }
 

@@ -152,6 +152,14 @@ export async function POST(req: NextRequest) {
           console.error('Failed to auto-resume services after topup:', resumeErr);
         }
 
+        // Clear low balance alert cooldown so user can receive future alerts when low
+        try {
+          const { clearLowBalanceAlert } = await import('@/lib/low-balance-alert');
+          await clearLowBalanceAlert(invoice.userId);
+        } catch (clearAlertErr) {
+          console.error('Failed to clear low balance alert after topup:', clearAlertErr);
+        }
+
         // Send emails for top-up (fire-and-forget)
         sendCustomerPaymentSuccessEmail({
           toEmail: customerEmail,
