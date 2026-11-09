@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth-middleware';
+import { encryptDeterministic, decryptDeterministic } from '@/lib/encryption';
 
 export async function GET(req: Request) {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
@@ -47,21 +48,60 @@ export async function GET(req: Request) {
       prisma.chatSession.count({ where }),
     ]);
 
-    const formatted = sessions.map(s => ({
-      id: s.id,
-      sessionId: s.sessionId,
-      name: s.name,
-      email: s.email,
-      phone: s.phone,
-      ipAddress: s.ipAddress,
-      status: s.status,
-      endedBy: s.endedBy,
-      endedAt: s.endedAt,
-      lastActiveAt: s.lastActiveAt,
-      createdAt: s.createdAt,
-      messageCount: s._count.messages,
-      injectionCount: s.messages.length,
-    }));
+    // Pre-resolve user images matching session emails
+    const rawEmails = Array.from(
+      new Set(
+        sessions
+          .map((s) => s.email?.trim().toLowerCase())
+          .filter((e): e is string => Boolean(e))
+      )
+    );
+
+    const userImageMap = new Map<string, string | null>();
+    if (rawEmails.length > 0) {
+      try {
+        const encryptedEmails = rawEmails.map((e) => encryptDeterministic(e));
+        const matchedUsers = await prisma.user.findMany({
+          where: {
+            OR: [
+              { email: { in: rawEmails } },
+              { email: { in: encryptedEmails } },
+            ],
+          },
+          select: { email: true, image: true },
+        });
+
+        for (const u of matchedUsers) {
+          const decEmail = decryptDeterministic(u.email).toLowerCase();
+          if (u.image) {
+            userImageMap.set(decEmail, u.image);
+            userImageMap.set(u.email.toLowerCase(), u.image);
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to resolve session user images:', err);
+      }
+    }
+
+    const formatted = sessions.map(s => {
+      const emailLower = s.email?.trim().toLowerCase() || '';
+      return {
+        id: s.id,
+        sessionId: s.sessionId,
+        name: s.name,
+        email: s.email,
+        phone: s.phone,
+        image: userImageMap.get(emailLower) || null,
+        ipAddress: s.ipAddress,
+        status: s.status,
+        endedBy: s.endedBy,
+        endedAt: s.endedAt,
+        lastActiveAt: s.lastActiveAt,
+        createdAt: s.createdAt,
+        messageCount: s._count.messages,
+        injectionCount: s.messages.length,
+      };
+    });
 
     return NextResponse.json({
       sessions: formatted,

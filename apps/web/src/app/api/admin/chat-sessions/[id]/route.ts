@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth-middleware';
+import { encryptDeterministic } from '@/lib/encryption';
 
 export async function GET(
   req: Request,
@@ -29,7 +30,30 @@ export async function GET(
       return NextResponse.json({ error: 'Session not found' }, { status: 404 });
     }
 
-    return NextResponse.json(session);
+    let userImage: string | null = null;
+    if (session.email) {
+      try {
+        const rawEmail = session.email.trim().toLowerCase();
+        const encryptedEmail = encryptDeterministic(rawEmail);
+        const user = await prisma.user.findFirst({
+          where: {
+            OR: [
+              { email: rawEmail },
+              { email: encryptedEmail },
+            ],
+          },
+          select: { image: true },
+        });
+        userImage = user?.image || null;
+      } catch (err) {
+        console.warn('Failed to resolve session detail user image:', err);
+      }
+    }
+
+    return NextResponse.json({
+      ...session,
+      image: userImage,
+    });
   } catch (error) {
     console.error('Error fetching chat session:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

@@ -1180,7 +1180,20 @@ export function AIChat() {
                       <div className={`flex gap-2 max-w-[85%] ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
                         <div className={cn("flex-shrink-0 w-6 h-6 mt-1 rounded-full flex items-center justify-center overflow-hidden border", msg.role === 'user' ? (isDark ? 'bg-[#0f172a] border-cyan-500/20' : 'bg-slate-100 border-slate-200') : (isDark ? 'bg-[#0F3B4A] border-cyan-400' : 'bg-cyan-50 border-cyan-500'))}>
                           {msg.role === 'user' ? (
-                            <img referrerPolicy="no-referrer" src={`/api/avatar?email=${encodeURIComponent(sessionInfo?.email || '')}&name=${encodeURIComponent(sessionInfo?.name || 'U')}`} alt="User" className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                            <img
+                              referrerPolicy="no-referrer"
+                              src={`/api/avatar?email=${encodeURIComponent(sessionInfo?.email || '')}&name=${encodeURIComponent(sessionInfo?.name || 'U')}`}
+                              alt="User"
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                              decoding="async"
+                              onError={(e) => {
+                                const target = e.currentTarget;
+                                if (!target.src.includes('fallback=1')) {
+                                  target.src = `/api/avatar?fallback=1&email=${encodeURIComponent(sessionInfo?.email || '')}&name=${encodeURIComponent(sessionInfo?.name || 'U')}`;
+                                }
+                              }}
+                            />
                           ) : msg.isAdmin ? (
                             <Headset size={12} className="text-cyan-400" strokeWidth={2.5} />
                           ) : (

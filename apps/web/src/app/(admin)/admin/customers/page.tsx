@@ -13,6 +13,7 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { LastSeenBadge } from "@/components/ui/LastSeenBadge";
 import { isUserOnline } from "@/lib/last-seen";
 import { useRealtimePresence } from "@/lib/useRealtimePresence";
+import { UserAvatar } from "@/components/ui/UserAvatar";
 
 export default function AdminCustomersPage() {
   const { theme } = useTheme();
@@ -613,13 +614,13 @@ export default function AdminCustomersPage() {
                     <td className="px-3.5 py-2.5 whitespace-nowrap">
                       <div className="flex items-center gap-3">
                         <div className="relative">
-                          <div className={cn("w-10 h-10 rounded-full overflow-hidden border shrink-0", isDark ? "border-white/[0.08]" : "border-slate-200")}>
-                            <img referrerPolicy="no-referrer" 
-                              src={u.image || `/api/avatar?email=${encodeURIComponent(u.email || '')}&name=${encodeURIComponent(u.name || 'User')}`} 
-                              alt={u.name || "User"}
-                              className="w-full h-full object-cover"
-                            loading="lazy" decoding="async" />
-                          </div>
+                          <UserAvatar
+                            image={u.image}
+                            email={u.email}
+                            name={u.name}
+                            size="md"
+                            isDark={isDark}
+                          />
                           {isUserOnline(u.lastActive) && (
                             <span 
                               className={cn(

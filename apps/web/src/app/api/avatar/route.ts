@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
 import { prisma } from '@/lib/prisma';
 import { encryptDeterministic } from '@/lib/encryption';
 import { getClientIp } from '@/lib/get-ip';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { getUploadsDir } from '@/lib/file-utils';
 
 // Exact Google Material Account palette (matching Customer page avatars: Guardian Marx #004d40, finger red #ab47bc)
 const GOOGLE_COLORS = [
@@ -101,6 +104,19 @@ export async function GET(req: Request) {
   const rawHash = (searchParams.get('hash') || '').trim().toLowerCase();
   const validHash = /^[0-9a-f]{32}$/.test(rawHash) ? rawHash : '';
   const name = (searchParams.get('name') || 'User').slice(0, 100);
+  const forceFallback = searchParams.get('fallback') === '1';
+
+  // If fallback is forced, directly return Google Material SVG avatar
+  if (forceFallback) {
+    const svg = generateGoogleFlatAvatar(name, rawEmail || validHash || name);
+    return new Response(svg, {
+      status: 200,
+      headers: {
+        'Content-Type': 'image/svg+xml; charset=utf-8',
+        'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800',
+      },
+    });
+  }
 
   // 1. Check if user has a profile image in Masdika DB (e.g. Google OAuth image or custom upload)
   if (rawEmail) {
@@ -117,9 +133,22 @@ export async function GET(req: Request) {
       });
 
       if (user?.image) {
-        const safeRedirectUrl = isTrustedAvatarUrl(user.image, req.url);
-        if (safeRedirectUrl) {
-          return NextResponse.redirect(safeRedirectUrl);
+        // If it's a local /uploads/ file, verify it actually exists on disk before redirecting
+        if (user.image.startsWith('/uploads/')) {
+          const subPath = user.image.replace(/^\/uploads\//, '');
+          const localPath = path.normalize(path.join(getUploadsDir(), ...subPath.split('/')));
+          if (fs.existsSync(localPath)) {
+            const safeRedirectUrl = isTrustedAvatarUrl(user.image, req.url);
+            if (safeRedirectUrl) {
+              return NextResponse.redirect(safeRedirectUrl);
+            }
+          }
+          // File does NOT exist on disk -> fall through to Google Flat SVG initial avatar
+        } else {
+          const safeRedirectUrl = isTrustedAvatarUrl(user.image, req.url);
+          if (safeRedirectUrl) {
+            return NextResponse.redirect(safeRedirectUrl);
+          }
         }
       }
     } catch {

@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { AdminLoader } from "@/components/admin/AdminLoader";
 import { parseChatMarkdown } from "@/lib/render-chat-markdown";
+import { UserAvatar } from "@/components/ui/UserAvatar";
 
 type ChatSessionItem = {
   id: number;
@@ -16,6 +17,7 @@ type ChatSessionItem = {
   name: string;
   email: string;
   phone: string;
+  image?: string | null;
   ipAddress: string;
   status: string;
   endedBy: string | null;
@@ -42,6 +44,7 @@ type SessionDetail = {
   name: string;
   email: string;
   phone: string;
+  image?: string | null;
   ipAddress: string;
   status: string;
   endedBy: string | null;
@@ -420,10 +423,13 @@ export default function AdminChatHistoryPage() {
                     </td>
                     <td className="px-3.5 py-2 min-w-[220px]">
                       <div className="flex items-center gap-3">
-                        <img referrerPolicy="no-referrer"                           src={`/api/avatar?email=${encodeURIComponent(s.email)}&name=${encodeURIComponent(s.name)}`}
-                          alt={s.name}
-                          className={cn("w-10 h-10 rounded-full border object-cover flex-shrink-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}
-                        loading="lazy" decoding="async" />
+                        <UserAvatar
+                          image={s.image}
+                          email={s.email}
+                          name={s.name}
+                          size="md"
+                          isDark={isDark}
+                        />
                         <div className="flex flex-col">
                           <div className={cn("font-semibold text-sm truncate max-w-[160px]", isDark ? "text-white" : "text-slate-900")}>{s.name}</div>
                           <div className="text-[11px] text-zinc-500 truncate max-w-[160px]">{s.email}</div>
@@ -524,10 +530,13 @@ export default function AdminChatHistoryPage() {
                 {/* Modal Header */}
                 <div className={cn("p-4 sm:p-5 border-b flex items-start justify-between gap-2", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                   <div className="flex gap-3 sm:gap-4 flex-1 min-w-0">
-                    <img referrerPolicy="no-referrer"                       src={`/api/avatar?email=${encodeURIComponent(detailSession.email)}&name=${encodeURIComponent(detailSession.name)}`}
-                      alt={detailSession.name}
-                      className={cn("w-10 h-10 sm:w-12 sm:h-12 rounded-full border object-cover flex-shrink-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}
-                    loading="lazy" decoding="async" />
+                    <UserAvatar
+                      image={detailSession.image}
+                      email={detailSession.email}
+                      name={detailSession.name}
+                      size="lg"
+                      isDark={isDark}
+                    />
                     <div className="flex-1 min-w-0">
                       <h3 className={cn("font-bold text-base sm:text-lg leading-tight truncate", isDark ? "text-white" : "text-slate-900")}>{detailSession.name}</h3>
                       <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-x-3 gap-y-0.5 mt-1 sm:mt-1.5">

@@ -9,12 +9,14 @@ import { useTheme } from "@/components/ThemeProvider";
 import { toast } from 'sonner';
 import { Pagination } from "@/components/ui/Pagination";
 import { parseChatMarkdown } from "@/lib/render-chat-markdown";
+import { UserAvatar } from "@/components/ui/UserAvatar";
 
 type ChatSession = {
   id: number;
   sessionId: string;
   name: string;
   email: string;
+  image?: string | null;
   lastActiveAt: string;
   messages: ChatMessage[];
 };
@@ -193,14 +195,25 @@ export default function AdminLiveChat() {
                   onClick={() => setSelectedSessionId(session.id)}
                   className={cn("p-3 rounded-lg cursor-pointer transition-all border", selectedSessionId === session.id ? (isDark ? "bg-cyan-500/10 border-cyan-500/50" : "bg-cyan-50 border-cyan-300") : (isDark ? "bg-[#0a0a0c]/50 border-white/[0.08] hover:border-slate-700" : "bg-white border-slate-200 hover:border-slate-300"))}
                 >
-                  <div className="flex justify-between items-start mb-1">
-                    <span className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>{session.name}</span>
-                    <span className="text-xs text-zinc-500 font-medium">
-                      {new Date(session.lastActiveAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
-                  <div className={cn("text-xs truncate", isDark ? "text-zinc-400" : "text-slate-500")}>
-                    {session.email}
+                  <div className="flex items-center gap-2.5">
+                    <UserAvatar
+                      image={session.image}
+                      email={session.email}
+                      name={session.name}
+                      size="sm"
+                      isDark={isDark}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start mb-0.5">
+                        <span className={cn("font-bold text-sm truncate", isDark ? "text-white" : "text-slate-900")}>{session.name}</span>
+                        <span className="text-[11px] text-zinc-500 font-medium shrink-0 ml-1">
+                          {new Date(session.lastActiveAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                      <div className={cn("text-xs truncate", isDark ? "text-zinc-400" : "text-slate-500")}>
+                        {session.email}
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))
@@ -226,6 +239,13 @@ export default function AdminLiveChat() {
                   >
                     <ArrowLeft size={16} />
                   </button>
+                  <UserAvatar
+                    image={selectedSession?.image}
+                    email={selectedSession?.email}
+                    name={selectedSession?.name}
+                    size="md"
+                    isDark={isDark}
+                  />
                   <div>
                     <h3 className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>{selectedSession?.name}</h3>
                     <p className={cn("text-xs font-medium", isDark ? "text-cyan-400" : "text-cyan-700")}>{selectedSession?.email}</p>
