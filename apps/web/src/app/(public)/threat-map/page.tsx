@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ShieldAlert,
@@ -241,19 +241,33 @@ export default function ThreatMapPage() {
   // Country Vector Hover State (FortiGuard Style Country Highlight & Tooltip)
   const [hoveredCountry, setHoveredCountry] = useState<HoveredCountryInfo | null>(null);
 
-  // Interactive Zoom & Pan State with non-passive wheel prevention on full card
-  const visualizerCardRef = useRef<HTMLDivElement>(null);
-  const mapFrameRef = useRef<HTMLDivElement>(null);
+  // Interactive Zoom & Pan State (Only the SVG map element itself is zoomable; zero shaking / getar)
   const mapContainerRef = useRef<HTMLDivElement>(null);
+  const svgMapRef = useRef<SVGSVGElement | null>(null);
+  const [svgEl, setSvgEl] = useState<SVGSVGElement | null>(null);
+  const setSvgRef = useCallback((node: SVGSVGElement | null) => {
+    svgMapRef.current = node;
+    setSvgEl(node);
+  }, []);
+
   const pinchStartDistRef = useRef(0);
   const pinchStartZoomRef = useRef(1);
   const touchStartPosRef = useRef({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
+  const [isAutoZooming, setIsAutoZooming] = useState(false);
   const dragStartRef = useRef({ x: 0, y: 0 });
   const dragStartClientRef = useRef({ x: 0, y: 0 });
   const streamTickRef = useRef(0);
+
+  // Synchronized refs to allow event listeners to read current values without re-attaching on every frame
+  const zoomRef = useRef(zoom);
+  const panRef = useRef(pan);
+  useEffect(() => {
+    zoomRef.current = zoom;
+    panRef.current = pan;
+  }, [zoom, pan]);
 
   const [stats, setStats] = useState({
     attacksPerSecond: 18,
@@ -297,79 +311,97 @@ export default function ThreatMapPage() {
     return () => clearInterval(timer);
   }, []);
 
-  // Zoom handlers
-  const handleZoomIn = () => setZoom(z => Math.min(4.0, Math.round((z + 0.3) * 10) / 10));
-  const handleZoomOut = () => setZoom(z => Math.max(0.7, Math.round((z - 0.3) * 10) / 10));
+  // Zoom handlers (Smoothly glide with 450ms animation curve)
+  const handleZoomIn = () => {
+    setIsAutoZooming(true);
+    setZoom(z => Math.min(4.0, Math.round((z + 0.3) * 10) / 10));
+    setTimeout(() => setIsAutoZooming(false), 460);
+  };
+  const handleZoomOut = () => {
+    setIsAutoZooming(true);
+    setZoom(z => Math.max(0.7, Math.round((z - 0.3) * 10) / 10));
+    setTimeout(() => setIsAutoZooming(false), 460);
+  };
   const handleResetZoom = () => {
+    setIsAutoZooming(true);
     setZoom(1);
     setPan({ x: 0, y: 0 });
+    setTimeout(() => setIsAutoZooming(false), 460);
   };
 
   // Reset zoom & pan when switching between regional and global view
   useEffect(() => {
+    setIsAutoZooming(true);
     setZoom(1);
     setPan({ x: 0, y: 0 });
     setHoveredCountry(null);
+    setTimeout(() => setIsAutoZooming(false), 460);
   }, [region]);
 
-  // Native Non-Passive Wheel Event Listener on Map Viewport to zoom map & prevent window scroll
+  // Native Non-Passive Wheel Event Listener ONLY on the SVG map element
+  // (Cursor in empty space/padding around the map will NOT zoom the map; zero vibration)
   useEffect(() => {
-    const el = mapFrameRef.current;
-    if (!el) return;
+    if (!svgEl) return;
 
     const handleNativeWheel = (e: WheelEvent) => {
-      // PREVENT BROWSER WINDOW FROM SCROLLING WHEN CURSOR IS OVER THE MAP VIEWPORT
+      const delta = e.deltaY;
+      const currentZoom = zoomRef.current;
+
+      // If fully zoomed out and scrolling down, allow default page scroll
+      if (delta > 0 && currentZoom <= 1.0) {
+        return;
+      }
+
+      // PREVENT BROWSER WINDOW FROM SCROLLING ONLY WHEN CURSOR IS DIRECTLY OVER SVG MAP
       e.preventDefault();
       e.stopPropagation();
 
-      const delta = e.deltaY;
-      setZoom(prev => {
-        const step = delta < 0 ? 0.25 : -0.25;
-        const next = Math.min(4.0, Math.max(0.7, Math.round((prev + step) * 10) / 10));
-        if (next <= 1) {
-          setPan({ x: 0, y: 0 });
-        } else {
-          setPan(p => ({
-            x: Math.max(-450 * next, Math.min(450 * next, p.x)),
-            y: Math.max(-450 * next, Math.min(450 * next, p.y)),
-          }));
-        }
-        return next;
-      });
+      const step = delta < 0 ? 0.2 : -0.2;
+      const nextZoom = Math.min(4.0, Math.max(1.0, Math.round((currentZoom + step) * 10) / 10));
+      if (nextZoom === currentZoom) return;
+
+      setZoom(nextZoom);
+      if (nextZoom <= 1.0) {
+        setPan({ x: 0, y: 0 });
+      } else {
+        setPan(p => ({
+          x: Math.round(Math.max(-450 * nextZoom, Math.min(450 * nextZoom, p.x))),
+          y: Math.round(Math.max(-450 * nextZoom, Math.min(450 * nextZoom, p.y))),
+        }));
+      }
     };
 
-    el.addEventListener('wheel', handleNativeWheel, { passive: false });
+    svgEl.addEventListener('wheel', handleNativeWheel, { passive: false });
     return () => {
-      el.removeEventListener('wheel', handleNativeWheel);
+      svgEl.removeEventListener('wheel', handleNativeWheel);
     };
-  }, []);
+  }, [svgEl]);
 
-  // Mobile 2-Finger Pinch-to-Zoom & Pan Gesture Listener on Map Frame
+  // Mobile 2-Finger Pinch-to-Zoom Gesture Listener ONLY on the SVG map element
   useEffect(() => {
-    const el = mapFrameRef.current;
-    if (!el) return;
+    if (!svgEl) return;
 
     const handleTouchStart = (e: TouchEvent) => {
       if (e.touches.length === 2) {
-        // 2-Finger Pinch Started on Map
+        // 2-Finger Pinch Started directly on Map
         e.preventDefault();
         const dist = Math.hypot(
           e.touches[0].clientX - e.touches[1].clientX,
           e.touches[0].clientY - e.touches[1].clientY
         );
         pinchStartDistRef.current = dist;
-        pinchStartZoomRef.current = zoom;
-      } else if (e.touches.length === 1) {
+        pinchStartZoomRef.current = zoomRef.current;
+      } else if (e.touches.length === 1 && zoomRef.current > 1) {
         touchStartPosRef.current = {
-          x: e.touches[0].clientX - pan.x,
-          y: e.touches[0].clientY - pan.y,
+          x: e.touches[0].clientX - panRef.current.x,
+          y: e.touches[0].clientY - panRef.current.y,
         };
       }
     };
 
     const handleTouchMove = (e: TouchEvent) => {
       if (e.touches.length === 2) {
-        // 2-Finger Pinch Move: Smoothly zoom map in/out!
+        // 2-Finger Pinch Move: Smoothly zoom map in/out without jitter
         e.preventDefault();
         e.stopPropagation();
         const dist = Math.hypot(
@@ -378,24 +410,22 @@ export default function ThreatMapPage() {
         );
         if (pinchStartDistRef.current > 0) {
           const factor = dist / pinchStartDistRef.current;
-          const nextZoom = Math.min(4.0, Math.max(0.7, Math.round(pinchStartZoomRef.current * factor * 10) / 10));
-          setZoom(nextZoom);
-          if (nextZoom <= 1) {
-            setPan({ x: 0, y: 0 });
-          } else {
-            setPan(p => ({
-              x: Math.max(-450 * nextZoom, Math.min(450 * nextZoom, p.x)),
-              y: Math.max(-450 * nextZoom, Math.min(450 * nextZoom, p.y)),
-            }));
+          const nextZoom = Math.min(4.0, Math.max(1.0, Math.round(pinchStartZoomRef.current * factor * 100) / 100));
+          if (nextZoom !== zoomRef.current) {
+            setZoom(nextZoom);
+            if (nextZoom <= 1.0) {
+              setPan({ x: 0, y: 0 });
+            }
           }
         }
-      } else if (e.touches.length === 1 && zoom > 1) {
+      } else if (e.touches.length === 1 && zoomRef.current > 1) {
         // 1-Finger Pan only when zoomed into the map
         e.preventDefault();
-        const maxPan = 450 * zoom;
+        const z = zoomRef.current;
+        const maxPan = 450 * z;
         const newX = Math.max(-maxPan, Math.min(maxPan, e.touches[0].clientX - touchStartPosRef.current.x));
         const newY = Math.max(-maxPan, Math.min(maxPan, e.touches[0].clientY - touchStartPosRef.current.y));
-        setPan({ x: newX, y: newY });
+        setPan({ x: Math.round(newX), y: Math.round(newY) });
       }
     };
 
@@ -405,27 +435,52 @@ export default function ThreatMapPage() {
       }
     };
 
-    el.addEventListener('touchstart', handleTouchStart, { passive: false });
-    el.addEventListener('touchmove', handleTouchMove, { passive: false });
-    el.addEventListener('touchend', handleTouchEnd, { passive: true });
+    svgEl.addEventListener('touchstart', handleTouchStart, { passive: false });
+    svgEl.addEventListener('touchmove', handleTouchMove, { passive: false });
+    svgEl.addEventListener('touchend', handleTouchEnd, { passive: true });
 
     return () => {
-      el.removeEventListener('touchstart', handleTouchStart);
-      el.removeEventListener('touchmove', handleTouchMove);
-      el.removeEventListener('touchend', handleTouchEnd);
+      svgEl.removeEventListener('touchstart', handleTouchStart);
+      svgEl.removeEventListener('touchmove', handleTouchMove);
+      svgEl.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [zoom, pan]);
+  }, [svgEl]);
 
-  // Prevent mobile browser page-level zoom outside the map frame (preserves clean 1:1 mobile layout)
+  // Window mousemove / mouseup for ultra smooth drag panning (zero jitter)
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleWindowMouseMove = (e: MouseEvent) => {
+      const z = zoomRef.current;
+      const maxPan = 450 * z;
+      const newX = Math.max(-maxPan, Math.min(maxPan, e.clientX - dragStartRef.current.x));
+      const newY = Math.max(-maxPan, Math.min(maxPan, e.clientY - dragStartRef.current.y));
+      setPan({ x: Math.round(newX), y: Math.round(newY) });
+    };
+
+    const handleWindowMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    window.addEventListener('mousemove', handleWindowMouseMove);
+    window.addEventListener('mouseup', handleWindowMouseUp);
+
+    return () => {
+      window.removeEventListener('mousemove', handleWindowMouseMove);
+      window.removeEventListener('mouseup', handleWindowMouseUp);
+    };
+  }, [isDragging]);
+
+  // Prevent mobile browser page-level zoom outside the map (preserves clean 1:1 mobile layout)
   useEffect(() => {
     const handleGlobalTouchMove = (e: TouchEvent) => {
       if (e.touches.length > 1) {
-        const mapEl = mapFrameRef.current;
-        if (mapEl && mapEl.contains(e.target as Node)) {
-          // Inside map: handled by map pinch handler
+        const svgEl = svgMapRef.current;
+        if (svgEl && svgEl.contains(e.target as Node)) {
+          // Inside SVG map: handled by map pinch handler
           return;
         }
-        // Outside map: PREVENT mobile browser whole-page pinch zoom
+        // Outside SVG map: PREVENT mobile browser whole-page pinch zoom
         e.preventDefault();
       }
     };
@@ -433,8 +488,8 @@ export default function ThreatMapPage() {
     let lastTouchEnd = 0;
     const handleGlobalTouchEnd = (e: TouchEvent) => {
       const now = Date.now();
-      const mapEl = mapFrameRef.current;
-      const isInside = mapEl && mapEl.contains(e.target as Node);
+      const svgEl = svgMapRef.current;
+      const isInside = svgEl && svgEl.contains(e.target as Node);
       if (!isInside && now - lastTouchEnd <= 300) {
         // Prevent double-tap page zoom outside the map
         e.preventDefault();
@@ -453,6 +508,9 @@ export default function ThreatMapPage() {
 
   // Precision Auto-Zoom to Any Country (Centering that country smoothly in the 1000x500 canvas)
   const zoomToCountry = (codeOrId: string, customZoom?: number) => {
+    setIsAutoZooming(true);
+    setTimeout(() => setIsAutoZooming(false), 460);
+
     const upper = codeOrId.toUpperCase();
     if (upper === 'ID' || upper === 'IDN') {
       if (region !== 'indonesia') {
@@ -484,6 +542,9 @@ export default function ThreatMapPage() {
     e.stopPropagation();
     const dist = Math.hypot(e.clientX - dragStartClientRef.current.x, e.clientY - dragStartClientRef.current.y);
     if (dist > 6) return; // User was panning/dragging, ignore click
+
+    setIsAutoZooming(true);
+    setTimeout(() => setIsAutoZooming(false), 460);
 
     if (country.id === 'IDN') {
       if (region === 'world') {
@@ -998,182 +1059,168 @@ export default function ThreatMapPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 relative z-10">
               
-              {/* Map Canvas Visualizer (8 Cols) */}
-              <div className="lg:col-span-8 p-3 sm:p-5 lg:border-r border-b lg:border-b-0 border-[var(--border-subtle)] flex flex-col justify-between relative">
+              {/* Map Canvas Visualizer (8 Cols) - Seamless Cockpit Layout */}
+              <div className="lg:col-span-8 p-3 sm:p-5 lg:border-r border-b lg:border-b-0 border-[var(--border-subtle)] flex flex-col justify-between relative overflow-hidden">
                 
-                {/* ── MAP VIEWPORT WITH TACTICAL BORDER (Matches User Request: "KASIH BORDER MAP NYA BIAR TAU BATAS") ── */}
-                <div
-                  ref={mapFrameRef}
-                  style={{ overscrollBehavior: 'contain', touchAction: 'none' }}
-                  className={cn(
-                    "relative w-full rounded-2xl border transition-all duration-200 overflow-hidden select-none flex-1 flex flex-col justify-between min-h-[480px] sm:min-h-[530px]",
-                    isDark
-                      ? "bg-[#030814]/90 border-slate-800 dark:border-cyan-500/25 shadow-[inset_0_1px_3px_rgba(0,0,0,0.5)]"
-                      : "bg-white/95 border-slate-300 shadow-sm"
-                  )}
-                >
-                  {/* Tactical Corner Accent Brackets on the Map Viewport */}
-                  <div className="absolute top-2.5 left-2.5 w-4 h-4 border-t-2 border-l-2 border-cyan-500/60 pointer-events-none z-20" />
-                  <div className="absolute top-2.5 right-2.5 w-4 h-4 border-t-2 border-r-2 border-cyan-500/60 pointer-events-none z-20" />
-                  <div className="absolute bottom-2.5 left-2.5 w-4 h-4 border-b-2 border-l-2 border-cyan-500/60 pointer-events-none z-20" />
-                  <div className="absolute bottom-2.5 right-2.5 w-4 h-4 border-b-2 border-r-2 border-cyan-500/60 pointer-events-none z-20" />
+                {/* Top HUD Controls */}
+                <div className="relative z-20 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 mb-3">
+                  {/* Top-Left: Defense & Incident Radar Status */}
+                  <div className="flex items-center gap-1.5">
+                    <div className={cn(
+                      "px-2.5 py-1 rounded-full border text-[11px] font-mono font-bold flex items-center gap-1.5 shadow-sm backdrop-blur-md",
+                      isDark
+                        ? "bg-[#08172c]/90 border-cyan-500/40 text-cyan-300"
+                        : "bg-white/95 border-cyan-200 text-cyan-700"
+                    )}>
+                      <Radio className="w-3 h-3 text-cyan-500 animate-pulse" />
+                      <span className="hidden sm:inline">DEFENSE RADAR</span>
+                      <span className="sm:hidden">RADAR</span>
+                    </div>
 
-                  {/* Top HUD Controls (INSIDE the map frame) */}
-                  <div className="relative z-20 flex items-center justify-between p-3 pointer-events-none">
-                    {/* Top-Left: Defense & Incident Radar Status */}
-                    <div className="flex items-center gap-1.5 pointer-events-auto">
-                      <div className={cn(
-                        "px-2.5 py-1 rounded-full border text-[11px] font-mono font-bold flex items-center gap-1.5 shadow-sm backdrop-blur-md",
-                        isDark
-                          ? "bg-[#08172c]/90 border-cyan-500/40 text-cyan-300"
-                          : "bg-white/95 border-cyan-200 text-cyan-700"
-                      )}>
-                        <Radio className="w-3 h-3 text-cyan-500 animate-pulse" />
-                        <span className="hidden sm:inline">DEFENSE RADAR</span>
-                        <span className="sm:hidden">RADAR</span>
+                    {stats.realIncidentsCount > 0 && (
+                      <div className="px-2.5 py-1 rounded-full border border-rose-500/30 bg-rose-500/10 text-rose-500 dark:text-rose-400 text-[11px] font-mono font-bold flex items-center gap-1 shadow-sm backdrop-blur-md">
+                        <ShieldAlert className="w-3 h-3 text-rose-500" />
+                        <span>{stats.realIncidentsCount} REAL</span>
                       </div>
+                    )}
+                  </div>
 
-                      {stats.realIncidentsCount > 0 && (
-                        <div className="px-2.5 py-1 rounded-full border border-rose-500/30 bg-rose-500/10 text-rose-500 dark:text-rose-400 text-[11px] font-mono font-bold flex items-center gap-1 shadow-sm backdrop-blur-md">
-                          <ShieldAlert className="w-3 h-3 text-rose-500" />
-                          <span>{stats.realIncidentsCount} REAL</span>
-                        </div>
+                  {/* Top-Center: Dedicated Region Pill */}
+                  <div>
+                    <div className={cn(
+                      "px-3 py-1.5 rounded-full border flex items-center gap-2 transition-all whitespace-nowrap",
+                      isDark
+                        ? region === 'indonesia'
+                          ? "bg-[#091813] border-[#1b3d30] text-slate-100 shadow-none"
+                          : "bg-[#081523] border-[#1b354d] text-slate-100 shadow-none"
+                        : "bg-white/95 border-slate-300 text-slate-900 shadow-sm"
+                    )}>
+                      {region === 'indonesia' ? (
+                        <>
+                          <CountryFlag code="ID" className="w-4 h-3 rounded-[2px]" />
+                          <span className="text-xs font-bold font-mono tracking-wide text-slate-200">
+                            Indonesia Focus
+                          </span>
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        </>
+                      ) : (
+                        <>
+                          <Globe className="w-3.5 h-3.5 text-cyan-400" />
+                          <span className="text-xs font-bold font-mono tracking-wide text-slate-200">
+                            Worldwide Threat Outbreaks
+                          </span>
+                          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                        </>
                       )}
-                    </div>
-
-                    {/* Top-Center: Dedicated Region Pill */}
-                    <div className="pointer-events-auto">
-                      <div className={cn(
-                        "px-3 py-1.5 rounded-full border flex items-center gap-2 transition-all whitespace-nowrap",
-                        isDark
-                          ? region === 'indonesia'
-                            ? "bg-[#091813] border-[#1b3d30] text-slate-100 shadow-none"
-                            : "bg-[#081523] border-[#1b354d] text-slate-100 shadow-none"
-                          : "bg-white/95 border-slate-300 text-slate-900 shadow-sm"
-                      )}>
-                        {region === 'indonesia' ? (
-                          <>
-                            <CountryFlag code="ID" className="w-4 h-3 rounded-[2px]" />
-                            <span className="text-xs font-bold font-mono tracking-wide text-slate-200">
-                              Indonesia Focus
-                            </span>
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                          </>
-                        ) : (
-                          <>
-                            <Globe className="w-3.5 h-3.5 text-cyan-400" />
-                            <span className="text-xs font-bold font-mono tracking-wide text-slate-200">
-                              Worldwide Threat Outbreaks
-                            </span>
-                            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-                          </>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Top-Right: Floating Tactical Zoom & Pan Controls */}
-                    <div className="pointer-events-auto flex items-center gap-1 p-1 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface)]/90 backdrop-blur-md shadow-sm">
-                      <button
-                        type="button"
-                        onClick={handleZoomIn}
-                        title="Zoom In (+)"
-                        className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-cyan-500 hover:bg-[var(--surface-secondary)] transition-colors"
-                      >
-                        <ZoomIn className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleZoomOut}
-                        title="Zoom Out (-)"
-                        className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-cyan-500 hover:bg-[var(--surface-secondary)] transition-colors"
-                      >
-                        <ZoomOut className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleResetZoom}
-                        title="Reset Zoom"
-                        className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-cyan-500 hover:bg-[var(--surface-secondary)] transition-colors"
-                      >
-                        <RotateCcw className="w-3 h-3" />
-                      </button>
-                      <span className="px-2 py-0.5 text-[10px] font-mono font-bold text-cyan-600 dark:text-cyan-400 border-l border-[var(--border-subtle)]">
-                        {Math.round(zoom * 100)}%
-                      </span>
                     </div>
                   </div>
 
-                  {/* Floating Hover Country Tooltip */}
-                  {hoveredCountry && (
-                    <div
-                      className="absolute z-30 pointer-events-none transform -translate-x-1/2 -translate-y-full mb-3 transition-transform duration-75 ease-out"
-                      style={{
-                        left: `${hoveredCountry.x}px`,
-                        top: `${hoveredCountry.y}px`,
-                      }}
+                  {/* Top-Right: Floating Tactical Zoom & Pan Controls */}
+                  <div className="flex items-center gap-1 p-1 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface)]/90 backdrop-blur-md shadow-sm">
+                    <button
+                      type="button"
+                      onClick={handleZoomIn}
+                      title="Zoom In (+)"
+                      className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-cyan-500 hover:bg-[var(--surface-secondary)] transition-colors"
                     >
-                      <div className={cn(
-                        "px-3 py-1.5 rounded-lg border backdrop-blur-md flex items-center gap-2 select-none",
-                        isDark
-                          ? "bg-[#0c1824] border-slate-700 text-slate-100 shadow-md"
-                          : "bg-white/95 border-slate-300 text-slate-900 shadow-md"
-                      )}>
-                        <CountryFlag code={hoveredCountry.code} className="w-4 h-3 shadow-sm" />
-                        <span className="text-xs font-mono font-bold tracking-tight">
-                          {hoveredCountry.name}
-                        </span>
-                      </div>
-                    </div>
-                  )}
+                      <ZoomIn className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleZoomOut}
+                      title="Zoom Out (-)"
+                      className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-cyan-500 hover:bg-[var(--surface-secondary)] transition-colors"
+                    >
+                      <ZoomOut className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleResetZoom}
+                      title="Reset Zoom"
+                      className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-cyan-500 hover:bg-[var(--surface-secondary)] transition-colors"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                    </button>
+                    <span className="px-2 py-0.5 text-[10px] font-mono font-bold text-cyan-600 dark:text-cyan-400 border-l border-[var(--border-subtle)]">
+                      {Math.round(zoom * 100)}%
+                    </span>
+                  </div>
+                </div>
 
-                  {/* SVG Tactical Vector Map with Real GIS Coastlines & Zoom/Pan */}
+                {/* Floating Hover Country Tooltip */}
+                {hoveredCountry && (
                   <div
-                    ref={mapContainerRef}
-                    className="w-full flex-1 flex items-center justify-center relative py-2 overflow-hidden touch-none"
-                    onMouseMove={handleCountryMove}
+                    className="absolute z-30 pointer-events-none transform -translate-x-1/2 -translate-y-full mb-3 transition-transform duration-75 ease-out"
+                    style={{
+                      left: `${hoveredCountry.x}px`,
+                      top: `${hoveredCountry.y}px`,
+                    }}
                   >
-                    <svg
-                      viewBox="0 0 1000 500"
-                      className={cn(
-                        "w-full h-auto max-h-[500px] select-none",
-                        zoom > 1 ? "cursor-grab active:cursor-grabbing" : "cursor-default"
-                      )}
-                      onMouseDown={onMouseDown}
-                      onMouseMove={onMouseMove}
-                      onMouseUp={onMouseUp}
-                      onMouseLeave={() => {
-                        onMouseUp();
-                        setHoveredCountry(null);
+                    <div className={cn(
+                      "px-3 py-1.5 rounded-lg border backdrop-blur-md flex items-center gap-2 select-none",
+                      isDark
+                        ? "bg-[#0c1824] border-slate-700 text-slate-100 shadow-md"
+                        : "bg-white/95 border-slate-300 text-slate-900 shadow-md"
+                    )}>
+                      <CountryFlag code={hoveredCountry.code} className="w-4 h-3 shadow-sm" />
+                      <span className="text-xs font-mono font-bold tracking-tight">
+                        {hoveredCountry.name}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* SVG Tactical Vector Map with Real GIS Coastlines & Zoom/Pan (Zoom occurs ONLY on SVG map) */}
+                <div
+                  ref={mapContainerRef}
+                  className="w-full flex-1 flex items-center justify-center relative py-2 overflow-hidden"
+                  onMouseMove={handleCountryMove}
+                >
+                  <svg
+                    ref={setSvgRef}
+                    viewBox="0 0 1000 500"
+                    style={{ touchAction: 'none' }}
+                    className={cn(
+                      "w-full h-auto max-h-[500px] select-none",
+                      zoom > 1 ? "cursor-grab active:cursor-grabbing" : "cursor-default"
+                    )}
+                    onMouseDown={onMouseDown}
+                    onMouseMove={onMouseMove}
+                    onMouseUp={onMouseUp}
+                    onMouseLeave={() => {
+                      onMouseUp();
+                      setHoveredCountry(null);
+                    }}
+                  >
+                    <defs>
+                      <clipPath id="map-clip">
+                        <rect x="0" y="0" width="1000" height="500" />
+                      </clipPath>
+
+                      <filter id="laser-glow" x="-25%" y="-25%" width="150%" height="150%">
+                        <feGaussianBlur stdDeviation="3" result="blur" />
+                        <feMerge>
+                          <feMergeNode in="blur" />
+                          <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                      </filter>
+
+                      <radialGradient id="target-beacon" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.8" />
+                        <stop offset="40%" stopColor="#0284c7" stopOpacity="0.35" />
+                        <stop offset="100%" stopColor={isDark ? "#040b17" : "#f8fafc"} stopOpacity="0" />
+                      </radialGradient>
+                    </defs>
+
+                    {/* Transform Group for Zoom & Pan (Zero Shaking / Getar during manual interactions) */}
+                    <g
+                      clipPath="url(#map-clip)"
+                      transform={`translate(${500 + pan.x}, ${250 + pan.y}) scale(${zoom}) translate(-500, -250)`}
+                      style={{
+                        transition: isAutoZooming ? 'transform 0.45s cubic-bezier(0.16, 1, 0.3, 1)' : 'none',
+                        willChange: 'transform',
                       }}
                     >
-                      <defs>
-                        <clipPath id="map-clip">
-                          <rect x="0" y="0" width="1000" height="500" />
-                        </clipPath>
-
-                        <filter id="laser-glow" x="-25%" y="-25%" width="150%" height="150%">
-                          <feGaussianBlur stdDeviation="3" result="blur" />
-                          <feMerge>
-                            <feMergeNode in="blur" />
-                            <feMergeNode in="SourceGraphic" />
-                          </feMerge>
-                        </filter>
-
-                        <radialGradient id="target-beacon" cx="50%" cy="50%" r="50%">
-                          <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.8" />
-                          <stop offset="40%" stopColor="#0284c7" stopOpacity="0.35" />
-                          <stop offset="100%" stopColor={isDark ? "#040b17" : "#f8fafc"} stopOpacity="0" />
-                        </radialGradient>
-                      </defs>
-
-                      {/* Transform Group for Zoom & Pan */}
-                      <g
-                        clipPath="url(#map-clip)"
-                        transform={`translate(${500 + pan.x}, ${250 + pan.y}) scale(${zoom}) translate(-500, -250)`}
-                        style={{
-                          transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
-                        }}
-                      >
                         {/* Radar Coordinate Grid & Concentric Scanning Rings */}
                         <circle cx="500" cy="250" r="140" fill="none" stroke={isDark ? "#06b6d4" : "#0284c7"} strokeWidth="0.5" strokeDasharray="3,3" opacity="0.22" />
                         <circle cx="500" cy="250" r="260" fill="none" stroke={isDark ? "#06b6d4" : "#0284c7"} strokeWidth="0.5" strokeDasharray="4,4" opacity="0.16" />
@@ -1389,37 +1436,35 @@ export default function ThreatMapPage() {
                     </svg>
                   </div>
 
-                  {/* Bottom Strip inside the Map Frame: Live Probe Alert (Cleanly docked inside frame, NEVER overlapping Legend) */}
-                  <div className="relative z-20 p-2.5 flex items-center justify-between pointer-events-none min-h-[38px] bg-gradient-to-t from-[var(--surface)]/40 to-transparent">
-                    {recentLiveAlert ? (
-                      <div className="pointer-events-auto animate-in fade-in slide-in-from-bottom-1 duration-200">
-                        <div className={cn(
-                          "px-2.5 py-1 rounded-md border text-[11px] font-mono font-bold flex items-center gap-2 shadow-sm backdrop-blur-md",
-                          recentLiveAlert.isReal
-                            ? "border-rose-500/50 bg-rose-950/90 text-rose-300"
-                            : "border-cyan-500/40 bg-[#061222]/90 text-cyan-300"
-                        )}>
-                          <CountryFlag code={recentLiveAlert.sourceCode} className="w-3.5 h-2.5" />
-                          <span>LIVE PROBE: {recentLiveAlert.sourceCity} [{recentLiveAlert.sourceCode}]</span>
-                          <span className="text-cyan-400">&rarr; {recentLiveAlert.targetCity}</span>
-                        </div>
+                {/* Live Probe Alert (Cleanly docked in normal layout flow ABOVE the Legend - NEVER overlapping!) */}
+                <div className="min-h-[34px] my-2.5 flex items-center justify-between">
+                  {recentLiveAlert ? (
+                    <div className="animate-in fade-in slide-in-from-bottom-1 duration-200">
+                      <div className={cn(
+                        "inline-flex items-center gap-2 px-2.5 py-1 rounded-md border text-[11px] font-mono font-bold shadow-sm backdrop-blur-md",
+                        recentLiveAlert.isReal
+                          ? "border-rose-500/50 bg-rose-950/90 text-rose-300"
+                          : "border-cyan-500/40 bg-[#061222]/90 text-cyan-300"
+                      )}>
+                        <CountryFlag code={recentLiveAlert.sourceCode} className="w-3.5 h-2.5" />
+                        <span>LIVE PROBE: {recentLiveAlert.sourceCity} [{recentLiveAlert.sourceCode}]</span>
+                        <span className="text-cyan-400">&rarr; {recentLiveAlert.targetCity}</span>
                       </div>
-                    ) : (
-                      <div className="text-[10px] font-mono text-[var(--text-secondary)] opacity-60 flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        <span>RADAR ACTIVE &bull; 2-FINGER PINCH / WHEEL TO ZOOM &bull; DRAG TO PAN</span>
-                      </div>
-                    )}
-
-                    <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-mono text-[var(--text-secondary)] opacity-70">
-                      <span>Touch: 2-Finger Pinch to Zoom</span>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="text-[10px] font-mono text-[var(--text-secondary)] opacity-60 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      <span>RADAR ACTIVE &bull; 2-FINGER PINCH / WHEEL ON MAP TO ZOOM &bull; DRAG TO PAN</span>
+                    </div>
+                  )}
 
+                  <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-mono text-[var(--text-secondary)] opacity-70">
+                    <span>Touch: 2-Finger Pinch Map to Zoom</span>
+                  </div>
                 </div>
 
-                {/* ── LEGEND BAR (OUTSIDE AND COMPLETELY BELOW THE MAP VIEWPORT BOX) ── */}
-                <div className="mt-3.5 pt-3 border-t border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+                {/* ── LEGEND BAR (COMPLETELY BELOW LIVE ALERT; ZERO OVERLAP) ── */}
+                <div className="pt-3 border-t border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
                   <div className="flex flex-wrap items-center gap-4">
                     <span className="flex items-center gap-1.5 text-rose-500 font-bold">
                       <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
