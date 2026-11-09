@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { ChevronLeft, ChevronRight, Calendar, BookOpen, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { renderMarkdown } from "@/lib/markdown";
-import { CodeBlock } from "@/components/ui/CodeBlock";
+import { CodeBlock, resolveCodeBlockMeta } from "@/components/ui/CodeBlock";
 import { prisma } from "@/lib/prisma";
 import { getCachedData } from "@/lib/cache";
 import { decryptDeterministic } from "@/lib/encryption";
@@ -20,20 +20,10 @@ function MarkdownContent({ content }: { content: string }) {
           const match = part.match(/^([^\n]*)\n([\s\S]*)$/);
           const langOrTitle = match ? match[1].trim() : "";
           const code = match ? match[2] : part;
-          const lower = langOrTitle.toLowerCase();
-          let language = "bash";
-          if (lower.includes("php")) language = "php";
-          else if (lower.includes("js") || lower.includes("jsx")) language = "javascript";
-          else if (lower.includes("ts") || lower.includes("tsx")) language = "typescript";
-          else if (lower.includes("yaml") || lower.includes("yml")) language = "yaml";
-          else if (lower.includes("html")) language = "html";
-          else if (lower.includes("css")) language = "css";
-          else if (lower.includes("json")) language = "json";
-          else if (lower.includes("sh") || lower.includes("bash")) language = "bash";
-          else if (langOrTitle) language = lower;
+          const { language, title } = resolveCodeBlockMeta(langOrTitle, code);
           return (
             <div key={index} className="not-prose my-6 sm:my-8">
-              <CodeBlock code={code.trim()} language={language} title={langOrTitle || language} />
+              <CodeBlock code={code.trim()} language={language} title={title} />
             </div>
           );
         }

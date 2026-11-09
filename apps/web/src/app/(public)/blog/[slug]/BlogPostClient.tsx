@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { CodeBlock } from "@/components/ui/CodeBlock";
+import { CodeBlock, resolveCodeBlockMeta } from "@/components/ui/CodeBlock";
 import { Calendar, Clock, ChevronLeft, Heart, Share2, MessageCircle, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -33,26 +33,11 @@ function MarkdownPreview({ content, isDark }: { content: string, isDark: boolean
           const match = part.match(/^([^\n]*)\n([\s\S]*)$/);
           const langOrTitle = match ? match[1].trim() : '';
           const code = match ? match[2] : part;
-
-          let language = 'bash';
-          let title = langOrTitle;
-
-          if (langOrTitle) {
-            const lower = langOrTitle.toLowerCase();
-            if (lower.includes('php') || lower.includes('laravel')) language = 'php';
-            else if (lower.includes('js') || lower.includes('jsx')) language = 'javascript';
-            else if (lower.includes('ts') || lower.includes('tsx')) language = 'typescript';
-            else if (lower.includes('yaml') || lower.includes('yml')) language = 'yaml';
-            else if (lower.includes('html')) language = 'html';
-            else if (lower.includes('css')) language = 'css';
-            else if (lower.includes('json')) language = 'json';
-            else if (lower.includes('sh') || lower.includes('bash')) language = 'bash';
-            else language = lower;
-          }
+          const { language, title } = resolveCodeBlockMeta(langOrTitle, code);
 
           return (
             <div key={index} className="not-prose my-8">
-              <CodeBlock code={code.trim()} language={language} title={title || language} />
+              <CodeBlock code={code.trim()} language={language} title={title} />
             </div>
           );
         } else {
