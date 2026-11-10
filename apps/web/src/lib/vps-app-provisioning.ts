@@ -10,7 +10,7 @@ export class VpsAppProvisioningService {
     proxmox: ProxmoxClient,
     node: string,
     vmid: number,
-    maxAttempts: number = 40 // 40 * 5s = ~200s
+    maxAttempts: number = 60 // 60 * 5s = ~300s
   ): Promise<boolean> {
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
@@ -130,27 +130,34 @@ export class VpsAppProvisioningService {
       const script = app.getInstallScript(primaryIp, rootPassword, appConfig);
       console.log(`[AppProvisioning] Executing install script for ${app.name} on VMID ${vps.vmid}...`);
 
-      // Write script to /tmp/install-app.sh and run in bash
+      // Write script to /tmp/install-app.sh and run in bash with generous timeout
       const encodedScript = Buffer.from(script).toString("base64");
-      const runnerCmd = `echo '${encodedScript}' | base64 -d > /tmp/install-app.sh && chmod +x /tmp/install-app.sh && bash /tmp/install-app.sh > /var/log/app-install.log 2>&1`;
+      const isHeavyPanel = ["cpanel", "plesk", "cyberpanel", "aapanel", "k3s"].includes(app.id);
+      const executionTimeout = isHeavyPanel ? 1200 : 600; // 20m for complex panels, 10m for standard apps
 
-      await this.runGuestCommand(proxmox, vps.node, vps.vmid, runnerCmd, 420);
+      const runnerCmd = `mkdir -p /var/log && (ufw allow ${app.defaultPort}/tcp 2>/dev/null || true) && (iptables -I INPUT -p tcp --dport ${app.defaultPort} -j ACCEPT 2>/dev/null || true) && for i in \$(seq 1 40); do if fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 || fuser /var/lib/apt/lists/lock >/dev/null 2>&1 || fuser /var/lib/dpkg/lock >/dev/null 2>&1; then sleep 3; else break; fi; done && echo '${encodedScript}' | base64 -d > /tmp/install-app.sh && chmod +x /tmp/install-app.sh && bash /tmp/install-app.sh > /var/log/app-install.log 2>&1`;
 
-      // Attempt to retrieve runtime-verified app info from /root/masdika-app-info.json
+      await this.runGuestCommand(proxmox, vps.node, vps.vmid, runnerCmd, executionTimeout);
+
+      // Attempt to retrieve runtime-verified app info from /root/masdika-app-info.json with retries
       let verifiedInfo: any = null;
-      try {
-        const verifyRes = await this.runGuestCommand(
-          proxmox,
-          vps.node,
-          vps.vmid,
-          "cat /root/masdika-app-info.json 2>/dev/null || true",
-          15
-        );
-        if (verifyRes.stdout && verifyRes.stdout.trim().startsWith("{")) {
-          verifiedInfo = JSON.parse(verifyRes.stdout.trim());
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          const verifyRes = await this.runGuestCommand(
+            proxmox,
+            vps.node,
+            vps.vmid,
+            "cat /root/masdika-app-info.json 2>/dev/null || true",
+            15
+          );
+          if (verifyRes.stdout && verifyRes.stdout.trim().startsWith("{")) {
+            verifiedInfo = JSON.parse(verifyRes.stdout.trim());
+            break;
+          }
+        } catch (verifyErr) {
+          // Retry after brief delay
         }
-      } catch (verifyErr) {
-        console.warn(`[AppProvisioning] Could not read /root/masdika-app-info.json on VM ${vps.vmid}:`, verifyErr);
+        await new Promise(resolve => setTimeout(resolve, 2500));
       }
 
       const port = Number(verifiedInfo?.port) || Number(appConfig.panelPort) || app.defaultPort;

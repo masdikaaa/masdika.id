@@ -568,6 +568,27 @@ export class VpsProvisioningService {
       }
     }
 
+    // 5.85 Apply 1-Click App Auto-Firewall Rule
+    if (vps.appName) {
+      const targetApp = getAppByName(vps.appName) || getAppById(vps.appName);
+      if (targetApp && targetApp.defaultPort && ![22, 80, 443].includes(targetApp.defaultPort)) {
+        console.log(`Applying 1-Click App firewall rule for ${targetApp.name} on VMID ${newVmid} (Port: ${targetApp.defaultPort})...`);
+        try {
+          await proxmox.updateFirewallOptions(vps.node, newVmid, { enable: 1 });
+          await proxmox.createFirewallRule(vps.node, newVmid, {
+            type: 'in',
+            action: 'ACCEPT',
+            proto: 'tcp',
+            dport: String(targetApp.defaultPort),
+            enable: 1,
+            comment: `Allow 1-Click App ${targetApp.name} (${targetApp.defaultPort})`
+          });
+        } catch (err: any) {
+          console.error(`Failed to apply app firewall rule for VMID ${newVmid}:`, err);
+        }
+      }
+    }
+
     // 6. Start VM
     console.log(`Starting VMID ${newVmid}...`);
     let started = false;

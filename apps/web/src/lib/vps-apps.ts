@@ -177,22 +177,24 @@ apt-get update && apt-get install -y apache2 mariadb-server php php-mysql php-cu
 
 # Configure MariaDB Database
 systemctl enable --now mariadb
+for i in {1..30}; do mysqladmin ping --silent && break || sleep 1; done
 mysql -e "CREATE DATABASE IF NOT EXISTS wordpress DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 mysql -e "CREATE USER IF NOT EXISTS 'wpuser'@'localhost' IDENTIFIED BY '${pass.replace(/'/g, "\\'")}';"
 mysql -e "GRANT ALL ON wordpress.* TO 'wpuser'@'localhost'; FLUSH PRIVILEGES;"
 
 # Install WP-CLI
-curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar || wget -q https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 chmod +x wp-cli.phar
 mv wp-cli.phar /usr/local/bin/wp
 
 # Download and Configure WordPress
 rm -rf /var/www/html/*
 cd /var/www/html
-wp core download --allow-root
+wp core download --allow-root || (wget -q https://wordpress.org/latest.tar.gz && tar -xzf latest.tar.gz --strip-components=1 && rm -f latest.tar.gz)
 wp config create --dbname=wordpress --dbuser=wpuser --dbpass='${pass.replace(/'/g, "\\'")}' --allow-root
 wp core install --url="${siteUrl}" --title="${title.replace(/"/g, '\\"')}" --admin_user="${user}" --admin_password='${pass.replace(/'/g, "\\'")}' --admin_email="${email}" --skip-email --allow-root
 
+a2enmod rewrite || true
 chown -R www-data:www-data /var/www/html
 systemctl enable --now apache2
 systemctl restart apache2
@@ -284,6 +286,7 @@ apt-get update && apt-get install -y apache2 mariadb-server php php-mysql php-cu
 
 # Configure MariaDB Database
 systemctl enable --now mariadb
+for i in {1..30}; do mysqladmin ping --silent && break || sleep 1; done
 mysql -e "CREATE DATABASE IF NOT EXISTS drupal DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 mysql -e "CREATE USER IF NOT EXISTS 'drupaluser'@'localhost' IDENTIFIED BY '${pass.replace(/'/g, "\\'")}';"
 mysql -e "GRANT ALL ON drupal.* TO 'drupaluser'@'localhost'; FLUSH PRIVILEGES;"
@@ -403,9 +406,16 @@ apt-get update && apt-get install -y apache2 mariadb-server php php-mysql php-cu
 
 # Configure MariaDB Database with utf8mb4 format for Moodle
 systemctl enable --now mariadb
+for i in {1..30}; do mysqladmin ping --silent && break || sleep 1; done
 mysql -e "CREATE DATABASE IF NOT EXISTS moodle DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 mysql -e "CREATE USER IF NOT EXISTS 'moodleuser'@'localhost' IDENTIFIED BY '${pass.replace(/'/g, "\\'")}';"
 mysql -e "GRANT ALL ON moodle.* TO 'moodleuser'@'localhost'; FLUSH PRIVILEGES;"
+
+# Configure PHP settings required by Moodle
+sed -i 's/;max_input_vars = 1000/max_input_vars = 5000/g' /etc/php/*/apache2/php.ini 2>/dev/null || true
+sed -i 's/max_input_vars = 1000/max_input_vars = 5000/g' /etc/php/*/apache2/php.ini 2>/dev/null || true
+sed -i 's/;max_input_vars = 1000/max_input_vars = 5000/g' /etc/php/*/cli/php.ini 2>/dev/null || true
+sed -i 's/max_input_vars = 1000/max_input_vars = 5000/g' /etc/php/*/cli/php.ini 2>/dev/null || true
 
 # Create moodledata directory with proper permissions
 mkdir -p /var/moodledata
@@ -673,7 +683,8 @@ ${appInfoCmd}
 set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y curl wget
-sh <(curl https://autoinstall.plesk.com/one-click-installer || wget -O - https://autoinstall.plesk.com/one-click-installer) --web-interface-port 8443 || true
+curl -fsSL https://autoinstall.plesk.com/one-click-installer -o /tmp/plesk-installer || wget -qO /tmp/plesk-installer https://autoinstall.plesk.com/one-click-installer
+sh /tmp/plesk-installer --web-interface-port 8443 || true
 
 ${appInfoCmd}
 `;
@@ -758,6 +769,7 @@ systemctl disable firewalld 2>/dev/null || true
 # Update package repository and install essential tools
 dnf makecache -y || true
 dnf install -y perl curl wget tar bzip2 NetworkManager 2>/dev/null || yum install -y perl curl wget tar bzip2 NetworkManager 2>/dev/null || true
+systemctl enable --now NetworkManager 2>/dev/null || true
 
 # Ensure root password is set
 if [ -n "${rootPassword}" ]; then
@@ -829,7 +841,58 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y curl tar unzip software-properties-common
 which docker || (curl -fsSL https://get.docker.com | sh)
 systemctl enable --now docker
-docker run -d --name pterodactyl-panel --restart always -p 80:80 -p 443:443 -e APP_URL="http://${ip}" -e DB_HOST="127.0.0.1" ghcr.io/pterodactyl/panel:latest || true
+for i in {1..30}; do docker info >/dev/null 2>&1 && break || sleep 1; done
+for i in {1..30}; do docker info >/dev/null 2>&1 && break || sleep 1; done
+
+mkdir -p /opt/pterodactyl/db /opt/pterodactyl/var /opt/pterodactyl/logs
+cat << 'DOCKER_EOF' > /opt/pterodactyl/docker-compose.yml
+services:
+  database:
+    image: mariadb:10.11
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_DATABASE: panel
+      MYSQL_USER: pterodactyl
+      MYSQL_PASSWORD: "${pass}"
+      MYSQL_ROOT_PASSWORD: "${pass}"
+    volumes:
+      - /opt/pterodactyl/db:/var/lib/mysql
+
+  cache:
+    image: redis:alpine
+    restart: always
+
+  panel:
+    image: ghcr.io/pterodactyl/panel:latest
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: "http://${ip}"
+      APP_TIMEZONE: UTC
+      DB_HOST: database
+      DB_PORT: 3306
+      DB_DATABASE: panel
+      DB_USERNAME: pterodactyl
+      DB_PASSWORD: "${pass}"
+      CACHE_DRIVER: redis
+      SESSION_DRIVER: redis
+      QUEUE_DRIVER: redis
+      REDIS_HOST: cache
+    depends_on:
+      - database
+      - cache
+    volumes:
+      - /opt/pterodactyl/var/:/app/var/
+      - /opt/pterodactyl/logs/:/app/storage/logs
+DOCKER_EOF
+
+cd /opt/pterodactyl
+docker compose up -d || docker-compose up -d || true
 
 ${appInfoCmd}
 `;
@@ -891,7 +954,13 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y curl
 which docker || (curl -fsSL https://get.docker.com | sh)
 systemctl enable --now docker
-docker run -d --name nextcloud --restart always -p 8080:80 -e NEXTCLOUD_ADMIN_USER="${user}" -e NEXTCLOUD_ADMIN_PASSWORD="${pass}" nextcloud:latest || true
+for i in {1..30}; do docker info >/dev/null 2>&1 && break || sleep 1; done
+for i in {1..30}; do docker info >/dev/null 2>&1 && break || sleep 1; done
+docker run -d --name nextcloud --restart always -p 8080:80 \
+  -e NEXTCLOUD_ADMIN_USER="${user}" \
+  -e NEXTCLOUD_ADMIN_PASSWORD="${pass}" \
+  -e NEXTCLOUD_TRUSTED_DOMAINS="${ip} *" \
+  nextcloud:latest || true
 
 ${appInfoCmd}
 `;
@@ -944,7 +1013,9 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y curl
 which docker || (curl -fsSL https://get.docker.com | sh)
 systemctl enable --now docker
-docker run -d --name n8n --restart always -p 5678:5678 -e N8N_BASIC_AUTH_ACTIVE=true -e N8N_BASIC_AUTH_USER=admin -e N8N_BASIC_AUTH_PASSWORD="${pass}" -v n8n_data:/home/node/.n8n docker.n8n.io/n8nio/n8n:latest || true
+for i in {1..30}; do docker info >/dev/null 2>&1 && break || sleep 1; done
+for i in {1..30}; do docker info >/dev/null 2>&1 && break || sleep 1; done
+docker run -d --name n8n --restart always -p 5678:5678 -e N8N_BASIC_AUTH_ACTIVE=true -e N8N_BASIC_AUTH_USER=admin -e N8N_BASIC_AUTH_PASSWORD="${pass}" -e WEBHOOK_URL="http://${ip}:5678/" -v n8n_data:/home/node/.n8n docker.n8n.io/n8nio/n8n:latest || docker run -d --name n8n --restart always -p 5678:5678 n8nio/n8n:latest || true
 
 ${appInfoCmd}
 `;
@@ -997,6 +1068,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y curl openssl
 which docker || (curl -fsSL https://get.docker.com | sh)
 systemctl enable --now docker
+for i in {1..30}; do docker info >/dev/null 2>&1 && break || sleep 1; done
 
 JWT_SECRET=$(openssl rand -hex 32 2>/dev/null || echo "masdika-vikunja-secret-jwt-key")
 
@@ -1051,6 +1123,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y curl
 which docker || (curl -fsSL https://get.docker.com | sh)
 systemctl enable --now docker
+for i in {1..30}; do docker info >/dev/null 2>&1 && break || sleep 1; done
 docker run -d --name hermes-agent --restart always -p 8080:8080 ghcr.io/nousresearch/hermes-function-calling:latest || docker run -d --name hermes-agent --restart always -p 8080:8080 nginx:alpine
 
 ${appInfoCmd}
@@ -1093,6 +1166,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y curl
 which docker || (curl -fsSL https://get.docker.com | sh)
 systemctl enable --now docker
+for i in {1..30}; do docker info >/dev/null 2>&1 && break || sleep 1; done
 docker run -d --name openclaw --restart always -p 3000:3000 ghcr.io/openclaw/openclaw:latest || docker run -d --name openclaw --restart always -p 3000:3000 nginx:alpine
 
 ${appInfoCmd}
@@ -1136,6 +1210,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y curl
 which docker || (curl -fsSL https://get.docker.com | sh)
 systemctl enable --now docker
+for i in {1..30}; do docker info >/dev/null 2>&1 && break || sleep 1; done
 docker run -d --name 9router --restart always -p 20128:20128 -v 9router_data:/app/data ghcr.io/decolua/9router:latest || true
 
 ${appInfoCmd}
@@ -1261,10 +1336,11 @@ ${appInfoCmd}
 set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y postgresql postgresql-contrib
-sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD '${rootPassword.replace(/'/g, "\\'")}';"
-echo "listen_addresses = '*'" >> /etc/postgresql/*/main/postgresql.conf
-echo "host all all 0.0.0.0/0 md5" >> /etc/postgresql/*/main/pg_hba.conf
-systemctl restart postgresql
+systemctl enable --now postgresql
+sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD '${rootPassword.replace(/'/g, "\\'")}';" || true
+echo "listen_addresses = '*'" >> /etc/postgresql/*/main/postgresql.conf 2>/dev/null || true
+echo "host all all 0.0.0.0/0 md5" >> /etc/postgresql/*/main/pg_hba.conf 2>/dev/null || true
+systemctl restart postgresql || true
 
 ${appInfoCmd}
 `;
@@ -1304,6 +1380,8 @@ ${appInfoCmd}
 set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y mysql-server
+systemctl enable --now mysql
+for i in {1..30}; do mysqladmin ping --silent && break || sleep 1; done
 mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${rootPassword.replace(/'/g, "\\'")}'; CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED BY '${rootPassword.replace(/'/g, "\\'")}'; GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION; FLUSH PRIVILEGES;" || true
 sed -i 's/127.0.0.1/0.0.0.0/g' /etc/mysql/mysql.conf.d/mysqld.cnf || true
 systemctl restart mysql
@@ -1346,6 +1424,8 @@ ${appInfoCmd}
 set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y mariadb-server
+systemctl enable --now mariadb
+for i in {1..30}; do mysqladmin ping --silent && break || sleep 1; done
 mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${rootPassword.replace(/'/g, "\\'")}'; GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '${rootPassword.replace(/'/g, "\\'")}'; FLUSH PRIVILEGES;" || true
 sed -i 's/127.0.0.1/0.0.0.0/g' /etc/mysql/mariadb.conf.d/50-server.cnf || true
 systemctl restart mariadb
@@ -1390,10 +1470,18 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y gnupg curl
 curl -fsSL https://www.mongodb.org/static/pgp/server-8.0.asc | gpg -o /usr/share/keyrings/mongodb-server-8.0.gpg --dearmor --yes
 echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg ] https://repo.mongodb.org/apt/ubuntu noble/mongodb-org/8.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-8.0.list
-apt-get update && apt-get install -y mongodb-org || apt-get install -y mongodb
-systemctl enable --now mongod || systemctl enable --now mongodb
-sed -i 's/bindIp: 127.0.0.1/bindIp: 0.0.0.0/g' /etc/mongod.conf || true
-systemctl restart mongod || true
+apt-get update && apt-get install -y mongodb-org || apt-get install -y mongodb || true
+systemctl enable --now mongod 2>/dev/null || systemctl enable --now mongodb 2>/dev/null || true
+sed -i 's/bindIp: 127.0.0.1/bindIp: 0.0.0.0/g' /etc/mongod.conf 2>/dev/null || true
+systemctl restart mongod 2>/dev/null || true
+
+# If host package failed to start (e.g. AVX compatibility), deploy containerized fallback
+if ! systemctl is-active --quiet mongod 2>/dev/null && ! systemctl is-active --quiet mongodb 2>/dev/null; then
+  which docker || (curl -fsSL https://get.docker.com | sh)
+  systemctl enable --now docker
+  for i in {1..30}; do docker info >/dev/null 2>&1 && break || sleep 1; done
+  docker run -d --name mongodb --restart always -p 27017:27017 mongo:latest || true
+fi
 
 ${appInfoCmd}
 `;
@@ -1445,9 +1533,9 @@ set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y curl tar gzip
 
-# Install official static FrankenPHP binary
-curl -fsSL https://github.com/dunglas/frankenphp/releases/latest/download/frankenphp-linux-x86_64 -o /usr/local/bin/frankenphp
-chmod +x /usr/local/bin/frankenphp
+# Install official static FrankenPHP binary with fallback
+curl -fsSL https://github.com/dunglas/frankenphp/releases/latest/download/frankenphp-linux-x86_64 -o /usr/local/bin/frankenphp || wget -qO /usr/local/bin/frankenphp https://github.com/dunglas/frankenphp/releases/latest/download/frankenphp-linux-x86_64 || true
+chmod +x /usr/local/bin/frankenphp 2>/dev/null || true
 
 mkdir -p /var/www/html
 cat << 'EOF' > /var/www/html/index.php
@@ -1458,8 +1546,9 @@ cat << 'EOF' > /var/www/html/index.php
 </html>
 EOF
 
-# Create Systemd Service
-cat << 'EOF' > /etc/systemd/system/frankenphp.service
+if [ -f /usr/local/bin/frankenphp ] && [ -s /usr/local/bin/frankenphp ]; then
+  # Create Systemd Service
+  cat << 'EOF' > /etc/systemd/system/frankenphp.service
 [Unit]
 Description=FrankenPHP Modern Application Server
 After=network.target
@@ -1476,8 +1565,15 @@ RestartSec=3
 WantedBy=multi-user.target
 EOF
 
-systemctl daemon-reload
-systemctl enable --now frankenphp
+  systemctl daemon-reload
+  systemctl enable --now frankenphp
+else
+  # Container fallback if direct binary download was restricted
+  which docker || (curl -fsSL https://get.docker.com | sh)
+  systemctl enable --now docker
+  for i in {1..30}; do docker info >/dev/null 2>&1 && break || sleep 1; done
+  docker run -d --name frankenphp --restart always -p 80:80 -v /var/www/html:/app/public dunglas/frankenphp || true
+fi
 
 ${appInfoCmd}
 `;
@@ -1581,6 +1677,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y curl
 which docker || (curl -fsSL https://get.docker.com | sh)
 systemctl enable --now docker
+for i in {1..30}; do docker info >/dev/null 2>&1 && break || sleep 1; done
 docker run -d --name grafana --restart always -p 3000:3000 \
   -e GF_SECURITY_ADMIN_USER="${user}" \
   -e GF_SECURITY_ADMIN_PASSWORD="${pass}" \
@@ -1647,6 +1744,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y curl
 which docker || (curl -fsSL https://get.docker.com | sh)
 systemctl enable --now docker
+for i in {1..30}; do docker info >/dev/null 2>&1 && break || sleep 1; done
 docker run -d --name mikrotik-chr --restart always --net=host --privileged -v /lib/modules:/lib/modules:ro evilfreelancer/docker-routeros:latest || true
 
 ${appInfoCmd}
@@ -1739,7 +1837,8 @@ ${appInfoCmd}
 set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y curl wget
-sh <(curl https://cyberpanel.net/install.sh || wget -O - https://cyberpanel.net/install.sh) --non-interactive --password "${pass}" || true
+curl -fsSL https://cyberpanel.net/install.sh -o /tmp/cyberpanel-installer.sh || wget -qO /tmp/cyberpanel-installer.sh https://cyberpanel.net/install.sh
+sh /tmp/cyberpanel-installer.sh --non-interactive --password "${pass}" || true
 
 ${appInfoCmd}
 `;
