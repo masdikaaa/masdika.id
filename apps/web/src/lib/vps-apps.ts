@@ -1095,6 +1095,107 @@ ${appInfoCmd}
     }
   },
 
+  // 13. OpenCode (Artificial Intelligence / Developer)
+  {
+    id: "opencode",
+    name: "OPENCODE",
+    category: "Artificial Intelligence",
+    secondaryCategories: ["Developer"],
+    description: "The open-source AI coding agent. Start with free models or bring any of 200+ providers across desktop, terminal, web, and mobile.",
+    icon: "/images/apps/opencode.png",
+    defaultPort: 4096,
+    defaultProtocol: "http",
+    osBase: "Ubuntu 26.04",
+    appVersion: "v2.2.7",
+    versions: [
+      { id: "227-ubu26", label: "OpenCode v2.2.7 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v2.2.7" },
+    ],
+    minSpecs: { cpu: 2, ram: 2, disk: 25 },
+    estimatedTime: "~2-3 mins",
+    adminUsername: "root",
+    instructions: "OpenCode server running at http://${ip}:4096. Log in with your server password, or SSH into terminal and run 'opencode'.",
+    configFields: [
+      {
+        key: "serverPassword",
+        label: "OpenCode Server Password (Optional)",
+        type: "password",
+        required: false,
+        placeholder: "Leave empty to use root password",
+        description: "Authentication password for web and remote client access."
+      }
+    ],
+    getInstallScript: (ip, rootPassword, config) => {
+      const serverPass = (config?.serverPassword && typeof config.serverPassword === "string" && config.serverPassword.trim())
+        ? config.serverPassword.trim()
+        : rootPassword;
+
+      const appInfoCmd = buildAppInfoJson({
+        appId: "opencode",
+        appName: "OpenCode",
+        port: 4096,
+        protocol: "http",
+        path: "",
+        username: "root",
+        password: serverPass,
+        url: `http://${ip}:4096`
+      });
+
+      return `
+set -e
+export DEBIAN_FRONTEND=noninteractive
+apt-get update && apt-get install -y curl tar gzip ufw
+
+# 1. Install OpenCode using official curl installer
+echo "[OPENCODE] Installing OpenCode via curl https://opencode.ai/v2/install..."
+curl -fsSL https://opencode.ai/v2/install | bash
+
+# 2. Ensure opencode binary is globally linked
+if [ -f /root/.opencode/bin/opencode ]; then
+  ln -sf /root/.opencode/bin/opencode /usr/local/bin/opencode
+  chmod +x /usr/local/bin/opencode
+fi
+
+# 3. Create persistent systemd background service for OpenCode Server
+cat <<EOF > /etc/systemd/system/opencode.service
+[Unit]
+Description=OpenCode - Open Source AI Coding Agent Server
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root
+Environment="OPENCODE_SERVER_PASSWORD=${serverPass}"
+Environment="PATH=/root/.opencode/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=/usr/local/bin/opencode serve --hostname 0.0.0.0 --port 4096
+Restart=always
+RestartSec=5
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable --now opencode
+
+# 4. Open firewall port 4096
+(ufw allow 4096/tcp 2>/dev/null || true)
+(iptables -I INPUT -p tcp --dport 4096 -j ACCEPT 2>/dev/null || true)
+
+# 5. Wait briefly for daemon endpoint to bind
+for i in {1..15}; do
+  if ss -tulpn | grep -q ":4096" || curl -s http://127.0.0.1:4096 >/dev/null 2>&1; then
+    break
+  fi
+  sleep 1
+done
+
+${appInfoCmd}
+`;
+    }
+  },
+
   // 13. Docker (Developer)
   {
     id: "docker",
