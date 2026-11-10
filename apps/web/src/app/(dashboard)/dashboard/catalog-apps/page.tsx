@@ -94,11 +94,8 @@ export default function CatalogAppsPage() {
         </div>
       </div>
 
-      {/* Category Filter Pills - Scrollable and Consistent */}
-      <div className={cn(
-        "p-1.5 rounded-2xl border flex items-center gap-1.5 overflow-x-auto scrollbar-none",
-        isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-100/70 border-slate-200"
-      )}>
+      {/* Category Filter Pills - Razor-Sharp Standalone Pills (No outer blurry capsule) */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
         {APP_CATEGORIES.map((cat) => {
           const isActive = selectedCategory === cat;
           const count = cat === "All Apps"
@@ -115,16 +112,18 @@ export default function CatalogAppsPage() {
                 isActive
                   ? "bg-cyan-400 border-cyan-400 text-slate-950 font-black shadow-xs ring-1 ring-cyan-300/50"
                   : isDark
-                    ? "bg-transparent border-transparent text-zinc-400 hover:text-white hover:bg-white/[0.04]"
-                    : "bg-transparent border-transparent text-slate-600 hover:text-slate-900 hover:bg-white/80"
+                    ? "bg-[#111115] border-white/[0.08] text-zinc-300 hover:text-white hover:border-white/20"
+                    : "bg-white border-slate-200 text-slate-700 hover:text-slate-900 hover:border-slate-300 shadow-2xs"
               )}
             >
               <span>{cat}</span>
               <span className={cn(
-                "text-[10px] px-1.5 py-0.2 rounded-md font-mono font-bold",
+                "text-[10px] px-1.5 py-0.5 rounded-md font-mono font-bold border",
                 isActive
-                  ? "bg-slate-950/20 text-slate-950"
-                  : isDark ? "bg-white/10 text-zinc-400" : "bg-slate-200 text-slate-700"
+                  ? "bg-slate-950/20 text-slate-950 border-slate-950/30"
+                  : isDark
+                    ? "bg-[#08090d] text-zinc-300 border-white/10"
+                    : "bg-slate-100 text-slate-700 border-slate-200"
               )}>
                 {count}
               </span>

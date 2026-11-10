@@ -111,15 +111,6 @@ const SERVICES: ServiceDef[] = [
     tags: ["1 Gbps Uplink", "Anti-DDoS BGP", "Root Access"]
   },
   {
-    id: "KUBERNETES",
-    name: "Managed Kubernetes (KaaS)",
-    category: "COMPUTE",
-    icon: SiKubernetes,
-    desc: "Production-ready K3s cluster with automated control plane & private VPC.",
-    badge: "Enterprise",
-    tags: ["K3s Engine", "Traefik Ingress", "Auto-heal"]
-  },
-  {
     id: "CDN",
     name: "File CDN",
     category: "STORAGE_CDN",

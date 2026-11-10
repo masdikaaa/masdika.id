@@ -877,7 +877,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                             isActive
                               ? "bg-cyan-400 border-cyan-400 text-slate-950 font-black shadow-xs ring-1 ring-cyan-300/50"
                               : isDark
-                                ? "bg-white/[0.03] border-white/[0.08] text-zinc-400 hover:text-white hover:border-white/20"
+                                ? "bg-[#111115] border-white/[0.08] text-zinc-300 hover:text-white hover:border-white/20"
                                 : "bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300"
                           )}
                         >

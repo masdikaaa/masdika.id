@@ -1361,6 +1361,133 @@ cat << 'EOF' > /root/masdika-app-info.json
 EOF
 `;
     }
+  },
+
+  // 23. Apache (Developer)
+  {
+    id: "apache",
+    name: "APACHE",
+    category: "Developer",
+    secondaryCategories: ["Web Panel"],
+    description: "World-renowned robust, flexible, and feature-rich open-source HTTP web server with mod_rewrite pre-configured.",
+    icon: "/images/apps/apache.svg",
+    defaultPort: 80,
+    defaultProtocol: "http",
+    osBase: "Ubuntu 26.04",
+    appVersion: "v2.4",
+    versions: [
+      { id: "24-ubu26", label: "Apache 2.4 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v2.4" },
+    ],
+    adminUsername: "root",
+    instructions: "Apache2 HTTP web server running on port 80. Document root is at /var/www/html.",
+    getInstallScript: (ip, rootPassword) => `
+set -e
+export DEBIAN_FRONTEND=noninteractive
+apt-get update && apt-get install -y apache2
+systemctl enable --now apache2
+
+cat << 'EOF' > /root/masdika-app-info.json
+{
+  "appId": "apache",
+  "appName": "Apache",
+  "port": 80,
+  "protocol": "http",
+  "path": "",
+  "username": "root",
+  "password": "${rootPassword}",
+  "url": "http://${ip}:80"
+}
+EOF
+`
+  },
+
+  // 24. CyberPanel (Web Panel)
+  {
+    id: "cyberpanel",
+    name: "CYBERPANEL",
+    category: "Web Panel",
+    secondaryCategories: ["Developer", "CMS"],
+    description: "Next-generation web hosting control panel powered by OpenLiteSpeed with LSCache, DNS, mail, and SSL automation.",
+    icon: "/images/apps/cyberpanel.png",
+    defaultPort: 8090,
+    defaultProtocol: "https",
+    osBase: "Ubuntu 26.04",
+    appVersion: "v2.3",
+    versions: [
+      { id: "23-ubu26", label: "CyberPanel 2.3 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v2.3" },
+    ],
+    adminUsername: "admin",
+    instructions: "Access CyberPanel web console at https://${ip}:8090. Username: 'admin', Password: configured password.",
+    configFields: [
+      {
+        key: "adminPassword",
+        label: "CyberPanel Admin Password",
+        type: "password",
+        placeholder: "Leave empty to use VPS Root Password",
+        description: "Direct administrative login password"
+      }
+    ],
+    getInstallScript: (ip, rootPassword, config = {}) => {
+      const pass = config.adminPassword || rootPassword;
+      return `
+set -e
+export DEBIAN_FRONTEND=noninteractive
+apt-get update && apt-get install -y curl wget
+sh <(curl https://cyberpanel.net/install.sh || wget -O - https://cyberpanel.net/install.sh) --non-interactive --password "${pass}" || true
+
+cat << 'EOF' > /root/masdika-app-info.json
+{
+  "appId": "cyberpanel",
+  "appName": "CyberPanel",
+  "port": 8090,
+  "protocol": "https",
+  "path": "",
+  "username": "admin",
+  "password": "${pass}",
+  "url": "https://${ip}:8090"
+}
+EOF
+`;
+    }
+  },
+
+  // 25. Kubernetes K3s (Developer)
+  {
+    id: "k3s",
+    name: "KUBERNETES K3S",
+    category: "Developer",
+    secondaryCategories: ["Business"],
+    description: "Lightweight, certified CNCF Kubernetes distribution packaged into a single binary, ideal for production microservices and containers.",
+    icon: "/images/apps/kubernetes.svg",
+    defaultPort: 6443,
+    defaultProtocol: "https",
+    osBase: "Ubuntu 26.04",
+    appVersion: "v1.31",
+    versions: [
+      { id: "131-ubu26", label: "K3s v1.31 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v1.31" },
+    ],
+    adminUsername: "admin",
+    instructions: "K3s Kubernetes cluster active. Access API at https://${ip}:6443. Kubeconfig stored at /etc/rancher/k3s/k3s.yaml.",
+    getInstallScript: (ip, rootPassword) => `
+set -e
+export DEBIAN_FRONTEND=noninteractive
+apt-get update && apt-get install -y curl
+curl -sfL https://get.k3s.io | sh -s - --tls-san "${ip}" --write-kubeconfig-mode 644
+systemctl enable --now k3s
+
+cat << 'EOF' > /root/masdika-app-info.json
+{
+  "appId": "k3s",
+  "appName": "Kubernetes K3s",
+  "port": 6443,
+  "protocol": "https",
+  "path": "",
+  "username": "admin",
+  "password": "${rootPassword}",
+  "url": "https://${ip}:6443"
+}
+EOF
+`
   }
 ];
 

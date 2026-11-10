@@ -77,7 +77,6 @@ const SIDEBAR_LINKS = [
   { name: "My Services", href: "/dashboard/services", icon: Layers, color: "text-cyan-400", group: "Main" },
   { name: "Cloud VPS", href: "/dashboard/vps", icon: Terminal, color: "text-cyan-400", group: "Compute & Network" },
   { name: "Catalog App", href: "/dashboard/catalog-apps", icon: Rocket, color: "text-cyan-400", group: "Compute & Network" },
-  { name: "Managed K3s", href: "/dashboard/k3s", icon: SiKubernetes, color: "text-cyan-400", group: "Compute & Network" },
   { name: "Metric & Alert", href: "/dashboard/alerts", icon: Activity, color: "text-cyan-400", group: "Compute & Network" },
   { name: "Incident Reports", href: "/dashboard/incidents", icon: ShieldAlert, color: "text-cyan-400", group: "Compute & Network" },
   { name: "Auto Scheduler", href: "/dashboard/scheduler", icon: Clock, color: "text-cyan-400", group: "Compute & Network" },

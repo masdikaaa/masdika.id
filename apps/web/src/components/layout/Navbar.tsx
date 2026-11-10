@@ -138,13 +138,6 @@ const DEV_MENU_ITEMS: MenuItem[] = [
     icon: Terminal,
     badge: "Premium",
   },
-  {
-    title: "Kubernetes (K3s)",
-    description: "Lightweight, fully managed Kubernetes clusters.",
-    href: "/k3s",
-    icon: SiKubernetes,
-    badge: "Premium",
-  },
 ];
 
 export function Navbar({ socialLinks }: { socialLinks?: any }) {
