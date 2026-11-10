@@ -47,8 +47,21 @@ export async function POST(req: NextRequest) {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-    if (!hostname || typeof hostname !== "string" || !finalPassword || typeof finalPassword !== "string" || !templateId) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    const targetApp = appId ? getAppById(appId) : undefined;
+    if (appId && !targetApp) {
+      return NextResponse.json({ error: "Invalid application identifier." }, { status: 400 });
+    }
+
+    if (!hostname || typeof hostname !== "string" || !hostname.trim()) {
+      return NextResponse.json({ error: "Hostname is required. Please configure Hostname in Section 9." }, { status: 400 });
+    }
+
+    if (!finalPassword || typeof finalPassword !== "string" || !finalPassword.trim()) {
+      return NextResponse.json({ error: "Root/Admin Password is required. Please set password in Section 9." }, { status: 400 });
+    }
+
+    if (!templateId && !targetApp && !isKubernetes) {
+      return NextResponse.json({ error: "Operating system template is required." }, { status: 400 });
     }
 
     // Security: Validate hostname format (prevent injection)
@@ -82,11 +95,6 @@ export async function POST(req: NextRequest) {
       }
       kubernetesVersion = kubernetesVersion.trim();
     }
-    
-    const targetApp = appId ? getAppById(appId) : undefined;
-    if (appId && !targetApp) {
-      return NextResponse.json({ error: "Invalid application identifier." }, { status: 400 });
-    }
 
     // Server-side strict minimum specs validation to prevent OOM-kills or failed deployments
     if (targetApp && targetApp.minSpecs) {
@@ -118,7 +126,7 @@ export async function POST(req: NextRequest) {
     ipv4Count = Math.min(5, Math.max(0, Math.floor(Number(ipv4Count) || 0)));
     ipv6Count = Math.min(5, Math.max(0, Math.floor(Number(ipv6Count) || 0)));
 
-    let template = await prisma.vpsTemplate.findUnique({ where: { id: templateId } });
+    let template = templateId ? await prisma.vpsTemplate.findUnique({ where: { id: Number(templateId) } }) : null;
 
     // Enforce base OS template for 1-Click Applications based on target app requirements
     if (targetApp) {

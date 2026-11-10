@@ -507,6 +507,31 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
     }
   }, [searchParams, templates]);
 
+  // Synchronize base OS template whenever 1-Click App or templates load
+  useEffect(() => {
+    if (imageMode === "apps" && selectedAppId && templates.length > 0) {
+      const app = getAppById(selectedAppId);
+      if (app) {
+        if (app.osBase.toLowerCase().includes("alma")) {
+          const almaTpl = templates.find((t: any) => t.name.toLowerCase().includes("almalinux-9"))
+            || templates.find((t: any) => t.name.toLowerCase().includes("almalinux"))
+            || templates.find((t: any) => t.name.toLowerCase().includes("alma"));
+          if (almaTpl && selectedTemplate !== almaTpl.id) {
+            setSelectedOsFamily("AlmaLinux");
+            setSelectedTemplate(almaTpl.id);
+          }
+        } else {
+          const ubuTpl = templates.find((t: any) => t.name.toLowerCase().includes("ubuntu-26"))
+            || templates.find((t: any) => t.name.toLowerCase().includes("ubuntu"));
+          if (ubuTpl && selectedTemplate !== ubuTpl.id) {
+            setSelectedOsFamily("Ubuntu");
+            setSelectedTemplate(ubuTpl.id);
+          }
+        }
+      }
+    }
+  }, [imageMode, selectedAppId, templates, selectedTemplate]);
+
   // When ordering Kubernetes, always ensure Debian-13 is locked as the template
   useEffect(() => {
     if (serviceType === "KUBERNETES" && templates.length > 0) {
@@ -611,8 +636,14 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
   };
 
   const handleOrder = async () => {
-    if (!hostname || !username || selectedTemplate === null || !password) {
-      toast.error("Please fill all required fields");
+    const is1ClickApp = imageMode === "apps" && Boolean(selectedAppId);
+    if (!hostname || !username || (!is1ClickApp && selectedTemplate === null) || !password) {
+      const missing = [];
+      if (!hostname) missing.push("Hostname");
+      if (!username) missing.push("Username");
+      if (!is1ClickApp && selectedTemplate === null) missing.push("OS Template");
+      if (!password) missing.push("Password");
+      toast.error(`Please complete required field(s): ${missing.join(", ")} in Section 9.`);
       return;
     }
 
@@ -713,7 +744,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
           username: isWindows ? "Administrator" : username,
           rootPassword: password,
           sshKey: sshKey,
-          templateId: is1ClickApp ? undefined : selectedTemplate,
+          templateId: selectedTemplate || undefined,
           billingMode: "PAYG",
           planId: selectedPlanId,
           cpuCores,
@@ -2473,7 +2504,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
               if (!username) missingFields.push("Username");
               if (!password) missingFields.push("Password");
               if (password !== passwordConfirm) missingFields.push("Password Confirmation");
-              if (selectedTemplate === null) missingFields.push("OS Template");
+              if (imageMode !== "apps" && selectedTemplate === null) missingFields.push("OS Template");
               
               if (useVpc && (!selectedVpcId || !privateIpAddress.trim() || (() => {
                 const currentVpc = vpcs.find(v => v.id === selectedVpcId);
@@ -2520,7 +2551,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
             <button
               onClick={handleOrder}
               disabled={
-                isDisabled || !termsAccepted || isSubmitting || !hostname || !username || selectedTemplate === null ||
+                isDisabled || !termsAccepted || isSubmitting || !hostname || !username || (imageMode !== "apps" && selectedTemplate === null) ||
                 (!selectedPaymentMethod || balance < 50000) ||
                 (!password || password !== passwordConfirm || !!passwordError) ||
                 (useVpc && (!selectedVpcId || !privateIpAddress.trim() || (() => {
