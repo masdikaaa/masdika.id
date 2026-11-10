@@ -3,7 +3,7 @@ import { useUrlTab } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from "react";
-import { User, Shield, Key, Save, Camera, CheckCircle2, XCircle, Trash2, X, Share2, Layout, Phone, FileText, Search, Check, CheckCircle, Settings, RefreshCw, Info, HardDrive, Eye, EyeOff, Server, AlertCircle, ArrowLeftRight } from "lucide-react";
+import { User, Shield, Key, Save, Camera, CheckCircle2, XCircle, Trash2, X, Share2, Layout, Phone, FileText, Search, Check, CheckCircle, Settings, RefreshCw, Info, HardDrive, Eye, EyeOff, Server, AlertCircle, ArrowLeftRight, Rocket } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -1311,17 +1311,17 @@ export default function SettingsPage() {
                     <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl border transition-colors group", isDark ? "bg-white/5 border-cyan-500/10 hover:border-cyan-500/30" : "bg-slate-50 border-slate-200 hover:border-cyan-500/30")}>
                       <div className="pr-4">
                         <h3 className={cn("font-bold flex items-center gap-2 text-lg", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                          <Settings className={cn("w-4 h-4 group-hover:rotate-45 transition-transform", isDark ? "text-cyan-400" : "text-cyan-700")} />
-                          Enable Kubernetes (K3s)
+                          <Rocket className={cn("w-4 h-4 group-hover:rotate-45 transition-transform", isDark ? "text-cyan-400" : "text-cyan-700")} />
+                          Enable 1-Click Apps
                         </h3>
-                        <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>When disabled, customers cannot deploy new Kubernetes clusters. The frontend will display "Coming Soon".</p>
+                        <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>When disabled, customers cannot deploy new 1-Click Applications.</p>
                       </div>
 
                       <button
                         onClick={() => setFormData({ ...formData, k3s_enabled: !formData.k3s_enabled })}
                         className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-black ${formData.k3s_enabled ? 'bg-cyan-500' : 'bg-zinc-700'}`}
                       >
-                        <span className="sr-only">Toggle Kubernetes</span>
+                        <span className="sr-only">Toggle 1-Click Apps</span>
                         <span aria-hidden="true" className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white ring-0 transition duration-200 ease-in-out ${formData.k3s_enabled ? 'translate-x-3' : '-translate-x-3'}`} />
                       </button>
                     </div>

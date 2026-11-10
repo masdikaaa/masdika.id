@@ -2,7 +2,7 @@
 
 import { useUpdateEffect, useUrlNumber, useUrlString, useUrlTab } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
-import { Plus, Server, HardDrive, Edit, Trash2, Cpu, MemoryStick, RefreshCw, Network, Search, Play, Square, RefreshCcw, Power, ShieldAlert, XCircle, AlertTriangle, Receipt, Settings, CheckCircle, Save, FileText, Globe, X, ChevronLeft, ChevronRight, Terminal, Key, Loader2, GripVertical, Gauge, Activity, Zap, Copy, Check, Info } from "lucide-react";
+import { Plus, Server, HardDrive, Edit, Trash2, Cpu, MemoryStick, RefreshCw, Network, Search, Play, Square, RefreshCcw, Power, ShieldAlert, XCircle, AlertTriangle, Receipt, Settings, CheckCircle, Save, FileText, Globe, X, ChevronLeft, ChevronRight, Terminal, Key, Loader2, GripVertical, Gauge, Activity, Zap, Copy, Check, Info, Rocket } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -23,6 +23,11 @@ type VpsService = {
   accumulatedCost?: number;
   expiresAt?: string | null;
   kubernetesClusterId?: number | null;
+  appName?: string | null;
+  appVersion?: string | null;
+  appStatus?: string | null;
+  appUrl?: string | null;
+  appCredentials?: string | null;
   suspendReason?: string | null;
   osTemplate?: string;
   user: { name: string; email: string };
@@ -639,7 +644,7 @@ export default function VpsManagementPage() {
   // Handle VPS fetching with debounce for Elasticsearch
   useEffect(() => {
     const handler = setTimeout(() => {
-      if (activeTab === "services" || activeTab === "k3s") {
+      if (activeTab === "services" || activeTab === "apps" || activeTab === "k3s") {
         fetchVpsServices(searchQuery);
       }
     }, 300);
@@ -978,6 +983,20 @@ export default function VpsManagementPage() {
     );
   }
 
+  const isAppsTab = activeTab === "apps" || activeTab === "k3s";
+  const displayedServices = vpsServices
+    .filter(v => (activeTab === "services" ? (!v.appName || v.appName === "NONE") : (!!v.appName && v.appName !== "NONE")))
+    .filter(v => {
+      if (!searchQuery.trim()) return true;
+      const q = searchQuery.toLowerCase().trim();
+      return (
+        v.hostname.toLowerCase().includes(q) ||
+        v.user.email.toLowerCase().includes(q) ||
+        v.user.name.toLowerCase().includes(q) ||
+        (v.appName && v.appName.toLowerCase().includes(q))
+      );
+    });
+
   return (
     <div className="space-y-6 pb-10">
       {/* Header */}
@@ -1002,7 +1021,7 @@ export default function VpsManagementPage() {
               if (activeTab === "templates") fetchTemplates();
               if (activeTab === "pricing") fetchPricing();
               if (activeTab === "bandwidth") fetchBandwidth();
-              if (activeTab === "services" || activeTab === "k3s") fetchVpsServices();
+              if (activeTab === "services" || activeTab === "apps" || activeTab === "k3s") fetchVpsServices();
               if (activeTab === "reserved-ips") fetchReservedIps();
               toast.success("Refreshed data");
             }}
@@ -1027,7 +1046,7 @@ export default function VpsManagementPage() {
             { id: "pricing", label: "Pricing", icon: Receipt },
             { id: "bandwidth", label: "Bandwidth Speed", icon: Gauge },
             { id: "services", label: "User VPS Services", icon: Server },
-            { id: "k3s", label: "Managed K3s", icon: Server },
+            { id: "apps", label: "1-Click Apps", icon: Rocket },
             { id: "reserved-ips", label: "Reserved IPs", icon: Network },
           ].map((tab) => (
             <button
@@ -2188,18 +2207,18 @@ export default function VpsManagementPage() {
         </div>
       )}
 
-      {/* Services and K3s Nodes Tabs */}
-      {(activeTab === "services" || activeTab === "k3s") && (
+      {/* Services and 1-Click Apps Tabs */}
+      {(activeTab === "services" || activeTab === "apps" || activeTab === "k3s") && (
         <div className={cn("p-4 sm:p-5 rounded-2xl border w-full shadow-md", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200")}>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
               <h2 className={cn("text-sm sm:text-base font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>
-                {activeTab === "services" ? "User VPS Services" : "Managed K3s Nodes"}
+                {activeTab === "services" ? "User VPS Services" : "1-Click App Instances"}
               </h2>
               <p className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>
                 {activeTab === "services"
                   ? "Monitor and manage all client virtual machines."
-                  : "Monitor and manage all client Kubernetes nodes."}
+                  : "Monitor and manage all client 1-Click Application deployments."}
               </p>
             </div>
             <div className="flex flex-col md:flex-row gap-3 items-center w-full md:w-auto">
@@ -2215,7 +2234,7 @@ export default function VpsManagementPage() {
                 <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
                 <input
                   type="text"
-                  placeholder="Search hostname or email..."
+                  placeholder="Search hostname, email, app..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className={cn("w-full border focus:border-cyan-500 rounded-2xl py-3.5 pl-10 pr-4 outline-none transition-all h-[48px]", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
@@ -2257,9 +2276,7 @@ export default function VpsManagementPage() {
                   </tr>
                 </thead>
                 <tbody className={cn("divide-y", isDark ? "divide-slate-800/80" : "divide-slate-200")}>
-                  {vpsServices
-                    .filter(v => (activeTab === "services" ? !v.kubernetesClusterId : !!v.kubernetesClusterId))
-                    .filter(v => v.hostname.includes(searchQuery) || v.user.email.includes(searchQuery))
+                  {displayedServices
                     .slice((vpsCurrentPage - 1) * vpsPerPage, vpsCurrentPage * vpsPerPage)
                     .map((vps) => (
                       <tr key={vps.id} className={`${isDark ? "hover:bg-white/5" : "hover:bg-slate-50/80"} transition-colors ${actionLoading === vps.id ? 'opacity-50 animate-pulse' : ''}`}>
@@ -2287,13 +2304,29 @@ export default function VpsManagementPage() {
                               <span className="w-1.5 h-1.5 rounded-full bg-cyan-500"></span>
                               <span className={cn("font-medium whitespace-nowrap", isDark ? "text-cyan-400" : "text-cyan-700")}>Cloud VPS</span>
                             </div>
-                            {(vps as any).kubernetesRole && (
+                            {vps.appName && vps.appName !== "NONE" && (
                               <div className="flex items-center gap-1.5 shrink-0">
                                 <span className="text-zinc-600">•</span>
-                                <span className={cn("font-medium whitespace-nowrap", isDark ? "text-purple-400" : "text-purple-700")}>K3s</span>
+                                <span className={cn("px-1.5 py-0.5 rounded text-[10px] font-bold font-mono tracking-wider uppercase bg-cyan-400/10 text-cyan-400 border border-cyan-400/20")}>
+                                  {vps.appName} {vps.appVersion ? `v${vps.appVersion}` : ""}
+                                </span>
                               </div>
                             )}
                           </div>
+                          {vps.appUrl && (
+                            <div className="mt-1">
+                              <a
+                                href={vps.appUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-[11px] font-mono text-cyan-400 hover:text-cyan-300 hover:underline transition-colors"
+                                title="Open application dashboard"
+                              >
+                                <Globe className="w-3 h-3 shrink-0" />
+                                <span className="truncate max-w-[200px]">{vps.appUrl}</span>
+                              </a>
+                            </div>
+                          )}
                         </td>
                         <td className="px-3.5 py-2.5">
                           {vps.osTemplate ? (
@@ -2423,10 +2456,22 @@ export default function VpsManagementPage() {
                                   {vps.suspendReason || 'Suspended by system'}
                                 </div>
                               )}
-                              <div className="mt-1">
-                                <span className={cn("text-[10px] uppercase font-bold tracking-wider bg-cyan-400/10 border border-cyan-400/20 px-2 py-0.5 rounded-full whitespace-nowrap", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                              <div className="mt-1 flex flex-col gap-1">
+                                <span className={cn("text-[10px] uppercase font-bold tracking-wider bg-cyan-400/10 border border-cyan-400/20 px-2 py-0.5 rounded-full whitespace-nowrap w-fit", isDark ? "text-cyan-400" : "text-cyan-700")}>
                                   PAYG Billing
                                 </span>
+                                {vps.appStatus && vps.appStatus !== "NONE" && (
+                                  <span className={cn(
+                                    "text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-full border whitespace-nowrap inline-flex items-center gap-1 w-fit",
+                                    vps.appStatus === "INSTALLED"
+                                      ? (isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200")
+                                      : vps.appStatus === "INSTALLING"
+                                      ? (isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20 animate-pulse" : "bg-cyan-50 text-cyan-700 border-cyan-200 animate-pulse")
+                                      : (isDark ? "bg-red-500/10 text-red-400 border-red-500/20" : "bg-red-50 text-red-700 border-red-200")
+                                  )}>
+                                    App: {vps.appStatus}
+                                  </span>
+                                )}
                               </div>
                             </>
                           )}
@@ -2541,10 +2586,10 @@ export default function VpsManagementPage() {
                         </td>
                       </tr>
                     ))}
-                  {vpsServices.filter(v => (activeTab === "services" ? !v.kubernetesClusterId : !!v.kubernetesClusterId)).length === 0 && (
+                  {displayedServices.length === 0 && (
                     <tr>
-                      <td colSpan={8} className="text-center py-12 text-zinc-500">
-                        {activeTab === "services" ? "No VPS services found." : "No K3s nodes found."}
+                      <td colSpan={9} className="text-center py-12 text-zinc-500">
+                        {activeTab === "services" ? "No VPS services found." : "No 1-Click App instances found."}
                       </td>
                     </tr>
                   )}
@@ -2554,10 +2599,10 @@ export default function VpsManagementPage() {
           )}
 
           {/* Pagination Controls */}
-          {!loadingServices && vpsServices.filter(v => (activeTab === "services" ? !v.kubernetesClusterId : !!v.kubernetesClusterId)).filter(v => v.hostname.includes(searchQuery) || v.user.email.includes(searchQuery)).length > vpsPerPage && (
+          {!loadingServices && displayedServices.length > vpsPerPage && (
             <div className={cn("px-6 py-4 border mt-4 rounded-2xl flex items-center justify-between glass", isDark ? "border-white/10" : "border-slate-200")}>
               <span className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-                Showing {((vpsCurrentPage - 1) * vpsPerPage) + 1} to {Math.min(vpsCurrentPage * vpsPerPage, vpsServices.filter(v => (activeTab === "services" ? !v.kubernetesClusterId : !!v.kubernetesClusterId)).filter(v => v.hostname.includes(searchQuery) || v.user.email.includes(searchQuery)).length)} of {vpsServices.filter(v => (activeTab === "services" ? !v.kubernetesClusterId : !!v.kubernetesClusterId)).filter(v => v.hostname.includes(searchQuery) || v.user.email.includes(searchQuery)).length} entries
+                Showing {((vpsCurrentPage - 1) * vpsPerPage) + 1} to {Math.min(vpsCurrentPage * vpsPerPage, displayedServices.length)} of {displayedServices.length} entries
               </span>
               <div className="flex gap-2">
                 <button
@@ -2568,8 +2613,8 @@ export default function VpsManagementPage() {
                   <ChevronLeft className="w-5 h-5" />
                 </button>
                 <button
-                  onClick={() => setVpsCurrentPage(p => Math.min(Math.ceil(vpsServices.filter(v => (activeTab === "services" ? !v.kubernetesClusterId : !!v.kubernetesClusterId)).filter(v => v.hostname.includes(searchQuery) || v.user.email.includes(searchQuery)).length / vpsPerPage), p + 1))}
-                  disabled={vpsCurrentPage === Math.ceil(vpsServices.filter(v => (activeTab === "services" ? !v.kubernetesClusterId : !!v.kubernetesClusterId)).filter(v => v.hostname.includes(searchQuery) || v.user.email.includes(searchQuery)).length / vpsPerPage)}
+                  onClick={() => setVpsCurrentPage(p => Math.min(Math.ceil(displayedServices.length / vpsPerPage), p + 1))}
+                  disabled={vpsCurrentPage === Math.ceil(displayedServices.length / vpsPerPage)}
                   className={cn("p-1 rounded hover:bg-white/10 disabled:opacity-50 transition-colors", isDark ? "text-white" : "text-slate-900")}
                 >
                   <ChevronRight className="w-5 h-5" />
