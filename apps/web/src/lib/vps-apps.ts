@@ -485,15 +485,16 @@ ${appInfoCmd}
     icon: "/images/apps/aapanel.png",
     defaultPort: 8888,
     defaultProtocol: "http",
-    osBase: "Ubuntu 26.04",
+    loginPath: "/login",
+    osBase: "Ubuntu 24.04",
     appVersion: "v7.0",
     versions: [
-      { id: "v7-ubu26", label: "aaPanel v7.0 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v7.0" },
+      { id: "v7-ubu24", label: "aaPanel v7.0 - Ubuntu 24.04", osBase: "Ubuntu 24.04", appVersion: "v7.0" },
     ],
     minSpecs: { cpu: 1, ram: 2, disk: 20 },
     estimatedTime: "~5-8 mins",
     adminUsername: "paneluser",
-    instructions: "Access aaPanel at http://${ip}:8888. Login using username 'paneluser' and your configured password.",
+    instructions: "Access aaPanel at http://${ip}:8888/login. Login using your configured username and password.",
     configFields: [
       {
         key: "panelPort",
@@ -520,55 +521,48 @@ ${appInfoCmd}
     ],
     getInstallScript: (ip, rootPassword, config = {}) => {
       const port = Number(config.panelPort) || 8888;
-      const user = config.adminUsername || "paneluser";
+      const rawUser = config.adminUsername || "paneluser";
       const pass = config.adminPassword || rootPassword;
       return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y wget curl sqlite3
 
-# Install aaPanel official release non-interactively
+# Prepare sanitized username: minimum 5 chars, cannot be 'admin' or 'root'
+AA_USER="${rawUser}"
+if [ "$AA_USER" = "admin" ] || [ "$AA_USER" = "root" ] || [ \${#AA_USER} -lt 5 ]; then
+  AA_USER="paneluser"
+fi
+
+# Install aaPanel official release non-interactively passing user, pass, port, and safe-path directly
 URL=https://www.aapanel.com/script/install_7.0_en.sh
 if [ -f /usr/bin/curl ]; then curl -ksSO "$URL"; else wget --no-check-certificate -O install_7.0_en.sh "$URL"; fi
-echo "y" | bash install_7.0_en.sh aapanel || true
+bash install_7.0_en.sh aapanel -y -u "\${AA_USER}" -p "${pass}" -P "${port}" --safe-path login --ssl-disable || true
 
 # Wait until panel directory is generated
 sleep 3
 
-# Configure aaPanel deterministically via official 'bt' utility and internal pyenv
+# Configure aaPanel deterministically and synchronize credentials
 if [ -d /www/server/panel ]; then
-  PY_BIN="/www/server/panel/pyenv/bin/python"
-  if [ ! -f "$PY_BIN" ]; then
-    PY_BIN="python3"
-  fi
+  PY_BIN="/www/server/panel/pyenv/bin/btpython"
+  [ -f "$PY_BIN" ] || PY_BIN="/www/server/panel/pyenv/bin/python"
+  [ -f "$PY_BIN" ] || PY_BIN="python3"
 
-  # 1. Set explicit panel port
-  echo "${port}" | bt 8 || true
-  echo "${port}" > /www/server/panel/data/port.pl
-  ufw allow ${port}/tcp || true
-  iptables -I INPUT -p tcp --dport ${port} -j ACCEPT || true
+  # Sync default.pl so 'bt 14' prints the exact configured password
+  echo "${pass}" > /www/server/panel/default.pl
+  chmod 600 /www/server/panel/default.pl
 
-  # 2. Set explicit password
-  echo "${pass}" | bt 5 || true
-  $PY_BIN /www/server/panel/tools.py set_panel_pwd "${pass}" || true
-  $PY_BIN /www/server/panel/tools.py panel "${pass}" || true
-
-  # 3. Set explicit username (aaPanel requires >= 5 chars, cannot be 'admin' or 'root')
-  AA_USER="${user}"
-  if [ "$AA_USER" = "admin" ] || [ "$AA_USER" = "root" ] || [ \${#AA_USER} -lt 5 ]; then
-    AA_USER="paneluser"
-  fi
-  echo "$AA_USER" | bt 6 || true
-  $PY_BIN /www/server/panel/tools.py set_panel_username "$AA_USER" || true
-
-  # 4. Remove random security entrance path so panel is accessible cleanly at http://${ip}:${port}/
-  rm -f /www/server/panel/data/admin_path.pl
-
-  # 5. Disable SSL so browser connects cleanly over HTTP without untrusted certificate warning
+  # Sync admin_path.pl so entrance is always /login
+  echo "/login" > /www/server/panel/data/admin_path.pl
   rm -f /www/server/panel/data/ssl.pl
 
-  # 6. Restart aaPanel daemon
-  bt 1 || /etc/init.d/bt restart || systemctl restart bt || true
+  # Apply to internal database and tools
+  $PY_BIN -c "import tools; tools.set_panel_pwd('${pass}')" 2>/dev/null || true
+  $PY_BIN -c "import tools; tools.set_panel_username('\${AA_USER}')" 2>/dev/null || true
+
+  ufw allow ${port}/tcp 2>/dev/null || true
+  iptables -I INPUT -p tcp --dport ${port} -j ACCEPT 2>/dev/null || true
+  /etc/init.d/bt restart 2>/dev/null || bt 1 2>/dev/null || true
 fi
 
 # Dynamically inspect aaPanel runtime files to guarantee 100% credential accuracy
@@ -580,7 +574,7 @@ if [ -f /www/server/panel/data/port.pl ]; then
   fi
 fi
 
-ACTUAL_USER="${user}"
+ACTUAL_USER="\${AA_USER}"
 if [ -f /www/server/panel/data/default.db ]; then
   DB_USER=\$(sqlite3 /www/server/panel/data/default.db "SELECT username FROM users LIMIT 1;" 2>/dev/null || echo "")
   if [ -n "$DB_USER" ]; then
@@ -588,15 +582,22 @@ if [ -f /www/server/panel/data/default.db ]; then
   fi
 fi
 
-ACTUAL_PATH=""
+ACTUAL_PASS="${pass}"
+if [ -f /www/server/panel/default.pl ]; then
+  READ_PASS=\$(cat /www/server/panel/default.pl 2>/dev/null | tr -d '\\r\\n')
+  if [ -n "$READ_PASS" ]; then
+    ACTUAL_PASS="\$READ_PASS"
+  fi
+fi
+
+ACTUAL_PATH="/login"
 if [ -f /www/server/panel/data/admin_path.pl ]; then
   TMP_PATH=\$(cat /www/server/panel/data/admin_path.pl 2>/dev/null | tr -d '\\r\\n')
   if [ -n "$TMP_PATH" ]; then
-    if [ "\${TMP_PATH:0:1}" != "/" ]; then
-      ACTUAL_PATH="/\$TMP_PATH"
-    else
-      ACTUAL_PATH="\$TMP_PATH"
-    fi
+    case "\$TMP_PATH" in
+      /*) ACTUAL_PATH="\$TMP_PATH" ;;
+      *) ACTUAL_PATH="/\$TMP_PATH" ;;
+    esac
   fi
 fi
 
@@ -613,7 +614,7 @@ cat << EOF > /root/masdika-app-info.json
   "protocol": "\${ACTUAL_PROTO}",
   "path": "\${ACTUAL_PATH}",
   "username": "\${ACTUAL_USER}",
-  "password": "${pass.replace(/"/g, '\\"')}",
+  "password": "\${ACTUAL_PASS}",
   "url": "\${ACTUAL_PROTO}://${ip}:\${ACTUAL_PORT}\${ACTUAL_PATH}"
 }
 EOF

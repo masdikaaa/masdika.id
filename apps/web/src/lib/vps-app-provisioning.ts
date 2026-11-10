@@ -281,6 +281,11 @@ export class VpsAppProvisioningService {
         appUrl = `${protocol}://${domainOrIp}${portSuffix}${path}`;
       }
 
+      // Ensure aaPanel URL always points to /login entrance to avoid 404
+      if (app.id === "aapanel" && !appUrl.includes("/login")) {
+        appUrl = appUrl.replace(/\/+$/, "") + "/login";
+      }
+
       let existingCreds: Record<string, any> = {};
       if (vps.appCredentials) {
         try { existingCreds = JSON.parse(vps.appCredentials); } catch {}

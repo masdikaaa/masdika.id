@@ -93,9 +93,18 @@ export function VpsAppInstallationMonitor({
   const serverLogs: string[] = Array.isArray(credentialsObj?.logs) ? credentialsObj.logs : [];
   const errorText: string | null = credentialsObj?.error || null;
 
-  const isVpsReady = statusData?.status === "ACTIVE";
-  const isFinished = statusData?.appStatus === "READY";
-  const isFailed = statusData?.appStatus === "FAILED";
+  const isVpsReady =
+    statusData?.status === "RUNNING" ||
+    statusData?.status === "INSTALLING" ||
+    statusData?.status === "ACTIVE" ||
+    statusData?.appStatus === "INSTALLING" ||
+    statusData?.appStatus === "READY";
+
+  const hasApp = Boolean(appDef || statusData?.appName || appName);
+  const isFinished = hasApp
+    ? statusData?.appStatus === "READY"
+    : (statusData?.status === "RUNNING" || statusData?.status === "ACTIVE");
+  const isFailed = statusData?.appStatus === "FAILED" || statusData?.status === "ERROR";
 
   // Polling logic
   useEffect(() => {
@@ -112,22 +121,33 @@ export function VpsAppInstallationMonitor({
         setStatusData(data);
 
         // Progress calculation across both phases:
-        // Stage 1 (VPS Infrastructure): 0% - 50%
-        // Stage 2 (Application Stack): 50% - 100%
-        if (data.appStatus === "READY") {
-          setProgress(100);
-        } else if (data.appStatus === "FAILED") {
-          setProgress(85);
-        } else if (data.status === "ACTIVE" && data.appStatus === "INSTALLING") {
-          // Incrementally simulate progress while app is installing (55% -> 92%)
-          setProgress((prev) => Math.min(92, Math.max(prev, 55) + 3));
-        } else if (data.status === "ACTIVE") {
-          setProgress((prev) => Math.min(60, Math.max(prev, 50)));
-        } else if (data.status === "PROVISIONING") {
-          setProgress((prev) => Math.min(48, Math.max(prev, 25) + 3));
+        if (hasApp) {
+          if (data.appStatus === "READY") {
+            setProgress(100);
+          } else if (data.appStatus === "FAILED") {
+            setProgress(85);
+          } else if (data.appStatus === "INSTALLING" || data.status === "INSTALLING" || data.status === "RUNNING") {
+            // Stage 2: App installation in progress (moves 55% -> 94%)
+            setProgress((prev) => Math.min(94, Math.max(prev, 55) + 3));
+          } else if (data.status === "PROVISIONING") {
+            // Stage 1: VPS infrastructure provisioning (moves 20% -> 48%)
+            const base = (data.vmid && data.assignedIps?.length) ? 40 : data.vmid ? 30 : 20;
+            setProgress((prev) => Math.min(48, Math.max(prev, base) + 2));
+          } else {
+            // PENDING
+            setProgress((prev) => Math.min(20, Math.max(prev, 12) + 2));
+          }
         } else {
-          // PENDING
-          setProgress((prev) => Math.min(22, Math.max(prev, 15)));
+          // Pure VPS Provisioning
+          if (data.status === "RUNNING" || data.status === "ACTIVE") {
+            setProgress(100);
+          } else if (data.status === "PROVISIONING") {
+            const base = (data.vmid && data.assignedIps?.length) ? 75 : data.vmid ? 50 : 25;
+            setProgress((prev) => Math.min(95, Math.max(prev, base) + 4));
+          } else {
+            // PENDING
+            setProgress((prev) => Math.min(25, Math.max(prev, 15) + 2));
+          }
         }
       } catch (err) {
         console.error("Failed to poll VPS provisioning status:", err);
@@ -141,7 +161,7 @@ export function VpsAppInstallationMonitor({
       isMounted = false;
       clearInterval(pollInterval);
     };
-  }, [vpsId]);
+  }, [vpsId, hasApp]);
 
   // Construct structured timeline logs
   const [logs, setLogs] = useState<string[]>([]);
@@ -161,16 +181,28 @@ export function VpsAppInstallationMonitor({
       timelineLogs.push(`[${timestamp()}] [OS-INIT] Base ${appDef?.osBase || "Linux"} booted. QEMU Guest Agent responsive.`);
     }
 
-    // Stage 2: Application Stack Logs
-    if (isVpsReady || statusData?.appStatus === "INSTALLING" || isFinished) {
-      timelineLogs.push(`[${timestamp()}] [APP-STACK] Starting automated deployment pipeline for ${displayName}...`);
-      timelineLogs.push(`[${timestamp()}] [SECURITY] Firewall policy enabled: opening TCP port ${appDef?.defaultPort || 80}.`);
-    }
-    if (progress >= 70 || isFinished) {
-      timelineLogs.push(`[${timestamp()}] [RUNTIME] Setting up container environment, database schema and configuration files...`);
-    }
-    if (progress >= 85 || isFinished) {
-      timelineLogs.push(`[${timestamp()}] [INSTALLER] Launching ${displayName} daemon and background workers...`);
+    // Stage 2: Application Stack Logs or Pure OS Completion
+    if (hasApp) {
+      if (isVpsReady || statusData?.appStatus === "INSTALLING" || isFinished) {
+        timelineLogs.push(`[${timestamp()}] [APP-STACK] Starting automated deployment pipeline for ${displayName}...`);
+        timelineLogs.push(`[${timestamp()}] [SECURITY] Firewall policy enabled: opening TCP port ${appDef?.defaultPort || 80}.`);
+      }
+      if (progress >= 70 || isFinished) {
+        timelineLogs.push(`[${timestamp()}] [RUNTIME] Setting up container environment, database schema and configuration files...`);
+      }
+      if (progress >= 85 || isFinished) {
+        timelineLogs.push(`[${timestamp()}] [INSTALLER] Launching ${displayName} daemon and background workers...`);
+      }
+    } else {
+      if (progress >= 60 || isVpsReady) {
+        timelineLogs.push(`[${timestamp()}] [STORAGE] Resizing primary filesystem to allocated disk capacity.`);
+      }
+      if (progress >= 80 || isFinished) {
+        timelineLogs.push(`[${timestamp()}] [NETWORK] Applying firewall filter rules and routing policies.`);
+      }
+      if (isFinished) {
+        timelineLogs.push(`[${timestamp()}] [READY] Server online. SSH service listening on port 22.`);
+      }
     }
 
     // Append server-recorded real logs if available
@@ -183,14 +215,18 @@ export function VpsAppInstallationMonitor({
     }
 
     if (isFinished) {
-      timelineLogs.push(`[${timestamp()}] [SUCCESS] ${displayName} daemon successfully launched.`);
-      timelineLogs.push(`[${timestamp()}] [HEALTHCHECK] HTTP endpoint verified at ${webUrl || `http://${primaryIp}:${appDef?.defaultPort || 80}`}. Ready for customer login.`);
+      if (hasApp) {
+        timelineLogs.push(`[${timestamp()}] [SUCCESS] ${displayName} daemon successfully launched.`);
+        timelineLogs.push(`[${timestamp()}] [HEALTHCHECK] HTTP endpoint verified at ${webUrl || `http://${primaryIp}:${appDef?.defaultPort || 80}`}. Ready for customer login.`);
+      } else {
+        timelineLogs.push(`[${timestamp()}] [SUCCESS] Virtual machine provisioning completed successfully.`);
+      }
     } else if (isFailed) {
       timelineLogs.push(`[${timestamp()}] [ERROR] Setup script returned an error. Review error details below.`);
     }
 
     setLogs(timelineLogs);
-  }, [progress, statusData, primaryIp, displayName, isFinished, isFailed, isVpsReady, webUrl, serverLogs]);
+  }, [progress, statusData, primaryIp, displayName, isFinished, isFailed, isVpsReady, webUrl, serverLogs, hasApp]);
 
   // Autoscroll logs to bottom
   useEffect(() => {
@@ -237,23 +273,23 @@ export function VpsAppInstallationMonitor({
       id: 2,
       title: "Public IPv4 & Network Stack",
       desc: primaryIp ? `Assigned IP: ${primaryIp}` : "Allocating dedicated Public IPv4 address",
-      isDone: isVpsReady || Boolean(primaryIp) || progress >= 40,
+      isDone: isVpsReady || Boolean(primaryIp) || progress >= (hasApp ? 40 : 60),
       isActive: !isVpsReady && Boolean(statusData?.vmid) && !primaryIp
     },
     {
       id: 3,
       title: "Base OS & Cloud-Init Bootstrap",
       desc: isVpsReady ? `${appDef?.osBase || "Linux"} booted & Guest Agent online` : `Booting ${appDef?.osBase || "Linux"} image`,
-      isDone: isVpsReady || progress >= 50,
+      isDone: isVpsReady || (!hasApp && isFinished) || progress >= (hasApp ? 50 : 90),
       isActive: !isVpsReady && Boolean(primaryIp)
     }
   ];
 
-  const appSteps = [
+  const appSteps = hasApp ? [
     {
       id: 4,
       title: "Container Runtime & Environment",
-      desc: isFinished ? "Docker / LAMP stack operational" : "Setting up runtime dependencies & security policy",
+      desc: isFinished ? "Docker / LNMP stack operational" : "Setting up runtime dependencies & security policy",
       isDone: isFinished || (isVpsReady && progress >= 70),
       isActive: isVpsReady && !isFinished && progress < 70
     },
@@ -271,31 +307,35 @@ export function VpsAppInstallationMonitor({
       isDone: isFinished,
       isActive: isVpsReady && !isFinished && progress >= 88
     }
-  ];
+  ] : [];
 
   const currentPhaseName = isFinished
-    ? "DEPLOYMENT COMPLETE"
+    ? (hasApp ? "APPLICATION READY" : "SERVER READY")
     : isFailed
     ? "SETUP ISSUE"
-    : !isVpsReady
-    ? "STAGE 1 OF 2: INFRASTRUCTURE"
-    : "STAGE 2 OF 2: APPLICATION STACK";
+    : hasApp
+    ? (!isVpsReady ? "STAGE 1 OF 2: INFRASTRUCTURE" : "STAGE 2 OF 2: APPLICATION STACK")
+    : "DEPLOYING SERVER INFRASTRUCTURE";
 
   const currentHeadline = isFinished
-    ? `${displayName} is Ready!`
+    ? (hasApp ? `${displayName} is Ready!` : "Server is Ready!")
     : isFailed
     ? `${displayName} Installation Issue`
-    : !isVpsReady
-    ? "Deploying Cloud VPS Instance"
-    : `Deploying ${displayName} Stack`;
+    : hasApp
+    ? (!isVpsReady ? "Deploying Cloud VPS Instance" : `Deploying ${displayName} Stack`)
+    : "Provisioning Server Infrastructure";
 
   const currentSubtitle = isFinished
-    ? "All infrastructure and application services have been verified and are fully operational."
+    ? (hasApp
+        ? "All infrastructure and application services have been verified and are fully operational."
+        : "Your dedicated virtual machine has been fully deployed, configured, and booted.")
     : isFailed
     ? "The VPS infrastructure is running, but automated application setup encountered an error."
-    : !isVpsReady
-    ? "Allocating dedicated hypervisor resources, network routing, and booting base OS image."
-    : `VPS infrastructure is online. Installing ${displayName} packages, configuring database, and opening port ${appDef?.defaultPort || 80}.`;
+    : hasApp
+    ? (!isVpsReady
+        ? "Allocating dedicated hypervisor resources, network routing, and booting base OS image."
+        : `VPS infrastructure is online. Installing ${displayName} packages, configuring database, and opening port ${appDef?.defaultPort || 80}.`)
+    : "Allocating dedicated hypervisor resources, network routing, and booting operating system.";
 
   const content = (
     <div className={cn(
@@ -348,12 +388,12 @@ export function VpsAppInstallationMonitor({
                 </span>
                 <span className="text-zinc-500 text-xs">•</span>
                 <span className="font-mono text-xs font-semibold text-zinc-300">
-                  {displayName} ({displayVersion})
+                  {hasApp ? `${displayName} (${displayVersion})` : (statusData?.hostname || "Cloud VPS")}
                 </span>
                 <span className="text-zinc-500 text-xs">•</span>
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
                   <Clock className="w-3 h-3 text-cyan-400" />
-                  <span>Est: {estimatedTime}</span>
+                  <span>Est: {hasApp ? estimatedTime : "~3-5 mins"}</span>
                 </span>
               </div>
 
@@ -403,10 +443,10 @@ export function VpsAppInstallationMonitor({
               <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider mb-2">
                 <span className={cn("flex items-center gap-1.5", isDark ? "text-cyan-400" : "text-cyan-600")}>
                   <Server className="w-3.5 h-3.5" />
-                  Stage 1: Cloud VPS Infrastructure
+                  {hasApp ? "Stage 1: Cloud VPS Infrastructure" : "Server Infrastructure Allocation"}
                 </span>
                 <span className="text-[10px] font-mono text-zinc-500">
-                  {isVpsReady ? "COMPLETED" : "IN PROGRESS"}
+                  {isVpsReady || isFinished ? "COMPLETED" : "IN PROGRESS"}
                 </span>
               </div>
               <div className="space-y-2">
@@ -463,68 +503,70 @@ export function VpsAppInstallationMonitor({
             </div>
 
             {/* Stage 2: Application Stack */}
-            <div>
-              <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider mb-2">
-                <span className={cn("flex items-center gap-1.5", isVpsReady ? "text-cyan-400" : "text-zinc-500")}>
-                  <Rocket className="w-3.5 h-3.5" />
-                  Stage 2: {displayName} Application Stack
-                </span>
-                <span className="text-[10px] font-mono text-zinc-500">
-                  {isFinished ? "COMPLETED" : isVpsReady ? "IN PROGRESS" : "AWAITING VPS"}
-                </span>
-              </div>
-              <div className="space-y-2">
-                {appSteps.map((st) => (
-                  <div
-                    key={st.id}
-                    className={cn(
-                      "p-2.5 rounded-xl border flex items-center justify-between gap-2.5 transition-colors text-xs",
-                      st.isDone
-                        ? isDark ? "bg-[#0a0a0c] border-white/[0.08] text-cyan-400" : "bg-slate-50/80 border-slate-200/90 text-slate-800 shadow-2xs"
-                        : st.isActive
-                        ? isDark ? "bg-[#111115] border-cyan-500/50 text-cyan-400 shadow-2xs ring-1 ring-cyan-500/20 relative overflow-hidden" : "bg-cyan-50/70 border-cyan-400 text-cyan-950 shadow-2xs ring-1 ring-cyan-400/20 relative overflow-hidden"
-                        : isDark ? "bg-[#0a0a0c]/60 border-white/[0.06] text-zinc-500" : "bg-slate-50/70 border-slate-200/80 text-slate-400"
-                    )}
-                  >
-                    {st.isActive && (
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-shimmer" />
-                    )}
-                    <div className="flex items-center gap-2.5 min-w-0 relative z-10">
-                      <div className={cn(
-                        "w-5 h-5 rounded-md flex items-center justify-center shrink-0 text-[10px] font-bold border",
+            {hasApp && (
+              <div>
+                <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider mb-2">
+                  <span className={cn("flex items-center gap-1.5", isVpsReady ? "text-cyan-400" : "text-zinc-500")}>
+                    <Rocket className="w-3.5 h-3.5" />
+                    Stage 2: {displayName} Application Stack
+                  </span>
+                  <span className="text-[10px] font-mono text-zinc-500">
+                    {isFinished ? "COMPLETED" : isVpsReady ? "IN PROGRESS" : "AWAITING VPS"}
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {appSteps.map((st) => (
+                    <div
+                      key={st.id}
+                      className={cn(
+                        "p-2.5 rounded-xl border flex items-center justify-between gap-2.5 transition-colors text-xs",
                         st.isDone
-                          ? "bg-cyan-400/20 text-cyan-300 border-cyan-400/40"
+                          ? isDark ? "bg-[#0a0a0c] border-white/[0.08] text-cyan-400" : "bg-slate-50/80 border-slate-200/90 text-slate-800 shadow-2xs"
                           : st.isActive
-                          ? "bg-cyan-400 text-slate-950 border-cyan-300"
-                          : isDark ? "bg-white/5 border-white/10 text-zinc-500" : "bg-slate-200 border-slate-300 text-slate-500"
-                      )}>
-                        {st.isDone ? <Check className="w-3 h-3 stroke-[3]" /> : st.id}
-                      </div>
-                      <div className="min-w-0">
-                        <span className="font-bold block truncate">{st.title}</span>
-                        <span className="text-[10px] block truncate opacity-75">{st.desc}</span>
-                      </div>
-                    </div>
-
-                    <div className="relative z-10 shrink-0">
-                      {st.isDone ? (
-                        <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-bold flex items-center gap-1">
-                          <Check className="w-2.5 h-2.5 stroke-[3]" /> DONE
-                        </span>
-                      ) : st.isActive ? (
-                        <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold flex items-center gap-1 animate-pulse">
-                          <RefreshCw className="w-2.5 h-2.5 animate-spin" /> INSTALLING
-                        </span>
-                      ) : (
-                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-white/5 text-zinc-500 border border-white/5">
-                          PENDING
-                        </span>
+                          ? isDark ? "bg-[#111115] border-cyan-500/50 text-cyan-400 shadow-2xs ring-1 ring-cyan-500/20 relative overflow-hidden" : "bg-cyan-50/70 border-cyan-400 text-cyan-950 shadow-2xs ring-1 ring-cyan-400/20 relative overflow-hidden"
+                          : isDark ? "bg-[#0a0a0c]/60 border-white/[0.06] text-zinc-500" : "bg-slate-50/70 border-slate-200/80 text-slate-400"
                       )}
+                    >
+                      {st.isActive && (
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-shimmer" />
+                      )}
+                      <div className="flex items-center gap-2.5 min-w-0 relative z-10">
+                        <div className={cn(
+                          "w-5 h-5 rounded-md flex items-center justify-center shrink-0 text-[10px] font-bold border",
+                          st.isDone
+                            ? "bg-cyan-400/20 text-cyan-300 border-cyan-400/40"
+                            : st.isActive
+                            ? "bg-cyan-400 text-slate-950 border-cyan-300"
+                            : isDark ? "bg-white/5 border-white/10 text-zinc-500" : "bg-slate-200 border-slate-300 text-slate-500"
+                        )}>
+                          {st.isDone ? <Check className="w-3 h-3 stroke-[3]" /> : st.id}
+                        </div>
+                        <div className="min-w-0">
+                          <span className="font-bold block truncate">{st.title}</span>
+                          <span className="text-[10px] block truncate opacity-75">{st.desc}</span>
+                        </div>
+                      </div>
+
+                      <div className="relative z-10 shrink-0">
+                        {st.isDone ? (
+                          <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-bold flex items-center gap-1">
+                            <Check className="w-2.5 h-2.5 stroke-[3]" /> DONE
+                          </span>
+                        ) : st.isActive ? (
+                          <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold flex items-center gap-1 animate-pulse">
+                            <RefreshCw className="w-2.5 h-2.5 animate-spin" /> INSTALLING
+                          </span>
+                        ) : (
+                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-white/5 text-zinc-500 border border-white/5">
+                            PENDING
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Bottom helper card on left */}
@@ -555,146 +597,282 @@ export function VpsAppInstallationMonitor({
         {/* RIGHT COLUMN: CREDENTIALS OR LIVE LOGS (lg:col-span-7) */}
         <div className="lg:col-span-7 flex flex-col min-h-[380px]">
           {isFinished ? (
-            /* FINISHED CREDENTIALS CARD */
-            <div className={cn(
-              "p-5 rounded-2xl border flex flex-col justify-between h-full animate-in fade-in zoom-in-95 duration-300",
-              isDark ? "bg-[#11131a] border-emerald-500/30 shadow-[0_0_25px_rgba(16,185,129,0.15)]" : "bg-emerald-50/70 border-emerald-200"
-            )}>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
-                    <Sparkles className="w-4 h-4 shrink-0" />
-                    <span>Application Web Access Credentials</span>
-                  </div>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
-                    ONLINE & READY
-                  </span>
-                </div>
-
-                {/* Web Access URL */}
-                <div>
-                  <label className={cn("block text-[11px] font-semibold uppercase tracking-wider mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>
-                    Web Access URL
-                  </label>
-                  <div className={cn(
-                    "flex items-center justify-between gap-2 p-2.5 rounded-xl border font-mono text-xs",
-                    isDark ? "bg-[#07080b] border-white/10" : "bg-white border-slate-200"
-                  )}>
-                    <span className="font-bold text-cyan-400 truncate">
-                      {webUrl || `http://${primaryIp || "pending"}:${appDef?.defaultPort || 80}`}
+            hasApp ? (
+              /* FINISHED APP CREDENTIALS CARD */
+              <div className={cn(
+                "p-5 rounded-2xl border flex flex-col justify-between h-full animate-in fade-in zoom-in-95 duration-300",
+                isDark ? "bg-[#11131a] border-emerald-500/30 shadow-[0_0_25px_rgba(16,185,129,0.15)]" : "bg-emerald-50/70 border-emerald-200"
+              )}>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
+                      <Sparkles className="w-4 h-4 shrink-0" />
+                      <span>Application Web Access Credentials</span>
+                    </div>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+                      ONLINE & READY
                     </span>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => copyToClipboard(webUrl, "url")}
-                        className={cn(
-                          "p-1.5 rounded-lg border transition-colors cursor-pointer",
-                          isDark ? "border-white/10 hover:bg-white/10 text-zinc-300" : "border-slate-200 hover:bg-slate-100 text-slate-700"
-                        )}
-                        title="Copy URL"
-                      >
-                        {copiedKey === "url" ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                      </button>
-                      {webUrl && (
-                        <a
-                          href={webUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-3 py-1.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
-                        >
-                          <span>Open Dashboard</span>
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Username & Password with Eye toggle */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {/* Username */}
-                  <div>
-                    <label className={cn("block text-[11px] font-semibold uppercase tracking-wider mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>
-                      Admin Username
-                    </label>
-                    <div className={cn(
-                      "flex items-center justify-between gap-2 p-2.5 rounded-xl border font-mono text-xs",
-                      isDark ? "bg-[#07080b] border-white/10" : "bg-white border-slate-200"
-                    )}>
-                      <span className="font-bold truncate">{username}</span>
-                      <button
-                        type="button"
-                        onClick={() => copyToClipboard(username, "user")}
-                        className={cn(
-                          "p-1.5 rounded-lg border transition-colors cursor-pointer",
-                          isDark ? "border-white/10 hover:bg-white/10 text-zinc-300" : "border-slate-200 hover:bg-slate-100 text-slate-700"
-                        )}
-                        title="Copy Username"
-                      >
-                        {copiedKey === "user" ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                      </button>
-                    </div>
                   </div>
 
-                  {/* Password (Masked with Eye toggle) */}
+                  {/* Web Access URL */}
                   <div>
                     <label className={cn("block text-[11px] font-semibold uppercase tracking-wider mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>
-                      Admin Password
+                      Web Access URL
                     </label>
                     <div className={cn(
                       "flex items-center justify-between gap-2 p-2.5 rounded-xl border font-mono text-xs",
                       isDark ? "bg-[#07080b] border-white/10" : "bg-white border-slate-200"
                     )}>
                       <span className="font-bold text-cyan-400 truncate">
-                        {showPassword ? password : "••••••••••••"}
+                        {webUrl || `http://${primaryIp || "pending"}:${appDef?.defaultPort || 80}`}
                       </span>
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-2 shrink-0">
                         <button
                           type="button"
-                          onClick={() => setShowPassword(!showPassword)}
+                          onClick={() => copyToClipboard(webUrl, "url")}
                           className={cn(
                             "p-1.5 rounded-lg border transition-colors cursor-pointer",
                             isDark ? "border-white/10 hover:bg-white/10 text-zinc-300" : "border-slate-200 hover:bg-slate-100 text-slate-700"
                           )}
-                          title={showPassword ? "Hide Password" : "Show Password"}
+                          title="Copy URL"
                         >
-                          {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                          {copiedKey === "url" ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                         </button>
+                        {webUrl && (
+                          <a
+                            href={webUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
+                          >
+                            <span>Open Dashboard</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Username & Password with Eye toggle */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* Username */}
+                    <div>
+                      <label className={cn("block text-[11px] font-semibold uppercase tracking-wider mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+                        Admin Username
+                      </label>
+                      <div className={cn(
+                        "flex items-center justify-between gap-2 p-2.5 rounded-xl border font-mono text-xs",
+                        isDark ? "bg-[#07080b] border-white/10" : "bg-white border-slate-200"
+                      )}>
+                        <span className="font-bold truncate">{username}</span>
                         <button
                           type="button"
-                          onClick={() => copyToClipboard(password, "pass")}
+                          onClick={() => copyToClipboard(username, "user")}
                           className={cn(
                             "p-1.5 rounded-lg border transition-colors cursor-pointer",
                             isDark ? "border-white/10 hover:bg-white/10 text-zinc-300" : "border-slate-200 hover:bg-slate-100 text-slate-700"
                           )}
-                          title="Copy Password"
+                          title="Copy Username"
                         >
-                          {copiedKey === "pass" ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                          {copiedKey === "user" ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                         </button>
+                      </div>
+                    </div>
+
+                    {/* Password (Masked with Eye toggle) */}
+                    <div>
+                      <label className={cn("block text-[11px] font-semibold uppercase tracking-wider mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+                        Admin Password
+                      </label>
+                      <div className={cn(
+                        "flex items-center justify-between gap-2 p-2.5 rounded-xl border font-mono text-xs",
+                        isDark ? "bg-[#07080b] border-white/10" : "bg-white border-slate-200"
+                      )}>
+                        <span className="font-bold text-cyan-400 truncate">
+                          {showPassword ? password : "••••••••••••"}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className={cn(
+                              "p-1.5 rounded-lg border transition-colors cursor-pointer",
+                              isDark ? "border-white/10 hover:bg-white/10 text-zinc-300" : "border-slate-200 hover:bg-slate-100 text-slate-700"
+                            )}
+                            title={showPassword ? "Hide Password" : "Show Password"}
+                          >
+                            {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => copyToClipboard(password, "pass")}
+                            className={cn(
+                              "p-1.5 rounded-lg border transition-colors cursor-pointer",
+                              isDark ? "border-white/10 hover:bg-white/10 text-zinc-300" : "border-slate-200 hover:bg-slate-100 text-slate-700"
+                            )}
+                            title="Copy Password"
+                          >
+                            {copiedKey === "pass" ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Instructions */}
+                  <div className={cn("p-3 rounded-xl border text-xs leading-relaxed", isDark ? "bg-[#07080b]/70 border-white/5 text-zinc-400" : "bg-white/80 border-slate-200 text-slate-600")}>
+                    <span className="font-bold text-zinc-200 block mb-1">Quick Start Instructions:</span>
+                    {instructions}
+                  </div>
+                </div>
+
+                {/* Bottom Finish Action */}
+                <div className="pt-4">
+                  <button
+                    type="button"
+                    onClick={onComplete}
+                    className="w-full py-3 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-black text-xs tracking-wide flex items-center justify-center gap-2 shadow-lg shadow-cyan-400/20 transition-all cursor-pointer"
+                  >
+                    <span>OK, Go to VPS Dashboard</span>
+                    <ArrowRight className="w-4 h-4 stroke-[2.5]" />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* FINISHED SERVER CREDENTIALS CARD (PURE VPS) */
+              <div className={cn(
+                "p-5 rounded-2xl border flex flex-col justify-between h-full animate-in fade-in zoom-in-95 duration-300",
+                isDark ? "bg-[#11131a] border-emerald-500/30 shadow-[0_0_25px_rgba(16,185,129,0.15)]" : "bg-emerald-50/70 border-emerald-200"
+              )}>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
+                      <Sparkles className="w-4 h-4 shrink-0" />
+                      <span>Server Access & Credentials</span>
+                    </div>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+                      ONLINE & READY
+                    </span>
+                  </div>
+
+                  {/* Primary IP */}
+                  <div>
+                    <label className={cn("block text-[11px] font-semibold uppercase tracking-wider mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+                      Dedicated Public IPv4
+                    </label>
+                    <div className={cn(
+                      "flex items-center justify-between gap-2 p-2.5 rounded-xl border font-mono text-xs",
+                      isDark ? "bg-[#07080b] border-white/10" : "bg-white border-slate-200"
+                    )}>
+                      <span className="font-bold text-cyan-400 truncate">
+                        {primaryIp || "Configured"}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(primaryIp, "ip")}
+                        className={cn(
+                          "p-1.5 rounded-lg border transition-colors cursor-pointer",
+                          isDark ? "border-white/10 hover:bg-white/10 text-zinc-300" : "border-slate-200 hover:bg-slate-100 text-slate-700"
+                        )}
+                        title="Copy IP"
+                      >
+                        {copiedKey === "ip" ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* SSH Command */}
+                  <div>
+                    <label className={cn("block text-[11px] font-semibold uppercase tracking-wider mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+                      SSH Connect Command
+                    </label>
+                    <div className={cn(
+                      "flex items-center justify-between gap-2 p-2.5 rounded-xl border font-mono text-xs",
+                      isDark ? "bg-[#07080b] border-white/10" : "bg-white border-slate-200"
+                    )}>
+                      <span className="text-zinc-300 truncate">
+                        ssh {username}@{primaryIp || "your-ip"}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(`ssh ${username}@${primaryIp}`, "ssh")}
+                        className={cn(
+                          "p-1.5 rounded-lg border transition-colors cursor-pointer",
+                          isDark ? "border-white/10 hover:bg-white/10 text-zinc-300" : "border-slate-200 hover:bg-slate-100 text-slate-700"
+                        )}
+                        title="Copy SSH Command"
+                      >
+                        {copiedKey === "ssh" ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* User & Password */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className={cn("block text-[11px] font-semibold uppercase tracking-wider mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+                        Default User
+                      </label>
+                      <div className={cn(
+                        "flex items-center justify-between gap-2 p-2.5 rounded-xl border font-mono text-xs",
+                        isDark ? "bg-[#07080b] border-white/10" : "bg-white border-slate-200"
+                      )}>
+                        <span className="font-bold truncate">{username}</span>
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard(username, "user")}
+                          className="p-1 text-zinc-400 hover:text-white transition-colors"
+                        >
+                          {copiedKey === "user" ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className={cn("block text-[11px] font-semibold uppercase tracking-wider mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+                        Root Password
+                      </label>
+                      <div className={cn(
+                        "flex items-center justify-between gap-2 p-2.5 rounded-xl border font-mono text-xs",
+                        isDark ? "bg-[#07080b] border-white/10" : "bg-white border-slate-200"
+                      )}>
+                        <span className="font-bold text-amber-300 truncate">
+                          {showPassword ? password : "••••••••••••"}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="p-1 text-zinc-400 hover:text-white transition-colors"
+                          >
+                            {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => copyToClipboard(password, "pass")}
+                            className="p-1 text-zinc-400 hover:text-white transition-colors"
+                          >
+                            {copiedKey === "pass" ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Instructions */}
-                <div className={cn("p-3 rounded-xl border text-xs leading-relaxed", isDark ? "bg-[#07080b]/70 border-white/5 text-zinc-400" : "bg-white/80 border-slate-200 text-slate-600")}>
-                  <span className="font-bold text-zinc-200 block mb-1">Quick Start Instructions:</span>
-                  {instructions}
+                {/* Bottom Action */}
+                <div className="pt-4">
+                  <button
+                    type="button"
+                    onClick={onComplete}
+                    className="w-full py-3 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-black text-xs tracking-wide flex items-center justify-center gap-2 shadow-lg shadow-cyan-400/20 transition-all cursor-pointer"
+                  >
+                    <span>OK, Go to VPS Dashboard</span>
+                    <ArrowRight className="w-4 h-4 stroke-[2.5]" />
+                  </button>
                 </div>
               </div>
-
-              {/* Bottom Finish Action */}
-              <div className="pt-4">
-                <button
-                  type="button"
-                  onClick={onComplete}
-                  className="w-full py-3 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-black text-xs tracking-wide flex items-center justify-center gap-2 shadow-lg shadow-cyan-400/20 transition-all cursor-pointer"
-                >
-                  <span>OK, Go to VPS Dashboard</span>
-                  <ArrowRight className="w-4 h-4 stroke-[2.5]" />
-                </button>
-              </div>
-            </div>
+            )
           ) : isFailed ? (
             /* FAILED STATE CARD */
             <div className={cn(
