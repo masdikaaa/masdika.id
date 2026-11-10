@@ -338,8 +338,8 @@ docker run -d --name n8n --restart always -p 5678:5678 -v n8n_data:/home/node/.n
     id: "hermes-agent",
     name: "HERMES AGENT",
     category: "Artificial Intelligence",
-    description: "Autonomous AI agent runtime optimized for multi-tool reasoning and function calling.",
-    icon: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/ollama.svg",
+    description: "Official Nous Research autonomous AI agent runtime with tool reasoning, skills, and memory.",
+    icon: "/images/apps/hermes-agent.png",
     defaultPort: 8080,
     defaultProtocol: "http",
     osBase: "Ubuntu 26.04",
@@ -363,8 +363,8 @@ docker run -d --name hermes-agent --restart always -p 8080:8080 ghcr.io/nousrese
     name: "OPEN CLAW",
     category: "Artificial Intelligence",
     secondaryCategories: ["Education"],
-    description: "Autonomous AI web crawler, data extractor, and workflow intelligence agent.",
-    icon: "https://cdn.simpleicons.org/robotframework/000000",
+    description: "Autonomous open-source AI assistant framework running locally across all your chats and devices.",
+    icon: "/images/apps/openclaw.png",
     defaultPort: 3000,
     defaultProtocol: "http",
     osBase: "Ubuntu 26.04",
@@ -384,27 +384,28 @@ docker run -d --name openclaw --restart always -p 3000:3000 ghcr.io/openclaw/ope
 `
   },
   {
-    id: "openrouter",
-    name: "OPENROUTER",
+    id: "9router",
+    name: "9ROUTER",
     category: "Artificial Intelligence",
-    description: "Unified AI gateway and Open WebUI dashboard for routing LLM prompts and local agents.",
-    icon: "https://cdn.simpleicons.org/openrouter/6566F1",
-    defaultPort: 3000,
+    secondaryCategories: ["Developer"],
+    description: "Free AI routing with smart fallback for Claude, Codex & 40+ providers. Token saver with RTK optimization.",
+    icon: "/images/apps/9router.png",
+    defaultPort: 20128,
     defaultProtocol: "http",
     osBase: "Ubuntu 26.04",
     appVersion: "v0.5",
     versions: [
-      { id: "05-ubu26", label: "OpenRouter & Open WebUI - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v0.5" },
+      { id: "05-ubu26", label: "9Router v0.5 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v0.5" },
     ],
     adminUsername: "admin",
-    instructions: "Connect to the Open WebUI at http://${ip}:3000 to manage model keys and chat sessions.",
+    instructions: "Access the 9Router web dashboard at http://${ip}:20128 to manage model keys, fallback rules, and tokens.",
     getInstallScript: () => `
 set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y curl
 which docker || (curl -fsSL https://get.docker.com | sh)
 systemctl enable --now docker
-docker run -d -p 3000:8080 -v open-webui:/app/backend/data --name open-webui --restart always ghcr.io/open-webui/open-webui:main || true
+docker run -d --name 9router --restart always -p 20128:20128 -v 9router_data:/app/data ghcr.io/decolua/9router:latest || true
 `
   }
 ];
@@ -418,3 +419,4 @@ export function getAppByName(name: string | null | undefined): VpsAppDefinition 
   if (!name) return undefined;
   return VPS_APPS.find(a => a.name.toLowerCase() === name.toLowerCase() || a.id.toLowerCase() === name.toLowerCase());
 }
+
