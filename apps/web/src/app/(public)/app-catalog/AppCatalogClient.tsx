@@ -486,3 +486,4 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
     </div>
   );
 }
+
