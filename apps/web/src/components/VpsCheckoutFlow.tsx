@@ -13,6 +13,7 @@ import { Select } from "@/components/ui/Select";
 import Link from "next/link";
 import { SiUbuntu, SiDebian, SiRockylinux, SiCentos, SiAlpinelinux, SiFedora, SiKubernetes } from "react-icons/si";
 import { EnterpriseInfraSidebarCard, IntelCpuBadge, NetworkInfraBadge, IntelLogo } from "@/components/EnterpriseInfraBadges";
+import { VPS_APPS, APP_CATEGORIES, AppCategory, VpsAppDefinition, getAppById } from "@/lib/vps-apps";
 
 const getOsIcon = (name: string, isDark: boolean = false) => {
   const lowerName = name.toLowerCase();
@@ -159,6 +160,29 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
   const [templates, setTemplates] = useState<any[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null);
   const [selectedOsFamily, setSelectedOsFamily] = useState<string | null>(null);
+
+  // 1-Click Apps State
+  const [imageMode, setImageMode] = useState<"os" | "apps">("os");
+  const [selectedAppCategory, setSelectedAppCategory] = useState<AppCategory>("All Apps");
+  const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
+  const [selectedAppVersion, setSelectedAppVersion] = useState<string | null>(null);
+
+  const selectApp = (app: VpsAppDefinition) => {
+    setSelectedAppId(app.id);
+    setSelectedAppVersion(app.versions[0]?.appVersion || app.appVersion);
+    const ubuTpl = templates.find((t: any) => t.name.toLowerCase().includes("ubuntu-26"))
+      || templates.find((t: any) => t.name.toLowerCase().includes("ubuntu"));
+    if (ubuTpl) {
+      setSelectedOsFamily("Ubuntu");
+      setSelectedTemplate(ubuTpl.id);
+    }
+    if (ipv4Count < 1) {
+      setIpv4Count(1);
+    }
+    if (useReservedIp) {
+      setUseReservedIp(false);
+    }
+  };
   const [plans, setPlans] = useState<any[]>([]);
   const [pricing, setPricing] = useState<Record<string, number>>({});
   const [isDisabled, setIsDisabled] = useState(false);
@@ -509,6 +533,11 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
       return;
     }
 
+    if (selectedAppId && !useReservedIp && ipv4Count === 0) {
+      toast.error("A Public IPv4 address is strictly required to deploy 1-Click Applications.");
+      return;
+    }
+
     if (useVpc) {
       if (!isCreatingVpc && !selectedVpcId) {
         toast.error("Please select a VPC Network");
@@ -584,7 +613,9 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
           privateIpAddress: useVpc ? privateIpAddress : undefined,
           firewallRules: processedFirewallRules,
           targetNode: selectedNode,
-          paymentMethodCode: "BALANCE"
+          paymentMethodCode: "BALANCE",
+          appId: selectedAppId || undefined,
+          appVersion: selectedAppVersion || undefined
         })
       });
 
@@ -665,65 +696,256 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
         {/* Configuration Pane */}
         <div className="xl:col-span-2 space-y-6 w-full max-w-full min-w-0">
 
-          {/* OS Templates - Only for regular VPS (Kubernetes is locked to Debian 13) */}
+          {/* OS Templates & 1-Click Applications - Only for regular VPS (Kubernetes is locked to Debian 13) */}
           {serviceType !== "KUBERNETES" && (
             <motion.div variants={itemVariants} className={cn("rounded-2xl p-5 sm:p-6 border relative z-[60] w-full max-w-full min-w-0 overflow-visible", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
-              <h2 className={cn("text-base sm:text-lg font-bold mb-4 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                <HardDrive className="w-4 h-4 text-cyan-400" />
-                1. Operating System Image
-              </h2>
-              {templates.length === 0 ? (
-                <div className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>No templates available. Please contact support.</div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className={cn("block text-xs font-medium mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>Distribution / OS Family</label>
-                    <Select
-                      value={selectedOsFamily || ""}
-                      onChange={(val) => {
-                        const fam = val.toString();
-                        setSelectedOsFamily(fam);
-                        const firstVersion = templates.find(t => t.name.startsWith(fam + "-")) || templates.find(t => t.name.startsWith(fam));
-                        if (firstVersion) setSelectedTemplate(firstVersion.id);
-                        if (fam.toLowerCase().includes("windows")) {
-                          setUsername("Administrator");
-                        } else if (username === "Administrator") {
-                          setUsername("");
-                        }
-                      }}
-                      options={Array.from(new Set(templates.map(t => t.name.split('-')[0]))).map(fam => ({ 
-                        value: fam, 
-                        label: (
-                          <div className="flex items-center gap-3">
-                            {getOsIcon(fam, isDark)}
-                            <span>{fam}</span>
-                          </div>
-                        ) 
-                      }))}
-                      placeholder="Select Image / App..."
-                      className={cn("w-full border rounded-xl px-4 py-3 text-sm font-semibold", isDark ? "bg-[#111115] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
-                    />
-                  </div>
-                  <div>
-                    <label className={cn("block text-xs font-medium mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>Release Version</label>
-                    <Select
-                      value={selectedTemplate || ""}
-                      onChange={(val) => setSelectedTemplate(Number(val))}
-                      options={templates
-                        .filter(t => t.name.startsWith((selectedOsFamily || "") + "-") || t.name === selectedOsFamily)
-                        .map(tpl => {
-                          const parts = tpl.name.split('-');
-                          const version = parts.slice(1).join('-') || 'Default';
-                          return {
-                            value: tpl.id, 
-                            label: version
-                          };
-                        })
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+                <h2 className={cn("text-base sm:text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                  {imageMode === "apps" ? (
+                    <Rocket className="w-4 h-4 text-cyan-400" />
+                  ) : (
+                    <HardDrive className="w-4 h-4 text-cyan-400" />
+                  )}
+                  1. Operating System & 1-Click Applications
+                </h2>
+
+                {/* Mode Selector Tabs */}
+                <div className={cn("flex items-center gap-1.5 p-1 rounded-xl border self-start sm:self-auto", isDark ? "bg-black/30 border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setImageMode("os");
+                      setSelectedAppId(null);
+                      setSelectedAppVersion(null);
+                    }}
+                    className={cn(
+                      "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer",
+                      imageMode === "os"
+                        ? "bg-cyan-400 text-slate-950 shadow-xs"
+                        : isDark
+                          ? "text-zinc-400 hover:text-white"
+                          : "text-slate-600 hover:text-slate-900"
+                    )}
+                  >
+                    <HardDrive className="w-3.5 h-3.5" />
+                    OS Images
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setImageMode("apps");
+                      if (!selectedAppId && VPS_APPS.length > 0) {
+                        selectApp(VPS_APPS[0]);
                       }
-                      placeholder="Select Version..."
-                      className={cn("w-full border rounded-xl px-4 py-3 text-sm font-semibold", isDark ? "bg-[#111115] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
-                    />
+                    }}
+                    className={cn(
+                      "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer",
+                      imageMode === "apps"
+                        ? "bg-cyan-400 text-slate-950 shadow-xs"
+                        : isDark
+                          ? "text-zinc-400 hover:text-white"
+                          : "text-slate-600 hover:text-slate-900"
+                    )}
+                  >
+                    <Rocket className="w-3.5 h-3.5" />
+                    1-Click Apps
+                    <span className={cn(
+                      "text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold",
+                      imageMode === "apps" ? "bg-slate-950/20 text-slate-950" : "bg-cyan-500/20 text-cyan-400"
+                    )}>
+                      {VPS_APPS.length}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* MODE 1: STANDARD OS IMAGES */}
+              {imageMode === "os" && (
+                <>
+                  {templates.length === 0 ? (
+                    <div className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>No templates available. Please contact support.</div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className={cn("block text-xs font-medium mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>Distribution / OS Family</label>
+                        <Select
+                          value={selectedOsFamily || ""}
+                          onChange={(val) => {
+                            const fam = val.toString();
+                            setSelectedOsFamily(fam);
+                            const firstVersion = templates.find(t => t.name.startsWith(fam + "-")) || templates.find(t => t.name.startsWith(fam));
+                            if (firstVersion) setSelectedTemplate(firstVersion.id);
+                            if (fam.toLowerCase().includes("windows")) {
+                              setUsername("Administrator");
+                            } else if (username === "Administrator") {
+                              setUsername("");
+                            }
+                          }}
+                          options={Array.from(new Set(templates.map(t => t.name.split('-')[0]))).map(fam => ({ 
+                            value: fam, 
+                            label: (
+                              <div className="flex items-center gap-3">
+                                {getOsIcon(fam, isDark)}
+                                <span>{fam}</span>
+                              </div>
+                            ) 
+                          }))}
+                          placeholder="Select Image..."
+                          className={cn("w-full border rounded-xl px-4 py-3 text-sm font-semibold", isDark ? "bg-[#111115] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
+                        />
+                      </div>
+                      <div>
+                        <label className={cn("block text-xs font-medium mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>Release Version</label>
+                        <Select
+                          value={selectedTemplate || ""}
+                          onChange={(val) => setSelectedTemplate(Number(val))}
+                          options={templates
+                            .filter(t => t.name.startsWith((selectedOsFamily || "") + "-") || t.name === selectedOsFamily)
+                            .map(tpl => {
+                              const parts = tpl.name.split('-');
+                              const version = parts.slice(1).join('-') || 'Default';
+                              return {
+                                value: tpl.id, 
+                                label: version
+                              };
+                            })
+                          }
+                          placeholder="Select Version..."
+                          className={cn("w-full border rounded-xl px-4 py-3 text-sm font-semibold", isDark ? "bg-[#111115] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* MODE 2: 1-CLICK APPLICATIONS MARKETPLACE */}
+              {imageMode === "apps" && (
+                <div className="space-y-4">
+                  {/* Category Pills Header */}
+                  <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+                    {APP_CATEGORIES.map((cat) => {
+                      const isActive = selectedAppCategory === cat;
+                      return (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => setSelectedAppCategory(cat)}
+                          className={cn(
+                            "px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all border cursor-pointer",
+                            isActive
+                              ? "bg-amber-600 border-amber-500 text-white shadow-xs ring-1 ring-amber-400/30"
+                              : isDark
+                                ? "bg-white/[0.03] border-white/[0.08] text-zinc-400 hover:text-white hover:border-white/20"
+                                : "bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300"
+                          )}
+                        >
+                          {cat}
+                        </button>
+                      );
+                    })}
                   </div>
+
+                  {/* App Cards Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                    {VPS_APPS
+                      .filter((app) => {
+                        if (selectedAppCategory === "All Apps") return true;
+                        return app.category === selectedAppCategory || app.secondaryCategories?.includes(selectedAppCategory);
+                      })
+                      .map((app) => {
+                        const isSelected = selectedAppId === app.id;
+                        return (
+                          <div
+                            key={app.id}
+                            onClick={() => selectApp(app)}
+                            className={cn(
+                              "relative p-4 rounded-xl border transition-all cursor-pointer flex flex-col justify-between group",
+                              isSelected
+                                ? isDark
+                                  ? "bg-cyan-950/20 border-cyan-500 ring-1 ring-cyan-500/50 shadow-md"
+                                  : "bg-cyan-50/50 border-cyan-500 ring-1 ring-cyan-500/40 shadow-sm"
+                                : isDark
+                                  ? "bg-white/[0.02] border-white/[0.07] hover:border-white/20 hover:bg-white/[0.04]"
+                                  : "bg-slate-50 border-slate-200 hover:border-slate-300 hover:bg-white"
+                            )}
+                          >
+                            {/* Card Top: Official Logo + Uppercase Name + Selected Badge */}
+                            <div>
+                              <div className="flex items-start justify-between gap-2.5 mb-2.5">
+                                <div className="flex items-center gap-3 min-w-0">
+                                  <div className={cn(
+                                    "w-10 h-10 rounded-xl flex items-center justify-center p-2 shrink-0 border transition-colors",
+                                    isDark ? "bg-[#050507] border-white/10" : "bg-white border-slate-200 shadow-2xs"
+                                  )}>
+                                    <img
+                                      referrerPolicy="no-referrer"
+                                      src={app.icon}
+                                      alt={app.name}
+                                      className="w-full h-full object-contain"
+                                      loading="lazy"
+                                    />
+                                  </div>
+                                  <div className="min-w-0">
+                                    <span className={cn(
+                                      "text-xs font-black block uppercase tracking-wide truncate",
+                                      isSelected
+                                        ? "text-cyan-400"
+                                        : isDark ? "text-white" : "text-slate-900"
+                                    )}>
+                                      {app.name}
+                                    </span>
+                                    <span className="text-[10px] text-zinc-500 font-medium block">
+                                      {app.category}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {isSelected ? (
+                                  <div className="w-5 h-5 rounded-full bg-cyan-400 text-slate-950 flex items-center justify-center shrink-0 shadow-xs">
+                                    <CheckCircle className="w-3.5 h-3.5 stroke-[2.5]" />
+                                  </div>
+                                ) : (
+                                  <div className={cn(
+                                    "w-5 h-5 rounded-full border shrink-0 transition-colors",
+                                    isDark ? "border-white/10 group-hover:border-white/30" : "border-slate-300 group-hover:border-slate-400"
+                                  )} />
+                                )}
+                              </div>
+
+                              <p className={cn("text-[11px] leading-relaxed line-clamp-2 mb-3", isDark ? "text-zinc-400" : "text-slate-600")}>
+                                {app.description}
+                              </p>
+                            </div>
+
+                            {/* Card Bottom: Version Selector Dropdown */}
+                            <div className="pt-2 border-t" style={{ borderColor: isDark ? "rgba(255,255,255,0.06)" : "#e2e8f0" }}>
+                              <div className={cn(
+                                "px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold flex items-center justify-between",
+                                isDark ? "bg-[#050507] border-white/10 text-zinc-300" : "bg-white border-slate-200 text-slate-700"
+                              )}>
+                                <span className="truncate">{app.versions[0]?.label || `${app.name} - Ubuntu 26.04`}</span>
+                                <span className="text-[10px] font-mono text-cyan-400 shrink-0 ml-1">:{app.defaultPort}</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+
+                  {/* Informational Banner */}
+                  {selectedAppId && (
+                    <div className={cn(
+                      "p-3.5 rounded-xl border text-xs flex items-start gap-2.5 mt-4",
+                      isDark ? "bg-cyan-950/20 border-cyan-800/40 text-cyan-300" : "bg-cyan-50 border-cyan-200 text-cyan-900"
+                    )}>
+                      <Info className="w-4 h-4 shrink-0 mt-0.5 text-cyan-400" />
+                      <div>
+                        <strong>{getAppById(selectedAppId)?.name}</strong> will be automatically installed on <strong>Ubuntu 26.04</strong> via Cloud-Init.
+                        {" "}A dedicated Public IPv4 address is attached to enable web panel access and remote client connectivity.
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </motion.div>
@@ -974,8 +1196,14 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                       )}>
                         <button
                           type="button"
-                          onClick={() => setIpv4Count(Math.max(0, ipv4Count - 1))}
-                          disabled={ipv4Count <= 0}
+                          onClick={() => {
+                            if (selectedAppId && ipv4Count <= 1) {
+                              toast.info("A dedicated Public IPv4 address is strictly required for 1-Click Applications.");
+                              return;
+                            }
+                            setIpv4Count(Math.max(0, ipv4Count - 1));
+                          }}
+                          disabled={ipv4Count <= 0 || Boolean(selectedAppId && ipv4Count <= 1)}
                           className={cn(
                             "w-6 h-6 flex items-center justify-center rounded text-xs font-bold transition-all disabled:opacity-30 cursor-pointer",
                             isDark ? "bg-white/[0.04] hover:bg-white/[0.08] text-white" : "bg-slate-50 hover:bg-slate-100 text-slate-800 border border-slate-200"
@@ -1851,12 +2079,21 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                   </span>
                 </div>
               )}
-              <div className="flex justify-between items-center text-xs px-3.5 py-2.5">
-                <span className={cn("font-medium flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><Disc className="w-3.5 h-3.5" /> Image</span>
-                <span className={cn("font-semibold truncate max-w-[160px]", isDark ? "text-zinc-200" : "text-slate-900")}>
-                  {templates.find(t => t.id === selectedTemplate)?.name || (serviceType === "KUBERNETES" ? "Debian-13" : "-")}
-                </span>
-              </div>
+              {selectedAppId ? (
+                <div className="flex justify-between items-center text-xs px-3.5 py-2.5">
+                  <span className={cn("font-medium flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><Rocket className="w-3.5 h-3.5 text-cyan-400" /> 1-Click App</span>
+                  <span className={cn("font-bold truncate max-w-[170px]", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                    {getAppById(selectedAppId)?.name} (Ubuntu 26.04)
+                  </span>
+                </div>
+              ) : (
+                <div className="flex justify-between items-center text-xs px-3.5 py-2.5">
+                  <span className={cn("font-medium flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><Disc className="w-3.5 h-3.5" /> Image</span>
+                  <span className={cn("font-semibold truncate max-w-[160px]", isDark ? "text-zinc-200" : "text-slate-900")}>
+                    {templates.find(t => t.id === selectedTemplate)?.name || (serviceType === "KUBERNETES" ? "Debian-13" : "-")}
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between items-center text-xs px-3.5 py-2.5">
                 <span className={cn("font-medium flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><Cpu className="w-3.5 h-3.5 text-cyan-400" /> Processor</span>
                 <span className={cn("font-semibold flex items-center gap-1.5", isDark ? "text-zinc-200" : "text-slate-900")}>
@@ -1952,8 +2189,9 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
               }
 
               const isK3sMissingIp = serviceType === "KUBERNETES" && !useReservedIp && ipv4Count === 0;
+              const isAppMissingIp = Boolean(selectedAppId && !useReservedIp && ipv4Count === 0);
 
-              if (missingFields.length > 0 || isK3sMissingIp) {
+              if (missingFields.length > 0 || isK3sMissingIp || isAppMissingIp) {
                 return (
                   <div className={cn("mb-4 rounded-xl p-3.5 flex items-start gap-2.5 text-xs border", isDark ? "bg-white/[0.02] border-white/[0.08] text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-700")}>
                     <Info className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
@@ -1965,6 +2203,9 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                         )}
                         {isK3sMissingIp && (
                           <li>K3s requires at least 1 Public IPv4 or Reserved IP.</li>
+                        )}
+                        {isAppMissingIp && (
+                          <li>1-Click Applications strictly require at least 1 Public IPv4 address.</li>
                         )}
                       </ul>
                     </div>
@@ -1992,7 +2233,8 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                   const ipNum = ipToNum(privateIpAddress.trim());
                   return ipNum < ipToNum(ipRange.first) || ipNum > ipToNum(ipRange.last);
                 })())) ||
-                (serviceType === "KUBERNETES" && !useReservedIp && ipv4Count === 0)
+                (serviceType === "KUBERNETES" && !useReservedIp && ipv4Count === 0) ||
+                (Boolean(selectedAppId && !useReservedIp && ipv4Count === 0))
               }
               className={cn("w-full bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-sm py-3 px-5 rounded-xl flex items-center justify-center gap-2.5 transition-all disabled:opacity-40 disabled:cursor-not-allowed relative z-10 shadow-xs cursor-pointer")}
             >

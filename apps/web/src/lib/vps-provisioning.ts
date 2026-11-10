@@ -3,6 +3,8 @@ import { ProxmoxClient } from "@/lib/proxmox";
 import { sendVpsProvisionedEmail } from "@/lib/email";
 import { decryptDeterministic, encryptDeterministic } from "@/lib/encryption";
 import { K3sProvisioningService } from "@/lib/k3s-provisioning";
+import { VpsAppProvisioningService } from "@/lib/vps-app-provisioning";
+import { getAppByName, getAppById } from "@/lib/vps-apps";
 import fs from "fs";
 import path from "path";
 
@@ -592,7 +594,14 @@ export class VpsProvisioningService {
       const name = decryptDeterministic(vps.user.name) || vps.user.name;
       const pass = decryptDeterministic(vps.rootPassword) || vps.rootPassword;
       const isKubernetes = !!vps.kubernetesClusterId;
-      await sendVpsProvisionedEmail(email, name, vps.hostname, primaryIp || "N/A", pass, vps.username || "root", isKubernetes, vps.kubernetesClusterId || undefined);
+      const targetApp = vps.appName ? (getAppByName(vps.appName) || getAppById(vps.appName)) : undefined;
+      const appData = targetApp ? {
+        appName: targetApp.name,
+        appUrl: `${targetApp.defaultProtocol}://${primaryIp}:${targetApp.defaultPort}${targetApp.loginPath || ""}`,
+        appPort: targetApp.defaultPort,
+        instructions: targetApp.instructions
+      } : undefined;
+      await sendVpsProvisionedEmail(email, name, vps.hostname, primaryIp || "N/A", pass, vps.username || "root", isKubernetes, vps.kubernetesClusterId || undefined, appData);
     } catch (emailErr) {
       console.error(`Failed to send VPS provisioned email to ${vps.user.email}:`, emailErr);
     }
@@ -608,6 +617,20 @@ export class VpsProvisioningService {
         rootPassword,
         (vps.kubernetesRole as "MASTER" | "WORKER") || "MASTER"
       ).catch(err => console.error("Background K3s Provisioning failed:", err));
+    }
+
+    // 8.5 Trigger 1-Click App Provisioning if applicable
+    if (vps.appName && !vps.kubernetesClusterId && primaryIp) {
+      const rootPassword = decryptDeterministic(vps.rootPassword) || vps.rootPassword;
+      const targetApp = getAppByName(vps.appName) || getAppById(vps.appName);
+      if (targetApp) {
+        VpsAppProvisioningService.installApp(
+          vps.id,
+          targetApp.id,
+          primaryIp,
+          rootPassword
+        ).catch(err => console.error("Background 1-Click App provisioning failed:", err));
+      }
     }
 
     return {

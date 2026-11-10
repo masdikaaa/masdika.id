@@ -796,6 +796,11 @@ model VpsService {
   terminationDate     DateTime?
   isReseller          Boolean            @default(false)
   stoppedRate         Int                @default(0)
+  appName             String?
+  appVersion          String?
+  appStatus           String?            @default("NONE")
+  appUrl              String?
+  appCredentials      String?
   invoices            Invoice[]
   reservedIps         ReservedIp[]
   alertRules          VpsAlertRule[]

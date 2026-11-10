@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth-middleware';
 import { prisma } from "@/lib/prisma";
 import { ProxmoxClient } from "@/lib/proxmox";
 import { getBandwidthOptions } from "@/lib/vps-bandwidth";
+import { VPS_APPS } from "@/lib/vps-apps";
 
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
@@ -155,7 +156,8 @@ export async function GET(req: Request) {
       vpsEnabled: true,
       k3sEnabled: true,
       reservedIps: unattachedReservedIps,
-      vpcs: userVpcs
+      vpcs: userVpcs,
+      apps: VPS_APPS
     });
   } catch (error) {
     console.error("Order Data Error:", error);

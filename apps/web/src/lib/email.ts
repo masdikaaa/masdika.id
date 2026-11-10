@@ -503,7 +503,17 @@ export const sendReactivatedEmail = async (email: string, userName: string, plan
   });
 };
 
-export const sendVpsProvisionedEmail = async (email: string, userName: string, hostname: string, ipAddress: string, rootPassword: string, vpsUsername: string = "root", isKubernetes: boolean = false, clusterId?: number) => {
+export const sendVpsProvisionedEmail = async (
+  email: string,
+  userName: string,
+  hostname: string,
+  ipAddress: string,
+  rootPassword: string,
+  vpsUsername: string = "root",
+  isKubernetes: boolean = false,
+  clusterId?: number,
+  appData?: { appName?: string; appUrl?: string; appPort?: number; instructions?: string }
+) => {
   const content = isKubernetes ? `
     <h2 style="color: #06b6d4; margin-bottom: 20px;">Your Kubernetes Node is Ready! 🚀</h2>
     <p>Hello <strong>${userName}</strong>,</p>
@@ -534,6 +544,16 @@ export const sendVpsProvisionedEmail = async (email: string, userName: string, h
         <tr><td style="padding: 10px 0; color: #94a3b8;">Password:</td><td style="padding: 10px 0; color: #fbbf24; font-weight: 700; text-align: right;">${rootPassword}</td></tr>
       </table>
     </div>
+    ${appData?.appName ? `
+    <div style="background-color: #082f49; padding: 18px 20px; border-radius: 10px; margin: 25px 0; border: 1px solid #0284c7; border-left: 4px solid #38bdf8;">
+      <h3 style="color: #38bdf8; margin-top: 0; margin-bottom: 12px; font-size: 15px; font-weight: 700;">1-Click Application: ${appData.appName}</h3>
+      <p style="margin: 0 0 10px 0; color: #e2e8f0; font-size: 13px;">Your application has been queued for installation via Cloud-Init. Access details:</p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="color: #e2e8f0; font-family: 'JetBrains Mono', monospace; font-size: 13px;">
+        <tr><td style="padding: 6px 0; color: #94a3b8;" width="180">Web Access:</td><td style="padding: 6px 0; text-align: right;"><a href="${appData.appUrl}" style="color: #38bdf8; font-weight: 700; text-decoration: underline;">${appData.appUrl}</a></td></tr>
+        <tr><td style="padding: 6px 0; color: #94a3b8;">Web Port:</td><td style="padding: 6px 0; color: #ffffff; text-align: right;">${appData.appPort}</td></tr>
+      </table>
+    </div>
+    ` : ''}
     <p>Please store these credentials securely. For security reasons, this is the only time the password will be sent to you in plain text.</p>
     <div style="text-align: center; margin: 35px 0;">
       <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://masdika.id'}/dashboard/vps" style="background-color: #06b6d4; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">Go to Dashboard</a>

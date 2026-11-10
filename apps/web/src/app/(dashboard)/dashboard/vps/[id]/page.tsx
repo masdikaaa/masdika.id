@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   Server, Play, Square, Power, RotateCcw, Activity, Cpu,
   Terminal, Settings, Settings2, HardDrive, Network, Wrench, ShieldAlert, Calculator, Shield,
-  ArrowLeft, ChevronLeft, ShieldCheck, Archive, RefreshCw, Plus, AlertTriangle, CheckCircle, Receipt, CreditCard, Trash2, Wallet, X, Eye, EyeOff, Copy, XCircle, Info
+  ArrowLeft, ArrowRight, ChevronLeft, ShieldCheck, Archive, RefreshCw, Plus, AlertTriangle, CheckCircle, Receipt, CreditCard, Trash2, Wallet, X, Eye, EyeOff, Copy, XCircle, Info
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -18,6 +18,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import { formatRupiah } from "@/lib/billing";
 
 import { getOsIconUrl, formatOsName } from "@/lib/vps-os";
+import { getAppByName, getAppById } from "@/lib/vps-apps";
 const getOsIcon = getOsIconUrl;
 
 const formatTime = (time: string) => {
@@ -1617,7 +1618,112 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
           <div className="min-h-[500px]">
             {/* OVERVIEW TAB */}
             {activeTab === "overview" && (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in duration-500">
+              <div className="space-y-6 animate-in fade-in duration-500">
+                {/* 1-Click Application Card (if deployed with an App) */}
+                {vps.appName && (() => {
+                  const appMeta = getAppByName(vps.appName) || getAppById(vps.appName);
+                  const primaryPublicIp = vps.assignedIps?.length > 0 
+                    ? (vps.assignedIps[0].publicIp || vps.assignedIps[0].ipAddress)
+                    : vps.vpcIp;
+                  const targetUrl = vps.appUrl || (appMeta && primaryPublicIp ? `${appMeta.defaultProtocol}://${primaryPublicIp}:${appMeta.defaultPort}${appMeta.loginPath || ""}` : "");
+
+                  return (
+                    <div className={cn("border rounded-2xl p-5 sm:p-6 relative overflow-hidden", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                          <div className={cn(
+                            "w-12 h-12 rounded-xl border flex items-center justify-center p-2 shrink-0 transition-colors",
+                            isDark ? "bg-[#050507] border-white/10" : "bg-slate-50 border-slate-200"
+                          )}>
+                            {appMeta?.icon ? (
+                              <img
+                                referrerPolicy="no-referrer"
+                                src={appMeta.icon}
+                                alt={vps.appName}
+                                className="w-full h-full object-contain"
+                              />
+                            ) : (
+                              <HardDrive className="w-6 h-6 text-cyan-400" />
+                            )}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2.5 flex-wrap">
+                              <h3 className={cn("text-base sm:text-lg font-black uppercase tracking-wider", isDark ? "text-white" : "text-slate-950")}>
+                                {vps.appName}
+                              </h3>
+                              {vps.appVersion && (
+                                <span className="text-xs px-2 py-0.5 rounded-full font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                                  {vps.appVersion}
+                                </span>
+                              )}
+                              <span className={cn(
+                                "text-xs px-2.5 py-0.5 rounded-full font-semibold flex items-center gap-1.5 border",
+                                vps.appStatus === "INSTALLING"
+                                  ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                                  : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                              )}>
+                                {vps.appStatus === "INSTALLING" ? (
+                                  <>
+                                    <RefreshCw className="w-3 h-3 animate-spin" />
+                                    Installing via Cloud-Init...
+                                  </>
+                                ) : (
+                                  <>
+                                    <CheckCircle className="w-3 h-3" />
+                                    Application Ready
+                                  </>
+                                )}
+                              </span>
+                            </div>
+                            <p className={cn("text-xs mt-1 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
+                              {appMeta?.description || "1-Click Application pre-configured and automated on Ubuntu 26.04."}
+                            </p>
+                          </div>
+                        </div>
+
+                        {targetUrl && (
+                          <a
+                            href={targetUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-5 py-2.5 rounded-xl font-bold text-xs bg-cyan-400 hover:bg-cyan-300 text-slate-950 flex items-center gap-2 transition-all shrink-0 shadow-xs cursor-pointer"
+                          >
+                            <span>Open Web Dashboard</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </a>
+                        )}
+                      </div>
+
+                      {/* Access Details Bar */}
+                      <div className={cn("mt-4 pt-4 border-t grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs", isDark ? "border-white/[0.06]" : "border-slate-100")}>
+                        <div>
+                          <span className={cn("block text-[11px] mb-0.5", isDark ? "text-zinc-500" : "text-slate-400")}>Web Access URL</span>
+                          {targetUrl ? (
+                            <a href={targetUrl} target="_blank" rel="noopener noreferrer" className="font-mono font-bold text-cyan-400 hover:underline">
+                              {targetUrl}
+                            </a>
+                          ) : (
+                            <span className="font-mono text-zinc-500">Waiting for IP allocation...</span>
+                          )}
+                        </div>
+                        <div>
+                          <span className={cn("block text-[11px] mb-0.5", isDark ? "text-zinc-500" : "text-slate-400")}>Admin Username</span>
+                          <span className={cn("font-mono font-semibold", isDark ? "text-zinc-200" : "text-slate-800")}>
+                            {appMeta?.adminUsername || "admin"}
+                          </span>
+                        </div>
+                        <div>
+                          <span className={cn("block text-[11px] mb-0.5", isDark ? "text-zinc-500" : "text-slate-400")}>Default Password</span>
+                          <span className={cn("font-mono font-semibold", isDark ? "text-amber-400" : "text-amber-600")}>
+                            Configured VPS Root Password
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Left Column: Progress Bars */}
                 <div className="space-y-6">
                   <div className={cn("border rounded-2xl p-4 sm:p-6 shadow-2xs", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
@@ -1801,7 +1907,8 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
 
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
 
 

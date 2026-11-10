@@ -7,6 +7,7 @@ import { ProxmoxClient } from "@/lib/proxmox";
 import { Address4 } from "ip-address";
 import { getBandwidthOptions, bandwidthHourlyCost, BASE_BANDWIDTH_MBPS } from "@/lib/vps-bandwidth";
 import { JobQueueService } from "@/lib/job-queue";
+import { getAppById } from "@/lib/vps-apps";
 
 // Security: Hostname validation regex (RFC 1123)
 const HOSTNAME_REGEX = /^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
@@ -21,7 +22,8 @@ export async function POST(req: NextRequest) {
     let { 
       hostname, username, rootPassword, password, sshKey, templateId, billingMode, planId, 
       cpuCores, ramGb, diskGb, diskType, backupGb, bandwidthMbps, ipv4Count = 1, ipv6Count = 0, paymentMethodCode,
-      useIpv4, useIpv6, isKubernetes, kubernetesVersion, action, kubernetesClusterId, billingCycle = 1, reservedIpId, firewallRules, vpcId, privateIpAddress, targetNode
+      useIpv4, useIpv6, isKubernetes, kubernetesVersion, action, kubernetesClusterId, billingCycle = 1, reservedIpId, firewallRules, vpcId, privateIpAddress, targetNode,
+      appId, appVersion
     } = await req.json();
     
     // Support both rootPassword and password for backward compatibility
@@ -81,13 +83,36 @@ export async function POST(req: NextRequest) {
       kubernetesVersion = kubernetesVersion.trim();
     }
     
+    const targetApp = appId ? getAppById(appId) : undefined;
+    if (appId && !targetApp) {
+      return NextResponse.json({ error: "Invalid application identifier." }, { status: 400 });
+    }
+
     if (useIpv4 !== undefined) ipv4Count = useIpv4 ? 1 : 0;
     if (useIpv6 !== undefined) ipv6Count = useIpv6 ? 1 : 0;
+
+    // Strict Enforcement: 1-Click Applications require Public IPv4 address
+    if (targetApp && !reservedIpId && ipv4Count < 1) {
+      return NextResponse.json({ error: "A dedicated Public IPv4 address is strictly required to deploy 1-Click Applications." }, { status: 400 });
+    }
 
     ipv4Count = Math.min(5, Math.max(0, Math.floor(Number(ipv4Count) || 0)));
     ipv6Count = Math.min(5, Math.max(0, Math.floor(Number(ipv6Count) || 0)));
 
     let template = await prisma.vpsTemplate.findUnique({ where: { id: templateId } });
+
+    // Enforce Ubuntu-26.04 template for 1-Click Applications
+    if (targetApp) {
+      const ubuntu26 = await prisma.vpsTemplate.findFirst({
+        where: { name: { contains: "Ubuntu-26", mode: "insensitive" } }
+      }) || await prisma.vpsTemplate.findFirst({
+        where: { name: { contains: "Ubuntu", mode: "insensitive" } }
+      });
+      if (ubuntu26) {
+        template = ubuntu26;
+        templateId = ubuntu26.id;
+      }
+    }
 
     // Enforce Debian-13 template for Kubernetes
     if (isKubernetes) {
@@ -152,7 +177,10 @@ export async function POST(req: NextRequest) {
       backupGb: safeBackup,
       bandwidthMbps: safeBandwidth,
       vpcId: vpcId ? Number(vpcId) : undefined,
-      vpcIp: privateIpAddress ? privateIpAddress.trim() : null
+      vpcIp: privateIpAddress ? privateIpAddress.trim() : null,
+      appName: targetApp ? targetApp.name : null,
+      appVersion: targetApp ? (appVersion || targetApp.appVersion) : null,
+      appStatus: targetApp ? "INSTALLING" : "NONE"
     };
 
     // Security: Validate VPC ownership to prevent IDOR (attaching VPS to another user's VPC)
