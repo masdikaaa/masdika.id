@@ -101,16 +101,30 @@ export async function POST(req: NextRequest) {
 
     let template = await prisma.vpsTemplate.findUnique({ where: { id: templateId } });
 
-    // Enforce Ubuntu-26.04 template for 1-Click Applications
+    // Enforce base OS template for 1-Click Applications based on target app requirements
     if (targetApp) {
-      const ubuntu26 = await prisma.vpsTemplate.findFirst({
-        where: { name: { contains: "Ubuntu-26", mode: "insensitive" } }
-      }) || await prisma.vpsTemplate.findFirst({
-        where: { name: { contains: "Ubuntu", mode: "insensitive" } }
-      });
-      if (ubuntu26) {
-        template = ubuntu26;
-        templateId = ubuntu26.id;
+      if (targetApp.osBase.toLowerCase().includes("alma")) {
+        const almaTpl = await prisma.vpsTemplate.findFirst({
+          where: { name: { contains: "AlmaLinux-9", mode: "insensitive" } }
+        }) || await prisma.vpsTemplate.findFirst({
+          where: { name: { contains: "AlmaLinux", mode: "insensitive" } }
+        }) || await prisma.vpsTemplate.findFirst({
+          where: { name: { contains: "Alma", mode: "insensitive" } }
+        });
+        if (almaTpl) {
+          template = almaTpl;
+          templateId = almaTpl.id;
+        }
+      } else {
+        const ubuntu26 = await prisma.vpsTemplate.findFirst({
+          where: { name: { contains: "Ubuntu-26", mode: "insensitive" } }
+        }) || await prisma.vpsTemplate.findFirst({
+          where: { name: { contains: "Ubuntu", mode: "insensitive" } }
+        });
+        if (ubuntu26) {
+          template = ubuntu26;
+          templateId = ubuntu26.id;
+        }
       }
     }
 
@@ -255,6 +269,15 @@ export async function POST(req: NextRequest) {
       const safeRam = Math.min(Math.max(Math.floor(Number(ramGb) || 1), 1), 128);
       const safeDisk = Math.min(Math.max(Math.floor(Number(diskGb) || 10), 10), 2000);
       // safeBackup is already defined and validated earlier
+
+      // Strictly enforce minimum system requirements for 1-Click Applications to avoid OOM kills and install failures
+      if (targetApp?.minSpecs) {
+        if (safeCpu < targetApp.minSpecs.cpu || safeRam < targetApp.minSpecs.ram || safeDisk < targetApp.minSpecs.disk) {
+          return NextResponse.json({
+            error: `Application ${targetApp.name} strictly requires at least ${targetApp.minSpecs.cpu} vCPU, ${targetApp.minSpecs.ram} GB RAM, and ${targetApp.minSpecs.disk} GB Disk to operate reliably without OOM crashes.`
+          }, { status: 400 });
+        }
+      }
 
       // --- Node Capacity & Allowlist Check ---
       try {

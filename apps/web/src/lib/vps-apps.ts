@@ -33,6 +33,12 @@ export const APP_CATEGORIES = [
 
 export type AppCategory = (typeof APP_CATEGORIES)[number];
 
+export interface AppMinSpecs {
+  cpu: number;
+  ram: number;
+  disk: number;
+}
+
 export interface VpsAppDefinition {
   id: string;
   name: string;
@@ -42,9 +48,10 @@ export interface VpsAppDefinition {
   icon: string;
   defaultPort: number;
   defaultProtocol: 'http' | 'https';
-  osBase: string; // e.g. "Ubuntu 26.04"
+  osBase: string; // e.g. "Ubuntu 26.04" or "AlmaLinux 9"
   appVersion: string; // e.g. "1.11"
   versions: AppVersionOption[];
+  minSpecs: AppMinSpecs; // Official minimum specs to prevent OOM kills
   loginPath?: string;
   adminUsername: string;
   instructions: string;
@@ -69,6 +76,7 @@ export const VPS_APPS: VpsAppDefinition[] = [
     versions: [
       { id: "67-ubu26", label: "WordPress 6.7 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v6.7" },
     ],
+    minSpecs: { cpu: 1, ram: 2, disk: 20 },
     adminUsername: "admin",
     instructions: "Access your WordPress site at http://${ip}/ and administrative console at http://${ip}/wp-admin.",
     configFields: [
@@ -175,6 +183,7 @@ EOF
     versions: [
       { id: "103-ubu26", label: "Drupal 10.3 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v10.3" },
     ],
+    minSpecs: { cpu: 2, ram: 2, disk: 20 },
     adminUsername: "admin",
     instructions: "Access your Drupal portal at http://${ip}/ and administrator login at http://${ip}/user/login.",
     configFields: [
@@ -293,6 +302,7 @@ EOF
     versions: [
       { id: "45-ubu26", label: "Moodle 4.5 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v4.5" },
     ],
+    minSpecs: { cpu: 2, ram: 4, disk: 25 },
     adminUsername: "admin",
     instructions: "Access Moodle LMS at http://${ip}/ and administrator login at http://${ip}/login/index.php.",
     configFields: [
@@ -414,6 +424,7 @@ EOF
     versions: [
       { id: "v7-ubu26", label: "aaPanel v7.0 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v7.0" },
     ],
+    minSpecs: { cpu: 1, ram: 2, disk: 20 },
     adminUsername: "admin",
     instructions: "Access aaPanel on port 8888. Login using username 'admin' and your configured password.",
     configFields: [
@@ -511,6 +522,7 @@ EOF
     versions: [
       { id: "v4-ubu26", label: "Coolify v4 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v4.0" },
     ],
+    minSpecs: { cpu: 2, ram: 2, disk: 30 },
     adminUsername: "root",
     instructions: "Navigate to http://${ip}:8000 to complete initial registration and cluster configuration.",
     getInstallScript: (ip, rootPassword) => `
@@ -548,6 +560,7 @@ EOF
     versions: [
       { id: "18-ubu26", label: "Plesk Obsidian - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "Obsidian 18.0" },
     ],
+    minSpecs: { cpu: 2, ram: 2, disk: 20 },
     adminUsername: "root",
     instructions: "Log into Plesk at https://${ip}:8443 using your VPS root password.",
     configFields: [
@@ -583,6 +596,101 @@ EOF
     }
   },
 
+  // 7. cPanel & WHM (Web Panel) - AlmaLinux 9
+  {
+    id: "cpanel",
+    name: "CPANEL & WHM",
+    category: "Web Panel",
+    secondaryCategories: ["Business", "Developer"],
+    description: "Industry-standard hosting management platform with WHM server administration and cPanel client panel on AlmaLinux 9.",
+    icon: "/images/apps/cpanel.svg",
+    defaultPort: 2087,
+    defaultProtocol: "https",
+    loginPath: "/",
+    osBase: "AlmaLinux 9",
+    appVersion: "v120",
+    versions: [
+      { id: "120-alma9", label: "cPanel & WHM 120 - AlmaLinux 9", osBase: "AlmaLinux 9", appVersion: "v120" },
+    ],
+    minSpecs: { cpu: 2, ram: 4, disk: 40 },
+    adminUsername: "root",
+    instructions: "Access WHM at https://${ip}:2087 and cPanel at https://${ip}:2083 using username 'root' and your VPS root password.",
+    configFields: [
+      {
+        key: "domain",
+        label: "Server Hostname (FQDN)",
+        type: "text",
+        placeholder: "e.g. cpanel.yourdomain.com",
+        description: "Fully qualified domain name for cPanel & WHM (must contain a dot)"
+      },
+      {
+        key: "adminEmail",
+        label: "Primary Contact Email",
+        type: "email",
+        placeholder: "admin@yourdomain.com",
+        description: "Notification email address for WHM alerts and SSL certificates"
+      }
+    ],
+    getInstallScript: (ip, rootPassword, config = {}) => {
+      const email = config.adminEmail || "admin@example.com";
+      const domain = config.domain || "";
+      return `
+set -e
+export DEBIAN_FRONTEND=noninteractive
+
+echo "=== Deploying cPanel & WHM on AlmaLinux 9 ==="
+
+# Configure FQDN Hostname (cPanel requirement)
+if [ -n "${domain}" ]; then
+  hostnamectl set-hostname "${domain}" || true
+else
+  CURRENT_HOST=$(hostname)
+  if [[ "$CURRENT_HOST" != *.* ]]; then
+    hostnamectl set-hostname "cpanel-\${ip//./-}.masdika.id" 2>/dev/null || hostnamectl set-hostname "cpanel.server.local"
+  fi
+fi
+
+# Ensure SELinux is permissive (cPanel installer requirement)
+setenforce 0 2>/dev/null || true
+if [ -f /etc/selinux/config ]; then
+  sed -i 's/^SELINUX=.*/SELINUX=permissive/' /etc/selinux/config 2>/dev/null || true
+fi
+
+# Stop firewalld during install to prevent port blocking
+systemctl stop firewalld 2>/dev/null || true
+systemctl disable firewalld 2>/dev/null || true
+
+# Update package repository and install essential tools
+dnf makecache -y || true
+dnf install -y perl curl wget tar bzip2 NetworkManager 2>/dev/null || yum install -y perl curl wget tar bzip2 NetworkManager 2>/dev/null || true
+
+# Ensure root password is set
+if [ -n "${rootPassword}" ]; then
+  echo "root:${rootPassword}" | chpasswd 2>/dev/null || true
+fi
+
+# Download and execute official cPanel & WHM installer
+cd /home
+curl -o latest -L https://securedownloads.cpanel.net/latest
+sh latest --non-interactive || true
+
+# Write completion metadata
+cat << 'EOF' > /root/masdika-app-info.json
+{
+  "appId": "cpanel",
+  "appName": "cPanel & WHM",
+  "port": 2087,
+  "protocol": "https",
+  "path": "",
+  "username": "root",
+  "password": "${rootPassword}",
+  "url": "https://${ip}:2087"
+}
+EOF
+`;
+    }
+  },
+
   // 7. Pterodactyl (Game Server)
   {
     id: "pterodactyl",
@@ -597,6 +705,7 @@ EOF
     versions: [
       { id: "1.11-ubu26", label: "Pterodactyl - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "1.11" },
     ],
+    minSpecs: { cpu: 2, ram: 4, disk: 30 },
     adminUsername: "admin",
     instructions: "Access the Pterodactyl web panel with username 'admin' and your configured password.",
     configFields: [
@@ -658,6 +767,7 @@ EOF
     versions: [
       { id: "30-ubu26", label: "Nextcloud 30 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v30" },
     ],
+    minSpecs: { cpu: 2, ram: 2, disk: 30 },
     adminUsername: "admin",
     instructions: "Access Nextcloud at http://${ip}:8080. Log in with username 'admin' and your configured password.",
     configFields: [
@@ -719,6 +829,7 @@ EOF
     versions: [
       { id: "175-ubu26", label: "n8n v1.75 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v1.75" },
     ],
+    minSpecs: { cpu: 2, ram: 2, disk: 20 },
     adminUsername: "admin",
     instructions: "Access n8n automation canvas at http://${ip}:5678 to build automated workflows.",
     configFields: [
@@ -771,6 +882,7 @@ EOF
     versions: [
       { id: "10-ubu26", label: "Hermes Agent v1.0 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v1.0" },
     ],
+    minSpecs: { cpu: 2, ram: 2, disk: 20 },
     adminUsername: "admin",
     instructions: "Hermes Agent endpoint running on port 8080. Ready for API and tool execution calls.",
     getInstallScript: (ip, rootPassword) => `
@@ -811,6 +923,7 @@ EOF
     versions: [
       { id: "20-ubu26", label: "OpenClaw v2.0 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v2.0" },
     ],
+    minSpecs: { cpu: 2, ram: 2, disk: 20 },
     adminUsername: "admin",
     instructions: "OpenClaw agent dashboard available at http://${ip}:3000.",
     getInstallScript: (ip, rootPassword) => `
@@ -851,6 +964,7 @@ EOF
     versions: [
       { id: "05-ubu26", label: "9Router v0.5 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v0.5" },
     ],
+    minSpecs: { cpu: 2, ram: 2, disk: 20 },
     adminUsername: "admin",
     instructions: "Access the 9Router web dashboard at http://${ip}:20128 to manage model keys, fallback rules, and tokens.",
     getInstallScript: (ip, rootPassword) => `
@@ -890,6 +1004,7 @@ EOF
     versions: [
       { id: "27-ubu26", label: "Docker CE 27 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v27.5" },
     ],
+    minSpecs: { cpu: 1, ram: 1, disk: 20 },
     adminUsername: "root",
     instructions: "Docker Engine and Docker Compose are installed and active. Access via SSH terminal.",
     getInstallScript: (ip, rootPassword) => `
@@ -930,6 +1045,7 @@ EOF
     versions: [
       { id: "22-ubu26", label: "Node.js 22 LTS - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v22 LTS" },
     ],
+    minSpecs: { cpu: 1, ram: 1, disk: 20 },
     adminUsername: "root",
     instructions: "Node.js 22 LTS, npm, pnpm, yarn, and PM2 are globally available via SSH.",
     getInstallScript: (ip, rootPassword) => `
@@ -969,6 +1085,7 @@ EOF
     versions: [
       { id: "17-ubu26", label: "PostgreSQL 17 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v17" },
     ],
+    minSpecs: { cpu: 2, ram: 2, disk: 20 },
     adminUsername: "postgres",
     instructions: "PostgreSQL database running on port 5432. Username: 'postgres', Password: VPS Root Password.",
     getInstallScript: (ip, rootPassword) => `
@@ -1009,6 +1126,7 @@ EOF
     versions: [
       { id: "84-ubu26", label: "MySQL 8.4 LTS - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v8.4 LTS" },
     ],
+    minSpecs: { cpu: 2, ram: 2, disk: 20 },
     adminUsername: "root",
     instructions: "MySQL running on port 3306. Admin user: 'root', Password: VPS Root Password.",
     getInstallScript: (ip, rootPassword) => `
@@ -1048,6 +1166,7 @@ EOF
     versions: [
       { id: "114-ubu26", label: "MariaDB 11.4 LTS - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v11.4 LTS" },
     ],
+    minSpecs: { cpu: 2, ram: 2, disk: 20 },
     adminUsername: "root",
     instructions: "MariaDB running on port 3306. Admin user: 'root', Password: VPS Root Password.",
     getInstallScript: (ip, rootPassword) => `
@@ -1087,6 +1206,7 @@ EOF
     versions: [
       { id: "80-ubu26", label: "MongoDB 8.0 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v8.0" },
     ],
+    minSpecs: { cpu: 2, ram: 2, disk: 20 },
     adminUsername: "admin",
     instructions: "MongoDB running on port 27017. Admin user: 'admin', Password: VPS Root Password.",
     getInstallScript: (ip, rootPassword) => `
@@ -1130,6 +1250,7 @@ EOF
     versions: [
       { id: "14-ubu26", label: "FrankenPHP 1.4 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v1.4" },
     ],
+    minSpecs: { cpu: 1, ram: 1, disk: 20 },
     adminUsername: "root",
     instructions: "FrankenPHP server running on port 80/443. Web root at /var/www/html with PHP 8.3/8.4.",
     configFields: [
@@ -1213,6 +1334,7 @@ EOF
     versions: [
       { id: "126-ubu26", label: "Nginx 1.26 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v1.26" },
     ],
+    minSpecs: { cpu: 1, ram: 1, disk: 20 },
     adminUsername: "root",
     instructions: "Nginx HTTP web server active on port 80. Default web root configured at /var/www/html.",
     getInstallScript: (ip, rootPassword) => `
@@ -1252,6 +1374,7 @@ EOF
     versions: [
       { id: "115-ubu26", label: "Grafana 11.5 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v11.5" },
     ],
+    minSpecs: { cpu: 1, ram: 2, disk: 20 },
     adminUsername: "admin",
     instructions: "Access Grafana web portal at http://${ip}:3000. Login with username 'admin' and your configured password.",
     configFields: [
@@ -1317,6 +1440,7 @@ EOF
     versions: [
       { id: "chr718-ubu26", label: "RouterOS v7.18 CHR - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v7.18" },
     ],
+    minSpecs: { cpu: 1, ram: 1, disk: 20 },
     adminUsername: "admin",
     instructions: "Access MikroTik WebFig at http://${ip}/webfig/ or WinBox on port 8291. Username: 'admin', Password: configured password.",
     configFields: [
@@ -1378,6 +1502,7 @@ EOF
     versions: [
       { id: "24-ubu26", label: "Apache 2.4 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v2.4" },
     ],
+    minSpecs: { cpu: 1, ram: 1, disk: 20 },
     adminUsername: "root",
     instructions: "Apache2 HTTP web server running on port 80. Document root is at /var/www/html.",
     getInstallScript: (ip, rootPassword) => `
@@ -1416,6 +1541,7 @@ EOF
     versions: [
       { id: "23-ubu26", label: "CyberPanel 2.3 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v2.3" },
     ],
+    minSpecs: { cpu: 2, ram: 2, disk: 20 },
     adminUsername: "admin",
     instructions: "Access CyberPanel web console at https://${ip}:8090. Username: 'admin', Password: configured password.",
     configFields: [
@@ -1466,6 +1592,7 @@ EOF
     versions: [
       { id: "131-ubu26", label: "K3s v1.31 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v1.31" },
     ],
+    minSpecs: { cpu: 2, ram: 2, disk: 20 },
     adminUsername: "admin",
     instructions: "K3s Kubernetes cluster active. Access API at https://${ip}:6443. Kubeconfig stored at /etc/rancher/k3s/k3s.yaml.",
     getInstallScript: (ip, rootPassword) => `

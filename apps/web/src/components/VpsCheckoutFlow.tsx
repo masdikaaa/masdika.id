@@ -171,31 +171,6 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
   const [installedVpsId, setInstalledVpsId] = useState<number | null>(null);
   const [showAppInstallationModal, setShowAppInstallationModal] = useState<boolean>(false);
 
-  const selectApp = (app: VpsAppDefinition) => {
-    setSelectedAppId(app.id);
-    setSelectedAppVersion(app.versions[0]?.appVersion || app.appVersion);
-    const initialConfig: Record<string, any> = {};
-    if (app.configFields) {
-      app.configFields.forEach((field) => {
-        if (field.defaultValue !== undefined) {
-          initialConfig[field.key] = field.defaultValue;
-        }
-      });
-    }
-    setAppConfig(initialConfig);
-    const ubuTpl = templates.find((t: any) => t.name.toLowerCase().includes("ubuntu-26"))
-      || templates.find((t: any) => t.name.toLowerCase().includes("ubuntu"));
-    if (ubuTpl) {
-      setSelectedOsFamily("Ubuntu");
-      setSelectedTemplate(ubuTpl.id);
-    }
-    if (ipv4Count < 1) {
-      setIpv4Count(1);
-    }
-    if (useReservedIp) {
-      setUseReservedIp(false);
-    }
-  };
   const [plans, setPlans] = useState<any[]>([]);
   const [pricing, setPricing] = useState<Record<string, number>>({});
   const [isDisabled, setIsDisabled] = useState(false);
@@ -304,6 +279,66 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
   // Proxmox Nodes
   const [nodes, setNodes] = useState<any[]>([]);
   const [selectedNode, setSelectedNode] = useState<string>("");
+
+  const selectApp = (app: VpsAppDefinition) => {
+    setSelectedAppId(app.id);
+    setSelectedAppVersion(app.versions[0]?.appVersion || app.appVersion);
+    const initialConfig: Record<string, any> = {};
+    if (app.configFields) {
+      app.configFields.forEach((field) => {
+        if (field.defaultValue !== undefined) {
+          initialConfig[field.key] = field.defaultValue;
+        }
+      });
+    }
+    setAppConfig(initialConfig);
+
+    // Auto-adjust VPS specs to satisfy the application's official requirements and prevent OOM kills
+    let autoAdjusted = false;
+    if (app.minSpecs) {
+      if (cpuCores < app.minSpecs.cpu) {
+        setCpuCores(app.minSpecs.cpu);
+        autoAdjusted = true;
+      }
+      if (ramGb < app.minSpecs.ram) {
+        setRamGb(app.minSpecs.ram);
+        autoAdjusted = true;
+      }
+      if (diskGb < app.minSpecs.disk) {
+        setDiskGb(app.minSpecs.disk);
+        autoAdjusted = true;
+      }
+    }
+
+    // Automatically switch base OS template matching the app's supported OS (e.g. AlmaLinux 9 for cPanel)
+    if (app.osBase.toLowerCase().includes("alma")) {
+      const almaTpl = templates.find((t: any) => t.name.toLowerCase().includes("almalinux-9"))
+        || templates.find((t: any) => t.name.toLowerCase().includes("almalinux"))
+        || templates.find((t: any) => t.name.toLowerCase().includes("alma"));
+      if (almaTpl) {
+        setSelectedOsFamily("AlmaLinux");
+        setSelectedTemplate(almaTpl.id);
+      }
+    } else {
+      const ubuTpl = templates.find((t: any) => t.name.toLowerCase().includes("ubuntu-26"))
+        || templates.find((t: any) => t.name.toLowerCase().includes("ubuntu"));
+      if (ubuTpl) {
+        setSelectedOsFamily("Ubuntu");
+        setSelectedTemplate(ubuTpl.id);
+      }
+    }
+
+    if (ipv4Count < 1) {
+      setIpv4Count(1);
+    }
+    if (useReservedIp) {
+      setUseReservedIp(false);
+    }
+
+    if (autoAdjusted && app.minSpecs) {
+      toast.info(`Server specs auto-adjusted to meet ${app.name} requirements (${app.minSpecs.cpu} vCPU, ${app.minSpecs.ram} GB RAM, ${app.minSpecs.disk} GB Disk).`);
+    }
+  };
 
   const fetchOrderData = async () => {
     try {
@@ -965,9 +1000,15 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                                 "px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold flex items-center justify-between",
                                 isDark ? "bg-[#050507] border-white/10 text-zinc-300" : "bg-white border-slate-200 text-slate-700"
                               )}>
-                                <span className="truncate">{app.versions[0]?.label || `${app.name} - Ubuntu 26.04`}</span>
+                                <span className="truncate">{app.versions[0]?.label || `${app.name} - ${app.osBase}`}</span>
                                 <span className="text-[10px] font-mono text-cyan-400 shrink-0 ml-1">:{app.defaultPort}</span>
                               </div>
+                              {app.minSpecs && (
+                                <div className="flex items-center justify-between text-[10px] text-zinc-500 font-mono mt-1 px-0.5">
+                                  <span>Min: {app.minSpecs.cpu}C / {app.minSpecs.ram}GB RAM</span>
+                                  <span>{app.minSpecs.disk}GB Disk</span>
+                                </div>
+                              )}
                             </div>
                           </div>
                         );
@@ -1039,18 +1080,35 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                   })()}
 
                   {/* Informational Banner */}
-                  {selectedAppId && (
-                    <div className={cn(
-                      "p-3.5 rounded-xl border text-xs flex items-start gap-2.5 mt-4",
-                      isDark ? "bg-cyan-950/20 border-cyan-800/40 text-cyan-300" : "bg-cyan-50 border-cyan-200 text-cyan-900"
-                    )}>
-                      <Info className="w-4 h-4 shrink-0 mt-0.5 text-cyan-400" />
-                      <div>
-                        <strong>{getAppById(selectedAppId)?.name}</strong> will be automatically installed on <strong>Ubuntu 26.04</strong> via Cloud-Init.
-                        {" "}A dedicated Public IPv4 address is attached to enable web panel access and remote client connectivity.
+                  {selectedAppId && (() => {
+                    const activeApp = getAppById(selectedAppId);
+                    if (!activeApp) return null;
+                    return (
+                      <div className={cn(
+                        "p-3.5 rounded-xl border text-xs flex items-start gap-2.5 mt-4",
+                        isDark ? "bg-cyan-950/20 border-cyan-800/40 text-cyan-300" : "bg-cyan-50 border-cyan-200 text-cyan-900"
+                      )}>
+                        <Info className="w-4 h-4 shrink-0 mt-0.5 text-cyan-400" />
+                        <div className="space-y-1">
+                          <div>
+                            <strong>{activeApp.name}</strong> will be automatically installed on <strong>{activeApp.osBase}</strong> via Cloud-Init.
+                            {" "}A dedicated Public IPv4 address is attached to enable web panel access and remote client connectivity.
+                          </div>
+                          {activeApp.minSpecs && (
+                            <div className="text-[11px] opacity-90 flex items-center gap-2 flex-wrap pt-0.5">
+                              <span className="font-semibold text-cyan-400">Official Minimum Requirements:</span>
+                              <span>{activeApp.minSpecs.cpu} vCPU Cores</span>
+                              <span>•</span>
+                              <span>{activeApp.minSpecs.ram} GB RAM</span>
+                              <span>•</span>
+                              <span>{activeApp.minSpecs.disk} GB Disk</span>
+                              <span className="text-emerald-400 font-medium">(Auto-enforced to prevent OOM kills)</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
                 </div>
               )}
             </motion.div>
@@ -1139,70 +1197,101 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
               </div>
             </div>
 
-            <div className="space-y-6 relative z-10">
-              {/* vCPU Slider */}
-              <div className={cn("p-4 rounded-xl border", isDark ? "bg-white/[0.015] border-white/[0.06]" : "bg-slate-50/50 border-slate-200/70")}>
-                <div className="flex justify-between items-center mb-2.5">
-                  <label className={cn("text-xs sm:text-sm font-semibold flex items-center gap-2", isDark ? "text-zinc-200" : "text-slate-700")}>
-                    <Cpu className="w-4 h-4 text-cyan-400" /> vCPU Cores
-                  </label>
-                  <span className={cn("text-xs font-mono font-bold px-2.5 py-0.5 rounded-md border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
-                    {cpuCores} Core{cpuCores > 1 ? 's' : ''}
-                  </span>
-                </div>
-                <input
-                  type="range" min="1" max={maxSpecs.cpu} step="1"
-                  value={cpuCores} onChange={e => setCpuCores(Number(e.target.value))}
-                  className={cn("w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-none", isDark ? "bg-white/10" : "bg-slate-200")}
-                  style={{ background: `linear-gradient(to right, #22d3ee ${((cpuCores - 1) / Math.max(1, maxSpecs.cpu - 1)) * 100}%, ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"} ${((cpuCores - 1) / Math.max(1, maxSpecs.cpu - 1)) * 100}%)` }}
-                />
-                <div className="flex justify-between text-[11px] font-mono text-zinc-500 mt-1.5">
-                  <span>1 Core</span><span>{maxSpecs.cpu} Cores</span>
-                </div>
-              </div>
+            {(() => {
+              const activeApp = imageMode === "apps" && selectedAppId ? getAppById(selectedAppId) : null;
+              const minCpu = activeApp?.minSpecs ? activeApp.minSpecs.cpu : 1;
+              const minRam = activeApp?.minSpecs ? activeApp.minSpecs.ram : 1;
+              const minDisk = activeApp?.minSpecs ? Math.max(20, activeApp.minSpecs.disk) : 20;
+              const currentCpu = Math.max(minCpu, cpuCores);
+              const currentRam = Math.max(minRam, ramGb);
+              const currentDisk = Math.max(minDisk, diskGb);
+              const maxDisk = diskType === "SSD" ? maxSpecs.diskSsd : maxSpecs.diskHdd;
 
-              {/* RAM Slider */}
-              <div className={cn("p-4 rounded-xl border", isDark ? "bg-white/[0.015] border-white/[0.06]" : "bg-slate-50/50 border-slate-200/70")}>
-                <div className="flex justify-between items-center mb-2.5">
-                  <label className={cn("text-xs sm:text-sm font-semibold flex items-center gap-2", isDark ? "text-zinc-200" : "text-slate-700")}>
-                    <MemoryStick className="w-4 h-4 text-cyan-400" /> Memory (RAM)
-                  </label>
-                  <span className={cn("text-xs font-mono font-bold px-2.5 py-0.5 rounded-md border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
-                    {ramGb} GB
-                  </span>
-                </div>
-                <input
-                  type="range" min="1" max={maxSpecs.ram} step="1"
-                  value={ramGb} onChange={e => setRamGb(Number(e.target.value))}
-                  className={cn("w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-none", isDark ? "bg-white/10" : "bg-slate-200")}
-                  style={{ background: `linear-gradient(to right, #22d3ee ${((ramGb - 1) / Math.max(1, maxSpecs.ram - 1)) * 100}%, ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"} ${((ramGb - 1) / Math.max(1, maxSpecs.ram - 1)) * 100}%)` }}
-                />
-                <div className="flex justify-between text-[11px] font-mono text-zinc-500 mt-1.5">
-                  <span>1 GB</span><span>{maxSpecs.ram} GB</span>
-                </div>
-              </div>
+              return (
+                <div className="space-y-6 relative z-10">
+                  {/* vCPU Slider */}
+                  <div className={cn("p-4 rounded-xl border", isDark ? "bg-white/[0.015] border-white/[0.06]" : "bg-slate-50/50 border-slate-200/70")}>
+                    <div className="flex justify-between items-center mb-2.5">
+                      <label className={cn("text-xs sm:text-sm font-semibold flex items-center gap-2", isDark ? "text-zinc-200" : "text-slate-700")}>
+                        <Cpu className="w-4 h-4 text-cyan-400" /> vCPU Cores
+                        {activeApp && activeApp.minSpecs.cpu > 1 && (
+                          <span className="text-[10px] text-cyan-400 font-semibold px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20">
+                            Min: {minCpu} Cores ({activeApp.name})
+                          </span>
+                        )}
+                      </label>
+                      <span className={cn("text-xs font-mono font-bold px-2.5 py-0.5 rounded-md border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+                        {currentCpu} Core{currentCpu > 1 ? 's' : ''}
+                      </span>
+                    </div>
+                    <input
+                      type="range" min={minCpu} max={maxSpecs.cpu} step="1"
+                      value={currentCpu} onChange={e => setCpuCores(Math.max(minCpu, Number(e.target.value)))}
+                      className={cn("w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-none", isDark ? "bg-white/10" : "bg-slate-200")}
+                      style={{ background: `linear-gradient(to right, #22d3ee ${((currentCpu - minCpu) / Math.max(1, maxSpecs.cpu - minCpu)) * 100}%, ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"} ${((currentCpu - minCpu) / Math.max(1, maxSpecs.cpu - minCpu)) * 100}%)` }}
+                    />
+                    <div className="flex justify-between text-[11px] font-mono text-zinc-500 mt-1.5">
+                      <span>{minCpu} Core{minCpu > 1 ? 's' : ''} {minCpu > 1 ? '(App Min)' : ''}</span>
+                      <span>{maxSpecs.cpu} Cores</span>
+                    </div>
+                  </div>
 
-              {/* Disk Slider */}
-              <div className={cn("p-4 rounded-xl border", isDark ? "bg-white/[0.015] border-white/[0.06]" : "bg-slate-50/50 border-slate-200/70")}>
-                <div className="flex justify-between items-center mb-2.5">
-                  <label className={cn("text-xs sm:text-sm font-semibold flex items-center gap-2", isDark ? "text-zinc-200" : "text-slate-700")}>
-                    <HardDrive className="w-4 h-4 text-cyan-400" /> Block Storage ({diskType})
-                  </label>
-                  <span className={cn("text-xs font-mono font-bold px-2.5 py-0.5 rounded-md border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
-                    {diskGb} GB {diskType}
-                  </span>
+                  {/* RAM Slider */}
+                  <div className={cn("p-4 rounded-xl border", isDark ? "bg-white/[0.015] border-white/[0.06]" : "bg-slate-50/50 border-slate-200/70")}>
+                    <div className="flex justify-between items-center mb-2.5">
+                      <label className={cn("text-xs sm:text-sm font-semibold flex items-center gap-2", isDark ? "text-zinc-200" : "text-slate-700")}>
+                        <MemoryStick className="w-4 h-4 text-cyan-400" /> Memory (RAM)
+                        {activeApp && activeApp.minSpecs.ram > 1 && (
+                          <span className="text-[10px] text-cyan-400 font-semibold px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20">
+                            Min: {minRam} GB ({activeApp.name})
+                          </span>
+                        )}
+                      </label>
+                      <span className={cn("text-xs font-mono font-bold px-2.5 py-0.5 rounded-md border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+                        {currentRam} GB
+                      </span>
+                    </div>
+                    <input
+                      type="range" min={minRam} max={maxSpecs.ram} step="1"
+                      value={currentRam} onChange={e => setRamGb(Math.max(minRam, Number(e.target.value)))}
+                      className={cn("w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-none", isDark ? "bg-white/10" : "bg-slate-200")}
+                      style={{ background: `linear-gradient(to right, #22d3ee ${((currentRam - minRam) / Math.max(1, maxSpecs.ram - minRam)) * 100}%, ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"} ${((currentRam - minRam) / Math.max(1, maxSpecs.ram - minRam)) * 100}%)` }}
+                    />
+                    <div className="flex justify-between text-[11px] font-mono text-zinc-500 mt-1.5">
+                      <span>{minRam} GB {minRam > 1 ? '(App Min)' : ''}</span>
+                      <span>{maxSpecs.ram} GB</span>
+                    </div>
+                  </div>
+
+                  {/* Disk Slider */}
+                  <div className={cn("p-4 rounded-xl border", isDark ? "bg-white/[0.015] border-white/[0.06]" : "bg-slate-50/50 border-slate-200/70")}>
+                    <div className="flex justify-between items-center mb-2.5">
+                      <label className={cn("text-xs sm:text-sm font-semibold flex items-center gap-2", isDark ? "text-zinc-200" : "text-slate-700")}>
+                        <HardDrive className="w-4 h-4 text-cyan-400" /> Block Storage ({diskType})
+                        {activeApp && activeApp.minSpecs.disk > 20 && (
+                          <span className="text-[10px] text-cyan-400 font-semibold px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20">
+                            Min: {minDisk} GB ({activeApp.name})
+                          </span>
+                        )}
+                      </label>
+                      <span className={cn("text-xs font-mono font-bold px-2.5 py-0.5 rounded-md border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+                        {currentDisk} GB {diskType}
+                      </span>
+                    </div>
+                    <input
+                      type="range" min={minDisk} max={maxDisk} step="10"
+                      value={currentDisk} onChange={e => setDiskGb(Math.max(minDisk, Number(e.target.value)))}
+                      className={cn("w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-none", isDark ? "bg-white/10" : "bg-slate-200")}
+                      style={{ background: `linear-gradient(to right, #22d3ee ${((currentDisk - minDisk) / Math.max(1, maxDisk - minDisk)) * 100}%, ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"} ${((currentDisk - minDisk) / Math.max(1, maxDisk - minDisk)) * 100}%)` }}
+                    />
+                    <div className="flex justify-between text-[11px] font-mono text-zinc-500 mt-1.5">
+                      <span>{minDisk} GB {minDisk > 20 ? '(App Min)' : ''}</span>
+                      <span>{maxDisk} GB</span>
+                    </div>
+                  </div>
                 </div>
-                <input
-                  type="range" min="20" max={diskType === "SSD" ? maxSpecs.diskSsd : maxSpecs.diskHdd} step="10"
-                  value={diskGb} onChange={e => setDiskGb(Number(e.target.value))}
-                  className={cn("w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-none", isDark ? "bg-white/10" : "bg-slate-200")}
-                  style={{ background: `linear-gradient(to right, #22d3ee ${((diskGb - 20) / Math.max(1, (diskType === "SSD" ? maxSpecs.diskSsd : maxSpecs.diskHdd) - 20)) * 100}%, ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"} ${((diskGb - 20) / Math.max(1, (diskType === "SSD" ? maxSpecs.diskSsd : maxSpecs.diskHdd) - 20)) * 100}%)` }}
-                />
-                <div className="flex justify-between text-[11px] font-mono text-zinc-500 mt-1.5">
-                  <span>20 GB</span><span>{diskType === "SSD" ? maxSpecs.diskSsd : maxSpecs.diskHdd} GB</span>
-                </div>
-              </div>
-            </div>
+              );
+            })()}
           </motion.div>
 
           {/* Network & Extra (Only for PAYG) */}
@@ -2187,8 +2276,8 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
               {selectedAppId ? (
                 <div className="flex justify-between items-center text-xs px-3.5 py-2.5">
                   <span className={cn("font-medium flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><Rocket className="w-3.5 h-3.5 text-cyan-400" /> 1-Click App</span>
-                  <span className={cn("font-bold truncate max-w-[170px]", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                    {getAppById(selectedAppId)?.name} (Ubuntu 26.04)
+                  <span className={cn("font-bold truncate max-w-[180px]", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                    {getAppById(selectedAppId)?.name} ({getAppById(selectedAppId)?.osBase || "Ubuntu 26.04"})
                   </span>
                 </div>
               ) : (

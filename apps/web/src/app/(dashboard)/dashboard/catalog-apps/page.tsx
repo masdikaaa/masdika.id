@@ -198,11 +198,11 @@ export default function CatalogAppsPage() {
                 <div className="flex items-center justify-between text-[10px] text-zinc-500 font-medium">
                   <span className="flex items-center gap-1">
                     <Server className="w-3 h-3 text-cyan-400" />
-                    <span>Ubuntu 26.04 Base</span>
+                    <span>{app.osBase} Base</span>
                   </span>
-                  <span className="flex items-center gap-1 text-emerald-400">
-                    <CheckCircle className="w-3 h-3" />
-                    <span>Auto Cloud-Init</span>
+                  <span className="flex items-center gap-1 font-mono text-cyan-400">
+                    <Cpu className="w-3 h-3" />
+                    <span>Min: {app.minSpecs.cpu}C / {app.minSpecs.ram}GB</span>
                   </span>
                 </div>
 

@@ -138,7 +138,7 @@ export function VpsAppInstallationMonitor({
       newLogs.push(`[${timestamp()}] [NETWORK] Dedicated Public IPv4 ${primaryIp || "binding"} attached.`);
     }
     if (progress >= 55 || statusData?.status === "ACTIVE") {
-      newLogs.push(`[${timestamp()}] [SYSTEM] Ubuntu 26.04 OS image booted. Cloud-Init initialized.`);
+      newLogs.push(`[${timestamp()}] [SYSTEM] ${appDef?.osBase || "Linux"} OS image booted. Cloud-Init initialized.`);
     }
     if (progress >= 70 || statusData?.appStatus === "INSTALLING") {
       newLogs.push(`[${timestamp()}] [APP] QEMU Guest Agent responsive. Running automated setup for ${displayName}...`);
@@ -178,7 +178,7 @@ export function VpsAppInstallationMonitor({
     {
       id: 3,
       title: "Base OS & Cloud-Init",
-      desc: "Booting Ubuntu 26.04 & QEMU Guest Agent",
+      desc: `Booting ${appDef?.osBase || "Linux"} & QEMU Guest Agent`,
       isDone: progress >= 70 || statusData?.status === "ACTIVE",
       isActive: progress >= 50 && statusData?.status !== "ACTIVE"
     },
@@ -247,7 +247,7 @@ export function VpsAppInstallationMonitor({
             <p className={cn("text-xs sm:text-sm mt-1 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
               {isFinished 
                 ? "Setup completed successfully. Your application and server are live."
-                : "Automated Cloud-Init setup on Ubuntu 26.04. Server actions are locked until setup finishes."}
+                : `Automated Cloud-Init setup on ${appDef?.osBase || "Linux"}. Server actions are locked until setup finishes.`}
             </p>
           </div>
         </div>

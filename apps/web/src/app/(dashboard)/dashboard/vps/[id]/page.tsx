@@ -1784,7 +1784,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                               </span>
                             </div>
                             <p className={cn("text-xs mt-1 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
-                              {appMeta?.description || "1-Click Application pre-configured and automated on Ubuntu 26.04."}
+                              {appMeta?.description || `1-Click Application pre-configured and automated on ${appMeta?.osBase || "Linux"}.`}
                             </p>
                           </div>
                         </div>
