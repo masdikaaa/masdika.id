@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -28,6 +28,7 @@ import { Badge } from "@/components/ui/Badge";
 import { HeroAvatarFrame } from "@/components/ui/HeroAvatarFrame";
 import { FadeIn } from "@/components/animations/FadeIn";
 import { FaqSection } from "@/components/ui/FaqSection";
+import { Pagination } from "@/components/ui/Pagination";
 import { cn } from "@/lib/utils";
 import {
   VPS_APPS,
@@ -59,9 +60,17 @@ const APP_CATALOG_FAQS = [
   },
 ];
 
+const ITEMS_PER_PAGE = 8;
+
 export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyRate?: number }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<AppCategory>("All Apps");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Reset pagination to page 1 whenever category or search filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory]);
 
   const filteredApps = useMemo(() => {
     return VPS_APPS.filter((app) => {
@@ -84,6 +93,13 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
       );
     });
   }, [searchQuery, selectedCategory]);
+
+  const totalPages = Math.ceil(filteredApps.length / ITEMS_PER_PAGE);
+
+  const paginatedApps = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredApps.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredApps, currentPage]);
 
   return (
     <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-20 lg:pb-28 overflow-x-hidden">
@@ -280,89 +296,119 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
 
           {/* Apps Grid */}
           {filteredApps.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredApps.map((app) => (
-                <div
-                  key={app.id}
-                  className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-5 sm:p-6 flex flex-col justify-between hover:border-cyan-500/50 hover:shadow-lg transition-all duration-200 group"
-                >
-                  <div>
-                    {/* Top Row: Icon + Badges */}
-                    <div className="flex items-start justify-between gap-3 mb-4">
-                      <div className="w-14 h-14 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] p-2.5 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-200 shadow-2xs">
-                        {app.icon ? (
-                          <img
-                            referrerPolicy="no-referrer"
-                            src={app.icon}
-                            alt={app.name}
-                            className="w-full h-full object-contain"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <Server className="w-7 h-7 text-cyan-400" />
-                        )}
-                      </div>
-                      <div className="flex flex-col items-end gap-1.5">
-                        <span className="text-[10px] px-2 py-0.5 rounded-full font-mono font-bold uppercase tracking-wider bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                          v{app.appVersion || "Latest"}
-                        </span>
-                        <span className="text-[10px] px-2 py-0.5 rounded-md font-semibold text-zinc-400 bg-white/[0.04] border border-white/[0.06]">
-                          {app.category}
-                        </span>
-                      </div>
-                    </div>
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {paginatedApps.map((app) => {
+                  const versionDisplay = app.appVersion
+                    ? (app.appVersion.toLowerCase().startsWith("v") ? app.appVersion : `v${app.appVersion}`)
+                    : "Latest";
 
-                    {/* App Name & Description */}
-                    <h3 className="text-lg font-bold text-[var(--text-primary)] group-hover:text-cyan-400 transition-colors mb-2">
-                      {app.name}
-                    </h3>
-                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed line-clamp-3 mb-4">
-                      {app.description}
-                    </p>
+                  return (
+                    <div
+                      key={app.id}
+                      className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-5 sm:p-6 flex flex-col justify-between hover:border-cyan-500/50 hover:shadow-lg transition-all duration-200 group"
+                    >
+                      <div>
+                        {/* Top Row: Icon + Badges */}
+                        <div className="flex items-start justify-between gap-3 mb-4">
+                          <div className="w-14 h-14 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] p-2.5 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-200 shadow-2xs">
+                            {app.icon ? (
+                              <img
+                                referrerPolicy="no-referrer"
+                                src={app.icon}
+                                alt={app.name}
+                                className="w-full h-full object-contain"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <Server className="w-7 h-7 text-cyan-400" />
+                            )}
+                          </div>
+                          <div className="flex flex-col items-end gap-1.5">
+                            <span className="text-[10px] px-2 py-0.5 rounded-full font-mono font-bold uppercase tracking-wider bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                              {versionDisplay}
+                            </span>
+                            <span className="text-[10px] px-2 py-0.5 rounded-md font-semibold text-zinc-400 bg-white/[0.04] border border-white/[0.06]">
+                              {app.category}
+                            </span>
+                          </div>
+                        </div>
 
-                    {/* Meta Specs Pill Bar */}
-                    <div className="space-y-1.5 pt-3 border-t border-[var(--border-primary)] text-[11px] font-mono text-zinc-400 mb-5">
-                      <div className="flex items-center justify-between">
-                        <span className="flex items-center gap-1.5">
-                          <Cpu className="w-3 h-3 text-cyan-400 shrink-0" />
-                          Min Specs:
-                        </span>
-                        <span className="font-semibold text-[var(--text-primary)]">
-                          {app.minSpecs.cpu} vCPU / {app.minSpecs.ram}GB RAM
-                        </span>
+                        {/* App Name & Description */}
+                        <h3 className="text-lg font-bold text-[var(--text-primary)] group-hover:text-cyan-400 transition-colors mb-2">
+                          {app.name}
+                        </h3>
+                        <p className="text-xs text-[var(--text-secondary)] leading-relaxed line-clamp-3 mb-4">
+                          {app.description}
+                        </p>
+
+                        {/* Meta Specs Pill Bar */}
+                        <div className="space-y-1.5 pt-3 border-t border-[var(--border-primary)] text-[11px] font-mono text-zinc-400 mb-5">
+                          <div className="flex items-center justify-between">
+                            <span className="flex items-center gap-1.5">
+                              <Cpu className="w-3 h-3 text-cyan-400 shrink-0" />
+                              Min Specs:
+                            </span>
+                            <span className="font-semibold text-[var(--text-primary)]">
+                              {app.minSpecs.cpu} vCPU / {app.minSpecs.ram}GB RAM
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="flex items-center gap-1.5">
+                              <Clock className="w-3 h-3 text-cyan-400 shrink-0" />
+                              Setup Time:
+                            </span>
+                            <span className="font-semibold text-emerald-400">
+                              {app.estimatedTime}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="flex items-center gap-1.5">
+                              <Globe className="w-3 h-3 text-cyan-400 shrink-0" />
+                              Web Port:
+                            </span>
+                            <span className="font-semibold text-[var(--text-primary)]">
+                              {app.defaultProtocol}://:{app.defaultPort}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="flex items-center gap-1.5">
-                          <Clock className="w-3 h-3 text-cyan-400 shrink-0" />
-                          Setup Time:
-                        </span>
-                        <span className="font-semibold text-emerald-400">
-                          {app.estimatedTime}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="flex items-center gap-1.5">
-                          <Globe className="w-3 h-3 text-cyan-400 shrink-0" />
-                          Web Port:
-                        </span>
-                        <span className="font-semibold text-[var(--text-primary)]">
-                          {app.defaultProtocol}://:{app.defaultPort}
-                        </span>
-                      </div>
+
+                      {/* Deploy Button */}
+                      <Link
+                        href={`/dashboard/checkout?service=APP_CATALOG&app=${encodeURIComponent(app.id)}`}
+                        className="w-full py-2.5 px-4 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer active:scale-98"
+                      >
+                        <span>Deploy 1-Click {app.name}</span>
+                        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                      </Link>
                     </div>
+                  );
+                })}
+              </div>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-10 pt-6 border-t border-[var(--border-primary)]">
+                  <div className="text-xs font-mono font-medium text-[var(--text-secondary)]">
+                    Showing <span className="font-bold text-[var(--text-primary)]">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span>–
+                    <span className="font-bold text-[var(--text-primary)]">{Math.min(currentPage * ITEMS_PER_PAGE, filteredApps.length)}</span> of{" "}
+                    <span className="font-bold text-cyan-400">{filteredApps.length}</span> Applications
                   </div>
-
-                  {/* Deploy Button */}
-                  <Link
-                    href={`/dashboard/checkout?service=APP_CATALOG&app=${encodeURIComponent(app.id)}`}
-                    className="w-full py-2.5 px-4 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer active:scale-98"
-                  >
-                    <span>Deploy 1-Click {app.name}</span>
-                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-                  </Link>
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={(page) => {
+                      setCurrentPage(page);
+                      const el = document.getElementById("catalog");
+                      if (el) {
+                        el.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                  />
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           ) : (
             <div className="py-16 text-center rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)]">
               <Search className="w-10 h-10 text-zinc-500 mx-auto mb-3" />
