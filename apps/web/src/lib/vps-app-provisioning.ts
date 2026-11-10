@@ -5,6 +5,51 @@ import { decryptDeterministic } from "@/lib/encryption";
 
 export class VpsAppProvisioningService {
   /**
+   * Helper to update real-time app provisioning progress, stage, and append timestamped logs to vps.appCredentials
+   */
+  static async updateAppProgress(
+    vpsId: number,
+    stage: string,
+    stageLabel: string,
+    progress: number,
+    logMsg?: string
+  ): Promise<void> {
+    try {
+      const vps = await prisma.vpsService.findUnique({
+        where: { id: vpsId },
+        select: { appCredentials: true }
+      });
+      let creds: Record<string, any> = {};
+      if (vps?.appCredentials) {
+        try {
+          const parsed = JSON.parse(vps.appCredentials);
+          if (typeof parsed === "object" && parsed !== null) creds = parsed;
+        } catch {}
+      }
+      const existingLogs: string[] = Array.isArray(creds.logs) ? creds.logs : [];
+      if (logMsg) {
+        const timestamp = new Date().toLocaleTimeString("en-US", { hour12: false });
+        const entry = `[${timestamp}] ${logMsg}`;
+        if (!existingLogs.includes(entry)) {
+          existingLogs.push(entry);
+        }
+      }
+      creds.stage = stage;
+      creds.stageLabel = stageLabel;
+      creds.progress = progress;
+      creds.logs = existingLogs.slice(-100);
+      creds.updatedAt = new Date().toISOString();
+
+      await prisma.vpsService.update({
+        where: { id: vpsId },
+        data: { appCredentials: JSON.stringify(creds) }
+      });
+    } catch (e) {
+      // Non-blocking log update
+    }
+  }
+
+  /**
    * Helper to append a timestamped log to vps.appCredentials JSON.
    */
   private static async appendAppLog(vpsId: number, msg: string): Promise<void> {
@@ -158,12 +203,24 @@ export class VpsAppProvisioningService {
     }
 
     const proxmox = new ProxmoxClient(server.host, server.tokenId, server.tokenSecret);
+    let existingCreds: Record<string, any> = {};
 
     try {
+      if (vps.appCredentials) {
+        try {
+          const parsed = JSON.parse(vps.appCredentials);
+          if (typeof parsed === "object" && parsed !== null) existingCreds = parsed;
+        } catch {}
+      }
+
       const initialCredentials = {
+        ...existingCreds,
         ...(customConfig || {}),
-        startedAt: new Date().toISOString(),
-        logs: []
+        stage: "INIT",
+        stageLabel: "Waiting for Guest Agent & Cloud-Init boot sequence...",
+        progress: 70,
+        startedAt: existingCreds.startedAt || new Date().toISOString(),
+        logs: Array.isArray(existingCreds.logs) ? existingCreds.logs : []
       };
 
       await prisma.vpsService.update({
@@ -176,7 +233,13 @@ export class VpsAppProvisioningService {
         }
       });
 
-      await this.appendAppLog(vpsId, `[INIT] Waiting for Guest Agent and Cloud-Init boot sequence...`);
+      await this.updateAppProgress(
+        vpsId,
+        "INIT",
+        "Waiting for Guest Agent & Cloud-Init boot sequence...",
+        70,
+        `[INIT] Waiting for Guest Agent and Cloud-Init boot sequence...`
+      );
       console.log(`[AppProvisioning] Waiting for guest agent on VMID ${vps.vmid} for app ${app.name}...`);
       const isReady = await this.waitForGuestReady(proxmox, vps.node, vps.vmid);
       if (!isReady) {
@@ -185,7 +248,13 @@ export class VpsAppProvisioningService {
 
       // Wait for cloud-init to finish first-boot locks
       await this.waitForCloudInit(proxmox, vps.node, vps.vmid, 120);
-      await this.appendAppLog(vpsId, `[SYSTEM] Base OS online. Preparing package manager and runtime stack...`);
+      await this.updateAppProgress(
+        vpsId,
+        "SYSTEM",
+        "Base OS online. Preparing package manager & runtime stack...",
+        78,
+        `[SYSTEM] Base OS online. Preparing package manager and runtime stack...`
+      );
 
       // Extract customer registered email (decrypted)
       const customerEmail = vps.user?.email ? (decryptDeterministic(vps.user.email) || vps.user.email) : undefined;
@@ -210,7 +279,13 @@ export class VpsAppProvisioningService {
 
       const script = app.getInstallScript(primaryIp, rootPassword, appConfig);
       console.log(`[AppProvisioning] Executing install script for ${app.name} on VMID ${vps.vmid}...`);
-      await this.appendAppLog(vpsId, `[INSTALLER] Executing automated setup script for ${app.name}...`);
+      await this.updateAppProgress(
+        vpsId,
+        "INSTALLER",
+        `Executing automated setup script for ${app.name}...`,
+        85,
+        `[INSTALLER] Executing automated setup script for ${app.name}...`
+      );
 
       const encodedScript = Buffer.from(script).toString("base64");
       const isHeavyPanel = ["cpanel", "plesk", "cyberpanel", "aapanel", "k3s"].includes(app.id);
@@ -239,7 +314,13 @@ export class VpsAppProvisioningService {
       if (execResult.exitcode !== 0) {
         const errorSummary = (execResult.stderr || execResult.stdout || `Exit code ${execResult.exitcode}`).slice(-1200);
         console.error(`[AppProvisioning] Failed to install ${app.name} on VMID ${vps.vmid} (code ${execResult.exitcode}):\n`, errorSummary);
-        await this.appendAppLog(vpsId, `[ERROR] Installation script failed with exit code ${execResult.exitcode}.`);
+        await this.updateAppProgress(
+          vpsId,
+          "ERROR",
+          `Installation script failed with exit code ${execResult.exitcode}.`,
+          85,
+          `[ERROR] Installation script failed with exit code ${execResult.exitcode}.`
+        );
 
         let credsObj: Record<string, any> = {};
         if (vps.appCredentials) {
@@ -247,6 +328,8 @@ export class VpsAppProvisioningService {
         }
         credsObj.error = errorSummary;
         credsObj.installFailed = true;
+        credsObj.stage = "ERROR";
+        credsObj.stageLabel = `Installation script failed (code ${execResult.exitcode})`;
 
         await prisma.vpsService.update({
           where: { id: vpsId },
@@ -258,7 +341,13 @@ export class VpsAppProvisioningService {
         return;
       }
 
-      await this.appendAppLog(vpsId, `[VERIFY] Installation script completed. Verifying runtime endpoints...`);
+      await this.updateAppProgress(
+        vpsId,
+        "VERIFY",
+        "Installation completed. Verifying runtime endpoints & generating credentials...",
+        94,
+        `[VERIFY] Installation script completed. Verifying runtime endpoints...`
+      );
 
       // Attempt to retrieve runtime-verified app info from /root/masdika-app-info.json with retries
       let verifiedInfo: any = null;
@@ -302,13 +391,21 @@ export class VpsAppProvisioningService {
         appUrl = appUrl.replace(/\/+$/, "") + "/login";
       }
 
-      let existingCreds: Record<string, any> = {};
-      if (vps.appCredentials) {
-        try { existingCreds = JSON.parse(vps.appCredentials); } catch {}
+      // Re-read latest appCredentials from DB to include all recent stage logs
+      existingCreds = {};
+      const latestVps = await prisma.vpsService.findUnique({
+        where: { id: vpsId },
+        select: { appCredentials: true }
+      });
+      if (latestVps?.appCredentials) {
+        try { existingCreds = JSON.parse(latestVps.appCredentials); } catch {}
       }
 
       const appCredentials = JSON.stringify({
         ...existingCreds,
+        stage: "READY",
+        stageLabel: `${app.name} service online and ready`,
+        progress: 100,
         appId: app.id,
         appName: app.name,
         username,
@@ -330,15 +427,26 @@ export class VpsAppProvisioningService {
         }
       });
 
-      await this.appendAppLog(vpsId, `[SUCCESS] ${app.name} service verified and online at ${appUrl}.`);
+      await this.updateAppProgress(
+        vpsId,
+        "READY",
+        `${app.name} service online and verified!`,
+        100,
+        `[SUCCESS] ${app.name} service verified and online at ${appUrl}.`
+      );
       console.log(`[AppProvisioning] Successfully installed ${app.name} on VPS #${vpsId} (${appUrl})`);
     } catch (err: any) {
       console.error(`[AppProvisioning] Fatal error during ${app.name} setup on VPS #${vpsId}:`, err);
       await this.appendAppLog(vpsId, `[FATAL] Provisioning exception: ${err?.message || "Unknown error"}`);
 
-      let existingCreds: Record<string, any> = {};
-      if (vps.appCredentials) {
-        try { existingCreds = JSON.parse(vps.appCredentials); } catch {}
+      // Re-read latest appCredentials from DB to include all recent stage logs
+      existingCreds = {};
+      const latestVps = await prisma.vpsService.findUnique({
+        where: { id: vpsId },
+        select: { appCredentials: true }
+      });
+      if (latestVps?.appCredentials) {
+        try { existingCreds = JSON.parse(latestVps.appCredentials); } catch {}
       }
       existingCreds.error = err?.message || "Exception during app provisioning";
       existingCreds.installFailed = true;

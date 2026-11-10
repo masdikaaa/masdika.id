@@ -69,15 +69,27 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     }
 
     // Atomic lock so concurrent reinstall calls cannot collide
+    const nowTime = new Date().toLocaleTimeString("en-US", { hour12: false });
+    const initialLogs = [
+      `[${nowTime}] [REINSTALL] Initializing clean OS reinstallation for ${targetTemplateName}...`
+    ];
+    const initialCreds = {
+      stage: "ALLOCATING",
+      stageLabel: `Initializing reinstallation for ${targetTemplateName}...`,
+      progress: 5,
+      startedAt: new Date().toISOString(),
+      logs: initialLogs
+    };
+
     const lock = await prisma.vpsService.updateMany({
       where: { id: vps.id, status: vps.status },
       data: { 
         status: "PROVISIONING",
         appName: app ? app.name : null,
         appVersion: app ? app.appVersion : null,
-        appStatus: app ? "INSTALLING" : "NONE",
+        appStatus: app ? "WAITING_VM" : "NONE",
         appUrl: null,
-        appCredentials: null
+        appCredentials: JSON.stringify(initialCreds)
       },
     });
     if (lock.count === 0) {

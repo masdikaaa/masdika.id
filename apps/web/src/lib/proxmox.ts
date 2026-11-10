@@ -211,8 +211,14 @@ export class ProxmoxClient {
   }
 
   // --- Tasks & Locks ---
-  async waitForTask(node: string, upid: string, timeoutMs: number = 300000): Promise<void> {
+  async waitForTask(
+    node: string,
+    upid: string,
+    timeoutMs: number = 300000,
+    onProgress?: (percent: number | null, text: string) => Promise<void> | void
+  ): Promise<void> {
     const start = Date.now();
+    let lastLogIndex = 0;
     while (Date.now() - start < timeoutMs) {
       try {
         const task = await this.getTaskStatus(node, upid);
@@ -221,6 +227,28 @@ export class ProxmoxClient {
             throw new Error(`Proxmox task failed: ${task.exitstatus}`);
           }
           return;
+        }
+
+        if (onProgress) {
+          try {
+            const logs = await this.getTaskLog(node, upid, lastLogIndex, 25);
+            if (Array.isArray(logs) && logs.length > 0) {
+              lastLogIndex += logs.length;
+              for (const item of logs) {
+                const text = String(item.t || "").trim();
+                if (!text) continue;
+                const match = text.match(/\((\d+(\.\d+)?)%\)/);
+                if (match) {
+                  const pct = parseFloat(match[1]);
+                  await onProgress(pct, text);
+                } else {
+                  await onProgress(null, text);
+                }
+              }
+            }
+          } catch {
+            // non-critical progress logging error
+          }
         }
       } catch (err: any) {
         if (err.message && err.message.includes("Proxmox task failed")) {

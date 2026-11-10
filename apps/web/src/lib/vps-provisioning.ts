@@ -27,6 +27,51 @@ class VpsResourceMutex {
 
 export class VpsProvisioningService {
   /**
+   * Helper to update real-time provisioning progress and append timestamped logs to vps.appCredentials
+   */
+  static async updateProvisioningProgress(
+    vpsId: number,
+    stage: string,
+    stageLabel: string,
+    progress: number,
+    logMsg?: string
+  ): Promise<void> {
+    try {
+      const vps = await prisma.vpsService.findUnique({
+        where: { id: vpsId },
+        select: { appCredentials: true }
+      });
+      let creds: Record<string, any> = {};
+      if (vps?.appCredentials) {
+        try {
+          const parsed = JSON.parse(vps.appCredentials);
+          if (typeof parsed === "object" && parsed !== null) creds = parsed;
+        } catch {}
+      }
+      const existingLogs: string[] = Array.isArray(creds.logs) ? creds.logs : [];
+      if (logMsg) {
+        const timestamp = new Date().toLocaleTimeString("en-US", { hour12: false });
+        const entry = `[${timestamp}] ${logMsg}`;
+        if (!existingLogs.includes(entry)) {
+          existingLogs.push(entry);
+        }
+      }
+      creds.stage = stage;
+      creds.stageLabel = stageLabel;
+      creds.progress = progress;
+      creds.logs = existingLogs.slice(-100);
+      creds.updatedAt = new Date().toISOString();
+
+      await prisma.vpsService.update({
+        where: { id: vpsId },
+        data: { appCredentials: JSON.stringify(creds) }
+      });
+    } catch {
+      // non-blocking
+    }
+  }
+
+  /**
    * Finds the next available IP in the pool that is NOT the gateway and NOT already assigned.
    */
   static async allocateIp(poolId: number): Promise<string> {
@@ -280,10 +325,26 @@ export class VpsProvisioningService {
 
     // 3. Clone Template
     console.log(`Cloning VMID ${template.vmid} to ${newVmid}...`);
+    await VpsProvisioningService.updateProvisioningProgress(
+      vps.id,
+      "CLONING",
+      `Cloning ${template.name} template disk...`,
+      20,
+      `[CLONE] Proxmox clone task initialized for VMID ${newVmid}...`
+    );
     const cloneResult = await proxmox.cloneVm(vps.node, template.vmid, newVmid, vps.hostname, vps.storageId);
     if (typeof cloneResult === "string" && cloneResult.startsWith("UPID:")) {
       console.log(`Waiting for clone task ${cloneResult} to complete...`);
-      await proxmox.waitForTask(vps.node, cloneResult, 300000);
+      await proxmox.waitForTask(vps.node, cloneResult, 300000, async (pct, text) => {
+        let progress = 20;
+        let label = `Cloning ${template.name} disk...`;
+        if (pct !== null) {
+          progress = Math.min(50, Math.round(20 + (pct / 100) * 30));
+          label = `Cloning ${template.name} disk (${pct.toFixed(1)}%)...`;
+        }
+        const logLine = text.includes("%") ? `[CLONE] ${text}` : undefined;
+        await VpsProvisioningService.updateProvisioningProgress(vps.id, "CLONING", label, progress, logLine);
+      });
       console.log(`Clone task completed for VMID ${newVmid}`);
     }
 
@@ -291,6 +352,13 @@ export class VpsProvisioningService {
     await proxmox.waitForVmUnlock(vps.node, newVmid, 180000);
 
     // 4. Configure Cloud-Init and Resources
+    await VpsProvisioningService.updateProvisioningProgress(
+      vps.id,
+      "CONFIGURING",
+      "Configuring Cloud-Init, network routing & security policies...",
+      52,
+      `[CONFIG] Template disk cloned. Configuring Cloud-Init and network interfaces...`
+    );
     const config: any = {
       cores: vps.cpuCores,
       memory: vps.ramGb * 1024,
@@ -414,6 +482,13 @@ export class VpsProvisioningService {
 
     // 4.5 Resize Disk
     console.log(`Resizing VMID ${newVmid} disk to ${vps.diskGb}G...`);
+    await VpsProvisioningService.updateProvisioningProgress(
+      vps.id,
+      "STORAGE",
+      `Resizing primary filesystem to ${vps.diskGb}GB...`,
+      56,
+      `[STORAGE] Expanding virtual disk storage to ${vps.diskGb}GB...`
+    );
     try {
       const vmConfig = await proxmox.getVmConfig(vps.node, newVmid);
       let targetDisk = "scsi0";
@@ -591,6 +666,13 @@ export class VpsProvisioningService {
 
     // 6. Start VM
     console.log(`Starting VMID ${newVmid}...`);
+    await VpsProvisioningService.updateProvisioningProgress(
+      vps.id,
+      "BOOTING",
+      "Booting virtual machine & initializing QEMU Guest Agent...",
+      60,
+      `[BOOT] Powering on VMID ${newVmid}. Waiting for hypervisor agent...`
+    );
     let started = false;
     let startAttempts = 0;
     while (!started && startAttempts < 5) {
@@ -607,6 +689,24 @@ export class VpsProvisioningService {
     if (!started) {
       console.error(`Warning: Could not start VMID ${newVmid} after provisioning. User can start it manually.`);
       // We still return success since the VM is built, they can just start it.
+    }
+
+    if (vps.appName) {
+      await VpsProvisioningService.updateProvisioningProgress(
+        vps.id,
+        "APP_STACK",
+        `Starting automated deployment pipeline for ${vps.appName}...`,
+        65,
+        `[APP-STACK] Infrastructure ready. Initializing ${vps.appName} installer...`
+      );
+    } else {
+      await VpsProvisioningService.updateProvisioningProgress(
+        vps.id,
+        "READY",
+        "VPS Provisioning completed successfully.",
+        100,
+        `[SUCCESS] Virtual machine is online and ready.`
+      );
     }
 
     // 7. Send Email
@@ -698,9 +798,8 @@ export class VpsProvisioningService {
         username: newUsername,
         appName: targetApp ? targetApp.name : null,
         appVersion: targetApp ? targetApp.appVersion : null,
-        appStatus: targetApp ? "INSTALLING" : "NONE",
+        appStatus: targetApp ? "WAITING_VM" : "NONE",
         appUrl: null,
-        appCredentials: null,
         ...(newPassword ? { rootPassword: encryptDeterministic(newPassword) } : {})
       }
     });
@@ -708,6 +807,13 @@ export class VpsProvisioningService {
     try {
       // 1. Delete existing VM
       console.log(`Stopping VMID ${vps.vmid} for reinstall...`);
+      await VpsProvisioningService.updateProvisioningProgress(
+        vps.id,
+        "PURGING",
+        `Stopping and purging previous VM disk for ${newTemplateName}...`,
+        10,
+        `[HYPERVISOR] Stopping and purging previous VM disk for clean rebuild...`
+      );
       try {
         await proxmox.stopVm(vps.node, vps.vmid);
         // wait for stop to process
@@ -740,10 +846,26 @@ export class VpsProvisioningService {
       if (!template) throw new Error(`Template ${newTemplateName} not found in DB`);
 
       console.log(`Cloning VMID ${template.vmid} to existing VMID ${vps.vmid}...`);
+      await VpsProvisioningService.updateProvisioningProgress(
+        vps.id,
+        "CLONING",
+        `Cloning ${newTemplateName} template disk...`,
+        20,
+        `[CLONE] Proxmox clone task initialized for VMID ${vps.vmid}...`
+      );
       const cloneResult = await proxmox.cloneVm(vps.node, template.vmid, vps.vmid, vps.hostname, vps.storageId);
       if (typeof cloneResult === "string" && cloneResult.startsWith("UPID:")) {
         console.log(`Waiting for reinstall clone task ${cloneResult} to complete...`);
-        await proxmox.waitForTask(vps.node, cloneResult, 300000);
+        await proxmox.waitForTask(vps.node, cloneResult, 300000, async (pct, text) => {
+          let progress = 20;
+          let label = `Cloning ${newTemplateName} disk...`;
+          if (pct !== null) {
+            progress = Math.min(50, Math.round(20 + (pct / 100) * 30));
+            label = `Cloning ${newTemplateName} disk (${pct.toFixed(1)}%)...`;
+          }
+          const logLine = text.includes("%") ? `[CLONE] ${text}` : undefined;
+          await VpsProvisioningService.updateProvisioningProgress(vps.id, "CLONING", label, progress, logLine);
+        });
         console.log(`Clone task completed for VMID ${vps.vmid}`);
       }
 
@@ -751,6 +873,13 @@ export class VpsProvisioningService {
       await proxmox.waitForVmUnlock(vps.node, vps.vmid, 180000);
 
       // 3. Configure Cloud-Init
+      await VpsProvisioningService.updateProvisioningProgress(
+        vps.id,
+        "CONFIGURING",
+        "Configuring Cloud-Init, network routing & security policies...",
+        52,
+        `[CONFIG] OS disk cloned. Reconfiguring Cloud-Init and network interfaces...`
+      );
       const config: any = {
         cores: vps.cpuCores,
         memory: vps.ramGb * 1024,
@@ -854,6 +983,13 @@ export class VpsProvisioningService {
 
       // 3.5 Resize Disk
       console.log(`Resizing VMID ${vps.vmid} disk to ${vps.diskGb}G...`);
+      await VpsProvisioningService.updateProvisioningProgress(
+        vps.id,
+        "STORAGE",
+        `Resizing primary filesystem to ${vps.diskGb}GB...`,
+        56,
+        `[STORAGE] Expanding virtual disk storage to ${vps.diskGb}GB...`
+      );
       try {
         const vmConfig = await proxmox.getVmConfig(vps.node, vps.vmid);
         let targetDisk = "scsi0";
@@ -892,6 +1028,13 @@ export class VpsProvisioningService {
 
       // 4. Start VM (Robust Retry Loop)
       console.log(`Starting VMID ${vps.vmid} after reinstall...`);
+      await VpsProvisioningService.updateProvisioningProgress(
+        vps.id,
+        "BOOTING",
+        "Booting virtual machine & initializing QEMU Guest Agent...",
+        60,
+        `[BOOT] Powering on virtual machine. Waiting for hypervisor agent...`
+      );
       let started = false;
       let startAttempts = 0;
       while (!started && startAttempts < 10) {
@@ -915,8 +1058,7 @@ export class VpsProvisioningService {
         appName: targetApp ? targetApp.name : null,
         appVersion: targetApp ? targetApp.appVersion : null,
         appStatus: targetApp ? "INSTALLING" : "NONE",
-        appUrl: null,
-        appCredentials: null
+        appUrl: null
       };
       if (newPassword) {
         dbUpdateData.rootPassword = encryptDeterministic(newPassword);
@@ -928,6 +1070,24 @@ export class VpsProvisioningService {
       });
 
       console.log(`Reinstall of VMID ${vps.vmid} complete!`);
+
+      if (targetApp) {
+        await VpsProvisioningService.updateProvisioningProgress(
+          vps.id,
+          "APP_STACK",
+          `Starting automated deployment pipeline for ${targetApp.name}...`,
+          65,
+          `[APP-STACK] Infrastructure ready. Initializing ${targetApp.name} installer...`
+        );
+      } else {
+        await VpsProvisioningService.updateProvisioningProgress(
+          vps.id,
+          "READY",
+          "OS Reinstallation completed successfully.",
+          100,
+          `[SUCCESS] Virtual machine rebuild completed. Server online.`
+        );
+      }
 
       // 5. Reapply Firewall Rules (IP filter, VPC, K3s)
       try {

@@ -60,23 +60,6 @@ export function VpsAppInstallationMonitor({
   onComplete,
 }: VpsAppInstallationMonitorProps) {
   const [statusData, setStatusData] = useState<QuickVpsStatus | null>(null);
-
-  // Initialize progress from localStorage if present so refresh/re-login never snaps back to 15%
-  const [progress, setProgress] = useState<number>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const saved = localStorage.getItem(`vps_progress_${vpsId}`);
-        if (saved) {
-          const parsed = parseInt(saved, 10);
-          if (!isNaN(parsed) && parsed > 0 && parsed <= 100) {
-            return parsed;
-          }
-        }
-      } catch {}
-    }
-    return 15;
-  });
-
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
@@ -92,7 +75,7 @@ export function VpsAppInstallationMonitor({
   const displayVersion = statusData?.appVersion || appDef?.appVersion || "latest";
   const estimatedTime = appDef?.estimatedTime || "~3-5 mins";
 
-  // Parse credentials and logs
+  // Parse credentials and logs directly from server
   let credentialsObj: any = null;
   if (statusData?.appCredentials) {
     try {
@@ -102,6 +85,11 @@ export function VpsAppInstallationMonitor({
     }
   }
 
+  const serverProgress: number | null = typeof credentialsObj?.progress === "number" ? credentialsObj.progress : null;
+  const serverStage: string | null = credentialsObj?.stage || null;
+  const serverStageLabel: string | null = credentialsObj?.stageLabel || null;
+  const serverLogs: string[] = Array.isArray(credentialsObj?.logs) ? credentialsObj.logs : [];
+
   const rawIp = statusData?.assignedIps?.[0];
   const primaryIp = typeof rawIp === "string" ? rawIp : (rawIp?.publicIp || rawIp?.ipAddress || "");
   const webUrl = statusData?.appUrl || credentialsObj?.loginUrl || (primaryIp && appDef ? `${appDef.defaultProtocol}://${primaryIp}:${appDef.defaultPort}${appDef.loginPath || ""}` : "");
@@ -109,21 +97,29 @@ export function VpsAppInstallationMonitor({
   const password = credentialsObj?.password || fallbackPassword || "Configured VPS Root Password";
   const email = credentialsObj?.email || null;
   const instructions = credentialsObj?.instructions || appDef?.instructions?.replace(/\$\{ip\}/g, primaryIp || "your-ip") || "Log in using the credentials above.";
-  const serverLogs: string[] = Array.isArray(credentialsObj?.logs) ? credentialsObj.logs : [];
   const errorText: string | null = credentialsObj?.error || null;
-
-  const isVpsReady =
-    statusData?.status === "RUNNING" ||
-    statusData?.status === "INSTALLING" ||
-    statusData?.status === "ACTIVE" ||
-    statusData?.appStatus === "INSTALLING" ||
-    statusData?.appStatus === "READY";
 
   const hasApp = Boolean(appDef || statusData?.appName || appName);
   const isFinished = hasApp
     ? statusData?.appStatus === "READY"
     : (statusData?.status === "RUNNING" || statusData?.status === "ACTIVE");
   const isFailed = statusData?.appStatus === "FAILED" || statusData?.status === "ERROR";
+
+  // Derive real-time progress from server state (no fake math or stale localStorage)
+  const rawProgress = isFinished
+    ? 100
+    : serverProgress !== null
+    ? serverProgress
+    : statusData?.status === "PROVISIONING"
+    ? 15
+    : (statusData?.appStatus === "INSTALLING" || statusData?.status === "INSTALLING")
+    ? 70
+    : 20;
+  const progress = Math.min(100, Math.max(5, rawProgress));
+
+  // Determine stage flags
+  const isVpsReady = ["APP_STACK", "INIT", "SYSTEM", "INSTALLER", "VERIFY", "READY"].includes(serverStage || "") || statusData?.appStatus === "INSTALLING" || isFinished;
+  const isStage2 = ["APP_STACK", "INIT", "SYSTEM", "INSTALLER", "VERIFY"].includes(serverStage || "") || statusData?.appStatus === "INSTALLING";
 
   const handleComplete = () => {
     try {
@@ -132,7 +128,7 @@ export function VpsAppInstallationMonitor({
     onComplete();
   };
 
-  // Polling logic with non-regressive monotonic progress calculation
+  // Status Polling from Server
   useEffect(() => {
     let isMounted = true;
     let pollInterval: NodeJS.Timeout;
@@ -143,169 +139,36 @@ export function VpsAppInstallationMonitor({
         if (!res.ok) return;
         const data: QuickVpsStatus = await res.json();
         if (!isMounted) return;
-
         setStatusData(data);
-
-        // Retrieve current stored progress
-        let storedProg = 0;
-        if (typeof window !== "undefined") {
-          try {
-            const s = localStorage.getItem(`vps_progress_${vpsId}`);
-            if (s) storedProg = parseInt(s, 10) || 0;
-          } catch {}
-        }
-
-        let targetProg = 15;
-        if (hasApp) {
-          if (data.appStatus === "READY") {
-            targetProg = 100;
-          } else if (data.appStatus === "FAILED") {
-            targetProg = 85;
-          } else if (data.appStatus === "INSTALLING" || data.status === "INSTALLING" || data.status === "RUNNING" || data.status === "ACTIVE") {
-            // Stage 2: App installation in progress
-            let p = 55;
-            let sLogs: string[] = [];
-            let startedAtMs = 0;
-            if (data.appCredentials) {
-              try {
-                const creds = JSON.parse(data.appCredentials);
-                if (Array.isArray(creds.logs)) sLogs = creds.logs;
-                if (creds.startedAt) startedAtMs = new Date(creds.startedAt).getTime();
-              } catch {}
-            }
-            if (!startedAtMs && data.updatedAt) {
-              startedAtMs = new Date(data.updatedAt).getTime();
-            }
-
-            const joinedLogs = sLogs.join(" ");
-            if (joinedLogs.includes("[INIT]")) p = Math.max(p, 60);
-            if (joinedLogs.includes("[SYSTEM]")) p = Math.max(p, 68);
-            if (joinedLogs.includes("[INSTALLER]")) p = Math.max(p, 76);
-            if (joinedLogs.includes("[RUNTIME]")) p = Math.max(p, 84);
-            if (joinedLogs.includes("[VERIFY]")) p = Math.max(p, 92);
-
-            // Time interpolation based on ~4 min expected install time
-            if (startedAtMs > 0) {
-              const elapsedSec = Math.max(0, (Date.now() - startedAtMs) / 1000);
-              const timeP = Math.min(94, Math.floor(55 + (elapsedSec / 220) * 39));
-              p = Math.max(p, timeP);
-            }
-
-            targetProg = p;
-          } else if (data.status === "PROVISIONING") {
-            // Stage 1: VPS infrastructure provisioning
-            const base = (data.vmid && data.assignedIps?.length) ? 44 : data.vmid ? 32 : 22;
-            targetProg = base;
-          } else {
-            targetProg = 18;
-          }
-        } else {
-          // Pure VPS Provisioning
-          if (data.status === "RUNNING" || data.status === "ACTIVE") {
-            targetProg = 100;
-          } else if (data.status === "ERROR") {
-            targetProg = 85;
-          } else if (data.status === "PROVISIONING") {
-            const base = (data.vmid && data.assignedIps?.length) ? 78 : data.vmid ? 52 : 28;
-            targetProg = base;
-          } else {
-            targetProg = 18;
-          }
-        }
-
-        setProgress((prev) => {
-          const effectiveBase = Math.max(prev, storedProg);
-          if (targetProg >= 100) {
-            try {
-              localStorage.setItem(`vps_progress_${vpsId}`, "100");
-            } catch {}
-            return 100;
-          }
-          // Never allow progress to regress on re-login or reload
-          const nextVal = Math.min(94, Math.max(effectiveBase, targetProg) + 1);
-          try {
-            localStorage.setItem(`vps_progress_${vpsId}`, String(nextVal));
-          } catch {}
-          return nextVal;
-        });
       } catch (err) {
         console.error("Failed to poll VPS provisioning status:", err);
       }
     };
 
     fetchStatus();
-    pollInterval = setInterval(fetchStatus, 2200);
+    pollInterval = setInterval(fetchStatus, 2000);
 
     return () => {
       isMounted = false;
       clearInterval(pollInterval);
     };
-  }, [vpsId, hasApp]);
+  }, [vpsId]);
 
-  // Construct structured timeline logs
-  const [logs, setLogs] = useState<string[]>([]);
-  useEffect(() => {
-    const timestamp = () => new Date().toLocaleTimeString("en-US", { hour12: false });
-    const timelineLogs: string[] = [];
-
-    // Stage 1: Infrastructure Logs
-    timelineLogs.push(`[${timestamp()}] [HYPERVISOR] Initializing virtual machine allocation on Proxmox node...`);
-    if (progress >= 20 || statusData?.vmid) {
-      timelineLogs.push(`[${timestamp()}] [VM] VMID ${statusData?.vmid || "assigned"} allocated with dedicated CPU & RAM reservations.`);
-    }
-    if (progress >= 30 || primaryIp) {
-      timelineLogs.push(`[${timestamp()}] [NETWORK] Dedicated Public IPv4 ${primaryIp || "binding"} bound to interface with Anti-DDoS protection.`);
-    }
-    if (progress >= 45 || isVpsReady) {
-      timelineLogs.push(`[${timestamp()}] [OS-INIT] Base ${appDef?.osBase || "Linux"} booted. QEMU Guest Agent responsive.`);
-    }
-
-    // Stage 2: Application Stack Logs or Pure OS Completion
-    if (hasApp) {
-      if (isVpsReady || statusData?.appStatus === "INSTALLING" || isFinished) {
-        timelineLogs.push(`[${timestamp()}] [APP-STACK] Starting automated deployment pipeline for ${displayName}...`);
-        timelineLogs.push(`[${timestamp()}] [SECURITY] Firewall policy enabled: opening TCP port ${appDef?.defaultPort || 80}.`);
-      }
-      if (progress >= 70 || isFinished) {
-        timelineLogs.push(`[${timestamp()}] [RUNTIME] Setting up container environment, database schema and configuration files...`);
-      }
-      if (progress >= 85 || isFinished) {
-        timelineLogs.push(`[${timestamp()}] [INSTALLER] Launching ${displayName} daemon and background workers...`);
-      }
-    } else {
-      if (progress >= 60 || isVpsReady) {
-        timelineLogs.push(`[${timestamp()}] [STORAGE] Resizing primary filesystem to allocated disk capacity.`);
-      }
-      if (progress >= 80 || isFinished) {
-        timelineLogs.push(`[${timestamp()}] [NETWORK] Applying firewall filter rules and routing policies.`);
-      }
-      if (isFinished) {
-        timelineLogs.push(`[${timestamp()}] [READY] Server online. SSH service listening on port 22.`);
-      }
-    }
-
-    // Append server-recorded real logs if available
+  // Real-time server-recorded logs
+  const logs = React.useMemo(() => {
     if (serverLogs.length > 0) {
-      for (const sLog of serverLogs) {
-        if (!timelineLogs.includes(sLog)) {
-          timelineLogs.push(sLog);
-        }
+      const result = [...serverLogs];
+      if (isFinished && !result.some(l => l.includes("[SUCCESS]"))) {
+        result.push(`[${new Date().toLocaleTimeString("en-US", { hour12: false })}] [SUCCESS] All services verified and online.`);
+      } else if (isFailed && !result.some(l => l.includes("[ERROR]"))) {
+        result.push(`[${new Date().toLocaleTimeString("en-US", { hour12: false })}] [ERROR] Setup script encountered an error.`);
       }
+      return result;
     }
-
-    if (isFinished) {
-      if (hasApp) {
-        timelineLogs.push(`[${timestamp()}] [SUCCESS] ${displayName} daemon successfully launched.`);
-        timelineLogs.push(`[${timestamp()}] [HEALTHCHECK] HTTP endpoint verified at ${webUrl || `http://${primaryIp}:${appDef?.defaultPort || 80}`}. Ready for customer login.`);
-      } else {
-        timelineLogs.push(`[${timestamp()}] [SUCCESS] Virtual machine provisioning completed successfully.`);
-      }
-    } else if (isFailed) {
-      timelineLogs.push(`[${timestamp()}] [ERROR] Setup script returned an error. Review error details below.`);
-    }
-
-    setLogs(timelineLogs);
-  }, [progress, statusData, primaryIp, displayName, isFinished, isFailed, isVpsReady, webUrl, serverLogs, hasApp]);
+    return [
+      `[${new Date().toLocaleTimeString("en-US", { hour12: false })}] [HYPERVISOR] Initializing virtual machine provisioning...`
+    ];
+  }, [serverLogs, isFinished, isFailed]);
 
   // Autoscroll logs to bottom
   useEffect(() => {
@@ -328,10 +191,6 @@ export function VpsAppInstallationMonitor({
       const data = await res.json();
       if (res.ok && data.success) {
         toast.success("Retrying application installation...");
-        setProgress(55);
-        try {
-          localStorage.setItem(`vps_progress_${vpsId}`, "55");
-        } catch {}
       } else {
         toast.error(data.error || "Failed to trigger retry");
       }
@@ -342,52 +201,64 @@ export function VpsAppInstallationMonitor({
     }
   };
 
-  // 2-Phase Steps definition
+  // Real-time stage progression based directly on serverStage
+  const isPastHypervisor = ["CONFIGURING", "STORAGE", "BOOTING", "APP_STACK", "INIT", "SYSTEM", "INSTALLER", "VERIFY", "READY"].includes(serverStage || "") || isFinished;
+  const isPastNetwork = ["STORAGE", "BOOTING", "APP_STACK", "INIT", "SYSTEM", "INSTALLER", "VERIFY", "READY"].includes(serverStage || "") || isFinished;
+  const isPastBootstrap = ["APP_STACK", "INIT", "SYSTEM", "INSTALLER", "VERIFY", "READY"].includes(serverStage || "") || (!hasApp && isFinished);
+
   const infraSteps = [
     {
       id: 1,
       title: "Hypervisor & VM Allocation",
-      desc: statusData?.vmid ? `VMID ${statusData.vmid} allocated on Proxmox node` : "Dedicated CPU, RAM, & storage allocation",
-      isDone: isVpsReady || Boolean(statusData?.vmid) || progress >= 25,
-      isActive: !isVpsReady && !statusData?.vmid
+      desc: serverStage === "CLONING"
+        ? (serverStageLabel || "Cloning template disk in Proxmox...")
+        : serverStage === "PURGING"
+        ? "Purging previous instance disk..."
+        : (statusData?.vmid ? `VMID ${statusData.vmid} allocated on Proxmox node` : "Dedicated CPU, RAM, & storage allocation"),
+      isDone: isPastHypervisor,
+      isActive: !isPastHypervisor
     },
     {
       id: 2,
       title: "Public IPv4 & Network Stack",
       desc: primaryIp ? `Assigned IP: ${primaryIp}` : "Allocating dedicated Public IPv4 address",
-      isDone: isVpsReady || Boolean(primaryIp) || progress >= (hasApp ? 40 : 60),
-      isActive: !isVpsReady && Boolean(statusData?.vmid) && !primaryIp
+      isDone: isPastNetwork,
+      isActive: isPastHypervisor && !isPastNetwork
     },
     {
       id: 3,
       title: "Base OS & Cloud-Init Bootstrap",
-      desc: isVpsReady ? `${appDef?.osBase || "Linux"} booted & Guest Agent online` : `Booting ${appDef?.osBase || "Linux"} image`,
-      isDone: isVpsReady || (!hasApp && isFinished) || progress >= (hasApp ? 50 : 90),
-      isActive: !isVpsReady && Boolean(primaryIp)
+      desc: isPastBootstrap ? `${appDef?.osBase || "Linux"} booted & Guest Agent online` : `Booting ${appDef?.osBase || "Linux"} image`,
+      isDone: isPastBootstrap,
+      isActive: isPastNetwork && !isPastBootstrap
     }
   ];
+
+  const isPastRuntime = ["INSTALLER", "VERIFY", "READY"].includes(serverStage || "") || isFinished;
+  const isPastInstaller = ["VERIFY", "READY"].includes(serverStage || "") || isFinished;
+  const isPastVerify = serverStage === "READY" || isFinished;
 
   const appSteps = hasApp ? [
     {
       id: 4,
       title: "Container Runtime & Environment",
-      desc: isFinished ? "Docker / LNMP stack operational" : "Setting up runtime dependencies & security policy",
-      isDone: isFinished || (isVpsReady && progress >= 70),
-      isActive: isVpsReady && !isFinished && progress < 70
+      desc: isPastRuntime ? "Runtime dependencies & environment initialized" : "Setting up runtime dependencies & security policy",
+      isDone: isPastRuntime,
+      isActive: isPastBootstrap && !isPastRuntime
     },
     {
       id: 5,
       title: `${displayName} Deployment`,
-      desc: isFinished ? "Application & database configured" : `Deploying ${displayName} & opening port ${appDef?.defaultPort || 80}`,
-      isDone: isFinished || (isVpsReady && progress >= 88),
-      isActive: isVpsReady && !isFinished && progress >= 70 && progress < 88
+      desc: isPastInstaller ? `${displayName} packages deployed` : `Deploying ${displayName} & opening port ${appDef?.defaultPort || 80}`,
+      isDone: isPastInstaller,
+      isActive: isPastRuntime && !isPastInstaller
     },
     {
       id: 6,
       title: "Health Check & Web Access",
-      desc: isFinished ? "HTTP service verified & live" : "Verifying daemon endpoints & generating credentials",
-      isDone: isFinished,
-      isActive: isVpsReady && !isFinished && progress >= 88
+      desc: isPastVerify ? "HTTP service verified & live" : "Verifying daemon endpoints & generating credentials",
+      isDone: isPastVerify,
+      isActive: isPastInstaller && !isPastVerify
     }
   ] : [];
 
@@ -396,28 +267,24 @@ export function VpsAppInstallationMonitor({
     : isFailed
     ? "SETUP ISSUE"
     : hasApp
-    ? (!isVpsReady ? "STAGE 1 OF 2: INFRASTRUCTURE" : "STAGE 2 OF 2: APPLICATION STACK")
+    ? (isStage2 ? "STAGE 2 OF 2: APPLICATION STACK" : "STAGE 1 OF 2: CLOUD VPS INFRASTRUCTURE")
     : "DEPLOYING SERVER INFRASTRUCTURE";
 
   const currentHeadline = isFinished
     ? (hasApp ? `${displayName} is Ready!` : "Server is Ready!")
     : isFailed
     ? `${displayName} Installation Issue`
-    : hasApp
-    ? (!isVpsReady ? "Deploying Cloud VPS Instance" : `Deploying ${displayName} Stack`)
-    : "Provisioning Server Infrastructure";
+    : (serverStageLabel || (isStage2 ? `Deploying ${displayName} Stack` : "Deploying Cloud VPS Instance"));
 
   const currentSubtitle = isFinished
     ? (hasApp
         ? "All infrastructure and application services have been verified and are fully operational."
         : "Your dedicated virtual machine has been fully deployed, configured, and booted.")
     : isFailed
-    ? "The VPS infrastructure is running, but automated application setup encountered an error."
-    : hasApp
-    ? (!isVpsReady
-        ? "Allocating dedicated hypervisor resources, network routing, and booting base OS image."
-        : `VPS infrastructure is online. Installing ${displayName} packages, configuring database, and opening port ${appDef?.defaultPort || 80}.`)
-    : "Allocating dedicated hypervisor resources, network routing, and booting operating system.";
+    ? (errorText || "Automated application setup encountered an error.")
+    : isStage2
+    ? `VPS infrastructure is online. Installing ${displayName} packages, configuring database, and opening port ${appDef?.defaultPort || 80}.`
+    : (serverStage === "CLONING" ? "Transferring virtual disk template on Proxmox node..." : "Allocating dedicated hypervisor resources, network routing, and booting base OS image.");
 
   const content = (
     <div className={cn(

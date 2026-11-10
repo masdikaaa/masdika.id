@@ -1390,6 +1390,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
         setIsSetupDismissed(false);
         try {
           sessionStorage.removeItem(`vps_setup_dismissed_${id}`);
+          localStorage.removeItem(`vps_progress_${id}`);
         } catch (e) {}
 
         setVps((prev: any) => prev ? {
@@ -1397,7 +1398,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
           status: 'PROVISIONING',
           appName: activeApp ? activeApp.name : null,
           appVersion: activeApp ? activeApp.appVersion : null,
-          appStatus: activeApp ? 'INSTALLING' : 'NONE',
+          appStatus: activeApp ? 'WAITING_VM' : 'NONE',
           appUrl: null,
           appCredentials: null
         } : null);
@@ -1493,7 +1494,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
             </button>
           </div>
         </div>
-      ) : (!isSetupDismissed && (['PENDING', 'PROVISIONING', 'INSTALLING'].includes(vps.status) || vps.appStatus === 'INSTALLING')) ? (
+      ) : (!isSetupDismissed && (['PENDING', 'PROVISIONING', 'INSTALLING'].includes(vps.status) || ['INSTALLING', 'WAITING_VM'].includes(vps.appStatus || ''))) ? (
         <VpsAppInstallationMonitor
           vpsId={vps.id}
           appName={vps.appName}
