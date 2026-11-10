@@ -1113,6 +1113,254 @@ cat << 'EOF' > /root/masdika-app-info.json
 }
 EOF
 `
+  },
+
+  // 19. FrankenPHP (Developer)
+  {
+    id: "frankenphp",
+    name: "FRANKENPHP",
+    category: "Developer",
+    secondaryCategories: ["Web Panel", "CMS"],
+    description: "Modern high-performance PHP application server and worker runtime built on Caddy with native HTTP/3 and 103 Early Hints.",
+    icon: "/images/apps/frankenphp.svg",
+    defaultPort: 80,
+    defaultProtocol: "http",
+    osBase: "Ubuntu 26.04",
+    appVersion: "v1.4",
+    versions: [
+      { id: "14-ubu26", label: "FrankenPHP 1.4 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v1.4" },
+    ],
+    adminUsername: "root",
+    instructions: "FrankenPHP server running on port 80/443. Web root at /var/www/html with PHP 8.3/8.4.",
+    configFields: [
+      {
+        key: "domain",
+        label: "Domain Name / FQDN (Optional)",
+        type: "text",
+        placeholder: "e.g. app.mydomain.com (leave blank for VPS IP)",
+        description: "Domain name pointing to this server"
+      }
+    ],
+    getInstallScript: (ip, rootPassword, config = {}) => {
+      const siteUrl = config.domain ? (config.domain.startsWith("http") ? config.domain : `http://${config.domain}`) : `http://${ip}`;
+      return `
+set -e
+export DEBIAN_FRONTEND=noninteractive
+apt-get update && apt-get install -y curl tar gzip
+
+# Install official static FrankenPHP binary
+curl -fsSL https://github.com/dunglas/frankenphp/releases/latest/download/frankenphp-linux-x86_64 -o /usr/local/bin/frankenphp
+chmod +x /usr/local/bin/frankenphp
+
+mkdir -p /var/www/html
+cat << 'EOF' > /var/www/html/index.php
+<!DOCTYPE html>
+<html>
+<head><title>FrankenPHP Running</title><style>body{font-family:sans-serif;background:#0b0c10;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;}h1{color:#38bdf8;}</style></head>
+<body><div style="text-align:center;"><h1>⚡ FrankenPHP is Live</h1><p>Modern PHP App Server on Ubuntu 26.04</p></div></body>
+</html>
+EOF
+
+# Create Systemd Service
+cat << 'EOF' > /etc/systemd/system/frankenphp.service
+[Unit]
+Description=FrankenPHP Modern Application Server
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/var/www/html
+ExecStart=/usr/local/bin/frankenphp php-server --listen :80 --root /var/www/html
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable --now frankenphp
+
+cat << 'EOF' > /root/masdika-app-info.json
+{
+  "appId": "frankenphp",
+  "appName": "FrankenPHP",
+  "port": 80,
+  "protocol": "http",
+  "path": "",
+  "username": "root",
+  "password": "${rootPassword}",
+  "url": "${siteUrl}"
+}
+EOF
+`;
+    }
+  },
+
+  // 20. Nginx (Developer)
+  {
+    id: "nginx",
+    name: "NGINX",
+    category: "Developer",
+    secondaryCategories: ["Web Panel"],
+    description: "Industry-standard, high-performance HTTP web server, reverse proxy, caching gateway, and load balancer.",
+    icon: "/images/apps/nginx.svg",
+    defaultPort: 80,
+    defaultProtocol: "http",
+    osBase: "Ubuntu 26.04",
+    appVersion: "v1.26",
+    versions: [
+      { id: "126-ubu26", label: "Nginx 1.26 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v1.26" },
+    ],
+    adminUsername: "root",
+    instructions: "Nginx HTTP web server active on port 80. Default web root configured at /var/www/html.",
+    getInstallScript: (ip, rootPassword) => `
+set -e
+export DEBIAN_FRONTEND=noninteractive
+apt-get update && apt-get install -y nginx
+systemctl enable --now nginx
+
+cat << 'EOF' > /root/masdika-app-info.json
+{
+  "appId": "nginx",
+  "appName": "Nginx",
+  "port": 80,
+  "protocol": "http",
+  "path": "",
+  "username": "root",
+  "password": "${rootPassword}",
+  "url": "http://${ip}:80"
+}
+EOF
+`
+  },
+
+  // 21. Grafana (Developer)
+  {
+    id: "grafana",
+    name: "GRAFANA",
+    category: "Developer",
+    secondaryCategories: ["Business"],
+    description: "Industry-leading analytics and interactive data visualization platform for Prometheus, MySQL, and server metrics.",
+    icon: "/images/apps/grafana.svg",
+    defaultPort: 3000,
+    defaultProtocol: "http",
+    loginPath: "/login",
+    osBase: "Ubuntu 26.04",
+    appVersion: "v11.5",
+    versions: [
+      { id: "115-ubu26", label: "Grafana 11.5 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v11.5" },
+    ],
+    adminUsername: "admin",
+    instructions: "Access Grafana web portal at http://${ip}:3000. Login with username 'admin' and your configured password.",
+    configFields: [
+      {
+        key: "adminUsername",
+        label: "Grafana Admin Username",
+        type: "text",
+        defaultValue: "admin",
+        placeholder: "admin",
+        description: "Administrator username for Grafana"
+      },
+      {
+        key: "adminPassword",
+        label: "Grafana Admin Password",
+        type: "password",
+        placeholder: "Leave empty to use VPS Root Password",
+        description: "Administrator password"
+      }
+    ],
+    getInstallScript: (ip, rootPassword, config = {}) => {
+      const user = config.adminUsername || "admin";
+      const pass = config.adminPassword || rootPassword;
+      return `
+set -e
+export DEBIAN_FRONTEND=noninteractive
+apt-get update && apt-get install -y curl
+which docker || (curl -fsSL https://get.docker.com | sh)
+systemctl enable --now docker
+docker run -d --name grafana --restart always -p 3000:3000 \
+  -e GF_SECURITY_ADMIN_USER="${user}" \
+  -e GF_SECURITY_ADMIN_PASSWORD="${pass}" \
+  -v grafana_data:/var/lib/grafana grafana/grafana-oss:latest || true
+
+cat << 'EOF' > /root/masdika-app-info.json
+{
+  "appId": "grafana",
+  "appName": "Grafana",
+  "port": 3000,
+  "protocol": "http",
+  "path": "/login",
+  "username": "${user}",
+  "password": "${pass}",
+  "url": "http://${ip}:3000/login"
+}
+EOF
+`;
+    }
+  },
+
+  // 22. MikroTik CHR (Developer)
+  {
+    id: "mikrotik-chr",
+    name: "MIKROTIK CHR",
+    category: "Developer",
+    secondaryCategories: ["Web Panel", "Business"],
+    description: "MikroTik Cloud Hosted Router (CHR) virtual appliance with WebFig, WinBox, firewall, VPN, and BGP routing engine.",
+    icon: "/images/apps/mikrotik.svg",
+    defaultPort: 80,
+    defaultProtocol: "http",
+    loginPath: "/webfig/",
+    osBase: "Ubuntu 26.04",
+    appVersion: "RouterOS v7.18",
+    versions: [
+      { id: "chr718-ubu26", label: "RouterOS v7.18 CHR - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v7.18" },
+    ],
+    adminUsername: "admin",
+    instructions: "Access MikroTik WebFig at http://${ip}/webfig/ or WinBox on port 8291. Username: 'admin', Password: configured password.",
+    configFields: [
+      {
+        key: "adminUsername",
+        label: "RouterOS Admin Username",
+        type: "text",
+        defaultValue: "admin",
+        placeholder: "admin",
+        description: "Administrator username for RouterOS WebFig"
+      },
+      {
+        key: "adminPassword",
+        label: "RouterOS Admin Password",
+        type: "password",
+        placeholder: "Leave empty to use VPS Root Password",
+        description: "Administrator password"
+      }
+    ],
+    getInstallScript: (ip, rootPassword, config = {}) => {
+      const user = config.adminUsername || "admin";
+      const pass = config.adminPassword || rootPassword;
+      return `
+set -e
+export DEBIAN_FRONTEND=noninteractive
+apt-get update && apt-get install -y curl
+which docker || (curl -fsSL https://get.docker.com | sh)
+systemctl enable --now docker
+docker run -d --name mikrotik-chr --restart always --net=host --privileged -v /lib/modules:/lib/modules:ro evilfreelancer/docker-routeros:latest || true
+
+cat << 'EOF' > /root/masdika-app-info.json
+{
+  "appId": "mikrotik-chr",
+  "appName": "MikroTik CHR",
+  "port": 80,
+  "protocol": "http",
+  "path": "/webfig/",
+  "username": "${user}",
+  "password": "${pass}",
+  "url": "http://${ip}/webfig/"
+}
+EOF
+`;
+    }
   }
 ];
 
