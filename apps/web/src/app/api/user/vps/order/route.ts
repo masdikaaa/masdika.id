@@ -88,6 +88,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid application identifier." }, { status: 400 });
     }
 
+    // Server-side strict minimum specs validation to prevent OOM-kills or failed deployments
+    if (targetApp && targetApp.minSpecs) {
+      if (Number(cpuCores) < targetApp.minSpecs.cpu) {
+        return NextResponse.json({
+          error: `${targetApp.name} requires at least ${targetApp.minSpecs.cpu} vCPU core(s).`
+        }, { status: 400 });
+      }
+      if (Number(ramGb) < targetApp.minSpecs.ram) {
+        return NextResponse.json({
+          error: `${targetApp.name} requires at least ${targetApp.minSpecs.ram} GB RAM.`
+        }, { status: 400 });
+      }
+      if (Number(diskGb) < targetApp.minSpecs.disk) {
+        return NextResponse.json({
+          error: `${targetApp.name} requires at least ${targetApp.minSpecs.disk} GB storage.`
+        }, { status: 400 });
+      }
+    }
+
     if (useIpv4 !== undefined) ipv4Count = useIpv4 ? 1 : 0;
     if (useIpv6 !== undefined) ipv6Count = useIpv6 ? 1 : 0;
 
@@ -176,6 +195,49 @@ export async function POST(req: NextRequest) {
     const safeBandwidth = requestedBandwidth;
     const bandwidthCost = bandwidthHourlyCost(safeBandwidth, pricing);
 
+    // Build strictly sanitized app configuration for 1-Click Applications
+    let cleanAppConfig: Record<string, any> | null = null;
+    if (targetApp) {
+      const rawCfg = typeof appConfig === "object" && appConfig !== null ? appConfig : {};
+      const sanitized: Record<string, any> = { ...rawCfg };
+
+      if (rawCfg.adminUsername && typeof rawCfg.adminUsername === "string") {
+        const trimmed = rawCfg.adminUsername.trim();
+        sanitized.adminUsername = /^[a-zA-Z0-9_.-]{3,32}$/.test(trimmed) ? trimmed : targetApp.adminUsername;
+      } else {
+        sanitized.adminUsername = targetApp.adminUsername;
+      }
+
+      if (rawCfg.adminPassword && typeof rawCfg.adminPassword === "string" && rawCfg.adminPassword.trim()) {
+        sanitized.adminPassword = rawCfg.adminPassword.trim().slice(0, 128);
+      } else {
+        sanitized.adminPassword = finalPassword;
+      }
+
+      if (rawCfg.adminEmail && typeof rawCfg.adminEmail === "string") {
+        const trimmed = rawCfg.adminEmail.trim();
+        sanitized.adminEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed) ? trimmed : user.email;
+      } else {
+        sanitized.adminEmail = user.email;
+      }
+
+      if (rawCfg.domain && typeof rawCfg.domain === "string") {
+        const trimmed = rawCfg.domain.trim().toLowerCase();
+        sanitized.domain = /^[a-z0-9.-]{3,253}$/.test(trimmed) ? trimmed : undefined;
+      }
+
+      if (rawCfg.panelPort !== undefined) {
+        const parsedPort = parseInt(String(rawCfg.panelPort), 10);
+        sanitized.panelPort = (parsedPort >= 1 && parsedPort <= 65535) ? parsedPort : targetApp.defaultPort;
+      }
+
+      if (rawCfg.siteTitle && typeof rawCfg.siteTitle === "string") {
+        sanitized.siteTitle = rawCfg.siteTitle.trim().slice(0, 80).replace(/[<>"'`\\]/g, "");
+      }
+
+      cleanAppConfig = sanitized;
+    }
+
     let vpsData: any = {
       userId,
       hostname,
@@ -195,20 +257,7 @@ export async function POST(req: NextRequest) {
       appName: targetApp ? targetApp.name : null,
       appVersion: targetApp ? (appVersion || targetApp.appVersion) : null,
       appStatus: targetApp ? "INSTALLING" : "NONE",
-      appCredentials: targetApp
-        ? JSON.stringify({
-            ...(typeof appConfig === "object" && appConfig !== null ? appConfig : {}),
-            adminUsername: (appConfig?.adminUsername && typeof appConfig.adminUsername === "string" && appConfig.adminUsername.trim())
-              ? appConfig.adminUsername.trim()
-              : targetApp.adminUsername,
-            adminPassword: (appConfig?.adminPassword && typeof appConfig.adminPassword === "string" && appConfig.adminPassword.trim())
-              ? appConfig.adminPassword.trim()
-              : finalPassword,
-            adminEmail: (appConfig?.adminEmail && typeof appConfig.adminEmail === "string" && appConfig.adminEmail.trim())
-              ? appConfig.adminEmail.trim()
-              : user.email
-          })
-        : null
+      appCredentials: cleanAppConfig ? JSON.stringify(cleanAppConfig) : null
     };
 
     // Security: Validate VPC ownership to prevent IDOR (attaching VPS to another user's VPC)

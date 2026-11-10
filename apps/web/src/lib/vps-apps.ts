@@ -59,6 +59,41 @@ export interface VpsAppDefinition {
   getInstallScript: (ip: string, rootPassword: string, config?: Record<string, any>) => string;
 }
 
+/**
+ * Safely quote a string for POSIX shell parameter expansion ('string_with_escaped_quotes')
+ */
+export function shQuote(val: string | number | undefined | null): string {
+  if (val === undefined || val === null) return "''";
+  return "'" + String(val).replace(/'/g, "'\\''") + "'";
+}
+
+/**
+ * Safely format an object as verified JSON heredoc for /root/masdika-app-info.json
+ */
+export function buildAppInfoJson(info: {
+  appId: string;
+  appName: string;
+  port: number;
+  protocol: 'http' | 'https';
+  path?: string;
+  username: string;
+  password?: string;
+  url: string;
+}): string {
+  const jsonStr = JSON.stringify({
+    appId: info.appId,
+    appName: info.appName,
+    port: info.port,
+    protocol: info.protocol,
+    path: info.path || "",
+    username: info.username,
+    password: info.password || "",
+    url: info.url
+  }, null, 2);
+
+  return `cat << 'MASDIKA_APP_INFO_EOF' > /root/masdika-app-info.json\n${jsonStr}\nMASDIKA_APP_INFO_EOF`;
+}
+
 export const VPS_APPS: VpsAppDefinition[] = [
   // 1. WordPress (CMS)
   {
@@ -124,6 +159,17 @@ export const VPS_APPS: VpsAppDefinition[] = [
       const user = config.adminUsername || "admin";
       const pass = config.adminPassword || rootPassword;
       const email = config.adminEmail || "admin@example.com";
+      const appInfoCmd = buildAppInfoJson({
+        appId: "wordpress",
+        appName: "WordPress",
+        port: 80,
+        protocol: "http",
+        path: "/wp-admin",
+        username: user,
+        password: pass,
+        url: `${siteUrl}/wp-admin`
+      });
+
       return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
@@ -151,18 +197,7 @@ chown -R www-data:www-data /var/www/html
 systemctl enable --now apache2
 systemctl restart apache2
 
-cat << 'EOF' > /root/masdika-app-info.json
-{
-  "appId": "wordpress",
-  "appName": "WordPress",
-  "port": 80,
-  "protocol": "http",
-  "path": "/wp-admin",
-  "username": "${user}",
-  "password": "${pass}",
-  "url": "${siteUrl}/wp-admin"
-}
-EOF
+${appInfoCmd}
 `;
     }
   },
@@ -231,6 +266,17 @@ EOF
       const user = config.adminUsername || "admin";
       const pass = config.adminPassword || rootPassword;
       const email = config.adminEmail || "admin@example.com";
+      const appInfoCmd = buildAppInfoJson({
+        appId: "drupal",
+        appName: "Drupal",
+        port: 80,
+        protocol: "http",
+        path: "/user/login",
+        username: user,
+        password: pass,
+        url: `${siteUrl}/user/login`
+      });
+
       return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
@@ -270,18 +316,7 @@ cat << 'EOF' > /etc/apache2/sites-available/000-default.conf
 EOF
 systemctl restart apache2
 
-cat << 'EOF' > /root/masdika-app-info.json
-{
-  "appId": "drupal",
-  "appName": "Drupal",
-  "port": 80,
-  "protocol": "http",
-  "path": "/user/login",
-  "username": "${user}",
-  "password": "${pass}",
-  "url": "${siteUrl}/user/login"
-}
-EOF
+${appInfoCmd}
 `;
     }
   },
@@ -350,6 +385,17 @@ EOF
       const user = config.adminUsername || "admin";
       const pass = config.adminPassword || rootPassword;
       const email = config.adminEmail || "admin@example.com";
+      const appInfoCmd = buildAppInfoJson({
+        appId: "moodle",
+        appName: "Moodle LMS",
+        port: 80,
+        protocol: "http",
+        path: "/login/index.php",
+        username: user,
+        password: pass,
+        url: `${siteUrl}/login/index.php`
+      });
+
       return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
@@ -394,18 +440,7 @@ php /var/www/html/admin/cli/install.php \
   --adminemail="${email}" \
   --agree-license || true
 
-cat << 'EOF' > /root/masdika-app-info.json
-{
-  "appId": "moodle",
-  "appName": "Moodle LMS",
-  "port": 80,
-  "protocol": "http",
-  "path": "/login/index.php",
-  "username": "${user}",
-  "password": "${pass}",
-  "url": "${siteUrl}/login/index.php"
-}
-EOF
+${appInfoCmd}
 `;
     }
   },
@@ -416,7 +451,7 @@ EOF
     name: "AAPANEL",
     category: "Web Panel",
     description: "Simple yet powerful Linux server management web control panel with LNMP/LAMP stack.",
-    icon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/aapanel.png",
+    icon: "/images/apps/aapanel.png",
     defaultPort: 8888,
     defaultProtocol: "http",
     osBase: "Ubuntu 26.04",
@@ -425,8 +460,8 @@ EOF
       { id: "v7-ubu26", label: "aaPanel v7.0 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v7.0" },
     ],
     minSpecs: { cpu: 1, ram: 2, disk: 20 },
-    adminUsername: "admin",
-    instructions: "Access aaPanel on port 8888. Login using username 'admin' and your configured password.",
+    adminUsername: "paneluser",
+    instructions: "Access aaPanel at http://${ip}:8888. Login using username 'paneluser' and your configured password.",
     configFields: [
       {
         key: "panelPort",
@@ -439,9 +474,9 @@ EOF
         key: "adminUsername",
         label: "Panel Administrator Username",
         type: "text",
-        defaultValue: "admin",
-        placeholder: "admin",
-        description: "Administrative login account name"
+        defaultValue: "paneluser",
+        placeholder: "paneluser",
+        description: "Admin login username (minimum 5 characters, cannot be 'admin' or 'root')"
       },
       {
         key: "adminPassword",
@@ -453,54 +488,101 @@ EOF
     ],
     getInstallScript: (ip, rootPassword, config = {}) => {
       const port = Number(config.panelPort) || 8888;
-      const user = config.adminUsername || "admin";
+      const user = config.adminUsername || "paneluser";
       const pass = config.adminPassword || rootPassword;
       return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
-apt-get update && apt-get install -y wget curl
+apt-get update && apt-get install -y wget curl sqlite3
 
 # Install aaPanel official release non-interactively
 URL=https://www.aapanel.com/script/install_7.0_en.sh
 if [ -f /usr/bin/curl ]; then curl -ksSO "$URL"; else wget --no-check-certificate -O install_7.0_en.sh "$URL"; fi
 echo "y" | bash install_7.0_en.sh aapanel || true
 
-# Wait until panel files exist
+# Wait until panel directory is generated
 sleep 3
 
-# Configure aaPanel deterministically
+# Configure aaPanel deterministically via official 'bt' utility and internal pyenv
 if [ -d /www/server/panel ]; then
+  PY_BIN="/www/server/panel/pyenv/bin/python"
+  if [ ! -f "$PY_BIN" ]; then
+    PY_BIN="python3"
+  fi
+
   # 1. Set explicit panel port
+  echo "${port}" | bt 8 || true
   echo "${port}" > /www/server/panel/data/port.pl
-
-  # 2. Set explicit username and password
-  cd /www/server/panel
-  python3 tools.py panel "${pass.replace(/"/g, '\\"')}" "${user.replace(/"/g, '\\"')}" || true
-
-  # 3. Disable random security entrance path so panel is accessible cleanly at http://${ip}:${port}/
-  rm -f /www/server/panel/data/admin_path.pl
-
-  # 4. Disable SSL so browser does not throw self-signed SSL warning
-  rm -f /www/server/panel/data/ssl.pl
-
-  # 5. Open firewall ports
   ufw allow ${port}/tcp || true
   iptables -I INPUT -p tcp --dport ${port} -j ACCEPT || true
+
+  # 2. Set explicit password
+  echo "${pass}" | bt 5 || true
+  $PY_BIN /www/server/panel/tools.py set_panel_pwd "${pass}" || true
+  $PY_BIN /www/server/panel/tools.py panel "${pass}" || true
+
+  # 3. Set explicit username (aaPanel requires >= 5 chars, cannot be 'admin' or 'root')
+  AA_USER="${user}"
+  if [ "$AA_USER" = "admin" ] || [ "$AA_USER" = "root" ] || [ \${#AA_USER} -lt 5 ]; then
+    AA_USER="paneluser"
+  fi
+  echo "$AA_USER" | bt 6 || true
+  $PY_BIN /www/server/panel/tools.py set_panel_username "$AA_USER" || true
+
+  # 4. Remove random security entrance path so panel is accessible cleanly at http://${ip}:${port}/
+  rm -f /www/server/panel/data/admin_path.pl
+
+  # 5. Disable SSL so browser connects cleanly over HTTP without untrusted certificate warning
+  rm -f /www/server/panel/data/ssl.pl
 
   # 6. Restart aaPanel daemon
   bt 1 || /etc/init.d/bt restart || systemctl restart bt || true
 fi
 
-cat << 'EOF' > /root/masdika-app-info.json
+# Dynamically inspect aaPanel runtime files to guarantee 100% credential accuracy
+ACTUAL_PORT=${port}
+if [ -f /www/server/panel/data/port.pl ]; then
+  TMP_PORT=\$(cat /www/server/panel/data/port.pl 2>/dev/null | tr -d '\\r\\n')
+  if [ -n "$TMP_PORT" ]; then
+    ACTUAL_PORT=$TMP_PORT
+  fi
+fi
+
+ACTUAL_USER="${user}"
+if [ -f /www/server/panel/data/default.db ]; then
+  DB_USER=\$(sqlite3 /www/server/panel/data/default.db "SELECT username FROM users LIMIT 1;" 2>/dev/null || echo "")
+  if [ -n "$DB_USER" ]; then
+    ACTUAL_USER="$DB_USER"
+  fi
+fi
+
+ACTUAL_PATH=""
+if [ -f /www/server/panel/data/admin_path.pl ]; then
+  TMP_PATH=\$(cat /www/server/panel/data/admin_path.pl 2>/dev/null | tr -d '\\r\\n')
+  if [ -n "$TMP_PATH" ]; then
+    if [ "\${TMP_PATH:0:1}" != "/" ]; then
+      ACTUAL_PATH="/\$TMP_PATH"
+    else
+      ACTUAL_PATH="\$TMP_PATH"
+    fi
+  fi
+fi
+
+ACTUAL_PROTO="http"
+if [ -f /www/server/panel/data/ssl.pl ]; then
+  ACTUAL_PROTO="https"
+fi
+
+cat << EOF > /root/masdika-app-info.json
 {
   "appId": "aapanel",
   "appName": "aaPanel",
-  "port": ${port},
-  "protocol": "http",
-  "path": "",
-  "username": "${user}",
-  "password": "${pass}",
-  "url": "http://${ip}:${port}/"
+  "port": \${ACTUAL_PORT},
+  "protocol": "\${ACTUAL_PROTO}",
+  "path": "\${ACTUAL_PATH}",
+  "username": "\${ACTUAL_USER}",
+  "password": "${pass.replace(/"/g, '\\"')}",
+  "url": "\${ACTUAL_PROTO}://${ip}:\${ACTUAL_PORT}\${ACTUAL_PATH}"
 }
 EOF
 `;
@@ -514,7 +596,7 @@ EOF
     category: "Web Panel",
     secondaryCategories: ["Developer"],
     description: "An open-source, self-hostable Heroku / Netlify / Vercel alternative.",
-    icon: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/coolify.svg",
+    icon: "/images/apps/coolify.svg",
     defaultPort: 8000,
     defaultProtocol: "http",
     osBase: "Ubuntu 26.04",
@@ -525,25 +607,27 @@ EOF
     minSpecs: { cpu: 2, ram: 2, disk: 30 },
     adminUsername: "root",
     instructions: "Navigate to http://${ip}:8000 to complete initial registration and cluster configuration.",
-    getInstallScript: (ip, rootPassword) => `
+    getInstallScript: (ip, rootPassword) => {
+      const appInfoCmd = buildAppInfoJson({
+        appId: "coolify",
+        appName: "Coolify",
+        port: 8000,
+        protocol: "http",
+        path: "",
+        username: "root",
+        password: rootPassword,
+        url: `http://${ip}:8000`
+      });
+
+      return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y curl
 curl -fsSL https://cdn.coollabs.io/coolify/install.sh | bash -s -- --non-interactive || true
 
-cat << 'EOF' > /root/masdika-app-info.json
-{
-  "appId": "coolify",
-  "appName": "Coolify",
-  "port": 8000,
-  "protocol": "http",
-  "path": "",
-  "username": "root",
-  "password": "${rootPassword}",
-  "url": "http://${ip}:8000"
-}
-EOF
-`
+${appInfoCmd}
+`;
+    }
   },
 
   // 6. Plesk (Web Panel)
@@ -574,24 +658,24 @@ EOF
     ],
     getInstallScript: (ip, rootPassword, config = {}) => {
       const pass = config.adminPassword || rootPassword;
+      const appInfoCmd = buildAppInfoJson({
+        appId: "plesk",
+        appName: "Plesk Obsidian",
+        port: 8443,
+        protocol: "https",
+        path: "",
+        username: "root",
+        password: pass,
+        url: `https://${ip}:8443`
+      });
+
       return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y curl wget
 sh <(curl https://autoinstall.plesk.com/one-click-installer || wget -O - https://autoinstall.plesk.com/one-click-installer) --web-interface-port 8443 || true
 
-cat << 'EOF' > /root/masdika-app-info.json
-{
-  "appId": "plesk",
-  "appName": "Plesk Obsidian",
-  "port": 8443,
-  "protocol": "https",
-  "path": "",
-  "username": "root",
-  "password": "${pass}",
-  "url": "https://${ip}:8443"
-}
-EOF
+${appInfoCmd}
 `;
     }
   },
@@ -634,6 +718,17 @@ EOF
     getInstallScript: (ip, rootPassword, config = {}) => {
       const email = config.adminEmail || "admin@example.com";
       const domain = config.domain || "";
+      const appInfoCmd = buildAppInfoJson({
+        appId: "cpanel",
+        appName: "cPanel & WHM",
+        port: 2087,
+        protocol: "https",
+        path: "",
+        username: "root",
+        password: rootPassword,
+        url: `https://${ip}:2087`
+      });
+
       return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
@@ -675,18 +770,7 @@ curl -o latest -L https://securedownloads.cpanel.net/latest
 sh latest --non-interactive || true
 
 # Write completion metadata
-cat << 'EOF' > /root/masdika-app-info.json
-{
-  "appId": "cpanel",
-  "appName": "cPanel & WHM",
-  "port": 2087,
-  "protocol": "https",
-  "path": "",
-  "username": "root",
-  "password": "${rootPassword}",
-  "url": "https://${ip}:2087"
-}
-EOF
+${appInfoCmd}
 `;
     }
   },
@@ -697,7 +781,7 @@ EOF
     name: "PTERODACTYL",
     category: "Game Server",
     description: "Open-source game server management panel built on Docker containers and wings.",
-    icon: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/pterodactyl.png",
+    icon: "/images/apps/pterodactyl.png",
     defaultPort: 80,
     defaultProtocol: "http",
     osBase: "Ubuntu 26.04",
@@ -728,6 +812,17 @@ EOF
     getInstallScript: (ip, rootPassword, config = {}) => {
       const user = config.adminUsername || "admin";
       const pass = config.adminPassword || rootPassword;
+      const appInfoCmd = buildAppInfoJson({
+        appId: "pterodactyl",
+        appName: "Pterodactyl",
+        port: 80,
+        protocol: "http",
+        path: "",
+        username: user,
+        password: pass,
+        url: `http://${ip}:80`
+      });
+
       return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
@@ -736,18 +831,7 @@ which docker || (curl -fsSL https://get.docker.com | sh)
 systemctl enable --now docker
 docker run -d --name pterodactyl-panel --restart always -p 80:80 -p 443:443 -e APP_URL="http://${ip}" -e DB_HOST="127.0.0.1" ghcr.io/pterodactyl/panel:latest || true
 
-cat << 'EOF' > /root/masdika-app-info.json
-{
-  "appId": "pterodactyl",
-  "appName": "Pterodactyl",
-  "port": 80,
-  "protocol": "http",
-  "path": "",
-  "username": "${user}",
-  "password": "${pass}",
-  "url": "http://${ip}:80"
-}
-EOF
+${appInfoCmd}
 `;
     }
   },
@@ -790,6 +874,17 @@ EOF
     getInstallScript: (ip, rootPassword, config = {}) => {
       const user = config.adminUsername || "admin";
       const pass = config.adminPassword || rootPassword;
+      const appInfoCmd = buildAppInfoJson({
+        appId: "nextcloud",
+        appName: "Nextcloud",
+        port: 8080,
+        protocol: "http",
+        path: "",
+        username: user,
+        password: pass,
+        url: `http://${ip}:8080`
+      });
+
       return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
@@ -798,18 +893,7 @@ which docker || (curl -fsSL https://get.docker.com | sh)
 systemctl enable --now docker
 docker run -d --name nextcloud --restart always -p 8080:80 -e NEXTCLOUD_ADMIN_USER="${user}" -e NEXTCLOUD_ADMIN_PASSWORD="${pass}" nextcloud:latest || true
 
-cat << 'EOF' > /root/masdika-app-info.json
-{
-  "appId": "nextcloud",
-  "appName": "Nextcloud",
-  "port": 8080,
-  "protocol": "http",
-  "path": "",
-  "username": "${user}",
-  "password": "${pass}",
-  "url": "http://${ip}:8080"
-}
-EOF
+${appInfoCmd}
 `;
     }
   },
@@ -821,7 +905,7 @@ EOF
     category: "Business",
     secondaryCategories: ["Developer", "Artificial Intelligence"],
     description: "Fair-code workflow automation tool with extensive API connectors and self-hosted AI orchestrations.",
-    icon: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/n8n.png",
+    icon: "/images/apps/n8n.png",
     defaultPort: 5678,
     defaultProtocol: "http",
     osBase: "Ubuntu 26.04",
@@ -843,6 +927,17 @@ EOF
     ],
     getInstallScript: (ip, rootPassword, config = {}) => {
       const pass = config.adminPassword || rootPassword;
+      const appInfoCmd = buildAppInfoJson({
+        appId: "n8n",
+        appName: "n8n",
+        port: 5678,
+        protocol: "http",
+        path: "",
+        username: "admin",
+        password: pass,
+        url: `http://${ip}:5678`
+      });
+
       return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
@@ -851,18 +946,7 @@ which docker || (curl -fsSL https://get.docker.com | sh)
 systemctl enable --now docker
 docker run -d --name n8n --restart always -p 5678:5678 -e N8N_BASIC_AUTH_ACTIVE=true -e N8N_BASIC_AUTH_USER=admin -e N8N_BASIC_AUTH_PASSWORD="${pass}" -v n8n_data:/home/node/.n8n docker.n8n.io/n8nio/n8n:latest || true
 
-cat << 'EOF' > /root/masdika-app-info.json
-{
-  "appId": "n8n",
-  "appName": "n8n",
-  "port": 5678,
-  "protocol": "http",
-  "path": "",
-  "username": "admin",
-  "password": "${pass}",
-  "url": "http://${ip}:5678"
-}
-EOF
+${appInfoCmd}
 `;
     }
   },
@@ -896,6 +980,17 @@ EOF
     ],
     getInstallScript: (ip, rootPassword, config = {}) => {
       const siteUrl = config.domain ? (config.domain.startsWith("http") ? config.domain : `http://${config.domain}`) : `http://${ip}:3456`;
+      const appInfoCmd = buildAppInfoJson({
+        appId: "vikunja",
+        appName: "Vikunja",
+        port: 3456,
+        protocol: "http",
+        path: "",
+        username: "admin",
+        password: rootPassword,
+        url: siteUrl
+      });
+
       return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
@@ -915,18 +1010,7 @@ docker run -d --name vikunja --restart always \
   -v /opt/vikunja/db:/app/vikunja/db \
   vikunja/vikunja:latest || true
 
-cat << 'EOF' > /root/masdika-app-info.json
-{
-  "appId": "vikunja",
-  "appName": "Vikunja",
-  "port": 3456,
-  "protocol": "http",
-  "path": "",
-  "username": "admin",
-  "password": "${rootPassword}",
-  "url": "${siteUrl}"
-}
-EOF
+${appInfoCmd}
 `;
     }
   },
@@ -949,7 +1033,19 @@ EOF
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
     adminUsername: "admin",
     instructions: "Hermes Agent endpoint running on port 8080. Ready for API and tool execution calls.",
-    getInstallScript: (ip, rootPassword) => `
+    getInstallScript: (ip, rootPassword) => {
+      const appInfoCmd = buildAppInfoJson({
+        appId: "hermes-agent",
+        appName: "Hermes Agent",
+        port: 8080,
+        protocol: "http",
+        path: "",
+        username: "admin",
+        password: rootPassword,
+        url: `http://${ip}:8080`
+      });
+
+      return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y curl
@@ -957,19 +1053,9 @@ which docker || (curl -fsSL https://get.docker.com | sh)
 systemctl enable --now docker
 docker run -d --name hermes-agent --restart always -p 8080:8080 ghcr.io/nousresearch/hermes-function-calling:latest || docker run -d --name hermes-agent --restart always -p 8080:8080 nginx:alpine
 
-cat << 'EOF' > /root/masdika-app-info.json
-{
-  "appId": "hermes-agent",
-  "appName": "Hermes Agent",
-  "port": 8080,
-  "protocol": "http",
-  "path": "",
-  "username": "admin",
-  "password": "${rootPassword}",
-  "url": "http://${ip}:8080"
-}
-EOF
-`
+${appInfoCmd}
+`;
+    }
   },
 
   // 11. Open Claw (Artificial Intelligence)
@@ -990,7 +1076,19 @@ EOF
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
     adminUsername: "admin",
     instructions: "OpenClaw agent dashboard available at http://${ip}:3000.",
-    getInstallScript: (ip, rootPassword) => `
+    getInstallScript: (ip, rootPassword) => {
+      const appInfoCmd = buildAppInfoJson({
+        appId: "openclaw",
+        appName: "Open Claw",
+        port: 3000,
+        protocol: "http",
+        path: "",
+        username: "admin",
+        password: rootPassword,
+        url: `http://${ip}:3000`
+      });
+
+      return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y curl
@@ -998,19 +1096,9 @@ which docker || (curl -fsSL https://get.docker.com | sh)
 systemctl enable --now docker
 docker run -d --name openclaw --restart always -p 3000:3000 ghcr.io/openclaw/openclaw:latest || docker run -d --name openclaw --restart always -p 3000:3000 nginx:alpine
 
-cat << 'EOF' > /root/masdika-app-info.json
-{
-  "appId": "openclaw",
-  "appName": "Open Claw",
-  "port": 3000,
-  "protocol": "http",
-  "path": "",
-  "username": "admin",
-  "password": "${rootPassword}",
-  "url": "http://${ip}:3000"
-}
-EOF
-`
+${appInfoCmd}
+`;
+    }
   },
 
   // 12. 9Router (Artificial Intelligence)
@@ -1031,7 +1119,19 @@ EOF
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
     adminUsername: "admin",
     instructions: "Access the 9Router web dashboard at http://${ip}:20128 to manage model keys, fallback rules, and tokens.",
-    getInstallScript: (ip, rootPassword) => `
+    getInstallScript: (ip, rootPassword) => {
+      const appInfoCmd = buildAppInfoJson({
+        appId: "9router",
+        appName: "9Router",
+        port: 20128,
+        protocol: "http",
+        path: "",
+        username: "admin",
+        password: rootPassword,
+        url: `http://${ip}:20128`
+      });
+
+      return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y curl
@@ -1039,19 +1139,9 @@ which docker || (curl -fsSL https://get.docker.com | sh)
 systemctl enable --now docker
 docker run -d --name 9router --restart always -p 20128:20128 -v 9router_data:/app/data ghcr.io/decolua/9router:latest || true
 
-cat << 'EOF' > /root/masdika-app-info.json
-{
-  "appId": "9router",
-  "appName": "9Router",
-  "port": 20128,
-  "protocol": "http",
-  "path": "",
-  "username": "admin",
-  "password": "${rootPassword}",
-  "url": "http://${ip}:20128"
-}
-EOF
-`
+${appInfoCmd}
+`;
+    }
   },
 
   // 13. Docker (Developer)
@@ -1060,7 +1150,7 @@ EOF
     name: "DOCKER",
     category: "Developer",
     description: "Containerization platform with Docker Engine, CLI, and Docker Compose pre-configured.",
-    icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg",
+    icon: "/images/apps/docker.svg",
     defaultPort: 2375,
     defaultProtocol: "http",
     osBase: "Ubuntu 26.04",
@@ -1071,7 +1161,19 @@ EOF
     minSpecs: { cpu: 1, ram: 1, disk: 20 },
     adminUsername: "root",
     instructions: "Docker Engine and Docker Compose are installed and active. Access via SSH terminal.",
-    getInstallScript: (ip, rootPassword) => `
+    getInstallScript: (ip, rootPassword) => {
+      const appInfoCmd = buildAppInfoJson({
+        appId: "docker",
+        appName: "Docker Engine",
+        port: 22,
+        protocol: "http",
+        path: "",
+        username: "root",
+        password: rootPassword,
+        url: `ssh://root@${ip}`
+      });
+
+      return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y curl
@@ -1080,19 +1182,9 @@ sh get-docker.sh
 systemctl enable --now docker
 docker --version
 
-cat << 'EOF' > /root/masdika-app-info.json
-{
-  "appId": "docker",
-  "appName": "Docker Engine",
-  "port": 22,
-  "protocol": "http",
-  "path": "",
-  "username": "root",
-  "password": "${rootPassword}",
-  "url": "ssh://root@${ip}"
-}
-EOF
-`
+${appInfoCmd}
+`;
+    }
   },
 
   // 14. Node.js (Developer)
@@ -1101,7 +1193,7 @@ EOF
     name: "NODE.JS",
     category: "Developer",
     description: "JavaScript runtime environment with npm, pnpm, yarn, and PM2 process manager pre-installed.",
-    icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nodejs/nodejs-original.svg",
+    icon: "/images/apps/nodejs.svg",
     defaultPort: 3000,
     defaultProtocol: "http",
     osBase: "Ubuntu 26.04",
@@ -1112,7 +1204,19 @@ EOF
     minSpecs: { cpu: 1, ram: 1, disk: 20 },
     adminUsername: "root",
     instructions: "Node.js 22 LTS, npm, pnpm, yarn, and PM2 are globally available via SSH.",
-    getInstallScript: (ip, rootPassword) => `
+    getInstallScript: (ip, rootPassword) => {
+      const appInfoCmd = buildAppInfoJson({
+        appId: "nodejs",
+        appName: "Node.js 22 LTS",
+        port: 22,
+        protocol: "http",
+        path: "",
+        username: "root",
+        password: rootPassword,
+        url: `ssh://root@${ip}`
+      });
+
+      return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y curl
@@ -1120,19 +1224,9 @@ curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
 apt-get install -y nodejs
 npm install -g pnpm yarn pm2
 
-cat << 'EOF' > /root/masdika-app-info.json
-{
-  "appId": "nodejs",
-  "appName": "Node.js 22 LTS",
-  "port": 22,
-  "protocol": "http",
-  "path": "",
-  "username": "root",
-  "password": "${rootPassword}",
-  "url": "ssh://root@${ip}"
-}
-EOF
-`
+${appInfoCmd}
+`;
+    }
   },
 
   // 15. PostgreSQL (Developer)
@@ -1141,7 +1235,7 @@ EOF
     name: "POSTGRESQL",
     category: "Developer",
     description: "Advanced, enterprise-class open source relational database with remote access support.",
-    icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postgresql/postgresql-original.svg",
+    icon: "/images/apps/postgresql.svg",
     defaultPort: 5432,
     defaultProtocol: "http",
     osBase: "Ubuntu 26.04",
@@ -1152,7 +1246,19 @@ EOF
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
     adminUsername: "postgres",
     instructions: "PostgreSQL database running on port 5432. Username: 'postgres', Password: VPS Root Password.",
-    getInstallScript: (ip, rootPassword) => `
+    getInstallScript: (ip, rootPassword) => {
+      const appInfoCmd = buildAppInfoJson({
+        appId: "postgresql",
+        appName: "PostgreSQL 17",
+        port: 5432,
+        protocol: "http",
+        path: "",
+        username: "postgres",
+        password: rootPassword,
+        url: `postgresql://postgres@${ip}:5432/postgres`
+      });
+
+      return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y postgresql postgresql-contrib
@@ -1161,19 +1267,9 @@ echo "listen_addresses = '*'" >> /etc/postgresql/*/main/postgresql.conf
 echo "host all all 0.0.0.0/0 md5" >> /etc/postgresql/*/main/pg_hba.conf
 systemctl restart postgresql
 
-cat << 'EOF' > /root/masdika-app-info.json
-{
-  "appId": "postgresql",
-  "appName": "PostgreSQL 17",
-  "port": 5432,
-  "protocol": "http",
-  "path": "",
-  "username": "postgres",
-  "password": "${rootPassword}",
-  "url": "postgresql://postgres@${ip}:5432/postgres"
-}
-EOF
-`
+${appInfoCmd}
+`;
+    }
   },
 
   // 16. MySQL (Developer)
@@ -1182,7 +1278,7 @@ EOF
     name: "MYSQL",
     category: "Developer",
     description: "High-performance open-source relational database with root remote access pre-configured.",
-    icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mysql/mysql-original.svg",
+    icon: "/images/apps/mysql.svg",
     defaultPort: 3306,
     defaultProtocol: "http",
     osBase: "Ubuntu 26.04",
@@ -1193,7 +1289,19 @@ EOF
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
     adminUsername: "root",
     instructions: "MySQL running on port 3306. Admin user: 'root', Password: VPS Root Password.",
-    getInstallScript: (ip, rootPassword) => `
+    getInstallScript: (ip, rootPassword) => {
+      const appInfoCmd = buildAppInfoJson({
+        appId: "mysql",
+        appName: "MySQL 8.4 LTS",
+        port: 3306,
+        protocol: "http",
+        path: "",
+        username: "root",
+        password: rootPassword,
+        url: `mysql://root@${ip}:3306`
+      });
+
+      return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y mysql-server
@@ -1201,19 +1309,9 @@ mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY
 sed -i 's/127.0.0.1/0.0.0.0/g' /etc/mysql/mysql.conf.d/mysqld.cnf || true
 systemctl restart mysql
 
-cat << 'EOF' > /root/masdika-app-info.json
-{
-  "appId": "mysql",
-  "appName": "MySQL 8.4 LTS",
-  "port": 3306,
-  "protocol": "http",
-  "path": "",
-  "username": "root",
-  "password": "${rootPassword}",
-  "url": "mysql://root@${ip}:3306"
-}
-EOF
-`
+${appInfoCmd}
+`;
+    }
   },
 
   // 17. MariaDB (Developer)
@@ -1222,7 +1320,7 @@ EOF
     name: "MARIADB",
     category: "Developer",
     description: "Fast, robust open-source MySQL replacement built by the original MySQL developers.",
-    icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mariadb/mariadb-original.svg",
+    icon: "/images/apps/mariadb.svg",
     defaultPort: 3306,
     defaultProtocol: "http",
     osBase: "Ubuntu 26.04",
@@ -1233,7 +1331,19 @@ EOF
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
     adminUsername: "root",
     instructions: "MariaDB running on port 3306. Admin user: 'root', Password: VPS Root Password.",
-    getInstallScript: (ip, rootPassword) => `
+    getInstallScript: (ip, rootPassword) => {
+      const appInfoCmd = buildAppInfoJson({
+        appId: "mariadb",
+        appName: "MariaDB 11.4 LTS",
+        port: 3306,
+        protocol: "http",
+        path: "",
+        username: "root",
+        password: rootPassword,
+        url: `mysql://root@${ip}:3306`
+      });
+
+      return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y mariadb-server
@@ -1241,19 +1351,9 @@ mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${rootPassword.replace(/'
 sed -i 's/127.0.0.1/0.0.0.0/g' /etc/mysql/mariadb.conf.d/50-server.cnf || true
 systemctl restart mariadb
 
-cat << 'EOF' > /root/masdika-app-info.json
-{
-  "appId": "mariadb",
-  "appName": "MariaDB 11.4 LTS",
-  "port": 3306,
-  "protocol": "http",
-  "path": "",
-  "username": "root",
-  "password": "${rootPassword}",
-  "url": "mysql://root@${ip}:3306"
-}
-EOF
-`
+${appInfoCmd}
+`;
+    }
   },
 
   // 18. MongoDB (Developer)
@@ -1262,7 +1362,7 @@ EOF
     name: "MONGODB",
     category: "Developer",
     description: "Modern, document-oriented NoSQL database for fast, flexible, scalable application data.",
-    icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mongodb/mongodb-original.svg",
+    icon: "/images/apps/mongodb.svg",
     defaultPort: 27017,
     defaultProtocol: "http",
     osBase: "Ubuntu 26.04",
@@ -1273,7 +1373,19 @@ EOF
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
     adminUsername: "admin",
     instructions: "MongoDB running on port 27017. Admin user: 'admin', Password: VPS Root Password.",
-    getInstallScript: (ip, rootPassword) => `
+    getInstallScript: (ip, rootPassword) => {
+      const appInfoCmd = buildAppInfoJson({
+        appId: "mongodb",
+        appName: "MongoDB 8.0",
+        port: 27017,
+        protocol: "http",
+        path: "",
+        username: "admin",
+        password: rootPassword,
+        url: `mongodb://admin:${rootPassword}@${ip}:27017`
+      });
+
+      return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y gnupg curl
@@ -1284,19 +1396,9 @@ systemctl enable --now mongod || systemctl enable --now mongodb
 sed -i 's/bindIp: 127.0.0.1/bindIp: 0.0.0.0/g' /etc/mongod.conf || true
 systemctl restart mongod || true
 
-cat << 'EOF' > /root/masdika-app-info.json
-{
-  "appId": "mongodb",
-  "appName": "MongoDB 8.0",
-  "port": 27017,
-  "protocol": "http",
-  "path": "",
-  "username": "admin",
-  "password": "${rootPassword}",
-  "url": "mongodb://admin:${rootPassword}@${ip}:27017"
-}
-EOF
-`
+${appInfoCmd}
+`;
+    }
   },
 
   // 19. FrankenPHP (Developer)
@@ -1328,6 +1430,17 @@ EOF
     ],
     getInstallScript: (ip, rootPassword, config = {}) => {
       const siteUrl = config.domain ? (config.domain.startsWith("http") ? config.domain : `http://${config.domain}`) : `http://${ip}`;
+      const appInfoCmd = buildAppInfoJson({
+        appId: "frankenphp",
+        appName: "FrankenPHP",
+        port: 80,
+        protocol: "http",
+        path: "",
+        username: "root",
+        password: rootPassword,
+        url: siteUrl
+      });
+
       return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
@@ -1367,18 +1480,7 @@ EOF
 systemctl daemon-reload
 systemctl enable --now frankenphp
 
-cat << 'EOF' > /root/masdika-app-info.json
-{
-  "appId": "frankenphp",
-  "appName": "FrankenPHP",
-  "port": 80,
-  "protocol": "http",
-  "path": "",
-  "username": "root",
-  "password": "${rootPassword}",
-  "url": "${siteUrl}"
-}
-EOF
+${appInfoCmd}
 `;
     }
   },
@@ -1401,25 +1503,27 @@ EOF
     minSpecs: { cpu: 1, ram: 1, disk: 20 },
     adminUsername: "root",
     instructions: "Nginx HTTP web server active on port 80. Default web root configured at /var/www/html.",
-    getInstallScript: (ip, rootPassword) => `
+    getInstallScript: (ip, rootPassword) => {
+      const appInfoCmd = buildAppInfoJson({
+        appId: "nginx",
+        appName: "Nginx",
+        port: 80,
+        protocol: "http",
+        path: "",
+        username: "root",
+        password: rootPassword,
+        url: `http://${ip}:80`
+      });
+
+      return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y nginx
 systemctl enable --now nginx
 
-cat << 'EOF' > /root/masdika-app-info.json
-{
-  "appId": "nginx",
-  "appName": "Nginx",
-  "port": 80,
-  "protocol": "http",
-  "path": "",
-  "username": "root",
-  "password": "${rootPassword}",
-  "url": "http://${ip}:80"
-}
-EOF
-`
+${appInfoCmd}
+`;
+    }
   },
 
   // 21. Grafana (Developer)
@@ -1461,6 +1565,17 @@ EOF
     getInstallScript: (ip, rootPassword, config = {}) => {
       const user = config.adminUsername || "admin";
       const pass = config.adminPassword || rootPassword;
+      const appInfoCmd = buildAppInfoJson({
+        appId: "grafana",
+        appName: "Grafana",
+        port: 3000,
+        protocol: "http",
+        path: "/login",
+        username: user,
+        password: pass,
+        url: `http://${ip}:3000/login`
+      });
+
       return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
@@ -1472,18 +1587,7 @@ docker run -d --name grafana --restart always -p 3000:3000 \
   -e GF_SECURITY_ADMIN_PASSWORD="${pass}" \
   -v grafana_data:/var/lib/grafana grafana/grafana-oss:latest || true
 
-cat << 'EOF' > /root/masdika-app-info.json
-{
-  "appId": "grafana",
-  "appName": "Grafana",
-  "port": 3000,
-  "protocol": "http",
-  "path": "/login",
-  "username": "${user}",
-  "password": "${pass}",
-  "url": "http://${ip}:3000/login"
-}
-EOF
+${appInfoCmd}
 `;
     }
   },
@@ -1527,6 +1631,17 @@ EOF
     getInstallScript: (ip, rootPassword, config = {}) => {
       const user = config.adminUsername || "admin";
       const pass = config.adminPassword || rootPassword;
+      const appInfoCmd = buildAppInfoJson({
+        appId: "mikrotik-chr",
+        appName: "MikroTik CHR",
+        port: 80,
+        protocol: "http",
+        path: "/webfig/",
+        username: user,
+        password: pass,
+        url: `http://${ip}/webfig/`
+      });
+
       return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
@@ -1535,18 +1650,7 @@ which docker || (curl -fsSL https://get.docker.com | sh)
 systemctl enable --now docker
 docker run -d --name mikrotik-chr --restart always --net=host --privileged -v /lib/modules:/lib/modules:ro evilfreelancer/docker-routeros:latest || true
 
-cat << 'EOF' > /root/masdika-app-info.json
-{
-  "appId": "mikrotik-chr",
-  "appName": "MikroTik CHR",
-  "port": 80,
-  "protocol": "http",
-  "path": "/webfig/",
-  "username": "${user}",
-  "password": "${pass}",
-  "url": "http://${ip}/webfig/"
-}
-EOF
+${appInfoCmd}
 `;
     }
   },
@@ -1569,25 +1673,27 @@ EOF
     minSpecs: { cpu: 1, ram: 1, disk: 20 },
     adminUsername: "root",
     instructions: "Apache2 HTTP web server running on port 80. Document root is at /var/www/html.",
-    getInstallScript: (ip, rootPassword) => `
+    getInstallScript: (ip, rootPassword) => {
+      const appInfoCmd = buildAppInfoJson({
+        appId: "apache",
+        appName: "Apache",
+        port: 80,
+        protocol: "http",
+        path: "",
+        username: "root",
+        password: rootPassword,
+        url: `http://${ip}:80`
+      });
+
+      return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y apache2
 systemctl enable --now apache2
 
-cat << 'EOF' > /root/masdika-app-info.json
-{
-  "appId": "apache",
-  "appName": "Apache",
-  "port": 80,
-  "protocol": "http",
-  "path": "",
-  "username": "root",
-  "password": "${rootPassword}",
-  "url": "http://${ip}:80"
-}
-EOF
-`
+${appInfoCmd}
+`;
+    }
   },
 
   // 24. CyberPanel (Web Panel)
@@ -1619,24 +1725,24 @@ EOF
     ],
     getInstallScript: (ip, rootPassword, config = {}) => {
       const pass = config.adminPassword || rootPassword;
+      const appInfoCmd = buildAppInfoJson({
+        appId: "cyberpanel",
+        appName: "CyberPanel",
+        port: 8090,
+        protocol: "https",
+        path: "",
+        username: "admin",
+        password: pass,
+        url: `https://${ip}:8090`
+      });
+
       return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y curl wget
 sh <(curl https://cyberpanel.net/install.sh || wget -O - https://cyberpanel.net/install.sh) --non-interactive --password "${pass}" || true
 
-cat << 'EOF' > /root/masdika-app-info.json
-{
-  "appId": "cyberpanel",
-  "appName": "CyberPanel",
-  "port": 8090,
-  "protocol": "https",
-  "path": "",
-  "username": "admin",
-  "password": "${pass}",
-  "url": "https://${ip}:8090"
-}
-EOF
+${appInfoCmd}
 `;
     }
   },
@@ -1659,26 +1765,28 @@ EOF
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
     adminUsername: "admin",
     instructions: "K3s Kubernetes cluster active. Access API at https://${ip}:6443. Kubeconfig stored at /etc/rancher/k3s/k3s.yaml.",
-    getInstallScript: (ip, rootPassword) => `
+    getInstallScript: (ip, rootPassword) => {
+      const appInfoCmd = buildAppInfoJson({
+        appId: "k3s",
+        appName: "Kubernetes K3s",
+        port: 6443,
+        protocol: "https",
+        path: "",
+        username: "admin",
+        password: rootPassword,
+        url: `https://${ip}:6443`
+      });
+
+      return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y curl
 curl -sfL https://get.k3s.io | sh -s - --tls-san "${ip}" --write-kubeconfig-mode 644
 systemctl enable --now k3s
 
-cat << 'EOF' > /root/masdika-app-info.json
-{
-  "appId": "k3s",
-  "appName": "Kubernetes K3s",
-  "port": 6443,
-  "protocol": "https",
-  "path": "",
-  "username": "admin",
-  "password": "${rootPassword}",
-  "url": "https://${ip}:6443"
-}
-EOF
-`
+${appInfoCmd}
+`;
+    }
   }
 ];
 

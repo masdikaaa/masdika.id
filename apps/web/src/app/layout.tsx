@@ -234,53 +234,6 @@ export default async function RootLayout({
                       }
                     }
                   ]
-                },
-                {
-                  "@type": "Product",
-                  "@id": "https://www.masdika.id/#managed-k3s",
-                  "name": "Masdika Managed Kubernetes (K3s)",
-                  "sku": "MASDIKA-K3S-ID",
-                  "mpn": "K3S-ID-01",
-                  "image": "https://www.masdika.id/images/brand/og-image.webp",
-                  "description": "Production-grade Managed K3s Kubernetes clusters with automated master control-plane, private VPC VLAN networking, and instant worker scaling.",
-                  "brand": {
-                    "@type": "Brand",
-                    "name": "Masdika"
-                  },
-                  "category": "Cloud Computing > Managed Kubernetes",
-                  "offers": {
-                    "@type": "AggregateOffer",
-                    "priceCurrency": "IDR",
-                    "lowPrice": "100",
-                    "highPrice": "1500000",
-                    "priceValidUntil": "2027-12-31",
-                    "offerCount": 50,
-                    "availability": "https://schema.org/InStock"
-                  },
-                  "aggregateRating": {
-                    "@type": "AggregateRating",
-                    "ratingValue": "4.9",
-                    "reviewCount": "96",
-                    "bestRating": "5",
-                    "worstRating": "1"
-                  },
-                  "review": [
-                    {
-                      "@type": "Review",
-                      "author": {
-                        "@type": "Person",
-                        "name": "Sarah Jenkins"
-                      },
-                      "datePublished": "2026-06-14",
-                      "reviewBody": "Masdika transformed our entire Kubernetes infrastructure. Our container deployments are now 5x faster and highly available.",
-                      "reviewRating": {
-                        "@type": "Rating",
-                        "ratingValue": "5",
-                        "bestRating": "5",
-                        "worstRating": "1"
-                      }
-                    }
-                  ]
                 }
               ]
             })

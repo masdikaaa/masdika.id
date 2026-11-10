@@ -184,8 +184,12 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
   });
   const [installedVpsId, setInstalledVpsId] = useState<number | null>(null);
   const [showAppInstallationModal, setShowAppInstallationModal] = useState<boolean>(false);
-  const [appPage, setAppPage] = useState(1);
   const APPS_PER_PAGE = 6;
+  const [appPage, setAppPage] = useState(() => {
+    if (!initialApp) return 1;
+    const idx = VPS_APPS.findIndex(a => a.id === initialApp.id);
+    return idx >= 0 ? Math.floor(idx / 6) + 1 : 1;
+  });
 
   const [plans, setPlans] = useState<any[]>([]);
   const [pricing, setPricing] = useState<Record<string, number>>({});
@@ -700,6 +704,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
     await new Promise(resolve => setTimeout(resolve, 50));
 
     try {
+      const is1ClickApp = imageMode === "apps" && Boolean(selectedAppId);
       const res = await fetch("/api/user/vps/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -708,7 +713,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
           username: isWindows ? "Administrator" : username,
           rootPassword: password,
           sshKey: sshKey,
-          templateId: selectedTemplate,
+          templateId: is1ClickApp ? undefined : selectedTemplate,
           billingMode: "PAYG",
           planId: selectedPlanId,
           cpuCores,
@@ -729,9 +734,9 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
           firewallRules: processedFirewallRules,
           targetNode: selectedNode,
           paymentMethodCode: "BALANCE",
-          appId: selectedAppId || undefined,
-          appVersion: selectedAppVersion || undefined,
-          appConfig: selectedAppId ? appConfig : undefined
+          appId: is1ClickApp ? selectedAppId : undefined,
+          appVersion: is1ClickApp ? (selectedAppVersion || undefined) : undefined,
+          appConfig: is1ClickApp ? appConfig : undefined
         })
       });
 
@@ -743,7 +748,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
         toast.success("Server deployment started!");
         if (data.k3sClusterId) {
           router.push(`/dashboard/k3s/${data.k3sClusterId}`);
-        } else if (selectedAppId) {
+        } else if (is1ClickApp) {
           // Open Live 1-Click App Installation Monitor modal so customer can track until finished
           setInstalledVpsId(data.vpsId);
           setShowAppInstallationModal(true);
