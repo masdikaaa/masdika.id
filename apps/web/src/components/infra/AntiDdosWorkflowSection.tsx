@@ -73,7 +73,7 @@ export function AntiDdosWorkflowSection({ mode = "vps" }: AntiDdosWorkflowSectio
   ];
 
   return (
-    <section id="anti-ddos-workflow" className="scroll-mt-24 mb-8 sm:mb-12">
+    <section id="anti-ddos-workflow" className="scroll-mt-24 py-10 sm:py-14 relative z-10">
       <div className="relative rounded-2xl sm:rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] p-5 sm:p-8 md:p-12 shadow-xl overflow-hidden transition-all">
         <div className="relative z-10">
           {/* Header */}

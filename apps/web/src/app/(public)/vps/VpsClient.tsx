@@ -332,7 +332,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
         </section>
 
         {/* â”€â”€ 1. VALUE PILLARS (4 Trust Highlights) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section className="py-6 sm:py-8 mb-10 sm:mb-14">
+        <section className="py-10 sm:py-14 relative z-10">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
             {[
               { icon: Cloud, title: "98.99% Uptime SLA", desc: "Automated failover with redundant power and enterprise network backbone." },
@@ -360,7 +360,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
         </section>
 
         {/* â”€â”€ 2. HARDWARE & SPECS SHOWCASE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section id="features" className="scroll-mt-24 mb-8 sm:mb-12">
+        <section id="features" className="scroll-mt-24 py-10 sm:py-14 relative z-10">
           <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-8 sm:p-12 shadow-xl overflow-hidden">
             <div className="absolute top-0 right-0 w-[450px] h-[450px] bg-gradient-to-tr from-cyan-500/15 via-cyan-400/10 to-transparent dark:from-cyan-500/20 dark:via-cyan-400/10 dark:to-transparent rounded-full blur-3xl pointer-events-none -z-0" />
 
@@ -456,7 +456,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
         <AntiDdosWorkflowSection mode="vps" />
 
         {/* â”€â”€ 3. SPEC SLIDER & PRICING CALCULATOR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section id="pricing" className="scroll-mt-24 mb-8 sm:mb-12">
+        <section id="pricing" className="scroll-mt-24 py-10 sm:py-14 relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-4 block">
               FLEXIBLE CLOUD PRICING
@@ -498,7 +498,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
         </section>
 
         {/* â”€â”€ 4. SUPPORTED OPERATING SYSTEMS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section className="mb-8 sm:mb-12">
+        <section className="py-10 sm:py-14 relative z-10">
           <div className="text-center mb-6 sm:mb-8">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
               OPERATING SYSTEMS
@@ -578,7 +578,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
         </section>
 
         {/* â”€â”€ 5. USE CASES SECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section className="mb-8 sm:mb-12">
+        <section className="py-10 sm:py-14 relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
               WORKLOAD SOLUTIONS
@@ -629,7 +629,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
         </section>
 
         {/* â”€â”€ 6. COMPREHENSIVE FEATURES GRID â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section className="mb-8 sm:mb-12">
+        <section className="py-10 sm:py-14 relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
               ENTERPRISE CAPABILITIES
@@ -670,7 +670,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
         </section>
 
         {/* â”€â”€ 7. HOW IT WORKS SECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section className="mb-8 sm:mb-12">
+        <section className="py-10 sm:py-14 relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
               DEPLOYMENT WORKFLOW
@@ -728,7 +728,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
         />
 
         {/* â”€â”€ 9. FINAL CTA SECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section className="pt-8 sm:pt-12 pb-0 w-full">
+        <section className="py-10 sm:py-14 relative z-10 w-full">
           <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-10 md:p-16 text-center shadow-xl overflow-hidden w-full">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-gradient-to-tr from-cyan-500/15 via-cyan-400/10 to-transparent dark:from-cyan-500/20 dark:via-cyan-400/10 dark:to-transparent rounded-full blur-3xl pointer-events-none -z-0" />
 

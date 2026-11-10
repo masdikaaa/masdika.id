@@ -174,7 +174,7 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
         </section>
 
         {/* â”€â”€ 1. VALUE PILLARS (4 Trust Highlights) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section className="py-6 sm:py-8 mb-10 sm:mb-14">
+        <section className="py-10 sm:py-14 relative z-10">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
             {[
               {
@@ -218,7 +218,7 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
         </section>
 
         {/* â”€â”€ 2. INTERACTIVE APP CATALOG & SEARCH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section id="catalog" className="py-4 sm:py-6 mb-8 sm:mb-10 scroll-mt-24">
+        <section id="catalog" className="scroll-mt-24 py-10 sm:py-14 relative z-10">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold font-mono uppercase bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 mb-3">
@@ -433,7 +433,7 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
         </section>
 
         {/* â”€â”€ 3. HOW IT WORKS (3 Simple Steps) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section className="pt-8 sm:pt-10 pb-4 sm:pb-6 mb-10 sm:mb-14">
+        <section className="py-10 sm:py-14 relative z-10">
           <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
             <span className="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400">
               Automated Architecture
@@ -494,7 +494,7 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
         <FaqSection faqs={APP_CATALOG_FAQS} />
 
         {/* â”€â”€ 5. BOTTOM CTA BANNER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section className="mt-8 sm:mt-12 mb-6 sm:mb-8">
+        <section className="py-10 sm:py-14 relative z-10">
           <div className="relative rounded-3xl overflow-hidden border border-cyan-500/30 bg-gradient-to-br from-cyan-950/40 via-[var(--surface)] to-[var(--surface)] p-8 sm:p-12 lg:p-16 text-center">
             <div className="max-w-2xl mx-auto relative z-10">
               <span className="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400 mb-3 block">

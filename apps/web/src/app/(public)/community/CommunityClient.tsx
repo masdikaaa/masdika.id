@@ -208,7 +208,7 @@ export default function CommunityClient({ initialGroups }: { initialGroups: Comm
         </section>
 
         {/* â”€â”€ 1. VALUE PILLARS (3 Highlights) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section className="py-8 sm:py-10 mb-10 sm:mb-14">
+        <section className="py-10 sm:py-14 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 items-stretch">
             <FadeIn delay={0.1} direction="up" className="h-full">
               <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] flex items-start gap-4 h-full shadow-sm">
@@ -261,7 +261,7 @@ export default function CommunityClient({ initialGroups }: { initialGroups: Comm
         </section>
 
         {/* â”€â”€ 2. COMMUNITY GROUPS DIRECTORY â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section id="community-groups" className="scroll-mt-24 mb-8 sm:mb-12">
+        <section id="community-groups" className="scroll-mt-24 py-10 sm:py-14 relative z-10">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
             <div>
               <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-4 block">
@@ -532,7 +532,7 @@ export default function CommunityClient({ initialGroups }: { initialGroups: Comm
         </section>
 
         {/* â”€â”€ 3. SUBMIT GROUP SECTION (Design-system Compliant Card) â”€â”€â”€â”€â”€â”€ */}
-        <section id="submit-group" className="scroll-mt-24 mb-0">
+        <section id="submit-group" className="scroll-mt-24 py-10 sm:py-14 relative z-10">
           <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-8 sm:p-12 overflow-hidden shadow-xl">
             {/* Soft Ambient Accent */}
             <div className="absolute top-0 right-0 w-[450px] h-[450px] bg-gradient-to-bl from-cyan-500/10 via-sky-500/5 to-transparent rounded-full blur-3xl pointer-events-none -z-0" />

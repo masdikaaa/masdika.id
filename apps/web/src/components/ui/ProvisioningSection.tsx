@@ -37,7 +37,7 @@ export function ProvisioningSection({
   const isDark = theme === "dark";
 
   return (
-    <section className={cn("relative py-12 sm:py-16 overflow-hidden z-20 mb-8 sm:mb-12", isDark ? "bg-transparent" : "bg-white")}>
+    <section className={cn("relative py-10 sm:py-14 overflow-hidden z-20", isDark ? "bg-transparent" : "bg-white")}>
       {/* Background elements */}
       {isDark && (
         <>

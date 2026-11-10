@@ -233,7 +233,7 @@ export default function FileCdnClient({
         </section>
 
         {/* â”€â”€ 1. VALUE PILLARS (4 Trust Highlights, Equal Height & Native CSS Variables) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section className="py-8 sm:py-10 mb-10 sm:mb-14">
+        <section className="py-10 sm:py-14 relative z-10">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
             {[
               { 
@@ -277,7 +277,7 @@ export default function FileCdnClient({
         </section>
 
         {/* â”€â”€ 2. DEVELOPER CODE & INTEGRATION SHOWCASE (High Contrast Terminal in Both Themes) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section className="mb-8 sm:mb-12">
+        <section className="py-10 sm:py-14 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             
             {/* Left: Dedicated High-Contrast Code Terminal */}
@@ -534,7 +534,7 @@ export default function FileCdnClient({
         </section>
 
         {/* â”€â”€ 3. ENTERPRISE CAPABILITIES (3 Equal Cards with Native Theme Variables) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section className="mb-8 sm:mb-12">
+        <section className="py-10 sm:py-14 relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-8">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
               ENTERPRISE CAPABILITIES
@@ -586,7 +586,7 @@ export default function FileCdnClient({
 
         {/* â”€â”€ 4. PRICING PLANS SECTION (Consistent Native Theme Cards) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {initialPlans && initialPlans.length > 0 && (
-          <section id="pricing" className="mb-8 sm:mb-12 pt-6 sm:pt-8">
+          <section id="pricing" className="scroll-mt-24 py-10 sm:py-14 relative z-10">
             <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-8">
               <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
                 TRANSPARENT PRICING
@@ -690,7 +690,7 @@ export default function FileCdnClient({
         )}
 
         {/* â”€â”€ 5. THREE-STEP WORKFLOW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section className="mb-8 sm:mb-12">
+        <section className="py-10 sm:py-14 relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-8">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
               DISTRIBUTION WORKFLOW

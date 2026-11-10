@@ -628,7 +628,7 @@ export default function ResellerApiClient() {
         </section>
 
         {/* â”€â”€ 1. VALUE PILLARS (4 Trust Highlights, Equal Height) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section className="py-8 sm:py-10 mb-10 sm:mb-14">
+        <section className="py-10 sm:py-14 relative z-10">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
             {[
               { icon: CodeXml, title: "RESTful JSON API", desc: "Straightforward endpoints with predictable JSON responses and full OpenAPI reference." },
@@ -652,7 +652,7 @@ export default function ResellerApiClient() {
         </section>
 
         {/* â”€â”€ 2. HARDWARE & ARCHITECTURE SHOWCASE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section id="features" className="scroll-mt-24 mb-8 sm:mb-12">
+        <section id="features" className="scroll-mt-24 py-10 sm:py-14 relative z-10">
           <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-8 sm:p-12 shadow-xl overflow-hidden">
             <div className="absolute top-0 right-0 w-[450px] h-[450px] bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -z-0" />
 
@@ -742,7 +742,7 @@ export default function ResellerApiClient() {
         </section>
 
         {/* â”€â”€ 3. WORKLOAD SOLUTIONS / TARGET USE CASES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section className="mb-8 sm:mb-12">
+        <section className="py-10 sm:py-14 relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-8">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
               TARGET USE CASES
@@ -793,7 +793,7 @@ export default function ResellerApiClient() {
         </section>
 
         {/* â”€â”€ 4. RESELLER WORKFLOW (3 Simple Steps) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section className="mb-8 sm:mb-12">
+        <section className="py-10 sm:py-14 relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-8">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
               RESELLER WORKFLOW
@@ -838,8 +838,7 @@ export default function ResellerApiClient() {
         </section>
 
         {/* â”€â”€ 5. PROVISIONING SECTION (Live Terminal Simulation) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <div className="mb-8 sm:mb-12 rounded-3xl overflow-hidden border border-[var(--border-primary)] shadow-sm">
-          <ProvisioningSection
+        <ProvisioningSection
             subtitle="AUTOMATED API PROVISIONING"
             title="Programmatic VM deployment in ~5 minutes."
             description="Send a single POST request with desired CPU cores, RAM, and OS image. Our hypervisors provision storage, attach network interfaces, and boot the instance automatically."
@@ -851,11 +850,10 @@ export default function ResellerApiClient() {
             iconType="vps"
             targetServer="Dell PowerEdge R630 â€¢ Sidoarjo DC"
             provisionEstimate="Backend: KVM Hypervisor (Estimasi ~5 Menit)"
-          />
-        </div>
+        />
 
         {/* â”€â”€ 6. SUPPORTED OPERATING SYSTEMS CAROUSEL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section className="pt-2 sm:pt-4 mb-8 sm:mb-12">
+        <section className="py-10 sm:py-14 relative z-10">
           <div className="text-center mb-8">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
               OPERATING SYSTEMS
@@ -935,7 +933,7 @@ export default function ResellerApiClient() {
         </section>
 
         {/* â”€â”€ 7. DEVELOPER QUICKSTART CODE TABS (Always Dark High-Contrast Terminal) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section className="mb-8 sm:mb-12">
+        <section className="py-10 sm:py-14 relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-8">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
               DEVELOPER QUICKSTART
@@ -1025,7 +1023,7 @@ export default function ResellerApiClient() {
         </section>
 
         {/* â”€â”€ 8. INTERACTIVE API DOCUMENTATION EXPLORER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section id="documentation" className="scroll-mt-24 mb-8 sm:mb-12">
+        <section id="documentation" className="scroll-mt-24 py-10 sm:py-14 relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-8">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
               API REFERENCE &amp; ENDPOINTS
@@ -1417,7 +1415,7 @@ onPaymentWebhook(order) {
         </section>
 
         {/* â”€â”€ 9. FINAL CTA SECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section className="pt-8 sm:pt-12 pb-0">
+        <section className="py-10 sm:py-14 relative z-10">
           <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-10 md:p-16 text-center shadow-xl overflow-hidden max-w-5xl mx-auto">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -z-0" />
 
