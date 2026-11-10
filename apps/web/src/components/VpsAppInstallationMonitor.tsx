@@ -664,14 +664,15 @@ export function VpsAppInstallationMonitor({
                 </span>
               </div>
             ) : (
-              <button
-                type="button"
-                onClick={handleComplete}
-                className="w-full py-3 px-5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-black text-xs tracking-wide flex items-center justify-center gap-2 shadow-lg shadow-cyan-400/20 transition-all cursor-pointer"
-              >
-                <span>OK, Go to VPS Dashboard</span>
-                <ArrowRight className="w-4 h-4 stroke-[2.5]" />
-              </button>
+              <div className={cn(
+                "p-3 rounded-xl border flex items-center gap-2 text-xs",
+                isDark ? "bg-cyan-500/5 border-cyan-500/20 text-cyan-300" : "bg-cyan-50 border-cyan-200 text-cyan-800"
+              )}>
+                <CheckCircle className="w-4 h-4 text-cyan-400 shrink-0" />
+                <span className="text-[11px] font-semibold leading-relaxed">
+                  All deployment stages completed successfully.
+                </span>
+              </div>
             )}
           </div>
         </div>

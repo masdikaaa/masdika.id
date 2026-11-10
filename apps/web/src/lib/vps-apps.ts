@@ -132,26 +132,11 @@ export const VPS_APPS: VpsAppDefinition[] = [
         description: "Public name for your new website"
       },
       {
-        key: "adminUsername",
-        label: "WP Admin Username",
-        type: "text",
-        defaultValue: "admin",
-        placeholder: "admin",
-        description: "Administrator username for /wp-admin"
-      },
-      {
         key: "adminEmail",
         label: "Admin Email",
         type: "email",
         placeholder: "admin@example.com",
         description: "Email for system notifications and recovery"
-      },
-      {
-        key: "adminPassword",
-        label: "WP Admin Password",
-        type: "password",
-        placeholder: "Leave empty to use VPS Root Password",
-        description: "Administrator login password"
       }
     ],
     getInstallScript: (ip, rootPassword, config = {}) => {
@@ -261,26 +246,11 @@ ${appInfoCmd}
         description: "Public portal name"
       },
       {
-        key: "adminUsername",
-        label: "Admin Username",
-        type: "text",
-        defaultValue: "admin",
-        placeholder: "admin",
-        description: "Administrator username for Drupal"
-      },
-      {
         key: "adminEmail",
         label: "Admin Email",
         type: "email",
         placeholder: "admin@example.com",
         description: "Email for system notifications and recovery"
-      },
-      {
-        key: "adminPassword",
-        label: "Admin Password",
-        type: "password",
-        placeholder: "Leave empty to use VPS Root Password",
-        description: "Administrator login password"
       }
     ],
     getInstallScript: (ip, rootPassword, config = {}) => {
@@ -381,26 +351,11 @@ ${appInfoCmd}
         description: "Full site name displayed to learners"
       },
       {
-        key: "adminUsername",
-        label: "Admin Username",
-        type: "text",
-        defaultValue: "admin",
-        placeholder: "admin",
-        description: "Administrator username for Moodle"
-      },
-      {
         key: "adminEmail",
         label: "Admin Email",
         type: "email",
         placeholder: "admin@example.com",
         description: "Email for system notifications and recovery"
-      },
-      {
-        key: "adminPassword",
-        label: "Admin Password",
-        type: "password",
-        placeholder: "Leave empty to use VPS Root Password",
-        description: "Administrator login password"
       }
     ],
     getInstallScript: (ip, rootPassword, config = {}) => {
@@ -519,9 +474,26 @@ bash install_7.0_en.sh aapanel -y -P "${port}" --safe-path login --ssl-disable |
 # Wait until panel files and database are generated
 sleep 5
 
-# Ensure entrance is always set to /login and firewall port is open
+# Configure aaPanel via official tools.py CLI so DB hash and default.pl match 100%
 if [ -d /www/server/panel ]; then
+  cd /www/server/panel
+  PY_BIN="/www/server/panel/pyenv/bin/python"
+  [ -f "$PY_BIN" ] || PY_BIN="/www/server/panel/pyenv/bin/btpython"
+  [ -f "$PY_BIN" ] || PY_BIN="python3"
+
+  # Set deterministic, clean auto user & pass
+  PANEL_USER="paneluser"
+  PANEL_PASS="${rootPassword}"
+  [ -z "$PANEL_PASS" ] && PANEL_PASS=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 12)
+
+  # Use official tools.py to update both DB and default.pl simultaneously
+  $PY_BIN tools.py username "$PANEL_USER" 2>/dev/null || true
+  $PY_BIN tools.py panel "$PANEL_PASS" 2>/dev/null || true
+  $PY_BIN tools.py admin_path /login 2>/dev/null || true
+
+  # Ensure entrance is /login and clear rate limits
   echo "/login" > /www/server/panel/data/admin_path.pl 2>/dev/null || true
+  rm -f /www/server/panel/data/limitip.conf 2>/dev/null || true
   rm -f /www/server/panel/data/ssl.pl 2>/dev/null || true
 
   ufw allow ${port}/tcp 2>/dev/null || true
@@ -540,11 +512,13 @@ ACTUAL_PASS=""
 if [ -f /www/server/panel/default.pl ]; then
   ACTUAL_PASS=$(cat /www/server/panel/default.pl 2>/dev/null | tr -d '\\r\\n ')
 fi
+[ -z "$ACTUAL_PASS" ] && ACTUAL_PASS="$PANEL_PASS"
 
 ACTUAL_USER=""
 if [ -f /www/server/panel/data/default.db ]; then
   ACTUAL_USER=$(sqlite3 /www/server/panel/data/default.db "SELECT username FROM users ORDER BY id ASC LIMIT 1;" 2>/dev/null | tr -d '\\r\\n ' || true)
 fi
+[ -z "$ACTUAL_USER" ] && ACTUAL_USER="$PANEL_USER"
 
 # Fallback: Query bt 14 or /etc/init.d/bt default to guarantee 100% credential match
 if [ -z "$ACTUAL_PASS" ] || [ -z "$ACTUAL_USER" ]; then
@@ -558,7 +532,7 @@ if [ -z "$ACTUAL_PASS" ] || [ -z "$ACTUAL_USER" ]; then
 fi
 
 [ -z "$ACTUAL_USER" ] && ACTUAL_USER="paneluser"
-[ -z "$ACTUAL_PASS" ] && ACTUAL_PASS="View via 'bt 14' in SSH terminal"
+[ -z "$ACTUAL_PASS" ] && ACTUAL_PASS="${rootPassword}"
 
 cat << EOF > /root/masdika-app-info.json
 {
@@ -635,15 +609,6 @@ ${appInfoCmd}
     estimatedTime: "~10-15 mins",
     adminUsername: "root",
     instructions: "Log into Plesk at https://${ip}:8443 using your VPS root password.",
-    configFields: [
-      {
-        key: "adminPassword",
-        label: "Plesk Root Password",
-        type: "password",
-        placeholder: "Leave empty to use VPS Root Password",
-        description: "Password for the 'root' administrator account"
-      }
-    ],
     getInstallScript: (ip, rootPassword, config = {}) => {
       const pass = config.adminPassword || rootPassword;
       const appInfoCmd = buildAppInfoJson({
@@ -782,24 +747,7 @@ ${appInfoCmd}
     minSpecs: { cpu: 2, ram: 4, disk: 30 },
     estimatedTime: "~4-6 mins",
     adminUsername: "admin",
-    instructions: "Access the Pterodactyl web panel with username 'admin' and your configured password.",
-    configFields: [
-      {
-        key: "adminUsername",
-        label: "Panel Username",
-        type: "text",
-        defaultValue: "admin",
-        placeholder: "admin",
-        description: "Pterodactyl admin account name"
-      },
-      {
-        key: "adminPassword",
-        label: "Panel Password",
-        type: "password",
-        placeholder: "Leave empty to use VPS Root Password",
-        description: "Pterodactyl admin password"
-      }
-    ],
+    instructions: "Access the Pterodactyl web panel with username 'admin' and your VPS root password.",
     getInstallScript: (ip, rootPassword, config = {}) => {
       const user = config.adminUsername || "admin";
       const pass = config.adminPassword || rootPassword;
@@ -895,24 +843,7 @@ ${appInfoCmd}
     minSpecs: { cpu: 2, ram: 2, disk: 30 },
     estimatedTime: "~3-5 mins",
     adminUsername: "admin",
-    instructions: "Access Nextcloud at http://${ip}:8080. Log in with username 'admin' and your configured password.",
-    configFields: [
-      {
-        key: "adminUsername",
-        label: "Nextcloud Admin Username",
-        type: "text",
-        defaultValue: "admin",
-        placeholder: "admin",
-        description: "Administrator username"
-      },
-      {
-        key: "adminPassword",
-        label: "Nextcloud Admin Password",
-        type: "password",
-        placeholder: "Leave empty to use VPS Root Password",
-        description: "Administrator password"
-      }
-    ],
+    instructions: "Access Nextcloud at http://${ip}:8080. Log in with username 'admin' and your VPS root password.",
     getInstallScript: (ip, rootPassword, config = {}) => {
       const user = config.adminUsername || "admin";
       const pass = config.adminPassword || rootPassword;
@@ -963,16 +894,7 @@ ${appInfoCmd}
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
     estimatedTime: "~2-4 mins",
     adminUsername: "admin",
-    instructions: "Access n8n automation canvas at http://${ip}:5678 to build automated workflows.",
-    configFields: [
-      {
-        key: "adminPassword",
-        label: "n8n Web Password",
-        type: "password",
-        placeholder: "Leave empty to use VPS Root Password",
-        description: "Password used for basic authentication"
-      }
-    ],
+    instructions: "Access n8n automation canvas at http://${ip}:5678. Login with username 'admin' and your VPS root password.",
     getInstallScript: (ip, rootPassword, config = {}) => {
       const pass = config.adminPassword || rootPassword;
       const appInfoCmd = buildAppInfoJson({
@@ -1625,24 +1547,7 @@ ${appInfoCmd}
     minSpecs: { cpu: 1, ram: 2, disk: 20 },
     estimatedTime: "~2-3 mins",
     adminUsername: "admin",
-    instructions: "Access Grafana web portal at http://${ip}:3000. Login with username 'admin' and your configured password.",
-    configFields: [
-      {
-        key: "adminUsername",
-        label: "Grafana Admin Username",
-        type: "text",
-        defaultValue: "admin",
-        placeholder: "admin",
-        description: "Administrator username for Grafana"
-      },
-      {
-        key: "adminPassword",
-        label: "Grafana Admin Password",
-        type: "password",
-        placeholder: "Leave empty to use VPS Root Password",
-        description: "Administrator password"
-      }
-    ],
+    instructions: "Access Grafana web portal at http://${ip}:3000. Login with username 'admin' and your VPS root password.",
     getInstallScript: (ip, rootPassword, config = {}) => {
       const user = config.adminUsername || "admin";
       const pass = config.adminPassword || rootPassword;
@@ -1692,24 +1597,7 @@ ${appInfoCmd}
     minSpecs: { cpu: 1, ram: 1, disk: 20 },
     estimatedTime: "~2-3 mins",
     adminUsername: "admin",
-    instructions: "Access MikroTik WebFig at http://${ip}/webfig/ or WinBox on port 8291. Username: 'admin', Password: configured password.",
-    configFields: [
-      {
-        key: "adminUsername",
-        label: "RouterOS Admin Username",
-        type: "text",
-        defaultValue: "admin",
-        placeholder: "admin",
-        description: "Administrator username for RouterOS WebFig"
-      },
-      {
-        key: "adminPassword",
-        label: "RouterOS Admin Password",
-        type: "password",
-        placeholder: "Leave empty to use VPS Root Password",
-        description: "Administrator password"
-      }
-    ],
+    instructions: "Access MikroTik WebFig at http://${ip}/webfig/ or WinBox on port 8291. Username: 'admin', Password: your VPS root password.",
     getInstallScript: (ip, rootPassword, config = {}) => {
       const user = config.adminUsername || "admin";
       const pass = config.adminPassword || rootPassword;
@@ -1796,16 +1684,7 @@ ${appInfoCmd}
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
     estimatedTime: "~8-12 mins",
     adminUsername: "admin",
-    instructions: "Access CyberPanel web console at https://${ip}:8090. Username: 'admin', Password: configured password.",
-    configFields: [
-      {
-        key: "adminPassword",
-        label: "CyberPanel Admin Password",
-        type: "password",
-        placeholder: "Leave empty to use VPS Root Password",
-        description: "Direct administrative login password"
-      }
-    ],
+    instructions: "Access CyberPanel web console at https://${ip}:8090. Username: 'admin', Password: your VPS root password.",
     getInstallScript: (ip, rootPassword, config = {}) => {
       const pass = config.adminPassword || rootPassword;
       const appInfoCmd = buildAppInfoJson({
