@@ -476,7 +476,7 @@ ${appInfoCmd}
     }
   },
 
-  // 4. aaPanel (Web Panel) - Deterministic credentials and fixed port
+  // 4. aaPanel (Web Panel) - Native OS-generated credentials and fixed login entrance
   {
     id: "aapanel",
     name: "AAPANEL",
@@ -493,8 +493,8 @@ ${appInfoCmd}
     ],
     minSpecs: { cpu: 1, ram: 2, disk: 20 },
     estimatedTime: "~5-8 mins",
-    adminUsername: "paneluser",
-    instructions: "Access aaPanel at http://${ip}:8888/login. Login using your configured username and password.",
+    adminUsername: "Auto-generated",
+    instructions: "Access aaPanel at http://${ip}:8888/login. Log in using the system-generated credentials shown below.",
     configFields: [
       {
         key: "panelPort",
@@ -502,120 +502,74 @@ ${appInfoCmd}
         type: "number",
         defaultValue: 8888,
         description: "Custom web interface port (default: 8888)"
-      },
-      {
-        key: "adminUsername",
-        label: "Panel Administrator Username",
-        type: "text",
-        defaultValue: "paneluser",
-        placeholder: "paneluser",
-        description: "Admin login username (minimum 5 characters, cannot be 'admin' or 'root')"
-      },
-      {
-        key: "adminPassword",
-        label: "Panel Administrator Password",
-        type: "password",
-        placeholder: "Leave empty to use VPS Root Password",
-        description: "Direct login password for aaPanel web console"
       }
     ],
     getInstallScript: (ip, rootPassword, config = {}) => {
       const port = Number(config.panelPort) || 8888;
-      const rawUser = config.adminUsername || "paneluser";
-      const pass = config.adminPassword || rootPassword;
       return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y wget curl sqlite3
 
-# Prepare sanitized username: minimum 5 chars, cannot be 'admin' or 'root'
-AA_USER="${rawUser}"
-if [ "$AA_USER" = "admin" ] || [ "$AA_USER" = "root" ] || [ \${#AA_USER} -lt 5 ]; then
-  AA_USER="paneluser"
-fi
-
-# Install aaPanel official release non-interactively passing user, pass, port, and safe-path directly
+# Install aaPanel official release non-interactively using native setup without forced passwords
 URL=https://www.aapanel.com/script/install_7.0_en.sh
 if [ -f /usr/bin/curl ]; then curl -ksSO "$URL"; else wget --no-check-certificate -O install_7.0_en.sh "$URL"; fi
-bash install_7.0_en.sh aapanel -y -u "\${AA_USER}" -p "${pass}" -P "${port}" --safe-path login --ssl-disable || true
+bash install_7.0_en.sh aapanel -y -P "${port}" --safe-path login --ssl-disable || true
 
-# Wait until panel directory is generated
-sleep 3
+# Wait until panel files and database are generated
+sleep 5
 
-# Configure aaPanel deterministically and synchronize credentials
+# Ensure entrance is always set to /login and firewall port is open
 if [ -d /www/server/panel ]; then
-  PY_BIN="/www/server/panel/pyenv/bin/btpython"
-  [ -f "$PY_BIN" ] || PY_BIN="/www/server/panel/pyenv/bin/python"
-  [ -f "$PY_BIN" ] || PY_BIN="python3"
-
-  # Sync default.pl so 'bt 14' prints the exact configured password
-  echo "${pass}" > /www/server/panel/default.pl
-  chmod 600 /www/server/panel/default.pl
-
-  # Sync admin_path.pl so entrance is always /login
-  echo "/login" > /www/server/panel/data/admin_path.pl
-  rm -f /www/server/panel/data/ssl.pl
-
-  # Apply to internal database and tools
-  $PY_BIN -c "import tools; tools.set_panel_pwd('${pass}')" 2>/dev/null || true
-  $PY_BIN -c "import tools; tools.set_panel_username('\${AA_USER}')" 2>/dev/null || true
+  echo "/login" > /www/server/panel/data/admin_path.pl 2>/dev/null || true
+  rm -f /www/server/panel/data/ssl.pl 2>/dev/null || true
 
   ufw allow ${port}/tcp 2>/dev/null || true
   iptables -I INPUT -p tcp --dport ${port} -j ACCEPT 2>/dev/null || true
   /etc/init.d/bt restart 2>/dev/null || bt 1 2>/dev/null || true
 fi
 
-# Dynamically inspect aaPanel runtime files to guarantee 100% credential accuracy
+# Dynamically inspect native aaPanel runtime credentials directly from the OS
 ACTUAL_PORT=${port}
 if [ -f /www/server/panel/data/port.pl ]; then
-  TMP_PORT=\$(cat /www/server/panel/data/port.pl 2>/dev/null | tr -d '\\r\\n')
-  if [ -n "$TMP_PORT" ]; then
-    ACTUAL_PORT=$TMP_PORT
-  fi
+  TMP_PORT=$(cat /www/server/panel/data/port.pl 2>/dev/null | tr -d '\\r\\n ')
+  [ -n "$TMP_PORT" ] && ACTUAL_PORT=$TMP_PORT
 fi
 
-ACTUAL_USER="\${AA_USER}"
-if [ -f /www/server/panel/data/default.db ]; then
-  DB_USER=\$(sqlite3 /www/server/panel/data/default.db "SELECT username FROM users LIMIT 1;" 2>/dev/null || echo "")
-  if [ -n "$DB_USER" ]; then
-    ACTUAL_USER="$DB_USER"
-  fi
-fi
-
-ACTUAL_PASS="${pass}"
+ACTUAL_PASS=""
 if [ -f /www/server/panel/default.pl ]; then
-  READ_PASS=\$(cat /www/server/panel/default.pl 2>/dev/null | tr -d '\\r\\n')
-  if [ -n "$READ_PASS" ]; then
-    ACTUAL_PASS="\$READ_PASS"
+  ACTUAL_PASS=$(cat /www/server/panel/default.pl 2>/dev/null | tr -d '\\r\\n ')
+fi
+
+ACTUAL_USER=""
+if [ -f /www/server/panel/data/default.db ]; then
+  ACTUAL_USER=$(sqlite3 /www/server/panel/data/default.db "SELECT username FROM users ORDER BY id ASC LIMIT 1;" 2>/dev/null | tr -d '\\r\\n ' || true)
+fi
+
+# Fallback: Query bt 14 or /etc/init.d/bt default to guarantee 100% credential match
+if [ -z "$ACTUAL_PASS" ] || [ -z "$ACTUAL_USER" ]; then
+  BT_INFO=$(bt 14 2>/dev/null || /etc/init.d/bt default 2>/dev/null || true)
+  if [ -z "$ACTUAL_PASS" ]; then
+    ACTUAL_PASS=$(echo "$BT_INFO" | grep -i "password:" | head -n1 | awk -F': ' '{print $2}' | tr -d '\\r\\n ')
+  fi
+  if [ -z "$ACTUAL_USER" ]; then
+    ACTUAL_USER=$(echo "$BT_INFO" | grep -i "username:" | head -n1 | awk -F': ' '{print $2}' | tr -d '\\r\\n ')
   fi
 fi
 
-ACTUAL_PATH="/login"
-if [ -f /www/server/panel/data/admin_path.pl ]; then
-  TMP_PATH=\$(cat /www/server/panel/data/admin_path.pl 2>/dev/null | tr -d '\\r\\n')
-  if [ -n "$TMP_PATH" ]; then
-    case "\$TMP_PATH" in
-      /*) ACTUAL_PATH="\$TMP_PATH" ;;
-      *) ACTUAL_PATH="/\$TMP_PATH" ;;
-    esac
-  fi
-fi
-
-ACTUAL_PROTO="http"
-if [ -f /www/server/panel/data/ssl.pl ]; then
-  ACTUAL_PROTO="https"
-fi
+[ -z "$ACTUAL_USER" ] && ACTUAL_USER="paneluser"
+[ -z "$ACTUAL_PASS" ] && ACTUAL_PASS="View via 'bt 14' in SSH terminal"
 
 cat << EOF > /root/masdika-app-info.json
 {
   "appId": "aapanel",
-  "appName": "aaPanel",
+  "appName": "AAPANEL",
   "port": \${ACTUAL_PORT},
-  "protocol": "\${ACTUAL_PROTO}",
-  "path": "\${ACTUAL_PATH}",
+  "protocol": "http",
+  "path": "/login",
   "username": "\${ACTUAL_USER}",
   "password": "\${ACTUAL_PASS}",
-  "url": "\${ACTUAL_PROTO}://${ip}:\${ACTUAL_PORT}\${ACTUAL_PATH}"
+  "url": "http://${ip}:\${ACTUAL_PORT}/login"
 }
 EOF
 `;

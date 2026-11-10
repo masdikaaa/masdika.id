@@ -1735,7 +1735,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                                 "text-xs px-2.5 py-0.5 rounded-full font-semibold flex items-center gap-1.5 border",
                                 vps.appStatus === "INSTALLING"
                                   ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                                  : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                  : "bg-cyan-500/10 text-cyan-400 border-cyan-500/20"
                               )}>
                                 {vps.appStatus === "INSTALLING" ? (
                                   <>
@@ -1744,7 +1744,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                                   </>
                                 ) : (
                                   <>
-                                    <CheckCircle className="w-3 h-3" />
+                                    <CheckCircle className="w-3 h-3 text-cyan-400" />
                                     Application Ready
                                   </>
                                 )}

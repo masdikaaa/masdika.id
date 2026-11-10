@@ -159,13 +159,19 @@ export class VpsAppProvisioningService {
     const proxmox = new ProxmoxClient(server.host, server.tokenId, server.tokenSecret);
 
     try {
+      const initialCredentials = {
+        ...(customConfig || {}),
+        startedAt: new Date().toISOString(),
+        logs: []
+      };
+
       await prisma.vpsService.update({
         where: { id: vpsId },
         data: {
           appStatus: "INSTALLING",
           appName: app.name,
           appVersion: app.appVersion,
-          ...(customConfig ? { appCredentials: JSON.stringify(customConfig) } : {})
+          appCredentials: JSON.stringify(initialCredentials)
         }
       });
 

@@ -68,6 +68,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         appStatus: vps.appStatus,
         appUrl: vps.appUrl,
         appCredentials: vps.appCredentials,
+        createdAt: vps.createdAt,
+        updatedAt: vps.updatedAt,
       });
     }
 
