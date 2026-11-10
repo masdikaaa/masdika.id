@@ -266,7 +266,7 @@ export function AIChat() {
   const initialGreeting: Message = {
     id: 'greeting-initial',
     role: 'model',
-    content: "Hello! I am Masdika's personal AI Assistant.\n\nHow can I help you today? You can ask about our **Cloud VPS, 1-Click Catalog Apps, Web Hosting**, or even ask me about my **Portfolio and Work Experience**!",
+    content: "Hello! I am Masdika's personal AI Assistant.\n\nHow can I help you today? You can ask about our **Cloud VPS, 1-Click App Catalog, Web Hosting**, or even ask me about my **Portfolio and Work Experience**!",
     timestamp: 0
   };
 
@@ -399,7 +399,7 @@ export function AIChat() {
       setMessages([{
         ...initialGreeting,
         id: 'greeting-' + Date.now(),
-        content: `Hello ${regName.trim()}! I am Masdika's personal AI Assistant.\n\nHow can I help you today? You can ask about our **Cloud VPS, 1-Click Catalog Apps, Web Hosting**, or even ask me about my **Portfolio and Work Experience**!`,
+        content: `Hello ${regName.trim()}! I am Masdika's personal AI Assistant.\n\nHow can I help you today? You can ask about our **Cloud VPS, 1-Click App Catalog, Web Hosting**, or even ask me about my **Portfolio and Work Experience**!`,
       }]);
 
       toast.success('Chat session started successfully!', {
@@ -455,7 +455,7 @@ export function AIChat() {
       const newGreeting = [{
         ...initialGreeting,
         id: 'greeting-' + Date.now(),
-        content: `Hello ${regName.trim()}! I am Masdika's personal AI Assistant.\n\nHow can I help you today? You can ask about our **Cloud VPS, 1-Click Catalog Apps, Web Hosting**, or even ask me about my **Portfolio and Work Experience**!`,
+        content: `Hello ${regName.trim()}! I am Masdika's personal AI Assistant.\n\nHow can I help you today? You can ask about our **Cloud VPS, 1-Click App Catalog, Web Hosting**, or even ask me about my **Portfolio and Work Experience**!`,
       }];
       setMessages(newGreeting);
       localStorage.setItem(STORAGE_KEY_MESSAGES, JSON.stringify({ messages: newGreeting, timestamp: Date.now() }));

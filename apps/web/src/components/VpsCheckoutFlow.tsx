@@ -163,11 +163,14 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
   const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null);
   const [selectedOsFamily, setSelectedOsFamily] = useState<string | null>(null);
 
-  // 1-Click Apps State (initialized immediately from URL query params)
+  // 1-Click Apps State (initialized immediately from URL query params or APP_CATALOG service)
   const initialAppQuery = searchParams.get("app") || searchParams.get("appId");
-  const initialApp = initialAppQuery ? (getAppById(initialAppQuery) || getAppByName(initialAppQuery)) : null;
+  const isAppCatalogService = serviceType === "APP_CATALOG";
+  const initialApp = initialAppQuery 
+    ? (getAppById(initialAppQuery) || getAppByName(initialAppQuery))
+    : (isAppCatalogService ? VPS_APPS[0] : null);
 
-  const [imageMode, setImageMode] = useState<"os" | "apps">(initialApp ? "apps" : "os");
+  const [imageMode, setImageMode] = useState<"os" | "apps">(initialApp || isAppCatalogService ? "apps" : "os");
   const [selectedAppCategory, setSelectedAppCategory] = useState<AppCategory>(initialApp ? initialApp.category : "All Apps");
   const [selectedAppId, setSelectedAppId] = useState<string | null>(initialApp ? initialApp.id : null);
   const [selectedAppVersion, setSelectedAppVersion] = useState<string | null>(initialApp ? (initialApp.versions[0]?.appVersion || initialApp.appVersion) : null);

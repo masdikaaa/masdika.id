@@ -22,6 +22,7 @@ import {
   Code,
   CodeXml,
   Terminal,
+  Rocket,
   Sun,
   Moon,
 } from "lucide-react";
@@ -136,6 +137,13 @@ const DEV_MENU_ITEMS: MenuItem[] = [
     href: "/vps",
     icon: Terminal,
     badge: "Premium",
+  },
+  {
+    title: "App Catalog",
+    description: "1-Click automated deployment for Docker, aaPanel & AI stacks.",
+    href: "/app-catalog",
+    icon: Rocket,
+    badge: "1-Click",
   },
 ];
 

@@ -109,11 +109,13 @@ export function Footer({ socialLinks }: { socialLinks?: any }) {
             </ul>
           </div>
 
-          {/* Column 3: Network */}
+          {/* Column 3: Cloud & Network */}
           <div className="lg:col-span-2">
-            <h3 className="text-sm font-semibold mb-5 text-[var(--text-primary)]">Network</h3>
+            <h3 className="text-sm font-semibold mb-5 text-[var(--text-primary)]">Cloud & Network</h3>
             <ul className="space-y-3">
               {[
+                { name: 'Cloud VPS', path: '/vps' },
+                { name: 'App Catalog', path: '/app-catalog', badge: '1-Click' },
                 { name: 'Looking Glass', path: '/lg', badge: 'Live' }
               ].map((link, idx) => (
                 <li key={idx}>

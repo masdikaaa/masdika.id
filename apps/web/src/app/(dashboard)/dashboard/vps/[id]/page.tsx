@@ -3242,7 +3242,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                   >
                     <div className="flex items-center gap-2.5">
                       <Rocket className="w-4 h-4 text-cyan-400" />
-                      <span>1-Click Catalog App</span>
+                      <span>1-Click App Catalog</span>
                     </div>
                     <span className={cn(
                       "text-[10px] font-mono px-1.5 py-0.5 rounded font-bold",

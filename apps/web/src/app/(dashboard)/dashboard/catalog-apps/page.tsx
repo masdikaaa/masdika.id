@@ -65,7 +65,7 @@ export default function CatalogAppsPage() {
         <div>
           <div className="flex items-center gap-2.5 flex-wrap">
             <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-              Catalog App
+              App Catalog
             </h1>
             <span className={cn(
               "px-2.5 py-0.5 rounded-full text-xs font-semibold border font-mono",

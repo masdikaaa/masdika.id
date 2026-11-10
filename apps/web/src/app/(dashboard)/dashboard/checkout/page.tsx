@@ -6,7 +6,7 @@ import {
   Check, ChevronRight, ChevronLeft, ShieldCheck,
   Wallet, Code2, Cloud,
   UploadCloud, Server, FileVideo, Music, PlaySquare,
-  FileText, Activity, X, ArrowUpCircle, ShoppingCart, Loader2, BadgeCheck, RefreshCw, Terminal, Plus
+  FileText, Activity, X, ArrowUpCircle, ShoppingCart, Loader2, BadgeCheck, RefreshCw, Terminal, Plus, Rocket
 } from "lucide-react";
 import { SiKubernetes } from "react-icons/si";
 import Link from "next/link";
@@ -111,6 +111,15 @@ const SERVICES: ServiceDef[] = [
     tags: ["1 Gbps Uplink", "Anti-DDoS BGP", "Root Access"]
   },
   {
+    id: "APP_CATALOG",
+    name: "App Catalog",
+    category: "COMPUTE",
+    icon: Rocket,
+    desc: "1-Click automated stack deployment for Docker, aaPanel, WordPress, Databases & AI.",
+    badge: "1-Click",
+    tags: ["Auto-Install", "Pre-configured", "Cloud VPS"]
+  },
+  {
     id: "CDN",
     name: "File CDN",
     category: "STORAGE_CDN",
@@ -191,7 +200,9 @@ function CheckoutContent() {
   const [activeSubscriptions, setActiveSubscriptions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const defaultService = appParam ? "VPS" : (urlService || "VPS");
+  const defaultService = appParam
+    ? "APP_CATALOG"
+    : (urlService === "APP_CATALOG" || urlService === "CATALOG_APPS" || urlService === "APPS" ? "APP_CATALOG" : (urlService || "VPS"));
   const defaultCategory = appParam ? "COMPUTE" : (SERVICES.find(s => s.id === defaultService)?.category || "COMPUTE");
 
   const [selectedCategory, setSelectedCategory] = useState<string>(defaultCategory);
@@ -672,7 +683,7 @@ function CheckoutContent() {
         )}
 
         {/* Service Checkout Content */}
-        {selectedService === "VPS" || selectedService === "KUBERNETES" ? (
+        {selectedService === "VPS" || selectedService === "KUBERNETES" || selectedService === "APP_CATALOG" ? (
           <div key="vps-flow" className="w-full max-w-full min-w-0 transition-all duration-200">
             <VpsCheckoutFlow serviceType={selectedService} />
           </div>
