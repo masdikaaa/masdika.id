@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import IncidentsClient from "./IncidentsClient";
 
 export const metadata: Metadata = {
-  title: "Incident Reports & Resource Audit | Masdika",
+  title: "Incident Reports & Resource Audit",
   description:
     "Review live VPS telemetry, inspect bandwidth throttling safeguards, and export official incident reports (CSV / PDF).",
 };

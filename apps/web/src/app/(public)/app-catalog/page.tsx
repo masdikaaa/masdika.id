@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: {
-    absolute: "App Catalog - 1-Click Cloud Applications & Stacks | Masdika",
+    absolute: "App Catalog - 1-Click Cloud Applications & Stacks",
   },
   description:
     "Deploy scalable 1-Click Applications on Cloud VPS in seconds. Automated Cloud-Init deployment for aaPanel, Docker, WordPress, Nginx Proxy Manager, Ollama AI, and enterprise developer stacks.",
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     canonical: "https://www.masdika.id/app-catalog",
   },
   openGraph: {
-    title: "App Catalog - 1-Click Cloud Applications & Stacks | Masdika",
+    title: "App Catalog - 1-Click Cloud Applications & Stacks",
     description:
       "Deploy scalable 1-Click Applications on Cloud VPS in seconds. Automated Cloud-Init deployment for aaPanel, Docker, WordPress, Nginx Proxy Manager, Ollama AI, and enterprise developer stacks.",
     url: "https://www.masdika.id/app-catalog",
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "App Catalog - 1-Click Cloud Applications & Stacks | Masdika",
+    title: "App Catalog - 1-Click Cloud Applications & Stacks",
     description:
       "Deploy scalable 1-Click Applications on Cloud VPS in seconds. Automated Cloud-Init deployment for aaPanel, Docker, WordPress, Nginx Proxy Manager, Ollama AI, and enterprise developer stacks.",
     images: ["/images/brand/og-image.webp"],
