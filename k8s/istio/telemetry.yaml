@@ -1,0 +1,27 @@
+# ==============================================================================
+# ISTIO TELEMETRY (Distributed Tracing, Metrics & Structured Access Logs)
+# Integrates with Prometheus, Grafana, OpenTelemetry, and APM
+# ==============================================================================
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: masdika-telemetry
+  namespace: masdika
+  labels:
+    app.kubernetes.io/part-of: masdika
+spec:
+  accessLogging:
+    - providers:
+        - name: envoy
+  tracing:
+    - providers:
+        - name: "zipkin"
+      randomSamplingPercentage: 10.0 # Sample 10% of requests for distributed tracing
+      disableSpanReporting: false
+  metrics:
+    - providers:
+        - name: prometheus
+      overrides:
+        - match:
+            metric: ALL_METRICS
+          mode: CLIENT_AND_SERVER

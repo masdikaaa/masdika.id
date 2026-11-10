@@ -2,7 +2,8 @@
 # Masdika.ID - Production Kubernetes (K3s) All-in-One Manifest
 # 
 # Stack:
-#   - Ingress: Traefik (Built-in K3s Ingress Controller, bound to host port 80/443)
+#   - Service Mesh: Istio (Zero-Trust mTLS, Circuit Breakers, L7 Authz, Canary)
+#   - Ingress: Traefik / Istio Ingress Gateway
 #   - Tunnel: Cloudflare Tunnel (cloudflared) -> pointing to http://localhost:80
 #   - Database: PostgreSQL 18 Alpine (PersistentVolume: local-path)
 #   - Cache / Queue: Redis 7 Alpine (PersistentVolume: local-path)
@@ -11,17 +12,6 @@
 #   - Web Application: Next.js Standalone (masdika-app) + HPA Autoscaler (1-5 pods)
 #   - Background Worker: Node Queue / Cron Worker (masdika-worker)
 #   - VNC Proxy: Dedicated WebSocket Proxy for VNC Console (masdika-vnc-proxy)
-#
-# Cara Deploy Cepat:
-#   1. Buat secret dari file .env:
-#      kubectl create namespace masdika
-#      kubectl create secret generic masdika-env --from-env-file=.env -n masdika
-#   2. Apply manifest ini:
-#      kubectl apply -f k3s-masdika.yaml
-#   3. Arahkan Cloudflare Tunnel (cloudflared) ke:
-#      Type: HTTP
-#      URL: localhost:80
-#      (Pastikan toggle WebSocket diaktifkan di dashboard Cloudflare Tunnel)
 # ==============================================================================
 
 apiVersion: v1
@@ -30,3 +20,4 @@ metadata:
   name: masdika
   labels:
     app.kubernetes.io/name: masdika
+    istio-injection: enabled
