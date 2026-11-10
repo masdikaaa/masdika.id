@@ -2339,7 +2339,12 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className={cn("block text-xs font-medium mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>Root / Admin Password</label>
+                  <label className={cn("block text-xs font-semibold mb-1.5", isDark ? "text-zinc-200" : "text-slate-800")}>
+                    VPS Server Root Password <span className="text-cyan-400">*</span>
+                    <span className={cn("block text-[10px] font-normal mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                      Used for SSH (Port 22) & Web Console access. 1-Click App web passwords are automatically generated.
+                    </span>
+                  </label>
                   <div className="relative">
                     <input
                       type={showPassword ? "text" : "password"}

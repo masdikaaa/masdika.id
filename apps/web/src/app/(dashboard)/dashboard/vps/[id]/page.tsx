@@ -3592,27 +3592,49 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                     return (
                       <div className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
                         <div className={cn("border-b", isDark ? "border-white/[0.08] bg-black/20" : "border-slate-200/90 bg-slate-50", "px-4 py-3 flex items-center justify-between")}>
-                          <h3 className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-950")}>
-                            {reinstallMode === "apps" && chosenApp
-                              ? `Root Server Password for ${chosenApp.name}`
-                              : "Password for OS after reinstallation"}
-                          </h3>
+                          <div>
+                            <h3 className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-950")}>
+                              VPS Operating System Root Password
+                            </h3>
+                            <p className={cn("text-[11px] mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                              {reinstallMode === "apps" && chosenApp
+                                ? `Used for SSH & server console access (App login is 100% automated)`
+                                : "Used for Linux SSH & Proxmox console access"}
+                            </p>
+                          </div>
                           <span className={cn(
-                            "text-xs px-2.5 py-1 rounded font-bold",
+                            "text-xs px-2.5 py-1 rounded font-bold shrink-0",
                             isDark ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30" : "bg-cyan-100 text-cyan-950 border border-cyan-300"
                           )}>
-                            Default user: <b>{defaultUser}</b>
+                            SSH User: <b>{defaultUser}</b>
                           </span>
                         </div>
-                        <div className="p-6 space-y-4 max-w-md">
+                        <div className="p-6 space-y-4 max-w-lg">
                           {reinstallMode === "apps" && chosenApp ? (
-                            <div className={cn("p-3.5 rounded-xl border flex items-start gap-3 text-xs transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-300 text-slate-800")}>
-                              <Info className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-700")} />
-                              <div>
-                                <p className={cn("font-bold mb-0.5", isDark ? "text-cyan-400" : "text-cyan-950")}>Application Reinstall Note:</p>
-                                <p className={cn("leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-800 font-medium")}>
-                                  The VPS will be rebuilt with {chosenApp.osBase}. After provisioning, <strong>{chosenApp.name}</strong> will be deployed automatically. This root password will be used for SSH/Console access.
-                                </p>
+                            <div className={cn("p-4 rounded-xl border space-y-2.5 text-xs transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
+                              <div className="flex items-center gap-2 font-bold text-cyan-400 text-xs">
+                                <ShieldCheck className="w-4 h-4 shrink-0 text-cyan-400" />
+                                <span>Important: Which password is this?</span>
+                              </div>
+                              <div className="space-y-2 text-[11px] leading-relaxed">
+                                <div className={cn("p-2.5 rounded-lg border", isDark ? "bg-black/40 border-white/10" : "bg-white border-slate-200")}>
+                                  <div className="flex items-center gap-1.5 font-bold text-cyan-400 mb-0.5 text-xs">
+                                    <Server className="w-3.5 h-3.5" />
+                                    <span>1. Password Below = VPS Linux Root Password</span>
+                                  </div>
+                                  <p className={cn("text-[11px]", isDark ? "text-zinc-300" : "text-slate-600")}>
+                                    This password will be configured on the base <strong>{chosenApp.osBase}</strong> OS. You will use it to log in via <strong>SSH (Port 22)</strong> or the <strong>NoVNC Server Console</strong> as user <code className="text-cyan-300 font-mono font-bold">{defaultUser}</code>.
+                                  </p>
+                                </div>
+                                <div className={cn("p-2.5 rounded-lg border", isDark ? "bg-black/40 border-white/10" : "bg-white border-slate-200")}>
+                                  <div className="flex items-center gap-1.5 font-bold text-cyan-400 mb-0.5 text-xs">
+                                    <Rocket className="w-3.5 h-3.5" />
+                                    <span>2. {chosenApp.name} Application Password = 100% Automated</span>
+                                  </div>
+                                  <p className={cn("text-[11px]", isDark ? "text-zinc-300" : "text-slate-600")}>
+                                    Web console credentials for <strong>{chosenApp.name}</strong> are <strong>automatically generated</strong> during installation. Once deployment completes, your dashboard will display the access URL, username, and password with one-click copy buttons.
+                                  </p>
+                                </div>
                               </div>
                             </div>
                           ) : isWindowsReinstall ? (
@@ -3637,11 +3659,18 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                             </div>
                           )}
 
+                          {/* New Root Password Field */}
                           <div>
+                            <label className={cn("block text-xs font-bold mb-1.5", isDark ? "text-zinc-200" : "text-slate-800")}>
+                              New VPS Root Password <span className="text-cyan-400">*</span>
+                              <span className={cn("block text-[10px] font-normal mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                                Used for SSH port 22 and server terminal console (minimum 8 characters)
+                              </span>
+                            </label>
                             <div className="relative">
                               <input
                                 type={showReinstallPassword ? "text" : "password"}
-                                placeholder="New Root/Admin Password"
+                                placeholder="Enter new VPS root password..."
                                 value={reinstallPassword}
                                 onChange={(e) => setReinstallPassword(e.target.value)}
                                 className={cn("w-full rounded-lg pl-4 pr-10 py-2.5 text-sm focus:outline-none transition-colors", isDark ? "bg-[#0a0a0c] border border-white/[0.08] text-white placeholder-zinc-500 focus:border-cyan-500/50" : "bg-slate-50 border border-slate-200/90 text-slate-950 font-medium placeholder:text-slate-400 focus:border-cyan-500")}
@@ -3649,7 +3678,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                               <button
                                 type="button"
                                 onClick={() => setShowReinstallPassword(!showReinstallPassword)}
-                                className={cn("absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded transition-colors text-slate-400 hover:text-cyan-600")}
+                                className={cn("absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded transition-colors text-slate-400 hover:text-cyan-400 cursor-pointer")}
                               >
                                 {showReinstallPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                               </button>
@@ -3657,22 +3686,30 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                           </div>
 
                           {/* Password Strength Indicator (Visual Only) */}
-                          <div className="flex gap-1 h-1.5">
-                            <div className={cn("flex-1 rounded-full", reinstallPassword.length > 0 ? "bg-red-500" : (isDark ? "bg-white/10" : "bg-slate-200"))}></div>
-                            <div className={cn("flex-1 rounded-full", reinstallPassword.length >= 6 ? "bg-yellow-500" : (isDark ? "bg-white/10" : "bg-slate-200"))}></div>
-                            <div className={cn("flex-1 rounded-full", reinstallPassword.length >= 8 ? "bg-green-500" : (isDark ? "bg-white/10" : "bg-slate-200"))}></div>
-                            <div className={cn("flex-1 rounded-full", reinstallPassword.length >= 10 && /[!@#$%^&*]/.test(reinstallPassword) ? "bg-green-500" : (isDark ? "bg-white/10" : "bg-slate-200"))}></div>
+                          <div className="space-y-1">
+                            <div className="flex gap-1 h-1.5">
+                              <div className={cn("flex-1 rounded-full", reinstallPassword.length > 0 ? "bg-red-500" : (isDark ? "bg-white/10" : "bg-slate-200"))}></div>
+                              <div className={cn("flex-1 rounded-full", reinstallPassword.length >= 6 ? "bg-yellow-500" : (isDark ? "bg-white/10" : "bg-slate-200"))}></div>
+                              <div className={cn("flex-1 rounded-full", reinstallPassword.length >= 8 ? "bg-green-500" : (isDark ? "bg-white/10" : "bg-slate-200"))}></div>
+                              <div className={cn("flex-1 rounded-full", reinstallPassword.length >= 10 && /[!@#$%^&*]/.test(reinstallPassword) ? "bg-green-500" : (isDark ? "bg-white/10" : "bg-slate-200"))}></div>
+                            </div>
+                            <p className={cn("text-[10px] font-semibold", isDark ? "text-zinc-400" : "text-slate-600")}>Password Strength</p>
                           </div>
-                          <p className={cn("text-xs font-semibold", isDark ? "text-zinc-400" : "text-slate-700")}>Strength Indicator</p>
 
-                          <div className="relative">
-                            <input
-                              type={showReinstallPassword ? "text" : "password"}
-                              placeholder="Retype Password"
-                              value={reinstallPasswordConfirm}
-                              onChange={(e) => setReinstallPasswordConfirm(e.target.value)}
-                              className={cn("w-full rounded-lg pl-4 pr-10 py-2.5 text-sm focus:outline-none transition-colors", isDark ? "bg-[#0a0a0c] border border-white/[0.08] text-white placeholder-zinc-500 focus:border-cyan-500/50" : "bg-slate-50 border border-slate-200/90 text-slate-950 font-medium placeholder:text-slate-400 focus:border-cyan-500")}
-                            />
+                          {/* Confirm Password Field */}
+                          <div>
+                            <label className={cn("block text-xs font-bold mb-1.5", isDark ? "text-zinc-200" : "text-slate-800")}>
+                              Confirm VPS Root Password <span className="text-cyan-400">*</span>
+                            </label>
+                            <div className="relative">
+                              <input
+                                type={showReinstallPassword ? "text" : "password"}
+                                placeholder="Retype VPS root password..."
+                                value={reinstallPasswordConfirm}
+                                onChange={(e) => setReinstallPasswordConfirm(e.target.value)}
+                                className={cn("w-full rounded-lg pl-4 pr-10 py-2.5 text-sm focus:outline-none transition-colors", isDark ? "bg-[#0a0a0c] border border-white/[0.08] text-white placeholder-zinc-500 focus:border-cyan-500/50" : "bg-slate-50 border border-slate-200/90 text-slate-950 font-medium placeholder:text-slate-400 focus:border-cyan-500")}
+                              />
+                            </div>
                           </div>
 
                           {reinstallPasswordError && (
@@ -3687,7 +3724,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                             {reinstalling ? (
                               <><div className="animate-spin rounded-full h-4 w-4 border-t-2 border-slate-950"></div> Rebuilding Server...</>
                             ) : reinstallMode === "apps" && chosenApp ? (
-                              <><Rocket className="w-4 h-4" /> Reinstall & Deploy {chosenApp.name}</>
+                              <><Rocket className="w-4 h-4" /> Rebuild VPS OS & Deploy {chosenApp.name}</>
                             ) : (
                               <><HardDrive className="w-4 h-4" /> Reinstall Server ({selectedTemplate || "Select OS"})</>
                             )}
