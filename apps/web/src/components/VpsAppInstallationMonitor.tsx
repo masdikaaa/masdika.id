@@ -107,6 +107,7 @@ export function VpsAppInstallationMonitor({
   const webUrl = statusData?.appUrl || credentialsObj?.loginUrl || (primaryIp && appDef ? `${appDef.defaultProtocol}://${primaryIp}:${appDef.defaultPort}${appDef.loginPath || ""}` : "");
   const username = credentialsObj?.username || appDef?.adminUsername || "admin";
   const password = credentialsObj?.password || fallbackPassword || "Configured VPS Root Password";
+  const email = credentialsObj?.email || null;
   const instructions = credentialsObj?.instructions || appDef?.instructions?.replace(/\$\{ip\}/g, primaryIp || "your-ip") || "Log in using the credentials above.";
   const serverLogs: string[] = Array.isArray(credentialsObj?.logs) ? credentialsObj.logs : [];
   const errorText: string | null = credentialsObj?.error || null;
@@ -737,7 +738,7 @@ export function VpsAppInstallationMonitor({
                   </div>
 
                   {/* Username & Password with Eye toggle */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className={cn("grid gap-3", email ? "grid-cols-1 sm:grid-cols-3" : "grid-cols-1 sm:grid-cols-2")}>
                     {/* Username */}
                     <div>
                       <label className={cn("block text-[11px] font-semibold uppercase tracking-wider mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -800,6 +801,32 @@ export function VpsAppInstallationMonitor({
                         </div>
                       </div>
                     </div>
+
+                    {/* Email if present */}
+                    {email && (
+                      <div>
+                        <label className={cn("block text-[11px] font-semibold uppercase tracking-wider mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+                          Admin Email
+                        </label>
+                        <div className={cn(
+                          "flex items-center justify-between gap-2 p-2.5 rounded-xl border font-mono text-xs",
+                          isDark ? "bg-[#07080b] border-white/10" : "bg-white border-slate-200"
+                        )}>
+                          <span className="font-bold truncate text-cyan-400">{email}</span>
+                          <button
+                            type="button"
+                            onClick={() => copyToClipboard(email, "email")}
+                            className={cn(
+                              "p-1.5 rounded-lg border transition-colors cursor-pointer",
+                              isDark ? "border-white/10 hover:bg-white/10 text-zinc-300" : "border-slate-200 hover:bg-slate-100 text-slate-700"
+                            )}
+                            title="Copy Email"
+                          >
+                            {copiedKey === "email" ? <Check className="w-3.5 h-3.5 text-cyan-400" /> : <Copy className="w-3.5 h-3.5" />}
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Instructions */}

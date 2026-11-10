@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { ProxmoxClient } from "./proxmox";
 import { getAppById, VpsAppDefinition } from "./vps-apps";
+import { decryptDeterministic } from "@/lib/encryption";
 
 export class VpsAppProvisioningService {
   /**
@@ -186,6 +187,9 @@ export class VpsAppProvisioningService {
       await this.waitForCloudInit(proxmox, vps.node, vps.vmid, 120);
       await this.appendAppLog(vpsId, `[SYSTEM] Base OS online. Preparing package manager and runtime stack...`);
 
+      // Extract customer registered email (decrypted)
+      const customerEmail = vps.user?.email ? (decryptDeterministic(vps.user.email) || vps.user.email) : undefined;
+
       // Extract initial app configuration if passed directly or stored in DB
       let appConfig: Record<string, any> = customConfig || {};
       if (Object.keys(appConfig).length === 0 && vps.appCredentials) {
@@ -197,6 +201,11 @@ export class VpsAppProvisioningService {
         } catch {
           // ignore parsing error
         }
+      }
+
+      // Automatically supply real registered customer email if not provided
+      if (customerEmail && !appConfig.adminEmail) {
+        appConfig.adminEmail = customerEmail;
       }
 
       const script = app.getInstallScript(primaryIp, rootPassword, appConfig);
@@ -277,6 +286,7 @@ export class VpsAppProvisioningService {
       const path = verifiedInfo?.path !== undefined ? verifiedInfo.path : (app.loginPath || "");
       const username = verifiedInfo?.username || appConfig.adminUsername || app.adminUsername;
       const password = verifiedInfo?.password || appConfig.adminPassword || rootPassword;
+      const email = verifiedInfo?.email || appConfig.adminEmail || customerEmail;
       const domainOrIp = (appConfig.domain && typeof appConfig.domain === "string" && appConfig.domain.trim())
         ? appConfig.domain.trim()
         : primaryIp;
@@ -303,6 +313,7 @@ export class VpsAppProvisioningService {
         appName: app.name,
         username,
         password,
+        email,
         port,
         loginUrl: appUrl,
         instructions: app.instructions.replace(/\$\{ip\}/g, primaryIp),

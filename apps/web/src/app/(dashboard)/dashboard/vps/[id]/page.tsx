@@ -1770,7 +1770,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                       </div>
 
                       {/* Access Details Bar */}
-                      <div className={cn("mt-4 pt-4 border-t grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs", isDark ? "border-white/[0.06]" : "border-slate-100")}>
+                      <div className={cn("mt-4 pt-4 border-t grid gap-3 text-xs", credentials?.email ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" : "grid-cols-1 sm:grid-cols-3", isDark ? "border-white/[0.06]" : "border-slate-100")}>
                         <div>
                           <span className={cn("block text-[11px] mb-0.5", isDark ? "text-zinc-500" : "text-slate-400")}>Web Access URL</span>
                           {targetUrl ? (
@@ -1831,6 +1831,27 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                             </div>
                           </div>
                         </div>
+                        {credentials?.email && (
+                          <div>
+                            <span className={cn("block text-[11px] mb-0.5", isDark ? "text-zinc-500" : "text-slate-400")}>Admin Email</span>
+                            <div className="flex items-center gap-1.5">
+                              <span className={cn("font-mono font-semibold truncate text-cyan-400")}>
+                                {credentials.email}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(credentials.email);
+                                  toast.success("Email copied to clipboard");
+                                }}
+                                className="p-1 rounded hover:bg-white/10 text-zinc-400 hover:text-white cursor-pointer transition-colors"
+                                title="Copy Email"
+                              >
+                                <Copy className="w-3 h-3" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   );

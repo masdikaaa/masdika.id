@@ -79,6 +79,7 @@ export function buildAppInfoJson(info: {
   path?: string;
   username: string;
   password?: string;
+  email?: string;
   url: string;
 }): string {
   const jsonStr = JSON.stringify({
@@ -89,6 +90,7 @@ export function buildAppInfoJson(info: {
     path: info.path || "",
     username: info.username,
     password: info.password || "",
+    email: info.email || "",
     url: info.url
   }, null, 2);
 
@@ -130,13 +132,6 @@ export const VPS_APPS: VpsAppDefinition[] = [
         defaultValue: "My WordPress Site",
         placeholder: "My WordPress Site",
         description: "Public name for your new website"
-      },
-      {
-        key: "adminEmail",
-        label: "Admin Email",
-        type: "email",
-        placeholder: "admin@example.com",
-        description: "Email for system notifications and recovery"
       }
     ],
     getInstallScript: (ip, rootPassword, config = {}) => {
@@ -144,7 +139,7 @@ export const VPS_APPS: VpsAppDefinition[] = [
       const title = config.siteTitle || "My WordPress Site";
       const user = config.adminUsername || "admin";
       const pass = config.adminPassword || rootPassword;
-      const email = config.adminEmail || "admin@example.com";
+      const email = config.adminEmail || "admin@masdika.id";
       const appInfoCmd = buildAppInfoJson({
         appId: "wordpress",
         appName: "WordPress",
@@ -153,6 +148,7 @@ export const VPS_APPS: VpsAppDefinition[] = [
         path: "/wp-admin",
         username: user,
         password: pass,
+        email: email,
         url: `${siteUrl}/wp-admin`
       });
 
@@ -244,13 +240,6 @@ ${appInfoCmd}
         defaultValue: "My Drupal Site",
         placeholder: "My Drupal Site",
         description: "Public portal name"
-      },
-      {
-        key: "adminEmail",
-        label: "Admin Email",
-        type: "email",
-        placeholder: "admin@example.com",
-        description: "Email for system notifications and recovery"
       }
     ],
     getInstallScript: (ip, rootPassword, config = {}) => {
@@ -258,7 +247,7 @@ ${appInfoCmd}
       const title = config.siteTitle || "My Drupal Site";
       const user = config.adminUsername || "admin";
       const pass = config.adminPassword || rootPassword;
-      const email = config.adminEmail || "admin@example.com";
+      const email = config.adminEmail || "admin@masdika.id";
       const appInfoCmd = buildAppInfoJson({
         appId: "drupal",
         appName: "Drupal",
@@ -267,6 +256,7 @@ ${appInfoCmd}
         path: "/user/login",
         username: user,
         password: pass,
+        email: email,
         url: `${siteUrl}/user/login`
       });
 
@@ -349,13 +339,6 @@ ${appInfoCmd}
         defaultValue: "Masdika Academy",
         placeholder: "Masdika Academy",
         description: "Full site name displayed to learners"
-      },
-      {
-        key: "adminEmail",
-        label: "Admin Email",
-        type: "email",
-        placeholder: "admin@example.com",
-        description: "Email for system notifications and recovery"
       }
     ],
     getInstallScript: (ip, rootPassword, config = {}) => {
@@ -363,7 +346,7 @@ ${appInfoCmd}
       const title = config.siteTitle || "Masdika Academy";
       const user = config.adminUsername || "admin";
       const pass = config.adminPassword || rootPassword;
-      const email = config.adminEmail || "admin@example.com";
+      const email = config.adminEmail || "admin@masdika.id";
       const appInfoCmd = buildAppInfoJson({
         appId: "moodle",
         appName: "Moodle LMS",
@@ -372,6 +355,7 @@ ${appInfoCmd}
         path: "/login/index.php",
         username: user,
         password: pass,
+        email: email,
         url: `${siteUrl}/login/index.php`
       });
 
@@ -452,6 +436,7 @@ ${appInfoCmd}
     instructions: "Access aaPanel at http://${ip}:8888/login. Log in using the system-generated credentials shown below.",
     getInstallScript: (ip, rootPassword, config = {}) => {
       const port = Number(config.panelPort) || 8888;
+      const email = config.adminEmail || "admin@masdika.id";
       return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
@@ -534,6 +519,7 @@ cat << EOF > /root/masdika-app-info.json
   "path": "/login",
   "username": "\${ACTUAL_USER}",
   "password": "\${ACTUAL_PASS}",
+  "email": "${email}",
   "url": "http://${ip}:\${ACTUAL_PORT}/login"
 }
 EOF
@@ -651,17 +637,10 @@ ${appInfoCmd}
         type: "text",
         placeholder: "e.g. cpanel.yourdomain.com",
         description: "Fully qualified domain name for cPanel & WHM (must contain a dot)"
-      },
-      {
-        key: "adminEmail",
-        label: "Primary Contact Email",
-        type: "email",
-        placeholder: "admin@yourdomain.com",
-        description: "Notification email address for WHM alerts and SSL certificates"
       }
     ],
     getInstallScript: (ip, rootPassword, config = {}) => {
-      const email = config.adminEmail || "admin@example.com";
+      const email = config.adminEmail || "admin@masdika.id";
       const domain = config.domain || "";
       const appInfoCmd = buildAppInfoJson({
         appId: "cpanel",
@@ -671,6 +650,7 @@ ${appInfoCmd}
         path: "",
         username: "root",
         password: rootPassword,
+        email: email,
         url: `https://${ip}:2087`
       });
 
