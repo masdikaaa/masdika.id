@@ -376,29 +376,36 @@ export class VpsAppProvisioningService {
       const username = verifiedInfo?.username || appConfig.adminUsername || app.adminUsername;
       const password = verifiedInfo?.password || appConfig.adminPassword || rootPassword;
       const email = verifiedInfo?.email || appConfig.adminEmail || customerEmail;
+      // Re-read latest appCredentials & assignedIps from DB
+      existingCreds = {};
+      const latestVps = await prisma.vpsService.findUnique({
+        where: { id: vpsId },
+        select: { appCredentials: true, assignedIps: true }
+      });
+      if (latestVps?.appCredentials) {
+        try { existingCreds = JSON.parse(latestVps.appCredentials); } catch {}
+      }
+
+      const primaryAssigned = latestVps?.assignedIps?.find((ip: any) => ip.isPrimary) || latestVps?.assignedIps?.[0];
+      const assignedWithPublic = latestVps?.assignedIps?.find((ip: any) => ip.publicIp && ip.publicIp.trim().length > 0);
+      const effectivePublicIp = primaryAssigned?.publicIp?.trim() || assignedWithPublic?.publicIp?.trim();
+      const effectiveBrowserIp = effectivePublicIp || primaryIp;
+
       const domainOrIp = (appConfig.domain && typeof appConfig.domain === "string" && appConfig.domain.trim())
         ? appConfig.domain.trim()
-        : primaryIp;
+        : effectiveBrowserIp;
 
       let appUrl = verifiedInfo?.url;
       if (!appUrl) {
         const portSuffix = (protocol === "http" && port === 80) || (protocol === "https" && port === 443) ? "" : `:${port}`;
         appUrl = `${protocol}://${domainOrIp}${portSuffix}${path}`;
+      } else if (effectivePublicIp && primaryIp && effectivePublicIp !== primaryIp && appUrl.includes(primaryIp)) {
+        appUrl = appUrl.split(primaryIp).join(effectivePublicIp);
       }
 
       // Ensure aaPanel URL always points to /login entrance to avoid 404
       if (app.id === "aapanel" && !appUrl.includes("/login")) {
         appUrl = appUrl.replace(/\/+$/, "") + "/login";
-      }
-
-      // Re-read latest appCredentials from DB to include all recent stage logs
-      existingCreds = {};
-      const latestVps = await prisma.vpsService.findUnique({
-        where: { id: vpsId },
-        select: { appCredentials: true }
-      });
-      if (latestVps?.appCredentials) {
-        try { existingCreds = JSON.parse(latestVps.appCredentials); } catch {}
       }
 
       const appCredentials = JSON.stringify({
@@ -413,7 +420,7 @@ export class VpsAppProvisioningService {
         email,
         port,
         loginUrl: appUrl,
-        instructions: app.instructions.replace(/\$\{ip\}/g, primaryIp),
+        instructions: app.instructions.replace(/\$\{ip\}/g, effectiveBrowserIp),
         error: null,
         installFailed: false
       });

@@ -91,12 +91,38 @@ export function VpsAppInstallationMonitor({
   const serverLogs: string[] = Array.isArray(credentialsObj?.logs) ? credentialsObj.logs : [];
 
   const rawIp = statusData?.assignedIps?.[0];
-  const primaryIp = typeof rawIp === "string" ? rawIp : (rawIp?.publicIp || rawIp?.ipAddress || "");
-  const webUrl = statusData?.appUrl || credentialsObj?.loginUrl || (primaryIp && appDef ? `${appDef.defaultProtocol}://${primaryIp}:${appDef.defaultPort}${appDef.loginPath || ""}` : "");
+  const primaryAssigned = Array.isArray(statusData?.assignedIps)
+    ? (statusData.assignedIps.find((ip: any) => typeof ip === "object" && (ip as any).isPrimary) || statusData.assignedIps[0])
+    : null;
+  const baseIp = typeof rawIp === "string" 
+    ? rawIp 
+    : (primaryAssigned && typeof primaryAssigned === "object" ? (primaryAssigned as any).ipAddress : "");
+  const assignedWithPublic = Array.isArray(statusData?.assignedIps)
+    ? statusData.assignedIps.find((ip: any) => typeof ip === "object" && Boolean((ip as any).publicIp?.trim()))
+    : null;
+  const primaryIp = typeof rawIp === "string" 
+    ? rawIp 
+    : ((primaryAssigned && typeof primaryAssigned === "object" ? (primaryAssigned as any).publicIp?.trim() : null) || 
+       (assignedWithPublic && typeof assignedWithPublic === "object" ? (assignedWithPublic as any).publicIp?.trim() : null) || 
+       baseIp || "");
+
+  let rawWebUrl = statusData?.appUrl || credentialsObj?.loginUrl;
+  if (rawWebUrl && primaryIp && baseIp && baseIp !== primaryIp && rawWebUrl.includes(baseIp)) {
+    rawWebUrl = rawWebUrl.split(baseIp).join(primaryIp);
+  }
+  let webUrl = rawWebUrl || (primaryIp && appDef ? `${appDef.defaultProtocol}://${primaryIp}:${appDef.defaultPort}${appDef.loginPath || ""}` : "");
+  if ((appName?.toLowerCase().includes("aapanel") || statusData?.appName?.toLowerCase().includes("aapanel")) && webUrl && !webUrl.includes("/login")) {
+    webUrl = webUrl.replace(/\/+$/, "") + "/login";
+  }
+
   const username = credentialsObj?.username || appDef?.adminUsername || "admin";
   const password = credentialsObj?.password || fallbackPassword || "Configured VPS Root Password";
   const email = credentialsObj?.email || null;
-  const instructions = credentialsObj?.instructions || appDef?.instructions?.replace(/\$\{ip\}/g, primaryIp || "your-ip") || "Log in using the credentials above.";
+
+  let instructions = credentialsObj?.instructions || appDef?.instructions?.replace(/\$\{ip\}/g, primaryIp || "your-ip") || "Log in using the credentials above.";
+  if (instructions && primaryIp && baseIp && baseIp !== primaryIp && instructions.includes(baseIp)) {
+    instructions = instructions.split(baseIp).join(primaryIp);
+  }
   const errorText: string | null = credentialsObj?.error || null;
 
   const hasApp = Boolean(appDef || statusData?.appName || appName);

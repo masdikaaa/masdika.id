@@ -3,6 +3,7 @@ import { requireAuth } from "@/lib/auth-middleware";
 import { prisma } from "@/lib/prisma";
 import { ProxmoxClient } from "@/lib/proxmox";
 import { Address4, Address6 } from "ip-address";
+import { syncVpsAppUrlsWithPublicIp } from "@/lib/vps-app-urls";
 
 // ---- IPv4 helpers ----
 function ipv4ToNum(ip: string): number {
@@ -471,9 +472,15 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const updated = await prisma.vpsIpAssignment.update({
       where: { id: assignmentId },
       data: {
-        publicIp: publicIp ? publicIp : null
+        publicIp: publicIp ? publicIp.trim() : null
       }
     });
+
+    // Automatically update VPS application URL and credentials with the new Public IP
+    const targetIp = (publicIp && typeof publicIp === "string" && publicIp.trim())
+      ? publicIp.trim()
+      : assignment.ipAddress;
+    await syncVpsAppUrlsWithPublicIp(prisma, vpsId, targetIp, [assignment.publicIp, assignment.ipAddress]);
 
     return NextResponse.json({
       success: true,

@@ -1697,16 +1697,34 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                 {/* 1-Click Application Card (if deployed with an App) */}
                 {vps.appName && (() => {
                   const appMeta = getAppByName(vps.appName) || getAppById(vps.appName);
-                  const primaryPublicIp = vps.assignedIps?.length > 0 
-                    ? (vps.assignedIps[0].publicIp || vps.assignedIps[0].ipAddress)
-                    : vps.vpcIp;
-                  const rawTargetUrl = vps.appUrl || (appMeta && primaryPublicIp ? `${appMeta.defaultProtocol}://${primaryPublicIp}:${appMeta.defaultPort}${appMeta.loginPath || ""}` : "");
+                  const primaryAssigned = vps.assignedIps?.find((ip: any) => ip.isPrimary) || vps.assignedIps?.[0];
+                  const assignedWithPublic = vps.assignedIps?.find((ip: any) => ip.publicIp && ip.publicIp.trim().length > 0);
+                  const primaryPublicIp = primaryAssigned?.publicIp?.trim() ||
+                    assignedWithPublic?.publicIp?.trim() ||
+                    primaryAssigned?.ipAddress ||
+                    vps.vpcIp;
+                  const baseIp = primaryAssigned?.ipAddress;
+
+                  let effectiveAppUrl = vps.appUrl;
+                  if (effectiveAppUrl && primaryPublicIp && baseIp && baseIp !== primaryPublicIp && effectiveAppUrl.includes(baseIp)) {
+                    effectiveAppUrl = effectiveAppUrl.split(baseIp).join(primaryPublicIp);
+                  }
+
+                  const rawTargetUrl = effectiveAppUrl || (appMeta && primaryPublicIp ? `${appMeta.defaultProtocol}://${primaryPublicIp}:${appMeta.defaultPort}${appMeta.loginPath || ""}` : "");
                   const targetUrl = (rawTargetUrl && vps.appName?.toLowerCase().includes("aapanel") && !rawTargetUrl.includes("/login"))
                     ? rawTargetUrl.replace(/\/+$/, "") + "/login"
                     : rawTargetUrl;
                   const credentials = (() => {
                     try {
-                      return vps.appCredentials ? JSON.parse(vps.appCredentials) : null;
+                      if (!vps.appCredentials) return null;
+                      const parsed = JSON.parse(vps.appCredentials);
+                      if (parsed.loginUrl && primaryPublicIp && baseIp && baseIp !== primaryPublicIp && parsed.loginUrl.includes(baseIp)) {
+                        parsed.loginUrl = parsed.loginUrl.split(baseIp).join(primaryPublicIp);
+                      }
+                      if (parsed.instructions && primaryPublicIp && baseIp && baseIp !== primaryPublicIp && parsed.instructions.includes(baseIp)) {
+                        parsed.instructions = parsed.instructions.split(baseIp).join(primaryPublicIp);
+                      }
+                      return parsed;
                     } catch (e) {
                       return null;
                     }

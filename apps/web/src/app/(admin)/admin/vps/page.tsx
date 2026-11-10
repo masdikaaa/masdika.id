@@ -423,6 +423,7 @@ export default function VpsManagementPage() {
         setEditingReservedIpId(null);
         setEditingReservedIpValue("");
         fetchReservedIps();
+        fetchVpsServices();
       } else {
         toast.error(data.error || "Failed to update Reserved IP");
       }
@@ -937,6 +938,7 @@ export default function VpsManagementPage() {
         setEditingPublicIpId(null);
         setEditingPublicIpValue("");
         fetchAssignedIps(showIpModal.id);
+        fetchVpsServices();
       } else {
         toast.error(data.error || "Failed to save Public IP");
       }
@@ -2313,20 +2315,33 @@ export default function VpsManagementPage() {
                               </div>
                             )}
                           </div>
-                          {vps.appUrl && (
-                            <div className="mt-1">
-                              <a
-                                href={vps.appUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 text-[11px] font-mono text-cyan-400 hover:text-cyan-300 hover:underline transition-colors"
-                                title="Open application dashboard"
-                              >
-                                <Globe className="w-3 h-3 shrink-0" />
-                                <span className="truncate max-w-[200px]">{vps.appUrl}</span>
-                              </a>
-                            </div>
-                          )}
+                          {vps.appUrl && (() => {
+                            const primaryAssigned = vps.assignedIps?.find((ip: any) => ip.isPrimary) || vps.assignedIps?.[0];
+                            const assignedWithPublic = vps.assignedIps?.find((ip: any) => ip.publicIp && ip.publicIp.trim().length > 0);
+                            const pub = primaryAssigned?.publicIp?.trim() || assignedWithPublic?.publicIp?.trim();
+                            const base = primaryAssigned?.ipAddress;
+                            let displayUrl = vps.appUrl;
+                            if (pub && base && base !== pub && displayUrl.includes(base)) {
+                              displayUrl = displayUrl.split(base).join(pub);
+                            }
+                            if (vps.appName?.toLowerCase().includes("aapanel") && !displayUrl.includes("/login")) {
+                              displayUrl = displayUrl.replace(/\/+$/, "") + "/login";
+                            }
+                            return (
+                              <div className="mt-1">
+                                <a
+                                  href={displayUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 text-[11px] font-mono text-cyan-400 hover:text-cyan-300 hover:underline transition-colors"
+                                  title="Open application dashboard"
+                                >
+                                  <Globe className="w-3 h-3 shrink-0" />
+                                  <span className="truncate max-w-[200px]">{displayUrl}</span>
+                                </a>
+                              </div>
+                            );
+                          })()}
                         </td>
                         <td className="px-3.5 py-2.5">
                           {vps.osTemplate ? (

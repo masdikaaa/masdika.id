@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { ProxmoxClient } from "@/lib/proxmox";
 import { getBandwidthOptions } from "@/lib/vps-bandwidth";
 import { cleanupUserCloudflareResourcesIfNoActiveVps } from "@/lib/cloudflare-cleanup";
+import { resolveEffectiveAppUrl, resolveEffectiveAppCredentials } from "@/lib/vps-app-urls";
 
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
@@ -62,6 +63,30 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         data: { status: "RUNNING" }
       });
       vps.status = "RUNNING";
+    }
+
+    // Auto-align app URL & credentials if a public IP is assigned to this VPS
+    const primaryAssigned = vps.assignedIps?.find((ip: any) => ip.isPrimary) || vps.assignedIps?.[0];
+    const assignedWithPublic = vps.assignedIps?.find((ip: any) => ip.publicIp && ip.publicIp.trim().length > 0);
+    const effectivePublicIp = primaryAssigned?.publicIp?.trim() || assignedWithPublic?.publicIp?.trim();
+    const baseIp = primaryAssigned?.ipAddress;
+
+    if (effectivePublicIp && baseIp && effectivePublicIp !== baseIp) {
+      let needsDbUpdate = false;
+      if (vps.appUrl && vps.appUrl.includes(baseIp)) {
+        vps.appUrl = resolveEffectiveAppUrl(vps.appUrl, effectivePublicIp, baseIp, vps.appName);
+        needsDbUpdate = true;
+      }
+      if (vps.appCredentials && vps.appCredentials.includes(baseIp)) {
+        vps.appCredentials = resolveEffectiveAppCredentials(vps.appCredentials, effectivePublicIp, baseIp, vps.appName);
+        needsDbUpdate = true;
+      }
+      if (needsDbUpdate) {
+        prisma.vpsService.update({
+          where: { id: vps.id },
+          data: { appUrl: vps.appUrl, appCredentials: vps.appCredentials }
+        }).catch((e: any) => console.warn("Failed to auto-heal appUrl:", e));
+      }
     }
 
     const { searchParams } = new URL(req.url);

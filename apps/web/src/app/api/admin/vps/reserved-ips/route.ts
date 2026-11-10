@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
 import { decryptDeterministic } from "@/lib/encryption";
+import { syncVpsAppUrlsWithPublicIp } from "@/lib/vps-app-urls";
 
 export async function GET(req: NextRequest) {
   try {
@@ -67,8 +68,13 @@ export async function PUT(req: NextRequest) {
           vpsId: existingIp.vpsId,
           ipAddress: existingIp.ipAddress,
         },
-        data: { publicIp: publicIp || null },
+        data: { publicIp: publicIp ? publicIp.trim() : null },
       });
+
+      const targetIp = (publicIp && typeof publicIp === "string" && publicIp.trim())
+        ? publicIp.trim()
+        : existingIp.ipAddress;
+      await syncVpsAppUrlsWithPublicIp(prisma, existingIp.vpsId, targetIp, [existingIp.publicIp, existingIp.ipAddress]);
     }
 
     return NextResponse.json({ message: "Reserved IP updated successfully", data: updatedIp });

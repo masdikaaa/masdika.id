@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { ProxmoxClient } from "@/lib/proxmox";
 import { calculateMinimumBaseVpsRate } from "@/lib/vps-billing-rate";
 import { bandwidthToProxmoxRate, BASE_BANDWIDTH_MBPS } from "@/lib/vps-bandwidth";
+import { syncVpsAppUrlsWithPublicIp } from "@/lib/vps-app-urls";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -137,6 +138,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       }
       throw txErr;
     }
+
+    // Update VPS application web access URLs to point to the newly attached IP
+    const targetAttachedIp = reservedIp.publicIp?.trim() || reservedIp.ipAddress;
+    await syncVpsAppUrlsWithPublicIp(prisma, vps.id, targetAttachedIp, [existingPrimaryIp?.publicIp, existingPrimaryIp?.ipAddress]);
 
     // Fetch updated VPS to get ALL its current IPs in order (so we can calculate net0, net2 properly)
     const updatedVps = await prisma.vpsService.findUnique({
