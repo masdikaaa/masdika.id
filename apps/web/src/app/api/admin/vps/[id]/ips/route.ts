@@ -317,6 +317,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       }
     }
 
+    if (matchedPool.type === 'PUBLIC' || assignment.isPrimary) {
+      await syncVpsAppUrlsWithPublicIp(prisma, vpsId, ipAddress, [vps.vpcIp]);
+    }
+
     return NextResponse.json({ 
       success: true, 
       assignment,

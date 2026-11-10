@@ -72,7 +72,7 @@ export function ProvisioningLiveVisualizer({
     <div
       className={cn(
         "w-full rounded-3xl overflow-hidden relative border shadow-2xl transition-all duration-300",
-        isDark ? "bg-[var(--surface)] border-[var(--border-primary)]" : "bg-white border-slate-200/90 shadow-xl"
+        isDark ? "bg-[var(--surface-secondary)] border-white/10" : "bg-white border-slate-200/90 shadow-xl"
       )}
     >
       {/* Top Gradient Progress Bar */}

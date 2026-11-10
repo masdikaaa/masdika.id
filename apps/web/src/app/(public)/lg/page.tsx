@@ -124,11 +124,11 @@ export default function LookingGlassPage() {
     <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-10 sm:pb-14 font-sans">
       <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
         
-        {/* â”€â”€ 0. HERO (Identik Patokan SLA, Terms, Privacy, Events, Vacancies & design.md) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 0. HERO (Identik Patokan SLA, Terms, Privacy, Events, Vacancies & design.md) ────────── */}
         <section className="relative pt-6 sm:pt-10 pb-8 sm:pb-12 flex items-center">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
 
-            {/* Left â€“ Text & Actions */}
+            {/* Left – Text & Actions */}
             <div className="max-w-2xl relative z-30">
               {/* Status pill using shared Badge */}
               <div className="mb-8">
@@ -173,11 +173,11 @@ export default function LookingGlassPage() {
               </div>
             </div>
 
-            {/* Right â€“ Hero Avatar (looking-glass.webp) with Floating Badges */}
+            {/* Right – Hero Avatar (looking-glass.webp) with Floating Badges */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
                 imageSrc="/images/mascots/looking-glass.webp"
-                imageAlt="Masdika â€“ Network Routing & Looking Glass"
+                imageAlt="Masdika – Network Routing & Looking Glass"
                 imageWidth={1536}
                 imageHeight={1024}
                 badges={[
@@ -192,7 +192,7 @@ export default function LookingGlassPage() {
           </div>
         </section>
 
-        {/* â”€â”€ 1. DIAGNOSTICS & TELEMETRY SUITE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 1. DIAGNOSTICS & TELEMETRY SUITE ──────────────────── */}
         <section id="lg-tools" className="scroll-mt-24 py-10 sm:py-14 relative z-10">
           
           {/* Section Header */}
@@ -210,7 +210,7 @@ export default function LookingGlassPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
-            {/* Left 8 Cols â€“ Info Cards + Interactive Diagnostic Terminal */}
+            {/* Left 8 Cols – Info Cards + Interactive Diagnostic Terminal */}
             <div className="lg:col-span-8 space-y-8">
               
               {/* Quick Info Cards Grid */}
@@ -477,7 +477,7 @@ export default function LookingGlassPage() {
               </div>
             </div>
 
-            {/* Right 4 Cols â€“ Sticky Sidebar (Product Ecosystem & Direct Peering) */}
+            {/* Right 4 Cols – Sticky Sidebar (Product Ecosystem & Direct Peering) */}
             <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-28">
               
               {/* Product Ecosystem Card */}

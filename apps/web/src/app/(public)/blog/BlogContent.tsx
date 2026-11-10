@@ -240,11 +240,11 @@ export function BlogContent({ initialPosts = [] }: { initialPosts?: BlogPostItem
     <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-10 sm:pb-14 overflow-x-hidden">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
 
-        {/* â”€â”€ 0. HERO SECTION (Identik dengan Vacancies & design.md) â”€â”€ */}
+        {/* ── 0. HERO SECTION (Identik dengan Vacancies & design.md) ── */}
         <section className="relative pt-6 sm:pt-10 pb-8 sm:pb-12 flex items-center">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
             
-            {/* Left â€“ Text & Actions */}
+            {/* Left – Text & Actions */}
             <div className="max-w-2xl relative z-30">
               {/* Status pill using shared Badge */}
               <div className="mb-8">
@@ -287,11 +287,11 @@ export function BlogContent({ initialPosts = [] }: { initialPosts?: BlogPostItem
               </div>
             </div>
 
-            {/* Right â€“ Hero Avatar (blog.webp) with 4 Floating Badges */}
+            {/* Right – Hero Avatar (blog.webp) with 4 Floating Badges */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
                 imageSrc="/images/mascots/blog.webp"
-                imageAlt="Masdika â€“ Tech Blog & Articles"
+                imageAlt="Masdika – Tech Blog & Articles"
                 imageWidth={1536}
                 imageHeight={1024}
                 badges={[
@@ -305,7 +305,7 @@ export function BlogContent({ initialPosts = [] }: { initialPosts?: BlogPostItem
           </div>
         </section>
 
-        {/* â”€â”€ 1. ARTICLES FEED SECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 1. ARTICLES FEED SECTION ───────────────────────────────── */}
         <section id="articles-feed" className="py-10 sm:py-14 relative z-10">
           <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
             <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
@@ -319,7 +319,7 @@ export function BlogContent({ initialPosts = [] }: { initialPosts?: BlogPostItem
             </p>
           </div>
 
-          {/* â”€â”€ CONTROLS: UNIFIED SLEEK FILTER & SEARCH BAR â”€â”€ */}
+          {/* ── CONTROLS: UNIFIED SLEEK FILTER & SEARCH BAR ── */}
           <div className="mb-10 pb-5 border-b border-[var(--border-primary)]/70">
             <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3.5">
               
@@ -667,7 +667,7 @@ export function BlogContent({ initialPosts = [] }: { initialPosts?: BlogPostItem
                                 year: "numeric"
                               })}
                             </span>
-                            <span>â€¢</span>
+                            <span>•</span>
                             <span className="flex items-center gap-1.5">
                               <Clock className="w-3.5 h-3.5" />
                               {post.readTime} min
@@ -760,7 +760,7 @@ export function BlogContent({ initialPosts = [] }: { initialPosts?: BlogPostItem
           )}
         </section>
 
-        {/* â”€â”€ 2. CORE TOPIC TRACKS (Identik dengan Section 2 Vacancies) â”€ */}
+        {/* ── 2. CORE TOPIC TRACKS (Identik dengan Section 2 Vacancies) ─ */}
         <section id="topics" className="py-10 sm:py-14 relative z-10">
           <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
             <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
@@ -824,7 +824,7 @@ export function BlogContent({ initialPosts = [] }: { initialPosts?: BlogPostItem
           </div>
         </section>
 
-        {/* â”€â”€ 3. COMMUNITY & NEWSLETTER CTA (Identik dengan Section 3 Vacancies) â”€ */}
+        {/* ── 3. COMMUNITY & NEWSLETTER CTA (Identik dengan Section 3 Vacancies) ─ */}
         <section className="pt-8 pb-0">
           <div className="rounded-2xl sm:rounded-3xl bg-[var(--surface)] border border-[var(--border-primary)] p-8 sm:p-12 lg:p-16 text-center relative overflow-hidden shadow-sm">
             <div className="absolute top-0 left-0 w-full h-px bg-cyan-500/40" />

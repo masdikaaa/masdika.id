@@ -16,7 +16,7 @@ export function FaqSection({ faqs }: FaqSectionProps) {
   const isDark = theme === "dark";
 
   return (
-    <section className="py-10 sm:py-14 relative z-10">
+    <section className="py-8 sm:py-12 relative z-10">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-10 sm:mb-12">
           <div className={cn("inline-flex items-center gap-2 px-3.5 py-1 rounded-full border text-[11px] font-bold tracking-widest uppercase mb-5 shadow-xs", isDark ? "border-cyan-800/80 bg-cyan-950/30 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>

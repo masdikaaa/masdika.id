@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getAppById, getAppByName, VpsAppDefinition } from "@/lib/vps-apps";
+import { resolveEffectiveAppUrl } from "@/lib/vps-app-urls";
 import { toast } from "sonner";
 
 interface VpsAppInstallationMonitorProps {
@@ -106,22 +107,26 @@ export function VpsAppInstallationMonitor({
        (assignedWithPublic && typeof assignedWithPublic === "object" ? (assignedWithPublic as any).publicIp?.trim() : null) || 
        baseIp || "");
 
-  let rawWebUrl = statusData?.appUrl || credentialsObj?.loginUrl;
-  if (rawWebUrl && primaryIp && baseIp && baseIp !== primaryIp && rawWebUrl.includes(baseIp)) {
-    rawWebUrl = rawWebUrl.split(baseIp).join(primaryIp);
-  }
-  let webUrl = rawWebUrl || (primaryIp && appDef ? `${appDef.defaultProtocol}://${primaryIp}:${appDef.defaultPort}${appDef.loginPath || ""}` : "");
-  if ((appName?.toLowerCase().includes("aapanel") || statusData?.appName?.toLowerCase().includes("aapanel")) && webUrl && !webUrl.includes("/login")) {
-    webUrl = webUrl.replace(/\/+$/, "") + "/login";
-  }
+  const effectiveAppName = appName || statusData?.appName;
+  let webUrl = resolveEffectiveAppUrl(
+    statusData?.appUrl || credentialsObj?.loginUrl || (primaryIp && appDef ? `${appDef.defaultProtocol}://${primaryIp}:${appDef.defaultPort}${appDef.loginPath || ""}` : ""),
+    primaryIp,
+    baseIp,
+    effectiveAppName
+  );
 
   const username = credentialsObj?.username || appDef?.adminUsername || "admin";
   const password = credentialsObj?.password || fallbackPassword || "Configured VPS Root Password";
   const email = credentialsObj?.email || null;
 
   let instructions = credentialsObj?.instructions || appDef?.instructions?.replace(/\$\{ip\}/g, primaryIp || "your-ip") || "Log in using the credentials above.";
-  if (instructions && primaryIp && baseIp && baseIp !== primaryIp && instructions.includes(baseIp)) {
-    instructions = instructions.split(baseIp).join(primaryIp);
+  if (instructions && primaryIp) {
+    instructions = instructions.replace(/https?:\/\/([^\s/:]+)(:\d+)?/g, (match: string, host: string) => {
+      return match.replace(host, primaryIp);
+    });
+    if (baseIp && baseIp !== primaryIp && instructions.includes(baseIp)) {
+      instructions = instructions.split(baseIp).join(primaryIp);
+    }
   }
   const errorText: string | null = credentialsObj?.error || null;
 

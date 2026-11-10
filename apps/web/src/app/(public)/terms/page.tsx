@@ -12,11 +12,11 @@ export default function TermsPage() {
     <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-10 sm:pb-14 overflow-x-hidden">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
 
-        {/* â”€â”€ 0. HERO (Identik Patokan Events, Vacancies & design.md) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 0. HERO (Identik Patokan Events, Vacancies & design.md) ────────── */}
         <section className="relative pt-6 sm:pt-10 pb-8 sm:pb-12 flex items-center">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
 
-            {/* Left â€“ Text & Actions */}
+            {/* Left – Text & Actions */}
             <div className="max-w-2xl relative z-30">
               {/* Status pill using shared Badge */}
               <div className="mb-8">
@@ -59,11 +59,11 @@ export default function TermsPage() {
               </div>
             </div>
 
-            {/* Right â€“ Hero Avatar (term-condition.webp) with Floating Badges */}
+            {/* Right – Hero Avatar (term-condition.webp) with Floating Badges */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
                 imageSrc="/images/mascots/term-condition.webp"
-                imageAlt="Masdika â€“ Terms and Conditions"
+                imageAlt="Masdika – Terms and Conditions"
                 imageWidth={1536}
                 imageHeight={1024}
                 badges={[
@@ -77,7 +77,7 @@ export default function TermsPage() {
           </div>
         </section>
 
-        {/* â”€â”€ 1. CONTENT (Document details) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 1. CONTENT (Document details) ────────── */}
         <div id="terms-content" className="max-w-4xl mx-auto pt-4 sm:pt-6 scroll-mt-28">
           
           <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 mb-8 sm:mb-10 pb-4 border-b border-[var(--border-primary)]">

@@ -21,6 +21,7 @@ import { formatRupiah } from "@/lib/billing";
 import { getOsIconUrl, formatOsName } from "@/lib/vps-os";
 import { VPS_APPS, APP_CATEGORIES, AppCategory, VpsAppDefinition, getAppByName, getAppById } from "@/lib/vps-apps";
 import { VpsAppInstallationMonitor } from "@/components/VpsAppInstallationMonitor";
+import { resolveEffectiveAppUrl } from "@/lib/vps-app-urls";
 const getOsIcon = getOsIconUrl;
 
 const formatTime = (time: string) => {
@@ -1502,7 +1503,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
             </button>
           </div>
         </div>
-      ) : (!isSetupDismissed && vps.appStatus !== 'READY' && (['PENDING', 'PROVISIONING'].includes(vps.status) || ['INSTALLING', 'WAITING_VM'].includes(vps.appStatus || '') || (vps.status === 'INSTALLING' && vps.appStatus !== 'READY'))) ? (
+      ) : (!isSetupDismissed && vps.appStatus !== 'READY' && !['RUNNING', 'ACTIVE'].includes(vps.status) && (['PENDING', 'PROVISIONING', 'INSTALLING'].includes(vps.status) || ['INSTALLING', 'WAITING_VM'].includes(vps.appStatus || ''))) ? (
         <VpsAppInstallationMonitor
           vpsId={vps.id}
           appName={vps.appName}
@@ -1705,24 +1706,27 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                     vps.vpcIp;
                   const baseIp = primaryAssigned?.ipAddress;
 
-                  let effectiveAppUrl = vps.appUrl;
-                  if (effectiveAppUrl && primaryPublicIp && baseIp && baseIp !== primaryPublicIp && effectiveAppUrl.includes(baseIp)) {
-                    effectiveAppUrl = effectiveAppUrl.split(baseIp).join(primaryPublicIp);
-                  }
+                  const targetUrl = resolveEffectiveAppUrl(
+                    vps.appUrl || (appMeta && primaryPublicIp ? `${appMeta.defaultProtocol}://${primaryPublicIp}:${appMeta.defaultPort}${appMeta.loginPath || ""}` : ""),
+                    primaryPublicIp,
+                    baseIp,
+                    vps.appName
+                  );
 
-                  const rawTargetUrl = effectiveAppUrl || (appMeta && primaryPublicIp ? `${appMeta.defaultProtocol}://${primaryPublicIp}:${appMeta.defaultPort}${appMeta.loginPath || ""}` : "");
-                  const targetUrl = (rawTargetUrl && vps.appName?.toLowerCase().includes("aapanel") && !rawTargetUrl.includes("/login"))
-                    ? rawTargetUrl.replace(/\/+$/, "") + "/login"
-                    : rawTargetUrl;
                   const credentials = (() => {
                     try {
                       if (!vps.appCredentials) return null;
                       const parsed = JSON.parse(vps.appCredentials);
-                      if (parsed.loginUrl && primaryPublicIp && baseIp && baseIp !== primaryPublicIp && parsed.loginUrl.includes(baseIp)) {
-                        parsed.loginUrl = parsed.loginUrl.split(baseIp).join(primaryPublicIp);
+                      if (parsed.loginUrl && primaryPublicIp) {
+                        parsed.loginUrl = resolveEffectiveAppUrl(parsed.loginUrl, primaryPublicIp, baseIp, vps.appName);
                       }
-                      if (parsed.instructions && primaryPublicIp && baseIp && baseIp !== primaryPublicIp && parsed.instructions.includes(baseIp)) {
-                        parsed.instructions = parsed.instructions.split(baseIp).join(primaryPublicIp);
+                      if (parsed.instructions && primaryPublicIp) {
+                        parsed.instructions = parsed.instructions.replace(/https?:\/\/([^\s/:]+)(:\d+)?/g, (match: string, host: string) => {
+                          return match.replace(host, primaryPublicIp);
+                        });
+                        if (baseIp && baseIp !== primaryPublicIp && parsed.instructions.includes(baseIp)) {
+                          parsed.instructions = parsed.instructions.split(baseIp).join(primaryPublicIp);
+                        }
                       }
                       return parsed;
                     } catch (e) {

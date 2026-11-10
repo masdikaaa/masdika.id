@@ -166,11 +166,11 @@ export default function FileCdnClient({
     <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-10 sm:pb-14 overflow-x-hidden">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
 
-        {/* â”€â”€ 0. HERO (Identik Patokan Home Page, Vacancies & design.md) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 0. HERO (Identik Patokan Home Page, Vacancies & design.md) ────────── */}
         <section className="relative pt-6 sm:pt-10 pb-8 sm:pb-12 flex items-center">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
             
-            {/* Left â€“ Text & Actions */}
+            {/* Left – Text & Actions */}
             <div className="max-w-2xl relative z-30">
               {/* Status pill using shared Badge */}
               <div className="mb-8">
@@ -213,7 +213,7 @@ export default function FileCdnClient({
               </div>
             </div>
 
-            {/* Right â€“ Hero Avatar (file-cdn.webp) with 4 Floating Badges */}
+            {/* Right – Hero Avatar (file-cdn.webp) with 4 Floating Badges */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
                 imageSrc="/images/mascots/file-cdn.webp"
@@ -232,7 +232,7 @@ export default function FileCdnClient({
           </div>
         </section>
 
-        {/* â”€â”€ 1. VALUE PILLARS (4 Trust Highlights, Equal Height & Native CSS Variables) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 1. VALUE PILLARS (4 Trust Highlights, Equal Height & Native CSS Variables) ────────── */}
         <section className="py-10 sm:py-14 relative z-10">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
             {[
@@ -276,7 +276,7 @@ export default function FileCdnClient({
           </div>
         </section>
 
-        {/* â”€â”€ 2. DEVELOPER CODE & INTEGRATION SHOWCASE (High Contrast Terminal in Both Themes) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 2. DEVELOPER CODE & INTEGRATION SHOWCASE (High Contrast Terminal in Both Themes) ────────── */}
         <section className="py-10 sm:py-14 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             
@@ -298,7 +298,7 @@ export default function FileCdnClient({
                       <div className="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123]" />
                       <div className="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29]" />
                       <span className="text-xs font-mono font-bold text-slate-200 ml-1.5 tracking-wide">
-                        bash â€” upload.sh
+                        bash — upload.sh
                       </span>
                     </div>
 
@@ -474,7 +474,7 @@ export default function FileCdnClient({
                         <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                       </span>
                       <span className="font-bold text-emerald-400">HTTP 201 Created</span>
-                      <span className="text-slate-500">â€¢</span>
+                      <span className="text-slate-500">•</span>
                       <span className="text-slate-300">24h Auto-Expiry</span>
                     </div>
 
@@ -533,7 +533,7 @@ export default function FileCdnClient({
           </div>
         </section>
 
-        {/* â”€â”€ 3. ENTERPRISE CAPABILITIES (3 Equal Cards with Native Theme Variables) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 3. ENTERPRISE CAPABILITIES (3 Equal Cards with Native Theme Variables) ────────── */}
         <section className="py-10 sm:py-14 relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-8">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
@@ -584,7 +584,7 @@ export default function FileCdnClient({
           </div>
         </section>
 
-        {/* â”€â”€ 4. PRICING PLANS SECTION (Consistent Native Theme Cards) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 4. PRICING PLANS SECTION (Consistent Native Theme Cards) ────────── */}
         {initialPlans && initialPlans.length > 0 && (
           <section id="pricing" className="scroll-mt-24 py-10 sm:py-14 relative z-10">
             <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-8">
@@ -689,7 +689,7 @@ export default function FileCdnClient({
           </section>
         )}
 
-        {/* â”€â”€ 5. THREE-STEP WORKFLOW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 5. THREE-STEP WORKFLOW ────────── */}
         <section className="py-10 sm:py-14 relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-8">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
@@ -749,7 +749,7 @@ export default function FileCdnClient({
           </div>
         </section>
 
-        {/* â”€â”€ 6. PROVISIONING TERMINAL & FAQ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 6. PROVISIONING TERMINAL & FAQ ────────── */}
         <ProvisioningSection
           title="Instant File Distribution"
           description="Upload files and instantly get a shareable, secure download link. Powered by our global edge network for lightning-fast delivery."

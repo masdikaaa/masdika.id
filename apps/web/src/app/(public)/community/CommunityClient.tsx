@@ -141,11 +141,11 @@ export default function CommunityClient({ initialGroups }: { initialGroups: Comm
     <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-10 sm:pb-14 overflow-x-hidden">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
 
-        {/* â”€â”€ 0. HERO (Identik Patokan Home Page, Vacancies & design.md) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 0. HERO (Identik Patokan Home Page, Vacancies & design.md) ────────── */}
         <section className="relative pt-6 sm:pt-10 pb-8 sm:pb-12 flex items-center">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
             
-            {/* Left â€“ Text & Actions */}
+            {/* Left – Text & Actions */}
             <div className="max-w-2xl relative z-30">
               {/* Status pill using shared Badge */}
               <div className="mb-8">
@@ -188,11 +188,11 @@ export default function CommunityClient({ initialGroups }: { initialGroups: Comm
               </div>
             </div>
 
-            {/* Right â€“ Hero Avatar (community.webp) with 4 Floating Badges */}
+            {/* Right – Hero Avatar (community.webp) with 4 Floating Badges */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
                 imageSrc="/images/mascots/community.webp"
-                imageAlt="Masdika â€“ Developer Community"
+                imageAlt="Masdika – Developer Community"
                 imageWidth={1536}
                 imageHeight={1024}
                 badges={[
@@ -207,7 +207,7 @@ export default function CommunityClient({ initialGroups }: { initialGroups: Comm
           </div>
         </section>
 
-        {/* â”€â”€ 1. VALUE PILLARS (3 Highlights) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 1. VALUE PILLARS (3 Highlights) ───────────────────────────── */}
         <section className="py-10 sm:py-14 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 items-stretch">
             <FadeIn delay={0.1} direction="up" className="h-full">
@@ -260,7 +260,7 @@ export default function CommunityClient({ initialGroups }: { initialGroups: Comm
           </div>
         </section>
 
-        {/* â”€â”€ 2. COMMUNITY GROUPS DIRECTORY â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 2. COMMUNITY GROUPS DIRECTORY ─────────────────────────────── */}
         <section id="community-groups" className="scroll-mt-24 py-10 sm:py-14 relative z-10">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
             <div>
@@ -531,7 +531,7 @@ export default function CommunityClient({ initialGroups }: { initialGroups: Comm
           )}
         </section>
 
-        {/* â”€â”€ 3. SUBMIT GROUP SECTION (Design-system Compliant Card) â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 3. SUBMIT GROUP SECTION (Design-system Compliant Card) ────── */}
         <section id="submit-group" className="scroll-mt-24 py-10 sm:py-14 relative z-10">
           <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-8 sm:p-12 overflow-hidden shadow-xl">
             {/* Soft Ambient Accent */}

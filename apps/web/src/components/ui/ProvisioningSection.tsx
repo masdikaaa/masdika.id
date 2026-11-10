@@ -37,26 +37,18 @@ export function ProvisioningSection({
   const isDark = theme === "dark";
 
   return (
-    <section className={cn("relative py-10 sm:py-14 overflow-hidden z-20", isDark ? "bg-transparent" : "bg-white")}>
-      {/* Background elements */}
-      {isDark && (
-        <>
-          <div className="absolute inset-0 bg-[var(--surface)]" />
-          <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]" />
-        </>
-      )}
-      {!isDark && (
-        <div className="absolute inset-0 bg-slate-50" />
-      )}
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid lg:grid-cols-[1fr_1.3fr] xl:grid-cols-[1fr_1.4fr] gap-10 lg:gap-16 items-center">
+    <section className="py-10 sm:py-14 relative z-10 w-full">
+      <div className="relative rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-[var(--border-primary)] bg-white dark:bg-[var(--surface)] p-6 sm:p-10 lg:p-12 shadow-xl dark:shadow-2xl overflow-hidden transition-all">
+        {/* Soft Ambient Corner Accent */}
+        <div className="absolute top-0 right-0 w-[450px] h-[450px] bg-gradient-to-tr from-cyan-500/10 via-cyan-400/5 to-transparent rounded-full blur-3xl pointer-events-none -z-0" />
+
+        <div className="relative z-10 grid lg:grid-cols-[1fr_1.3fr] xl:grid-cols-[1fr_1.4fr] gap-10 lg:gap-14 items-center">
           
           {/* Left Column: Content */}
           <FadeIn direction="right" delay={0.1}>
             <div className="max-w-xl">
               <div className={cn(
-                "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-black tracking-widest uppercase mb-6 shadow-sm",
+                "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-black tracking-widest uppercase mb-6 shadow-xs",
                 isDark
                   ? "border-cyan-800/80 bg-cyan-950/30 text-cyan-400"
                   : "border-cyan-200 bg-cyan-50 text-cyan-700"
@@ -64,7 +56,7 @@ export function ProvisioningSection({
                 {subtitle}
               </div>
               
-              <h2 className={cn("text-4xl md:text-5xl font-black leading-[1.15] mb-6", isDark ? "text-white" : "text-slate-900")}>
+              <h2 className={cn("text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.15] mb-6", isDark ? "text-white" : "text-slate-900")}>
                 {title.split(', ').map((text, i) => (
                   <span key={i}>
                     {i === 1 ? (
@@ -82,7 +74,7 @@ export function ProvisioningSection({
                 ))}
               </h2>
               
-              <p className={cn("font-medium text-lg leading-relaxed mb-10", isDark ? "text-zinc-400" : "text-slate-600")}>
+              <p className={cn("font-medium text-base sm:text-lg leading-relaxed mb-8 sm:mb-10", isDark ? "text-zinc-400" : "text-slate-600")}>
                 {description}
               </p>
               
@@ -98,7 +90,7 @@ export function ProvisioningSection({
           </FadeIn>
 
           {/* Right Column: Visualizer */}
-          <FadeIn direction="left" delay={0.2} className="relative">
+          <FadeIn direction="left" delay={0.2} className="relative w-full">
             {/* Ambient Background Glow — radial gradient instead of expensive blur filter */}
             <div
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] rounded-full pointer-events-none"

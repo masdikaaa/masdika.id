@@ -71,14 +71,16 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     const effectivePublicIp = primaryAssigned?.publicIp?.trim() || assignedWithPublic?.publicIp?.trim();
     const baseIp = primaryAssigned?.ipAddress;
 
-    if (effectivePublicIp && baseIp && effectivePublicIp !== baseIp) {
+    if (effectivePublicIp) {
       let needsDbUpdate = false;
-      if (vps.appUrl && vps.appUrl.includes(baseIp)) {
-        vps.appUrl = resolveEffectiveAppUrl(vps.appUrl, effectivePublicIp, baseIp, vps.appName);
+      const resolvedUrl = resolveEffectiveAppUrl(vps.appUrl, effectivePublicIp, baseIp, vps.appName);
+      if (resolvedUrl && resolvedUrl !== vps.appUrl) {
+        vps.appUrl = resolvedUrl;
         needsDbUpdate = true;
       }
-      if (vps.appCredentials && vps.appCredentials.includes(baseIp)) {
-        vps.appCredentials = resolveEffectiveAppCredentials(vps.appCredentials, effectivePublicIp, baseIp, vps.appName);
+      const resolvedCreds = resolveEffectiveAppCredentials(vps.appCredentials, effectivePublicIp, baseIp, vps.appName);
+      if (resolvedCreds && resolvedCreds !== vps.appCredentials) {
+        vps.appCredentials = resolvedCreds;
         needsDbUpdate = true;
       }
       if (needsDbUpdate) {

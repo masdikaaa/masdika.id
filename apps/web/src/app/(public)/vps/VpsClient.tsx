@@ -265,11 +265,11 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
     <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-10 sm:pb-14 overflow-x-hidden">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
 
-        {/* â”€â”€ 0. HERO (Identik Patokan Home Page, Vacancies & design.md) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 0. HERO (Identik Patokan Home Page, Vacancies & design.md) ────────── */}
         <section className="relative pt-6 sm:pt-10 pb-8 sm:pb-12 flex items-center">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
             
-            {/* Left â€“ Text & Actions */}
+            {/* Left – Text & Actions */}
             <div className="max-w-2xl relative z-30">
               {/* Status pill using shared Badge */}
               <div className="mb-8">
@@ -312,11 +312,11 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
               </div>
             </div>
 
-            {/* Right â€“ Hero Avatar (vps.webp) with 4 Floating Badges */}
+            {/* Right – Hero Avatar (vps.webp) with 4 Floating Badges */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
                 imageSrc="/images/mascots/vps.webp"
-                imageAlt="Masdika â€“ Cloud VPS & Compute"
+                imageAlt="Masdika – Cloud VPS & Compute"
                 imageWidth={1536}
                 imageHeight={1024}
                 badges={[
@@ -331,7 +331,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
           </div>
         </section>
 
-        {/* â”€â”€ 1. VALUE PILLARS (4 Trust Highlights) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 1. VALUE PILLARS (4 Trust Highlights) ─────────────────────── */}
         <section className="py-10 sm:py-14 relative z-10">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
             {[
@@ -359,7 +359,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
           </div>
         </section>
 
-        {/* â”€â”€ 2. HARDWARE & SPECS SHOWCASE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 2. HARDWARE & SPECS SHOWCASE ──────────────────────────────── */}
         <section id="features" className="scroll-mt-24 py-10 sm:py-14 relative z-10">
           <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-8 sm:p-12 shadow-xl overflow-hidden">
             <div className="absolute top-0 right-0 w-[450px] h-[450px] bg-gradient-to-tr from-cyan-500/15 via-cyan-400/10 to-transparent dark:from-cyan-500/20 dark:via-cyan-400/10 dark:to-transparent rounded-full blur-3xl pointer-events-none -z-0" />
@@ -449,13 +449,13 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
           </div>
         </section>
  
-        {/* â”€â”€ 2.5. SUPPORT INFRA & CARRIER-GRADE ARCHITECTURE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 2.5. SUPPORT INFRA & CARRIER-GRADE ARCHITECTURE ──────────── */}
         <EnterpriseInfraSection mode="vps" />
 
-        {/* â”€â”€ 2.6. HOW ANTI-DDOS WORKS ANIMATED PIPELINE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 2.6. HOW ANTI-DDOS WORKS ANIMATED PIPELINE ───────────────── */}
         <AntiDdosWorkflowSection mode="vps" />
 
-        {/* â”€â”€ 3. SPEC SLIDER & PRICING CALCULATOR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 3. SPEC SLIDER & PRICING CALCULATOR ───────────────────────── */}
         <section id="pricing" className="scroll-mt-24 py-10 sm:py-14 relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-4 block">
@@ -481,7 +481,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
           {/* 4 Feature Badges Under Slider */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
             {[
-              { icon: ShieldCheck, title: "Isolated Resources", desc: "Dedicated vCPU and memory allocation â€” zero noisy neighbors." },
+              { icon: ShieldCheck, title: "Isolated Resources", desc: "Dedicated vCPU and memory allocation — zero noisy neighbors." },
               { icon: Terminal, title: "Full Root Control", desc: "Install custom kernels, OS packages, and daemons without limitations." },
               { icon: TrendingUp, title: "Instant Upgrades", desc: "Scale compute, memory, and disk capacity smoothly from your dashboard." },
               { icon: Shield, title: "KVM Virtualization", desc: "Hardware-level virtualization ensuring complete operational isolation." },
@@ -497,7 +497,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
           </div>
         </section>
 
-        {/* â”€â”€ 4. SUPPORTED OPERATING SYSTEMS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 4. SUPPORTED OPERATING SYSTEMS ────────────────────────────── */}
         <section className="py-10 sm:py-14 relative z-10">
           <div className="text-center mb-6 sm:mb-8">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
@@ -577,7 +577,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
           </div>
         </section>
 
-        {/* â”€â”€ 5. USE CASES SECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 5. USE CASES SECTION ──────────────────────────────────────── */}
         <section className="py-10 sm:py-14 relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
@@ -628,7 +628,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
           </div>
         </section>
 
-        {/* â”€â”€ 6. COMPREHENSIVE FEATURES GRID â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 6. COMPREHENSIVE FEATURES GRID ────────────────────────────── */}
         <section className="py-10 sm:py-14 relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
@@ -669,7 +669,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
           </div>
         </section>
 
-        {/* â”€â”€ 7. HOW IT WORKS SECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 7. HOW IT WORKS SECTION ───────────────────────────────────── */}
         <section className="py-10 sm:py-14 relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
@@ -714,7 +714,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
           </div>
         </section>
 
-        {/* â”€â”€ 8. PROVISIONING SECTION (Live Terminal) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 8. PROVISIONING SECTION (Live Terminal) ───────────────────── */}
         <ProvisioningSection
           subtitle="AUTOMATED PROVISIONING"
           title="One-click, instant cloud server deployment."
@@ -727,7 +727,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
           iconType="vps"
         />
 
-        {/* â”€â”€ 9. FINAL CTA SECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 9. FINAL CTA SECTION ──────────────────────────────────────── */}
         <section className="py-10 sm:py-14 relative z-10 w-full">
           <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-10 md:p-16 text-center shadow-xl overflow-hidden w-full">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-gradient-to-tr from-cyan-500/15 via-cyan-400/10 to-transparent dark:from-cyan-500/20 dark:via-cyan-400/10 dark:to-transparent rounded-full blur-3xl pointer-events-none -z-0" />
@@ -764,7 +764,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
           </div>
         </section>
 
-        {/* â”€â”€ 10. FAQ SECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 10. FAQ SECTION ───────────────────────────────────────────── */}
         <FaqSection faqs={VPS_FAQS} />
 
       </div>

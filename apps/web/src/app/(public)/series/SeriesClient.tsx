@@ -113,11 +113,11 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
     <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-10 sm:pb-14 overflow-x-hidden">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
 
-        {/* â”€â”€ 0. HERO SECTION (Identik dengan Vacancies, Blog & design.md) â”€â”€ */}
+        {/* ── 0. HERO SECTION (Identik dengan Vacancies, Blog & design.md) ── */}
         <section className="relative pt-6 sm:pt-10 pb-8 sm:pb-12 flex items-center">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
             
-            {/* Left â€“ Text & Actions */}
+            {/* Left – Text & Actions */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
@@ -165,7 +165,7 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
               </div>
             </motion.div>
 
-            {/* Right â€“ Hero Avatar (series.webp) with 4 Floating Badges */}
+            {/* Right – Hero Avatar (series.webp) with 4 Floating Badges */}
             <motion.div
               initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -174,7 +174,7 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
             >
               <HeroAvatarFrame
                 imageSrc="/images/mascots/series.webp"
-                imageAlt="Masdika â€“ Learning Series"
+                imageAlt="Masdika – Learning Series"
                 imageWidth={1536}
                 imageHeight={1024}
                 badges={[
@@ -188,7 +188,7 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
           </div>
         </section>
 
-        {/* â”€â”€ 1. SERIES CATALOG SECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 1. SERIES CATALOG SECTION ──────────────────────────────── */}
         <section id="series-catalog" className="py-10 sm:py-14 relative z-10">
           <FadeIn direction="down" className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
             <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
@@ -390,7 +390,7 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
           )}
         </section>
 
-        {/* â”€â”€ 2. CURRICULUM TRACKS (Identik dengan Section 2 Vacancies) â”€â”€ */}
+        {/* ── 2. CURRICULUM TRACKS (Identik dengan Section 2 Vacancies) ── */}
         <section id="curriculum" className="py-10 sm:py-14 relative z-10">
           <FadeIn direction="down" className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
             <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
@@ -449,7 +449,7 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
           </div>
         </section>
 
-        {/* â”€â”€ 3. COMMUNITY & WORKSHOP CTA (Identik dengan Section 3 Vacancies) â”€â”€ */}
+        {/* ── 3. COMMUNITY & WORKSHOP CTA (Identik dengan Section 3 Vacancies) ── */}
         <section className="pt-8 pb-0">
           <FadeIn direction="up" duration={0.7} className="rounded-2xl sm:rounded-3xl bg-[var(--surface)] border border-[var(--border-primary)] p-8 sm:p-12 lg:p-16 text-center relative overflow-hidden shadow-sm">
             <div className="absolute top-0 left-0 w-full h-px bg-cyan-500/40" />

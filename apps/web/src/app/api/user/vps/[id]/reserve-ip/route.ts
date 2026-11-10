@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth-middleware";
 import { prisma } from "@/lib/prisma";
 import { bandwidthToProxmoxRate, BASE_BANDWIDTH_MBPS } from "@/lib/vps-bandwidth";
+import { syncVpsAppUrlsWithPublicIp } from "@/lib/vps-app-urls";
 
 const CANONICAL_IPV4_REGEX = /^(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/;
 
@@ -226,6 +227,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       where: { id: vps.id },
       data: { status: vps.status }
     });
+
+    // Automatically align application URLs and credentials with the newly attached IP
+    await syncVpsAppUrlsWithPublicIp(prisma, vps.id, ipAddress, [vps.vpcIp]);
 
     return NextResponse.json({ success: true, ipAddress });
 

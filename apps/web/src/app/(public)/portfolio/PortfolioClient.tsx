@@ -88,11 +88,11 @@ export function PortfolioClient({ initialProjects = [] }: PortfolioClientProps) 
     <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-10 sm:pb-14 overflow-x-hidden">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
 
-        {/* â”€â”€ 0. HERO (Identik Patokan Events & design.md) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 0. HERO (Identik Patokan Events & design.md) ────────── */}
         <section className="relative pt-6 sm:pt-10 pb-8 sm:pb-12 flex items-center">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
 
-            {/* Left â€“ Text & Actions */}
+            {/* Left – Text & Actions */}
             <div className="max-w-2xl relative z-30">
               <div className="mb-8">
                 <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase">
@@ -131,11 +131,11 @@ export function PortfolioClient({ initialProjects = [] }: PortfolioClientProps) 
               </div>
             </div>
 
-            {/* Right â€“ Hero Avatar (portofolio.webp) with 4 Floating Info Badges (All 4 Visible on Mobile) */}
+            {/* Right – Hero Avatar (portofolio.webp) with 4 Floating Info Badges (All 4 Visible on Mobile) */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
                 imageSrc="/images/mascots/portofolio.webp"
-                imageAlt="Masdika â€“ Portfolio Works"
+                imageAlt="Masdika – Portfolio Works"
                 imageWidth={1323}
                 imageHeight={1189}
                 badges={[
@@ -150,7 +150,7 @@ export function PortfolioClient({ initialProjects = [] }: PortfolioClientProps) 
           </div>
         </section>
 
-        {/* â”€â”€ 1. FILTER TABS & PROJECTS GRID â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 1. FILTER TABS & PROJECTS GRID ───────────────────────────── */}
         <section id="projects-grid" className="py-10 sm:py-14 relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-8">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
@@ -337,7 +337,7 @@ export function PortfolioClient({ initialProjects = [] }: PortfolioClientProps) 
           </div>
         </section>
 
-        {/* â”€â”€ 2. ENGINEERING HIGHLIGHTS SECTION (Format identik Session Formats di Events) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 2. ENGINEERING HIGHLIGHTS SECTION (Format identik Session Formats di Events) ────────── */}
         <section className="py-10 sm:py-14 relative z-10">
           <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
             <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
@@ -395,7 +395,7 @@ export function PortfolioClient({ initialProjects = [] }: PortfolioClientProps) 
           </div>
         </section>
 
-        {/* â”€â”€ 3. CALL TO ACTION (Identik Patokan Events) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── 3. CALL TO ACTION (Identik Patokan Events) ──────────────────────── */}
         <section className="pt-8 pb-0">
           <div className="rounded-2xl sm:rounded-3xl bg-[var(--surface)] border border-[var(--border-primary)] p-8 sm:p-12 lg:p-16 text-center relative overflow-hidden shadow-sm">
             <div className="absolute top-0 left-0 w-full h-px bg-cyan-500/40" />
