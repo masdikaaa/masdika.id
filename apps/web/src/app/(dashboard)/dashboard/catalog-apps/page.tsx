@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/ThemeProvider";
 import {
   Rocket, Search, Server, ArrowRight, ShieldCheck,
-  CheckCircle, Sparkles, X, Terminal, Cpu, HardDrive
+  CheckCircle, Sparkles, X, Terminal, Cpu, HardDrive, Clock
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VPS_APPS, APP_CATEGORIES, AppCategory, VpsAppDefinition } from "@/lib/vps-apps";
@@ -213,13 +213,13 @@ export default function CatalogAppsPage() {
                 {/* Card Footer */}
                 <div className="pt-3 border-t border-white/[0.06] space-y-3">
                   <div className="flex items-center justify-between text-[10px] text-zinc-500 font-medium">
-                    <span className="flex items-center gap-1">
-                      <Server className="w-3 h-3 text-cyan-400" />
-                      <span>{app.osBase} Base</span>
-                    </span>
                     <span className="flex items-center gap-1 font-mono text-cyan-400">
                       <Cpu className="w-3 h-3" />
                       <span>Min: {app.minSpecs.cpu}C / {app.minSpecs.ram}GB</span>
+                    </span>
+                    <span className="flex items-center gap-1 font-mono text-zinc-400">
+                      <Clock className="w-3 h-3 text-cyan-400" />
+                      <span>{app.estimatedTime}</span>
                     </span>
                   </div>
 

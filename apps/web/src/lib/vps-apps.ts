@@ -52,6 +52,7 @@ export interface VpsAppDefinition {
   appVersion: string; // e.g. "1.11"
   versions: AppVersionOption[];
   minSpecs: AppMinSpecs; // Official minimum specs to prevent OOM kills
+  estimatedTime: string; // e.g. "~2-4 mins"
   loginPath?: string;
   adminUsername: string;
   instructions: string;
@@ -112,6 +113,7 @@ export const VPS_APPS: VpsAppDefinition[] = [
       { id: "67-ubu26", label: "WordPress 6.7 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v6.7" },
     ],
     minSpecs: { cpu: 1, ram: 2, disk: 20 },
+    estimatedTime: "~2-4 mins",
     adminUsername: "admin",
     instructions: "Access your WordPress site at http://${ip}/ and administrative console at http://${ip}/wp-admin.",
     configFields: [
@@ -241,6 +243,7 @@ ${appInfoCmd}
       { id: "103-ubu26", label: "Drupal 10.3 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v10.3" },
     ],
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
+    estimatedTime: "~3-5 mins",
     adminUsername: "admin",
     instructions: "Access your Drupal portal at http://${ip}/ and administrator login at http://${ip}/user/login.",
     configFields: [
@@ -361,6 +364,7 @@ ${appInfoCmd}
       { id: "45-ubu26", label: "Moodle 4.5 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v4.5" },
     ],
     minSpecs: { cpu: 2, ram: 4, disk: 25 },
+    estimatedTime: "~4-6 mins",
     adminUsername: "admin",
     instructions: "Access Moodle LMS at http://${ip}/ and administrator login at http://${ip}/login/index.php.",
     configFields: [
@@ -490,6 +494,7 @@ ${appInfoCmd}
       { id: "v7-ubu26", label: "aaPanel v7.0 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v7.0" },
     ],
     minSpecs: { cpu: 1, ram: 2, disk: 20 },
+    estimatedTime: "~5-8 mins",
     adminUsername: "paneluser",
     instructions: "Access aaPanel at http://${ip}:8888. Login using username 'paneluser' and your configured password.",
     configFields: [
@@ -635,6 +640,7 @@ EOF
       { id: "v4-ubu26", label: "Coolify v4 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v4.0" },
     ],
     minSpecs: { cpu: 2, ram: 2, disk: 30 },
+    estimatedTime: "~3-5 mins",
     adminUsername: "root",
     instructions: "Navigate to http://${ip}:8000 to complete initial registration and cluster configuration.",
     getInstallScript: (ip, rootPassword) => {
@@ -675,6 +681,7 @@ ${appInfoCmd}
       { id: "18-ubu26", label: "Plesk Obsidian - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "Obsidian 18.0" },
     ],
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
+    estimatedTime: "~10-15 mins",
     adminUsername: "root",
     instructions: "Log into Plesk at https://${ip}:8443 using your VPS root password.",
     configFields: [
@@ -728,6 +735,7 @@ ${appInfoCmd}
       { id: "120-alma9", label: "cPanel & WHM 120 - AlmaLinux 9", osBase: "AlmaLinux 9", appVersion: "v120" },
     ],
     minSpecs: { cpu: 2, ram: 4, disk: 40 },
+    estimatedTime: "~12-18 mins",
     adminUsername: "root",
     instructions: "Access WHM at https://${ip}:2087 and cPanel at https://${ip}:2083 using username 'root' and your VPS root password.",
     configFields: [
@@ -822,6 +830,7 @@ ${appInfoCmd}
       { id: "1.11-ubu26", label: "Pterodactyl - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "1.11" },
     ],
     minSpecs: { cpu: 2, ram: 4, disk: 30 },
+    estimatedTime: "~4-6 mins",
     adminUsername: "admin",
     instructions: "Access the Pterodactyl web panel with username 'admin' and your configured password.",
     configFields: [
@@ -935,6 +944,7 @@ ${appInfoCmd}
       { id: "30-ubu26", label: "Nextcloud 30 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v30" },
     ],
     minSpecs: { cpu: 2, ram: 2, disk: 30 },
+    estimatedTime: "~3-5 mins",
     adminUsername: "admin",
     instructions: "Access Nextcloud at http://${ip}:8080. Log in with username 'admin' and your configured password.",
     configFields: [
@@ -1003,6 +1013,7 @@ ${appInfoCmd}
       { id: "175-ubu26", label: "n8n v1.75 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v1.75" },
     ],
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
+    estimatedTime: "~2-4 mins",
     adminUsername: "admin",
     instructions: "Access n8n automation canvas at http://${ip}:5678 to build automated workflows.",
     configFields: [
@@ -1058,6 +1069,7 @@ ${appInfoCmd}
       { id: "024-ubu26", label: "Vikunja v0.24 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v0.24" },
     ],
     minSpecs: { cpu: 1, ram: 1, disk: 20 },
+    estimatedTime: "~2-3 mins",
     adminUsername: "admin",
     instructions: "Access Vikunja at http://${ip}:3456 to register your administrator account and start managing projects.",
     configFields: [
@@ -1123,6 +1135,7 @@ ${appInfoCmd}
       { id: "10-ubu26", label: "Hermes Agent v1.0 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v1.0" },
     ],
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
+    estimatedTime: "~3-5 mins",
     adminUsername: "admin",
     instructions: "Hermes Agent endpoint running on port 8080. Ready for API and tool execution calls.",
     getInstallScript: (ip, rootPassword) => {
@@ -1166,6 +1179,7 @@ ${appInfoCmd}
       { id: "20-ubu26", label: "OpenClaw v2.0 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v2.0" },
     ],
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
+    estimatedTime: "~3-5 mins",
     adminUsername: "admin",
     instructions: "OpenClaw agent dashboard available at http://${ip}:3000.",
     getInstallScript: (ip, rootPassword) => {
@@ -1210,6 +1224,7 @@ ${appInfoCmd}
       { id: "05-ubu26", label: "9Router v0.5 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v0.5" },
     ],
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
+    estimatedTime: "~2-3 mins",
     adminUsername: "admin",
     instructions: "Access the 9Router web dashboard at http://${ip}:20128 to manage model keys, fallback rules, and tokens.",
     getInstallScript: (ip, rootPassword) => {
@@ -1253,6 +1268,7 @@ ${appInfoCmd}
       { id: "27-ubu26", label: "Docker CE 27 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v27.5" },
     ],
     minSpecs: { cpu: 1, ram: 1, disk: 20 },
+    estimatedTime: "~1-2 mins",
     adminUsername: "root",
     instructions: "Docker Engine and Docker Compose are installed and active. Access via SSH terminal.",
     getInstallScript: (ip, rootPassword) => {
@@ -1296,6 +1312,7 @@ ${appInfoCmd}
       { id: "22-ubu26", label: "Node.js 22 LTS - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v22 LTS" },
     ],
     minSpecs: { cpu: 1, ram: 1, disk: 20 },
+    estimatedTime: "~1-2 mins",
     adminUsername: "root",
     instructions: "Node.js 22 LTS, npm, pnpm, yarn, and PM2 are globally available via SSH.",
     getInstallScript: (ip, rootPassword) => {
@@ -1338,6 +1355,7 @@ ${appInfoCmd}
       { id: "17-ubu26", label: "PostgreSQL 17 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v17" },
     ],
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
+    estimatedTime: "~2-3 mins",
     adminUsername: "postgres",
     instructions: "PostgreSQL database running on port 5432. Username: 'postgres', Password: VPS Root Password.",
     getInstallScript: (ip, rootPassword) => {
@@ -1382,6 +1400,7 @@ ${appInfoCmd}
       { id: "84-ubu26", label: "MySQL 8.4 LTS - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v8.4 LTS" },
     ],
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
+    estimatedTime: "~2-3 mins",
     adminUsername: "root",
     instructions: "MySQL running on port 3306. Admin user: 'root', Password: VPS Root Password.",
     getInstallScript: (ip, rootPassword) => {
@@ -1426,6 +1445,7 @@ ${appInfoCmd}
       { id: "114-ubu26", label: "MariaDB 11.4 LTS - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v11.4 LTS" },
     ],
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
+    estimatedTime: "~2-3 mins",
     adminUsername: "root",
     instructions: "MariaDB running on port 3306. Admin user: 'root', Password: VPS Root Password.",
     getInstallScript: (ip, rootPassword) => {
@@ -1470,6 +1490,7 @@ ${appInfoCmd}
       { id: "80-ubu26", label: "MongoDB 8.0 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v8.0" },
     ],
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
+    estimatedTime: "~2-3 mins",
     adminUsername: "admin",
     instructions: "MongoDB running on port 27017. Admin user: 'admin', Password: VPS Root Password.",
     getInstallScript: (ip, rootPassword) => {
@@ -1524,6 +1545,7 @@ ${appInfoCmd}
       { id: "14-ubu26", label: "FrankenPHP 1.4 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v1.4" },
     ],
     minSpecs: { cpu: 1, ram: 1, disk: 20 },
+    estimatedTime: "~2-3 mins",
     adminUsername: "root",
     instructions: "FrankenPHP server running on port 80/443. Web root at /var/www/html with PHP 8.3/8.4.",
     configFields: [
@@ -1616,6 +1638,7 @@ ${appInfoCmd}
       { id: "126-ubu26", label: "Nginx 1.26 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v1.26" },
     ],
     minSpecs: { cpu: 1, ram: 1, disk: 20 },
+    estimatedTime: "~1-2 mins",
     adminUsername: "root",
     instructions: "Nginx HTTP web server active on port 80. Default web root configured at /var/www/html.",
     getInstallScript: (ip, rootPassword) => {
@@ -1658,6 +1681,7 @@ ${appInfoCmd}
       { id: "115-ubu26", label: "Grafana 11.5 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v11.5" },
     ],
     minSpecs: { cpu: 1, ram: 2, disk: 20 },
+    estimatedTime: "~2-3 mins",
     adminUsername: "admin",
     instructions: "Access Grafana web portal at http://${ip}:3000. Login with username 'admin' and your configured password.",
     configFields: [
@@ -1725,6 +1749,7 @@ ${appInfoCmd}
       { id: "chr718-ubu26", label: "RouterOS v7.18 CHR - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v7.18" },
     ],
     minSpecs: { cpu: 1, ram: 1, disk: 20 },
+    estimatedTime: "~2-3 mins",
     adminUsername: "admin",
     instructions: "Access MikroTik WebFig at http://${ip}/webfig/ or WinBox on port 8291. Username: 'admin', Password: configured password.",
     configFields: [
@@ -1788,6 +1813,7 @@ ${appInfoCmd}
       { id: "24-ubu26", label: "Apache 2.4 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v2.4" },
     ],
     minSpecs: { cpu: 1, ram: 1, disk: 20 },
+    estimatedTime: "~1-2 mins",
     adminUsername: "root",
     instructions: "Apache2 HTTP web server running on port 80. Document root is at /var/www/html.",
     getInstallScript: (ip, rootPassword) => {
@@ -1829,6 +1855,7 @@ ${appInfoCmd}
       { id: "23-ubu26", label: "CyberPanel 2.3 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v2.3" },
     ],
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
+    estimatedTime: "~8-12 mins",
     adminUsername: "admin",
     instructions: "Access CyberPanel web console at https://${ip}:8090. Username: 'admin', Password: configured password.",
     configFields: [
@@ -1881,6 +1908,7 @@ ${appInfoCmd}
       { id: "131-ubu26", label: "K3s v1.31 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v1.31" },
     ],
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
+    estimatedTime: "~3-5 mins",
     adminUsername: "admin",
     instructions: "K3s Kubernetes cluster active. Access API at https://${ip}:6443. Kubeconfig stored at /etc/rancher/k3s/k3s.yaml.",
     getInstallScript: (ip, rootPassword) => {
@@ -1917,3 +1945,8 @@ export function getAppByName(name: string | null | undefined): VpsAppDefinition 
   if (!name) return undefined;
   return VPS_APPS.find(a => a.name.toLowerCase() === name.toLowerCase() || a.id.toLowerCase() === name.toLowerCase());
 }
+
+export function getEstimatedInstallTime(app?: VpsAppDefinition | null): string {
+  return app?.estimatedTime || "~3-5 mins";
+}
+

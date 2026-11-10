@@ -96,6 +96,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
   const [reinstallPasswordConfirm, setReinstallPasswordConfirm] = useState("");
   const [reinstallPasswordError, setReinstallPasswordError] = useState("");
   const [showReinstallPassword, setShowReinstallPassword] = useState(false);
+  const [showOverviewPassword, setShowOverviewPassword] = useState(false);
 
   const [isGeneratingKey, setIsGeneratingKey] = useState(false);
 
@@ -1322,6 +1323,15 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
       const data = await res.json();
       if (res.ok) {
         toast.success(data.message);
+        setVps((prev: any) => prev ? {
+          ...prev,
+          status: 'PROVISIONING',
+          appName: null,
+          appVersion: null,
+          appStatus: 'NONE',
+          appUrl: null,
+          appCredentials: null
+        } : null);
         setActiveTab("overview");
         fetchVpsDetails();
       } else {
@@ -1610,82 +1620,6 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
             </div>
           </div>
 
-          {/* 1-Click Application Access Banner */}
-          {vps.appName && vps.appStatus === 'READY' && (() => {
-            const appDef = getAppByName(vps.appName) || getAppById(vps.appName);
-            let creds: any = {};
-            try {
-              if (vps.appCredentials) creds = JSON.parse(vps.appCredentials);
-            } catch (e) {}
-            const webUrl = vps.appUrl || creds.loginUrl;
-            const appUser = creds.username || appDef?.adminUsername || "admin";
-
-            return (
-              <div className={cn(
-                "p-4 sm:p-5 rounded-2xl border transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs",
-                isDark ? "bg-[#0c0e14] border-cyan-500/30 ring-1 ring-cyan-500/20" : "bg-cyan-50/70 border-cyan-300"
-              )}>
-                <div className="flex items-center gap-3.5 min-w-0">
-                  <div className={cn(
-                    "w-11 h-11 rounded-xl p-2 flex items-center justify-center shrink-0 border",
-                    isDark ? "bg-[#06070a] border-white/10" : "bg-white border-slate-200 shadow-2xs"
-                  )}>
-                    {appDef?.icon ? (
-                      <img src={appDef.icon} alt={vps.appName} className="w-full h-full object-contain" />
-                    ) : (
-                      <Server className="w-5 h-5 text-cyan-400" />
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className={cn("text-sm font-bold uppercase tracking-wider truncate", isDark ? "text-white" : "text-slate-900")}>
-                        {vps.appName}
-                      </span>
-                      <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                        Live & Ready
-                      </span>
-                    </div>
-                    <p className="text-xs text-zinc-400 mt-0.5 flex flex-wrap items-center gap-2 font-mono">
-                      <span>User: <strong className="text-cyan-400">{appUser}</strong></span>
-                      <span>•</span>
-                      <span>URL: <span className="text-zinc-300 truncate max-w-[240px] inline-block align-bottom">{webUrl || "Available via IP"}</span></span>
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
-                  {webUrl && (
-                    <a
-                      href={webUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
-                    >
-                      <span>Open {vps.appName}</span>
-                      <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
-                    </a>
-                  )}
-                  {webUrl && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        navigator.clipboard.writeText(webUrl);
-                        toast.success("Web access URL copied!");
-                      }}
-                      className={cn(
-                        "p-2 rounded-xl border transition-colors cursor-pointer",
-                        isDark ? "border-white/10 hover:bg-white/10 text-zinc-300" : "border-slate-200 hover:bg-slate-100 text-slate-700"
-                      )}
-                      title="Copy Login URL"
-                    >
-                      <Copy className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
-            );
-          })()}
-
           {/* Tabs Navigation */}
           <div className={cn("border transition-colors shadow-2xs", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90", "flex gap-1.5 p-1.5 rounded-2xl overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] w-full")}>
             {[
@@ -1835,23 +1769,33 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         </div>
                         <div>
                           <span className={cn("block text-[11px] mb-0.5", isDark ? "text-zinc-500" : "text-slate-400")}>Default Password</span>
-                          <div className="flex items-center gap-1.5">
-                            <span className={cn("font-mono font-semibold truncate", isDark ? "text-amber-400" : "text-amber-600")}>
-                              {credentials?.password || "Configured VPS Root Password"}
+                          <div className="flex items-center gap-2">
+                            <span className={cn("font-mono font-semibold truncate", isDark ? "text-cyan-400" : "text-cyan-600")}>
+                              {showOverviewPassword ? (credentials?.password || "Configured VPS Root Password") : "••••••••••••"}
                             </span>
-                            {credentials?.password && (
+                            <div className="flex items-center gap-1 shrink-0">
                               <button
                                 type="button"
-                                onClick={() => {
-                                  navigator.clipboard.writeText(credentials.password);
-                                  toast.success("Password copied to clipboard");
-                                }}
-                                className="p-1 rounded hover:bg-white/10 text-zinc-400 hover:text-white cursor-pointer"
-                                title="Copy Password"
+                                onClick={() => setShowOverviewPassword(!showOverviewPassword)}
+                                className="p-1 rounded hover:bg-white/10 text-zinc-400 hover:text-white cursor-pointer transition-colors"
+                                title={showOverviewPassword ? "Hide Password" : "Show Password"}
                               >
-                                <Copy className="w-3 h-3" />
+                                {showOverviewPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                               </button>
-                            )}
+                              {credentials?.password && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(credentials.password);
+                                    toast.success("Password copied to clipboard");
+                                  }}
+                                  className="p-1 rounded hover:bg-white/10 text-zinc-400 hover:text-white cursor-pointer transition-colors"
+                                  title="Copy Password"
+                                >
+                                  <Copy className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>

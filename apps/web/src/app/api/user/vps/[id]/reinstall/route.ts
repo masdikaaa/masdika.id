@@ -47,10 +47,17 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         return NextResponse.json({ error: "Invalid template selected" }, { status: 400 });
     }
 
-    // Atomic lock so concurrent reinstall calls cannot collide
+    // Atomic lock so concurrent reinstall calls cannot collide and clear old 1-Click App data
     const lock = await prisma.vpsService.updateMany({
       where: { id: vps.id, status: vps.status },
-      data: { status: "PROVISIONING" },
+      data: { 
+        status: "PROVISIONING",
+        appName: null,
+        appVersion: null,
+        appStatus: "NONE",
+        appUrl: null,
+        appCredentials: null
+      },
     });
     if (lock.count === 0) {
       return NextResponse.json({ error: "Instance state changed. Please retry." }, { status: 409 });

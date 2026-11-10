@@ -41,7 +41,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     // Atomic lock so two concurrent reinstall calls can't both rebuild the same VM
     const lock = await prisma.vpsService.updateMany({
       where: { id: vps.id, status: vps.status },
-      data: { status: "PROVISIONING" },
+      data: { 
+        status: "PROVISIONING",
+        appName: null,
+        appVersion: null,
+        appStatus: "NONE",
+        appUrl: null,
+        appCredentials: null
+      },
     });
     if (lock.count === 0) return apiError("Instance state changed. Please retry.", 409);
 

@@ -681,13 +681,18 @@ export class VpsProvisioningService {
     const isWindowsReinstall = newTemplateName.toLowerCase().includes("windows");
     const newUsername = isWindowsReinstall ? "Administrator" : (vps.username === "Administrator" ? "root" : (vps.username || "root"));
 
-    // Update status to provisioning
+    // Update status to provisioning and clear any previous 1-Click App data
     await prisma.vpsService.update({
       where: { id: vps.id },
       data: {
         status: "PROVISIONING",
         osTemplate: newTemplateName,
         username: newUsername,
+        appName: null,
+        appVersion: null,
+        appStatus: "NONE",
+        appUrl: null,
+        appCredentials: null,
         ...(newPassword ? { rootPassword: encryptDeterministic(newPassword) } : {})
       }
     });
@@ -897,7 +902,14 @@ export class VpsProvisioningService {
       }
 
       // Update DB
-      const dbUpdateData: any = { status: vps.kubernetesClusterId ? "INSTALLING_K3S" : "RUNNING" };
+      const dbUpdateData: any = { 
+        status: vps.kubernetesClusterId ? "INSTALLING_K3S" : "RUNNING",
+        appName: null,
+        appVersion: null,
+        appStatus: "NONE",
+        appUrl: null,
+        appCredentials: null
+      };
       if (newPassword) {
         dbUpdateData.rootPassword = encryptDeterministic(newPassword);
       }

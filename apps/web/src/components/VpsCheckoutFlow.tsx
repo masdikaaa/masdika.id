@@ -1091,9 +1091,12 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                                 <span className="text-[10px] font-mono text-cyan-400 shrink-0 ml-1">:{app.defaultPort}</span>
                               </div>
                               {app.minSpecs && (
-                                <div className="flex items-center justify-between text-[10px] text-zinc-500 font-mono mt-1 px-0.5">
-                                  <span>Min: {app.minSpecs.cpu}C / {app.minSpecs.ram}GB RAM</span>
-                                  <span>{app.minSpecs.disk}GB Disk</span>
+                                <div className="flex items-center justify-between text-[10px] font-mono mt-1 px-0.5">
+                                  <span className="text-zinc-500">Min: {app.minSpecs.cpu}C / {app.minSpecs.ram}GB</span>
+                                  <span className="flex items-center gap-1 text-cyan-400 font-semibold">
+                                    <Clock className="w-2.5 h-2.5" />
+                                    <span>{app.estimatedTime}</span>
+                                  </span>
                                 </div>
                               )}
                             </div>
@@ -1202,6 +1205,11 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                                 <span>{activeApp.minSpecs.ram} GB RAM</span>
                                 <span>•</span>
                                 <span>{activeApp.minSpecs.disk} GB Disk</span>
+                                <span>•</span>
+                                <span className="text-cyan-400 font-semibold flex items-center gap-1">
+                                  <Clock className="w-3 h-3" />
+                                  <span>Est: {activeApp.estimatedTime}</span>
+                                </span>
                                 <span className="text-emerald-400 font-medium">(Auto-enforced to prevent OOM kills)</span>
                               </div>
                             )}
