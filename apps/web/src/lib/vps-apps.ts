@@ -1063,7 +1063,6 @@ ${appInfoCmd}
     id: "openclaw",
     name: "OPEN CLAW",
     category: "Artificial Intelligence",
-    secondaryCategories: ["Education"],
     description: "Autonomous open-source AI assistant framework running locally across all your chats and devices.",
     icon: "/images/apps/openclaw.png",
     defaultPort: 3000,
