@@ -41,7 +41,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
-/* ─── Supported Operating Systems ─── */
+/* â”€â”€â”€ Supported Operating Systems â”€â”€â”€ */
 const SUPPORTED_OPERATING_SYSTEMS = [
   { name: "AlmaLinux", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/almalinux/almalinux-original.svg" },
   { name: "Alpine Linux", icon: "https://cdn.simpleicons.org/alpinelinux/0D597F" },
@@ -60,7 +60,7 @@ const REPEATED_OPERATING_SYSTEMS = [
   ...SUPPORTED_OPERATING_SYSTEMS,
 ];
 
-/* ─── Terminal Logs & Stats for ProvisioningSection ─── */
+/* â”€â”€â”€ Terminal Logs & Stats for ProvisioningSection â”€â”€â”€ */
 const RESELLER_TERMINAL_LOGS = [
   { time: "00:01", module: "CONFIG", message: "POST /api/v1/instances (plan: vps-1gb, os: ubuntu-22.04)" },
   { time: "00:02", module: "AUTH", message: "Bearer token validated. Master deposit balance deducted." },
@@ -78,7 +78,7 @@ const RESELLER_TERMINAL_STATS = [
   { value: "KVM", label: "HYPERVISOR" },
 ];
 
-/* ─── Reseller FAQs ─── */
+/* â”€â”€â”€ Reseller FAQs â”€â”€â”€ */
 const RESELLER_FAQS = [
   {
     q: "Is Masdika branding completely hidden from my customers?",
@@ -106,7 +106,7 @@ const RESELLER_FAQS = [
   }
 ];
 
-/* ─── Developer Quickstart Snippets ─── */
+/* â”€â”€â”€ Developer Quickstart Snippets â”€â”€â”€ */
 const QUICKSTART_SNIPPETS = {
   curl: `curl -X POST "https://www.masdika.id/api/v1/instances" \\
   -H "Authorization: Bearer masdika_YOUR_SECRET_KEY" \\
@@ -176,7 +176,7 @@ print_r($result);
 ?>`
 };
 
-/* ─── Reusable Copy Button ─── */
+/* â”€â”€â”€ Reusable Copy Button â”€â”€â”€ */
 const CopyBtn = ({ text, small, darkStyle }: { text: string; small?: boolean; darkStyle?: boolean }) => {
   const [copied, setCopied] = useState(false);
   const handleCopy = () => {
@@ -202,7 +202,7 @@ const CopyBtn = ({ text, small, darkStyle }: { text: string; small?: boolean; da
   );
 };
 
-/* ─── Method Badge ─── */
+/* â”€â”€â”€ Method Badge â”€â”€â”€ */
 const MethodBadge = ({ method }: { method: string }) => {
   const colors: Record<string, string> = {
     GET: "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30",
@@ -218,7 +218,7 @@ const MethodBadge = ({ method }: { method: string }) => {
   );
 };
 
-/* ─── Dedicated Dark Code Block (Always Crisp in Both Light & Dark) ─── */
+/* â”€â”€â”€ Dedicated Dark Code Block (Always Crisp in Both Light & Dark) â”€â”€â”€ */
 const CodeBlock = ({ title, children, raw }: { title: string; children: React.ReactNode; raw?: string }) => (
   <div 
     className="rounded-xl overflow-hidden shadow-xl"
@@ -245,7 +245,7 @@ const CodeBlock = ({ title, children, raw }: { title: string; children: React.Re
   </div>
 );
 
-/* ─── Endpoint Section ─── */
+/* â”€â”€â”€ Endpoint Section â”€â”€â”€ */
 const EndpointSection = ({ id, title, method, endpoint, description, parameters, payload, response }: any) => {
   let curlCommand = `curl "https://www.masdika.id${endpoint}" \\\n  -H "Authorization: Bearer masdika_YOUR_SECRET_KEY" \\\n  -X ${method}`;
   if (payload) {
@@ -340,7 +340,7 @@ const EndpointSection = ({ id, title, method, endpoint, description, parameters,
   );
 };
 
-/* ─── Sidebar Navigation ─── */
+/* â”€â”€â”€ Sidebar Navigation â”€â”€â”€ */
 const navSections = [
   {
     label: "Getting Started",
@@ -558,14 +558,14 @@ export default function ResellerApiClient() {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-20 lg:pb-28 font-sans">
+    <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-10 sm:pb-14 font-sans">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
 
-        {/* ── 0. HERO (Identik Patokan Home Page, VPS, K3s & design.md) ────────── */}
-        <section className="relative pt-8 sm:pt-12 pb-16 lg:pb-24 flex items-center">
+        {/* â”€â”€ 0. HERO (Identik Patokan Home Page, VPS, K3s & design.md) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <section className="relative pt-6 sm:pt-10 pb-8 sm:pb-12 flex items-center">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
             
-            {/* Left – Text & Actions */}
+            {/* Left â€“ Text & Actions */}
             <div className="max-w-2xl relative z-30">
               {/* Status pill using shared Badge */}
               <div className="mb-8">
@@ -608,11 +608,11 @@ export default function ResellerApiClient() {
               </div>
             </div>
 
-            {/* Right – Hero Avatar (reseller-api.webp) with 4 Floating Badges */}
+            {/* Right â€“ Hero Avatar (reseller-api.webp) with 4 Floating Badges */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
                 imageSrc="/images/mascots/reseller-api.webp"
-                imageAlt="Masdika – White-Label Reseller API"
+                imageAlt="Masdika â€“ White-Label Reseller API"
                 imageWidth={1536}
                 imageHeight={1024}
                 badges={[
@@ -627,8 +627,8 @@ export default function ResellerApiClient() {
           </div>
         </section>
 
-        {/* ── 1. VALUE PILLARS (4 Trust Highlights, Equal Height) ────────── */}
-        <section className="py-12 border-y border-[var(--border-primary)] mb-16 lg:mb-24">
+        {/* â”€â”€ 1. VALUE PILLARS (4 Trust Highlights, Equal Height) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <section className="py-8 sm:py-10 border-y border-[var(--border-primary)] mb-8 sm:mb-12">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
             {[
               { icon: CodeXml, title: "RESTful JSON API", desc: "Straightforward endpoints with predictable JSON responses and full OpenAPI reference." },
@@ -651,8 +651,8 @@ export default function ResellerApiClient() {
           </div>
         </section>
 
-        {/* ── 2. HARDWARE & ARCHITECTURE SHOWCASE ───────────────────────── */}
-        <section id="features" className="scroll-mt-24 mb-16 lg:mb-24">
+        {/* â”€â”€ 2. HARDWARE & ARCHITECTURE SHOWCASE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <section id="features" className="scroll-mt-24 mb-8 sm:mb-12">
           <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-8 sm:p-12 shadow-xl overflow-hidden">
             <div className="absolute top-0 right-0 w-[450px] h-[450px] bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -z-0" />
 
@@ -741,9 +741,9 @@ export default function ResellerApiClient() {
           </div>
         </section>
 
-        {/* ── 3. WORKLOAD SOLUTIONS / TARGET USE CASES ──────────────────── */}
-        <section className="mb-16 lg:mb-24">
-          <div className="text-center max-w-3xl mx-auto mb-12">
+        {/* â”€â”€ 3. WORKLOAD SOLUTIONS / TARGET USE CASES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <section className="mb-8 sm:mb-12">
+          <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-8">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
               TARGET USE CASES
             </span>
@@ -792,9 +792,9 @@ export default function ResellerApiClient() {
           </div>
         </section>
 
-        {/* ── 4. RESELLER WORKFLOW (3 Simple Steps) ─────────────────────── */}
-        <section className="mb-16 lg:mb-24">
-          <div className="text-center max-w-3xl mx-auto mb-12">
+        {/* â”€â”€ 4. RESELLER WORKFLOW (3 Simple Steps) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <section className="mb-8 sm:mb-12">
+          <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-8">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
               RESELLER WORKFLOW
             </span>
@@ -837,8 +837,8 @@ export default function ResellerApiClient() {
           </div>
         </section>
 
-        {/* ── 5. PROVISIONING SECTION (Live Terminal Simulation) ─────────── */}
-        <div className="mb-16 lg:mb-24 rounded-3xl overflow-hidden border border-[var(--border-primary)] shadow-sm">
+        {/* â”€â”€ 5. PROVISIONING SECTION (Live Terminal Simulation) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <div className="mb-8 sm:mb-12 rounded-3xl overflow-hidden border border-[var(--border-primary)] shadow-sm">
           <ProvisioningSection
             subtitle="AUTOMATED API PROVISIONING"
             title="Programmatic VM deployment in ~5 minutes."
@@ -849,13 +849,13 @@ export default function ResellerApiClient() {
             stats={RESELLER_TERMINAL_STATS}
             terminalTitle="PROVISIONING RESELLER VM"
             iconType="vps"
-            targetServer="Dell PowerEdge R630 • Sidoarjo DC"
+            targetServer="Dell PowerEdge R630 â€¢ Sidoarjo DC"
             provisionEstimate="Backend: KVM Hypervisor (Estimasi ~5 Menit)"
           />
         </div>
 
-        {/* ── 6. SUPPORTED OPERATING SYSTEMS CAROUSEL ───────────────────── */}
-        <section className="pt-6 sm:pt-10 mb-16 lg:mb-24">
+        {/* â”€â”€ 6. SUPPORTED OPERATING SYSTEMS CAROUSEL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <section className="pt-2 sm:pt-4 mb-8 sm:mb-12">
           <div className="text-center mb-8">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
               OPERATING SYSTEMS
@@ -934,9 +934,9 @@ export default function ResellerApiClient() {
           </div>
         </section>
 
-        {/* ── 7. DEVELOPER QUICKSTART CODE TABS (Always Dark High-Contrast Terminal) ─────────────────────────── */}
-        <section className="mb-16 lg:mb-24">
-          <div className="text-center max-w-3xl mx-auto mb-10">
+        {/* â”€â”€ 7. DEVELOPER QUICKSTART CODE TABS (Always Dark High-Contrast Terminal) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <section className="mb-8 sm:mb-12">
+          <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-8">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
               DEVELOPER QUICKSTART
             </span>
@@ -1024,9 +1024,9 @@ export default function ResellerApiClient() {
           </div>
         </section>
 
-        {/* ── 8. INTERACTIVE API DOCUMENTATION EXPLORER ──────────────────── */}
-        <section id="documentation" className="scroll-mt-24 mb-16 lg:mb-24">
-          <div className="text-center max-w-3xl mx-auto mb-12">
+        {/* â”€â”€ 8. INTERACTIVE API DOCUMENTATION EXPLORER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <section id="documentation" className="scroll-mt-24 mb-8 sm:mb-12">
+          <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-8">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
               API REFERENCE &amp; ENDPOINTS
             </span>
@@ -1128,7 +1128,7 @@ export default function ResellerApiClient() {
                 </div>
               </section>
 
-              {/* ── Endpoints ── */}
+              {/* â”€â”€ Endpoints â”€â”€ */}
               <EndpointSection
                 id="list-images"
                 title="List OS Images"
@@ -1318,7 +1318,7 @@ export default function ResellerApiClient() {
                     </h2>
                     <div className="space-y-3 text-sm leading-relaxed mb-6 text-[var(--text-secondary)]">
                       <p>Masdika operates on a <strong className="text-[var(--text-primary)]">prepaid wholesale</strong> model. You top up your balance on Masdika, then provision VPS instances via the API. The wholesale cost is deducted from your balance automatically.</p>
-                      <p>You handle your own customer billing using any payment gateway of your choice (<strong className="text-[var(--text-primary)]">Xendit, Midtrans, Duitku, Stripe</strong>, etc). Masdika only deducts the wholesale VPS cost — you keep all the profit from your markup.</p>
+                      <p>You handle your own customer billing using any payment gateway of your choice (<strong className="text-[var(--text-primary)]">Xendit, Midtrans, Duitku, Stripe</strong>, etc). Masdika only deducts the wholesale VPS cost â€” you keep all the profit from your markup.</p>
                     </div>
 
                     <h3 className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">Recommended Flow</h3>
@@ -1328,7 +1328,7 @@ export default function ResellerApiClient() {
                         <>Your server receives <strong className="text-[var(--text-primary)]">payment webhook</strong> confirming successful payment.</>,
                         <>Call <code className="font-mono text-[11px] px-1 py-0.5 rounded bg-[var(--surface-secondary)] border border-[var(--border-primary)] text-cyan-600 dark:text-cyan-400">GET /api/v1/billing</code> to verify your Masdika balance is sufficient.</>,
                         <>Call <code className="font-mono text-[11px] px-1 py-0.5 rounded bg-[var(--surface-secondary)] border border-[var(--border-primary)] text-cyan-600 dark:text-cyan-400">POST /api/v1/instances</code> to provision the VPS. Masdika deducts the wholesale cost.</>,
-                        <><strong className="text-emerald-600 dark:text-emerald-400 font-bold">Your profit</strong> = Customer payment − Masdika wholesale cost. You set your own markup freely.</>,
+                        <><strong className="text-emerald-600 dark:text-emerald-400 font-bold">Your profit</strong> = Customer payment âˆ’ Masdika wholesale cost. You set your own markup freely.</>,
                       ].map((text, i) => (
                         <div key={i} className="flex items-start gap-3">
                           <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black mt-0.5 bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400 shrink-0">{i + 1}</span>
@@ -1416,8 +1416,8 @@ onPaymentWebhook(order) {
           </div>
         </section>
 
-        {/* ── 9. FINAL CTA SECTION ──────────────────────────────────────── */}
-        <section className="pt-16 lg:pt-24 pb-0">
+        {/* â”€â”€ 9. FINAL CTA SECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <section className="pt-8 sm:pt-12 pb-0">
           <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-10 md:p-16 text-center shadow-xl overflow-hidden max-w-5xl mx-auto">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -z-0" />
 
@@ -1453,7 +1453,7 @@ onPaymentWebhook(order) {
           </div>
         </section>
 
-        {/* ── 10. FAQ SECTION ───────────────────────────────────────────── */}
+        {/* â”€â”€ 10. FAQ SECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <FaqSection faqs={RESELLER_FAQS} />
 
       </div>

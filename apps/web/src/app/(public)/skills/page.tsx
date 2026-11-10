@@ -359,14 +359,14 @@ export default function SkillsPage() {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-20 lg:pb-28 overflow-x-hidden">
+    <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-10 sm:pb-14 overflow-x-hidden">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
 
-        {/* ── 0. HERO ────────────────────────────────────────────────── */}
-        <section className="relative pt-8 sm:pt-12 pb-16 lg:pb-24 flex items-center">
+        {/* â”€â”€ 0. HERO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <section className="relative pt-6 sm:pt-10 pb-8 sm:pb-12 flex items-center">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
 
-            {/* Left – Text & Actions */}
+            {/* Left â€“ Text & Actions */}
             <div className="max-w-2xl relative z-30">
               <div className="mb-8">
                 <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase">
@@ -405,11 +405,11 @@ export default function SkillsPage() {
               </div>
             </div>
 
-            {/* Right – Hero Avatar */}
+            {/* Right â€“ Hero Avatar */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
                 imageSrc="/images/mascots/skills.webp"
-                imageAlt="Masdika – Technical Skills"
+                imageAlt="Masdika â€“ Technical Skills"
                 imageWidth={1024}
                 imageHeight={1024}
                 badges={[
@@ -423,9 +423,9 @@ export default function SkillsPage() {
           </div>
         </section>
 
-        {/* ── 1. TECHNICAL PROFICIENCIES SECTION ──────────────────────── */}
-        <section id="skills-grid" className="py-16 lg:py-24 relative z-10">
-          <div className="text-center max-w-2xl mx-auto mb-16">
+        {/* â”€â”€ 1. TECHNICAL PROFICIENCIES SECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <section id="skills-grid" className="py-10 sm:py-14 relative z-10">
+          <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
             <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
               Core Competencies
             </span>
@@ -449,7 +449,7 @@ export default function SkillsPage() {
                     </div>
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)]">
                       <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400" />
-                      {category.badge} • {category.skills.length} Tools
+                      {category.badge} â€¢ {category.skills.length} Tools
                     </span>
                   </div>
 
@@ -504,9 +504,9 @@ export default function SkillsPage() {
           </div>
         </section>
 
-        {/* ── 2. PROFESSIONAL TRAITS SECTION ─────────────────────────── */}
-        <section className="py-16 lg:py-24 relative z-10">
-          <div className="text-center max-w-2xl mx-auto mb-16">
+        {/* â”€â”€ 2. PROFESSIONAL TRAITS SECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <section className="py-10 sm:py-14 relative z-10">
+          <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
             <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
               Engineering Mindset
             </span>
@@ -579,8 +579,8 @@ export default function SkillsPage() {
           </div>
         </section>
 
-        {/* ── 3. CERTIFICATIONS & ACCREDITATIONS SECTION (REFINED) ────── */}
-        <section id="certifications-section" className="py-16 lg:py-24 relative z-10 border-t border-[var(--border-primary)]">
+        {/* â”€â”€ 3. CERTIFICATIONS & ACCREDITATIONS SECTION (REFINED) â”€â”€â”€â”€â”€â”€ */}
+        <section id="certifications-section" className="py-10 sm:py-14 relative z-10 border-t border-[var(--border-primary)]">
           <SectionOrnaments variant="sides" />
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-stretch relative z-10">
 
@@ -758,7 +758,7 @@ export default function SkillsPage() {
               {totalCertPages > 1 && (
                 <div className="flex items-center justify-between gap-4 pt-2">
                   <span className="text-xs font-mono text-[var(--text-muted)]">
-                    Showing {(certPage - 1) * certsPerPage + 1}–{Math.min(certPage * certsPerPage, certifications.length)} of {certifications.length} credentials
+                    Showing {(certPage - 1) * certsPerPage + 1}â€“{Math.min(certPage * certsPerPage, certifications.length)} of {certifications.length} credentials
                   </span>
                   <div className="flex items-center gap-1.5">
                     {Array.from({ length: totalCertPages }, (_, i) => i + 1).map((pageNum) => (
@@ -784,7 +784,7 @@ export default function SkillsPage() {
           </div>
         </section>
 
-        {/* ── 4. CALL TO ACTION ──────────────────────────────────────── */}
+        {/* â”€â”€ 4. CALL TO ACTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <section className="pt-8 pb-0">
           <div className="rounded-2xl sm:rounded-3xl bg-[var(--surface)] border border-[var(--border-primary)] p-8 sm:p-12 lg:p-16 text-center relative overflow-hidden shadow-sm">
             <div className="absolute top-0 left-0 w-full h-px bg-cyan-500/40" />

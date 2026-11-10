@@ -121,14 +121,14 @@ export default function LookingGlassPage() {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-20 lg:pb-28 font-sans">
+    <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-10 sm:pb-14 font-sans">
       <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
         
-        {/* ── 0. HERO (Identik Patokan SLA, Terms, Privacy, Events, Vacancies & design.md) ────────── */}
-        <section className="relative pt-8 sm:pt-12 pb-16 lg:pb-24 flex items-center">
+        {/* â”€â”€ 0. HERO (Identik Patokan SLA, Terms, Privacy, Events, Vacancies & design.md) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <section className="relative pt-6 sm:pt-10 pb-8 sm:pb-12 flex items-center">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
 
-            {/* Left – Text & Actions */}
+            {/* Left â€“ Text & Actions */}
             <div className="max-w-2xl relative z-30">
               {/* Status pill using shared Badge */}
               <div className="mb-8">
@@ -173,11 +173,11 @@ export default function LookingGlassPage() {
               </div>
             </div>
 
-            {/* Right – Hero Avatar (looking-glass.webp) with Floating Badges */}
+            {/* Right â€“ Hero Avatar (looking-glass.webp) with Floating Badges */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
                 imageSrc="/images/mascots/looking-glass.webp"
-                imageAlt="Masdika – Network Routing & Looking Glass"
+                imageAlt="Masdika â€“ Network Routing & Looking Glass"
                 imageWidth={1536}
                 imageHeight={1024}
                 badges={[
@@ -192,11 +192,11 @@ export default function LookingGlassPage() {
           </div>
         </section>
 
-        {/* ── 1. DIAGNOSTICS & TELEMETRY SUITE ──────────────────── */}
-        <section id="lg-tools" className="scroll-mt-28 pt-8 sm:pt-12 mb-0">
+        {/* â”€â”€ 1. DIAGNOSTICS & TELEMETRY SUITE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <section id="lg-tools" className="scroll-mt-24 pt-4 sm:pt-6 mb-0">
           
           {/* Section Header */}
-          <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
+          <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-8">
             <span className="text-xs font-mono font-bold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
               LIVE NETWORK TELEMETRY
             </span>
@@ -210,7 +210,7 @@ export default function LookingGlassPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
-            {/* Left 8 Cols – Info Cards + Interactive Diagnostic Terminal */}
+            {/* Left 8 Cols â€“ Info Cards + Interactive Diagnostic Terminal */}
             <div className="lg:col-span-8 space-y-8">
               
               {/* Quick Info Cards Grid */}
@@ -477,7 +477,7 @@ export default function LookingGlassPage() {
               </div>
             </div>
 
-            {/* Right 4 Cols – Sticky Sidebar (Product Ecosystem & Direct Peering) */}
+            {/* Right 4 Cols â€“ Sticky Sidebar (Product Ecosystem & Direct Peering) */}
             <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-28">
               
               {/* Product Ecosystem Card */}

@@ -163,14 +163,14 @@ export default function FileCdnClient({
   };
 
   return (
-    <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-20 lg:pb-28 overflow-x-hidden">
+    <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-10 sm:pb-14 overflow-x-hidden">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
 
-        {/* ── 0. HERO (Identik Patokan Home Page, Vacancies & design.md) ────────── */}
-        <section className="relative pt-8 sm:pt-12 pb-16 lg:pb-24 flex items-center">
+        {/* â”€â”€ 0. HERO (Identik Patokan Home Page, Vacancies & design.md) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <section className="relative pt-6 sm:pt-10 pb-8 sm:pb-12 flex items-center">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
             
-            {/* Left – Text & Actions */}
+            {/* Left â€“ Text & Actions */}
             <div className="max-w-2xl relative z-30">
               {/* Status pill using shared Badge */}
               <div className="mb-8">
@@ -213,7 +213,7 @@ export default function FileCdnClient({
               </div>
             </div>
 
-            {/* Right – Hero Avatar (file-cdn.webp) with 4 Floating Badges */}
+            {/* Right â€“ Hero Avatar (file-cdn.webp) with 4 Floating Badges */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
                 imageSrc="/images/mascots/file-cdn.webp"
@@ -232,8 +232,8 @@ export default function FileCdnClient({
           </div>
         </section>
 
-        {/* ── 1. VALUE PILLARS (4 Trust Highlights, Equal Height & Native CSS Variables) ────────── */}
-        <section className="py-12 border-y border-[var(--border-primary)] mb-16 lg:mb-24">
+        {/* â”€â”€ 1. VALUE PILLARS (4 Trust Highlights, Equal Height & Native CSS Variables) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <section className="py-8 sm:py-10 border-y border-[var(--border-primary)] mb-8 sm:mb-12">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
             {[
               { 
@@ -276,8 +276,8 @@ export default function FileCdnClient({
           </div>
         </section>
 
-        {/* ── 2. DEVELOPER CODE & INTEGRATION SHOWCASE (High Contrast Terminal in Both Themes) ────────── */}
-        <section className="mb-16 lg:mb-24">
+        {/* â”€â”€ 2. DEVELOPER CODE & INTEGRATION SHOWCASE (High Contrast Terminal in Both Themes) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <section className="mb-8 sm:mb-12">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             
             {/* Left: Dedicated High-Contrast Code Terminal */}
@@ -298,7 +298,7 @@ export default function FileCdnClient({
                       <div className="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123]" />
                       <div className="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29]" />
                       <span className="text-xs font-mono font-bold text-slate-200 ml-1.5 tracking-wide">
-                        bash — upload.sh
+                        bash â€” upload.sh
                       </span>
                     </div>
 
@@ -474,7 +474,7 @@ export default function FileCdnClient({
                         <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                       </span>
                       <span className="font-bold text-emerald-400">HTTP 201 Created</span>
-                      <span className="text-slate-500">•</span>
+                      <span className="text-slate-500">â€¢</span>
                       <span className="text-slate-300">24h Auto-Expiry</span>
                     </div>
 
@@ -533,9 +533,9 @@ export default function FileCdnClient({
           </div>
         </section>
 
-        {/* ── 3. ENTERPRISE CAPABILITIES (3 Equal Cards with Native Theme Variables) ────────── */}
-        <section className="mb-16 lg:mb-24">
-          <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+        {/* â”€â”€ 3. ENTERPRISE CAPABILITIES (3 Equal Cards with Native Theme Variables) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <section className="mb-8 sm:mb-12">
+          <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-8">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
               ENTERPRISE CAPABILITIES
             </span>
@@ -584,10 +584,10 @@ export default function FileCdnClient({
           </div>
         </section>
 
-        {/* ── 4. PRICING PLANS SECTION (Consistent Native Theme Cards) ────────── */}
+        {/* â”€â”€ 4. PRICING PLANS SECTION (Consistent Native Theme Cards) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {initialPlans && initialPlans.length > 0 && (
-          <section id="pricing" className="mb-16 lg:mb-24 pt-10">
-            <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+          <section id="pricing" className="mb-8 sm:mb-12 pt-6 sm:pt-8">
+            <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-8">
               <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
                 TRANSPARENT PRICING
               </span>
@@ -689,9 +689,9 @@ export default function FileCdnClient({
           </section>
         )}
 
-        {/* ── 5. THREE-STEP WORKFLOW ────────── */}
-        <section className="mb-16 lg:mb-24">
-          <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+        {/* â”€â”€ 5. THREE-STEP WORKFLOW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <section className="mb-8 sm:mb-12">
+          <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-8">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
               DISTRIBUTION WORKFLOW
             </span>
@@ -749,7 +749,7 @@ export default function FileCdnClient({
           </div>
         </section>
 
-        {/* ── 6. PROVISIONING TERMINAL & FAQ ────────── */}
+        {/* â”€â”€ 6. PROVISIONING TERMINAL & FAQ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <ProvisioningSection
           title="Instant File Distribution"
           description="Upload files and instantly get a shareable, secure download link. Powered by our global edge network for lightning-fast delivery."

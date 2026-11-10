@@ -15,14 +15,14 @@ export default function SLAPage() {
   const isDark = theme === "dark";
 
   return (
-    <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-20 lg:pb-28 overflow-x-hidden">
+    <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-10 sm:pb-14 overflow-x-hidden">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
 
-        {/* ── 0. HERO (Identik Patokan Events, Vacancies & design.md) ────────── */}
-        <section className="relative pt-8 sm:pt-12 pb-16 lg:pb-24 flex items-center">
+        {/* â”€â”€ 0. HERO (Identik Patokan Events, Vacancies & design.md) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <section className="relative pt-6 sm:pt-10 pb-8 sm:pb-12 flex items-center">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
 
-            {/* Left – Text & Actions */}
+            {/* Left â€“ Text & Actions */}
             <div className="max-w-2xl relative z-30">
               {/* Status pill using shared Badge */}
               <div className="mb-8">
@@ -65,11 +65,11 @@ export default function SLAPage() {
               </div>
             </div>
 
-            {/* Right – Hero Avatar (sla.webp) with Floating Badges */}
+            {/* Right â€“ Hero Avatar (sla.webp) with Floating Badges */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
                 imageSrc="/images/mascots/sla.webp"
-                imageAlt="Masdika – Service Level Agreement"
+                imageAlt="Masdika â€“ Service Level Agreement"
                 imageWidth={1145}
                 imageHeight={1374}
                 isPortrait={true}
@@ -84,8 +84,8 @@ export default function SLAPage() {
           </div>
         </section>
 
-        {/* ── 1. CONTENT (Document details) ────────── */}
-        <div id="sla-content" className="max-w-4xl mx-auto pt-8 sm:pt-12 scroll-mt-28">
+        {/* â”€â”€ 1. CONTENT (Document details) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <div id="sla-content" className="max-w-4xl mx-auto pt-4 sm:pt-6 scroll-mt-28">
           
           <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 mb-8 sm:mb-10 pb-4 border-b border-[var(--border-primary)]">
             <div className="inline-flex items-center gap-2 sm:gap-2.5 text-xs sm:text-sm font-mono font-semibold text-[var(--text-secondary)] whitespace-nowrap">

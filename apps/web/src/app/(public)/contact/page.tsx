@@ -127,9 +127,9 @@ export default function ContactPage() {
   );
 
   return (
-    <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-20 lg:pb-28 overflow-x-hidden text-[var(--text-primary)] transition-colors">
-      {/* ── 1. HERO SECTION (2-Kolom Sesuai design.md) ───────────────── */}
-      <section className="relative pt-4 sm:pt-8 pb-12 lg:pb-20 flex items-center">
+    <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-10 sm:pb-14 overflow-x-hidden text-[var(--text-primary)] transition-colors">
+      {/* â”€â”€ 1. HERO SECTION (2-Kolom Sesuai design.md) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      <section className="relative pt-4 sm:pt-6 pb-6 sm:pb-10 flex items-center">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
             
@@ -209,8 +209,8 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* ── 2. CONTACT SECTION (Interactive Form & Direct Channels) ─────── */}
-      <section id="contact-form" className="pt-12 sm:pt-16 pb-0">
+      {/* â”€â”€ 2. CONTACT SECTION (Interactive Form & Direct Channels) â”€â”€â”€â”€â”€â”€â”€ */}
+      <section id="contact-form" className="pt-4 sm:pt-6 pb-0">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className={cn(
             "w-full rounded-[32px] sm:rounded-[40px] p-6 sm:p-10 lg:p-14 relative overflow-hidden border transition-all duration-300",
@@ -391,7 +391,7 @@ export default function ContactPage() {
                             value={otp}
                             onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                             required
-                            placeholder="••••••"
+                            placeholder="â€¢â€¢â€¢â€¢â€¢â€¢"
                             className={cn(inputClass, "text-center text-2xl font-mono tracking-[0.5em]")}
                           />
                         </div>

@@ -532,7 +532,7 @@ export function HomeClient({
       </section>
 
       {/* ── 2. ABOUT ──────────────────────────────────────────────── */}
-      <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
+      <section className="py-10 sm:py-14 relative z-10 overflow-hidden">
         <SectionOrnaments variant="sides" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 lg:gap-x-8 lg:gap-y-6 items-stretch">
@@ -667,7 +667,7 @@ export function HomeClient({
       </section>
 
       {/* ── 3. WORKING PROCESS ──────────────────────────────────────── */}
-      <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
+      <section className="py-10 sm:py-14 relative z-10 overflow-hidden">
         <SectionOrnaments variant="diagonal" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <FadeIn direction="down" className="text-center max-w-2xl mx-auto mb-16">
@@ -704,7 +704,7 @@ export function HomeClient({
       </section>
 
       {/* ── 3.5 PRODUCTS ────────────────────────────────────────────── */}
-      <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
+      <section className="py-10 sm:py-14 relative z-10 overflow-hidden">
         <SectionOrnaments variant="center" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <FadeIn direction="down" duration={0.5} className="text-center max-w-2xl mx-auto mb-16">
@@ -789,7 +789,7 @@ export function HomeClient({
       </section>
 
       {/* ── 3.8 SUPPORT & INFRASTRUCTURE ────────────────────────────── */}
-      <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
+      <section className="py-10 sm:py-14 relative z-10 overflow-hidden">
         <SectionOrnaments variant="sides" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <FadeIn direction="down" duration={0.5} className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
@@ -836,7 +836,7 @@ export function HomeClient({
       </section>
 
       {/* ── 4. TOOLS & TECHNOLOGIES ─────────────────────────────────── */}
-      <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
+      <section className="py-10 sm:py-14 relative z-10 overflow-hidden">
         <SectionOrnaments variant="center-wide" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <FadeIn direction="up" duration={0.7} className="text-center max-w-2xl mx-auto mb-16">
@@ -867,7 +867,7 @@ export function HomeClient({
       </section>
 
       {/* ── 5. SERVICES ─────────────────────────────────────────────── */}
-      <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
+      <section className="py-10 sm:py-14 relative z-10 overflow-hidden">
         <SectionOrnaments variant="bottom-left" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <FadeIn direction="down" className="text-center max-w-2xl mx-auto mb-14 sm:mb-16">
@@ -997,7 +997,7 @@ export function HomeClient({
       </section>
 
       {/* ── 6. PORTFOLIO HIGHLIGHTS ─────────────────────────────────── */}
-      <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
+      <section className="py-10 sm:py-14 relative z-10 overflow-hidden">
         <SectionOrnaments variant="right-focus" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <FadeIn direction="down" className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 sm:mb-16">
@@ -1136,7 +1136,7 @@ export function HomeClient({
       </section>
 
       {/* ── 7. TESTIMONIALS ─────────────────────────────────────────── */}
-      <section className="py-16 lg:py-24 relative z-10 overflow-hidden" data-nosnippet>
+      <section className="py-10 sm:py-14 relative z-10 overflow-hidden" data-nosnippet>
         <SectionOrnaments variant="sides" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <FadeIn direction="down" className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12 sm:mb-16">
@@ -1283,7 +1283,7 @@ export function HomeClient({
       </section>
 
       {/* ── 8. LATEST BLOG POSTS ────────────────────────────────────── */}
-      <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
+      <section className="py-10 sm:py-14 relative z-10 overflow-hidden">
         <SectionOrnaments variant="right-focus" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <FadeIn direction="down" className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
@@ -1372,7 +1372,7 @@ export function HomeClient({
       </section>
 
       {/* ── 9. CTA ──────────────────────────────────────────────────── */}
-      <section className="py-16 lg:py-24 relative z-10 overflow-hidden">
+      <section className="py-10 sm:py-14 relative z-10 overflow-hidden">
         <SectionOrnaments variant="cta" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <FadeIn direction="up" duration={0.7} className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 p-6 sm:p-8 md:p-12 lg:p-14 xl:p-16 shadow-sm transition-all duration-300">

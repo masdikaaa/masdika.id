@@ -93,14 +93,14 @@ export default function ServicesPage() {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-20 lg:pb-28 overflow-x-hidden">
+    <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-10 sm:pb-14 overflow-x-hidden">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
 
-        {/* ── 0. HERO (Identik Patokan Home Page) ────────────────────── */}
-        <section className="relative pt-8 sm:pt-12 pb-16 lg:pb-24 flex items-center">
+        {/* â”€â”€ 0. HERO (Identik Patokan Home Page) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <section className="relative pt-6 sm:pt-10 pb-8 sm:pb-12 flex items-center">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
             
-            {/* Left – Text & Actions */}
+            {/* Left â€“ Text & Actions */}
             <div className="max-w-2xl relative z-30">
               {/* Status pill using shared Badge */}
               <div className="mb-8">
@@ -143,11 +143,11 @@ export default function ServicesPage() {
               </div>
             </div>
 
-            {/* Right – Hero Avatar (services.webp) with 4 Floating Badges (All 4 Visible on Mobile) */}
+            {/* Right â€“ Hero Avatar (services.webp) with 4 Floating Badges (All 4 Visible on Mobile) */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
                 imageSrc="/images/mascots/services.webp"
-                imageAlt="Masdika – Services & Solutions"
+                imageAlt="Masdika â€“ Services & Solutions"
                 imageWidth={1024}
                 imageHeight={1024}
                 badges={[
@@ -161,9 +161,9 @@ export default function ServicesPage() {
           </div>
         </section>
 
-        {/* ── 1. PRODUCTS SECTION (Sama persis patokan Home) ────────────────── */}
-        <section id="products-section" className="py-16 lg:py-24 relative z-10">
-          <div className="text-center max-w-2xl mx-auto mb-16">
+        {/* â”€â”€ 1. PRODUCTS SECTION (Sama persis patokan Home) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <section id="products-section" className="py-10 sm:py-14 relative z-10">
+          <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
             <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
               Our Products
             </span>
@@ -218,9 +218,9 @@ export default function ServicesPage() {
           </div>
         </section>
 
-        {/* ── 2. TECHNICAL EXPERTISE SECTION (Sama persis patokan Home) ────── */}
-        <section className="py-16 lg:py-24 relative z-10">
-          <div className="text-center max-w-2xl mx-auto mb-16">
+        {/* â”€â”€ 2. TECHNICAL EXPERTISE SECTION (Sama persis patokan Home) â”€â”€â”€â”€â”€â”€ */}
+        <section className="py-10 sm:py-14 relative z-10">
+          <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
             <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
               What I Do
             </span>
@@ -280,9 +280,9 @@ export default function ServicesPage() {
           </div>
         </section>
 
-        {/* ── 3. WORKING PROCESS SECTION (Sama persis patokan Home) ─────────── */}
-        <section className="py-16 lg:py-24 relative z-10">
-          <div className="text-center max-w-2xl mx-auto mb-16">
+        {/* â”€â”€ 3. WORKING PROCESS SECTION (Sama persis patokan Home) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <section className="py-10 sm:py-14 relative z-10">
+          <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
             <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
               Workflow
             </span>
@@ -328,7 +328,7 @@ export default function ServicesPage() {
           </div>
         </section>
 
-        {/* ── 4. CALL TO ACTION ──────────────────────────────────────────────── */}
+        {/* â”€â”€ 4. CALL TO ACTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <section className="pt-8 pb-0">
           <div className="rounded-2xl sm:rounded-3xl bg-[var(--surface)] border border-[var(--border-primary)] p-8 sm:p-12 lg:p-16 text-center relative overflow-hidden shadow-sm">
             <div className="absolute top-0 left-0 w-full h-px bg-cyan-500/40" />

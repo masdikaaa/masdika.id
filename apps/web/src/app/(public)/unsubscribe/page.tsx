@@ -75,8 +75,8 @@ function UnsubscribeForm() {
 
 export default function UnsubscribePage() {
   return (
-    <div className="pt-24 md:pt-32 pb-20 lg:pb-28 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 min-h-[75vh]">
-      <AnimatedSection className="text-center max-w-4xl mx-auto mb-16 pt-10">
+    <div className="pt-24 md:pt-32 pb-10 sm:pb-14 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 min-h-[75vh]">
+      <AnimatedSection className="text-center max-w-4xl mx-auto mb-8 sm:mb-10 pt-4 sm:pt-6">
         <span className="text-cyan-400 font-black tracking-[0.2em] text-xs mb-4 inline-block uppercase bg-cyan-500/10 border border-cyan-500/20 px-4 py-2 rounded-full shadow-[0_0_15px_rgba(34,211,238,0.15)]">
           Newsletter
         </span>
@@ -84,7 +84,7 @@ export default function UnsubscribePage() {
           Unsubscribe <br className="hidden sm:block" />
           <span className="bg-gradient-to-r from-cyan-400 to-cyan-200 bg-clip-text text-transparent drop-shadow-sm">Newsletter</span>
         </h1>
-        <p className="text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed font-medium mb-12">
+        <p className="text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed font-medium mb-6 sm:mb-8">
           We're sorry to see you go. Enter your email below to unsubscribe from our newsletter updates.
         </p>
         

@@ -102,14 +102,14 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
   }, [filteredApps, currentPage]);
 
   return (
-    <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-20 lg:pb-28 overflow-x-hidden">
+    <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-10 sm:pb-14 overflow-x-hidden">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
 
-        {/* ── 0. HERO SECTION ────────────────────────────────────────── */}
-        <section className="relative pt-8 sm:pt-12 pb-16 lg:pb-24 flex items-center">
+        {/* â”€â”€ 0. HERO SECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <section className="relative pt-6 sm:pt-10 pb-8 sm:pb-12 flex items-center">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
             
-            {/* Left – Text & Actions */}
+            {/* Left â€“ Text & Actions */}
             <div className="max-w-2xl relative z-30">
               <div className="mb-8">
                 <Badge
@@ -154,11 +154,11 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
               </div>
             </div>
 
-            {/* Right – Hero Avatar Frame */}
+            {/* Right â€“ Hero Avatar Frame */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
                 imageSrc="/images/mascots/app-catalog.webp"
-                imageAlt="Masdika – 1-Click App Catalog"
+                imageAlt="Masdika â€“ 1-Click App Catalog"
                 imageWidth={1536}
                 imageHeight={1024}
                 badges={[
@@ -173,8 +173,8 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
           </div>
         </section>
 
-        {/* ── 1. VALUE PILLARS (4 Trust Highlights) ───────────────────── */}
-        <section className="py-12 border-y border-[var(--border-primary)] mb-16 lg:mb-24">
+        {/* â”€â”€ 1. VALUE PILLARS (4 Trust Highlights) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <section className="py-6 sm:py-8 border-y border-[var(--border-primary)] mb-8 sm:mb-10">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
             {[
               {
@@ -217,8 +217,8 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
           </div>
         </section>
 
-        {/* ── 2. INTERACTIVE APP CATALOG & SEARCH ─────────────────────── */}
-        <section id="catalog" className="py-10 mb-20 scroll-mt-24">
+        {/* â”€â”€ 2. INTERACTIVE APP CATALOG & SEARCH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <section id="catalog" className="py-4 sm:py-6 mb-8 sm:mb-10 scroll-mt-24">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold font-mono uppercase bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 mb-3">
@@ -391,7 +391,7 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
               {totalPages > 1 && (
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-10 pt-6 border-t border-[var(--border-primary)]">
                   <div className="text-xs font-mono font-medium text-[var(--text-secondary)]">
-                    Showing <span className="font-bold text-[var(--text-primary)]">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span>–
+                    Showing <span className="font-bold text-[var(--text-primary)]">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span>â€“
                     <span className="font-bold text-[var(--text-primary)]">{Math.min(currentPage * ITEMS_PER_PAGE, filteredApps.length)}</span> of{" "}
                     <span className="font-bold text-cyan-400">{filteredApps.length}</span> Applications
                   </div>
@@ -432,9 +432,9 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
           )}
         </section>
 
-        {/* ── 3. HOW IT WORKS (3 Simple Steps) ────────────────────────── */}
-        <section className="py-16 border-t border-[var(--border-primary)] mb-16">
-          <div className="text-center max-w-2xl mx-auto mb-12">
+        {/* â”€â”€ 3. HOW IT WORKS (3 Simple Steps) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <section className="pt-8 sm:pt-10 pb-4 sm:pb-6 border-t border-[var(--border-primary)] mb-4 sm:mb-6">
+          <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
             <span className="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400">
               Automated Architecture
             </span>
@@ -490,11 +490,11 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
           </div>
         </section>
 
-        {/* ── 4. FAQS SECTION ─────────────────────────────────────────── */}
+        {/* â”€â”€ 4. FAQS SECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <FaqSection faqs={APP_CATALOG_FAQS} />
 
-        {/* ── 5. BOTTOM CTA BANNER ─────────────────────────────────────── */}
-        <section className="mt-20">
+        {/* â”€â”€ 5. BOTTOM CTA BANNER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <section className="mt-8 sm:mt-12 mb-6 sm:mb-8">
           <div className="relative rounded-3xl overflow-hidden border border-cyan-500/30 bg-gradient-to-br from-cyan-950/40 via-[var(--surface)] to-[var(--surface)] p-8 sm:p-12 lg:p-16 text-center">
             <div className="max-w-2xl mx-auto relative z-10">
               <span className="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400 mb-3 block">

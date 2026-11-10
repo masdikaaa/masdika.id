@@ -79,9 +79,9 @@ export function OpportunityGrid({ opportunities, emptyType = 'ALL' }: Opportunit
     : "Search events, webinars, or workshops...";
 
   return (
-    <div className="mb-24">
+    <div className="mb-8 sm:mb-12">
       {/* Search Bar */}
-      <div className="max-w-2xl mx-auto mb-12">
+      <div className="max-w-2xl mx-auto mb-6 sm:mb-8">
         <div className="relative group">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
             <Search className="h-5 w-5 text-[var(--text-muted)] group-focus-within:text-cyan-600 dark:group-focus-within:text-cyan-400 transition-colors" />
