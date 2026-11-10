@@ -202,9 +202,9 @@ export function VpsAppInstallationMonitor({
   };
 
   // Real-time stage progression based directly on serverStage
-  const isPastHypervisor = ["CONFIGURING", "STORAGE", "BOOTING", "APP_STACK", "INIT", "SYSTEM", "INSTALLER", "VERIFY", "READY"].includes(serverStage || "") || isFinished;
-  const isPastNetwork = ["STORAGE", "BOOTING", "APP_STACK", "INIT", "SYSTEM", "INSTALLER", "VERIFY", "READY"].includes(serverStage || "") || isFinished;
-  const isPastBootstrap = ["APP_STACK", "INIT", "SYSTEM", "INSTALLER", "VERIFY", "READY"].includes(serverStage || "") || (!hasApp && isFinished);
+  const isPastHypervisor = isFinished || ["CONFIGURING", "STORAGE", "BOOTING", "APP_STACK", "INIT", "SYSTEM", "INSTALLER", "VERIFY", "READY"].includes(serverStage || "");
+  const isPastNetwork = isFinished || ["STORAGE", "BOOTING", "APP_STACK", "INIT", "SYSTEM", "INSTALLER", "VERIFY", "READY"].includes(serverStage || "");
+  const isPastBootstrap = isFinished || ["APP_STACK", "INIT", "SYSTEM", "INSTALLER", "VERIFY", "READY"].includes(serverStage || "");
 
   const infraSteps = [
     {

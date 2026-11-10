@@ -122,6 +122,7 @@ export const VPS_APPS: VpsAppDefinition[] = [
         key: "domain",
         label: "Domain Name / FQDN (Optional)",
         type: "text",
+        required: false,
         placeholder: "e.g. blog.mydomain.com (leave blank for VPS IP)",
         description: "Domain name pointing to this server"
       },
@@ -230,6 +231,7 @@ ${appInfoCmd}
         key: "domain",
         label: "Domain Name / FQDN (Optional)",
         type: "text",
+        required: false,
         placeholder: "e.g. portal.mydomain.com (leave blank for VPS IP)",
         description: "Domain name pointing to this server"
       },
@@ -329,6 +331,7 @@ ${appInfoCmd}
         key: "domain",
         label: "Domain Name / FQDN (Optional)",
         type: "text",
+        required: false,
         placeholder: "e.g. lms.university.edu (leave blank for VPS IP)",
         description: "Domain name pointing to this server"
       },
@@ -917,6 +920,7 @@ ${appInfoCmd}
         key: "domain",
         label: "Domain Name / FQDN (Optional)",
         type: "text",
+        required: false,
         placeholder: "e.g. tasks.mydomain.com (leave blank for VPS IP)",
         description: "Custom domain name pointing to this server"
       }
@@ -1390,6 +1394,7 @@ ${appInfoCmd}
         key: "domain",
         label: "Domain Name / FQDN (Optional)",
         type: "text",
+        required: false,
         placeholder: "e.g. app.mydomain.com (leave blank for VPS IP)",
         description: "Domain name pointing to this server"
       }

@@ -1166,7 +1166,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                                 <div key={field.key} className={field.key === "siteTitle" || field.key === "domain" ? "sm:col-span-2" : ""}>
                                   <label className={cn("block text-xs font-semibold mb-1.5", isDark ? "text-zinc-300" : "text-slate-700")}>
                                     {field.label}
-                                    {field.required === false && (
+                                    {field.required === false && !field.label.toLowerCase().includes("optional") && (
                                       <span className="text-[10px] text-zinc-500 font-normal ml-1.5">(Optional)</span>
                                     )}
                                   </label>

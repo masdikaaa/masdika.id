@@ -421,6 +421,7 @@ export class VpsAppProvisioningService {
       await prisma.vpsService.update({
         where: { id: vpsId },
         data: {
+          status: "RUNNING",
           appStatus: "READY",
           appUrl,
           appCredentials

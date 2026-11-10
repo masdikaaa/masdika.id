@@ -49,7 +49,8 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
   const [isSetupDismissed, setIsSetupDismissed] = useState<boolean>(() => {
     if (typeof window !== "undefined") {
       try {
-        return sessionStorage.getItem(`vps_setup_dismissed_${id}`) === "true";
+        return sessionStorage.getItem(`vps_setup_dismissed_${id}`) === "true" ||
+               localStorage.getItem(`vps_setup_dismissed_${id}`) === "true";
       } catch (e) {
         return false;
       }
@@ -1335,7 +1336,8 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
       const activeApp = getAppById(reinstallAppId);
       if (activeApp?.configFields) {
         for (const field of activeApp.configFields) {
-          if (field.required !== false) {
+          const isOptional = field.required === false || field.label.toLowerCase().includes("optional");
+          if (!isOptional) {
             const val = reinstallAppConfig[field.key];
             if (val === undefined || val === null || String(val).trim() === "") {
               toast.error(`Please enter ${field.label}`);
@@ -1395,6 +1397,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
         setIsSetupDismissed(false);
         try {
           sessionStorage.removeItem(`vps_setup_dismissed_${id}`);
+          localStorage.removeItem(`vps_setup_dismissed_${id}`);
           localStorage.removeItem(`vps_progress_${id}`);
         } catch (e) {}
 
@@ -1499,7 +1502,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
             </button>
           </div>
         </div>
-      ) : (!isSetupDismissed && (['PENDING', 'PROVISIONING', 'INSTALLING'].includes(vps.status) || ['INSTALLING', 'WAITING_VM'].includes(vps.appStatus || ''))) ? (
+      ) : (!isSetupDismissed && vps.appStatus !== 'READY' && (['PENDING', 'PROVISIONING'].includes(vps.status) || ['INSTALLING', 'WAITING_VM'].includes(vps.appStatus || '') || (vps.status === 'INSTALLING' && vps.appStatus !== 'READY'))) ? (
         <VpsAppInstallationMonitor
           vpsId={vps.id}
           appName={vps.appName}
@@ -1510,6 +1513,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
             setIsSetupDismissed(true);
             try {
               sessionStorage.setItem(`vps_setup_dismissed_${vps.id}`, "true");
+              localStorage.setItem(`vps_setup_dismissed_${vps.id}`, "true");
             } catch (e) {}
             fetchVpsDetails();
           }}
@@ -3562,7 +3566,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                                     <div key={field.key} className={field.key === "siteTitle" || field.key === "domain" ? "sm:col-span-2" : ""}>
                                       <label className={cn("block text-xs font-semibold mb-1.5", isDark ? "text-zinc-300" : "text-slate-700")}>
                                         {field.label}
-                                        {field.required === false && (
+                                        {field.required === false && !field.label.toLowerCase().includes("optional") && (
                                           <span className="text-[10px] text-zinc-500 font-normal ml-1.5">(Optional)</span>
                                         )}
                                       </label>

@@ -55,6 +55,15 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       return NextResponse.json({ error: "VPS not found" }, { status: 404 });
     }
 
+    // Auto-heal: If application is already verified and READY, mark VPS status as RUNNING
+    if (vps.appStatus === "READY" && vps.status === "INSTALLING") {
+      await prisma.vpsService.update({
+        where: { id: vps.id },
+        data: { status: "RUNNING" }
+      });
+      vps.status = "RUNNING";
+    }
+
     const { searchParams } = new URL(req.url);
     if (searchParams.get("quick") === "true") {
       return NextResponse.json({
