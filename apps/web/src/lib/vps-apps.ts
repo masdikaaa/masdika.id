@@ -173,29 +173,49 @@ export const VPS_APPS: VpsAppDefinition[] = [
       return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
-apt-get update && apt-get install -y apache2 mariadb-server php php-mysql php-curl php-gd php-mbstring php-xml php-xmlrpc php-soap php-intl php-zip curl wget unzip
 
-# Configure MariaDB Database
-systemctl enable --now mariadb
-for i in {1..30}; do mysqladmin ping --silent && break || sleep 1; done
+# 1. Update package list and install LAMP dependencies
+apt-get update -y
+apt-get install -y --no-install-recommends apache2 mariadb-server php libapache2-mod-php php-mysql php-curl php-gd php-mbstring php-xml php-intl php-zip curl wget unzip
+
+# 2. Configure MariaDB Database
+systemctl enable --now mariadb || systemctl enable --now mysql || true
+for i in $(seq 1 30); do
+  if mysqladmin ping --silent 2>/dev/null; then
+    break
+  fi
+  sleep 1
+done
+
 mysql -e "CREATE DATABASE IF NOT EXISTS wordpress DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 mysql -e "CREATE USER IF NOT EXISTS 'wpuser'@'localhost' IDENTIFIED BY '${pass.replace(/'/g, "\\'")}';"
+mysql -e "ALTER USER 'wpuser'@'localhost' IDENTIFIED BY '${pass.replace(/'/g, "\\'")}';"
 mysql -e "GRANT ALL ON wordpress.* TO 'wpuser'@'localhost'; FLUSH PRIVILEGES;"
 
-# Install WP-CLI
-curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar || wget -q https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-chmod +x wp-cli.phar
-mv wp-cli.phar /usr/local/bin/wp
+# 3. Install WP-CLI
+mkdir -p /usr/local/bin /var/www/html
+curl -sSL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o /usr/local/bin/wp || \
+wget -qO /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar || true
+chmod +x /usr/local/bin/wp 2>/dev/null || true
 
-# Download and Configure WordPress
-rm -rf /var/www/html/*
+# 4. Download and Configure WordPress
 cd /var/www/html
-wp core download --allow-root || (wget -q https://wordpress.org/latest.tar.gz && tar -xzf latest.tar.gz --strip-components=1 && rm -f latest.tar.gz)
-wp config create --dbname=wordpress --dbuser=wpuser --dbpass='${pass.replace(/'/g, "\\'")}' --allow-root
-wp core install --url="${siteUrl}" --title="${title.replace(/"/g, '\\"')}" --admin_user="${user}" --admin_password='${pass.replace(/'/g, "\\'")}' --admin_email="${email}" --skip-email --allow-root
+rm -f index.html
+if [ ! -f wp-config.php ]; then
+  if command -v wp >/dev/null 2>&1; then
+    wp core download --allow-root || (wget -qO /tmp/wp.tar.gz https://wordpress.org/latest.tar.gz && tar -xzf /tmp/wp.tar.gz --strip-components=1 -C /var/www/html && rm -f /tmp/wp.tar.gz)
+    wp config create --dbname=wordpress --dbuser=wpuser --dbpass='${pass.replace(/'/g, "\\'")}' --dbhost=localhost --allow-root --force || true
+    wp core install --url="${siteUrl}" --title="${title.replace(/"/g, '\\"')}" --admin_user="${user}" --admin_password='${pass.replace(/'/g, "\\'")}' --admin_email="${email}" --skip-email --allow-root || true
+  else
+    wget -qO /tmp/wp.tar.gz https://wordpress.org/latest.tar.gz
+    tar -xzf /tmp/wp.tar.gz --strip-components=1 -C /var/www/html
+    rm -f /tmp/wp.tar.gz
+  fi
+fi
 
-a2enmod rewrite || true
+a2enmod rewrite 2>/dev/null || true
 chown -R www-data:www-data /var/www/html
+chmod -R 755 /var/www/html
 systemctl enable --now apache2
 systemctl restart apache2
 
@@ -402,7 +422,7 @@ ${appInfoCmd}
       return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
-apt-get update && apt-get install -y apache2 mariadb-server php php-mysql php-curl php-gd php-mbstring php-xml php-xmlrpc php-soap php-intl php-zip php-ldap graphviz aspell git wget
+apt-get update && apt-get install -y --no-install-recommends apache2 mariadb-server php libapache2-mod-php php-mysql php-curl php-gd php-mbstring php-xml php-soap php-intl php-zip php-ldap graphviz aspell git wget
 
 # Configure MariaDB Database with utf8mb4 format for Moodle
 systemctl enable --now mariadb

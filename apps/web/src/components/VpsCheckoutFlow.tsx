@@ -855,7 +855,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
 
           {/* OS Templates & 1-Click Applications - Only for regular VPS (Kubernetes is locked to Debian 13) */}
           {serviceType !== "KUBERNETES" && (
-            <motion.div variants={itemVariants} className={cn("rounded-2xl p-5 sm:p-6 border relative z-[60] w-full max-w-full min-w-0 overflow-visible", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
+            <motion.div variants={itemVariants} className={cn("rounded-2xl p-5 sm:p-6 border relative z-20 w-full max-w-full min-w-0 overflow-visible", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
                 <h2 className={cn("text-base sm:text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                   {imageMode === "apps" ? (

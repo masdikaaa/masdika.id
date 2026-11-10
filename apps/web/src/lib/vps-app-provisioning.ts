@@ -4,6 +4,35 @@ import { getAppById, VpsAppDefinition } from "./vps-apps";
 
 export class VpsAppProvisioningService {
   /**
+   * Helper to append a timestamped log to vps.appCredentials JSON.
+   */
+  private static async appendAppLog(vpsId: number, msg: string): Promise<void> {
+    try {
+      const vps = await prisma.vpsService.findUnique({
+        where: { id: vpsId },
+        select: { appCredentials: true }
+      });
+      let creds: Record<string, any> = {};
+      if (vps?.appCredentials) {
+        try {
+          creds = JSON.parse(vps.appCredentials);
+        } catch {}
+      }
+      const existingLogs: string[] = Array.isArray(creds.logs) ? creds.logs : [];
+      const timestamp = new Date().toLocaleTimeString("en-US", { hour12: false });
+      const newLogs = [...existingLogs, `[${timestamp}] ${msg}`].slice(-100);
+      creds.logs = newLogs;
+
+      await prisma.vpsService.update({
+        where: { id: vpsId },
+        data: { appCredentials: JSON.stringify(creds) }
+      });
+    } catch (e) {
+      // Non-blocking log update
+    }
+  }
+
+  /**
    * Waits for QEMU Guest Agent inside the VM to report ready before issuing commands.
    */
   static async waitForGuestReady(
@@ -24,6 +53,36 @@ export class VpsAppProvisioningService {
       await new Promise(resolve => setTimeout(resolve, 5000));
     }
     return false;
+  }
+
+  /**
+   * Waits for cloud-init on the guest VM to finish first-boot tasks.
+   */
+  static async waitForCloudInit(
+    proxmox: ProxmoxClient,
+    node: string,
+    vmid: number,
+    maxWaitSeconds: number = 180
+  ): Promise<void> {
+    const startTime = Date.now();
+    while ((Date.now() - startTime) < maxWaitSeconds * 1000) {
+      try {
+        const res = await this.runGuestCommand(
+          proxmox,
+          node,
+          vmid,
+          "cloud-init status 2>&1 || echo done",
+          15
+        );
+        const out = (res.stdout || "").toLowerCase();
+        if (out.includes("done") || out.includes("finished") || out.includes("error") || out.includes("not found")) {
+          return;
+        }
+      } catch {
+        // Retry
+      }
+      await new Promise(r => setTimeout(r, 4000));
+    }
   }
 
   /**
@@ -58,7 +117,7 @@ export class VpsAppProvisioningService {
       if (status && status.exited === 1) {
         const stdout = status["out-data"] || "";
         const stderr = status["err-data"] || "";
-        return { exitcode: status.exitcode, stdout, stderr };
+        return { exitcode: status.exitcode ?? 0, stdout, stderr };
       }
     }
 
@@ -108,11 +167,16 @@ export class VpsAppProvisioningService {
         }
       });
 
+      await this.appendAppLog(vpsId, `[INIT] Waiting for Guest Agent and Cloud-Init boot sequence...`);
       console.log(`[AppProvisioning] Waiting for guest agent on VMID ${vps.vmid} for app ${app.name}...`);
       const isReady = await this.waitForGuestReady(proxmox, vps.node, vps.vmid);
       if (!isReady) {
         console.warn(`[AppProvisioning] Guest agent timed out on VMID ${vps.vmid}, proceeding to execute script anyway.`);
       }
+
+      // Wait for cloud-init to finish first-boot locks
+      await this.waitForCloudInit(proxmox, vps.node, vps.vmid, 120);
+      await this.appendAppLog(vpsId, `[SYSTEM] Base OS online. Preparing package manager and runtime stack...`);
 
       // Extract initial app configuration if stored during checkout
       let appConfig: Record<string, any> = {};
@@ -129,19 +193,59 @@ export class VpsAppProvisioningService {
 
       const script = app.getInstallScript(primaryIp, rootPassword, appConfig);
       console.log(`[AppProvisioning] Executing install script for ${app.name} on VMID ${vps.vmid}...`);
+      await this.appendAppLog(vpsId, `[INSTALLER] Executing automated setup script for ${app.name}...`);
 
-      // Write script to /tmp/install-app.sh and run in bash with generous timeout
       const encodedScript = Buffer.from(script).toString("base64");
       const isHeavyPanel = ["cpanel", "plesk", "cyberpanel", "aapanel", "k3s"].includes(app.id);
       const executionTimeout = isHeavyPanel ? 1200 : 600; // 20m for complex panels, 10m for standard apps
 
-      const runnerCmd = `mkdir -p /var/log && (ufw allow ${app.defaultPort}/tcp 2>/dev/null || true) && (iptables -I INPUT -p tcp --dport ${app.defaultPort} -j ACCEPT 2>/dev/null || true) && for i in \$(seq 1 40); do if fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 || fuser /var/lib/apt/lists/lock >/dev/null 2>&1 || fuser /var/lib/dpkg/lock >/dev/null 2>&1; then sleep 3; else break; fi; done && echo '${encodedScript}' | base64 -d > /tmp/install-app.sh && chmod +x /tmp/install-app.sh && bash /tmp/install-app.sh > /var/log/app-install.log 2>&1`;
+      // Robust runner with lock release loop, unattended-upgrades shutdown, and logging
+      const runnerCmd = `mkdir -p /var/log /tmp && ` +
+        `systemctl stop unattended-upgrades 2>/dev/null || true; ` +
+        `systemctl disable unattended-upgrades 2>/dev/null || true; ` +
+        `for i in $(seq 1 60); do ` +
+        `if fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 || fuser /var/lib/apt/lists/lock >/dev/null 2>&1 || fuser /var/lib/dpkg/lock >/dev/null 2>&1 || pgrep -f "apt-get|dpkg|unattended-upgrade" >/dev/null 2>&1; then ` +
+        `sleep 2; ` +
+        `else break; fi; ` +
+        `done; ` +
+        `(ufw allow ${app.defaultPort}/tcp 2>/dev/null || true); ` +
+        `(iptables -I INPUT -p tcp --dport ${app.defaultPort} -j ACCEPT 2>/dev/null || true); ` +
+        `echo '${encodedScript}' | base64 -d > /tmp/install-app.sh && ` +
+        `chmod +x /tmp/install-app.sh && ` +
+        `bash /tmp/install-app.sh > /var/log/app-install.log 2>&1; ` +
+        `INSTALL_EXIT=$?; ` +
+        `tail -n 60 /var/log/app-install.log; ` +
+        `exit $INSTALL_EXIT`;
 
-      await this.runGuestCommand(proxmox, vps.node, vps.vmid, runnerCmd, executionTimeout);
+      const execResult = await this.runGuestCommand(proxmox, vps.node, vps.vmid, runnerCmd, executionTimeout);
+
+      if (execResult.exitcode !== 0) {
+        const errorSummary = (execResult.stderr || execResult.stdout || `Exit code ${execResult.exitcode}`).slice(-1200);
+        console.error(`[AppProvisioning] Failed to install ${app.name} on VMID ${vps.vmid} (code ${execResult.exitcode}):\n`, errorSummary);
+        await this.appendAppLog(vpsId, `[ERROR] Installation script failed with exit code ${execResult.exitcode}.`);
+
+        let credsObj: Record<string, any> = {};
+        if (vps.appCredentials) {
+          try { credsObj = JSON.parse(vps.appCredentials); } catch {}
+        }
+        credsObj.error = errorSummary;
+        credsObj.installFailed = true;
+
+        await prisma.vpsService.update({
+          where: { id: vpsId },
+          data: {
+            appStatus: "FAILED",
+            appCredentials: JSON.stringify(credsObj)
+          }
+        });
+        return;
+      }
+
+      await this.appendAppLog(vpsId, `[VERIFY] Installation script completed. Verifying runtime endpoints...`);
 
       // Attempt to retrieve runtime-verified app info from /root/masdika-app-info.json with retries
       let verifiedInfo: any = null;
-      for (let attempt = 0; attempt < 3; attempt++) {
+      for (let attempt = 0; attempt < 4; attempt++) {
         try {
           const verifyRes = await this.runGuestCommand(
             proxmox,
@@ -157,7 +261,7 @@ export class VpsAppProvisioningService {
         } catch (verifyErr) {
           // Retry after brief delay
         }
-        await new Promise(resolve => setTimeout(resolve, 2500));
+        await new Promise(resolve => setTimeout(resolve, 2000));
       }
 
       const port = Number(verifiedInfo?.port) || Number(appConfig.panelPort) || app.defaultPort;
@@ -175,14 +279,22 @@ export class VpsAppProvisioningService {
         appUrl = `${protocol}://${domainOrIp}${portSuffix}${path}`;
       }
 
+      let existingCreds: Record<string, any> = {};
+      if (vps.appCredentials) {
+        try { existingCreds = JSON.parse(vps.appCredentials); } catch {}
+      }
+
       const appCredentials = JSON.stringify({
+        ...existingCreds,
         appId: app.id,
         appName: app.name,
         username,
         password,
         port,
         loginUrl: appUrl,
-        instructions: app.instructions.replace(/\$\{ip\}/g, primaryIp)
+        instructions: app.instructions.replace(/\$\{ip\}/g, primaryIp),
+        error: null,
+        installFailed: false
       });
 
       await prisma.vpsService.update({
@@ -194,27 +306,26 @@ export class VpsAppProvisioningService {
         }
       });
 
+      await this.appendAppLog(vpsId, `[SUCCESS] ${app.name} service verified and online at ${appUrl}.`);
       console.log(`[AppProvisioning] Successfully installed ${app.name} on VPS #${vpsId} (${appUrl})`);
     } catch (err: any) {
-      console.error(`[AppProvisioning] Failed to install ${app.name} on VPS #${vpsId}:`, err);
-      // Mark as failed or ready with fallback note so customer can access VNC
+      console.error(`[AppProvisioning] Fatal error during ${app.name} setup on VPS #${vpsId}:`, err);
+      await this.appendAppLog(vpsId, `[FATAL] Provisioning exception: ${err?.message || "Unknown error"}`);
+
+      let existingCreds: Record<string, any> = {};
+      if (vps.appCredentials) {
+        try { existingCreds = JSON.parse(vps.appCredentials); } catch {}
+      }
+      existingCreds.error = err?.message || "Exception during app provisioning";
+      existingCreds.installFailed = true;
+
       await prisma.vpsService.update({
         where: { id: vpsId },
         data: {
-          appStatus: "READY", // Set to ready so user can login, logs exist in /var/log/app-install.log
-          appUrl: `${app.defaultProtocol}://${primaryIp}:${app.defaultPort}`,
-          appCredentials: JSON.stringify({
-            appId: app.id,
-            appName: app.name,
-            username: app.adminUsername,
-            password: rootPassword,
-            port: app.defaultPort,
-            loginUrl: `${app.defaultProtocol}://${primaryIp}:${app.defaultPort}`,
-            instructions: `Installation finalized. Review /var/log/app-install.log via SSH if initial startup requires manual configuration.`
-          })
+          appStatus: "FAILED",
+          appCredentials: JSON.stringify(existingCreds)
         }
       });
     }
   }
 }
-
