@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
@@ -332,7 +332,7 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
         </section>
 
         {/* â”€â”€ 1. VALUE PILLARS (4 Trust Highlights) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section className="py-6 sm:py-8 border-y border-[var(--border-primary)] mb-8 sm:mb-12">
+        <section className="py-6 sm:py-8 mb-10 sm:mb-14">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
             {[
               { icon: Cloud, title: "98.99% Uptime SLA", desc: "Automated failover with redundant power and enterprise network backbone." },

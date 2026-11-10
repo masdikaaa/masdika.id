@@ -628,7 +628,7 @@ export default function ResellerApiClient() {
         </section>
 
         {/* â”€â”€ 1. VALUE PILLARS (4 Trust Highlights, Equal Height) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section className="py-8 sm:py-10 border-y border-[var(--border-primary)] mb-8 sm:mb-12">
+        <section className="py-8 sm:py-10 mb-10 sm:mb-14">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
             {[
               { icon: CodeXml, title: "RESTful JSON API", desc: "Straightforward endpoints with predictable JSON responses and full OpenAPI reference." },

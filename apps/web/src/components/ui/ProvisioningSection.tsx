@@ -37,18 +37,17 @@ export function ProvisioningSection({
   const isDark = theme === "dark";
 
   return (
-    <section className={cn("relative py-8 sm:py-12 overflow-hidden z-20", isDark ? "bg-transparent" : "bg-white")}>
+    <section className={cn("relative py-12 sm:py-16 overflow-hidden z-20 mb-8 sm:mb-12", isDark ? "bg-transparent" : "bg-white")}>
       {/* Background elements */}
       {isDark && (
         <>
-          <div className="absolute inset-0 bg-[var(--surface)] border-y border-[var(--border-primary)]" />
+          <div className="absolute inset-0 bg-[var(--surface)]" />
           <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]" />
         </>
       )}
       {!isDark && (
-        <div className="absolute inset-0 bg-slate-50 border-y border-slate-200" />
+        <div className="absolute inset-0 bg-slate-50" />
       )}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid lg:grid-cols-[1fr_1.3fr] xl:grid-cols-[1fr_1.4fr] gap-10 lg:gap-16 items-center">

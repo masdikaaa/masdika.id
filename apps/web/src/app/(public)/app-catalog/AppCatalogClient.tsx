@@ -174,7 +174,7 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
         </section>
 
         {/* â”€â”€ 1. VALUE PILLARS (4 Trust Highlights) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section className="py-6 sm:py-8 border-y border-[var(--border-primary)] mb-8 sm:mb-10">
+        <section className="py-6 sm:py-8 mb-10 sm:mb-14">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
             {[
               {
@@ -433,7 +433,7 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
         </section>
 
         {/* â”€â”€ 3. HOW IT WORKS (3 Simple Steps) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section className="pt-8 sm:pt-10 pb-4 sm:pb-6 border-t border-[var(--border-primary)] mb-4 sm:mb-6">
+        <section className="pt-8 sm:pt-10 pb-4 sm:pb-6 mb-10 sm:mb-14">
           <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
             <span className="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400">
               Automated Architecture

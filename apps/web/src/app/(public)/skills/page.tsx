@@ -580,7 +580,7 @@ export default function SkillsPage() {
         </section>
 
         {/* â”€â”€ 3. CERTIFICATIONS & ACCREDITATIONS SECTION (REFINED) â”€â”€â”€â”€â”€â”€ */}
-        <section id="certifications-section" className="py-10 sm:py-14 relative z-10 border-t border-[var(--border-primary)]">
+        <section id="certifications-section" className="py-10 sm:py-14 relative z-10">
           <SectionOrnaments variant="sides" />
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-stretch relative z-10">
 

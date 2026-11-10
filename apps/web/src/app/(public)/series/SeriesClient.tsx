@@ -391,7 +391,7 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
         </section>
 
         {/* â”€â”€ 2. CURRICULUM TRACKS (Identik dengan Section 2 Vacancies) â”€â”€ */}
-        <section id="curriculum" className="py-10 sm:py-14 relative z-10 border-t border-[var(--border-primary)]">
+        <section id="curriculum" className="py-10 sm:py-14 relative z-10">
           <FadeIn direction="down" className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
             <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
               Structured Pathways

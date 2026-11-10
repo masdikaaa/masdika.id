@@ -208,7 +208,7 @@ export default function CommunityClient({ initialGroups }: { initialGroups: Comm
         </section>
 
         {/* â”€â”€ 1. VALUE PILLARS (3 Highlights) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <section className="py-8 sm:py-10 border-y border-[var(--border-primary)] mb-8 sm:mb-12">
+        <section className="py-8 sm:py-10 mb-10 sm:mb-14">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 items-stretch">
             <FadeIn delay={0.1} direction="up" className="h-full">
               <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] flex items-start gap-4 h-full shadow-sm">

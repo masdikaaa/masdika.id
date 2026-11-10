@@ -16,10 +16,10 @@ export function FaqSection({ faqs }: FaqSectionProps) {
   const isDark = theme === "dark";
 
   return (
-    <section className="pt-8 sm:pt-12 pb-4 relative z-20">
+    <section className="pt-14 sm:pt-20 pb-10 sm:pb-14 relative z-20">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-8 sm:mb-10">
-          <div className={cn("inline-flex items-center gap-2 px-3.5 py-1 rounded-full border text-[11px] font-bold tracking-widest uppercase mb-3 shadow-xs", isDark ? "border-cyan-800/80 bg-cyan-950/30 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+        <div className="text-center mb-10 sm:mb-12">
+          <div className={cn("inline-flex items-center gap-2 px-3.5 py-1 rounded-full border text-[11px] font-bold tracking-widest uppercase mb-5 shadow-xs", isDark ? "border-cyan-800/80 bg-cyan-950/30 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
             Support
           </div>
           <h2 className={cn("text-3xl sm:text-4xl lg:text-5xl font-black leading-tight", isDark ? "text-white" : "text-slate-900")}>Frequently Asked Questions</h2>

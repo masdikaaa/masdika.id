@@ -161,16 +161,9 @@ function PlusOrnament({
   );
 }
 
-const RING_NEUTRAL_DASHED =
-  "rounded-full border border-dashed border-neutral-300/80 dark:border-zinc-700/60";
-const RING_ACCENT_SOLID =
-  "rounded-full border border-cyan-500/25 dark:border-cyan-400/20";
-const RING_ACCENT_DASHED =
-  "rounded-full border border-dashed border-cyan-500/25 dark:border-cyan-400/20";
-
 /**
  * Architectural section background ornaments.
- * Pure vector lines, rings, and clean dot grid.
+ * Clean dot grid and subtle accents (rings removed).
  */
 export function SectionOrnaments({
   variant = "sides",
@@ -194,13 +187,6 @@ export function SectionOrnaments({
       {/* ── 1. HERO VARIANT ── */}
       {variant === "hero" && (
         <>
-          <div
-            className={cn(
-              "absolute -top-[12%] left-[10%] w-[960px] h-[960px]",
-              RING_NEUTRAL_DASHED
-            )}
-          />
-
           <DiamondOrnament size={20} className="top-36 sm:top-40 left-6 sm:left-14 hidden md:flex" />
           <DiamondOrnament size={18} className="top-36 sm:top-40 right-8 sm:right-20" />
           <DiamondOrnament size={16} className="bottom-24 left-8 sm:left-20 hidden md:flex" />
@@ -217,31 +203,6 @@ export function SectionOrnaments({
       {/* ── 2. SIDES VARIANT ── */}
       {variant === "sides" && (
         <>
-          <div
-            className={cn(
-              "absolute top-1/2 -left-[260px] -translate-y-1/2 w-[760px] h-[760px]",
-              RING_NEUTRAL_DASHED
-            )}
-          />
-          <div
-            className={cn(
-              "absolute top-1/2 -left-[180px] -translate-y-1/2 w-[580px] h-[580px]",
-              RING_ACCENT_SOLID
-            )}
-          />
-          <div
-            className={cn(
-              "absolute top-1/2 -right-[260px] -translate-y-1/2 w-[760px] h-[760px]",
-              RING_NEUTRAL_DASHED
-            )}
-          />
-          <div
-            className={cn(
-              "absolute top-1/2 -right-[180px] -translate-y-1/2 w-[580px] h-[580px]",
-              RING_ACCENT_SOLID
-            )}
-          />
-
           <DiamondOrnament size={20} className="top-10 left-6 sm:left-14 hidden md:flex" />
           <DiamondOrnament size={20} className="top-10 right-6 sm:right-14" />
           <DiamondOrnament size={16} className="bottom-10 left-8 sm:left-16 hidden md:flex" />
@@ -258,31 +219,6 @@ export function SectionOrnaments({
       {/* ── 3. DIAGONAL VARIANT ── */}
       {variant === "diagonal" && (
         <>
-          <div
-            className={cn(
-              "absolute top-[4%] right-[-160px] w-[820px] h-[820px]",
-              RING_NEUTRAL_DASHED
-            )}
-          />
-          <div
-            className={cn(
-              "absolute top-[8%] right-[-80px] w-[620px] h-[620px]",
-              RING_ACCENT_DASHED
-            )}
-          />
-          <div
-            className={cn(
-              "absolute top-[40%] left-[-180px] w-[860px] h-[860px]",
-              RING_NEUTRAL_DASHED
-            )}
-          />
-          <div
-            className={cn(
-              "absolute top-[44%] left-[-100px] w-[660px] h-[660px]",
-              RING_ACCENT_DASHED
-            )}
-          />
-
           <DiamondOrnament size={22} className="top-12 right-8 sm:right-20" />
           <DiamondOrnament size={16} className="top-[18%] left-6 sm:left-16 hidden md:flex" />
           <DiamondOrnament size={18} className="top-[45%] right-8 sm:right-20" />
@@ -301,19 +237,6 @@ export function SectionOrnaments({
       {/* ── 4. CENTER VARIANT ── */}
       {variant === "center" && (
         <>
-          <div
-            className={cn(
-              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] sm:w-[1300px] h-[900px] sm:h-[1300px]",
-              "rounded-full border border-dashed border-neutral-300/75 dark:border-zinc-700/60"
-            )}
-          />
-          <div
-            className={cn(
-              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] sm:w-[1050px] h-[700px] sm:h-[1050px]",
-              RING_ACCENT_SOLID
-            )}
-          />
-
           <DiamondOrnament size={20} className="top-8 left-8 sm:left-20 hidden md:flex" />
           <DiamondOrnament size={18} className="top-8 right-8 sm:right-20" />
           <DiamondOrnament size={16} className="bottom-8 left-10 sm:left-24 hidden md:flex" />
@@ -327,19 +250,6 @@ export function SectionOrnaments({
       {/* ── 5. CENTER-WIDE VARIANT ── */}
       {variant === "center-wide" && (
         <>
-          <div
-            className={cn(
-              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1050px] sm:w-[1450px] h-[1050px] sm:h-[1450px]",
-              RING_NEUTRAL_DASHED
-            )}
-          />
-          <div
-            className={cn(
-              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[750px] sm:w-[1100px] h-[750px] sm:h-[1100px]",
-              RING_ACCENT_DASHED
-            )}
-          />
-
           <DiamondOrnament size={22} className="top-12 left-8 sm:left-20 hidden md:flex" />
           <DiamondOrnament size={20} className="top-12 right-8 sm:right-20" />
           <DiamondOrnament size={16} className="bottom-12 left-10 sm:left-24 hidden md:flex" />
@@ -356,25 +266,6 @@ export function SectionOrnaments({
       {/* ── 6. BOTTOM-LEFT VARIANT ── */}
       {variant === "bottom-left" && (
         <>
-          <div
-            className={cn(
-              "absolute -bottom-[80px] left-[6%] w-[800px] h-[800px]",
-              RING_NEUTRAL_DASHED
-            )}
-          />
-          <div
-            className={cn(
-              "absolute -bottom-[20px] left-[10%] w-[620px] h-[620px]",
-              RING_ACCENT_DASHED
-            )}
-          />
-          <div
-            className={cn(
-              "absolute top-[6%] right-[-8%] w-[620px] h-[620px]",
-              "rounded-full border border-dashed border-neutral-300/70 dark:border-zinc-700/60"
-            )}
-          />
-
           <DiamondOrnament size={22} className="top-10 left-6 sm:left-14" />
           <DiamondOrnament size={18} className="top-10 right-8 sm:right-20" />
           <DiamondOrnament size={16} className="bottom-10 left-8 sm:left-16" />
@@ -390,25 +281,6 @@ export function SectionOrnaments({
       {/* ── 7. RIGHT-FOCUS VARIANT ── */}
       {variant === "right-focus" && (
         <>
-          <div
-            className={cn(
-              "absolute top-1/2 -right-[220px] -translate-y-1/2 w-[800px] h-[800px]",
-              RING_NEUTRAL_DASHED
-            )}
-          />
-          <div
-            className={cn(
-              "absolute top-1/2 -right-[140px] -translate-y-1/2 w-[620px] h-[620px]",
-              RING_ACCENT_DASHED
-            )}
-          />
-          <div
-            className={cn(
-              "absolute top-1/4 -left-[200px] w-[680px] h-[680px]",
-              "rounded-full border border-dashed border-neutral-300/70 dark:border-zinc-700/60"
-            )}
-          />
-
           <DiamondOrnament size={20} className="top-10 left-8 sm:left-18" />
           <DiamondOrnament size={20} className="top-10 right-8 sm:right-20" />
           <DiamondOrnament size={16} className="bottom-12 left-8 sm:left-18" />
@@ -424,19 +296,6 @@ export function SectionOrnaments({
       {/* ── 8. CTA VARIANT ── */}
       {variant === "cta" && (
         <>
-          <div
-            className={cn(
-              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1100px] sm:w-[1500px] h-[1100px] sm:h-[1500px]",
-              RING_NEUTRAL_DASHED
-            )}
-          />
-          <div
-            className={cn(
-              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] sm:w-[1150px] h-[800px] sm:h-[1150px]",
-              RING_ACCENT_DASHED
-            )}
-          />
-
           <DiamondOrnament size={22} className="top-12 left-10 sm:left-20" />
           <DiamondOrnament size={22} className="top-12 right-10 sm:right-20" />
           <DiamondOrnament size={18} className="bottom-16 left-10 sm:left-20" />
@@ -453,18 +312,6 @@ export function SectionOrnaments({
       {/* ── 9. PANEL VARIANT ── */}
       {variant === "panel" && (
         <>
-          <div
-            className={cn(
-              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[460px] h-[460px]",
-              RING_NEUTRAL_DASHED
-            )}
-          />
-          <div
-            className={cn(
-              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[330px] h-[330px]",
-              RING_ACCENT_SOLID
-            )}
-          />
           <DiamondOrnament size={16} className="top-10 left-6" />
           <DiamondOrnament size={16} className="top-12 right-6" />
           <DiamondOrnament size={14} className="bottom-20 left-6" />
@@ -524,19 +371,9 @@ export function HeroOrnaments({ className }: { className?: string }) {
   );
 }
 
-const PAGE_ORNAMENT_BANDS: OrnamentVariant[] = [
-  "hero",
-  "sides",
-  "diagonal",
-  "center-wide",
-  "right-focus",
-  "bottom-left",
-  "cta",
-];
-
 /**
- * Scrolling page-level architectural ornaments for subpages.
- * Starts from top: 0 so dot grid seamlessly spans behind navbar with no empty gaps.
+ * Clean, subtle dot grid matrix for subpages.
+ * Zero stray rings or arbitrary lines.
  */
 export function PageOrnaments() {
   return (
@@ -545,13 +382,6 @@ export function PageOrnaments() {
       className="pointer-events-none absolute inset-0 overflow-hidden select-none -z-10"
     >
       <DotGridPattern />
-      <div className="flex flex-col w-full">
-        {PAGE_ORNAMENT_BANDS.map((variant, idx) => (
-          <div key={idx} className="relative w-full h-[850px] shrink-0">
-            <SectionOrnaments variant={variant} withDotGrid={false} />
-          </div>
-        ))}
-      </div>
     </div>
   );
 }

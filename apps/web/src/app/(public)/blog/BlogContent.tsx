@@ -761,7 +761,7 @@ export function BlogContent({ initialPosts = [] }: { initialPosts?: BlogPostItem
         </section>
 
         {/* â”€â”€ 2. CORE TOPIC TRACKS (Identik dengan Section 2 Vacancies) â”€ */}
-        <section id="topics" className="py-10 sm:py-14 relative z-10 border-t border-[var(--border-primary)]">
+        <section id="topics" className="py-10 sm:py-14 relative z-10">
           <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
             <span className="text-xs font-semibold uppercase tracking-widest mb-4 block text-cyan-600 dark:text-cyan-400">
               Curated Knowledge Tracks
