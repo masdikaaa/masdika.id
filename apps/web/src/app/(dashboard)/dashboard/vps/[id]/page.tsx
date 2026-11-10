@@ -19,6 +19,7 @@ import { formatRupiah } from "@/lib/billing";
 
 import { getOsIconUrl, formatOsName } from "@/lib/vps-os";
 import { getAppByName, getAppById } from "@/lib/vps-apps";
+import { VpsAppInstallationMonitor } from "@/components/VpsAppInstallationMonitor";
 const getOsIcon = getOsIconUrl;
 
 const formatTime = (time: string) => {
@@ -44,6 +45,16 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
   const [vps, setVps] = useState<any>(null);
   const [status, setStatus] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isSetupDismissed, setIsSetupDismissed] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        return sessionStorage.getItem(`vps_setup_dismissed_${id}`) === "true";
+      } catch (e) {
+        return false;
+      }
+    }
+    return false;
+  });
   const [actionLoading, setActionLoading] = useState(false);
   const [confirmPowerModal, setConfirmPowerModal] = useState<{
     action: "start" | "shutdown" | "stop" | "reboot";
@@ -1391,18 +1402,32 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
             <div className={cn("w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center mb-6 border", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
               <CreditCard className={cn("w-10 h-10 md:w-12 md:h-12", isDark ? "text-cyan-400" : "text-cyan-600")} />
             </div>
-            <h2 className={cn("text-2xl md:text-3xl font-bold mb-2 md:mb-3", isDark ? "text-white" : "text-slate-900")}>Menunggu Pembayaran</h2>
+            <h2 className={cn("text-2xl md:text-3xl font-bold mb-2 md:mb-3", isDark ? "text-white" : "text-slate-900")}>Waiting for Payment</h2>
             <p className={cn("text-sm md:text-base mb-8 px-2", isDark ? "text-zinc-400" : "text-slate-500")}>
-              Server ini masih menunggu pembayaran untuk dapat diprovisioning. Silakan selesaikan pembayaran tagihan Anda.
+              This server is awaiting payment to be provisioned. Please complete your invoice payment to deploy this instance.
             </p>
             <button
               onClick={() => router.push("/dashboard/billing")}
               className="px-3.5 py-2 w-full sm:w-auto bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 font-bold rounded-xl transition-all shadow-2xs text-slate-950 text-xs cursor-pointer"
             >
-              Lihat Tagihan
+              View Invoices
             </button>
           </div>
         </div>
+      ) : (vps.appName && (vps.appStatus === 'INSTALLING' || (!isSetupDismissed && (['PENDING', 'PROVISIONING'].includes(vps.status) || vps.appStatus === 'INSTALLING')))) ? (
+        <VpsAppInstallationMonitor
+          vpsId={vps.id}
+          appName={vps.appName}
+          isDark={isDark}
+          mode="gate"
+          onComplete={() => {
+            setIsSetupDismissed(true);
+            try {
+              sessionStorage.setItem(`vps_setup_dismissed_${vps.id}`, "true");
+            } catch (e) {}
+            fetchVpsDetails();
+          }}
+        />
       ) : ['PENDING', 'PROVISIONING'].includes(vps.status) ? (
         <div className={cn("flex flex-col items-center justify-center py-12 sm:py-16 md:py-24 px-4 sm:px-6 md:px-8 border rounded-2xl md:rounded-3xl shadow-2xs relative overflow-hidden mt-4 md:mt-8 w-full", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
           <div className="relative z-10 flex flex-col items-center w-full max-w-lg mx-auto">
@@ -1626,6 +1651,13 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                     ? (vps.assignedIps[0].publicIp || vps.assignedIps[0].ipAddress)
                     : vps.vpcIp;
                   const targetUrl = vps.appUrl || (appMeta && primaryPublicIp ? `${appMeta.defaultProtocol}://${primaryPublicIp}:${appMeta.defaultPort}${appMeta.loginPath || ""}` : "");
+                  const credentials = (() => {
+                    try {
+                      return vps.appCredentials ? JSON.parse(vps.appCredentials) : null;
+                    } catch (e) {
+                      return null;
+                    }
+                  })();
 
                   return (
                     <div className={cn("border rounded-2xl p-5 sm:p-6 relative overflow-hidden", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
@@ -1699,9 +1731,22 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         <div>
                           <span className={cn("block text-[11px] mb-0.5", isDark ? "text-zinc-500" : "text-slate-400")}>Web Access URL</span>
                           {targetUrl ? (
-                            <a href={targetUrl} target="_blank" rel="noopener noreferrer" className="font-mono font-bold text-cyan-400 hover:underline">
-                              {targetUrl}
-                            </a>
+                            <div className="flex items-center gap-1.5">
+                              <a href={targetUrl} target="_blank" rel="noopener noreferrer" className="font-mono font-bold text-cyan-400 hover:underline truncate">
+                                {targetUrl}
+                              </a>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(targetUrl);
+                                  toast.success("URL copied to clipboard");
+                                }}
+                                className="p-1 rounded hover:bg-white/10 text-zinc-400 hover:text-white cursor-pointer"
+                                title="Copy URL"
+                              >
+                                <Copy className="w-3 h-3" />
+                              </button>
+                            </div>
                           ) : (
                             <span className="font-mono text-zinc-500">Waiting for IP allocation...</span>
                           )}
@@ -1709,14 +1754,29 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         <div>
                           <span className={cn("block text-[11px] mb-0.5", isDark ? "text-zinc-500" : "text-slate-400")}>Admin Username</span>
                           <span className={cn("font-mono font-semibold", isDark ? "text-zinc-200" : "text-slate-800")}>
-                            {appMeta?.adminUsername || "admin"}
+                            {credentials?.username || appMeta?.adminUsername || "admin"}
                           </span>
                         </div>
                         <div>
                           <span className={cn("block text-[11px] mb-0.5", isDark ? "text-zinc-500" : "text-slate-400")}>Default Password</span>
-                          <span className={cn("font-mono font-semibold", isDark ? "text-amber-400" : "text-amber-600")}>
-                            Configured VPS Root Password
-                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <span className={cn("font-mono font-semibold truncate", isDark ? "text-amber-400" : "text-amber-600")}>
+                              {credentials?.password || "Configured VPS Root Password"}
+                            </span>
+                            {credentials?.password && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(credentials.password);
+                                  toast.success("Password copied to clipboard");
+                                }}
+                                className="p-1 rounded hover:bg-white/10 text-zinc-400 hover:text-white cursor-pointer"
+                                title="Copy Password"
+                              >
+                                <Copy className="w-3 h-3" />
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>

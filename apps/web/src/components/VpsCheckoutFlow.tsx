@@ -14,6 +14,7 @@ import Link from "next/link";
 import { SiUbuntu, SiDebian, SiRockylinux, SiCentos, SiAlpinelinux, SiFedora, SiKubernetes } from "react-icons/si";
 import { EnterpriseInfraSidebarCard, IntelCpuBadge, NetworkInfraBadge, IntelLogo } from "@/components/EnterpriseInfraBadges";
 import { VPS_APPS, APP_CATEGORIES, AppCategory, VpsAppDefinition, getAppById } from "@/lib/vps-apps";
+import { VpsAppInstallationMonitor } from "@/components/VpsAppInstallationMonitor";
 
 const getOsIcon = (name: string, isDark: boolean = false) => {
   const lowerName = name.toLowerCase();
@@ -166,6 +167,8 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
   const [selectedAppCategory, setSelectedAppCategory] = useState<AppCategory>("All Apps");
   const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
   const [selectedAppVersion, setSelectedAppVersion] = useState<string | null>(null);
+  const [installedVpsId, setInstalledVpsId] = useState<number | null>(null);
+  const [showAppInstallationModal, setShowAppInstallationModal] = useState<boolean>(false);
 
   const selectApp = (app: VpsAppDefinition) => {
     setSelectedAppId(app.id);
@@ -627,6 +630,11 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
         toast.success("Server deployment started!");
         if (data.k3sClusterId) {
           router.push(`/dashboard/k3s/${data.k3sClusterId}`);
+        } else if (selectedAppId) {
+          // Open Live 1-Click App Installation Monitor modal so customer can track until finished
+          setInstalledVpsId(data.vpsId);
+          setShowAppInstallationModal(true);
+          setIsSubmitting(false);
         } else {
           router.push(`/dashboard/vps/${data.vpsId}`);
         }
@@ -2264,6 +2272,20 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
           </div>
         </motion.div>
       </div>
+
+      {showAppInstallationModal && installedVpsId && (
+        <VpsAppInstallationMonitor
+          vpsId={installedVpsId}
+          appId={selectedAppId}
+          fallbackPassword={password}
+          isDark={isDark}
+          mode="modal"
+          onComplete={() => {
+            setShowAppInstallationModal(false);
+            router.push(`/dashboard/vps/${installedVpsId}`);
+          }}
+        />
+      )}
     </>
   );
 }

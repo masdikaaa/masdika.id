@@ -128,6 +128,7 @@ export class VpsAppProvisioningService {
         appId: app.id,
         appName: app.name,
         username: app.adminUsername,
+        password: rootPassword,
         port: app.defaultPort,
         loginUrl: appUrl,
         instructions: app.instructions.replace(/\$\{ip\}/g, primaryIp)
@@ -155,6 +156,7 @@ export class VpsAppProvisioningService {
             appId: app.id,
             appName: app.name,
             username: app.adminUsername,
+            password: rootPassword,
             port: app.defaultPort,
             loginUrl: `${app.defaultProtocol}://${primaryIp}:${app.defaultPort}`,
             instructions: `Installation finalized. Review /var/log/app-install.log via SSH if initial startup requires manual configuration.`

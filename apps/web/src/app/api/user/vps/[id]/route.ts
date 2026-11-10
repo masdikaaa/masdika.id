@@ -42,12 +42,33 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         diskType: true,
         bandwidthMbps: true,
         assignedIps: true,
+        appName: true,
+        appVersion: true,
+        appStatus: true,
+        appUrl: true,
+        appCredentials: true,
         // rootPassword and sshKey intentionally excluded from API response
       }
     });
 
     if (!vps) {
       return NextResponse.json({ error: "VPS not found" }, { status: 404 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    if (searchParams.get("quick") === "true") {
+      return NextResponse.json({
+        id: vps.id,
+        hostname: vps.hostname,
+        status: vps.status,
+        vmid: vps.vmid,
+        assignedIps: vps.assignedIps,
+        appName: vps.appName,
+        appVersion: vps.appVersion,
+        appStatus: vps.appStatus,
+        appUrl: vps.appUrl,
+        appCredentials: vps.appCredentials,
+      });
     }
 
     // Try fetching live status from proxmox
