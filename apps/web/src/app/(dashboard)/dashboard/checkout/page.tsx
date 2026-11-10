@@ -192,6 +192,7 @@ function CheckoutContent() {
   const upgradeId = searchParams.get("upgrade_id") || searchParams.get("upgradeId");
   const action = searchParams.get("action");
   const urlService = searchParams.get("service")?.toUpperCase();
+  const appParam = searchParams.get("app") || searchParams.get("appId");
 
   const [plans, setPlans] = useState<any[]>([]);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
@@ -199,8 +200,8 @@ function CheckoutContent() {
   const [activeSubscriptions, setActiveSubscriptions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const defaultService = urlService || "VPS";
-  const defaultCategory = SERVICES.find(s => s.id === defaultService)?.category || "COMPUTE";
+  const defaultService = appParam ? "VPS" : (urlService || "VPS");
+  const defaultCategory = appParam ? "COMPUTE" : (SERVICES.find(s => s.id === defaultService)?.category || "COMPUTE");
 
   const [selectedCategory, setSelectedCategory] = useState<string>(defaultCategory);
   const [servicePage, setServicePage] = useState<number>(1);

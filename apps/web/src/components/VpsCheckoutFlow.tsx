@@ -13,7 +13,7 @@ import { Select } from "@/components/ui/Select";
 import Link from "next/link";
 import { SiUbuntu, SiDebian, SiRockylinux, SiCentos, SiAlpinelinux, SiFedora, SiKubernetes } from "react-icons/si";
 import { EnterpriseInfraSidebarCard, IntelCpuBadge, NetworkInfraBadge, IntelLogo } from "@/components/EnterpriseInfraBadges";
-import { VPS_APPS, APP_CATEGORIES, AppCategory, VpsAppDefinition, getAppById } from "@/lib/vps-apps";
+import { VPS_APPS, APP_CATEGORIES, AppCategory, VpsAppDefinition, getAppById, getAppByName } from "@/lib/vps-apps";
 import { VpsAppInstallationMonitor } from "@/components/VpsAppInstallationMonitor";
 
 const getOsIcon = (name: string, isDark: boolean = false) => {
@@ -383,6 +383,16 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
             setSelectedOsFamily(firstFamily);
             setSelectedTemplate(firstTpl.id);
           }
+
+          // Check if an application was requested via query parameter (e.g. ?app=wordpress or ?appId=aapanel)
+          const urlApp = searchParams.get("app") || searchParams.get("appId");
+          if (urlApp) {
+            const matchedApp = getAppById(urlApp) || getAppByName(urlApp);
+            if (matchedApp) {
+              setImageMode("apps");
+              selectApp(matchedApp);
+            }
+          }
         }
         if (data.plans && data.plans.length > 0) {
           setSelectedPlanId(data.plans[0].id);
@@ -400,6 +410,18 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
   useEffect(() => {
     fetchOrderData();
   }, []);
+
+  // When app query parameter changes or templates load, ensure requested app is selected
+  useEffect(() => {
+    const urlApp = searchParams.get("app") || searchParams.get("appId");
+    if (urlApp && templates.length > 0) {
+      const matchedApp = getAppById(urlApp) || getAppByName(urlApp);
+      if (matchedApp) {
+        setImageMode("apps");
+        selectApp(matchedApp);
+      }
+    }
+  }, [searchParams, templates]);
 
   // When ordering Kubernetes, always ensure Debian-13 is locked as the template
   useEffect(() => {
