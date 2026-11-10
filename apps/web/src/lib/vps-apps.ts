@@ -867,6 +867,70 @@ EOF
     }
   },
 
+  // 10. Vikunja (Business)
+  {
+    id: "vikunja",
+    name: "VIKUNJA",
+    category: "Business",
+    secondaryCategories: ["Developer"],
+    description: "Open-source, self-hostable to-do and project management platform with Kanban boards, Gantt charts, and team collaboration.",
+    icon: "/images/apps/vikunja.svg",
+    defaultPort: 3456,
+    defaultProtocol: "http",
+    osBase: "Ubuntu 26.04",
+    appVersion: "v0.24",
+    versions: [
+      { id: "024-ubu26", label: "Vikunja v0.24 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v0.24" },
+    ],
+    minSpecs: { cpu: 1, ram: 1, disk: 20 },
+    adminUsername: "admin",
+    instructions: "Access Vikunja at http://${ip}:3456 to register your administrator account and start managing projects.",
+    configFields: [
+      {
+        key: "domain",
+        label: "Domain Name / FQDN (Optional)",
+        type: "text",
+        placeholder: "e.g. tasks.mydomain.com (leave blank for VPS IP)",
+        description: "Custom domain name pointing to this server"
+      }
+    ],
+    getInstallScript: (ip, rootPassword, config = {}) => {
+      const siteUrl = config.domain ? (config.domain.startsWith("http") ? config.domain : `http://${config.domain}`) : `http://${ip}:3456`;
+      return `
+set -e
+export DEBIAN_FRONTEND=noninteractive
+apt-get update && apt-get install -y curl openssl
+which docker || (curl -fsSL https://get.docker.com | sh)
+systemctl enable --now docker
+
+JWT_SECRET=$(openssl rand -hex 32 2>/dev/null || echo "masdika-vikunja-secret-jwt-key")
+
+mkdir -p /opt/vikunja/files /opt/vikunja/db
+
+docker run -d --name vikunja --restart always \
+  -p 3456:3456 \
+  -e VIKUNJA_SERVICE_JWTSECRET="$JWT_SECRET" \
+  -e VIKUNJA_SERVICE_PUBLICURL="${siteUrl}" \
+  -v /opt/vikunja/files:/app/vikunja/files \
+  -v /opt/vikunja/db:/app/vikunja/db \
+  vikunja/vikunja:latest || true
+
+cat << 'EOF' > /root/masdika-app-info.json
+{
+  "appId": "vikunja",
+  "appName": "Vikunja",
+  "port": 3456,
+  "protocol": "http",
+  "path": "",
+  "username": "admin",
+  "password": "${rootPassword}",
+  "url": "${siteUrl}"
+}
+EOF
+`;
+    }
+  },
+
   // 10. Hermes Agent (Artificial Intelligence)
   {
     id: "hermes-agent",
