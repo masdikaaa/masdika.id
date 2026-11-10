@@ -7,7 +7,7 @@ import { ProxmoxClient } from "@/lib/proxmox";
 import { Address4 } from "ip-address";
 import { getBandwidthOptions, bandwidthHourlyCost, BASE_BANDWIDTH_MBPS } from "@/lib/vps-bandwidth";
 import { JobQueueService } from "@/lib/job-queue";
-import { getAppById } from "@/lib/vps-apps";
+import { getAppById, matchTemplateForApp } from "@/lib/vps-apps";
 
 // Security: Hostname validation regex (RFC 1123)
 const HOSTNAME_REGEX = /^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
@@ -126,42 +126,27 @@ export async function POST(req: NextRequest) {
     ipv4Count = Math.min(5, Math.max(0, Math.floor(Number(ipv4Count) || 0)));
     ipv6Count = Math.min(5, Math.max(0, Math.floor(Number(ipv6Count) || 0)));
 
-    let template = templateId ? await prisma.vpsTemplate.findUnique({ where: { id: Number(templateId) } }) : null;
+    const activeTemplates = await prisma.vpsTemplate.findMany({
+      where: { isActive: true },
+      orderBy: { id: "asc" }
+    });
+
+    let template = templateId ? activeTemplates.find(t => t.id === Number(templateId)) || await prisma.vpsTemplate.findUnique({ where: { id: Number(templateId) } }) : null;
 
     // Enforce base OS template for 1-Click Applications based on target app requirements
     if (targetApp) {
-      if (targetApp.osBase.toLowerCase().includes("alma")) {
-        const almaTpl = await prisma.vpsTemplate.findFirst({
-          where: { name: { contains: "AlmaLinux-9", mode: "insensitive" } }
-        }) || await prisma.vpsTemplate.findFirst({
-          where: { name: { contains: "AlmaLinux", mode: "insensitive" } }
-        }) || await prisma.vpsTemplate.findFirst({
-          where: { name: { contains: "Alma", mode: "insensitive" } }
-        });
-        if (almaTpl) {
-          template = almaTpl;
-          templateId = almaTpl.id;
-        }
-      } else {
-        const ubuntu26 = await prisma.vpsTemplate.findFirst({
-          where: { name: { contains: "Ubuntu-26", mode: "insensitive" } }
-        }) || await prisma.vpsTemplate.findFirst({
-          where: { name: { contains: "Ubuntu", mode: "insensitive" } }
-        });
-        if (ubuntu26) {
-          template = ubuntu26;
-          templateId = ubuntu26.id;
-        }
+      const matchedName = matchTemplateForApp(targetApp, activeTemplates);
+      const matchedTpl = matchedName ? activeTemplates.find(t => t.name === matchedName) : null;
+      if (matchedTpl) {
+        template = matchedTpl;
+        templateId = matchedTpl.id;
       }
     }
 
     // Enforce Debian-13 template for Kubernetes
-    if (isKubernetes) {
-      const debian13 = await prisma.vpsTemplate.findFirst({
-        where: { name: { contains: "Debian-13", mode: "insensitive" } }
-      }) || await prisma.vpsTemplate.findFirst({
-        where: { name: { contains: "Debian", mode: "insensitive" } }
-      });
+    if (isKubernetes && !targetApp) {
+      const debian13 = activeTemplates.find(t => t.name.toLowerCase().includes("debian-13")) ||
+        activeTemplates.find(t => t.name.toLowerCase().includes("debian"));
       if (debian13) {
         template = debian13;
         templateId = debian13.id;

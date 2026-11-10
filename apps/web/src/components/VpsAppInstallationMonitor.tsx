@@ -590,7 +590,7 @@ export function VpsAppInstallationMonitor({
               )}>
                 <Lock className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-700")} />
                 <span className="text-[11px] leading-relaxed">
-                  Proses berjalan aman di background server. Anda dapat sign out / menutup halaman kapan saja tanpa mengganggu instalasi.
+                  Safe background server process. You can sign out or close this page at any time without interrupting the installation.
                 </span>
               </div>
             ) : (

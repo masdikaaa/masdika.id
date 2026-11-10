@@ -580,10 +580,10 @@ ${appInfoCmd}
     icon: "/images/apps/plesk.svg",
     defaultPort: 8443,
     defaultProtocol: "https",
-    osBase: "Ubuntu 26.04",
+    osBase: "Ubuntu 24.04",
     appVersion: "Obsidian 18.0",
     versions: [
-      { id: "18-ubu26", label: "Plesk Obsidian - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "Obsidian 18.0" },
+      { id: "18-ubu24", label: "Plesk Obsidian - Ubuntu 24.04", osBase: "Ubuntu 24.04", appVersion: "Obsidian 18.0" },
     ],
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
     estimatedTime: "~10-15 mins",
@@ -713,10 +713,10 @@ ${appInfoCmd}
     icon: "/images/apps/pterodactyl.png",
     defaultPort: 80,
     defaultProtocol: "http",
-    osBase: "Ubuntu 26.04",
+    osBase: "Ubuntu 24.04",
     appVersion: "1.11",
     versions: [
-      { id: "1.11-ubu26", label: "Pterodactyl - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "1.11" },
+      { id: "1.11-ubu24", label: "Pterodactyl - Ubuntu 24.04", osBase: "Ubuntu 24.04", appVersion: "1.11" },
     ],
     minSpecs: { cpu: 2, ram: 4, disk: 30 },
     estimatedTime: "~4-6 mins",
@@ -1427,10 +1427,10 @@ ${appInfoCmd}
     icon: "/images/apps/mongodb.svg",
     defaultPort: 27017,
     defaultProtocol: "http",
-    osBase: "Ubuntu 26.04",
+    osBase: "Ubuntu 24.04",
     appVersion: "v8.0",
     versions: [
-      { id: "80-ubu26", label: "MongoDB 8.0 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v8.0" },
+      { id: "80-ubu24", label: "MongoDB 8.0 - Ubuntu 24.04", osBase: "Ubuntu 24.04", appVersion: "v8.0" },
     ],
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
     estimatedTime: "~2-3 mins",
@@ -1753,10 +1753,10 @@ ${appInfoCmd}
     icon: "/images/apps/cyberpanel.png",
     defaultPort: 8090,
     defaultProtocol: "https",
-    osBase: "Ubuntu 26.04",
+    osBase: "Ubuntu 24.04",
     appVersion: "v2.3",
     versions: [
-      { id: "23-ubu26", label: "CyberPanel 2.3 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v2.3" },
+      { id: "23-ubu24", label: "CyberPanel 2.3 - Ubuntu 24.04", osBase: "Ubuntu 24.04", appVersion: "v2.3" },
     ],
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
     estimatedTime: "~8-12 mins",
@@ -1842,5 +1842,88 @@ export function getAppByName(name: string | null | undefined): VpsAppDefinition 
 
 export function getEstimatedInstallTime(app?: VpsAppDefinition | null): string {
   return app?.estimatedTime || "~3-5 mins";
+}
+
+/**
+ * Match the most suitable active OS template for an application based on its osBase requirement.
+ * Ensures consistent selection across initial deployment, reinstall, and client preview.
+ */
+export function matchTemplateForApp(
+  app: VpsAppDefinition | { osBase: string },
+  availableTemplates: { name: string; isActive?: boolean }[]
+): string | null {
+  const req = (app.osBase || "").trim().toLowerCase();
+  if (!req || availableTemplates.length === 0) return null;
+
+  // Filter to active templates if isActive is provided
+  const templates = availableTemplates.filter(t => t.isActive !== false);
+  if (templates.length === 0) return null;
+
+  // Extract version numbers e.g. "26.04" from "Ubuntu 26.04", "9" from "AlmaLinux 9"
+  const verMatch = req.match(/(\d+(?:\.\d+)?)/);
+  const version = verMatch ? verMatch[1] : null;
+
+  const has = (tpl: { name: string }, ...tokens: string[]) => {
+    const tName = tpl.name.toLowerCase();
+    return tokens.every(tok => tName.includes(tok.toLowerCase()));
+  };
+
+  // AlmaLinux / RHEL / CentOS family
+  if (req.includes("alma")) {
+    if (version) {
+      const match = templates.find(t => has(t, "alma", version));
+      if (match) return match.name;
+    }
+    const anyAlma = templates.find(t => has(t, "alma"));
+    if (anyAlma) return anyAlma.name;
+  }
+
+  // Rocky Linux family
+  if (req.includes("rocky")) {
+    if (version) {
+      const match = templates.find(t => has(t, "rocky", version));
+      if (match) return match.name;
+    }
+    const anyRocky = templates.find(t => has(t, "rocky"));
+    if (anyRocky) return anyRocky.name;
+  }
+
+  // Debian family
+  if (req.includes("debian")) {
+    if (version) {
+      const match = templates.find(t => has(t, "debian", version));
+      if (match) return match.name;
+    }
+    const anyDebian = templates.find(t => has(t, "debian"));
+    if (anyDebian) return anyDebian.name;
+  }
+
+  // Ubuntu family
+  if (req.includes("ubuntu")) {
+    if (version) {
+      // 1. Try exact version: e.g. "26.04"
+      const exactMatch = templates.find(t => has(t, "ubuntu", version));
+      if (exactMatch) return exactMatch.name;
+
+      // 2. Try major version: e.g. "26"
+      const major = version.split(".")[0];
+      const majorMatch = templates.find(t => has(t, "ubuntu", major));
+      if (majorMatch) return majorMatch.name;
+    }
+
+    // 3. Fallbacks in order of modern preference: Ubuntu 26 -> Ubuntu 24 -> Ubuntu 22 -> Any Ubuntu
+    const ubu26 = templates.find(t => has(t, "ubuntu", "26"));
+    if (ubu26) return ubu26.name;
+    const ubu24 = templates.find(t => has(t, "ubuntu", "24"));
+    if (ubu24) return ubu24.name;
+    const ubu22 = templates.find(t => has(t, "ubuntu", "22"));
+    if (ubu22) return ubu22.name;
+    const anyUbu = templates.find(t => has(t, "ubuntu"));
+    if (anyUbu) return anyUbu.name;
+  }
+
+  // Generic fallback: check if any template contains words from the requirement
+  const directMatch = templates.find(t => t.name.toLowerCase().includes(req));
+  return directMatch ? directMatch.name : (templates[0]?.name || null);
 }
 

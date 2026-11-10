@@ -13,7 +13,7 @@ import { Select } from "@/components/ui/Select";
 import Link from "next/link";
 import { SiUbuntu, SiDebian, SiRockylinux, SiCentos, SiAlpinelinux, SiFedora, SiKubernetes } from "react-icons/si";
 import { EnterpriseInfraSidebarCard, IntelCpuBadge, NetworkInfraBadge, IntelLogo } from "@/components/EnterpriseInfraBadges";
-import { VPS_APPS, APP_CATEGORIES, AppCategory, VpsAppDefinition, getAppById, getAppByName } from "@/lib/vps-apps";
+import { VPS_APPS, APP_CATEGORIES, AppCategory, VpsAppDefinition, getAppById, getAppByName, matchTemplateForApp } from "@/lib/vps-apps";
 import { VpsAppInstallationMonitor } from "@/components/VpsAppInstallationMonitor";
 import { Pagination } from "@/components/ui/Pagination";
 
@@ -363,22 +363,17 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
       }
     }
 
-    // Automatically switch base OS template matching the app's supported OS (e.g. AlmaLinux 9 for cPanel)
-    if (app.osBase.toLowerCase().includes("alma")) {
-      const almaTpl = templates.find((t: any) => t.name.toLowerCase().includes("almalinux-9"))
-        || templates.find((t: any) => t.name.toLowerCase().includes("almalinux"))
-        || templates.find((t: any) => t.name.toLowerCase().includes("alma"));
-      if (almaTpl) {
-        setSelectedOsFamily("AlmaLinux");
-        setSelectedTemplate(almaTpl.id);
-      }
-    } else {
-      const ubuTpl = templates.find((t: any) => t.name.toLowerCase().includes("ubuntu-26"))
-        || templates.find((t: any) => t.name.toLowerCase().includes("ubuntu"));
-      if (ubuTpl) {
-        setSelectedOsFamily("Ubuntu");
-        setSelectedTemplate(ubuTpl.id);
-      }
+    // Automatically switch base OS template matching the app's supported OS
+    const matchedName = matchTemplateForApp(app, templates);
+    const matchedTpl = matchedName ? templates.find((t: any) => t.name === matchedName) : null;
+    if (matchedTpl) {
+      const lowerName = matchedTpl.name.toLowerCase();
+      const family = lowerName.includes("alma") ? "AlmaLinux" :
+        lowerName.includes("ubuntu") ? "Ubuntu" :
+        lowerName.includes("debian") ? "Debian" :
+        lowerName.includes("rocky") ? "Rocky Linux" : "Linux";
+      setSelectedOsFamily(family);
+      setSelectedTemplate(matchedTpl.id);
     }
 
     if (ipv4Count < 1) {
@@ -516,21 +511,16 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
     if (imageMode === "apps" && selectedAppId && templates.length > 0) {
       const app = getAppById(selectedAppId);
       if (app) {
-        if (app.osBase.toLowerCase().includes("alma")) {
-          const almaTpl = templates.find((t: any) => t.name.toLowerCase().includes("almalinux-9"))
-            || templates.find((t: any) => t.name.toLowerCase().includes("almalinux"))
-            || templates.find((t: any) => t.name.toLowerCase().includes("alma"));
-          if (almaTpl && selectedTemplate !== almaTpl.id) {
-            setSelectedOsFamily("AlmaLinux");
-            setSelectedTemplate(almaTpl.id);
-          }
-        } else {
-          const ubuTpl = templates.find((t: any) => t.name.toLowerCase().includes("ubuntu-26"))
-            || templates.find((t: any) => t.name.toLowerCase().includes("ubuntu"));
-          if (ubuTpl && selectedTemplate !== ubuTpl.id) {
-            setSelectedOsFamily("Ubuntu");
-            setSelectedTemplate(ubuTpl.id);
-          }
+        const matchedName = matchTemplateForApp(app, templates);
+        const tpl = matchedName ? templates.find((t: any) => t.name === matchedName) : null;
+        if (tpl && selectedTemplate !== tpl.id) {
+          const lowerName = tpl.name.toLowerCase();
+          const family = lowerName.includes("alma") ? "AlmaLinux" :
+            lowerName.includes("ubuntu") ? "Ubuntu" :
+            lowerName.includes("debian") ? "Debian" :
+            lowerName.includes("rocky") ? "Rocky Linux" : "Linux";
+          setSelectedOsFamily(family);
+          setSelectedTemplate(tpl.id);
         }
       }
     }

@@ -580,21 +580,21 @@ export default function ClientProfile({ userId }: { userId: string }) {
   const handleImpersonateClient = async () => {
     if (!user) return;
     setIsImpersonating(true);
-    const toastId = toast.loading(`Masuk sebagai ${user.name}...`);
+    const toastId = toast.loading(`Logging in as ${user.name}...`);
     try {
       const res = await fetch(`/api/admin/users/${user.id}/impersonate`, {
         method: "POST"
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        toast.success(data.message || `Berhasil masuk sebagai ${user.name}`, { id: toastId });
+        toast.success(data.message || `Successfully logged in as ${user.name}`, { id: toastId });
         router.push(data.redirectUrl || '/dashboard');
       } else {
-        toast.error(data.error || 'Gagal masuk sebagai klien', { id: toastId });
+        toast.error(data.error || 'Failed to log in as client', { id: toastId });
         setIsImpersonating(false);
       }
     } catch {
-      toast.error('Terjadi kesalahan saat impersonasi', { id: toastId });
+      toast.error('An error occurred during impersonation', { id: toastId });
       setIsImpersonating(false);
     }
   };

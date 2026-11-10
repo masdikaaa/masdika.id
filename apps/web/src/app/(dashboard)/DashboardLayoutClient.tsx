@@ -127,14 +127,14 @@ export default function DashboardLayoutClient({
       }
       const data = await res.json();
       if (res.ok && data.success) {
-        toast.success(data.message || 'Kembali ke sesi admin');
+        toast.success(data.message || 'Returned to admin session');
         router.push(data.redirectUrl || '/admin/customers');
       } else {
-        toast.error(data.error || 'Gagal mengakhiri impersonasi');
+        toast.error(data.error || 'Failed to exit impersonation');
         setIsStoppingImpersonation(false);
       }
     } catch {
-      toast.error('Terjadi kesalahan saat mengakhiri impersonasi');
+      toast.error('An error occurred while exiting impersonation');
       setIsStoppingImpersonation(false);
     }
   };
@@ -352,8 +352,8 @@ export default function DashboardLayoutClient({
                   <ShieldAlert className="w-4 h-4 text-slate-950" />
                 </span>
                 <p className="text-xs text-slate-950 leading-snug break-words">
-                  Mode Impersonasi: Mengelola akun <strong className="font-bold">{userName}</strong>{" "}
-                  <span className="hidden sm:inline opacity-85">({userEmail})</span> sebagai <strong className="font-bold">{impersonatorAdminName}</strong>
+                  Admin Impersonation: Managing account <strong className="font-bold">{userName}</strong>{" "}
+                  <span className="hidden sm:inline opacity-85">({userEmail})</span> as <strong className="font-bold">{impersonatorAdminName}</strong>
                 </p>
               </div>
               <button
@@ -367,7 +367,7 @@ export default function DashboardLayoutClient({
                 ) : (
                   <LogOut className="w-3.5 h-3.5" />
                 )}
-                <span>Kembali ke Admin Panel</span>
+                <span>Return to Admin Panel</span>
               </button>
             </div>
           </div>

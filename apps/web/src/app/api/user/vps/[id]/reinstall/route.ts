@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAuth } from '@/lib/auth-middleware';
 import { prisma } from "@/lib/prisma";
 import { JobQueueService } from "@/lib/job-queue";
-import { getAppById } from "@/lib/vps-apps";
+import { getAppById, matchTemplateForApp } from "@/lib/vps-apps";
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -44,17 +44,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       return NextResponse.json({ error: "Invalid application selected" }, { status: 400 });
     }
 
-    if (!targetTemplateName && app) {
-      if (app.osBase.toLowerCase().includes("alma")) {
-        const almaTpl = await prisma.vpsTemplate.findFirst({
-          where: { name: { contains: "alma", mode: "insensitive" }, isActive: true }
-        });
-        if (almaTpl) targetTemplateName = almaTpl.name;
-      } else {
-        const ubuTpl = await prisma.vpsTemplate.findFirst({
-          where: { name: { contains: "ubuntu", mode: "insensitive" }, isActive: true }
-        });
-        if (ubuTpl) targetTemplateName = ubuTpl.name;
+    const activeTemplates = await prisma.vpsTemplate.findMany({
+      where: { isActive: true },
+      orderBy: { id: "asc" }
+    });
+
+    if (app) {
+      // 1-Click App installation strictly enforces base OS template based on app requirement
+      const matchedAppTemplate = matchTemplateForApp(app, activeTemplates);
+      if (matchedAppTemplate) {
+        targetTemplateName = matchedAppTemplate;
       }
     }
 
@@ -63,7 +62,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     }
 
     // Verify template exists
-    const template = await prisma.vpsTemplate.findFirst({ where: { name: targetTemplateName } });
+    const template = activeTemplates.find(t => t.name === targetTemplateName) ||
+      await prisma.vpsTemplate.findFirst({ where: { name: targetTemplateName } });
     if (!template) {
       return NextResponse.json({ error: "Invalid template selected" }, { status: 400 });
     }

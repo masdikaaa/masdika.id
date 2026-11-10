@@ -19,7 +19,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import { formatRupiah } from "@/lib/billing";
 
 import { getOsIconUrl, formatOsName } from "@/lib/vps-os";
-import { VPS_APPS, APP_CATEGORIES, AppCategory, VpsAppDefinition, getAppByName, getAppById } from "@/lib/vps-apps";
+import { VPS_APPS, APP_CATEGORIES, AppCategory, VpsAppDefinition, getAppByName, getAppById, matchTemplateForApp } from "@/lib/vps-apps";
 import { VpsAppInstallationMonitor } from "@/components/VpsAppInstallationMonitor";
 import { resolveEffectiveAppUrl } from "@/lib/vps-app-urls";
 const getOsIcon = getOsIconUrl;
@@ -116,6 +116,10 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
       });
     }
     setReinstallAppConfig(initCfg);
+    const matched = matchTemplateForApp(app, templates);
+    if (matched) {
+      setSelectedTemplate(matched);
+    }
   };
 
   const [reinstallPassword, setReinstallPassword] = useState("");
@@ -1370,14 +1374,9 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
       const activeApp = reinstallMode === "apps" && reinstallAppId ? getAppById(reinstallAppId) : null;
       let effectiveTemplate = selectedTemplate;
       if (activeApp) {
-        const isAlma = activeApp.osBase.toLowerCase().includes("alma");
-        const found = templates.find((t: any) =>
-          isAlma
-            ? t.name.toLowerCase().includes("alma")
-            : (t.name.toLowerCase().includes("ubuntu-24") || t.name.toLowerCase().includes("ubuntu"))
-        );
-        if (found) {
-          effectiveTemplate = found.name;
+        const matched = matchTemplateForApp(activeApp, templates);
+        if (matched) {
+          effectiveTemplate = matched;
         }
       }
 
