@@ -167,12 +167,22 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
   const [selectedAppCategory, setSelectedAppCategory] = useState<AppCategory>("All Apps");
   const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
   const [selectedAppVersion, setSelectedAppVersion] = useState<string | null>(null);
+  const [appConfig, setAppConfig] = useState<Record<string, any>>({});
   const [installedVpsId, setInstalledVpsId] = useState<number | null>(null);
   const [showAppInstallationModal, setShowAppInstallationModal] = useState<boolean>(false);
 
   const selectApp = (app: VpsAppDefinition) => {
     setSelectedAppId(app.id);
     setSelectedAppVersion(app.versions[0]?.appVersion || app.appVersion);
+    const initialConfig: Record<string, any> = {};
+    if (app.configFields) {
+      app.configFields.forEach((field) => {
+        if (field.defaultValue !== undefined) {
+          initialConfig[field.key] = field.defaultValue;
+        }
+      });
+    }
+    setAppConfig(initialConfig);
     const ubuTpl = templates.find((t: any) => t.name.toLowerCase().includes("ubuntu-26"))
       || templates.find((t: any) => t.name.toLowerCase().includes("ubuntu"));
     if (ubuTpl) {
@@ -618,7 +628,8 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
           targetNode: selectedNode,
           paymentMethodCode: "BALANCE",
           appId: selectedAppId || undefined,
-          appVersion: selectedAppVersion || undefined
+          appVersion: selectedAppVersion || undefined,
+          appConfig: selectedAppId ? appConfig : undefined
         })
       });
 
@@ -940,6 +951,70 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                         );
                       })}
                   </div>
+
+                  {/* 1-Click App Custom Configuration Fields */}
+                  {selectedAppId && (() => {
+                    const activeApp = getAppById(selectedAppId);
+                    if (!activeApp?.configFields || activeApp.configFields.length === 0) return null;
+                    return (
+                      <div className={cn(
+                        "mt-5 p-5 rounded-2xl border transition-all space-y-4",
+                        isDark ? "bg-[#0b0c10] border-white/10" : "bg-slate-50/80 border-slate-200"
+                      )}>
+                        <div className="flex items-center gap-3 pb-3 border-b border-white/[0.08]">
+                          <div className={cn(
+                            "w-9 h-9 rounded-xl flex items-center justify-center p-1.5 shrink-0 border",
+                            isDark ? "bg-[#050507] border-white/10" : "bg-white border-slate-200"
+                          )}>
+                            <img
+                              referrerPolicy="no-referrer"
+                              src={activeApp.icon}
+                              alt={activeApp.name}
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                          <div>
+                            <h4 className={cn("text-xs font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                              <span>{activeApp.name} Initial Configuration</span>
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-400/10 text-cyan-400 border border-cyan-400/20 font-bold lowercase">
+                                automated setup
+                              </span>
+                            </h4>
+                            <p className="text-[11px] text-zinc-400">
+                              Define your administrator credentials or custom domain. They will be automatically provisioned during installation.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                          {activeApp.configFields.map((field) => (
+                            <div key={field.key} className={field.key === "siteTitle" || field.key === "domain" ? "sm:col-span-2" : ""}>
+                              <label className={cn("block text-xs font-semibold mb-1.5", isDark ? "text-zinc-300" : "text-slate-700")}>
+                                {field.label}
+                              </label>
+                              <input
+                                type={field.type}
+                                value={appConfig[field.key] ?? (field.defaultValue ?? "")}
+                                onChange={(e) => setAppConfig((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                                placeholder={field.placeholder}
+                                className={cn(
+                                  "w-full border rounded-xl px-3.5 py-2.5 text-xs font-medium outline-hidden transition-all",
+                                  isDark
+                                    ? "bg-[#14151c] border-white/10 text-white placeholder-zinc-500 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+                                    : "bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                                )}
+                              />
+                              {field.description && (
+                                <span className="text-[10px] text-zinc-500 mt-1 block">
+                                  {field.description}
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   {/* Informational Banner */}
                   {selectedAppId && (

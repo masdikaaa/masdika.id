@@ -114,22 +114,66 @@ export class VpsAppProvisioningService {
         console.warn(`[AppProvisioning] Guest agent timed out on VMID ${vps.vmid}, proceeding to execute script anyway.`);
       }
 
-      const script = app.getInstallScript(primaryIp, rootPassword);
+      // Extract initial app configuration if stored during checkout
+      let appConfig: Record<string, any> = {};
+      if (vps.appCredentials) {
+        try {
+          const parsed = JSON.parse(vps.appCredentials);
+          if (typeof parsed === "object" && parsed !== null) {
+            appConfig = parsed;
+          }
+        } catch {
+          // ignore parsing error
+        }
+      }
+
+      const script = app.getInstallScript(primaryIp, rootPassword, appConfig);
       console.log(`[AppProvisioning] Executing install script for ${app.name} on VMID ${vps.vmid}...`);
 
-      // Write script to /root/install-app.sh and run in bash
+      // Write script to /tmp/install-app.sh and run in bash
       const encodedScript = Buffer.from(script).toString("base64");
       const runnerCmd = `echo '${encodedScript}' | base64 -d > /tmp/install-app.sh && chmod +x /tmp/install-app.sh && bash /tmp/install-app.sh > /var/log/app-install.log 2>&1`;
 
       await this.runGuestCommand(proxmox, vps.node, vps.vmid, runnerCmd, 420);
 
-      const appUrl = `${app.defaultProtocol}://${primaryIp}:${app.defaultPort}${app.loginPath || ""}`;
+      // Attempt to retrieve runtime-verified app info from /root/masdika-app-info.json
+      let verifiedInfo: any = null;
+      try {
+        const verifyRes = await this.runGuestCommand(
+          proxmox,
+          vps.node,
+          vps.vmid,
+          "cat /root/masdika-app-info.json 2>/dev/null || true",
+          15
+        );
+        if (verifyRes.stdout && verifyRes.stdout.trim().startsWith("{")) {
+          verifiedInfo = JSON.parse(verifyRes.stdout.trim());
+        }
+      } catch (verifyErr) {
+        console.warn(`[AppProvisioning] Could not read /root/masdika-app-info.json on VM ${vps.vmid}:`, verifyErr);
+      }
+
+      const port = Number(verifiedInfo?.port) || Number(appConfig.panelPort) || app.defaultPort;
+      const protocol = verifiedInfo?.protocol || app.defaultProtocol;
+      const path = verifiedInfo?.path !== undefined ? verifiedInfo.path : (app.loginPath || "");
+      const username = verifiedInfo?.username || appConfig.adminUsername || app.adminUsername;
+      const password = verifiedInfo?.password || appConfig.adminPassword || rootPassword;
+      const domainOrIp = (appConfig.domain && typeof appConfig.domain === "string" && appConfig.domain.trim())
+        ? appConfig.domain.trim()
+        : primaryIp;
+
+      let appUrl = verifiedInfo?.url;
+      if (!appUrl) {
+        const portSuffix = (protocol === "http" && port === 80) || (protocol === "https" && port === 443) ? "" : `:${port}`;
+        appUrl = `${protocol}://${domainOrIp}${portSuffix}${path}`;
+      }
+
       const appCredentials = JSON.stringify({
         appId: app.id,
         appName: app.name,
-        username: app.adminUsername,
-        password: rootPassword,
-        port: app.defaultPort,
+        username,
+        password,
+        port,
         loginUrl: appUrl,
         instructions: app.instructions.replace(/\$\{ip\}/g, primaryIp)
       });

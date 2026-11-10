@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
       hostname, username, rootPassword, password, sshKey, templateId, billingMode, planId, 
       cpuCores, ramGb, diskGb, diskType, backupGb, bandwidthMbps, ipv4Count = 1, ipv6Count = 0, paymentMethodCode,
       useIpv4, useIpv6, isKubernetes, kubernetesVersion, action, kubernetesClusterId, billingCycle = 1, reservedIpId, firewallRules, vpcId, privateIpAddress, targetNode,
-      appId, appVersion
+      appId, appVersion, appConfig
     } = await req.json();
     
     // Support both rootPassword and password for backward compatibility
@@ -180,7 +180,21 @@ export async function POST(req: NextRequest) {
       vpcIp: privateIpAddress ? privateIpAddress.trim() : null,
       appName: targetApp ? targetApp.name : null,
       appVersion: targetApp ? (appVersion || targetApp.appVersion) : null,
-      appStatus: targetApp ? "INSTALLING" : "NONE"
+      appStatus: targetApp ? "INSTALLING" : "NONE",
+      appCredentials: targetApp
+        ? JSON.stringify({
+            ...(typeof appConfig === "object" && appConfig !== null ? appConfig : {}),
+            adminUsername: (appConfig?.adminUsername && typeof appConfig.adminUsername === "string" && appConfig.adminUsername.trim())
+              ? appConfig.adminUsername.trim()
+              : targetApp.adminUsername,
+            adminPassword: (appConfig?.adminPassword && typeof appConfig.adminPassword === "string" && appConfig.adminPassword.trim())
+              ? appConfig.adminPassword.trim()
+              : finalPassword,
+            adminEmail: (appConfig?.adminEmail && typeof appConfig.adminEmail === "string" && appConfig.adminEmail.trim())
+              ? appConfig.adminEmail.trim()
+              : user.email
+          })
+        : null
     };
 
     // Security: Validate VPC ownership to prevent IDOR (attaching VPS to another user's VPC)
