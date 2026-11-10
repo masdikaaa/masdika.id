@@ -131,7 +131,8 @@ export class VpsAppProvisioningService {
     vpsId: number,
     appId: string,
     primaryIp: string,
-    rootPassword: string
+    rootPassword: string,
+    customConfig?: Record<string, any>
   ): Promise<void> {
     const app = getAppById(appId);
     if (!app) {
@@ -163,7 +164,8 @@ export class VpsAppProvisioningService {
         data: {
           appStatus: "INSTALLING",
           appName: app.name,
-          appVersion: app.appVersion
+          appVersion: app.appVersion,
+          ...(customConfig ? { appCredentials: JSON.stringify(customConfig) } : {})
         }
       });
 
@@ -178,9 +180,9 @@ export class VpsAppProvisioningService {
       await this.waitForCloudInit(proxmox, vps.node, vps.vmid, 120);
       await this.appendAppLog(vpsId, `[SYSTEM] Base OS online. Preparing package manager and runtime stack...`);
 
-      // Extract initial app configuration if stored during checkout
-      let appConfig: Record<string, any> = {};
-      if (vps.appCredentials) {
+      // Extract initial app configuration if passed directly or stored in DB
+      let appConfig: Record<string, any> = customConfig || {};
+      if (Object.keys(appConfig).length === 0 && vps.appCredentials) {
         try {
           const parsed = JSON.parse(vps.appCredentials);
           if (typeof parsed === "object" && parsed !== null) {

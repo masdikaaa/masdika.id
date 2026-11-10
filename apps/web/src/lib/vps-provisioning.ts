@@ -664,7 +664,13 @@ export class VpsProvisioningService {
   /**
    * Reinstalls an existing VPS with a new or same template, keeping VMID and IP.
    */
-  static async reinstallVps(vpsId: number, newTemplateName: string, newPassword?: string) {
+  static async reinstallVps(
+    vpsId: number,
+    newTemplateName: string,
+    newPassword?: string,
+    appId?: string,
+    appConfig?: Record<string, any>
+  ) {
     const vps = await prisma.vpsService.findUnique({
       where: { id: vpsId },
       include: { user: true, assignedIps: { include: { ipPool: true } }, vpc: { include: { router: true } } }
@@ -672,6 +678,8 @@ export class VpsProvisioningService {
 
     if (!vps) throw new Error("VPS Service not found");
     if (!vps.vmid) throw new Error("VPS is not provisioned on a node yet");
+
+    const targetApp = appId ? getAppById(appId) : null;
 
     const server = await prisma.proxmoxServer.findFirst({ where: { isActive: true } });
     if (!server) throw new Error("No active Proxmox server configured");
@@ -681,16 +689,16 @@ export class VpsProvisioningService {
     const isWindowsReinstall = newTemplateName.toLowerCase().includes("windows");
     const newUsername = isWindowsReinstall ? "Administrator" : (vps.username === "Administrator" ? "root" : (vps.username || "root"));
 
-    // Update status to provisioning and clear any previous 1-Click App data
+    // Update status to provisioning and set 1-Click App data if selected
     await prisma.vpsService.update({
       where: { id: vps.id },
       data: {
         status: "PROVISIONING",
         osTemplate: newTemplateName,
         username: newUsername,
-        appName: null,
-        appVersion: null,
-        appStatus: "NONE",
+        appName: targetApp ? targetApp.name : null,
+        appVersion: targetApp ? targetApp.appVersion : null,
+        appStatus: targetApp ? "INSTALLING" : "NONE",
         appUrl: null,
         appCredentials: null,
         ...(newPassword ? { rootPassword: encryptDeterministic(newPassword) } : {})
@@ -903,10 +911,10 @@ export class VpsProvisioningService {
 
       // Update DB
       const dbUpdateData: any = { 
-        status: vps.kubernetesClusterId ? "INSTALLING_K3S" : "RUNNING",
-        appName: null,
-        appVersion: null,
-        appStatus: "NONE",
+        status: targetApp ? "INSTALLING" : (vps.kubernetesClusterId ? "INSTALLING_K3S" : "RUNNING"),
+        appName: targetApp ? targetApp.name : null,
+        appVersion: targetApp ? targetApp.appVersion : null,
+        appStatus: targetApp ? "INSTALLING" : "NONE",
         appUrl: null,
         appCredentials: null
       };
@@ -974,6 +982,20 @@ export class VpsProvisioningService {
         ).catch(err => {
           console.error(`Failed async K3s re-provision for VPS ${vps.id}:`, err);
         });
+      }
+
+      // 7. Trigger 1-Click App Provisioning if reinstalling with an app
+      const primaryIp = vps.assignedIps?.find(ip => (ip as any).isPrimary)?.ipAddress || vps.assignedIps?.[0]?.ipAddress;
+      if (targetApp && primaryIp) {
+        const rootPass = newPassword || (decryptDeterministic(vps.rootPassword) || vps.rootPassword);
+        console.log(`[Reinstall] Triggering 1-Click App provisioning for ${targetApp.name} on VMID ${vps.vmid} (${primaryIp})...`);
+        VpsAppProvisioningService.installApp(
+          vps.id,
+          targetApp.id,
+          primaryIp,
+          rootPass,
+          appConfig
+        ).catch(err => console.error(`[Reinstall] Background 1-Click App provisioning failed for ${targetApp.name}:`, err));
       }
 
     } catch (error) {

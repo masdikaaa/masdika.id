@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import {
   Server, Play, Square, Power, RotateCcw, Activity, Cpu,
   Terminal, Settings, Settings2, HardDrive, Network, Wrench, ShieldAlert, Calculator, Shield,
-  ArrowLeft, ArrowRight, ChevronLeft, ShieldCheck, Archive, RefreshCw, Plus, AlertTriangle, CheckCircle, Receipt, CreditCard, Trash2, Wallet, X, Eye, EyeOff, Copy, XCircle, Info
+  ArrowLeft, ArrowRight, ChevronLeft, ShieldCheck, Archive, RefreshCw, Plus, AlertTriangle, CheckCircle, Receipt, CreditCard, Trash2, Wallet, X, Eye, EyeOff, Copy, XCircle, Info,
+  Rocket, Sparkles, Search, Check, Clock
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -18,7 +19,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import { formatRupiah } from "@/lib/billing";
 
 import { getOsIconUrl, formatOsName } from "@/lib/vps-os";
-import { getAppByName, getAppById } from "@/lib/vps-apps";
+import { VPS_APPS, APP_CATEGORIES, AppCategory, VpsAppDefinition, getAppByName, getAppById } from "@/lib/vps-apps";
 import { VpsAppInstallationMonitor } from "@/components/VpsAppInstallationMonitor";
 const getOsIcon = getOsIconUrl;
 
@@ -91,6 +92,29 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
   const [passwordConfirmInput, setPasswordConfirmInput] = useState("");
   const [sshKeyInput, setSshKeyInput] = useState("");
   const [showReinstallModal, setShowReinstallModal] = useState(false);
+
+  // Reinstall Modes & Catalog App Selection State
+  const [reinstallMode, setReinstallMode] = useState<"os" | "apps">("os");
+  const [reinstallAppCategory, setReinstallAppCategory] = useState<AppCategory>("All Apps");
+  const [reinstallAppSearch, setReinstallAppSearch] = useState("");
+  const [reinstallAppId, setReinstallAppId] = useState<string | null>(null);
+  const [reinstallAppConfig, setReinstallAppConfig] = useState<Record<string, any>>({});
+  const [reinstallAppPage, setReinstallAppPage] = useState(1);
+  const [showReinstallAppPasswords, setShowReinstallAppPasswords] = useState<Record<string, boolean>>({});
+  const REINSTALL_APPS_PER_PAGE = 6;
+
+  const selectReinstallApp = (app: VpsAppDefinition) => {
+    setReinstallAppId(app.id);
+    const initCfg: Record<string, any> = {};
+    if (app.configFields) {
+      app.configFields.forEach((field) => {
+        if (field.defaultValue !== undefined) {
+          initCfg[field.key] = field.defaultValue;
+        }
+      });
+    }
+    setReinstallAppConfig(initCfg);
+  };
 
   const [reinstallPassword, setReinstallPassword] = useState("");
   const [reinstallPasswordConfirm, setReinstallPasswordConfirm] = useState("");
@@ -1293,10 +1317,30 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
   };
 
   const handleReinstallClick = () => {
-    if (!selectedTemplate) {
-      toast.error("Please select a template first.");
-      return;
+    if (reinstallMode === "os") {
+      if (!selectedTemplate) {
+        toast.error("Please select an operating system template first.");
+        return;
+      }
+    } else {
+      if (!reinstallAppId) {
+        toast.error("Please select a 1-Click Application from the catalog.");
+        return;
+      }
+      const activeApp = getAppById(reinstallAppId);
+      if (activeApp?.configFields) {
+        for (const field of activeApp.configFields) {
+          if (field.required !== false) {
+            const val = reinstallAppConfig[field.key];
+            if (val === undefined || val === null || String(val).trim() === "") {
+              toast.error(`Please enter ${field.label}`);
+              return;
+            }
+          }
+        }
+      }
     }
+
     if (reinstallPassword.length < 8) {
       setReinstallPasswordError("Password must be at least 8 characters long.");
       toast.error("Password must be at least 8 characters long.");
@@ -1315,20 +1359,45 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
     setReinstalling(true);
     setShowReinstallModal(false);
     try {
+      const activeApp = reinstallMode === "apps" && reinstallAppId ? getAppById(reinstallAppId) : null;
+      let effectiveTemplate = selectedTemplate;
+      if (activeApp) {
+        const isAlma = activeApp.osBase.toLowerCase().includes("alma");
+        const found = templates.find((t: any) =>
+          isAlma
+            ? t.name.toLowerCase().includes("alma")
+            : (t.name.toLowerCase().includes("ubuntu-24") || t.name.toLowerCase().includes("ubuntu"))
+        );
+        if (found) {
+          effectiveTemplate = found.name;
+        }
+      }
+
       const res = await fetch(`/api/user/vps/${id}/reinstall`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ templateName: selectedTemplate, password: reinstallPassword }),
+        body: JSON.stringify({
+          templateName: effectiveTemplate || undefined,
+          password: reinstallPassword,
+          appId: reinstallMode === "apps" && reinstallAppId ? reinstallAppId : undefined,
+          appConfig: reinstallMode === "apps" && reinstallAppId ? reinstallAppConfig : undefined,
+        }),
       });
       const data = await res.json();
       if (res.ok) {
         toast.success(data.message);
+        // Clear setup dismissal so VpsAppInstallationMonitor immediately activates on Overview
+        setIsSetupDismissed(false);
+        try {
+          sessionStorage.removeItem(`vps_setup_dismissed_${id}`);
+        } catch (e) {}
+
         setVps((prev: any) => prev ? {
           ...prev,
           status: 'PROVISIONING',
-          appName: null,
-          appVersion: null,
-          appStatus: 'NONE',
+          appName: activeApp ? activeApp.name : null,
+          appVersion: activeApp ? activeApp.appVersion : null,
+          appStatus: activeApp ? 'INSTALLING' : 'NONE',
           appUrl: null,
           appCredentials: null
         } : null);
@@ -3118,88 +3187,452 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
               <div className="flex flex-col lg:flex-row gap-6 animate-in fade-in duration-500">
 
                 {/* Sidebar Reinstall Menu */}
-                <div className={cn("w-full lg:w-64 shrink-0 border rounded-2xl p-2 h-fit flex flex-col gap-1", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
-                  <button className={cn("w-full text-left px-3.5 py-2 text-xs font-bold rounded-xl transition-all", isDark ? "bg-[#0a0a0c] text-cyan-400 border border-cyan-500/30" : "bg-cyan-50 text-cyan-950 border border-cyan-300 shadow-2xs")}>
-                    Reinstall OS
+                <div className={cn("w-full lg:w-64 shrink-0 border rounded-2xl p-2 h-fit flex flex-col gap-1.5", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                  <div className="px-3 py-2 text-[11px] font-black uppercase tracking-wider text-zinc-500">
+                    Reinstall Modes
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setReinstallMode("os")}
+                    className={cn(
+                      "w-full text-left px-3.5 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center justify-between cursor-pointer",
+                      reinstallMode === "os"
+                        ? isDark
+                          ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-xs"
+                          : "bg-cyan-50 text-cyan-950 border border-cyan-300 shadow-2xs"
+                        : isDark
+                          ? "text-zinc-400 hover:text-white hover:bg-white/[0.04]"
+                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                    )}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <HardDrive className="w-4 h-4 text-cyan-400" />
+                      <span>Native OS</span>
+                    </div>
+                    {reinstallMode === "os" && <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />}
                   </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setReinstallMode("apps")}
+                    className={cn(
+                      "w-full text-left px-3.5 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center justify-between cursor-pointer",
+                      reinstallMode === "apps"
+                        ? isDark
+                          ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-xs"
+                          : "bg-cyan-50 text-cyan-950 border border-cyan-300 shadow-2xs"
+                        : isDark
+                          ? "text-zinc-400 hover:text-white hover:bg-white/[0.04]"
+                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                    )}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Rocket className="w-4 h-4 text-cyan-400" />
+                      <span>1-Click Catalog App</span>
+                    </div>
+                    <span className={cn(
+                      "text-[10px] font-mono px-1.5 py-0.5 rounded font-bold",
+                      reinstallMode === "apps"
+                        ? "bg-cyan-400 text-slate-950"
+                        : isDark ? "bg-white/[0.08] text-zinc-400" : "bg-slate-200 text-slate-700"
+                    )}>
+                      {VPS_APPS.length}
+                    </span>
+                  </button>
+
+                  <div className={cn("p-3 rounded-xl border mt-2 text-[11px] leading-relaxed", isDark ? "bg-black/30 border-white/[0.06] text-zinc-400" : "bg-slate-50 border-slate-200 text-slate-600")}>
+                    <p className={cn("font-semibold mb-1", isDark ? "text-zinc-300" : "text-slate-800")}>
+                      {reinstallMode === "os" ? "Clean OS Install" : "Automated App Deploy"}
+                    </p>
+                    <p>
+                      {reinstallMode === "os"
+                        ? "Completely re-formats the disk with a fresh operating system image."
+                        : "Installs base OS and automatically provisions the selected application with custom credentials."}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Main Reinstall Area */}
                 <div className="flex-1 space-y-6">
 
-                  {/* OS Selection Grid */}
-                  <div className={cn("border rounded-2xl p-6", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
-                    <h3 className={cn("font-bold mb-4", isDark ? "text-white" : "text-slate-950")}>Select OS:</h3>
+                  {/* Mode 1: Native OS Grid */}
+                  {reinstallMode === "os" && (
+                    <div className={cn("border rounded-2xl p-6", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className={cn("font-bold", isDark ? "text-white" : "text-slate-950")}>Select Native OS:</h3>
+                        <span className={cn("text-xs font-mono font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
+                          {templates.length} templates available
+                        </span>
+                      </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
-                      {Object.entries(osGroups).map(([family, versions]: [string, any]) => {
-                        const isActive = activeOsFamily === family;
-                        return (
-                          <div
-                            key={family}
-                            className={cn(
-                              "relative rounded-2xl border p-4 flex flex-col items-center gap-3 transition-all cursor-pointer",
-                              isActive 
-                                ? (isDark ? "bg-cyan-500/10 border-cyan-500 ring-1 ring-cyan-500/30" : "bg-cyan-50/60 border-cyan-500 ring-1 ring-cyan-500/20 shadow-2xs") 
-                                : (isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/20" : "bg-white border-slate-200/90 hover:border-cyan-500 shadow-2xs")
-                            )}
-                            onClick={() => {
-                              setActiveOsFamily(family);
-                              if (!isActive && versions.length > 0) {
-                                setSelectedTemplate(versions[0].name);
-                              }
-                            }}
-                          >
-                            {/* OS Icon */}
-                            {(() => {
-                              const iconUrl = getOsIcon(family, isDark);
-                              return iconUrl ? (
-                                <img referrerPolicy="no-referrer" src={iconUrl} alt={family} className="w-12 h-12 object-contain filter drop-shadow-md" loading="lazy" decoding="async" />
-                              ) : (
-                                <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl" style={{
-                                  backgroundColor: family === 'Ubuntu' ? '#E95420' :
-                                    family === 'CentOS' ? '#932279' :
-                                      family === 'Debian' ? '#A80030' :
-                                        family === 'Rocky Linux' ? '#10B981' :
-                                          family.toLowerCase().includes('alpine') ? '#0D597F' :
-                                            family.toLowerCase().includes('alma') ? '#141E34' :
-                                              family.toLowerCase().includes('freebsd') ? '#AB2B28' : '#475569',
-                                  color: 'white'
-                                }}>
-                                  {family.charAt(0)}
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-2">
+                        {Object.entries(osGroups).map(([family, versions]: [string, any]) => {
+                          const isActive = activeOsFamily === family;
+                          return (
+                            <div
+                              key={family}
+                              className={cn(
+                                "relative rounded-2xl border p-4 flex flex-col items-center gap-3 transition-all cursor-pointer",
+                                isActive 
+                                  ? (isDark ? "bg-cyan-500/10 border-cyan-500 ring-1 ring-cyan-500/30" : "bg-cyan-50/60 border-cyan-500 ring-1 ring-cyan-500/20 shadow-2xs") 
+                                  : (isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/20" : "bg-white border-slate-200/90 hover:border-cyan-500 shadow-2xs")
+                              )}
+                              onClick={() => {
+                                setActiveOsFamily(family);
+                                if (!isActive && versions.length > 0) {
+                                  setSelectedTemplate(versions[0].name);
+                                }
+                              }}
+                            >
+                              {/* OS Icon */}
+                              {(() => {
+                                const iconUrl = getOsIcon(family, isDark);
+                                return iconUrl ? (
+                                  <img referrerPolicy="no-referrer" src={iconUrl} alt={family} className="w-12 h-12 object-contain filter drop-shadow-md" loading="lazy" decoding="async" />
+                                ) : (
+                                  <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl" style={{
+                                    backgroundColor: family === 'Ubuntu' ? '#E95420' :
+                                      family === 'CentOS' ? '#932279' :
+                                        family === 'Debian' ? '#A80030' :
+                                          family === 'Rocky Linux' ? '#10B981' :
+                                            family.toLowerCase().includes('alpine') ? '#0D597F' :
+                                              family.toLowerCase().includes('alma') ? '#141E34' :
+                                                family.toLowerCase().includes('freebsd') ? '#AB2B28' : '#475569',
+                                    color: 'white'
+                                  }}>
+                                    {family.charAt(0)}
+                                  </div>
+                                );
+                              })()}
+                              <span className={cn("text-sm font-bold", isDark ? "text-white" : "text-slate-950")}>{family}</span>
+
+                              {isActive && (
+                                <div className="w-full mt-2" onClick={(e) => e.stopPropagation()}>
+                                  <Select
+                                    value={selectedTemplate}
+                                    onChange={(val) => setSelectedTemplate(val)}
+                                    options={versions.map((v: any) => ({ value: v.name, label: v.name }))}
+                                    placeholder="SELECT VERSION"
+                                    className="py-1.5 px-2 text-xs rounded font-medium"
+                                  />
                                 </div>
-                              );
-                            })()}
-                            <span className={cn("text-sm font-bold", isDark ? "text-white" : "text-slate-950")}>{family}</span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
 
-                            {isActive && (
-                              <div className="w-full mt-2" onClick={(e) => e.stopPropagation()}>
-                                <Select
-                                  value={selectedTemplate}
-                                  onChange={(val) => setSelectedTemplate(val)}
-                                  options={versions.map((v: any) => ({ value: v.name, label: v.name }))}
-                                  placeholder="SELECT VERSION"
-                                  className="py-1.5 px-2 text-xs rounded font-medium"
-                                />
-                              </div>
+                  {/* Mode 2: 1-Click Catalog App Selection */}
+                  {reinstallMode === "apps" && (() => {
+                    const filteredApps = VPS_APPS.filter((app) => {
+                      const matchesCat = reinstallAppCategory === "All Apps" || app.category === reinstallAppCategory;
+                      const matchesSearch = !reinstallAppSearch ||
+                        app.name.toLowerCase().includes(reinstallAppSearch.toLowerCase()) ||
+                        app.description.toLowerCase().includes(reinstallAppSearch.toLowerCase()) ||
+                        app.category.toLowerCase().includes(reinstallAppSearch.toLowerCase());
+                      return matchesCat && matchesSearch;
+                    });
+
+                    const totalAppPages = Math.ceil(filteredApps.length / REINSTALL_APPS_PER_PAGE);
+                    const paginatedApps = filteredApps.slice(
+                      (reinstallAppPage - 1) * REINSTALL_APPS_PER_PAGE,
+                      reinstallAppPage * REINSTALL_APPS_PER_PAGE
+                    );
+
+                    return (
+                      <div className={cn("border rounded-2xl p-6 space-y-5", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <div>
+                            <h3 className={cn("font-bold text-base flex items-center gap-2", isDark ? "text-white" : "text-slate-950")}>
+                              <Rocket className="w-5 h-5 text-cyan-400" />
+                              Select 1-Click Application
+                            </h3>
+                            <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-600")}>
+                              Select an application to format the VPS, deploy the base OS, and auto-configure the software.
+                            </p>
+                          </div>
+
+                          {/* Search Input */}
+                          <div className="relative sm:w-64">
+                            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
+                            <input
+                              type="text"
+                              placeholder="Search apps..."
+                              value={reinstallAppSearch}
+                              onChange={(e) => {
+                                setReinstallAppSearch(e.target.value);
+                                setReinstallAppPage(1);
+                              }}
+                              className={cn(
+                                "w-full pl-9 pr-8 py-2 text-xs rounded-xl border outline-hidden transition-all",
+                                isDark ? "bg-[#0a0a0c] border-white/10 text-white placeholder-zinc-500 focus:border-cyan-400" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500"
+                              )}
+                            />
+                            {reinstallAppSearch && (
+                              <button
+                                type="button"
+                                onClick={() => setReinstallAppSearch("")}
+                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
                             )}
                           </div>
-                        );
-                      })}
-                    </div>
-                  </div>
+                        </div>
+
+                        {/* Category Filter Pills */}
+                        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+                          {APP_CATEGORIES.map((cat) => {
+                            const isActive = reinstallAppCategory === cat;
+                            const count = cat === "All Apps"
+                              ? VPS_APPS.length
+                              : VPS_APPS.filter((a) => a.category === cat).length;
+                            return (
+                              <button
+                                key={cat}
+                                type="button"
+                                onClick={() => {
+                                  setReinstallAppCategory(cat);
+                                  setReinstallAppPage(1);
+                                }}
+                                className={cn(
+                                  "px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all border cursor-pointer inline-flex items-center gap-1.5",
+                                  isActive
+                                    ? "bg-cyan-400 border-cyan-400 text-slate-950 font-black shadow-xs ring-1 ring-cyan-300/50"
+                                    : isDark
+                                      ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300 hover:text-white hover:border-white/20"
+                                      : "bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300"
+                                )}
+                              >
+                                <span>{cat}</span>
+                                <span className={cn(
+                                  "text-[10px] px-1.5 py-0.2 rounded-full font-mono",
+                                  isActive
+                                    ? "bg-slate-950/20 text-slate-950 font-bold"
+                                    : isDark ? "bg-white/10 text-zinc-400" : "bg-slate-200 text-slate-700"
+                                )}>
+                                  {count}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* App Cards Grid */}
+                        {paginatedApps.length === 0 ? (
+                          <div className={cn("text-center py-10 rounded-xl border border-dashed", isDark ? "border-white/10 text-zinc-400" : "border-slate-200 text-slate-500")}>
+                            No applications found matching &quot;{reinstallAppSearch}&quot;
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                            {paginatedApps.map((app) => {
+                              const isSelected = reinstallAppId === app.id;
+                              return (
+                                <div
+                                  key={app.id}
+                                  onClick={() => selectReinstallApp(app)}
+                                  className={cn(
+                                    "relative p-4 rounded-xl border transition-all cursor-pointer flex flex-col justify-between group",
+                                    isSelected
+                                      ? isDark
+                                        ? "bg-cyan-950/20 border-cyan-500 ring-1 ring-cyan-500/50 shadow-md"
+                                        : "bg-cyan-50/50 border-cyan-500 ring-1 ring-cyan-500/40 shadow-sm"
+                                      : isDark
+                                        ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/20 hover:bg-white/[0.02]"
+                                        : "bg-white border-slate-200/90 hover:border-slate-300 hover:bg-slate-50/50"
+                                  )}
+                                >
+                                  <div>
+                                    <div className="flex items-start justify-between gap-2.5 mb-2.5">
+                                      <div className="flex items-center gap-3 min-w-0">
+                                        <div className={cn(
+                                          "w-10 h-10 rounded-xl flex items-center justify-center p-2 shrink-0 border transition-colors",
+                                          isDark ? "bg-[#050507] border-white/10" : "bg-white border-slate-200 shadow-2xs"
+                                        )}>
+                                          <img
+                                            referrerPolicy="no-referrer"
+                                            src={app.icon}
+                                            alt={app.name}
+                                            className="w-full h-full object-contain"
+                                            loading="lazy"
+                                          />
+                                        </div>
+                                        <div className="min-w-0">
+                                          <span className={cn(
+                                            "text-xs font-black block uppercase tracking-wide truncate",
+                                            isSelected ? "text-cyan-400" : isDark ? "text-white" : "text-slate-900"
+                                          )}>
+                                            {app.name}
+                                          </span>
+                                          <span className="text-[10px] text-zinc-500 font-medium block">
+                                            {app.category}
+                                          </span>
+                                        </div>
+                                      </div>
+
+                                      {isSelected ? (
+                                        <div className="w-5 h-5 rounded-full bg-cyan-400 text-slate-950 flex items-center justify-center shrink-0 shadow-xs">
+                                          <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                                        </div>
+                                      ) : (
+                                        <div className={cn(
+                                          "w-5 h-5 rounded-full border shrink-0 transition-colors",
+                                          isDark ? "border-white/10 group-hover:border-white/30" : "border-slate-300 group-hover:border-slate-400"
+                                        )} />
+                                      )}
+                                    </div>
+
+                                    <p className={cn("text-[11px] leading-relaxed line-clamp-2 mb-3", isDark ? "text-zinc-400" : "text-slate-600")}>
+                                      {app.description}
+                                    </p>
+                                  </div>
+
+                                  <div className="pt-2 border-t" style={{ borderColor: isDark ? "rgba(255,255,255,0.06)" : "#e2e8f0" }}>
+                                    <div className={cn(
+                                      "px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold flex items-center justify-between",
+                                      isDark ? "bg-[#050507] border-white/10 text-zinc-300" : "bg-white border-slate-200 text-slate-700"
+                                    )}>
+                                      <span className="truncate">{app.appVersion ? `${app.name} ${app.appVersion} - ${app.osBase}` : `${app.name} - ${app.osBase}`}</span>
+                                      <span className="text-[10px] font-mono text-cyan-400 shrink-0 ml-1">:{app.defaultPort}</span>
+                                    </div>
+                                    {app.minSpecs && (
+                                      <div className="flex items-center justify-between text-[10px] font-mono mt-1.5 px-0.5">
+                                        <span className="text-zinc-500">Min: {app.minSpecs.cpu}C / {app.minSpecs.ram}GB</span>
+                                        <span className="flex items-center gap-1 text-cyan-400 font-semibold">
+                                          <Clock className="w-2.5 h-2.5" />
+                                          <span>{app.estimatedTime}</span>
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+
+                        {/* Pagination */}
+                        {totalAppPages > 1 && (
+                          <div className={cn("flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                            <span className={cn("text-xs font-mono font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>
+                              Showing {(reinstallAppPage - 1) * REINSTALL_APPS_PER_PAGE + 1} - {Math.min(reinstallAppPage * REINSTALL_APPS_PER_PAGE, filteredApps.length)} of {filteredApps.length} Apps
+                            </span>
+                            <Pagination currentPage={reinstallAppPage} totalPages={totalAppPages} onPageChange={setReinstallAppPage} />
+                          </div>
+                        )}
+
+                        {/* 1-Click App Custom Configuration Fields */}
+                        {reinstallAppId && (() => {
+                          const activeApp = getAppById(reinstallAppId);
+                          if (!activeApp?.configFields || activeApp.configFields.length === 0) return null;
+                          return (
+                            <div className={cn(
+                              "mt-4 p-5 sm:p-6 rounded-2xl border transition-all space-y-5",
+                              isDark ? "bg-[#0b0c10] border-white/10" : "bg-slate-50/90 border-slate-200"
+                            )}>
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-white/[0.08]">
+                                <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                                  <div className={cn(
+                                    "w-10 h-10 rounded-xl flex items-center justify-center p-2 shrink-0 border shadow-xs",
+                                    isDark ? "bg-[#050507] border-white/10" : "bg-white border-slate-200"
+                                  )}>
+                                    <img
+                                      referrerPolicy="no-referrer"
+                                      src={activeApp.icon}
+                                      alt={activeApp.name}
+                                      className="w-full h-full object-contain"
+                                    />
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-2.5 flex-wrap">
+                                      <h4 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider", isDark ? "text-white" : "text-slate-900")}>
+                                        {activeApp.name} Configuration
+                                      </h4>
+                                      <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-cyan-400/10 text-cyan-300 border border-cyan-400/25 font-bold uppercase tracking-wide whitespace-nowrap shrink-0 inline-flex items-center gap-1.5 shadow-xs">
+                                        <Sparkles className="w-2.5 h-2.5 text-cyan-400" />
+                                        Automated Setup
+                                      </span>
+                                    </div>
+                                    <p className="text-[11px] text-zinc-400 mt-0.5 leading-relaxed">
+                                      Administrator credentials and environment settings automatically provisioned during installation.
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {activeApp.configFields.map((field) => {
+                                  const isPassword = field.type === "password";
+                                  const isShown = showReinstallAppPasswords[field.key];
+                                  return (
+                                    <div key={field.key} className={field.key === "siteTitle" || field.key === "domain" ? "sm:col-span-2" : ""}>
+                                      <label className={cn("block text-xs font-semibold mb-1.5", isDark ? "text-zinc-300" : "text-slate-700")}>
+                                        {field.label}
+                                        {field.required === false && (
+                                          <span className="text-[10px] text-zinc-500 font-normal ml-1.5">(Optional)</span>
+                                        )}
+                                      </label>
+                                      <div className="relative">
+                                        <input
+                                          type={isPassword ? (isShown ? "text" : "password") : field.type}
+                                          value={reinstallAppConfig[field.key] ?? (field.defaultValue ?? "")}
+                                          onChange={(e) => setReinstallAppConfig((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                                          placeholder={field.placeholder}
+                                          className={cn(
+                                            "w-full border rounded-xl px-3.5 py-2.5 text-xs font-medium outline-hidden transition-all",
+                                            isPassword && "pr-10",
+                                            isDark
+                                              ? "bg-[#14151c] border-white/10 text-white placeholder-zinc-500 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+                                              : "bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                                          )}
+                                        />
+                                        {isPassword && (
+                                          <button
+                                            type="button"
+                                            onClick={() => setShowReinstallAppPasswords((prev) => ({ ...prev, [field.key]: !prev[field.key] }))}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-cyan-400 transition-colors"
+                                          >
+                                            {isShown ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                          </button>
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    );
+                  })()}
 
                   {/* Password Form */}
                   {(() => {
-                    const isWindowsReinstall = Boolean(
+                    const isWindowsReinstall = reinstallMode === "os" && Boolean(
                       activeOsFamily?.toLowerCase().includes("windows") ||
                       selectedTemplate?.toLowerCase().includes("windows")
                     );
+                    const chosenApp = reinstallMode === "apps" && reinstallAppId ? getAppById(reinstallAppId) : null;
                     const defaultUser = isWindowsReinstall ? "Administrator" : (vps?.username || "root");
+
+                    const isFormValid =
+                      (reinstallMode === "os" ? Boolean(selectedTemplate) : Boolean(reinstallAppId)) &&
+                      vps.status !== 'SUSPENDED' &&
+                      reinstallPassword.length >= 8 &&
+                      reinstallPassword === reinstallPasswordConfirm;
+
                     return (
                       <div className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
-                        <div className={cn("border-b", isDark ? "border-white/[0.08] bg-black/20" : "border-slate-200/90 bg-slate-50", "px-3.5 py-2 flex items-center justify-between")}>
-                          <h3 className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-950")}>Password for OS after reinstallation</h3>
+                        <div className={cn("border-b", isDark ? "border-white/[0.08] bg-black/20" : "border-slate-200/90 bg-slate-50", "px-4 py-3 flex items-center justify-between")}>
+                          <h3 className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-950")}>
+                            {reinstallMode === "apps" && chosenApp
+                              ? `Root Server Password for ${chosenApp.name}`
+                              : "Password for OS after reinstallation"}
+                          </h3>
                           <span className={cn(
                             "text-xs px-2.5 py-1 rounded font-bold",
                             isDark ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30" : "bg-cyan-100 text-cyan-950 border border-cyan-300"
@@ -3208,7 +3641,17 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                           </span>
                         </div>
                         <div className="p-6 space-y-4 max-w-md">
-                          {isWindowsReinstall ? (
+                          {reinstallMode === "apps" && chosenApp ? (
+                            <div className={cn("p-3.5 rounded-xl border flex items-start gap-3 text-xs transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-300 text-slate-800")}>
+                              <Info className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-700")} />
+                              <div>
+                                <p className={cn("font-bold mb-0.5", isDark ? "text-cyan-400" : "text-cyan-950")}>Application Reinstall Note:</p>
+                                <p className={cn("leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-800 font-medium")}>
+                                  The VPS will be rebuilt with {chosenApp.osBase}. After provisioning, <strong>{chosenApp.name}</strong> will be deployed automatically. This root password will be used for SSH/Console access.
+                                </p>
+                              </div>
+                            </div>
+                          ) : isWindowsReinstall ? (
                             <div className={cn("p-3.5 rounded-xl border flex items-start gap-3 text-xs transition-all shadow-sm", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-300 text-slate-800")}>
                               <Info className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-700")} />
                               <div>
@@ -3224,7 +3667,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                               <div>
                                 <p className={cn("font-bold mb-0.5", isDark ? "text-cyan-400" : "text-cyan-950")}>Linux Access Note:</p>
                                 <p className={cn("leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-800 font-medium")}>
-                                  The default user after reinstallation remains <strong>{defaultUser}</strong> (the same username sent in your setup email). This new password will be used to log in as {defaultUser} via SSH or Web Console.
+                                  The default user after reinstallation remains <strong>{defaultUser}</strong>. This new password will be used to log in as {defaultUser} via SSH or Web Console.
                                 </p>
                               </div>
                             </div>
@@ -3234,7 +3677,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                             <div className="relative">
                               <input
                                 type={showReinstallPassword ? "text" : "password"}
-                                placeholder="New Password"
+                                placeholder="New Root/Admin Password"
                                 value={reinstallPassword}
                                 onChange={(e) => setReinstallPassword(e.target.value)}
                                 className={cn("w-full rounded-lg pl-4 pr-10 py-2.5 text-sm focus:outline-none transition-colors", isDark ? "bg-[#0a0a0c] border border-white/[0.08] text-white placeholder-zinc-500 focus:border-cyan-500/50" : "bg-slate-50 border border-slate-200/90 text-slate-950 font-medium placeholder:text-slate-400 focus:border-cyan-500")}
@@ -3274,13 +3717,15 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
 
                           <button
                             onClick={handleReinstallClick}
-                            disabled={reinstalling || !selectedTemplate || vps.status === 'SUSPENDED' || reinstallPassword.length < 8 || reinstallPassword !== reinstallPasswordConfirm}
-                            className="w-full mt-2 flex items-center justify-center gap-2 px-3.5 py-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 font-bold rounded-lg transition-all shadow-sm disabled:opacity-50 text-slate-950 text-xs"
+                            disabled={reinstalling || !isFormValid}
+                            className="w-full mt-2 flex items-center justify-center gap-2 px-3.5 py-2.5 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 font-bold rounded-lg transition-all shadow-sm disabled:opacity-50 text-slate-950 text-xs cursor-pointer"
                           >
                             {reinstalling ? (
-                              <><div className="animate-spin rounded-full h-4 w-4 border-t-2 border-slate-950"></div> Rebuilding...</>
+                              <><div className="animate-spin rounded-full h-4 w-4 border-t-2 border-slate-950"></div> Rebuilding Server...</>
+                            ) : reinstallMode === "apps" && chosenApp ? (
+                              <><Rocket className="w-4 h-4" /> Reinstall & Deploy {chosenApp.name}</>
                             ) : (
-                              <><HardDrive className="w-4 h-4" /> Reinstall Server</>
+                              <><HardDrive className="w-4 h-4" /> Reinstall Server ({selectedTemplate || "Select OS"})</>
                             )}
                           </button>
                         </div>
@@ -3999,9 +4444,13 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
         isOpen={showReinstallModal}
         onClose={() => setShowReinstallModal(false)}
         onConfirm={executeReinstall}
-        title="Reinstall Operating System"
-        description={`This action will completely format the disk and rebuild the server using the "${selectedTemplate}" template. All existing data will be permanently destroyed. The default user after reinstallation is ${selectedTemplate?.toLowerCase().includes("windows") || activeOsFamily?.toLowerCase().includes("windows") ? "Administrator" : (vps?.username || "root")}. Are you absolutely sure?`}
-        confirmText="Rebuild"
+        title={reinstallMode === "apps" && reinstallAppId ? `Reinstall & Deploy ${getAppById(reinstallAppId)?.name || "Application"}` : "Reinstall Operating System"}
+        description={
+          reinstallMode === "apps" && reinstallAppId
+            ? `This action will completely format the disk, reinstall the base ${getAppById(reinstallAppId)?.osBase || "Linux"} OS, and automatically deploy ${getAppById(reinstallAppId)?.name || "the application"}. All existing data will be permanently destroyed. Are you absolutely sure?`
+            : `This action will completely format the disk and rebuild the server using the "${selectedTemplate}" template. All existing data will be permanently destroyed. The default user after reinstallation is ${selectedTemplate?.toLowerCase().includes("windows") || activeOsFamily?.toLowerCase().includes("windows") ? "Administrator" : (vps?.username || "root")}. Are you absolutely sure?`
+        }
+        confirmText={reinstallMode === "apps" && reinstallAppId ? `Format & Deploy ${getAppById(reinstallAppId)?.name || "App"}` : "Rebuild"}
         cancelText="Cancel"
         variant="danger"
         isLoading={reinstalling}

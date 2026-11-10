@@ -111,8 +111,8 @@ async function start() {
         } else if (job.type === 'REINSTALL_K3S') {
           await reinstallK3sCluster(payload);
         } else if (job.type === 'REINSTALL_VPS') {
-          const { vpsId, templateName, password } = payload;
-          await VpsProvisioningService.reinstallVps(vpsId, templateName, password);
+          const { vpsId, templateName, password, appId, appConfig } = payload;
+          await VpsProvisioningService.reinstallVps(vpsId, templateName, password, appId, appConfig);
         } else {
           throw new Error(`Unknown job type: ${job.type}`);
         }
