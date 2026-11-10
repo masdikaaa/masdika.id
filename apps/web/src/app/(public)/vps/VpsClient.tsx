@@ -728,8 +728,8 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
         />
 
         {/* ── 9. FINAL CTA SECTION ──────────────────────────────────────── */}
-        <section className="pt-16 lg:pt-24 pb-0">
-          <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-10 md:p-16 text-center shadow-xl overflow-hidden max-w-5xl mx-auto">
+        <section className="pt-16 lg:pt-24 pb-0 w-full">
+          <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-10 md:p-16 text-center shadow-xl overflow-hidden w-full">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-gradient-to-tr from-cyan-500/15 via-cyan-400/10 to-transparent dark:from-cyan-500/20 dark:via-cyan-400/10 dark:to-transparent rounded-full blur-3xl pointer-events-none -z-0" />
 
             <div className="relative z-10 max-w-2xl mx-auto">

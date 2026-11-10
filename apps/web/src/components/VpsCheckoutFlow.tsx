@@ -1277,13 +1277,13 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
               const currentDisk = Math.max(minDisk, diskGb);
               const maxDisk = diskType === "SSD" ? maxSpecs.diskSsd : maxSpecs.diskHdd;
 
-              const cpuPercent = Math.min(100, Math.max(3, ((currentCpu - 1) / Math.max(1, maxSpecs.cpu - 1)) * 100));
-              const ramPercent = Math.min(100, Math.max(3, ((currentRam - 1) / Math.max(1, maxSpecs.ram - 1)) * 100));
-              const diskPercent = Math.min(100, Math.max(3, ((currentDisk - 20) / Math.max(1, maxDisk - 20)) * 100));
+              const cpuRange = Math.max(1, maxSpecs.cpu - minCpu);
+              const ramRange = Math.max(1, maxSpecs.ram - minRam);
+              const diskRange = Math.max(1, maxDisk - minDisk);
 
-              const cpuPresets = [1, 2, 4, 8, 16, 32].filter(c => c <= maxSpecs.cpu);
-              const ramPresets = [1, 2, 4, 8, 16, 32, 64].filter(r => r <= maxSpecs.ram);
-              const diskPresets = [20, 40, 80, 160, 320, 500].filter(d => d <= maxDisk);
+              const cpuPercent = Math.min(100, Math.max(0, ((currentCpu - minCpu) / cpuRange) * 100));
+              const ramPercent = Math.min(100, Math.max(0, ((currentRam - minRam) / ramRange) * 100));
+              const diskPercent = Math.min(100, Math.max(0, ((currentDisk - minDisk) / diskRange) * 100));
 
               return (
                 <div className="space-y-6 relative z-10">
@@ -1303,18 +1303,11 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                       </span>
                     </div>
                     <input
-                      type="range" min={1} max={maxSpecs.cpu} step="1"
+                      type="range" min={minCpu} max={maxSpecs.cpu} step="1"
                       value={currentCpu}
                       onChange={e => {
                         const val = Number(e.target.value);
-                        if (val < minCpu) {
-                          setCpuCores(minCpu);
-                          if (activeApp) {
-                            toast.warning(`${activeApp.name} requires at least ${minCpu} vCPU Cores.`);
-                          }
-                        } else {
-                          setCpuCores(val);
-                        }
+                        setCpuCores(Math.max(minCpu, val));
                       }}
                       className={cn(
                         "w-full h-2 rounded-lg appearance-none cursor-pointer outline-none transition-all",
@@ -1326,33 +1319,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                       }}
                     />
                     <div className="flex justify-between items-center text-[11px] font-mono text-zinc-500 mt-1.5">
-                      <span>1 Core {minCpu > 1 ? `(Min: ${minCpu}C)` : ''}</span>
-                      <div className="hidden sm:flex items-center gap-1">
-                        {cpuPresets.map(cores => {
-                          const isBelowMin = cores < minCpu;
-                          const isSelected = currentCpu === cores;
-                          return (
-                            <button
-                              key={cores}
-                              type="button"
-                              disabled={isBelowMin}
-                              onClick={() => setCpuCores(cores)}
-                              className={cn(
-                                "px-1.5 py-0.5 rounded text-[10px] font-mono border transition-all cursor-pointer",
-                                isSelected
-                                  ? "bg-cyan-400 text-slate-950 font-bold border-cyan-400"
-                                  : isBelowMin
-                                    ? "opacity-30 cursor-not-allowed border-transparent text-zinc-600 line-through"
-                                    : isDark
-                                      ? "bg-white/[0.03] text-zinc-400 border-white/10 hover:text-white hover:border-white/20"
-                                      : "bg-slate-100 text-slate-600 border-slate-200 hover:text-slate-900"
-                              )}
-                            >
-                              {cores}C
-                            </button>
-                          );
-                        })}
-                      </div>
+                      <span>{minCpu} Core{minCpu > 1 ? 's' : ''} {minCpu > 1 ? '(App Min)' : ''}</span>
                       <span>{maxSpecs.cpu} Cores</span>
                     </div>
                   </div>
@@ -1373,18 +1340,11 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                       </span>
                     </div>
                     <input
-                      type="range" min={1} max={maxSpecs.ram} step="1"
+                      type="range" min={minRam} max={maxSpecs.ram} step="1"
                       value={currentRam}
                       onChange={e => {
                         const val = Number(e.target.value);
-                        if (val < minRam) {
-                          setRamGb(minRam);
-                          if (activeApp) {
-                            toast.warning(`${activeApp.name} requires at least ${minRam} GB RAM.`);
-                          }
-                        } else {
-                          setRamGb(val);
-                        }
+                        setRamGb(Math.max(minRam, val));
                       }}
                       className={cn(
                         "w-full h-2 rounded-lg appearance-none cursor-pointer outline-none transition-all",
@@ -1396,33 +1356,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                       }}
                     />
                     <div className="flex justify-between items-center text-[11px] font-mono text-zinc-500 mt-1.5">
-                      <span>1 GB {minRam > 1 ? `(Min: ${minRam}GB)` : ''}</span>
-                      <div className="hidden sm:flex items-center gap-1">
-                        {ramPresets.map(gb => {
-                          const isBelowMin = gb < minRam;
-                          const isSelected = currentRam === gb;
-                          return (
-                            <button
-                              key={gb}
-                              type="button"
-                              disabled={isBelowMin}
-                              onClick={() => setRamGb(gb)}
-                              className={cn(
-                                "px-1.5 py-0.5 rounded text-[10px] font-mono border transition-all cursor-pointer",
-                                isSelected
-                                  ? "bg-cyan-400 text-slate-950 font-bold border-cyan-400"
-                                  : isBelowMin
-                                    ? "opacity-30 cursor-not-allowed border-transparent text-zinc-600 line-through"
-                                    : isDark
-                                      ? "bg-white/[0.03] text-zinc-400 border-white/10 hover:text-white hover:border-white/20"
-                                      : "bg-slate-100 text-slate-600 border-slate-200 hover:text-slate-900"
-                              )}
-                            >
-                              {gb}G
-                            </button>
-                          );
-                        })}
-                      </div>
+                      <span>{minRam} GB {minRam > 1 ? '(App Min)' : ''}</span>
                       <span>{maxSpecs.ram} GB</span>
                     </div>
                   </div>
@@ -1443,18 +1377,11 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                       </span>
                     </div>
                     <input
-                      type="range" min={20} max={maxDisk} step="10"
+                      type="range" min={minDisk} max={maxDisk} step={minDisk % 10 === 0 ? "10" : "5"}
                       value={currentDisk}
                       onChange={e => {
                         const val = Number(e.target.value);
-                        if (val < minDisk) {
-                          setDiskGb(minDisk);
-                          if (activeApp) {
-                            toast.warning(`${activeApp.name} requires at least ${minDisk} GB Disk.`);
-                          }
-                        } else {
-                          setDiskGb(val);
-                        }
+                        setDiskGb(Math.max(minDisk, val));
                       }}
                       className={cn(
                         "w-full h-2 rounded-lg appearance-none cursor-pointer outline-none transition-all",
@@ -1466,33 +1393,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                       }}
                     />
                     <div className="flex justify-between items-center text-[11px] font-mono text-zinc-500 mt-1.5">
-                      <span>20 GB {minDisk > 20 ? `(Min: ${minDisk}GB)` : ''}</span>
-                      <div className="hidden sm:flex items-center gap-1">
-                        {diskPresets.map(gb => {
-                          const isBelowMin = gb < minDisk;
-                          const isSelected = currentDisk === gb;
-                          return (
-                            <button
-                              key={gb}
-                              type="button"
-                              disabled={isBelowMin}
-                              onClick={() => setDiskGb(gb)}
-                              className={cn(
-                                "px-1.5 py-0.5 rounded text-[10px] font-mono border transition-all cursor-pointer",
-                                isSelected
-                                  ? "bg-cyan-400 text-slate-950 font-bold border-cyan-400"
-                                  : isBelowMin
-                                    ? "opacity-30 cursor-not-allowed border-transparent text-zinc-600 line-through"
-                                    : isDark
-                                      ? "bg-white/[0.03] text-zinc-400 border-white/10 hover:text-white hover:border-white/20"
-                                      : "bg-slate-100 text-slate-600 border-slate-200 hover:text-slate-900"
-                              )}
-                            >
-                              {gb}G
-                            </button>
-                          );
-                        })}
-                      </div>
+                      <span>{minDisk} GB {minDisk > 20 ? '(App Min)' : ''}</span>
                       <span>{maxDisk} GB</span>
                     </div>
                   </div>
@@ -2489,7 +2390,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                 </div>
               ) : (
                 <div className="flex justify-between items-center text-xs px-3.5 py-2.5">
-                  <span className={cn("font-medium flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><Disc className="w-3.5 h-3.5" /> Image</span>
+                  <span className={cn("font-medium flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><Disc className="w-3.5 h-3.5 text-cyan-400" /> Image</span>
                   <span className={cn("font-semibold truncate max-w-[160px]", isDark ? "text-zinc-200" : "text-slate-900")}>
                     {templates.find(t => t.id === selectedTemplate)?.name || (serviceType === "KUBERNETES" ? "Debian-13" : "-")}
                   </span>
@@ -2502,28 +2403,28 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                 </span>
               </div>
               <div className="flex justify-between items-center text-xs px-3.5 py-2.5">
-                <span className={cn("font-medium flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><MemoryStick className="w-3.5 h-3.5" /> Memory</span>
+                <span className={cn("font-medium flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><MemoryStick className="w-3.5 h-3.5 text-cyan-400" /> Memory</span>
                 <span className={cn("font-mono font-semibold", isDark ? "text-zinc-200" : "text-slate-900")}>{ramGb} GB RAM</span>
               </div>
               <div className="flex justify-between items-center text-xs px-3.5 py-2.5">
-                <span className={cn("font-medium flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><HardDrive className="w-3.5 h-3.5" /> Storage</span>
+                <span className={cn("font-medium flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><HardDrive className="w-3.5 h-3.5 text-cyan-400" /> Storage</span>
                 <span className={cn("font-mono font-semibold", isDark ? "text-zinc-200" : "text-slate-900")}>{diskGb} GB {diskType}</span>
               </div>
               <div className="flex justify-between items-center text-xs px-3.5 py-2.5">
-                <span className={cn("font-medium flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><Network className="w-3.5 h-3.5" /> Public IP</span>
+                <span className={cn("font-medium flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><Network className="w-3.5 h-3.5 text-cyan-400" /> Public IP</span>
                 <span className={cn("font-mono font-semibold", isDark ? "text-zinc-200" : "text-slate-900")}>
                   {ipv4Count > 0 && ipv6Count > 0 ? `${ipv4Count} IPv4 + ${ipv6Count} IPv6` : ipv4Count > 0 ? `${ipv4Count} IPv4` : ipv6Count > 0 ? `${ipv6Count} IPv6` : "VPC Only"}
                 </span>
               </div>
               <div className="flex justify-between items-center text-xs px-3.5 py-2.5">
-                <span className={cn("font-medium flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><Activity className="w-3.5 h-3.5" /> Port Speed</span>
+                <span className={cn("font-medium flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><Activity className="w-3.5 h-3.5 text-cyan-400" /> Port Speed</span>
                 <span className={cn("font-mono font-semibold", isDark ? "text-zinc-200" : "text-slate-900")}>
                   {bandwidthMbps} Mbps
                 </span>
               </div>
               {backupGb > 0 && (
                 <div className="flex justify-between items-center text-xs px-3.5 py-2.5">
-                  <span className={cn("font-medium flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><DatabaseBackup className="w-3.5 h-3.5" /> Backups</span>
+                  <span className={cn("font-medium flex items-center gap-2", isDark ? "text-zinc-400" : "text-slate-500")}><DatabaseBackup className="w-3.5 h-3.5 text-cyan-400" /> Backups</span>
                   <span className={cn("font-mono font-semibold", isDark ? "text-zinc-200" : "text-slate-900")}>{backupGb} GB</span>
                 </div>
               )}
