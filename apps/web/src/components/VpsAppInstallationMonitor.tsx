@@ -239,7 +239,7 @@ export function VpsAppInstallationMonitor({
                   <CheckCircle className="w-3.5 h-3.5" /> Ready
                 </span>
               ) : (
-                <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1.5 animate-pulse">
+                <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center gap-1.5 animate-pulse">
                   <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Installing...
                 </span>
               )}
@@ -364,7 +364,7 @@ export function VpsAppInstallationMonitor({
                     "flex items-center justify-between gap-2 p-2.5 rounded-xl border font-mono text-xs sm:text-sm",
                     isDark ? "bg-[#0b0c10] border-white/10" : "bg-white border-slate-200"
                   )}>
-                    <span className="font-bold text-amber-400 truncate">
+                    <span className="font-bold text-cyan-400 truncate">
                       {showPassword ? password : "••••••••••••"}
                     </span>
                     <div className="flex items-center gap-1">
@@ -500,7 +500,7 @@ export function VpsAppInstallationMonitor({
               "p-3.5 rounded-2xl border flex items-center justify-center gap-2.5 text-xs font-semibold text-center",
               isDark ? "bg-white/[0.03] border-white/10 text-zinc-400" : "bg-slate-50 border-slate-200 text-slate-500"
             )}>
-              <Lock className="w-4 h-4 text-amber-400 shrink-0" />
+              <Lock className="w-4 h-4 text-cyan-400 shrink-0" />
               <span>
                 VPS management controls are temporarily locked during installation. Please wait until setup finishes.
               </span>
@@ -526,3 +526,4 @@ export function VpsAppInstallationMonitor({
     </div>
   );
 }
+

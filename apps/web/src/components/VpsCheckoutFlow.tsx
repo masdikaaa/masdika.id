@@ -842,7 +842,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                           className={cn(
                             "px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all border cursor-pointer",
                             isActive
-                              ? "bg-amber-600 border-amber-500 text-white shadow-xs ring-1 ring-amber-400/30"
+                              ? "bg-cyan-400 border-cyan-400 text-slate-950 font-black shadow-xs ring-1 ring-cyan-300/50"
                               : isDark
                                 ? "bg-white/[0.03] border-white/[0.08] text-zinc-400 hover:text-white hover:border-white/20"
                                 : "bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300"
