@@ -62,11 +62,11 @@ export async function GET(req: Request) {
            console.warn("Failed to list nodes, falling back to default node 'proxmox'");
         }
         
-        // Fetch node CPU and RAM
+        // Fetch node CPU and RAM, capped to platform maximums allowed by order validator (32 vCPU, 128 GB RAM)
         const nodeStatus = await proxmox.getNodeStatus(activeNode);
         if (nodeStatus && nodeStatus.memory && nodeStatus.cpuinfo) {
-          maxSpecs.cpu = nodeStatus.cpuinfo.cpus;
-          maxSpecs.ram = Math.floor(nodeStatus.memory.total / (1024 * 1024 * 1024));
+          maxSpecs.cpu = Math.min(32, nodeStatus.cpuinfo.cpus || 32);
+          maxSpecs.ram = Math.min(128, Math.floor(nodeStatus.memory.total / (1024 * 1024 * 1024)) || 64);
         }
 
         // Fetch storage free space (avail)
@@ -78,10 +78,10 @@ export async function GET(req: Request) {
         const targetStorageSsd = storages.find((s: any) => s.storage === mainStorageSsdName);
         
         if (targetStorage && targetStorage.avail) {
-          maxSpecs.diskHdd = Math.floor(targetStorage.avail / (1024 * 1024 * 1024));
+          maxSpecs.diskHdd = Math.min(1000, Math.floor(targetStorage.avail / (1024 * 1024 * 1024)));
         }
         if (targetStorageSsd && targetStorageSsd.avail) {
-          maxSpecs.diskSsd = Math.floor(targetStorageSsd.avail / (1024 * 1024 * 1024));
+          maxSpecs.diskSsd = Math.min(500, Math.floor(targetStorageSsd.avail / (1024 * 1024 * 1024)));
         }
 
         const backupStorageName = server.backupStorage;

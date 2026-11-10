@@ -162,12 +162,25 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
   const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null);
   const [selectedOsFamily, setSelectedOsFamily] = useState<string | null>(null);
 
-  // 1-Click Apps State
-  const [imageMode, setImageMode] = useState<"os" | "apps">("os");
-  const [selectedAppCategory, setSelectedAppCategory] = useState<AppCategory>("All Apps");
-  const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
-  const [selectedAppVersion, setSelectedAppVersion] = useState<string | null>(null);
-  const [appConfig, setAppConfig] = useState<Record<string, any>>({});
+  // 1-Click Apps State (initialized immediately from URL query params)
+  const initialAppQuery = searchParams.get("app") || searchParams.get("appId");
+  const initialApp = initialAppQuery ? (getAppById(initialAppQuery) || getAppByName(initialAppQuery)) : null;
+
+  const [imageMode, setImageMode] = useState<"os" | "apps">(initialApp ? "apps" : "os");
+  const [selectedAppCategory, setSelectedAppCategory] = useState<AppCategory>(initialApp ? initialApp.category : "All Apps");
+  const [selectedAppId, setSelectedAppId] = useState<string | null>(initialApp ? initialApp.id : null);
+  const [selectedAppVersion, setSelectedAppVersion] = useState<string | null>(initialApp ? (initialApp.versions[0]?.appVersion || initialApp.appVersion) : null);
+  const [appConfig, setAppConfig] = useState<Record<string, any>>(() => {
+    const initCfg: Record<string, any> = {};
+    if (initialApp?.configFields) {
+      initialApp.configFields.forEach((field) => {
+        if (field.defaultValue !== undefined) {
+          initCfg[field.key] = field.defaultValue;
+        }
+      });
+    }
+    return initCfg;
+  });
   const [installedVpsId, setInstalledVpsId] = useState<number | null>(null);
   const [showAppInstallationModal, setShowAppInstallationModal] = useState<boolean>(false);
 
@@ -228,23 +241,52 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
       .catch(console.error);
   }, []);
 
-  // Resource Sliders
-  const [cpuCores, setCpuCores] = useState(parseInt(searchParams.get("cpu") || "1"));
-  const [ramGb, setRamGb] = useState(parseInt(searchParams.get("ram") || "1"));
-  const [diskGb, setDiskGb] = useState(parseInt(searchParams.get("disk") || "20"));
+  // Resource Sliders - initialized with app's minimum requirements if requested via URL
+  const initialMinCpu = initialApp?.minSpecs?.cpu || 1;
+  const initialMinRam = initialApp?.minSpecs?.ram || 1;
+  const initialMinDisk = initialApp?.minSpecs?.disk || 20;
+
+  const [cpuCores, setCpuCores] = useState(() => {
+    const paramVal = parseInt(searchParams.get("cpu") || "0");
+    return Math.max(initialMinCpu, paramVal || 1);
+  });
+  const [ramGb, setRamGb] = useState(() => {
+    const paramVal = parseInt(searchParams.get("ram") || "0");
+    return Math.max(initialMinRam, paramVal || 1);
+  });
+  const [diskGb, setDiskGb] = useState(() => {
+    const paramVal = parseInt(searchParams.get("disk") || "0");
+    return Math.max(initialMinDisk, paramVal || 20);
+  });
   const [diskType, setDiskType] = useState<"HDD" | "SSD">((searchParams.get("diskType") as "HDD" | "SSD") || "HDD");
   const [backupGb, setBackupGb] = useState(0);
   const [bandwidthMbps, setBandwidthMbps] = useState(parseInt(searchParams.get("bandwidth") || searchParams.get("bandwidthMbps") || "100"));
   const [bandwidthOptions, setBandwidthOptions] = useState<number[]>([100, 150, 200, 250, 300]);
 
-  const [maxSpecs, setMaxSpecs] = useState({ cpu: 16, ram: 64, diskHdd: 1000, diskSsd: 500, backup: 500 });
+  const [maxSpecs, setMaxSpecs] = useState({ cpu: 32, ram: 128, diskHdd: 1000, diskSsd: 500, backup: 500 });
+
+  // Dedicated switch handler to ensure minimum disk requirement is strictly preserved when switching between SSD and HDD
+  const handleSwitchDiskType = (newType: "HDD" | "SSD") => {
+    setDiskType(newType);
+    const activeApp = imageMode === "apps" && selectedAppId ? getAppById(selectedAppId) : null;
+    const requiredMinDisk = activeApp?.minSpecs ? Math.max(20, activeApp.minSpecs.disk) : 20;
+    const targetMax = newType === "SSD" ? maxSpecs.diskSsd : maxSpecs.diskHdd;
+    setDiskGb(prev => {
+      const ensured = Math.max(requiredMinDisk, prev);
+      return Math.min(ensured, targetMax);
+    });
+  };
 
   useEffect(() => {
     const maxDisk = diskType === "SSD" ? maxSpecs.diskSsd : maxSpecs.diskHdd;
-    if (diskGb > maxDisk) {
-      setDiskGb(maxDisk);
-    }
-  }, [diskType, maxSpecs, diskGb]);
+    const activeApp = imageMode === "apps" && selectedAppId ? getAppById(selectedAppId) : null;
+    const requiredMinDisk = activeApp?.minSpecs ? Math.max(20, activeApp.minSpecs.disk) : 20;
+    setDiskGb(prev => {
+      if (prev < requiredMinDisk) return requiredMinDisk;
+      if (prev > maxDisk) return Math.max(requiredMinDisk, maxDisk);
+      return prev;
+    });
+  }, [diskType, maxSpecs, imageMode, selectedAppId]);
 
   // Networking
   const [ipv4Count, setIpv4Count] = useState(0);
@@ -1181,15 +1223,15 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                 <div className={cn("flex rounded-lg p-0.5 border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
                   <button
                     type="button"
-                    onClick={() => setDiskType("HDD")}
-                    className={cn("px-3 py-1 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer", diskType === "HDD" ? "bg-cyan-400 text-slate-950 shadow-2xs" : (isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900"))}
+                    onClick={() => handleSwitchDiskType("HDD")}
+                    className={cn("px-3 py-1 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer", diskType === "HDD" ? "bg-cyan-400 text-slate-950 shadow-2xs font-bold" : (isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900"))}
                   >
                     <HardDrive className="w-3.5 h-3.5" /> HDD
                   </button>
                   <button
                     type="button"
-                    onClick={() => setDiskType("SSD")}
-                    className={cn("px-3 py-1 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer", diskType === "SSD" ? "bg-cyan-400 text-slate-950 shadow-2xs" : (isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900"))}
+                    onClick={() => handleSwitchDiskType("SSD")}
+                    className={cn("px-3 py-1 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer", diskType === "SSD" ? "bg-cyan-400 text-slate-950 shadow-2xs font-bold" : (isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900"))}
                   >
                     <Disc className="w-3.5 h-3.5" /> SSD
                   </button>
@@ -1206,6 +1248,14 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
               const currentRam = Math.max(minRam, ramGb);
               const currentDisk = Math.max(minDisk, diskGb);
               const maxDisk = diskType === "SSD" ? maxSpecs.diskSsd : maxSpecs.diskHdd;
+
+              const cpuPercent = Math.min(100, Math.max(3, ((currentCpu - 1) / Math.max(1, maxSpecs.cpu - 1)) * 100));
+              const ramPercent = Math.min(100, Math.max(3, ((currentRam - 1) / Math.max(1, maxSpecs.ram - 1)) * 100));
+              const diskPercent = Math.min(100, Math.max(3, ((currentDisk - 20) / Math.max(1, maxDisk - 20)) * 100));
+
+              const cpuPresets = [1, 2, 4, 8, 16, 32].filter(c => c <= maxSpecs.cpu);
+              const ramPresets = [1, 2, 4, 8, 16, 32, 64].filter(r => r <= maxSpecs.ram);
+              const diskPresets = [20, 40, 80, 160, 320, 500].filter(d => d <= maxDisk);
 
               return (
                 <div className="space-y-6 relative z-10">
@@ -1225,13 +1275,56 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                       </span>
                     </div>
                     <input
-                      type="range" min={minCpu} max={maxSpecs.cpu} step="1"
-                      value={currentCpu} onChange={e => setCpuCores(Math.max(minCpu, Number(e.target.value)))}
-                      className={cn("w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-none", isDark ? "bg-white/10" : "bg-slate-200")}
-                      style={{ background: `linear-gradient(to right, #22d3ee ${((currentCpu - minCpu) / Math.max(1, maxSpecs.cpu - minCpu)) * 100}%, ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"} ${((currentCpu - minCpu) / Math.max(1, maxSpecs.cpu - minCpu)) * 100}%)` }}
+                      type="range" min={1} max={maxSpecs.cpu} step="1"
+                      value={currentCpu}
+                      onChange={e => {
+                        const val = Number(e.target.value);
+                        if (val < minCpu) {
+                          setCpuCores(minCpu);
+                          if (activeApp) {
+                            toast.warning(`${activeApp.name} requires at least ${minCpu} vCPU Cores.`);
+                          }
+                        } else {
+                          setCpuCores(val);
+                        }
+                      }}
+                      className={cn(
+                        "w-full h-2 rounded-lg appearance-none cursor-pointer outline-none transition-all",
+                        "[&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-webkit-slider-thumb]:shadow-[0_0_10px_rgba(34,211,238,0.7)] [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:hover:scale-110 [&::-webkit-slider-thumb]:transition-transform",
+                        "[&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-none [&::-moz-range-thumb]:shadow-[0_0_10px_rgba(34,211,238,0.7)] [&::-moz-range-thumb]:cursor-pointer"
+                      )}
+                      style={{
+                        background: `linear-gradient(to right, #22d3ee 0%, #22d3ee ${cpuPercent}%, ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"} ${cpuPercent}%, ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"} 100%)`
+                      }}
                     />
-                    <div className="flex justify-between text-[11px] font-mono text-zinc-500 mt-1.5">
-                      <span>{minCpu} Core{minCpu > 1 ? 's' : ''} {minCpu > 1 ? '(App Min)' : ''}</span>
+                    <div className="flex justify-between items-center text-[11px] font-mono text-zinc-500 mt-1.5">
+                      <span>1 Core {minCpu > 1 ? `(Min: ${minCpu}C)` : ''}</span>
+                      <div className="hidden sm:flex items-center gap-1">
+                        {cpuPresets.map(cores => {
+                          const isBelowMin = cores < minCpu;
+                          const isSelected = currentCpu === cores;
+                          return (
+                            <button
+                              key={cores}
+                              type="button"
+                              disabled={isBelowMin}
+                              onClick={() => setCpuCores(cores)}
+                              className={cn(
+                                "px-1.5 py-0.5 rounded text-[10px] font-mono border transition-all cursor-pointer",
+                                isSelected
+                                  ? "bg-cyan-400 text-slate-950 font-bold border-cyan-400"
+                                  : isBelowMin
+                                    ? "opacity-30 cursor-not-allowed border-transparent text-zinc-600 line-through"
+                                    : isDark
+                                      ? "bg-white/[0.03] text-zinc-400 border-white/10 hover:text-white hover:border-white/20"
+                                      : "bg-slate-100 text-slate-600 border-slate-200 hover:text-slate-900"
+                              )}
+                            >
+                              {cores}C
+                            </button>
+                          );
+                        })}
+                      </div>
                       <span>{maxSpecs.cpu} Cores</span>
                     </div>
                   </div>
@@ -1252,13 +1345,56 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                       </span>
                     </div>
                     <input
-                      type="range" min={minRam} max={maxSpecs.ram} step="1"
-                      value={currentRam} onChange={e => setRamGb(Math.max(minRam, Number(e.target.value)))}
-                      className={cn("w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-none", isDark ? "bg-white/10" : "bg-slate-200")}
-                      style={{ background: `linear-gradient(to right, #22d3ee ${((currentRam - minRam) / Math.max(1, maxSpecs.ram - minRam)) * 100}%, ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"} ${((currentRam - minRam) / Math.max(1, maxSpecs.ram - minRam)) * 100}%)` }}
+                      type="range" min={1} max={maxSpecs.ram} step="1"
+                      value={currentRam}
+                      onChange={e => {
+                        const val = Number(e.target.value);
+                        if (val < minRam) {
+                          setRamGb(minRam);
+                          if (activeApp) {
+                            toast.warning(`${activeApp.name} requires at least ${minRam} GB RAM.`);
+                          }
+                        } else {
+                          setRamGb(val);
+                        }
+                      }}
+                      className={cn(
+                        "w-full h-2 rounded-lg appearance-none cursor-pointer outline-none transition-all",
+                        "[&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-webkit-slider-thumb]:shadow-[0_0_10px_rgba(34,211,238,0.7)] [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:hover:scale-110 [&::-webkit-slider-thumb]:transition-transform",
+                        "[&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-none [&::-moz-range-thumb]:shadow-[0_0_10px_rgba(34,211,238,0.7)] [&::-moz-range-thumb]:cursor-pointer"
+                      )}
+                      style={{
+                        background: `linear-gradient(to right, #22d3ee 0%, #22d3ee ${ramPercent}%, ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"} ${ramPercent}%, ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"} 100%)`
+                      }}
                     />
-                    <div className="flex justify-between text-[11px] font-mono text-zinc-500 mt-1.5">
-                      <span>{minRam} GB {minRam > 1 ? '(App Min)' : ''}</span>
+                    <div className="flex justify-between items-center text-[11px] font-mono text-zinc-500 mt-1.5">
+                      <span>1 GB {minRam > 1 ? `(Min: ${minRam}GB)` : ''}</span>
+                      <div className="hidden sm:flex items-center gap-1">
+                        {ramPresets.map(gb => {
+                          const isBelowMin = gb < minRam;
+                          const isSelected = currentRam === gb;
+                          return (
+                            <button
+                              key={gb}
+                              type="button"
+                              disabled={isBelowMin}
+                              onClick={() => setRamGb(gb)}
+                              className={cn(
+                                "px-1.5 py-0.5 rounded text-[10px] font-mono border transition-all cursor-pointer",
+                                isSelected
+                                  ? "bg-cyan-400 text-slate-950 font-bold border-cyan-400"
+                                  : isBelowMin
+                                    ? "opacity-30 cursor-not-allowed border-transparent text-zinc-600 line-through"
+                                    : isDark
+                                      ? "bg-white/[0.03] text-zinc-400 border-white/10 hover:text-white hover:border-white/20"
+                                      : "bg-slate-100 text-slate-600 border-slate-200 hover:text-slate-900"
+                              )}
+                            >
+                              {gb}G
+                            </button>
+                          );
+                        })}
+                      </div>
                       <span>{maxSpecs.ram} GB</span>
                     </div>
                   </div>
@@ -1279,13 +1415,56 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                       </span>
                     </div>
                     <input
-                      type="range" min={minDisk} max={maxDisk} step="10"
-                      value={currentDisk} onChange={e => setDiskGb(Math.max(minDisk, Number(e.target.value)))}
-                      className={cn("w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-none", isDark ? "bg-white/10" : "bg-slate-200")}
-                      style={{ background: `linear-gradient(to right, #22d3ee ${((currentDisk - minDisk) / Math.max(1, maxDisk - minDisk)) * 100}%, ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"} ${((currentDisk - minDisk) / Math.max(1, maxDisk - minDisk)) * 100}%)` }}
+                      type="range" min={20} max={maxDisk} step="10"
+                      value={currentDisk}
+                      onChange={e => {
+                        const val = Number(e.target.value);
+                        if (val < minDisk) {
+                          setDiskGb(minDisk);
+                          if (activeApp) {
+                            toast.warning(`${activeApp.name} requires at least ${minDisk} GB Disk.`);
+                          }
+                        } else {
+                          setDiskGb(val);
+                        }
+                      }}
+                      className={cn(
+                        "w-full h-2 rounded-lg appearance-none cursor-pointer outline-none transition-all",
+                        "[&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-webkit-slider-thumb]:shadow-[0_0_10px_rgba(34,211,238,0.7)] [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:hover:scale-110 [&::-webkit-slider-thumb]:transition-transform",
+                        "[&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-none [&::-moz-range-thumb]:shadow-[0_0_10px_rgba(34,211,238,0.7)] [&::-moz-range-thumb]:cursor-pointer"
+                      )}
+                      style={{
+                        background: `linear-gradient(to right, #22d3ee 0%, #22d3ee ${diskPercent}%, ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"} ${diskPercent}%, ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"} 100%)`
+                      }}
                     />
-                    <div className="flex justify-between text-[11px] font-mono text-zinc-500 mt-1.5">
-                      <span>{minDisk} GB {minDisk > 20 ? '(App Min)' : ''}</span>
+                    <div className="flex justify-between items-center text-[11px] font-mono text-zinc-500 mt-1.5">
+                      <span>20 GB {minDisk > 20 ? `(Min: ${minDisk}GB)` : ''}</span>
+                      <div className="hidden sm:flex items-center gap-1">
+                        {diskPresets.map(gb => {
+                          const isBelowMin = gb < minDisk;
+                          const isSelected = currentDisk === gb;
+                          return (
+                            <button
+                              key={gb}
+                              type="button"
+                              disabled={isBelowMin}
+                              onClick={() => setDiskGb(gb)}
+                              className={cn(
+                                "px-1.5 py-0.5 rounded text-[10px] font-mono border transition-all cursor-pointer",
+                                isSelected
+                                  ? "bg-cyan-400 text-slate-950 font-bold border-cyan-400"
+                                  : isBelowMin
+                                    ? "opacity-30 cursor-not-allowed border-transparent text-zinc-600 line-through"
+                                    : isDark
+                                      ? "bg-white/[0.03] text-zinc-400 border-white/10 hover:text-white hover:border-white/20"
+                                      : "bg-slate-100 text-slate-600 border-slate-200 hover:text-slate-900"
+                              )}
+                            >
+                              {gb}G
+                            </button>
+                          );
+                        })}
+                      </div>
                       <span>{maxDisk} GB</span>
                     </div>
                   </div>

@@ -25,7 +25,6 @@ import {
   Sun,
   Moon,
 } from "lucide-react";
-import { SiKubernetes } from "react-icons/si";
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";

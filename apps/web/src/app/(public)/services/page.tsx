@@ -36,14 +36,6 @@ export default function ServicesPage() {
       href: "/api-hub"
     },
     {
-      icon: SiKubernetes,
-      title: "Managed K3s",
-      type: "PaaS",
-      percentage: 99,
-      description: "Lightweight, production-ready Kubernetes clusters optimized for edge and IoT, fully managed for you.",
-      href: "/k3s"
-    },
-    {
       icon: Terminal,
       title: "High-Performance VPS",
       type: "IaaS",
@@ -194,11 +186,7 @@ export default function ServicesPage() {
                   <div className="relative h-full p-6 flex flex-col">
                     <div className="flex items-start justify-between mb-5">
                       <div className="w-11 h-11 rounded-xl flex items-center justify-center border bg-cyan-50 dark:bg-cyan-950/30 border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400 group-hover:scale-105 group-hover:border-cyan-500/60 group-hover:bg-cyan-500/10 transition-all duration-300">
-                        {prod.title === "Managed K3s" ? (
-                          <prod.icon className="w-5 h-5" />
-                        ) : (
-                          <prod.icon className="w-5 h-5" strokeWidth={1.5} />
-                        )}
+                        <prod.icon className="w-5 h-5" strokeWidth={1.5} />
                       </div>
                       <div className="flex items-center gap-2">
                         {prod.type && (
