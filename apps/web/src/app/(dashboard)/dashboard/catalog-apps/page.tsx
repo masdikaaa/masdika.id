@@ -31,8 +31,7 @@ export default function CatalogAppsPage() {
     return VPS_APPS.filter((app) => {
       const matchesCategory =
         selectedCategory === "All Apps" ||
-        app.category === selectedCategory ||
-        app.secondaryCategories?.includes(selectedCategory);
+        app.category === selectedCategory;
 
       if (!matchesCategory) return false;
 
@@ -43,8 +42,7 @@ export default function CatalogAppsPage() {
         app.name.toLowerCase().includes(q) ||
         app.description.toLowerCase().includes(q) ||
         app.category.toLowerCase().includes(q) ||
-        app.defaultPort.toString().includes(q) ||
-        app.secondaryCategories?.some((cat) => cat.toLowerCase().includes(q))
+        app.defaultPort.toString().includes(q)
       );
     });
   }, [searchQuery, selectedCategory]);
@@ -116,7 +114,7 @@ export default function CatalogAppsPage() {
           const isActive = selectedCategory === cat;
           const count = cat === "All Apps"
             ? VPS_APPS.length
-            : VPS_APPS.filter(a => a.category === cat || a.secondaryCategories?.includes(cat)).length;
+            : VPS_APPS.filter(a => a.category === cat).length;
 
           return (
             <button

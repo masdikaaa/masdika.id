@@ -981,7 +981,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
               {imageMode === "apps" && (() => {
                 const filteredAppsByCategory = VPS_APPS.filter((app) => {
                   if (selectedAppCategory === "All Apps") return true;
-                  return app.category === selectedAppCategory || app.secondaryCategories?.includes(selectedAppCategory);
+                  return app.category === selectedAppCategory;
                 });
                 const totalAppPages = Math.ceil(filteredAppsByCategory.length / APPS_PER_PAGE);
                 const paginatedCheckoutApps = filteredAppsByCategory.slice((appPage - 1) * APPS_PER_PAGE, appPage * APPS_PER_PAGE);
