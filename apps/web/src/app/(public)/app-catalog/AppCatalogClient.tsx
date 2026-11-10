@@ -27,6 +27,8 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { HeroAvatarFrame } from "@/components/ui/HeroAvatarFrame";
 import { FadeIn } from "@/components/animations/FadeIn";
+import { AnimatedBeam, OrbitalRings } from "@/components/animations/DeploymentAnimations";
+import { ProvisioningSection } from "@/components/ui/ProvisioningSection";
 import { FaqSection } from "@/components/ui/FaqSection";
 import { Pagination } from "@/components/ui/Pagination";
 import { cn } from "@/lib/utils";
@@ -36,6 +38,23 @@ import {
   AppCategory,
   VpsAppDefinition,
 } from "@/lib/vps-apps";
+
+const APP_TERMINAL_LOGS = [
+  { time: "00:01", module: "CONFIG", message: "Parsing instance specifications..." },
+  { time: "00:02", module: "REGION", message: "Initializing resources in Sidoarjo Data Center..." },
+  { time: "00:03", module: "COMPUTE", message: "Allocating scalable vCPU and RAM..." },
+  { time: "00:04", module: "STORAGE", message: "Attaching high-speed SSD block storage..." },
+  { time: "00:05", module: "NET", message: "Configuring VPC, NAT Gateway, and Firewall Rules..." },
+  { time: "00:06", module: "BOOT", message: "Booting instance and passing health checks..." },
+  { time: "00:07", module: "READY", message: "ssh root@masdika.node", isCommand: true },
+];
+
+const APP_TERMINAL_STATS = [
+  { value: "Custom", label: "FIREWALL" },
+  { value: "Included", label: "NAT GATEWAY" },
+  { value: "Included", label: "VPC PEERING" },
+  { value: "Any", label: "OPEN PORTS" },
+];
 
 function formatCatalogVersion(ver?: string | null): string {
   if (!ver || !ver.trim()) return "Latest";
@@ -230,14 +249,13 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
         <section id="catalog" className="scroll-mt-24 py-10 sm:py-14 relative z-10">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold font-mono uppercase bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 mb-3">
-                <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Verified Application Marketplace</span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[var(--text-primary)]">
+              <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+                VERIFIED APPLICATION MARKETPLACE
+              </span>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-[var(--text-primary)] leading-[1.15] mb-3">
                 Browse Pre-Configured Apps
               </h2>
-              <p className="text-sm sm:text-base mt-2 text-[var(--text-secondary)] max-w-2xl">
+              <p className="text-sm sm:text-base text-[var(--text-secondary)] max-w-2xl">
                 Choose from control panels, CMS platforms, container runtimes, and local AI stacks. Ready to launch instantly on your cloud instance.
               </p>
             </div>
@@ -293,7 +311,7 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
                       "text-[10px] px-1.5 py-0.2 rounded-full font-mono",
                       isActive
                         ? "bg-slate-950/20 text-slate-950 font-bold"
-                        : "bg-white/[0.06] text-zinc-400"
+                        : "bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-zinc-400"
                     )}
                   >
                     {count}
@@ -332,17 +350,17 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
                             )}
                           </div>
                           <div className="flex flex-col items-end gap-1.5">
-                            <span className="text-[10px] px-2 py-0.5 rounded-full font-mono font-bold tracking-wider bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                            <span className="text-[10px] px-2 py-0.5 rounded-full font-mono font-bold tracking-wider bg-cyan-50 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border border-cyan-200/80 dark:border-cyan-500/20">
                               {versionDisplay}
                             </span>
-                            <span className="text-[10px] px-2 py-0.5 rounded-md font-semibold text-zinc-400 bg-white/[0.04] border border-white/[0.06]">
+                            <span className="text-[10px] px-2 py-0.5 rounded-md font-semibold text-slate-600 dark:text-zinc-400 bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.06]">
                               {app.category}
                             </span>
                           </div>
                         </div>
 
                         {/* App Name & Description */}
-                        <h3 className="text-lg font-bold text-[var(--text-primary)] group-hover:text-cyan-400 transition-colors mb-2">
+                        <h3 className="text-lg font-bold text-[var(--text-primary)] group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors mb-2">
                           {app.name}
                         </h3>
                         <p className="text-xs text-[var(--text-secondary)] leading-relaxed line-clamp-3 mb-4">
@@ -350,10 +368,10 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
                         </p>
 
                         {/* Meta Specs Pill Bar */}
-                        <div className="space-y-1.5 pt-3 border-t border-[var(--border-primary)] text-[11px] font-mono text-zinc-400 mb-5">
+                        <div className="space-y-1.5 pt-3 border-t border-[var(--border-primary)] text-[11px] font-mono text-slate-500 dark:text-zinc-400 mb-5">
                           <div className="flex items-center justify-between">
                             <span className="flex items-center gap-1.5">
-                              <Cpu className="w-3 h-3 text-cyan-400 shrink-0" />
+                              <Cpu className="w-3 h-3 text-cyan-600 dark:text-cyan-400 shrink-0" />
                               Min Specs:
                             </span>
                             <span className="font-semibold text-[var(--text-primary)]">
@@ -362,16 +380,16 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="flex items-center gap-1.5">
-                              <Clock className="w-3 h-3 text-cyan-400 shrink-0" />
+                              <Clock className="w-3 h-3 text-cyan-600 dark:text-cyan-400 shrink-0" />
                               Setup Time:
                             </span>
-                            <span className="font-semibold text-emerald-400">
+                            <span className="font-semibold text-emerald-600 dark:text-emerald-400">
                               {app.estimatedTime}
                             </span>
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="flex items-center gap-1.5">
-                              <Globe className="w-3 h-3 text-cyan-400 shrink-0" />
+                              <Globe className="w-3 h-3 text-cyan-600 dark:text-cyan-400 shrink-0" />
                               Web Port:
                             </span>
                             <span className="font-semibold text-[var(--text-primary)]">
@@ -384,7 +402,7 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
                       {/* Deploy Button */}
                       <Link
                         href={`/dashboard/checkout?service=APP_CATALOG&app=${encodeURIComponent(app.id)}`}
-                        className="w-full py-2.5 px-4 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer active:scale-98"
+                        className="w-full py-2.5 px-4 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer active:scale-98"
                       >
                         <span>Deploy 1-Click {app.name}</span>
                         <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
@@ -439,80 +457,100 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
           )}
         </section>
 
-        {/* ── 3. HOW IT WORKS (3 Simple Steps) ────────────────────────── */}
-        <section className="py-8 sm:py-12 relative z-10">
-          <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400">
-              Automated Architecture
+        {/* ── 3. HOW IT WORKS SECTION ───────────────────────────────────── */}
+        <section className="py-10 sm:py-14 relative z-10">
+          <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+              DEPLOYMENT WORKFLOW
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-[var(--text-primary)] mt-2">
-              How 1-Click Provisioning Works
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+              Go Live in 3 Simple Steps
             </h2>
-            <p className="text-sm text-[var(--text-secondary)] mt-2">
+            <p className="text-base text-[var(--text-secondary)]">
               From zero to a running application dashboard with full HTTPS and credentials in 3 automated steps.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative items-stretch">
+            {/* Connecting Line Container */}
+            <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-[2px] bg-slate-200 dark:bg-white/10 overflow-hidden rounded-full">
+              <AnimatedBeam />
+            </div>
+
             {[
               {
                 step: "01",
                 title: "Choose Application",
                 desc: "Pick your desired software stack from aaPanel to Ollama AI. Pre-filled with optimal defaults or customizable inputs.",
-                icon: Rocket,
               },
               {
                 step: "02",
                 title: "Select Compute Specs",
                 desc: "Choose vCPU cores, RAM size, and Enterprise SSD disk. Hourly pay-as-you-go billing starting at Rp 100/hr.",
-                icon: Cpu,
               },
               {
                 step: "03",
                 title: "Instant Web Access",
                 desc: "Cloud-Init automatically boots, installs vendor packages, opens ports, and serves your live web login link.",
-                icon: CheckCircle2,
               },
-            ].map((s, i) => (
-              <div
-                key={i}
-                className="relative p-6 sm:p-8 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-colors"
-              >
-                <div className="flex items-center justify-between mb-5">
-                  <div className="w-12 h-12 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
-                    <s.icon className="w-6 h-6" />
+            ].map((st, i) => (
+              <FadeIn key={i} delay={i * 0.15} direction="up" className="h-full">
+                <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-8 text-center shadow-sm hover:border-cyan-500/40 transition-all duration-300 h-full flex flex-col justify-between relative z-10 group">
+                  <div>
+                    <div className="w-20 h-20 mx-auto rounded-full bg-[var(--surface-secondary)] border border-[var(--border-primary)] flex items-center justify-center mb-6 relative group-hover:scale-110 transition-transform duration-300">
+                      <OrbitalRings />
+                      <span className="relative z-10 text-3xl font-black bg-gradient-to-br from-cyan-600 to-cyan-400 bg-clip-text text-transparent">
+                        {st.step}
+                      </span>
+                    </div>
+
+                    <h3 className="text-xl font-bold text-[var(--text-primary)] mb-3">
+                      {st.title}
+                    </h3>
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                      {st.desc}
+                    </p>
                   </div>
-                  <span className="text-3xl font-black font-mono text-zinc-300 dark:text-zinc-700">
-                    {s.step}
-                  </span>
                 </div>
-                <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2">
-                  {s.title}
-                </h3>
-                <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
-                  {s.desc}
-                </p>
-              </div>
+              </FadeIn>
             ))}
           </div>
         </section>
 
-        {/* ── 4. FAQS SECTION ─────────────────────────────────────────── */}
+        {/* ── 4. PROVISIONING SECTION (Live Terminal) ───────────────────── */}
+        <ProvisioningSection
+          subtitle="AUTOMATED PROVISIONING"
+          title="One-click, instant cloud server deployment."
+          description="Our control panel manages backend virtualization, disk attachments, and network routing seamlessly. Simply choose your specs and connect via SSH instantly."
+          buttonText="Open Dashboard"
+          buttonHref="/dashboard"
+          logs={APP_TERMINAL_LOGS}
+          stats={APP_TERMINAL_STATS}
+          terminalTitle="PROVISIONING CLOUD VPS"
+          iconType="vps"
+          targetServer="Dell PowerEdge R630 • Sidoarjo DC"
+          provisionEstimate="Backend: KVM Hypervisor (Estimasi ~5 Menit)"
+        />
+
+        {/* ── 5. FAQS SECTION ─────────────────────────────────────────── */}
         <FaqSection faqs={APP_CATALOG_FAQS} />
 
-        {/* ── 5. BOTTOM CTA BANNER ─────────────────────────────────────── */}
-        <section className="py-10 sm:py-14 relative z-10">
-          <div className="relative rounded-3xl overflow-hidden border border-cyan-500/30 bg-gradient-to-br from-cyan-950/40 via-[var(--surface)] to-[var(--surface)] p-8 sm:p-12 lg:p-16 text-center">
-            <div className="max-w-2xl mx-auto relative z-10">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400 mb-3 block">
-                Instant Cloud Automation
+        {/* ── 6. FINAL CTA SECTION ──────────────────────────────────────── */}
+        <section className="py-10 sm:py-14 relative z-10 w-full">
+          <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-10 md:p-16 text-center shadow-xl overflow-hidden w-full">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-gradient-to-tr from-cyan-500/15 via-cyan-400/10 to-transparent dark:from-cyan-500/20 dark:via-cyan-400/10 dark:to-transparent rounded-full blur-3xl pointer-events-none -z-0" />
+
+            <div className="relative z-10 max-w-2xl mx-auto">
+              <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+                START COMPUTING TODAY
               </span>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[var(--text-primary)] mb-4">
-                Deploy Your First 1-Click Application Today
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-tight mb-4">
+                Ready for True High-Performance Compute?
               </h2>
-              <p className="text-sm sm:text-base text-[var(--text-secondary)] mb-8 leading-relaxed">
-                Experience high-performance cloud computing backed by enterprise Intel Xeon CPUs, NVMe storage, and automated deployment pipelines.
+              <p className="text-base sm:text-lg text-[var(--text-secondary)] mb-8 leading-relaxed">
+                Deploy workloads on Masdika Cloud infrastructure today. Enjoy dedicated resources, local low latency, and full administrative freedom.
               </p>
+
               <div className="flex flex-wrap items-center justify-center gap-4">
                 <Button
                   variant="primary"
@@ -520,7 +558,7 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
                   href="/dashboard/checkout?service=APP_CATALOG"
                   rightIcon={<ArrowRight className="w-4 h-4" />}
                 >
-                  Launch App in Dashboard
+                  Deploy Your Server
                 </Button>
                 <Button
                   variant="secondary"
