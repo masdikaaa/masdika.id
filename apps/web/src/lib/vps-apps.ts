@@ -448,17 +448,8 @@ ${appInfoCmd}
     ],
     minSpecs: { cpu: 1, ram: 2, disk: 20 },
     estimatedTime: "~5-8 mins",
-    adminUsername: "Auto-generated",
+    adminUsername: "paneluser",
     instructions: "Access aaPanel at http://${ip}:8888/login. Log in using the system-generated credentials shown below.",
-    configFields: [
-      {
-        key: "panelPort",
-        label: "Panel Port",
-        type: "number",
-        defaultValue: 8888,
-        description: "Custom web interface port (default: 8888)"
-      }
-    ],
     getInstallScript: (ip, rootPassword, config = {}) => {
       const port = Number(config.panelPort) || 8888;
       return `
