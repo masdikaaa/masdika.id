@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
 import { formatRupiah } from "@/lib/billing";
 import { motion } from "framer-motion";
-import { RefreshCw, Plus, Settings2, Receipt, Disc, DatabaseBackup, ListChecks, ChevronLeft, ChevronRight, CreditCard, Building2, Wallet, Store, QrCode, Sliders, Rocket, Loader2, Plug, MapPin, AlertTriangle, Info } from "lucide-react";
+import { RefreshCw, Plus, Settings2, Receipt, Disc, DatabaseBackup, ListChecks, ChevronLeft, ChevronRight, CreditCard, Building2, Wallet, Store, QrCode, Sliders, Rocket, Loader2, Plug, MapPin, AlertTriangle, Info, Sparkles } from "lucide-react";
 import { Select } from "@/components/ui/Select";
 import Link from "next/link";
 import { SiUbuntu, SiDebian, SiRockylinux, SiCentos, SiAlpinelinux, SiFedora, SiKubernetes } from "react-icons/si";
@@ -182,6 +182,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
     }
     return initCfg;
   });
+  const [showAppPasswords, setShowAppPasswords] = useState<Record<string, boolean>>({});
   const [installedVpsId, setInstalledVpsId] = useState<number | null>(null);
   const [showAppInstallationModal, setShowAppInstallationModal] = useState<boolean>(false);
   const APPS_PER_PAGE = 6;
@@ -1124,59 +1125,84 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                       if (!activeApp?.configFields || activeApp.configFields.length === 0) return null;
                       return (
                         <div className={cn(
-                          "mt-5 p-5 rounded-2xl border transition-all space-y-4",
-                          isDark ? "bg-[#0b0c10] border-white/10" : "bg-slate-50/80 border-slate-200"
+                          "mt-5 p-5 sm:p-6 rounded-2xl border transition-all space-y-5",
+                          isDark ? "bg-[#0b0c10] border-white/10" : "bg-slate-50/90 border-slate-200"
                         )}>
-                          <div className="flex items-center gap-3 pb-3 border-b border-white/[0.08]">
-                            <div className={cn(
-                              "w-9 h-9 rounded-xl flex items-center justify-center p-1.5 shrink-0 border",
-                              isDark ? "bg-[#050507] border-white/10" : "bg-white border-slate-200"
-                            )}>
-                              <img
-                                referrerPolicy="no-referrer"
-                                src={activeApp.icon}
-                                alt={activeApp.name}
-                                className="w-full h-full object-contain"
-                              />
-                            </div>
-                            <div>
-                              <h4 className={cn("text-xs font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                                <span>{activeApp.name} Initial Configuration</span>
-                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-400/10 text-cyan-400 border border-cyan-400/20 font-bold lowercase">
-                                  automated setup
-                                </span>
-                              </h4>
-                              <p className="text-[11px] text-zinc-400">
-                                Define your administrator credentials or custom domain. They will be automatically provisioned during installation.
-                              </p>
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-white/[0.08]">
+                            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                              <div className={cn(
+                                "w-10 h-10 rounded-xl flex items-center justify-center p-2 shrink-0 border shadow-xs",
+                                isDark ? "bg-[#050507] border-white/10" : "bg-white border-slate-200"
+                              )}>
+                                <img
+                                  referrerPolicy="no-referrer"
+                                  src={activeApp.icon}
+                                  alt={activeApp.name}
+                                  className="w-full h-full object-contain"
+                                />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2.5 flex-wrap">
+                                  <h4 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider", isDark ? "text-white" : "text-slate-900")}>
+                                    {activeApp.name} Configuration
+                                  </h4>
+                                  <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-cyan-400/10 text-cyan-300 border border-cyan-400/25 font-bold uppercase tracking-wide whitespace-nowrap shrink-0 inline-flex items-center gap-1.5 shadow-xs">
+                                    <Sparkles className="w-2.5 h-2.5 text-cyan-400" />
+                                    Automated Setup
+                                  </span>
+                                </div>
+                                <p className="text-[11px] text-zinc-400 mt-0.5 leading-relaxed">
+                                  Administrator credentials and environment settings automatically provisioned during installation.
+                                </p>
+                              </div>
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                            {activeApp.configFields.map((field) => (
-                              <div key={field.key} className={field.key === "siteTitle" || field.key === "domain" ? "sm:col-span-2" : ""}>
-                                <label className={cn("block text-xs font-semibold mb-1.5", isDark ? "text-zinc-300" : "text-slate-700")}>
-                                  {field.label}
-                                </label>
-                                <input
-                                  type={field.type}
-                                  value={appConfig[field.key] ?? (field.defaultValue ?? "")}
-                                  onChange={(e) => setAppConfig((prev) => ({ ...prev, [field.key]: e.target.value }))}
-                                  placeholder={field.placeholder}
-                                  className={cn(
-                                    "w-full border rounded-xl px-3.5 py-2.5 text-xs font-medium outline-hidden transition-all",
-                                    isDark
-                                      ? "bg-[#14151c] border-white/10 text-white placeholder-zinc-500 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
-                                      : "bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {activeApp.configFields.map((field) => {
+                              const isPassword = field.type === "password";
+                              const isShown = showAppPasswords[field.key];
+                              return (
+                                <div key={field.key} className={field.key === "siteTitle" || field.key === "domain" ? "sm:col-span-2" : ""}>
+                                  <label className={cn("block text-xs font-semibold mb-1.5", isDark ? "text-zinc-300" : "text-slate-700")}>
+                                    {field.label}
+                                    {field.required === false && (
+                                      <span className="text-[10px] text-zinc-500 font-normal ml-1.5">(Optional)</span>
+                                    )}
+                                  </label>
+                                  <div className="relative">
+                                    <input
+                                      type={isPassword ? (isShown ? "text" : "password") : field.type}
+                                      value={appConfig[field.key] ?? (field.defaultValue ?? "")}
+                                      onChange={(e) => setAppConfig((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                                      placeholder={field.placeholder}
+                                      className={cn(
+                                        "w-full border rounded-xl px-3.5 py-2.5 text-xs font-medium outline-hidden transition-all",
+                                        isPassword && "pr-10",
+                                        isDark
+                                          ? "bg-[#14151c] border-white/10 text-white placeholder-zinc-500 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+                                          : "bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                                      )}
+                                    />
+                                    {isPassword && (
+                                      <button
+                                        type="button"
+                                        onClick={() => setShowAppPasswords((prev) => ({ ...prev, [field.key]: !prev[field.key] }))}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors p-1"
+                                        title={isShown ? "Hide password" : "Show password"}
+                                      >
+                                        {isShown ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                      </button>
+                                    )}
+                                  </div>
+                                  {field.description && (
+                                    <span className="text-[10px] text-zinc-500 mt-1 block">
+                                      {field.description}
+                                    </span>
                                   )}
-                                />
-                                {field.description && (
-                                  <span className="text-[10px] text-zinc-500 mt-1 block">
-                                    {field.description}
-                                  </span>
-                                )}
-                              </div>
-                            ))}
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                       );
