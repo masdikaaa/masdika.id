@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Server, HardDrive, Cpu, MemoryStick, Network, Activity, ShieldCheck, ArrowRight, Shield, XCircle, CheckCircle, Clock, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
@@ -15,6 +15,7 @@ import { SiUbuntu, SiDebian, SiRockylinux, SiCentos, SiAlpinelinux, SiFedora, Si
 import { EnterpriseInfraSidebarCard, IntelCpuBadge, NetworkInfraBadge, IntelLogo } from "@/components/EnterpriseInfraBadges";
 import { VPS_APPS, APP_CATEGORIES, AppCategory, VpsAppDefinition, getAppById, getAppByName } from "@/lib/vps-apps";
 import { VpsAppInstallationMonitor } from "@/components/VpsAppInstallationMonitor";
+import { Pagination } from "@/components/ui/Pagination";
 
 const getOsIcon = (name: string, isDark: boolean = false) => {
   const lowerName = name.toLowerCase();
@@ -183,6 +184,8 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
   });
   const [installedVpsId, setInstalledVpsId] = useState<number | null>(null);
   const [showAppInstallationModal, setShowAppInstallationModal] = useState<boolean>(false);
+  const [appPage, setAppPage] = useState(1);
+  const APPS_PER_PAGE = 6;
 
   const [plans, setPlans] = useState<any[]>([]);
   const [pricing, setPricing] = useState<Record<string, number>>({});
@@ -938,40 +941,46 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
               )}
 
               {/* MODE 2: 1-CLICK APPLICATIONS MARKETPLACE */}
-              {imageMode === "apps" && (
-                <div className="space-y-4">
-                  {/* Category Pills Header */}
-                  <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-                    {APP_CATEGORIES.map((cat) => {
-                      const isActive = selectedAppCategory === cat;
-                      return (
-                        <button
-                          key={cat}
-                          type="button"
-                          onClick={() => setSelectedAppCategory(cat)}
-                          className={cn(
-                            "px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all border cursor-pointer",
-                            isActive
-                              ? "bg-cyan-400 border-cyan-400 text-slate-950 font-black shadow-xs ring-1 ring-cyan-300/50"
-                              : isDark
-                                ? "bg-[#111115] border-white/[0.08] text-zinc-300 hover:text-white hover:border-white/20"
-                                : "bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300"
-                          )}
-                        >
-                          {cat}
-                        </button>
-                      );
-                    })}
-                  </div>
+              {imageMode === "apps" && (() => {
+                const filteredAppsByCategory = VPS_APPS.filter((app) => {
+                  if (selectedAppCategory === "All Apps") return true;
+                  return app.category === selectedAppCategory || app.secondaryCategories?.includes(selectedAppCategory);
+                });
+                const totalAppPages = Math.ceil(filteredAppsByCategory.length / APPS_PER_PAGE);
+                const paginatedCheckoutApps = filteredAppsByCategory.slice((appPage - 1) * APPS_PER_PAGE, appPage * APPS_PER_PAGE);
 
-                  {/* App Cards Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                    {VPS_APPS
-                      .filter((app) => {
-                        if (selectedAppCategory === "All Apps") return true;
-                        return app.category === selectedAppCategory || app.secondaryCategories?.includes(selectedAppCategory);
-                      })
-                      .map((app) => {
+                return (
+                  <div className="space-y-4">
+                    {/* Category Pills Header */}
+                    <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+                      {APP_CATEGORIES.map((cat) => {
+                        const isActive = selectedAppCategory === cat;
+                        return (
+                          <button
+                            key={cat}
+                            type="button"
+                            onClick={() => {
+                              setSelectedAppCategory(cat);
+                              setAppPage(1);
+                            }}
+                            className={cn(
+                              "px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all border cursor-pointer",
+                              isActive
+                                ? "bg-cyan-400 border-cyan-400 text-slate-950 font-black shadow-xs ring-1 ring-cyan-300/50"
+                                : isDark
+                                  ? "bg-[#111115] border-white/[0.08] text-zinc-300 hover:text-white hover:border-white/20"
+                                  : "bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300"
+                            )}
+                          >
+                            {cat}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* App Cards Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                      {paginatedCheckoutApps.map((app) => {
                         const isSelected = selectedAppId === app.id;
                         return (
                           <div
@@ -1055,104 +1064,118 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                           </div>
                         );
                       })}
-                  </div>
+                    </div>
 
-                  {/* 1-Click App Custom Configuration Fields */}
-                  {selectedAppId && (() => {
-                    const activeApp = getAppById(selectedAppId);
-                    if (!activeApp?.configFields || activeApp.configFields.length === 0) return null;
-                    return (
+                    {/* App Pagination Controls */}
+                    {totalAppPages > 1 && (
                       <div className={cn(
-                        "mt-5 p-5 rounded-2xl border transition-all space-y-4",
-                        isDark ? "bg-[#0b0c10] border-white/10" : "bg-slate-50/80 border-slate-200"
+                        "flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 pb-1 border-t",
+                        isDark ? "border-white/[0.08]" : "border-slate-200"
                       )}>
-                        <div className="flex items-center gap-3 pb-3 border-b border-white/[0.08]">
-                          <div className={cn(
-                            "w-9 h-9 rounded-xl flex items-center justify-center p-1.5 shrink-0 border",
-                            isDark ? "bg-[#050507] border-white/10" : "bg-white border-slate-200"
-                          )}>
-                            <img
-                              referrerPolicy="no-referrer"
-                              src={activeApp.icon}
-                              alt={activeApp.name}
-                              className="w-full h-full object-contain"
-                            />
-                          </div>
-                          <div>
-                            <h4 className={cn("text-xs font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                              <span>{activeApp.name} Initial Configuration</span>
-                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-400/10 text-cyan-400 border border-cyan-400/20 font-bold lowercase">
-                                automated setup
-                              </span>
-                            </h4>
-                            <p className="text-[11px] text-zinc-400">
-                              Define your administrator credentials or custom domain. They will be automatically provisioned during installation.
-                            </p>
-                          </div>
-                        </div>
+                        <span className={cn("text-xs font-mono font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>
+                          Showing {(appPage - 1) * APPS_PER_PAGE + 1} - {Math.min(appPage * APPS_PER_PAGE, filteredAppsByCategory.length)} of {filteredAppsByCategory.length} Apps
+                        </span>
+                        <Pagination currentPage={appPage} totalPages={totalAppPages} onPageChange={setAppPage} />
+                      </div>
+                    )}
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                          {activeApp.configFields.map((field) => (
-                            <div key={field.key} className={field.key === "siteTitle" || field.key === "domain" ? "sm:col-span-2" : ""}>
-                              <label className={cn("block text-xs font-semibold mb-1.5", isDark ? "text-zinc-300" : "text-slate-700")}>
-                                {field.label}
-                              </label>
-                              <input
-                                type={field.type}
-                                value={appConfig[field.key] ?? (field.defaultValue ?? "")}
-                                onChange={(e) => setAppConfig((prev) => ({ ...prev, [field.key]: e.target.value }))}
-                                placeholder={field.placeholder}
-                                className={cn(
-                                  "w-full border rounded-xl px-3.5 py-2.5 text-xs font-medium outline-hidden transition-all",
-                                  isDark
-                                    ? "bg-[#14151c] border-white/10 text-white placeholder-zinc-500 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
-                                    : "bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-                                )}
+                    {/* 1-Click App Custom Configuration Fields */}
+                    {selectedAppId && (() => {
+                      const activeApp = getAppById(selectedAppId);
+                      if (!activeApp?.configFields || activeApp.configFields.length === 0) return null;
+                      return (
+                        <div className={cn(
+                          "mt-5 p-5 rounded-2xl border transition-all space-y-4",
+                          isDark ? "bg-[#0b0c10] border-white/10" : "bg-slate-50/80 border-slate-200"
+                        )}>
+                          <div className="flex items-center gap-3 pb-3 border-b border-white/[0.08]">
+                            <div className={cn(
+                              "w-9 h-9 rounded-xl flex items-center justify-center p-1.5 shrink-0 border",
+                              isDark ? "bg-[#050507] border-white/10" : "bg-white border-slate-200"
+                            )}>
+                              <img
+                                referrerPolicy="no-referrer"
+                                src={activeApp.icon}
+                                alt={activeApp.name}
+                                className="w-full h-full object-contain"
                               />
-                              {field.description && (
-                                <span className="text-[10px] text-zinc-500 mt-1 block">
-                                  {field.description}
+                            </div>
+                            <div>
+                              <h4 className={cn("text-xs font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                                <span>{activeApp.name} Initial Configuration</span>
+                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-400/10 text-cyan-400 border border-cyan-400/20 font-bold lowercase">
+                                  automated setup
                                 </span>
-                              )}
+                              </h4>
+                              <p className="text-[11px] text-zinc-400">
+                                Define your administrator credentials or custom domain. They will be automatically provisioned during installation.
+                              </p>
                             </div>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })()}
-
-                  {/* Informational Banner */}
-                  {selectedAppId && (() => {
-                    const activeApp = getAppById(selectedAppId);
-                    if (!activeApp) return null;
-                    return (
-                      <div className={cn(
-                        "p-3.5 rounded-xl border text-xs flex items-start gap-2.5 mt-4",
-                        isDark ? "bg-cyan-950/20 border-cyan-800/40 text-cyan-300" : "bg-cyan-50 border-cyan-200 text-cyan-900"
-                      )}>
-                        <Info className="w-4 h-4 shrink-0 mt-0.5 text-cyan-400" />
-                        <div className="space-y-1">
-                          <div>
-                            <strong>{activeApp.name}</strong> will be automatically installed on <strong>{activeApp.osBase}</strong> via Cloud-Init.
-                            {" "}A dedicated Public IPv4 address is attached to enable web panel access and remote client connectivity.
                           </div>
-                          {activeApp.minSpecs && (
-                            <div className="text-[11px] opacity-90 flex items-center gap-2 flex-wrap pt-0.5">
-                              <span className="font-semibold text-cyan-400">Official Minimum Requirements:</span>
-                              <span>{activeApp.minSpecs.cpu} vCPU Cores</span>
-                              <span>•</span>
-                              <span>{activeApp.minSpecs.ram} GB RAM</span>
-                              <span>•</span>
-                              <span>{activeApp.minSpecs.disk} GB Disk</span>
-                              <span className="text-emerald-400 font-medium">(Auto-enforced to prevent OOM kills)</span>
-                            </div>
-                          )}
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                            {activeApp.configFields.map((field) => (
+                              <div key={field.key} className={field.key === "siteTitle" || field.key === "domain" ? "sm:col-span-2" : ""}>
+                                <label className={cn("block text-xs font-semibold mb-1.5", isDark ? "text-zinc-300" : "text-slate-700")}>
+                                  {field.label}
+                                </label>
+                                <input
+                                  type={field.type}
+                                  value={appConfig[field.key] ?? (field.defaultValue ?? "")}
+                                  onChange={(e) => setAppConfig((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                                  placeholder={field.placeholder}
+                                  className={cn(
+                                    "w-full border rounded-xl px-3.5 py-2.5 text-xs font-medium outline-hidden transition-all",
+                                    isDark
+                                      ? "bg-[#14151c] border-white/10 text-white placeholder-zinc-500 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+                                      : "bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                                  )}
+                                />
+                                {field.description && (
+                                  <span className="text-[10px] text-zinc-500 mt-1 block">
+                                    {field.description}
+                                  </span>
+                                )}
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })()}
-                </div>
-              )}
+                      );
+                    })()}
+
+                    {/* Informational Banner */}
+                    {selectedAppId && (() => {
+                      const activeApp = getAppById(selectedAppId);
+                      if (!activeApp) return null;
+                      return (
+                        <div className={cn(
+                          "p-3.5 rounded-xl border text-xs flex items-start gap-2.5 mt-4",
+                          isDark ? "bg-cyan-950/20 border-cyan-800/40 text-cyan-300" : "bg-cyan-50 border-cyan-200 text-cyan-900"
+                        )}>
+                          <Info className="w-4 h-4 shrink-0 mt-0.5 text-cyan-400" />
+                          <div className="space-y-1">
+                            <div>
+                              <strong>{activeApp.name}</strong> will be automatically installed on <strong>{activeApp.osBase}</strong> via Cloud-Init.
+                              {" "}A dedicated Public IPv4 address is attached to enable web panel access and remote client connectivity.
+                            </div>
+                            {activeApp.minSpecs && (
+                              <div className="text-[11px] opacity-90 flex items-center gap-2 flex-wrap pt-0.5">
+                                <span className="font-semibold text-cyan-400">Official Minimum Requirements:</span>
+                                <span>{activeApp.minSpecs.cpu} vCPU Cores</span>
+                                <span>•</span>
+                                <span>{activeApp.minSpecs.ram} GB RAM</span>
+                                <span>•</span>
+                                <span>{activeApp.minSpecs.disk} GB Disk</span>
+                                <span className="text-emerald-400 font-medium">(Auto-enforced to prevent OOM kills)</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                );
+              })()}
             </motion.div>
           )}
 

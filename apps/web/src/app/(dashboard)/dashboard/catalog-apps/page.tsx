@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/ThemeProvider";
 import {
@@ -9,6 +9,9 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VPS_APPS, APP_CATEGORIES, AppCategory, VpsAppDefinition } from "@/lib/vps-apps";
+import { Pagination } from "@/components/ui/Pagination";
+
+const ITEMS_PER_PAGE = 8;
 
 export default function CatalogAppsPage() {
   const { theme } = useTheme();
@@ -17,6 +20,12 @@ export default function CatalogAppsPage() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<AppCategory>("All Apps");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Reset pagination to page 1 whenever category or search filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory]);
 
   const filteredApps = useMemo(() => {
     return VPS_APPS.filter((app) => {
@@ -39,6 +48,13 @@ export default function CatalogAppsPage() {
       );
     });
   }, [searchQuery, selectedCategory]);
+
+  const totalPages = Math.ceil(filteredApps.length / ITEMS_PER_PAGE);
+
+  const paginatedApps = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredApps.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredApps, currentPage]);
 
   const handleDeployApp = (app: VpsAppDefinition) => {
     router.push(`/dashboard/checkout?service=vps&app=${encodeURIComponent(app.id)}`);
@@ -134,90 +150,105 @@ export default function CatalogAppsPage() {
 
       {/* Applications Grid - Full Space 4 Columns on XL / 3 on LG / 2 on MD / 1 on Mobile */}
       {filteredApps.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full">
-          {filteredApps.map((app) => (
-            <div
-              key={app.id}
-              className={cn(
-                "rounded-2xl p-4 sm:p-5 border transition-all flex flex-col justify-between group relative overflow-hidden",
-                isDark
-                  ? "bg-[#111115] border-white/[0.08] hover:border-cyan-500/40 hover:bg-[#14141a] hover:shadow-[0_0_25px_rgba(6,182,212,0.08)]"
-                  : "bg-white border-slate-200/90 hover:border-cyan-400 shadow-2xs hover:shadow-md"
-              )}
-            >
-              {/* Card Header & Content */}
-              <div>
-                <div className="flex items-start justify-between gap-3 mb-3">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className={cn(
-                      "w-11 h-11 rounded-xl flex items-center justify-center p-2 shrink-0 border transition-transform duration-200 group-hover:scale-105",
-                      isDark ? "bg-[#08090d] border-white/10" : "bg-slate-50 border-slate-200 shadow-2xs"
-                    )}>
-                      <img
-                        referrerPolicy="no-referrer"
-                        src={app.icon}
-                        alt={app.name}
-                        className="w-full h-full object-contain"
-                        loading="lazy"
-                      />
-                    </div>
-                    <div className="min-w-0">
-                      <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wide truncate group-hover:text-cyan-400 transition-colors", isDark ? "text-white" : "text-slate-900")}>
-                        {app.name}
-                      </h3>
-                      <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className={cn(
-                          "text-[10px] font-bold px-2 py-0.5 rounded-md border uppercase tracking-wider",
-                          isDark ? "bg-white/[0.04] border-white/10 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-600"
-                        )}>
-                          {app.category}
-                        </span>
-                        <span className="text-[10px] font-mono text-zinc-500 font-medium">
-                          {app.appVersion}
-                        </span>
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full">
+            {paginatedApps.map((app) => (
+              <div
+                key={app.id}
+                className={cn(
+                  "rounded-2xl p-4 sm:p-5 border transition-all flex flex-col justify-between group relative overflow-hidden",
+                  isDark
+                    ? "bg-[#111115] border-white/[0.08] hover:border-cyan-500/40 hover:bg-[#14141a] hover:shadow-[0_0_25px_rgba(6,182,212,0.08)]"
+                    : "bg-white border-slate-200/90 hover:border-cyan-400 shadow-2xs hover:shadow-md"
+                )}
+              >
+                {/* Card Header & Content */}
+                <div>
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={cn(
+                        "w-11 h-11 rounded-xl flex items-center justify-center p-2 shrink-0 border transition-transform duration-200 group-hover:scale-105",
+                        isDark ? "bg-[#08090d] border-white/10" : "bg-slate-50 border-slate-200 shadow-2xs"
+                      )}>
+                        <img
+                          referrerPolicy="no-referrer"
+                          src={app.icon}
+                          alt={app.name}
+                          className="w-full h-full object-contain"
+                          loading="lazy"
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wide truncate group-hover:text-cyan-400 transition-colors", isDark ? "text-white" : "text-slate-900")}>
+                          {app.name}
+                        </h3>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <span className={cn(
+                            "text-[10px] font-bold px-2 py-0.5 rounded-md border uppercase tracking-wider",
+                            isDark ? "bg-white/[0.04] border-white/10 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-600"
+                          )}>
+                            {app.category}
+                          </span>
+                          <span className="text-[10px] font-mono text-zinc-500 font-medium">
+                            {app.appVersion}
+                          </span>
+                        </div>
                       </div>
                     </div>
+
+                    <span className={cn(
+                      "text-[10px] font-mono font-bold px-2 py-0.5 rounded-md border shrink-0",
+                      isDark ? "bg-cyan-950/40 border-cyan-800/50 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-800"
+                    )}>
+                      :{app.defaultPort}
+                    </span>
                   </div>
 
-                  <span className={cn(
-                    "text-[10px] font-mono font-bold px-2 py-0.5 rounded-md border shrink-0",
-                    isDark ? "bg-cyan-950/40 border-cyan-800/50 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-800"
-                  )}>
-                    :{app.defaultPort}
-                  </span>
+                  {/* Description */}
+                  <p className={cn("text-xs leading-relaxed line-clamp-2 mb-4", isDark ? "text-zinc-400" : "text-slate-600")}>
+                    {app.description}
+                  </p>
                 </div>
 
-                {/* Description */}
-                <p className={cn("text-xs leading-relaxed line-clamp-2 mb-4", isDark ? "text-zinc-400" : "text-slate-600")}>
-                  {app.description}
-                </p>
-              </div>
+                {/* Card Footer */}
+                <div className="pt-3 border-t border-white/[0.06] space-y-3">
+                  <div className="flex items-center justify-between text-[10px] text-zinc-500 font-medium">
+                    <span className="flex items-center gap-1">
+                      <Server className="w-3 h-3 text-cyan-400" />
+                      <span>{app.osBase} Base</span>
+                    </span>
+                    <span className="flex items-center gap-1 font-mono text-cyan-400">
+                      <Cpu className="w-3 h-3" />
+                      <span>Min: {app.minSpecs.cpu}C / {app.minSpecs.ram}GB</span>
+                    </span>
+                  </div>
 
-              {/* Card Footer */}
-              <div className="pt-3 border-t border-white/[0.06] space-y-3">
-                <div className="flex items-center justify-between text-[10px] text-zinc-500 font-medium">
-                  <span className="flex items-center gap-1">
-                    <Server className="w-3 h-3 text-cyan-400" />
-                    <span>{app.osBase} Base</span>
-                  </span>
-                  <span className="flex items-center gap-1 font-mono text-cyan-400">
-                    <Cpu className="w-3 h-3" />
-                    <span>Min: {app.minSpecs.cpu}C / {app.minSpecs.ram}GB</span>
-                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleDeployApp(app)}
+                    className="w-full py-2 px-3 rounded-xl font-bold text-xs bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer group/btn"
+                  >
+                    <Rocket className="w-3.5 h-3.5 transition-transform group-hover/btn:-translate-y-0.5" />
+                    <span>Deploy {app.name}</span>
+                    <ArrowRight className="w-3.5 h-3.5 stroke-[2.5] transition-transform group-hover/btn:translate-x-0.5" />
+                  </button>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={() => handleDeployApp(app)}
-                  className="w-full py-2 px-3 rounded-xl font-bold text-xs bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer group/btn"
-                >
-                  <Rocket className="w-3.5 h-3.5 transition-transform group-hover/btn:-translate-y-0.5" />
-                  <span>Deploy {app.name}</span>
-                  <ArrowRight className="w-3.5 h-3.5 stroke-[2.5] transition-transform group-hover/btn:translate-x-0.5" />
-                </button>
               </div>
+            ))}
+          </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className={cn(
+              "flex flex-col sm:flex-row items-center justify-between gap-3 pt-5 pb-2 border-t",
+              isDark ? "border-white/[0.08]" : "border-slate-200"
+            )}>
+              <span className={cn("text-xs font-mono font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>
+                Showing <span className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> - <span className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{Math.min(currentPage * ITEMS_PER_PAGE, filteredApps.length)}</span> of <span className="font-bold">{filteredApps.length}</span> Applications
+              </span>
+              <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
             </div>
-          ))}
+          )}
         </div>
       ) : (
         <div className={cn(

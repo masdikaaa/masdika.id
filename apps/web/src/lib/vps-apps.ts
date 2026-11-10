@@ -552,7 +552,7 @@ EOF
     name: "PLESK",
     category: "Web Panel",
     description: "Leading WebOps hosting platform for building, securing, and running websites and apps.",
-    icon: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/plesk.svg",
+    icon: "/images/apps/plesk.svg",
     defaultPort: 8443,
     defaultProtocol: "https",
     osBase: "Ubuntu 26.04",
