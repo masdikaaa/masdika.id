@@ -365,6 +365,11 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
           setBackupSchedule(data.vps.backupSchedule);
         }
       } else {
+        if (res.status === 401) {
+          // Clean redirect to login if session ended or user clicked Sign Out
+          router.push("/login");
+          return;
+        }
         toast.error(data.error || "Failed to load VPS");
         router.push("/dashboard/vps");
       }

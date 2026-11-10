@@ -330,27 +330,32 @@ export function VpsAppInstallationMonitor({
               <div className="flex items-center gap-2 flex-wrap mb-1">
                 <span className={cn(
                   "px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider border uppercase",
-                  isFinished ? "text-cyan-400 border-cyan-500/30 bg-cyan-500/10" :
-                  isFailed ? "text-rose-400 border-rose-500/30 bg-rose-500/10" :
-                  "text-cyan-400 border-cyan-500/30 bg-cyan-500/10"
+                  isFinished 
+                    ? isDark ? "text-cyan-400 border-cyan-500/30 bg-cyan-500/10" : "text-cyan-800 border-cyan-300 bg-cyan-100 font-extrabold" 
+                    : isFailed 
+                    ? isDark ? "text-rose-400 border-rose-500/30 bg-rose-500/10" : "text-rose-800 border-rose-300 bg-rose-100 font-extrabold"
+                    : isDark ? "text-cyan-400 border-cyan-500/30 bg-cyan-500/10" : "text-cyan-900 border-cyan-300 bg-cyan-100 font-extrabold"
                 )}>
                   {currentPhaseName}
                 </span>
-                <span className="text-zinc-500 text-xs">•</span>
-                <span className="font-mono text-xs font-semibold text-zinc-300">
+                <span className={isDark ? "text-zinc-500" : "text-slate-400"}>•</span>
+                <span className={cn("font-mono text-xs font-bold", isDark ? "text-zinc-300" : "text-slate-800")}>
                   {hasApp ? `${displayName} (${displayVersion})` : (statusData?.hostname || "Cloud VPS")}
                 </span>
-                <span className="text-zinc-500 text-xs">•</span>
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
-                  <Clock className="w-3 h-3 text-cyan-400" />
+                <span className={isDark ? "text-zinc-500" : "text-slate-400"}>•</span>
+                <span className={cn(
+                  "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold border",
+                  isDark ? "bg-cyan-500/10 text-cyan-300 border-cyan-500/20" : "bg-cyan-100 text-cyan-900 border-cyan-300"
+                )}>
+                  <Clock className={cn("w-3 h-3", isDark ? "text-cyan-400" : "text-cyan-700")} />
                   <span>Est: {hasApp ? estimatedTime : "~3-5 mins"}</span>
                 </span>
               </div>
 
-              <h2 className="text-lg sm:text-xl md:text-2xl font-black tracking-tight leading-tight">
+              <h2 className={cn("text-lg sm:text-xl md:text-2xl font-black tracking-tight leading-tight", isDark ? "text-white" : "text-slate-950")}>
                 {currentHeadline}
               </h2>
-              <p className={cn("text-xs max-w-2xl mt-0.5 leading-relaxed line-clamp-1 sm:line-clamp-none", isDark ? "text-zinc-400" : "text-slate-600")}>
+              <p className={cn("text-xs max-w-2xl mt-0.5 leading-relaxed line-clamp-1 sm:line-clamp-none font-medium", isDark ? "text-zinc-400" : "text-slate-700")}>
                 {currentSubtitle}
               </p>
             </div>
@@ -359,14 +364,14 @@ export function VpsAppInstallationMonitor({
           {/* Right: Percentage & Progress */}
           <div className="w-full md:w-64 shrink-0 flex flex-col justify-center">
             <div className="flex justify-between items-center text-xs font-mono font-semibold mb-1.5">
-              <span className={isDark ? "text-zinc-400" : "text-slate-500"}>
+              <span className={isDark ? "text-zinc-400" : "text-slate-700 font-bold"}>
                 {isFinished ? "100% Complete" : isFailed ? "Halted" : `${progress}% Provisioned`}
               </span>
-              <span className={cn("font-bold text-base", isFinished ? "text-cyan-400" : isFailed ? "text-rose-400" : "text-cyan-400")}>
+              <span className={cn("font-bold text-base", isFinished ? (isDark ? "text-cyan-400" : "text-cyan-800") : isFailed ? "text-rose-500" : (isDark ? "text-cyan-400" : "text-cyan-800"))}>
                 {progress}%
               </span>
             </div>
-            <div className={cn("w-full h-2.5 rounded-full overflow-hidden p-0.5 border", isDark ? "bg-white/5 border-white/10" : "bg-slate-100 border-slate-200")}>
+            <div className={cn("w-full h-2.5 rounded-full overflow-hidden p-0.5 border", isDark ? "bg-white/5 border-white/10" : "bg-slate-200 border-slate-300")}>
               <div
                 className={cn(
                   "h-full rounded-full transition-all duration-700 ease-out",
@@ -390,12 +395,12 @@ export function VpsAppInstallationMonitor({
           <div className="space-y-4">
             {/* Stage 1: Cloud VPS Infrastructure */}
             <div>
-              <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider mb-2">
-                <span className={cn("flex items-center gap-1.5", isDark ? "text-cyan-400" : "text-cyan-600")}>
+              <div className="flex items-center justify-between text-xs font-extrabold uppercase tracking-wider mb-2">
+                <span className={cn("flex items-center gap-1.5", isDark ? "text-cyan-400" : "text-cyan-950")}>
                   <Server className="w-3.5 h-3.5" />
                   {hasApp ? "Stage 1: Cloud VPS Infrastructure" : "Server Infrastructure Allocation"}
                 </span>
-                <span className="text-[10px] font-mono text-zinc-500">
+                <span className={cn("text-[10px] font-mono font-bold", isDark ? "text-zinc-500" : "text-slate-600")}>
                   {isVpsReady || isFinished ? "COMPLETED" : "IN PROGRESS"}
                 </span>
               </div>
@@ -406,10 +411,10 @@ export function VpsAppInstallationMonitor({
                     className={cn(
                       "p-2.5 rounded-xl border flex items-center justify-between gap-2.5 transition-colors text-xs",
                       st.isDone
-                        ? isDark ? "bg-[#0a0a0c] border-white/[0.08] text-cyan-400" : "bg-slate-50/80 border-slate-200/90 text-slate-800 shadow-2xs"
+                        ? isDark ? "bg-[#0a0a0c] border-white/[0.08] text-cyan-400" : "bg-white border-slate-200 text-slate-900 shadow-2xs"
                         : st.isActive
-                        ? isDark ? "bg-[#111115] border-cyan-500/50 text-cyan-400 shadow-2xs ring-1 ring-cyan-500/20 relative overflow-hidden" : "bg-cyan-50/70 border-cyan-400 text-cyan-950 shadow-2xs ring-1 ring-cyan-400/20 relative overflow-hidden"
-                        : isDark ? "bg-[#0a0a0c]/60 border-white/[0.06] text-zinc-500" : "bg-slate-50/70 border-slate-200/80 text-slate-400"
+                        ? isDark ? "bg-[#111115] border-cyan-500/50 text-cyan-400 shadow-2xs ring-1 ring-cyan-500/20 relative overflow-hidden" : "bg-cyan-50/90 border-cyan-500 text-cyan-950 shadow-2xs ring-1 ring-cyan-400/40 relative overflow-hidden"
+                        : isDark ? "bg-[#0a0a0c]/60 border-white/[0.06] text-zinc-500" : "bg-slate-50/80 border-slate-200/90 text-slate-500"
                     )}
                   >
                     {st.isActive && (
@@ -419,30 +424,43 @@ export function VpsAppInstallationMonitor({
                       <div className={cn(
                         "w-5 h-5 rounded-md flex items-center justify-center shrink-0 text-[10px] font-bold border",
                         st.isDone
-                          ? "bg-cyan-400/20 text-cyan-300 border-cyan-400/40"
+                          ? isDark ? "bg-cyan-400/20 text-cyan-300 border-cyan-400/40" : "bg-cyan-100 text-cyan-800 border-cyan-300 font-extrabold"
                           : st.isActive
-                          ? "bg-cyan-400 text-slate-950 border-cyan-300"
-                          : isDark ? "bg-white/5 border-white/10 text-zinc-500" : "bg-slate-200 border-slate-300 text-slate-500"
+                          ? isDark ? "bg-cyan-400 text-slate-950 border-cyan-300" : "bg-cyan-500 text-white border-cyan-600 shadow-xs"
+                          : isDark ? "bg-white/5 border-white/10 text-zinc-500" : "bg-slate-200 border-slate-300 text-slate-700"
                       )}>
                         {st.isDone ? <Check className="w-3 h-3 stroke-[3]" /> : st.id}
                       </div>
                       <div className="min-w-0">
-                        <span className="font-bold block truncate">{st.title}</span>
-                        <span className="text-[10px] block truncate opacity-75">{st.desc}</span>
+                        <span className={cn("font-bold block truncate", isDark ? (st.isDone || st.isActive ? "text-white" : "text-zinc-400") : (st.isDone || st.isActive ? "text-slate-950" : "text-slate-700"))}>
+                          {st.title}
+                        </span>
+                        <span className={cn("text-[10px] block truncate font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>
+                          {st.desc}
+                        </span>
                       </div>
                     </div>
 
                     <div className="relative z-10 shrink-0">
                       {st.isDone ? (
-                        <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-bold flex items-center gap-1">
+                        <span className={cn(
+                          "text-[9px] font-mono px-2 py-0.5 rounded-full font-bold flex items-center gap-1 border",
+                          isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-100 text-cyan-800 border-cyan-300 font-extrabold"
+                        )}>
                           <Check className="w-2.5 h-2.5 stroke-[3]" /> DONE
                         </span>
                       ) : st.isActive ? (
-                        <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold flex items-center gap-1 animate-pulse">
+                        <span className={cn(
+                          "text-[9px] font-mono px-2 py-0.5 rounded-full font-bold flex items-center gap-1 border animate-pulse",
+                          isDark ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/30" : "bg-cyan-200 text-cyan-950 border-cyan-400 font-extrabold"
+                        )}>
                           <RefreshCw className="w-2.5 h-2.5 animate-spin" /> PROVISIONING
                         </span>
                       ) : (
-                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-white/5 text-zinc-500 border border-white/5">
+                        <span className={cn(
+                          "text-[9px] font-mono px-1.5 py-0.5 rounded-full border",
+                          isDark ? "bg-white/5 text-zinc-500 border-white/5" : "bg-slate-100 text-slate-600 border-slate-200 font-semibold"
+                        )}>
                           PENDING
                         </span>
                       )}
@@ -456,11 +474,11 @@ export function VpsAppInstallationMonitor({
             {hasApp && (
               <div>
                 <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider mb-2">
-                  <span className={cn("flex items-center gap-1.5", isVpsReady ? "text-cyan-400" : "text-zinc-500")}>
+                  <span className={cn("flex items-center gap-1.5 font-extrabold", isDark ? (isVpsReady ? "text-cyan-400" : "text-zinc-500") : (isVpsReady ? "text-cyan-950" : "text-slate-600"))}>
                     <Rocket className="w-3.5 h-3.5" />
                     Stage 2: {displayName} Application Stack
                   </span>
-                  <span className="text-[10px] font-mono text-zinc-500">
+                  <span className={cn("text-[10px] font-mono font-bold", isDark ? "text-zinc-500" : "text-slate-600")}>
                     {isFinished ? "COMPLETED" : isVpsReady ? "IN PROGRESS" : "AWAITING VPS"}
                   </span>
                 </div>
@@ -471,10 +489,10 @@ export function VpsAppInstallationMonitor({
                       className={cn(
                         "p-2.5 rounded-xl border flex items-center justify-between gap-2.5 transition-colors text-xs",
                         st.isDone
-                          ? isDark ? "bg-[#0a0a0c] border-white/[0.08] text-cyan-400" : "bg-slate-50/80 border-slate-200/90 text-slate-800 shadow-2xs"
+                          ? isDark ? "bg-[#0a0a0c] border-white/[0.08] text-cyan-400" : "bg-white border-slate-200 text-slate-900 shadow-2xs"
                           : st.isActive
-                          ? isDark ? "bg-[#111115] border-cyan-500/50 text-cyan-400 shadow-2xs ring-1 ring-cyan-500/20 relative overflow-hidden" : "bg-cyan-50/70 border-cyan-400 text-cyan-950 shadow-2xs ring-1 ring-cyan-400/20 relative overflow-hidden"
-                          : isDark ? "bg-[#0a0a0c]/60 border-white/[0.06] text-zinc-500" : "bg-slate-50/70 border-slate-200/80 text-slate-400"
+                          ? isDark ? "bg-[#111115] border-cyan-500/50 text-cyan-400 shadow-2xs ring-1 ring-cyan-500/20 relative overflow-hidden" : "bg-cyan-50/90 border-cyan-500 text-cyan-950 shadow-2xs ring-1 ring-cyan-400/40 relative overflow-hidden"
+                          : isDark ? "bg-[#0a0a0c]/60 border-white/[0.06] text-zinc-500" : "bg-slate-50/80 border-slate-200/90 text-slate-500"
                       )}
                     >
                       {st.isActive && (
@@ -484,30 +502,43 @@ export function VpsAppInstallationMonitor({
                         <div className={cn(
                           "w-5 h-5 rounded-md flex items-center justify-center shrink-0 text-[10px] font-bold border",
                           st.isDone
-                            ? "bg-cyan-400/20 text-cyan-300 border-cyan-400/40"
+                            ? isDark ? "bg-cyan-400/20 text-cyan-300 border-cyan-400/40" : "bg-cyan-100 text-cyan-800 border-cyan-300 font-extrabold"
                             : st.isActive
-                            ? "bg-cyan-400 text-slate-950 border-cyan-300"
-                            : isDark ? "bg-white/5 border-white/10 text-zinc-500" : "bg-slate-200 border-slate-300 text-slate-500"
+                            ? isDark ? "bg-cyan-400 text-slate-950 border-cyan-300" : "bg-cyan-500 text-white border-cyan-600 shadow-xs"
+                            : isDark ? "bg-white/5 border-white/10 text-zinc-500" : "bg-slate-200 border-slate-300 text-slate-700"
                         )}>
                           {st.isDone ? <Check className="w-3 h-3 stroke-[3]" /> : st.id}
                         </div>
                         <div className="min-w-0">
-                          <span className="font-bold block truncate">{st.title}</span>
-                          <span className="text-[10px] block truncate opacity-75">{st.desc}</span>
+                          <span className={cn("font-bold block truncate", isDark ? (st.isDone || st.isActive ? "text-white" : "text-zinc-400") : (st.isDone || st.isActive ? "text-slate-950" : "text-slate-700"))}>
+                            {st.title}
+                          </span>
+                          <span className={cn("text-[10px] block truncate font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>
+                            {st.desc}
+                          </span>
                         </div>
                       </div>
 
                       <div className="relative z-10 shrink-0">
                         {st.isDone ? (
-                          <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-bold flex items-center gap-1">
+                          <span className={cn(
+                            "text-[9px] font-mono px-2 py-0.5 rounded-full font-bold flex items-center gap-1 border",
+                            isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-100 text-cyan-800 border-cyan-300 font-extrabold"
+                          )}>
                             <Check className="w-2.5 h-2.5 stroke-[3]" /> DONE
                           </span>
                         ) : st.isActive ? (
-                          <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold flex items-center gap-1 animate-pulse">
+                          <span className={cn(
+                            "text-[9px] font-mono px-2 py-0.5 rounded-full font-bold flex items-center gap-1 border animate-pulse",
+                            isDark ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/30" : "bg-cyan-200 text-cyan-950 border-cyan-400 font-extrabold"
+                          )}>
                             <RefreshCw className="w-2.5 h-2.5 animate-spin" /> INSTALLING
                           </span>
                         ) : (
-                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-white/5 text-zinc-500 border border-white/5">
+                          <span className={cn(
+                            "text-[9px] font-mono px-1.5 py-0.5 rounded-full border",
+                            isDark ? "bg-white/5 text-zinc-500 border-white/5" : "bg-slate-100 text-slate-600 border-slate-200 font-semibold"
+                          )}>
                             PENDING
                           </span>
                         )}
@@ -524,20 +555,20 @@ export function VpsAppInstallationMonitor({
             {!isFinished ? (
               <div className={cn(
                 "p-3 rounded-xl border flex items-center gap-2 text-xs",
-                isDark ? "bg-white/[0.02] border-white/5 text-zinc-400" : "bg-slate-50 border-slate-200 text-slate-500"
+                isDark ? "bg-white/[0.02] border-white/5 text-zinc-400" : "bg-slate-100/90 border-slate-200 text-slate-700 font-medium"
               )}>
-                <Lock className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                <Lock className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-700")} />
                 <span className="text-[11px] leading-relaxed">
-                  Actions locked during deployment. Typical duration: <strong>{estimatedTime}</strong>.
+                  Proses berjalan aman di background server. Anda dapat sign out / menutup halaman kapan saja tanpa mengganggu instalasi.
                 </span>
               </div>
             ) : (
               <div className={cn(
                 "p-3 rounded-xl border flex items-center gap-2 text-xs",
-                isDark ? "bg-cyan-500/5 border-cyan-500/20 text-cyan-300" : "bg-cyan-50 border-cyan-200 text-cyan-800"
+                isDark ? "bg-cyan-500/5 border-cyan-500/20 text-cyan-300" : "bg-cyan-50 border-cyan-200 text-cyan-900"
               )}>
-                <CheckCircle className="w-4 h-4 text-cyan-400 shrink-0" />
-                <span className="text-[11px] font-semibold leading-relaxed">
+                <CheckCircle className="w-4 h-4 text-cyan-500 shrink-0" />
+                <span className="text-[11px] font-bold leading-relaxed">
                   All deployment stages completed successfully.
                 </span>
               </div>
@@ -896,12 +927,12 @@ export function VpsAppInstallationMonitor({
             /* LIVE TERMINAL LOGS CONSOLE (Fills the entire right column) */
             <div className="flex flex-col h-full min-h-[380px]">
               <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider mb-2">
-                <span className={cn("flex items-center gap-1.5", isDark ? "text-zinc-400" : "text-slate-500")}>
-                  <Terminal className="w-3.5 h-3.5 text-cyan-400" />
+                <span className={cn("flex items-center gap-1.5 font-extrabold", isDark ? "text-zinc-400" : "text-slate-800")}>
+                  <Terminal className={cn("w-3.5 h-3.5", isDark ? "text-cyan-400" : "text-cyan-700")} />
                   Live Deployment Console
                 </span>
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-mono text-zinc-500">
+                  <span className={cn("text-[10px] font-mono", isDark ? "text-zinc-500" : "text-slate-600 font-semibold")}>
                     {logs.length} events logged
                   </span>
                   <button
@@ -909,11 +940,11 @@ export function VpsAppInstallationMonitor({
                     onClick={() => copyToClipboard(logs.join("\n"), "logs")}
                     className={cn(
                       "p-1 px-2 rounded-md border text-[10px] font-mono flex items-center gap-1 transition-colors cursor-pointer",
-                      isDark ? "border-white/10 hover:bg-white/10 text-zinc-400" : "border-slate-200 hover:bg-slate-100 text-slate-600"
+                      isDark ? "border-white/10 hover:bg-white/10 text-zinc-400" : "border-slate-300 hover:bg-slate-100 text-slate-800 bg-white font-bold shadow-2xs"
                     )}
                     title="Copy all logs"
                   >
-                    {copiedKey === "logs" ? <Check className="w-3 h-3 text-cyan-400" /> : <Copy className="w-3 h-3" />}
+                    {copiedKey === "logs" ? <Check className="w-3 h-3 text-cyan-600" /> : <Copy className="w-3 h-3" />}
                     <span>Copy</span>
                   </button>
                 </div>
