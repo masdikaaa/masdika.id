@@ -650,7 +650,7 @@ EOF
     category: "Business",
     secondaryCategories: ["Developer"],
     description: "Self-hosted productivity platform for files, calendars, contacts, and real-time document collaboration.",
-    icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nextcloud/nextcloud-original.svg",
+    icon: "/images/apps/nextcloud.png",
     defaultPort: 8080,
     defaultProtocol: "http",
     osBase: "Ubuntu 26.04",
