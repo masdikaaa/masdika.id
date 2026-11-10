@@ -31,7 +31,8 @@ export default function CatalogAppsPage() {
     return VPS_APPS.filter((app) => {
       const matchesCategory =
         selectedCategory === "All Apps" ||
-        app.category === selectedCategory;
+        app.category === selectedCategory ||
+        (app.secondaryCategories && app.secondaryCategories.includes(selectedCategory));
 
       if (!matchesCategory) return false;
 
@@ -42,7 +43,8 @@ export default function CatalogAppsPage() {
         app.name.toLowerCase().includes(q) ||
         app.description.toLowerCase().includes(q) ||
         app.category.toLowerCase().includes(q) ||
-        app.defaultPort.toString().includes(q)
+        app.defaultPort.toString().includes(q) ||
+        (app.accessNote && app.accessNote.toLowerCase().includes(q))
       );
     });
   }, [searchQuery, selectedCategory]);
@@ -114,7 +116,7 @@ export default function CatalogAppsPage() {
           const isActive = selectedCategory === cat;
           const count = cat === "All Apps"
             ? VPS_APPS.length
-            : VPS_APPS.filter(a => a.category === cat).length;
+            : VPS_APPS.filter(a => a.category === cat || (a.secondaryCategories && a.secondaryCategories.includes(cat))).length;
 
           return (
             <button
@@ -196,16 +198,33 @@ export default function CatalogAppsPage() {
 
                     <span className={cn(
                       "text-[10px] font-mono font-bold px-2 py-0.5 rounded-md border shrink-0",
-                      isDark ? "bg-cyan-950/40 border-cyan-800/50 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-800"
+                      app.isWebAccess === false
+                        ? isDark ? "bg-amber-950/40 border-amber-800/50 text-amber-400" : "bg-amber-50 border-amber-200 text-amber-800"
+                        : isDark ? "bg-cyan-950/40 border-cyan-800/50 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-800"
                     )}>
-                      :{app.defaultPort}
+                      {app.isWebAccess === false
+                        ? (app.accessType === "database" ? `DB :${app.defaultPort}` : "CLI / SSH")
+                        : `:${app.defaultPort}`}
                     </span>
                   </div>
 
                   {/* Description */}
-                  <p className={cn("text-xs leading-relaxed line-clamp-2 mb-4", isDark ? "text-zinc-400" : "text-slate-600")}>
+                  <p className={cn("text-xs leading-relaxed line-clamp-2 mb-3", isDark ? "text-zinc-400" : "text-slate-600")}>
                     {app.description}
                   </p>
+
+                  {/* Note for Non-Browser (CLI/Database) Apps */}
+                  {app.isWebAccess === false && (
+                    <div className={cn(
+                      "p-2 rounded-xl border text-[11px] flex items-start gap-1.5 mb-3",
+                      isDark ? "bg-amber-950/20 border-amber-800/30 text-amber-300" : "bg-amber-50 border-amber-200 text-amber-900"
+                    )}>
+                      <Terminal className="w-3 h-3 text-amber-500 shrink-0 mt-0.5" />
+                      <span className="leading-tight text-[10px]">
+                        <strong className="font-semibold">No Browser UI:</strong> {app.accessNote || "Operated directly via SSH terminal."}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Card Footer */}

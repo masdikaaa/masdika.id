@@ -48,6 +48,9 @@ export interface VpsAppDefinition {
   icon: string;
   defaultPort: number;
   defaultProtocol: 'http' | 'https';
+  isWebAccess?: boolean; // false for CLI / Database / Headless stacks without web UI
+  accessType?: 'web' | 'cli' | 'database' | 'api'; // Defaults to 'web'
+  accessNote?: string; // Informational note explaining how to connect
   osBase: string; // e.g. "Ubuntu 26.04" or "AlmaLinux 9"
   appVersion: string; // e.g. "1.11"
   versions: AppVersionOption[];
@@ -1105,6 +1108,9 @@ ${appInfoCmd}
     icon: "/images/apps/opencode.png",
     defaultPort: 4096,
     defaultProtocol: "http",
+    isWebAccess: true,
+    accessType: "web",
+    accessNote: "Terminal AI coding agent CLI via SSH ('opencode') or web server at port 4096.",
     osBase: "Ubuntu 26.04",
     appVersion: "v2.2.7",
     versions: [
@@ -1196,15 +1202,75 @@ ${appInfoCmd}
     }
   },
 
-  // 13. Docker (Developer)
+  // 14. Antigravity CLI (Developer / Artificial Intelligence)
+  {
+    id: "antigravity-cli",
+    name: "ANTIGRAVITY CLI",
+    category: "Developer",
+    secondaryCategories: ["Artificial Intelligence"],
+    description: "Work with Antigravity directly in your codebase. Build, debug, and ship from your terminal. Describe what you need, and Antigravity handles the rest.",
+    icon: "/images/apps/antigravity.svg",
+    defaultPort: 22,
+    defaultProtocol: "http",
+    isWebAccess: false,
+    accessType: "cli",
+    accessNote: "CLI agent accessed directly via SSH terminal. Run 'antigravity' or 'agy' in any directory (No web browser required).",
+    osBase: "Ubuntu 26.04",
+    appVersion: "v1.5.3",
+    versions: [
+      { id: "153-ubu26", label: "Antigravity CLI v1.5.3 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v1.5.3" },
+    ],
+    minSpecs: { cpu: 1, ram: 2, disk: 20 },
+    estimatedTime: "~1-2 mins",
+    adminUsername: "root",
+    instructions: "Connect via SSH ('ssh root@${ip}') and run 'antigravity' or 'agy' in any directory to start coding.",
+    getInstallScript: (ip, rootPassword) => {
+      const appInfoCmd = buildAppInfoJson({
+        appId: "antigravity-cli",
+        appName: "Antigravity CLI",
+        port: 22,
+        protocol: "http",
+        path: "",
+        username: "root",
+        password: rootPassword,
+        url: `ssh://root@${ip}`
+      });
+
+      return `
+set -e
+export DEBIAN_FRONTEND=noninteractive
+apt-get update && apt-get install -y curl ca-certificates tar gzip
+
+# 1. Install Antigravity CLI via official curl installer
+echo "[ANTIGRAVITY] Installing Antigravity CLI v1.5.3..."
+curl -fsSL https://antigravity.google/cli/install.sh | bash
+
+# 2. Ensure antigravity and agy binaries are globally accessible in PATH
+for p in /root/.antigravity/bin/antigravity /root/.antigravity/bin/agy /root/.local/bin/antigravity /root/.local/bin/agy; do
+  if [ -f "$p" ]; then
+    b=$(basename "$p")
+    ln -sf "$p" "/usr/local/bin/$b"
+    chmod +x "/usr/local/bin/$b" 2>/dev/null || true
+  fi
+done
+
+${appInfoCmd}
+`;
+    }
+  },
+
+  // 15. Docker (Developer)
   {
     id: "docker",
     name: "DOCKER",
     category: "Developer",
     description: "Containerization platform with Docker Engine, CLI, and Docker Compose pre-configured.",
     icon: "/images/apps/docker.svg",
-    defaultPort: 2375,
+    defaultPort: 22,
     defaultProtocol: "http",
+    isWebAccess: false,
+    accessType: "cli",
+    accessNote: "Docker Engine & CLI accessed via SSH terminal (No web browser required).",
     osBase: "Ubuntu 26.04",
     appVersion: "v27.5",
     versions: [
@@ -1240,15 +1306,18 @@ ${appInfoCmd}
     }
   },
 
-  // 14. Node.js (Developer)
+  // 16. Node.js (Developer)
   {
     id: "nodejs",
     name: "NODE.JS",
     category: "Developer",
     description: "JavaScript runtime environment with npm, pnpm, yarn, and PM2 process manager pre-installed.",
     icon: "/images/apps/nodejs.svg",
-    defaultPort: 3000,
+    defaultPort: 22,
     defaultProtocol: "http",
+    isWebAccess: false,
+    accessType: "cli",
+    accessNote: "Node.js 22 LTS, npm, pnpm & PM2 accessed via SSH terminal (No web browser required).",
     osBase: "Ubuntu 26.04",
     appVersion: "v22 LTS",
     versions: [
@@ -1283,7 +1352,7 @@ ${appInfoCmd}
     }
   },
 
-  // 15. PostgreSQL (Developer)
+  // 17. PostgreSQL (Developer)
   {
     id: "postgresql",
     name: "POSTGRESQL",
@@ -1292,6 +1361,9 @@ ${appInfoCmd}
     icon: "/images/apps/postgresql.svg",
     defaultPort: 5432,
     defaultProtocol: "http",
+    isWebAccess: false,
+    accessType: "database",
+    accessNote: "PostgreSQL database server. Connect via psql or DB client on port 5432 (No web browser required).",
     osBase: "Ubuntu 26.04",
     appVersion: "v17",
     versions: [
@@ -1328,7 +1400,7 @@ ${appInfoCmd}
     }
   },
 
-  // 16. MySQL (Developer)
+  // 18. MySQL (Developer)
   {
     id: "mysql",
     name: "MYSQL",
@@ -1337,6 +1409,9 @@ ${appInfoCmd}
     icon: "/images/apps/mysql.svg",
     defaultPort: 3306,
     defaultProtocol: "http",
+    isWebAccess: false,
+    accessType: "database",
+    accessNote: "MySQL database server. Connect via MySQL client on port 3306 (No web browser required).",
     osBase: "Ubuntu 26.04",
     appVersion: "v8.4 LTS",
     versions: [
@@ -1373,7 +1448,7 @@ ${appInfoCmd}
     }
   },
 
-  // 17. MariaDB (Developer)
+  // 19. MariaDB (Developer)
   {
     id: "mariadb",
     name: "MARIADB",
@@ -1382,6 +1457,9 @@ ${appInfoCmd}
     icon: "/images/apps/mariadb.svg",
     defaultPort: 3306,
     defaultProtocol: "http",
+    isWebAccess: false,
+    accessType: "database",
+    accessNote: "MariaDB database server. Connect via MariaDB/MySQL client on port 3306 (No web browser required).",
     osBase: "Ubuntu 26.04",
     appVersion: "v11.4 LTS",
     versions: [
@@ -1418,7 +1496,7 @@ ${appInfoCmd}
     }
   },
 
-  // 18. MongoDB (Developer)
+  // 20. MongoDB (Developer)
   {
     id: "mongodb",
     name: "MONGODB",
@@ -1427,6 +1505,9 @@ ${appInfoCmd}
     icon: "/images/apps/mongodb.svg",
     defaultPort: 27017,
     defaultProtocol: "http",
+    isWebAccess: false,
+    accessType: "database",
+    accessNote: "MongoDB document database. Connect via mongosh or DB client on port 27017 (No web browser required).",
     osBase: "Ubuntu 24.04",
     appVersion: "v8.0",
     versions: [
@@ -1787,7 +1868,7 @@ ${appInfoCmd}
     }
   },
 
-  // 25. Kubernetes K3s (Developer)
+  // 26. Kubernetes K3s (Developer)
   {
     id: "k3s",
     name: "KUBERNETES K3S",
@@ -1796,6 +1877,9 @@ ${appInfoCmd}
     icon: "/images/apps/kubernetes.svg",
     defaultPort: 6443,
     defaultProtocol: "https",
+    isWebAccess: false,
+    accessType: "api",
+    accessNote: "Kubernetes K3s cluster. Connect using kubectl CLI via SSH or Kubeconfig file (No web dashboard pre-installed).",
     osBase: "Ubuntu 26.04",
     appVersion: "v1.31",
     versions: [

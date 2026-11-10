@@ -117,7 +117,8 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
         app.description.toLowerCase().includes(q) ||
         app.category.toLowerCase().includes(q) ||
         app.defaultPort.toString().includes(q) ||
-        app.osBase.toLowerCase().includes(q)
+        app.osBase.toLowerCase().includes(q) ||
+        (app.accessNote && app.accessNote.toLowerCase().includes(q))
       );
     });
   }, [searchQuery, selectedCategory]);
@@ -353,9 +354,16 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
                             <span className="text-[10px] px-2 py-0.5 rounded-full font-mono font-bold tracking-wider bg-cyan-50 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border border-cyan-200/80 dark:border-cyan-500/20">
                               {versionDisplay}
                             </span>
-                            <span className="text-[10px] px-2 py-0.5 rounded-md font-semibold text-slate-600 dark:text-zinc-400 bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.06]">
-                              {app.category}
-                            </span>
+                            <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                              <span className="text-[10px] px-2 py-0.5 rounded-md font-semibold text-slate-600 dark:text-zinc-400 bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.06]">
+                                {app.category}
+                              </span>
+                              {app.isWebAccess === false && (
+                                <span className="text-[9px] px-1.5 py-0.5 rounded-md font-mono font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
+                                  {app.accessType === "database" ? "Database" : "CLI / SSH"}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
 
@@ -368,7 +376,7 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
                         </p>
 
                         {/* Meta Specs Pill Bar */}
-                        <div className="space-y-1.5 pt-3 border-t border-[var(--border-primary)] text-[11px] font-mono text-slate-500 dark:text-zinc-400 mb-5">
+                        <div className="space-y-1.5 pt-3 border-t border-[var(--border-primary)] text-[11px] font-mono text-slate-500 dark:text-zinc-400 mb-3">
                           <div className="flex items-center justify-between">
                             <span className="flex items-center gap-1.5">
                               <Cpu className="w-3 h-3 text-cyan-600 dark:text-cyan-400 shrink-0" />
@@ -387,16 +395,39 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
                               {app.estimatedTime}
                             </span>
                           </div>
-                          <div className="flex items-center justify-between">
-                            <span className="flex items-center gap-1.5">
-                              <Globe className="w-3 h-3 text-cyan-600 dark:text-cyan-400 shrink-0" />
-                              Web Port:
-                            </span>
-                            <span className="font-semibold text-[var(--text-primary)]">
-                              {app.defaultProtocol}://:{app.defaultPort}
-                            </span>
-                          </div>
+                          {app.isWebAccess === false ? (
+                            <div className="flex items-center justify-between">
+                              <span className="flex items-center gap-1.5">
+                                <Terminal className="w-3 h-3 text-cyan-600 dark:text-cyan-400 shrink-0" />
+                                Access Mode:
+                              </span>
+                              <span className="font-semibold text-cyan-600 dark:text-cyan-400">
+                                {app.accessType === "database" ? `Port :${app.defaultPort} (DB)` : "Terminal / SSH (CLI)"}
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-between">
+                              <span className="flex items-center gap-1.5">
+                                <Globe className="w-3 h-3 text-cyan-600 dark:text-cyan-400 shrink-0" />
+                                Web Port:
+                              </span>
+                              <span className="font-semibold text-[var(--text-primary)]">
+                                {app.defaultProtocol}://:{app.defaultPort}
+                              </span>
+                            </div>
+                          )}
                         </div>
+
+                        {/* Note for Non-Browser (CLI/Database) Apps */}
+                        {app.isWebAccess === false && (
+                          <div className="p-2.5 rounded-xl border border-amber-500/20 bg-amber-500/5 text-[11px] text-amber-800 dark:text-amber-300 flex items-start gap-2 mb-4">
+                            <Terminal className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                            <div className="leading-snug">
+                              <strong className="font-semibold">No Browser UI:</strong>{" "}
+                              <span>{app.accessNote || "This application is operated directly via SSH terminal or remote client (no browser required)."}</span>
+                            </div>
+                          </div>
+                        )}
                       </div>
 
                       {/* Deploy Button */}

@@ -1082,7 +1082,11 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                                 isDark ? "bg-[#050507] border-white/10 text-zinc-300" : "bg-white border-slate-200 text-slate-700"
                               )}>
                                 <span className="truncate">{app.versions[0]?.label || `${app.name} - ${app.osBase}`}</span>
-                                <span className="text-[10px] font-mono text-cyan-400 shrink-0 ml-1">:{app.defaultPort}</span>
+                                <span className="text-[10px] font-mono text-cyan-400 shrink-0 ml-1">
+                                  {app.isWebAccess === false
+                                    ? (app.accessType === "database" ? `DB :${app.defaultPort}` : "CLI / SSH")
+                                    : `:${app.defaultPort}`}
+                                </span>
                               </div>
                               {app.minSpecs && (
                                 <div className="flex items-center justify-between text-[10px] font-mono mt-1 px-0.5">
@@ -1214,7 +1218,14 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                           <div className="space-y-1">
                             <div>
                               <strong>{activeApp.name}</strong> will be automatically installed on <strong>{activeApp.osBase}</strong> via Cloud-Init.
-                              {" "}A dedicated Public IPv4 address is attached to enable web panel access and remote client connectivity.
+                              {" "}
+                              {activeApp.isWebAccess === false ? (
+                                <span className="text-amber-400 font-medium">
+                                  Note: {activeApp.accessNote || "No web browser required. Operated directly via SSH terminal or remote client."}
+                                </span>
+                              ) : (
+                                "A dedicated Public IPv4 address is attached to enable web panel access and remote client connectivity."
+                              )}
                             </div>
                             {activeApp.minSpecs && (
                               <div className="text-[11px] opacity-90 flex items-center gap-2 flex-wrap pt-0.5">
