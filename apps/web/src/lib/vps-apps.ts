@@ -1908,6 +1908,79 @@ ${appInfoCmd}
     }
   },
 
+  // 21. Redis (Developer / In-Memory Cache)
+  {
+    id: "redis",
+    name: "REDIS",
+    category: "Developer",
+    secondaryCategories: ["Business"],
+    description: "Ultra-fast in-memory key-value data store, cache, and message broker with password authentication.",
+    icon: "/images/apps/redis.svg",
+    defaultPort: 6379,
+    defaultProtocol: "http",
+    isWebAccess: false,
+    accessType: "database",
+    accessNote: "Redis in-memory store & cache server. Connect via redis-cli or application client on port 6379 (No web browser required).",
+    osBase: "Ubuntu 26.04",
+    appVersion: "v7.4",
+    versions: [
+      { id: "74-ubu26", label: "Redis 7.4 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v7.4" },
+    ],
+    minSpecs: { cpu: 1, ram: 1, disk: 15 },
+    estimatedTime: "~1-2 mins",
+    adminUsername: "default",
+    instructions: "Redis server running on port 6379. Connect via 'redis-cli -h ${ip} -p 6379 -a <password>'. Auth user: 'default', Password: VPS Root Password.",
+    getInstallScript: (ip, rootPassword, config = {}) => {
+      const pass = config.adminPassword || rootPassword;
+      const appInfoCmd = buildAppInfoJson({
+        appId: "redis",
+        appName: "Redis 7.4",
+        port: 6379,
+        protocol: "http",
+        path: "",
+        username: "default",
+        password: pass,
+        url: `redis://:${pass}@${ip}:6379`
+      });
+
+      return `
+set -e
+export DEBIAN_FRONTEND=noninteractive
+apt-get update && apt-get install -y redis-server ufw
+
+systemctl stop redis-server 2>/dev/null || true
+
+# Configure Redis for remote connection and requirepass
+sed -i 's/^bind 127.0.0.1.*/bind 0.0.0.0/' /etc/redis/redis.conf || true
+sed -i 's/^protected-mode yes/protected-mode no/' /etc/redis/redis.conf || true
+if grep -q "^# requirepass" /etc/redis/redis.conf; then
+  sed -i "s/^# requirepass .*/requirepass '${pass.replace(/'/g, "\\'")}'/" /etc/redis/redis.conf
+elif grep -q "^requirepass" /etc/redis/redis.conf; then
+  sed -i "s/^requirepass .*/requirepass '${pass.replace(/'/g, "\\'")}'/" /etc/redis/redis.conf
+else
+  echo "requirepass '${pass.replace(/'/g, "\\'")}'" >> /etc/redis/redis.conf
+fi
+
+systemctl enable --now redis-server
+systemctl restart redis-server || true
+
+# If host package failed to start, deploy official containerized fallback
+if ! systemctl is-active --quiet redis-server 2>/dev/null; then
+  which docker || (curl -fsSL https://get.docker.com | sh)
+  systemctl enable --now docker
+  for i in {1..30}; do docker info >/dev/null 2>&1 && break || sleep 1; done
+  docker run -d --name redis --restart always -p 6379:6379 redis:latest redis-server --requirepass "${pass}" || true
+fi
+
+# Open firewall port 6379
+(ufw allow 6379/tcp 2>/dev/null || true)
+(iptables -I INPUT -p tcp --dport 6379 -j ACCEPT 2>/dev/null || true)
+
+${appInfoCmd}
+`;
+    }
+  },
+
   // 19. FrankenPHP (Developer)
   {
     id: "frankenphp",

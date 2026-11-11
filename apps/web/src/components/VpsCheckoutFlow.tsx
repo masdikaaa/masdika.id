@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
 import { formatRupiah } from "@/lib/billing";
 import { motion } from "framer-motion";
-import { RefreshCw, Plus, Settings2, Receipt, Disc, DatabaseBackup, ListChecks, ChevronLeft, ChevronRight, CreditCard, Building2, Wallet, Store, QrCode, Sliders, Rocket, Loader2, Plug, MapPin, AlertTriangle, Info, Sparkles } from "lucide-react";
+import { RefreshCw, Plus, Settings2, Receipt, Disc, DatabaseBackup, ListChecks, ChevronLeft, ChevronRight, CreditCard, Building2, Wallet, Store, QrCode, Sliders, Rocket, Loader2, Plug, MapPin, AlertTriangle, Info, Sparkles, KeyRound, ExternalLink, Check } from "lucide-react";
 import { Select } from "@/components/ui/Select";
 import Link from "next/link";
 import { SiUbuntu, SiDebian, SiRockylinux, SiCentos, SiAlpinelinux, SiFedora, SiKubernetes } from "react-icons/si";
@@ -237,6 +237,52 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [sshKey, setSshKey] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
+
+  // Global Saved SSH Keys
+  interface SavedSshKey {
+    id: number;
+    name: string;
+    publicKey: string;
+    fingerprint: string | null;
+    keyType: string | null;
+  }
+  const [userSavedKeys, setUserSavedKeys] = useState<SavedSshKey[]>([]);
+  const [selectedSavedKeyId, setSelectedSavedKeyId] = useState<number | null>(null);
+  const [isLoadingSavedKeys, setIsLoadingSavedKeys] = useState(false);
+  const [sshKeyMode, setSshKeyMode] = useState<'saved' | 'custom'>('saved');
+
+  useEffect(() => {
+    const fetchSavedSshKeys = async () => {
+      try {
+        setIsLoadingSavedKeys(true);
+        const res = await fetch("/api/user/ssh-keys");
+        const data = await res.json();
+        if (res.ok && data.success && Array.isArray(data.keys)) {
+          setUserSavedKeys(data.keys);
+          if (data.keys.length > 0) {
+            setSshKeyMode('saved');
+          } else {
+            setSshKeyMode('custom');
+          }
+        }
+      } catch {
+        // silent fallback
+      } finally {
+        setIsLoadingSavedKeys(false);
+      }
+    };
+    fetchSavedSshKeys();
+  }, []);
+
+  const handleSelectSavedKey = (key: SavedSshKey) => {
+    if (selectedSavedKeyId === key.id) {
+      setSelectedSavedKeyId(null);
+      setSshKey("");
+    } else {
+      setSelectedSavedKeyId(key.id);
+      setSshKey(key.publicKey);
+    }
+  };
 
   // Firewall State
   const [firewallRules, setFirewallRules] = useState({
@@ -825,6 +871,8 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
 
       if (res.ok) {
         setSshKey(data.publicKey);
+        setSshKeyMode('custom');
+        setSelectedSavedKeyId(null);
 
         // Auto download the private key
         const blob = new Blob([data.privateKey], { type: 'application/x-pem-file' });
@@ -2440,32 +2488,203 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
             </div>
 
             <div className="mt-5 pt-5 border-t" style={{ borderColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(226,232,240,0.8)" }}>
-              <div className="flex items-center justify-between mb-2">
-                <label className={cn("block text-xs font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>SSH Public Key (Optional)</label>
-                <button
-                  type="button"
-                  onClick={handleGenerateSSHKey}
-                  disabled={isGeneratingKey}
-                  className={cn(
-                    "text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-colors font-semibold cursor-pointer",
-                    isDark ? "text-cyan-400 hover:bg-white/[0.06] bg-white/[0.03] border-white/[0.08]" : "text-cyan-700 hover:bg-slate-100 bg-slate-50 border-slate-200"
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-3">
+                <div className="flex items-center gap-2">
+                  <label className={cn("block text-xs font-bold", isDark ? "text-zinc-300" : "text-slate-700")}>
+                    SSH Public Key (Optional)
+                  </label>
+                  {userSavedKeys.length > 0 && (
+                    <span className={cn(
+                      "text-[10px] font-semibold px-2 py-0.5 rounded-full border",
+                      isDark ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700"
+                    )}>
+                      {userSavedKeys.length} Saved {userSavedKeys.length === 1 ? 'Key' : 'Keys'}
+                    </span>
                   )}
-                >
-                  {isGeneratingKey ? (
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <Plus className="w-3.5 h-3.5" />
-                  )}
-                  Generate & Download .pem
-                </button>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Link
+                    href="/dashboard/settings?tab=ssh-keys"
+                    target="_blank"
+                    className={cn(
+                      "text-[11px] inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border transition-colors font-medium",
+                      isDark
+                        ? "text-zinc-400 hover:text-white border-white/[0.08] hover:bg-white/[0.04]"
+                        : "text-slate-600 hover:text-slate-900 border-slate-200 hover:bg-slate-50"
+                    )}
+                  >
+                    <KeyRound className="w-3 h-3 text-cyan-400" />
+                    Manage in Settings
+                    <ExternalLink className="w-2.5 h-2.5 opacity-60" />
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={handleGenerateSSHKey}
+                    disabled={isGeneratingKey}
+                    className={cn(
+                      "text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-colors font-semibold cursor-pointer",
+                      isDark ? "text-cyan-400 hover:bg-white/[0.06] bg-white/[0.03] border-white/[0.08]" : "text-cyan-700 hover:bg-slate-100 bg-slate-50 border-slate-200"
+                    )}
+                  >
+                    {isGeneratingKey ? (
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Plus className="w-3.5 h-3.5" />
+                    )}
+                    Generate & Download .pem
+                  </button>
+                </div>
               </div>
-              <textarea
-                value={sshKey}
-                onChange={(e) => setSshKey(e.target.value)}
-                placeholder="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQ... user@hostname"
-                className={cn("w-full h-24 border rounded-xl px-4 py-3 text-xs sm:text-sm focus:outline-none transition-colors font-mono resize-none leading-relaxed", isDark ? "bg-[#111115] border-white/[0.08] text-white focus:border-cyan-500/60 placeholder:text-zinc-600" : "bg-white border-slate-200 text-slate-900 focus:border-cyan-500 placeholder:text-slate-400")}
-              />
-              <p className="text-[11px] text-zinc-500 mt-1.5">Add your SSH public key for passwordless authentication.</p>
+
+              {/* Saved Keys vs Custom Switch (if user has saved keys) */}
+              {userSavedKeys.length > 0 ? (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 p-1 rounded-xl border max-w-fit" style={{ borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(226,232,240,0.9)", background: isDark ? "#0f0f12" : "#f8fafc" }}>
+                    <button
+                      type="button"
+                      onClick={() => setSshKeyMode('saved')}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer",
+                        sshKeyMode === 'saved'
+                          ? (isDark ? "bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 shadow-xs" : "bg-white text-cyan-700 border border-slate-200 shadow-xs")
+                          : (isDark ? "text-zinc-400 hover:text-zinc-200" : "text-slate-500 hover:text-slate-800")
+                      )}
+                    >
+                      <KeyRound className="w-3.5 h-3.5" />
+                      Select Saved Key ({userSavedKeys.length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSshKeyMode('custom');
+                        setSelectedSavedKeyId(null);
+                      }}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer",
+                        sshKeyMode === 'custom'
+                          ? (isDark ? "bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 shadow-xs" : "bg-white text-cyan-700 border border-slate-200 shadow-xs")
+                          : (isDark ? "text-zinc-400 hover:text-zinc-200" : "text-slate-500 hover:text-slate-800")
+                      )}
+                    >
+                      Custom / Paste Key
+                    </button>
+                  </div>
+
+                  {sshKeyMode === 'saved' ? (
+                    <div className="space-y-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        {userSavedKeys.map((key) => {
+                          const isSelected = selectedSavedKeyId === key.id;
+                          return (
+                            <div
+                              key={key.id}
+                              onClick={() => handleSelectSavedKey(key)}
+                              className={cn(
+                                "group relative p-3 rounded-xl border text-left cursor-pointer transition-all duration-150 flex flex-col justify-between gap-2",
+                                isSelected
+                                  ? (isDark
+                                      ? "bg-cyan-500/10 border-cyan-500/60 shadow-sm shadow-cyan-500/10 ring-1 ring-cyan-500/50"
+                                      : "bg-cyan-50/80 border-cyan-500 shadow-xs ring-1 ring-cyan-500/30")
+                                  : (isDark
+                                      ? "bg-[#111115] border-white/[0.08] hover:border-white/[0.18] hover:bg-white/[0.02]"
+                                      : "bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50/60")
+                              )}
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <div className={cn(
+                                    "w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border",
+                                    isSelected
+                                      ? (isDark ? "bg-cyan-500/20 border-cyan-500/40 text-cyan-400" : "bg-cyan-100 border-cyan-300 text-cyan-700")
+                                      : (isDark ? "bg-white/[0.04] border-white/[0.08] text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-500")
+                                  )}>
+                                    <KeyRound className="w-3.5 h-3.5" />
+                                  </div>
+                                  <div className="min-w-0">
+                                    <div className={cn("text-xs font-bold truncate", isDark ? "text-white" : "text-slate-900")}>
+                                      {key.name}
+                                    </div>
+                                    <span className={cn(
+                                      "inline-block text-[10px] font-mono px-1.5 py-0.2 rounded border uppercase font-semibold mt-0.5",
+                                      key.keyType === 'ssh-ed25519'
+                                        ? (isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200")
+                                        : (isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")
+                                    )}>
+                                      {key.keyType === 'ssh-ed25519' ? 'ED25519' : key.keyType ? key.keyType.replace('ssh-', '').toUpperCase() : 'SSH'}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className={cn(
+                                  "w-5 h-5 rounded-md flex items-center justify-center border transition-all shrink-0 mt-0.5",
+                                  isSelected
+                                    ? "bg-cyan-500 border-cyan-500 text-slate-950 font-bold"
+                                    : (isDark ? "border-white/[0.15] bg-white/[0.02]" : "border-slate-300 bg-white")
+                                )}>
+                                  {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                                </div>
+                              </div>
+                              {key.fingerprint && (
+                                <div className={cn("text-[10px] font-mono truncate px-2 py-1 rounded border", isDark ? "bg-black/30 text-zinc-400 border-white/[0.04]" : "bg-slate-100 text-slate-500 border-slate-200")}>
+                                  {key.fingerprint}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <div className="flex items-center justify-between text-[11px] pt-1">
+                        <span className={cn(selectedSavedKeyId ? (isDark ? "text-cyan-400 font-medium" : "text-cyan-700 font-medium") : "text-zinc-500")}>
+                          {selectedSavedKeyId
+                            ? "✓ Selected SSH key will be automatically injected into /root/.ssh/authorized_keys."
+                            : "Click any key to select it for passwordless root login (optional)."}
+                        </span>
+                        {selectedSavedKeyId && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedSavedKeyId(null);
+                              setSshKey("");
+                            }}
+                            className={cn("text-[11px] underline cursor-pointer", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-800")}
+                          >
+                            Deselect key
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <textarea
+                        value={sshKey}
+                        onChange={(e) => setSshKey(e.target.value)}
+                        placeholder="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQ... user@hostname"
+                        className={cn("w-full h-24 border rounded-xl px-4 py-3 text-xs sm:text-sm focus:outline-none transition-colors font-mono resize-none leading-relaxed", isDark ? "bg-[#111115] border-white/[0.08] text-white focus:border-cyan-500/60 placeholder:text-zinc-600" : "bg-white border-slate-200 text-slate-900 focus:border-cyan-500 placeholder:text-slate-400")}
+                      />
+                      <p className="text-[11px] text-zinc-500 mt-1.5">Enter a custom SSH public key for this order.</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div>
+                  <textarea
+                    value={sshKey}
+                    onChange={(e) => setSshKey(e.target.value)}
+                    placeholder="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQ... user@hostname"
+                    className={cn("w-full h-24 border rounded-xl px-4 py-3 text-xs sm:text-sm focus:outline-none transition-colors font-mono resize-none leading-relaxed", isDark ? "bg-[#111115] border-white/[0.08] text-white focus:border-cyan-500/60 placeholder:text-zinc-600" : "bg-white border-slate-200 text-slate-900 focus:border-cyan-500 placeholder:text-slate-400")}
+                  />
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] mt-1.5">
+                    <span className="text-zinc-500">Add your SSH public key for passwordless authentication.</span>
+                    <Link
+                      href="/dashboard/settings?tab=ssh-keys"
+                      target="_blank"
+                      className={cn("inline-flex items-center gap-1 font-medium transition-colors", isDark ? "text-cyan-400 hover:underline" : "text-cyan-700 hover:underline")}
+                    >
+                      Save keys to your profile for 1-click orders ↗
+                    </Link>
+                  </div>
+                </div>
+              )}
             </div>
           </motion.div>
         </div>

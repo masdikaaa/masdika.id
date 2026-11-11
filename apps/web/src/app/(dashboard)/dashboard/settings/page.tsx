@@ -11,6 +11,7 @@ import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Select } from '@/components/ui/Select';
 import { BrowserIcon } from '@/components/ui/BrowserIcon';
 import { motion, AnimatePresence } from 'framer-motion';
+import { SshKeysManagerSection } from '@/components/settings/SshKeysManagerSection';
 
 const COUNTRY_OPTIONS = [
   { value: "ID", label: "🇮🇩 Indonesia" },
@@ -83,7 +84,7 @@ export default function SettingsPage() {
   const isDark = theme === 'dark';
   const inputClass = isDark ? inputClassDark : inputClassLight;
   const labelClass = isDark ? labelClassDark : labelClassLight;
-  const [activeTab, setActiveTab] = useUrlTab<'profile' | 'security'>('profile', { allowed: ['profile', 'security'] as const });
+  const [activeTab, setActiveTab] = useUrlTab<'profile' | 'security' | 'ssh-keys'>('profile', { allowed: ['profile', 'security', 'ssh-keys'] as const });
   
   // Profile State
   const [name, setName] = useState('');
@@ -570,6 +571,7 @@ export default function SettingsPage() {
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User, desc: 'Manage personal info' },
     { id: 'security', label: 'Security', icon: Shield, desc: 'Passwords & 2FA' },
+    { id: 'ssh-keys', label: 'SSH Keys', icon: KeyRound, desc: 'Global public keys' },
   ];
 
   const containerVariants = {
@@ -595,7 +597,7 @@ export default function SettingsPage() {
             </span>
           </div>
           <p className={cn("text-xs sm:text-sm max-w-xl", isDark ? "text-zinc-400" : "text-slate-500")}>
-            Manage your profile information, email address, password, and account security.
+            Manage your profile information, email address, password, SSH keys, and account security.
           </p>
         </div>
       </motion.div>
@@ -603,13 +605,13 @@ export default function SettingsPage() {
       <motion.div variants={itemVariants} className="flex flex-col md:flex-row gap-5 md:gap-6 items-stretch md:items-start w-full max-w-full min-w-0">
         {/* Navigation Sidebar (Sticky on mobile & desktop) */}
         <div className="w-full max-w-full md:w-60 shrink-0 sticky top-0 md:top-6 md:self-start lg:sticky lg:top-6 lg:self-start z-20 min-w-0 py-2 -my-2 md:py-0 md:my-0 bg-[#f8fafb]/90 dark:bg-[#000000]/90 md:bg-transparent md:dark:bg-transparent backdrop-blur-md md:backdrop-blur-none transition-all">
-          <div className={cn("w-full max-w-full rounded-2xl p-1.5 sm:p-2 grid grid-cols-2 md:flex md:flex-col gap-1.5 border min-w-0 box-border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+          <div className={cn("w-full max-w-full rounded-2xl p-1.5 sm:p-2 grid grid-cols-3 md:flex md:flex-col gap-1.5 border min-w-0 box-border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as 'profile' | 'security')}
+                  onClick={() => setActiveTab(tab.id as 'profile' | 'security' | 'ssh-keys')}
                   className={`relative flex items-center justify-center md:justify-start gap-2.5 sm:gap-3 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl transition-all text-left shrink-0 w-full min-w-0 border cursor-pointer ${
                     isActive
                       ? (isDark ? 'bg-[#111115] text-white border-white/[0.12]' : 'bg-slate-100 text-slate-900 border-slate-200/90')
@@ -1447,6 +1449,14 @@ export default function SettingsPage() {
                   </div>
                 </div>
               </motion.div>
+            )}
+
+            {activeTab === 'ssh-keys' && (
+              <SshKeysManagerSection
+                isDark={isDark}
+                inputClass={inputClass}
+                labelClass={labelClass}
+              />
             )}
           </AnimatePresence>
         </div>
