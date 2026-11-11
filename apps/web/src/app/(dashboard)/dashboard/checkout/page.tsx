@@ -567,6 +567,23 @@ function CheckoutContent() {
                           onClick={() => {
                             setSelectedService(srv.id);
                             setTierPage(1);
+                            if (srv.id === "APP_CATALOG") {
+                              router.replace("/dashboard/checkout?service=APP_CATALOG", { scroll: false });
+                              setTimeout(() => {
+                                const el = document.getElementById("step-os-apps-selection");
+                                if (el) {
+                                  el.scrollIntoView({ behavior: "smooth", block: "start" });
+                                }
+                              }, 100);
+                            } else if (srv.id === "VPS") {
+                              router.replace("/dashboard/checkout?service=VPS", { scroll: false });
+                              setTimeout(() => {
+                                const el = document.getElementById("step-os-apps-selection");
+                                if (el) {
+                                  el.scrollIntoView({ behavior: "smooth", block: "start" });
+                                }
+                              }, 100);
+                            }
                           }}
                           className={cn(
                             "group relative text-left p-4 rounded-xl border transition-all duration-150 flex flex-col justify-between cursor-pointer",
@@ -685,7 +702,13 @@ function CheckoutContent() {
         {/* Service Checkout Content */}
         {selectedService === "VPS" || selectedService === "KUBERNETES" || selectedService === "APP_CATALOG" ? (
           <div key="vps-flow" className="w-full max-w-full min-w-0 transition-all duration-200">
-            <VpsCheckoutFlow serviceType={selectedService} />
+            <VpsCheckoutFlow
+              serviceType={selectedService}
+              onServiceChange={(newService) => {
+                setSelectedService(newService);
+                router.replace(`/dashboard/checkout?service=${newService}`, { scroll: false });
+              }}
+            />
           </div>
         ) : (
           <div

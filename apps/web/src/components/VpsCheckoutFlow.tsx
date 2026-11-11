@@ -36,6 +36,7 @@ const getOsIcon = (name: string, isDark: boolean = false) => {
 
 interface VpsCheckoutFlowProps {
   serviceType?: string;
+  onServiceChange?: (service: string) => void;
 }
 
 const VpcIcon = ({ className }: { className?: string }) => (
@@ -149,7 +150,7 @@ const validateCidr = (cidr: string): CidrValidationResult => {
   return { error: null };
 };
 
-export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlowProps) {
+export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }: VpsCheckoutFlowProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const router = useRouter();
@@ -171,7 +172,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
     : (isAppCatalogService ? VPS_APPS[0] : null);
 
   const [imageMode, setImageMode] = useState<"os" | "apps">(initialApp || isAppCatalogService ? "apps" : "os");
-  const [selectedAppCategory, setSelectedAppCategory] = useState<AppCategory>(initialApp ? initialApp.category : "All Apps");
+  const [selectedAppCategory, setSelectedAppCategory] = useState<AppCategory>("All Apps");
   const [selectedAppId, setSelectedAppId] = useState<string | null>(initialApp ? initialApp.id : null);
   const [selectedAppVersion, setSelectedAppVersion] = useState<string | null>(initialApp ? (initialApp.versions[0]?.appVersion || initialApp.appVersion) : null);
   const [appConfig, setAppConfig] = useState<Record<string, any>>(() => {
@@ -539,6 +540,24 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
     }
   }, [serviceType, templates, selectedTemplate]);
 
+  // Synchronize imageMode and app selection when serviceType prop changes (e.g. user toggles between Cloud VPS and App Catalog in parent checkout page)
+  useEffect(() => {
+    if (serviceType === "APP_CATALOG") {
+      setImageMode("apps");
+      setSelectedAppCategory("All Apps");
+      if (!selectedAppId && VPS_APPS.length > 0) {
+        selectApp(VPS_APPS[0]);
+      }
+    } else if (serviceType === "VPS") {
+      const urlApp = searchParams.get("app") || searchParams.get("appId");
+      if (!urlApp && imageMode === "apps") {
+        setImageMode("os");
+        setSelectedAppId(null);
+        setSelectedAppVersion(null);
+      }
+    }
+  }, [serviceType]);
+
   const calculateHourlyPrice = () => {
     let total = 0;
     total += cpuCores * (pricing.vcpu || 0);
@@ -849,7 +868,11 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
 
           {/* OS Templates & 1-Click Applications - Only for regular VPS (Kubernetes is locked to Debian 13) */}
           {serviceType !== "KUBERNETES" && (
-            <motion.div variants={itemVariants} className={cn("rounded-2xl p-5 sm:p-6 border relative z-20 w-full max-w-full min-w-0 overflow-visible", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
+            <motion.div
+              id="step-os-apps-selection"
+              variants={itemVariants}
+              className={cn("rounded-2xl p-5 sm:p-6 border relative z-20 w-full max-w-full min-w-0 overflow-visible", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}
+            >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
                 <h2 className={cn("text-base sm:text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                   {imageMode === "apps" ? (
@@ -868,6 +891,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                       setImageMode("os");
                       setSelectedAppId(null);
                       setSelectedAppVersion(null);
+                      onServiceChange?.("VPS");
                     }}
                     className={cn(
                       "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer",
@@ -885,9 +909,11 @@ export default function VpsCheckoutFlow({ serviceType = "VPS" }: VpsCheckoutFlow
                     type="button"
                     onClick={() => {
                       setImageMode("apps");
+                      setSelectedAppCategory("All Apps");
                       if (!selectedAppId && VPS_APPS.length > 0) {
                         selectApp(VPS_APPS[0]);
                       }
+                      onServiceChange?.("APP_CATALOG");
                     }}
                     className={cn(
                       "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer",
