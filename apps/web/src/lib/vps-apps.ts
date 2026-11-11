@@ -1090,6 +1090,13 @@ if [ -n "${sshUser}" ] && [ "${sshUser}" != "root" ] && id "${sshUser}" >/dev/nu
   usermod -aG sudo "${sshUser}" 2>/dev/null || true
 fi
 
+# 4. Pre-warm / pre-initialize Hermes isolated runtime so first-run starts immediately
+echo "[HERMES] Pre-initializing isolated runtime..."
+/usr/local/bin/hermes --version 2>/dev/null || true
+if [ -n "${sshUser}" ] && [ "${sshUser}" != "root" ] && id "${sshUser}" >/dev/null 2>&1; then
+  sudo -u "${sshUser}" -H env PATH="/usr/local/bin:$PATH" /usr/local/bin/hermes --version 2>/dev/null || true
+fi
+
 ${appInfoCmd}
 `;
     }
