@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CreditCard, Save, Building2, Wallet, Store, QrCode, Loader2, RefreshCw, CheckCircle2, ShieldCheck } from "lucide-react";
+import { CreditCard, Save, Building2, Wallet, Store, QrCode, Loader2, RefreshCw, CheckCircle2, ShieldCheck, Trash2 } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { AdminLoader } from "@/components/admin/AdminLoader";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 export default function AdminPaymentSettingsPage() {
   const { theme } = useTheme();
@@ -27,10 +28,35 @@ export default function AdminPaymentSettingsPage() {
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [pmToDelete, setPmToDelete] = useState<any | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetchPaymentMethods();
   }, []);
+
+  const handleDelete = async () => {
+    if (!pmToDelete) return;
+    const toastId = toast.loading(`Deleting ${pmToDelete.name}...`);
+    try {
+      setIsDeleting(true);
+      const res = await fetch(`/api/admin/payment-methods?id=${pmToDelete.id}`, {
+        method: "DELETE"
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success(`${pmToDelete.name} deleted successfully`, { id: toastId });
+        setPaymentMethods(prev => prev.filter(p => p.id !== pmToDelete.id));
+        setPmToDelete(null);
+      } else {
+        toast.error(data.error || "Failed to delete payment method", { id: toastId });
+      }
+    } catch {
+      toast.error("An error occurred while deleting payment method", { id: toastId });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
 
   const handleToggle = async (id: number) => {
@@ -247,6 +273,20 @@ export default function AdminPaymentSettingsPage() {
                   >
                     Save
                   </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setPmToDelete(pm)}
+                    title={`Delete ${pm.name}`}
+                    className={cn(
+                      "p-1.5 rounded-lg border transition-colors shrink-0 cursor-pointer",
+                      isDark 
+                        ? "border-red-500/20 text-red-400/80 hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/40" 
+                        : "border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
+                    )}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
             </div>
@@ -353,6 +393,17 @@ export default function AdminPaymentSettingsPage() {
           </>
         )}
       </div>
+
+      <ConfirmModal
+        isOpen={Boolean(pmToDelete)}
+        onClose={() => setPmToDelete(null)}
+        onConfirm={handleDelete}
+        title="Delete Payment Method"
+        description={`Are you sure you want to delete payment method "${pmToDelete?.name}" (${pmToDelete?.code})? This payment method will no longer be available for customers.`}
+        confirmText={isDeleting ? "Deleting..." : "Delete"}
+        isLoading={isDeleting}
+        variant="danger"
+      />
     </div>
   );
 }
