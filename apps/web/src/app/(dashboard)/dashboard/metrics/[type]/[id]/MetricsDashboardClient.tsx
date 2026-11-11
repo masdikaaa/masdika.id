@@ -55,7 +55,7 @@ export default function MetricsDashboardClient({ type, id }: MetricsDashboardCli
     return rawData.map(point => {
       const timeMs = point.time < 1e11 ? point.time * 1000 : point.time;
       const date = new Date(timeMs);
-      const cpuVal = point.cpu !== undefined ? (point.cpu <= 1 && point.cpu > 0 ? (point.cpu * 100).toFixed(2) : Number(point.cpu).toFixed(2)) : "0";
+      const cpuVal = typeof point.cpu === 'number' ? point.cpu.toFixed(2) : (point.cpu !== undefined ? Number(point.cpu).toFixed(2) : "0");
       const memVal = point.memory !== undefined ? Number(point.memory).toFixed(2) : (point.maxmem && point.mem ? ((point.mem / point.maxmem) * 100).toFixed(2) : "0");
       return {
         time: timeframe === "hour" ? date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : date.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit' }),

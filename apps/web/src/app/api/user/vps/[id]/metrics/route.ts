@@ -2,6 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
 import { ProxmoxClient } from "@/lib/proxmox";
+import { decryptDeterministic } from "@/lib/encryption";
+
+// In-memory cache to compute real-time rate (Bytes/sec) from Proxmox cumulative byte counters
+interface LiveSample {
+  timeMs: number;
+  netin: number;
+  netout: number;
+  diskread: number;
+  diskwrite: number;
+}
+const liveSamplesMap = new Map<number, LiveSample>();
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -14,7 +25,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const timeframe = searchParams.get("timeframe") || "hour";
 
     const vps = await prisma.vpsService.findFirst({
-      where: { id: parseInt(vpsId, 10), userId: user.id }
+      where: user.role === "ADMIN" ? { id: parseInt(vpsId, 10) } : { id: parseInt(vpsId, 10), userId: user.id }
     });
 
     if (!vps) {
@@ -30,7 +41,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "No active Proxmox server found" }, { status: 500 });
     }
 
-    const proxmox = new ProxmoxClient(server.host, server.tokenId, server.tokenSecret);
+    const secret = decryptDeterministic(server.tokenSecret) || server.tokenSecret;
+    const proxmox = new ProxmoxClient(server.host, server.tokenId, secret);
     
     // Valid timeframes: hour, day, week, month, year
     const validTimeframes = ["hour", "day", "week", "month", "year"];
@@ -57,26 +69,34 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const formattedPoints: any[] = [];
     for (const pt of rawPoints) {
       if (!pt || typeof pt.time !== "number") continue;
-      // Proxmox RRD timestamp is in seconds (e.g. 1730900000). Convert to ms:
+      // Proxmox RRD timestamp is in seconds. Convert to ms:
       const timeMs = pt.time < 1e11 ? pt.time * 1000 : pt.time;
       
-      // Proxmox RRD cpu is a fraction 0.0 .. 1.0. Convert to percentage 0..100:
-      const cpu = pt.cpu !== null && pt.cpu !== undefined ? parseFloat((pt.cpu * 100).toFixed(2)) : 0;
+      // Proxmox RRD cpu is a fraction 0.0 .. 1.0 (or >1 for multi-core).
+      // Convert to clean percentage 0.00% .. 100.00%:
+      const rawCpu = pt.cpu !== null && pt.cpu !== undefined ? Number(pt.cpu) : 0;
+      const maxCpu = pt.maxcpu && pt.maxcpu > 0 ? Number(pt.maxcpu) : (vps.cpuCores || 1);
+      const normalizedCpu = rawCpu > 1 ? rawCpu / maxCpu : rawCpu;
+      const cpu = parseFloat(Math.min(100, Math.max(0, normalizedCpu * 100)).toFixed(2));
       
-      // Memory percentage
-      const mem = pt.maxmem && pt.mem ? parseFloat(((pt.mem / pt.maxmem) * 100).toFixed(2)) : 0;
+      // Memory percentage (0..100)
+      const memBytes = pt.mem !== null && pt.mem !== undefined ? Number(pt.mem) : 0;
+      const maxMemBytes = pt.maxmem && pt.maxmem > 0 ? Number(pt.maxmem) : 1;
+      const mem = parseFloat(Math.min(100, Math.max(0, (memBytes / maxMemBytes) * 100)).toFixed(2));
       
-      const netin = pt.netin !== null && pt.netin !== undefined ? Math.max(0, pt.netin) : 0;
-      const netout = pt.netout !== null && pt.netout !== undefined ? Math.max(0, pt.netout) : 0;
-      const diskread = pt.diskread !== null && pt.diskread !== undefined ? Math.max(0, pt.diskread) : 0;
-      const diskwrite = pt.diskwrite !== null && pt.diskwrite !== undefined ? Math.max(0, pt.diskwrite) : 0;
+      // In Proxmox RRD, netin/netout and diskread/diskwrite are ALREADY rates in Bytes/second:
+      const netin = pt.netin !== null && pt.netin !== undefined ? Math.max(0, Number(pt.netin)) : 0;
+      const netout = pt.netout !== null && pt.netout !== undefined ? Math.max(0, Number(pt.netout)) : 0;
+      const diskread = pt.diskread !== null && pt.diskread !== undefined ? Math.max(0, Number(pt.diskread)) : 0;
+      const diskwrite = pt.diskwrite !== null && pt.diskwrite !== undefined ? Math.max(0, Number(pt.diskwrite)) : 0;
 
       formattedPoints.push({
         time: timeMs,
         cpu,
         mem,
         memory: mem,
-        maxmem: pt.maxmem || 0,
+        memBytes,
+        maxmem: maxMemBytes,
         netin,
         netout,
         netIn: netin,
@@ -91,19 +111,62 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     // 4. Inject live realtime telemetry point from Proxmox
     if (liveStatus && liveStatus.status === "running") {
       const nowMs = Date.now();
-      const currentCpu = liveStatus.cpu !== null && liveStatus.cpu !== undefined ? parseFloat((liveStatus.cpu * 100).toFixed(2)) : 0;
-      const currentMem = liveStatus.maxmem && liveStatus.mem ? parseFloat(((liveStatus.mem / liveStatus.maxmem) * 100).toFixed(2)) : 0;
-      const currentNetIn = Math.max(0, liveStatus.netin || 0);
-      const currentNetOut = Math.max(0, liveStatus.netout || 0);
-      const currentDiskRead = Math.max(0, liveStatus.diskread || 0);
-      const currentDiskWrite = Math.max(0, liveStatus.diskwrite || 0);
+      const rawCpu = liveStatus.cpu !== null && liveStatus.cpu !== undefined ? Number(liveStatus.cpu) : 0;
+      const cpus = liveStatus.cpus && liveStatus.cpus > 0 ? Number(liveStatus.cpus) : (vps.cpuCores || 1);
+      const normalizedCpu = rawCpu > 1 ? rawCpu / cpus : rawCpu;
+      const currentCpu = parseFloat(Math.min(100, Math.max(0, normalizedCpu * 100)).toFixed(2));
+
+      const memBytes = liveStatus.mem !== null && liveStatus.mem !== undefined ? Number(liveStatus.mem) : 0;
+      const maxMemBytes = liveStatus.maxmem && liveStatus.maxmem > 0 ? Number(liveStatus.maxmem) : 1;
+      const currentMem = parseFloat(Math.min(100, Math.max(0, (memBytes / maxMemBytes) * 100)).toFixed(2));
+
+      // Calculate real-time rate (Bytes/sec) from delta of cumulative counters
+      const lastRrd = formattedPoints.length > 0 ? formattedPoints[formattedPoints.length - 1] : null;
+      let currentNetIn = lastRrd ? lastRrd.netin : 0;
+      let currentNetOut = lastRrd ? lastRrd.netout : 0;
+      let currentDiskRead = lastRrd ? lastRrd.diskread : 0;
+      let currentDiskWrite = lastRrd ? lastRrd.diskwrite : 0;
+
+      const prevSample = liveSamplesMap.get(vps.id);
+      const cumNetIn = Number(liveStatus.netin || 0);
+      const cumNetOut = Number(liveStatus.netout || 0);
+      const cumDiskRead = Number(liveStatus.diskread || 0);
+      const cumDiskWrite = Number(liveStatus.diskwrite || 0);
+
+      if (prevSample && prevSample.timeMs < nowMs) {
+        const deltaSec = (nowMs - prevSample.timeMs) / 1000;
+        // Compute delta rate if sampled within 1s to 45s window
+        if (deltaSec >= 1 && deltaSec <= 45) {
+          if (cumNetIn >= prevSample.netin) {
+            currentNetIn = parseFloat(((cumNetIn - prevSample.netin) / deltaSec).toFixed(1));
+          }
+          if (cumNetOut >= prevSample.netout) {
+            currentNetOut = parseFloat(((cumNetOut - prevSample.netout) / deltaSec).toFixed(1));
+          }
+          if (cumDiskRead >= prevSample.diskread) {
+            currentDiskRead = parseFloat(((cumDiskRead - prevSample.diskread) / deltaSec).toFixed(1));
+          }
+          if (cumDiskWrite >= prevSample.diskwrite) {
+            currentDiskWrite = parseFloat(((cumDiskWrite - prevSample.diskwrite) / deltaSec).toFixed(1));
+          }
+        }
+      }
+
+      liveSamplesMap.set(vps.id, {
+        timeMs: nowMs,
+        netin: cumNetIn,
+        netout: cumNetOut,
+        diskread: cumDiskRead,
+        diskwrite: cumDiskWrite
+      });
 
       const livePoint = {
         time: nowMs,
         cpu: currentCpu,
         mem: currentMem,
         memory: currentMem,
-        maxmem: liveStatus.maxmem || 0,
+        memBytes,
+        maxmem: maxMemBytes,
         netin: currentNetIn,
         netout: currentNetOut,
         netIn: currentNetIn,
@@ -114,7 +177,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         diskWrite: currentDiskWrite,
       };
 
-      if (formattedPoints.length === 0 || nowMs - formattedPoints[formattedPoints.length - 1].time > 5000) {
+      if (formattedPoints.length === 0 || nowMs - formattedPoints[formattedPoints.length - 1].time > 15000) {
         formattedPoints.push(livePoint);
       } else {
         formattedPoints[formattedPoints.length - 1] = livePoint;
@@ -124,8 +187,13 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     // 5. If new VM with fewer than 3 historical points, backfill with baseline live data so graph displays immediately
     if (formattedPoints.length < 3 && liveStatus && liveStatus.status === "running") {
       const now = Date.now();
-      const currentCpu = liveStatus.cpu !== null && liveStatus.cpu !== undefined ? parseFloat((liveStatus.cpu * 100).toFixed(2)) : 0;
-      const currentMem = liveStatus.maxmem && liveStatus.mem ? parseFloat(((liveStatus.mem / liveStatus.maxmem) * 100).toFixed(2)) : 0;
+      const rawCpu = liveStatus.cpu !== null && liveStatus.cpu !== undefined ? Number(liveStatus.cpu) : 0;
+      const cpus = liveStatus.cpus && liveStatus.cpus > 0 ? Number(liveStatus.cpus) : (vps.cpuCores || 1);
+      const normalizedCpu = rawCpu > 1 ? rawCpu / cpus : rawCpu;
+      const currentCpu = parseFloat(Math.min(100, Math.max(0, normalizedCpu * 100)).toFixed(2));
+      const memBytes = liveStatus.mem !== null && liveStatus.mem !== undefined ? Number(liveStatus.mem) : 0;
+      const maxMemBytes = liveStatus.maxmem && liveStatus.maxmem > 0 ? Number(liveStatus.maxmem) : 1;
+      const currentMem = parseFloat(Math.min(100, Math.max(0, (memBytes / maxMemBytes) * 100)).toFixed(2));
       
       const synthetic = [];
       for (let i = 12; i >= 1; i--) {
@@ -134,15 +202,16 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
           cpu: currentCpu,
           mem: currentMem,
           memory: currentMem,
-          maxmem: liveStatus.maxmem || 0,
-          netin: Math.max(0, liveStatus.netin || 0),
-          netout: Math.max(0, liveStatus.netout || 0),
-          netIn: Math.max(0, liveStatus.netin || 0),
-          netOut: Math.max(0, liveStatus.netout || 0),
-          diskread: Math.max(0, liveStatus.diskread || 0),
-          diskwrite: Math.max(0, liveStatus.diskwrite || 0),
-          diskRead: Math.max(0, liveStatus.diskread || 0),
-          diskWrite: Math.max(0, liveStatus.diskwrite || 0),
+          memBytes,
+          maxmem: maxMemBytes,
+          netin: 0,
+          netout: 0,
+          netIn: 0,
+          netOut: 0,
+          diskread: 0,
+          diskwrite: 0,
+          diskRead: 0,
+          diskWrite: 0,
         });
       }
       formattedPoints.unshift(...synthetic);

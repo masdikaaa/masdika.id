@@ -399,7 +399,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
         if (Array.isArray(processedData)) {
           processedData = processedData.map((pt: any) => {
             const timeMs = pt.time < 1e11 ? pt.time * 1000 : Number(pt.time);
-            const cpuVal = pt.cpu !== undefined ? (pt.cpu <= 1 && pt.cpu > 0 ? Number((pt.cpu * 100).toFixed(2)) : Number(pt.cpu)) : 0;
+            const cpuVal = typeof pt.cpu === 'number' ? Number(pt.cpu.toFixed(2)) : (pt.cpu !== undefined ? Number(pt.cpu) : 0);
             const memVal = pt.memory !== undefined ? Number(pt.memory) : (pt.mem !== undefined ? Number(pt.mem) : 0);
             const netInVal = pt.netin !== undefined ? Number(pt.netin) : (pt.netIn !== undefined ? Number(pt.netIn) : 0);
             const netOutVal = pt.netout !== undefined ? Number(pt.netout) : (pt.netOut !== undefined ? Number(pt.netOut) : 0);

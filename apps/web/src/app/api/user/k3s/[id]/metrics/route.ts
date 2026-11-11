@@ -63,7 +63,15 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       try {
         const secret = decryptDeterministic(server.tokenSecret) || server.tokenSecret;
         const proxmox = new ProxmoxClient(server.host, server.tokenId, secret);
-        const rrdData = await proxmox.getRRDData(node.node, node.vmid!, tf);
+        const rawRrd = await proxmox.getRRDData(node.node, node.vmid!, tf);
+        const rrdData = Array.isArray(rawRrd) ? rawRrd.map((pt: any) => {
+          if (!pt || typeof pt.time !== "number") return pt;
+          const rawCpu = pt.cpu !== null && pt.cpu !== undefined ? Number(pt.cpu) : 0;
+          const maxCpu = pt.maxcpu && pt.maxcpu > 0 ? Number(pt.maxcpu) : (node.cpuCores || 1);
+          const normalizedCpu = rawCpu > 1 ? rawCpu / maxCpu : rawCpu;
+          const cpu = parseFloat(Math.min(100, Math.max(0, normalizedCpu * 100)).toFixed(2));
+          return { ...pt, cpu };
+        }) : [];
         nodesMetrics.push({
           hostname: node.hostname,
           vmid: node.vmid,
