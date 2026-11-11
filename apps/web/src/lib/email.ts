@@ -206,21 +206,141 @@ export const sendBillingReminderEmail = async (email: string, userName: string, 
 };
 
 export const sendPaygSuspendedEmail = async (email: string, userName: string, planName: string, serviceName: string) => {
+  const decEmail = decryptDeterministic(email) || email;
+  const decName = decryptDeterministic(userName) || userName;
   const content = `
     <h2 style="color: #ef4444; margin-bottom: 20px;">Service Suspended: Insufficient Balance</h2>
-    <p>Hello <strong>${userName}</strong>,</p>
+    <p>Hello <strong>${decName}</strong>,</p>
     <p>Your "Pay as You Go" subscription for <strong>${planName} (${serviceName.replace('_', ' ')})</strong> has been suspended because your account balance is insufficient for the next hourly billing cycle.</p>
-    <p>To reactivate your service, please top up your account balance immediately.</p>
+    <div style="background-color: #030712; padding: 16px 20px; border-radius: 10px; margin: 20px 0; border: 1px solid #1e293b; border-left: 4px solid #f59e0b;">
+      <p style="color: #f59e0b; margin: 0; font-weight: bold; font-size: 14px;">3-Day Grace Period Active</p>
+      <p style="color: #cbd5e1; margin: 6px 0 0 0; font-size: 13px; line-height: 1.5;">
+        You have a <strong>3-day grace period</strong> to top up your account balance. As soon as sufficient funds are added, your service will automatically resume. If no top-up is completed within 3 days, this service will be permanently terminated.
+      </p>
+    </div>
     <div style="text-align: center; margin: 35px 0;">
       <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://masdika.id'}/dashboard/billing/topup" style="background-color: #ef4444; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">Top Up Balance</a>
     </div>
-    <p>Once you have sufficient balance, your service will automatically resume at the next billing cycle, or you can reactivate it manually in the dashboard.</p>
+    <p style="color: #94a3b8; font-size: 13px;">Once you have sufficient balance, your service will automatically resume at the next billing cycle, or you can reactivate it manually in the dashboard.</p>
   `;
   
   await getTransporter().sendMail({
     from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
-    to: email,
-    subject: `[Service Suspended] Insufficient Balance for ${planName}`,
+    to: decEmail,
+    subject: `[Service Suspended] Insufficient Balance for ${planName} (3-Day Grace Period)`,
+    html: getBaseHtml(content),
+  });
+};
+
+export interface VpsSuspendedGracePeriodEmailParams {
+  email: string;
+  userName: string;
+  vpsHostname: string;
+  terminationDate: Date;
+  hourlyRate?: number;
+  reason?: string;
+  vpcName?: string | null;
+}
+
+export const sendVpsSuspendedGracePeriodEmail = async ({
+  email,
+  userName,
+  vpsHostname,
+  terminationDate,
+  hourlyRate,
+  reason,
+  vpcName,
+}: VpsSuspendedGracePeriodEmailParams) => {
+  const decEmail = decryptDeterministic(email) || email;
+  const decName = decryptDeterministic(userName) || userName;
+
+  const deadlineStr = terminationDate.toLocaleString('id-ID', {
+    timeZone: 'Asia/Jakarta',
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }) + ' WIB';
+
+  const formattedRate = hourlyRate && hourlyRate > 0
+    ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(hourlyRate) + '/jam'
+    : null;
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://masdika.id';
+
+  const vpcNotice = vpcName
+    ? `<li style="margin-bottom: 8px;"><strong>Jaringan VPC (${vpcName}):</strong> Jaringan VPC privat Anda akan tetap diamankan selama masa tenggang. Namun jika masa tenggang 3 hari berakhir tanpa top up dan VPS ini dihapus, VPC juga akan <strong>otomatis dihapus</strong> oleh sistem demi efisiensi resource.</li>`
+    : `<li style="margin-bottom: 8px;"><strong>Jaringan VPC Terkait:</strong> Jika server ini terhubung ke VPC privat dan tidak ada server aktif lain di dalamnya, VPC juga akan <strong>otomatis dihapus</strong> setelah VPS dihapus.</li>`;
+
+  const content = `
+    <div style="margin-bottom: 20px;">
+      <span style="display: inline-block; background-color: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 700; text-transform: uppercase;">
+        ⚠️ Pemberitahuan Penangguhan (Suspended)
+      </span>
+    </div>
+
+    <h2 style="color: #ef4444; margin-top: 0; margin-bottom: 16px; font-size: 22px;">Layanan VPS Di-Suspend: Saldo Tidak Mencukupi</h2>
+    
+    <p style="color: #e2e8f0; font-size: 15px; line-height: 1.6;">
+      Halo <strong>${decName}</strong>,
+    </p>
+
+    <p style="color: #cbd5e1; font-size: 14px; line-height: 1.6;">
+      Layanan Cloud VPS Anda dengan hostname <strong style="color: #38bdf8; font-family: monospace;">${vpsHostname}</strong> saat ini telah ditangguhkan (<strong>SUSPENDED</strong>) karena saldo akun Masdika Anda tidak mencukupi untuk pemotongan biaya berkala (${reason || 'Billing cycle failed due to insufficient balance'}).
+    </p>
+
+    <div style="background-color: #030712; padding: 20px 24px; border-radius: 12px; margin: 25px 0; border: 1px solid #1e293b; border-left: 4px solid #f59e0b;">
+      <h3 style="color: #f59e0b; margin-top: 0; margin-bottom: 14px; font-size: 15px; font-weight: 700; text-transform: uppercase;">Masa Tenggang 3 Hari (Grace Period)</h3>
+      <table width="100%" cellpadding="0" cellspacing="0" style="color: #e2e8f0; font-size: 14px;">
+        <tr>
+          <td style="padding: 6px 0; color: #94a3b8;" width="160">Hostname VPS:</td>
+          <td style="padding: 6px 0; color: #38bdf8; font-weight: 700; font-family: monospace;">${vpsHostname}</td>
+        </tr>
+        ${formattedRate ? `<tr>
+          <td style="padding: 6px 0; color: #94a3b8;">Tarif Layanan:</td>
+          <td style="padding: 6px 0; color: #e2e8f0; font-weight: 600;">${formattedRate}</td>
+        </tr>` : ''}
+        <tr>
+          <td style="padding: 6px 0; color: #94a3b8;">Status Saat Ini:</td>
+          <td style="padding: 6px 0; color: #ef4444; font-weight: 700;">SUSPENDED (VM Stopped)</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #f59e0b; font-weight: 700;">Batas Waktu Top Up:</td>
+          <td style="padding: 8px 0; color: #f59e0b; font-weight: 800; font-size: 15px;">${deadlineStr}</td>
+        </tr>
+      </table>
+    </div>
+
+    <div style="background-color: #0c1a2e; border: 1px solid #1e3a8a; border-radius: 10px; padding: 18px 20px; margin: 25px 0;">
+      <h3 style="color: #38bdf8; margin-top: 0; margin-bottom: 10px; font-size: 15px;">💡 Auto-Unsuspend (Reaktivasi Otomatis)</h3>
+      <ul style="color: #cbd5e1; font-size: 13.5px; line-height: 1.6; margin: 0; padding-left: 20px;">
+        <li style="margin-bottom: 8px;"><strong>Data Server Aman:</strong> Seluruh konfigurasi, disk storage, dan IP server Anda tetap tersimpan utuh selama masa tenggang 3 hari ini. Server hanya dimatikan sementara agar tidak terus memotong saldo.</li>
+        <li style="margin-bottom: 8px;"><strong>Cukup Top Up Saldo:</strong> Begitu Anda melakukan top up saldo dan nominalnya mencukupi, sistem kami akan <strong>secara otomatis mengaktifkan kembali (unsuspend)</strong> dan menyalakan VM Anda tanpa tindakan manual.</li>
+        ${vpcNotice}
+      </ul>
+    </div>
+
+    <div style="background-color: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 10px; padding: 16px 20px; margin: 25px 0;">
+      <p style="color: #f87171; margin: 0; font-size: 13px; line-height: 1.5;">
+        ⚠️ <strong>PENTING:</strong> Apabila akun tidak di-top up hingga batas waktu <strong>${deadlineStr}</strong> (3 hari), layanan VPS beserta seluruh file di dalamnya akan <strong>dihapus permanen (TERMINATED)</strong>. Jaringan VPC yang kosong juga akan dihapus. Data yang telah dihapus tidak dapat dipulihkan kembali.
+      </p>
+    </div>
+
+    <div style="text-align: center; margin: 35px 0;">
+      <a href="${appUrl}/dashboard/billing/topup" style="background-color: #06b6d4; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 15px; display: inline-block;">Top Up Saldo Sekarang</a>
+    </div>
+
+    <p style="color: #94a3b8; font-size: 13px; line-height: 1.5;">
+      Jika Anda membutuhkan bantuan atau perpanjangan waktu khusus, silakan hubungi tim dukungan kami melalui menu Tiket Bantuan di dashboard.
+    </p>
+  `;
+
+  await getTransporter().sendMail({
+    from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
+    to: decEmail,
+    subject: `[PENTING] Layanan VPS ${vpsHostname} Ditangguhkan (Grace Period 3 Hari) - Masdika Cloud`,
     html: getBaseHtml(content),
   });
 };
@@ -448,17 +568,19 @@ export const sendAutoRenewDisabledSuspensionEmail = async (email: string, userNa
 };
 
 export const sendTerminationEmail = async (email: string, userName: string, planName: string, serviceName: string) => {
+  const decEmail = decryptDeterministic(email) || email;
+  const decName = decryptDeterministic(userName) || userName;
   const content = `
     <h2 style="color: #7f1d1d; margin-bottom: 20px;">Service Terminated</h2>
-    <p>Hello <strong>${userName}</strong>,</p>
-    <p>As we did not receive payment within the 3-day suspension grace period, your subscription for <strong>${planName} (${serviceName.replace('_', ' ')})</strong> has been formally terminated.</p>
-    <p>Any associated service limits have been permanently revoked. If you wish to use our services again, you will need to purchase a new subscription.</p>
-    <p>Thank you for having used our services.</p>
+    <p>Hello <strong>${decName}</strong>,</p>
+    <p>As we did not receive top up or payment within the 3-day suspension grace period, your service <strong>${planName} (${serviceName.replace('_', ' ')})</strong> has been formally terminated.</p>
+    <p>Any associated service data has been permanently removed from the cluster. If you wish to use our services again, you can deploy a new instance anytime from your dashboard.</p>
+    <p>Thank you for having used Masdika Cloud.</p>
   `;
   
   await getTransporter().sendMail({
     from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
-    to: email,
+    to: decEmail,
     subject: `Notice: Your ${serviceName.replace('_', ' ')} Service has been Terminated`,
     html: getBaseHtml(content),
   });

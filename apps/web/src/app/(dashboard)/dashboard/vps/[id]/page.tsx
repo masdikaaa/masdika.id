@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useUrlNumber, useUrlString, useUrlTab } from "@/lib/useUrlTab";
 import { useState, useEffect, use, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -1688,6 +1689,67 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
               </button>
             ))}
           </div>
+
+          {/* Suspension Grace Period Alert Banner */}
+          {vps.status === 'SUSPENDED' && (
+            <div className={cn(
+              "p-4 sm:p-5 rounded-2xl border transition-all mb-6",
+              isDark
+                ? "bg-amber-500/[0.08] border-amber-500/25 text-amber-200"
+                : "bg-amber-50 border-amber-200 text-amber-900"
+            )}>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <div className={cn(
+                    "p-2 rounded-xl shrink-0 mt-0.5",
+                    isDark ? "bg-amber-500/20 text-amber-400" : "bg-amber-100 text-amber-700"
+                  )}>
+                    <AlertTriangle className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm sm:text-base flex items-center gap-2">
+                      Layanan VPS Ditangguhkan (Suspended)
+                      <span className={cn(
+                        "text-[10px] font-mono px-2 py-0.5 rounded-full uppercase tracking-wider font-extrabold",
+                        isDark ? "bg-amber-500/20 text-amber-300" : "bg-amber-200 text-amber-900"
+                      )}>
+                        Grace Period 3 Hari
+                      </span>
+                    </h3>
+                    <p className={cn("text-xs mt-1 leading-relaxed", isDark ? "text-amber-300/80" : "text-amber-800")}>
+                      {vps.suspendReason || "Saldo akun tidak mencukupi untuk pemotongan tagihan berkala."} Server dimatikan sementara agar biaya tidak bertambah. Seluruh disk storage dan konfigurasi tetap tersimpan aman.
+                    </p>
+                    {vps.terminationDate && (
+                      <p className={cn("text-xs font-semibold mt-1.5 flex flex-wrap items-center gap-1.5", isDark ? "text-amber-200" : "text-amber-900")}>
+                        <Clock className="w-3.5 h-3.5" />
+                        Batas Waktu Top Up:{" "}
+                        <span className="font-mono font-bold">
+                          {new Date(vps.terminationDate).toLocaleString('id-ID', {
+                            timeZone: 'Asia/Jakarta',
+                            weekday: 'short',
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })} WIB
+                        </span>
+                        <span className="text-[11px] opacity-75">(Lewat 3 hari tanpa top up, VPS & VPC terkait akan dihapus otomatis)</span>
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                  <Link
+                    href="/dashboard/billing/topup"
+                    className="w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-black transition-all shadow-md active:scale-95 flex items-center justify-center gap-1.5"
+                  >
+                    <Wallet className="w-4 h-4" /> Top Up Saldo
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Tab Content */}
           <div className="min-h-[500px]">

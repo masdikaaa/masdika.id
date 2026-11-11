@@ -37,7 +37,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         node: true, vmid: true, cpuCores: true, ramGb: true, diskGb: true,
         backupGb: true, backupSchedule: true, networkBridge: true, storageId: true,
         hourlyRate: true, accumulatedCost: true,
-        expiresAt: true, createdAt: true, updatedAt: true, suspendReason: true,
+        expiresAt: true, createdAt: true, updatedAt: true, suspendReason: true, terminationDate: true,
         osTemplate: true, vpcId: true, vpcIp: true, autoRenew: true,
         kubernetesClusterId: true, kubernetesRole: true,
         diskType: true,

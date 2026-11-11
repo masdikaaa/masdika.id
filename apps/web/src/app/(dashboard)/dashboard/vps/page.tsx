@@ -723,6 +723,17 @@ export default function MyVpsPage() {
                             <span className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>
                               {vps.node}
                             </span>
+                            {isSuspended && (
+                              <>
+                                <span className={cn("text-xs", isDark ? "text-zinc-700" : "text-slate-300")}>•</span>
+                                <span className={cn(
+                                  "text-[10px] font-semibold px-1.5 py-0.5 rounded border",
+                                  isDark ? "bg-amber-500/10 border-amber-500/20 text-amber-300" : "bg-amber-50 border-amber-200 text-amber-800"
+                                )}>
+                                  Grace Period 3 Hari
+                                </span>
+                              </>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -1194,46 +1205,56 @@ export default function MyVpsPage() {
 
                         {/* Status */}
                         <td className="py-3.5 px-3 align-middle">
-                          <span
-                            className={cn(
-                              "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border",
-                              isRunning && !isSuspended && !isTerminated
-                                ? isDark
-                                  ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                                  : "bg-emerald-50 text-emerald-700 border-emerald-200"
-                                : isSuspended
-                                ? isDark
-                                  ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                                  : "bg-amber-50 text-amber-700 border-amber-200"
-                                : isTerminated
-                                ? isDark
-                                  ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
-                                  : "bg-rose-50 text-rose-700 border-rose-200"
-                                : isProvisioning
-                                ? isDark
-                                  ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20 animate-pulse"
-                                  : "bg-cyan-50 text-cyan-700 border-cyan-200 animate-pulse"
-                                : isDark
-                                ? "bg-white/[0.04] text-zinc-400 border-white/[0.08]"
-                                : "bg-slate-100 text-slate-600 border-slate-200"
-                            )}
-                          >
+                          <div className="flex flex-col items-start gap-1">
                             <span
                               className={cn(
-                                "w-1.5 h-1.5 rounded-full",
+                                "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border",
                                 isRunning && !isSuspended && !isTerminated
-                                  ? "bg-emerald-400 animate-pulse"
+                                  ? isDark
+                                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                    : "bg-emerald-50 text-emerald-700 border-emerald-200"
                                   : isSuspended
-                                  ? "bg-amber-400"
+                                  ? isDark
+                                    ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                                    : "bg-amber-50 text-amber-700 border-amber-200"
                                   : isTerminated
-                                  ? "bg-rose-400"
+                                  ? isDark
+                                    ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                                    : "bg-rose-50 text-rose-700 border-rose-200"
                                   : isProvisioning
-                                  ? "bg-cyan-400"
-                                  : "bg-zinc-500"
+                                  ? isDark
+                                    ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20 animate-pulse"
+                                    : "bg-cyan-50 text-cyan-700 border-cyan-200 animate-pulse"
+                                  : isDark
+                                  ? "bg-white/[0.04] text-zinc-400 border-white/[0.08]"
+                                  : "bg-slate-100 text-slate-600 border-slate-200"
                               )}
-                            />
-                            {displayStatus}
-                          </span>
+                            >
+                              <span
+                                className={cn(
+                                  "w-1.5 h-1.5 rounded-full",
+                                  isRunning && !isSuspended && !isTerminated
+                                    ? "bg-emerald-400 animate-pulse"
+                                    : isSuspended
+                                    ? "bg-amber-400"
+                                    : isTerminated
+                                    ? "bg-rose-400"
+                                    : isProvisioning
+                                    ? "bg-cyan-400"
+                                    : "bg-zinc-500"
+                                )}
+                              />
+                              {displayStatus}
+                            </span>
+                            {isSuspended && (
+                              <span className={cn(
+                                "text-[10px] font-semibold px-2 py-0.5 rounded border whitespace-nowrap",
+                                isDark ? "bg-amber-500/10 border-amber-500/20 text-amber-300" : "bg-amber-50 border-amber-200 text-amber-800"
+                              )}>
+                                Grace Period 3 Hari
+                              </span>
+                            )}
+                          </div>
                         </td>
 
                         {/* Disciplined Actions & Console */}

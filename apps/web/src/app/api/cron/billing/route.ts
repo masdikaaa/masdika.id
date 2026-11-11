@@ -1,6 +1,15 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { sendBillingReminderEmail, sendSuspensionEmail, sendAutoRenewDisabledSuspensionEmail, sendTerminationEmail, sendRenewalInvoiceEmail, sendAdminServiceSuspendedEmail } from '@/lib/email';
+import { 
+  sendBillingReminderEmail, 
+  sendSuspensionEmail, 
+  sendAutoRenewDisabledSuspensionEmail, 
+  sendTerminationEmail, 
+  sendRenewalInvoiceEmail, 
+  sendAdminServiceSuspendedEmail,
+  sendVpsSuspendedGracePeriodEmail,
+  sendVpcDeletedEmail
+} from '@/lib/email';
 import { decryptDeterministic } from '@/lib/encryption';
 import { ProxmoxClient } from '@/lib/proxmox';
 import { createDuitkuTransaction } from '@/lib/duitku';
@@ -198,16 +207,24 @@ export async function GET(req: Request) {
     }
 
     // 3. Terminations (H+3)
-    const threeDaysAgo = new Date(now);
-    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+    const defaultThreeDays = new Date(now);
+    defaultThreeDays.setDate(defaultThreeDays.getDate() + 3);
+
+    // Self-heal any suspended subscription with missing terminationDate so it always gets a 3-day grace period
+    await prisma.subscription.updateMany({
+      where: { 
+        status: 'SUSPENDED', 
+        terminationDate: null 
+      },
+      data: { 
+        terminationDate: defaultThreeDays 
+      }
+    });
 
     const terminatedSubs = await prisma.subscription.findMany({
       where: { 
         status: 'SUSPENDED', 
-        OR: [
-          { terminationDate: { lte: now } },
-          { terminationDate: null, expiresAt: { lt: threeDaysAgo } }
-        ]
+        terminationDate: { not: null, lte: now }
       },
       include: { user: true, plan: true },
       take: 20 // Process in chunks to prevent timeout
@@ -362,6 +379,7 @@ export async function GET(req: Request) {
       },
       include: { 
         user: true, 
+        vpc: true,
         invoices: { 
           where: { reference: 'PAYG_RUNNING', type: 'VPS' }, 
           orderBy: { createdAt: 'desc' as const },
@@ -479,7 +497,15 @@ export async function GET(req: Request) {
             
             const email = decryptDeterministic(vps.user.email) || vps.user.email;
             const name = decryptDeterministic(vps.user.name) || vps.user.name;
-            await sendSuspensionEmail(email, name, "VPS Server", "VPS").catch(e => console.error(e));
+            await sendVpsSuspendedGracePeriodEmail({
+              email,
+              userName: name,
+              vpsHostname: vps.hostname || "VPS Server",
+              terminationDate: defaultTermination,
+              reason: 'Insufficient balance for Reseller monthly renewal',
+              vpcName: (vps as any).vpc?.name || null
+            }).catch(e => console.error(e));
+            await sendAdminServiceSuspendedEmail(name, email, vps.hostname || "VPS Server", "VPS").catch(e => console.error(e));
             
             try {
               const server = await prisma.proxmoxServer.findFirst({ where: { isActive: true } });
@@ -507,8 +533,16 @@ export async function GET(req: Request) {
           
           const email = decryptDeterministic(vps.user.email) || vps.user.email;
           const name = decryptDeterministic(vps.user.name) || vps.user.name;
-          await sendAutoRenewDisabledSuspensionEmail(email, name, "VPS Server", "VPS").catch(e => console.error(e));
-          await sendAdminServiceSuspendedEmail(name, email, "VPS Server", "VPS").catch(e => console.error(e));
+          await sendVpsSuspendedGracePeriodEmail({
+            email,
+            userName: name,
+            vpsHostname: vps.hostname || "VPS Server",
+            terminationDate: defaultTermination,
+            hourlyRate: vps.hourlyRate || 0,
+            reason: 'Insufficient balance for Pay as You Go monthly renewal',
+            vpcName: (vps as any).vpc?.name || null
+          }).catch(e => console.error(e));
+          await sendAdminServiceSuspendedEmail(name, email, vps.hostname || "VPS Server", "VPS").catch(e => console.error(e));
           
           try {
             const server = await prisma.proxmoxServer.findFirst({ where: { isActive: true } });
@@ -533,20 +567,31 @@ export async function GET(req: Request) {
     }
 
     // 2. VPS Terminations (H+3)
+    const defaultThreeDaysVps = new Date(now);
+    defaultThreeDaysVps.setDate(defaultThreeDaysVps.getDate() + 3);
+
+    // Self-heal any suspended VPS with missing terminationDate so it always gets a 3-day grace period
+    await prisma.vpsService.updateMany({
+      where: {
+        status: 'SUSPENDED',
+        terminationDate: null
+      },
+      data: {
+        terminationDate: defaultThreeDaysVps
+      }
+    });
+
     const terminatedVpsList = await prisma.vpsService.findMany({
       where: {
         status: 'SUSPENDED',
-        OR: [
-          { terminationDate: { lte: now } },
-          { terminationDate: null, expiresAt: { lt: threeDaysAgo } }
-        ],
+        terminationDate: { not: null, lte: now },
         NOT: {
           suspendReason: {
             contains: '[ABUSE_LOCKED]'
           }
         }
       },
-      include: { user: true },
+      include: { user: true, vpc: true },
       take: 10 // Safe limit for VPS termination to prevent timeout
     });
 
@@ -583,6 +628,9 @@ export async function GET(req: Request) {
           }
         }
 
+        const targetVpcId = vps.vpcId;
+        const targetUserId = vps.userId;
+
         // Only after Proxmox deletion succeeds (or if no vmid exists), we update the DB
         await prisma.$transaction(async (tx) => {
           await tx.vpsService.update({
@@ -608,16 +656,73 @@ export async function GET(req: Request) {
           });
         });
 
-        // Auto-cleanup Cloudflare tunnels and domains if this user has no remaining active VPS services
-        if (vps.userId) {
-          cleanupUserCloudflareResourcesIfNoActiveVps(vps.userId).catch((err) => {
-            console.error(`[Auto-Cleanup] Failed to cleanup Cloudflare resources for billing terminated VPS user ${vps.userId}:`, err);
-          });
-        }
-        
         const email = decryptDeterministic(vps.user.email) || vps.user.email;
         const name = decryptDeterministic(vps.user.name) || vps.user.name;
-        await sendTerminationEmail(email, name, "VPS Server", "VPS").catch(e => console.error(e));
+        await sendTerminationEmail(email, name, vps.hostname || "VPS Server", "VPS").catch(e => console.error(e));
+
+        // Auto-cleanup Cloudflare tunnels and domains if this user has no remaining active VPS services
+        if (targetUserId) {
+          cleanupUserCloudflareResourcesIfNoActiveVps(targetUserId).catch((err) => {
+            console.error(`[Auto-Cleanup] Failed to cleanup Cloudflare resources for billing terminated VPS user ${targetUserId}:`, err);
+          });
+        }
+
+        // Auto-cleanup unused VPC network and send email notification
+        if (targetVpcId) {
+          try {
+            // Check if there are any remaining active/suspended VPS services in this VPC
+            const remainingActiveVpsInVpc = await prisma.vpsService.count({
+              where: {
+                vpcId: targetVpcId,
+                id: { not: vps.id },
+                status: { notIn: ['TERMINATED', 'TERMINATING'] }
+              }
+            });
+
+            if (remainingActiveVpsInVpc === 0) {
+              const vpcToDelete = await prisma.vpcNetwork.findUnique({
+                where: { id: targetVpcId },
+                include: { router: true, peeringsA: true, peeringsB: true, user: true }
+              });
+
+              if (vpcToDelete) {
+                const { deleteVpcFromMikrotik, deleteVpcPeeringFromMikrotik } = await import('@/lib/mikrotik');
+                
+                // Clean up any peerings first
+                const allPeerings = [...vpcToDelete.peeringsA, ...vpcToDelete.peeringsB];
+                for (const peering of allPeerings) {
+                  try {
+                    await deleteVpcPeeringFromMikrotik(vpcToDelete.router, peering.id);
+                    await prisma.vpcPeering.delete({ where: { id: peering.id } }).catch(() => {});
+                  } catch (peeringErr) {
+                    console.error(`Failed to auto-cleanup peering ${peering.id}:`, peeringErr);
+                  }
+                }
+
+                try {
+                  await Promise.race([
+                    deleteVpcFromMikrotik(vpcToDelete.router, vpcToDelete),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error("Mikrotik delete timed out after 30s")), 30000))
+                  ]);
+                } catch (routerErr: any) {
+                  console.error(`Error removing VPC from router for terminated VPS ${vps.id}:`, routerErr?.message || routerErr);
+                }
+
+                await prisma.vpcNetwork.delete({ where: { id: vpcToDelete.id } });
+
+                console.log(`Auto-cleaned up unused VPC ${vpcToDelete.name} (ID: ${vpcToDelete.id}) following VPS ${vps.id} termination.`);
+
+                if (email) {
+                  await sendVpcDeletedEmail(email, name, vpcToDelete.name, vpcToDelete.cidr).catch(err => {
+                    console.error(`Failed to send VPC deleted email to ${email}:`, err);
+                  });
+                }
+              }
+            }
+          } catch (vpcErr) {
+            console.error(`Failed to auto-cleanup VPC ${targetVpcId} for terminated VPS ${vps.id}:`, vpcErr);
+          }
+        }
         
       } catch (e) {
         console.error(`Failed termination for VPS ${vps.id} (Will retry next run):`, e);
@@ -743,14 +848,43 @@ export async function GET(req: Request) {
 
         // Insufficient balance or autoRenew off, release the IP
         if (ip.isAttached && ip.vpsId) {
+          const defaultTermination = new Date(now);
+          defaultTermination.setDate(defaultTermination.getDate() + 3);
+
           // Suspend the VPS it is attached to, to prevent exploit (using IP without paying reservation fee)
           await prisma.vpsService.update({
             where: { id: ip.vpsId },
             data: { 
               status: 'SUSPENDED', 
-              suspendReason: `[SYSTEM] The attached Reserved IP (${ip.ipAddress}) has expired due to insufficient balance or disabled auto-renew.` 
+              suspendReason: `[SYSTEM] The attached Reserved IP (${ip.ipAddress}) has expired due to insufficient balance or disabled auto-renew.`,
+              terminationDate: defaultTermination
             }
           });
+
+          const vps = await prisma.vpsService.findUnique({
+            where: { id: ip.vpsId },
+            include: { user: true, vpc: true }
+          });
+          if (vps) {
+            if (vps.vmid) {
+              const server = await prisma.proxmoxServer.findFirst({ where: { isActive: true } });
+              if (server) {
+                const proxmox = new ProxmoxClient(server.host, server.tokenId, server.tokenSecret);
+                await proxmox.stopVm(vps.node, vps.vmid).catch(err => console.error(`Failed to stop VM for reserved IP suspension:`, err));
+              }
+            }
+            const email = decryptDeterministic(vps.user.email) || vps.user.email;
+            const name = decryptDeterministic(vps.user.name) || vps.user.name;
+            await sendVpsSuspendedGracePeriodEmail({
+              email,
+              userName: name,
+              vpsHostname: vps.hostname || "VPS Server",
+              terminationDate: defaultTermination,
+              hourlyRate: vps.hourlyRate || 0,
+              reason: `The attached Reserved IP (${ip.ipAddress}) has expired due to insufficient balance or disabled auto-renew`,
+              vpcName: vps.vpc?.name || null
+            }).catch(e => console.error(e));
+          }
         }
         
         await prisma.reservedIp.delete({

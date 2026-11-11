@@ -207,8 +207,8 @@ export default function CustomerBillingPage() {
                               <div className="flex items-center gap-1.5 flex-wrap">
                                 <span className={cn("text-sm font-bold truncate", isDark ? "text-white" : "text-slate-900")}>{s.plan?.name}</span>
                                 {isSuspended && (
-                                  <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-red-500/15 text-red-400 border border-red-500/30">
-                                    Suspended
+                                  <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                                    Suspended (Grace Period 3 Hari)
                                   </span>
                                 )}
                               </div>
@@ -249,8 +249,8 @@ export default function CustomerBillingPage() {
                               <div className="flex items-center gap-1.5 flex-wrap">
                                 <span className={cn("text-sm font-bold truncate", isDark ? "text-white" : "text-slate-900")}>{v.hostname}</span>
                                 {isSuspended && (
-                                  <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-red-500/15 text-red-400 border border-red-500/30">
-                                    Suspended
+                                  <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                                    Suspended (Grace Period 3 Hari)
                                   </span>
                                 )}
                               </div>

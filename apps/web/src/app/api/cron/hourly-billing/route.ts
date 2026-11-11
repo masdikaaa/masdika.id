@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendPaygSuspendedEmail } from "@/lib/email";
+import { sendPaygSuspendedEmail, sendVpsSuspendedGracePeriodEmail } from "@/lib/email";
 import { decryptDeterministic } from "@/lib/encryption";
 import { ProxmoxClient } from "@/lib/proxmox";
 import { logger } from "@/lib/logger";
@@ -200,6 +200,7 @@ export async function GET(req: Request) {
       include: {
         user: true,
         assignedIps: true,
+        vpc: true,
         invoices: {
           where: { reference: 'PAYG_RUNNING', type: 'VPS' },
           orderBy: { createdAt: 'desc' },
@@ -398,7 +399,15 @@ export async function GET(req: Request) {
           
           const email = decryptDeterministic(vps.user.email) || vps.user.email;
           const name = decryptDeterministic(vps.user.name) || vps.user.name;
-          await sendPaygSuspendedEmail(email, name, "VPS Server", "VPS");
+          await sendVpsSuspendedGracePeriodEmail({
+            email,
+            userName: name,
+            vpsHostname: vps.hostname || "VPS Server",
+            terminationDate: defaultTermination,
+            hourlyRate: vps.hourlyRate || 0,
+            reason: 'Insufficient balance for Pay as You Go hourly billing',
+            vpcName: (vps as any).vpc?.name || null
+          }).catch(e => console.error("Failed to send VPS suspension email:", e));
           
           try {
             if (server && vps.vmid) {
@@ -492,25 +501,48 @@ export async function GET(req: Request) {
           ipSuspended++;
           ipReleased++;
           
-          // SECURITY FIX: Actually act on insufficient balance - suspend attached VPS
+          // SECURITY FIX: Actually act on insufficient balance - suspend attached VPS with 3-day grace period
           try {
             if (ip.isAttached && ip.vpsId) {
+              const defaultTermination = new Date(now);
+              defaultTermination.setDate(defaultTermination.getDate() + 3);
+
               await prisma.vpsService.update({
                 where: { id: ip.vpsId },
                 data: {
                   status: 'SUSPENDED',
-                  suspendReason: `[SYSTEM] Attached Reserved IP (${(ip as any).ipAddress || ip.id}) billing failed due to insufficient balance.`
+                  suspendReason: `[SYSTEM] Attached Reserved IP (${(ip as any).ipAddress || ip.id}) billing failed due to insufficient balance.`,
+                  terminationDate: defaultTermination
                 }
               });
               
-              // Also stop the VM on Proxmox
-              const vps = await prisma.vpsService.findUnique({ where: { id: ip.vpsId } });
-              if (vps?.vmid) {
-                const proxmoxServer = await prisma.proxmoxServer.findFirst({ where: { isActive: true } });
-                if (proxmoxServer) {
-                  const proxmox = new ProxmoxClient(proxmoxServer.host, proxmoxServer.tokenId, proxmoxServer.tokenSecret);
-                  await proxmox.stopVm(vps.node, vps.vmid).catch(err => console.error(`Failed to stop VM for reserved IP suspension:`, err));
+              const vps = await prisma.vpsService.findUnique({
+                where: { id: ip.vpsId },
+                include: { user: true, vpc: true }
+              });
+
+              if (vps) {
+                // Stop the VM on Proxmox
+                if (vps.vmid) {
+                  const proxmoxServer = await prisma.proxmoxServer.findFirst({ where: { isActive: true } });
+                  if (proxmoxServer) {
+                    const proxmox = new ProxmoxClient(proxmoxServer.host, proxmoxServer.tokenId, proxmoxServer.tokenSecret);
+                    await proxmox.stopVm(vps.node, vps.vmid).catch(err => console.error(`Failed to stop VM for reserved IP suspension:`, err));
+                  }
                 }
+
+                // Send suspension email informing about 3-day grace period
+                const email = decryptDeterministic(vps.user.email) || vps.user.email;
+                const name = decryptDeterministic(vps.user.name) || vps.user.name;
+                await sendVpsSuspendedGracePeriodEmail({
+                  email,
+                  userName: name,
+                  vpsHostname: vps.hostname || "VPS Server",
+                  terminationDate: defaultTermination,
+                  hourlyRate: vps.hourlyRate || 0,
+                  reason: `Attached Reserved IP (${(ip as any).ipAddress || ip.id}) billing failed due to insufficient balance`,
+                  vpcName: vps.vpc?.name || null
+                }).catch(err => console.error("Failed to send Reserved IP VPS suspension email:", err));
               }
             } else {
               // Detached Reserved IP whose owner has insufficient balance: finalize invoice and release back to pool
