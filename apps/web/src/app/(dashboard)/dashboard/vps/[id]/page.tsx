@@ -7,7 +7,7 @@ import {
   Server, Play, Square, Power, RotateCcw, Activity, Cpu,
   Terminal, Settings, Settings2, HardDrive, Network, Wrench, ShieldAlert, Calculator, Shield,
   ArrowLeft, ArrowRight, ChevronLeft, ShieldCheck, Archive, RefreshCw, Plus, AlertTriangle, CheckCircle, Receipt, CreditCard, Trash2, Wallet, X, Eye, EyeOff, Copy, XCircle, Info,
-  Rocket, Sparkles, Search, Check, Clock
+  Rocket, Sparkles, Search, Check, Clock, Globe
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -1818,8 +1818,8 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         )}
                       </div>
 
-                      {/* No Browser UI Notice Banner */}
-                      {appMeta?.isWebAccess === false && (
+                      {/* Access Notice Banner */}
+                      {appMeta?.isWebAccess === false ? (
                         <div className={cn(
                           "mt-3.5 p-3 rounded-xl border text-xs flex items-start gap-2.5",
                           isDark ? "bg-amber-950/20 border-amber-800/40 text-amber-300" : "bg-amber-50 border-amber-200 text-amber-900"
@@ -1830,7 +1830,18 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                             <span>{appMeta.accessNote || "This application is operated directly via SSH terminal or remote client (no web browser dashboard)."}</span>
                           </div>
                         </div>
-                      )}
+                      ) : appMeta?.accessNote ? (
+                        <div className={cn(
+                          "mt-3.5 p-3 rounded-xl border text-xs flex items-start gap-2.5",
+                          isDark ? "bg-cyan-950/20 border-cyan-800/40 text-cyan-300" : "bg-cyan-50 border-cyan-200 text-cyan-900"
+                        )}>
+                          <Globe className="w-4 h-4 shrink-0 text-cyan-500 mt-0.5" />
+                          <div className="leading-relaxed">
+                            <strong className="font-semibold">Browser UI:</strong>{" "}
+                            <span>{appMeta.accessNote.replace(/<ip>/g, primaryPublicIp || "ip")}</span>
+                          </div>
+                        </div>
+                      ) : null}
 
                       {/* Access Details Bar */}
                       <div className={cn("mt-4 pt-4 border-t grid gap-3 text-xs", credentials?.email ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" : "grid-cols-1 sm:grid-cols-3", isDark ? "border-white/[0.06]" : "border-slate-100")}>

@@ -119,6 +119,7 @@ export const VPS_APPS: VpsAppDefinition[] = [
     minSpecs: { cpu: 1, ram: 2, disk: 20 },
     estimatedTime: "~2-4 mins",
     adminUsername: "admin",
+    accessNote: "Web installer & admin dashboard at http://<ip>/wp-admin. MySQL & WP-CLI pre-configured.",
     instructions: "Access your WordPress site at http://${ip}/ and administrative console at http://${ip}/wp-admin.",
     configFields: [
       {
@@ -228,6 +229,7 @@ ${appInfoCmd}
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
     estimatedTime: "~3-5 mins",
     adminUsername: "admin",
+    accessNote: "Web setup & management dashboard at http://<ip>:80. Drush CLI pre-installed.",
     instructions: "Access your Drupal portal at http://${ip}/ and administrator login at http://${ip}/user/login.",
     configFields: [
       {
@@ -328,6 +330,7 @@ ${appInfoCmd}
     minSpecs: { cpu: 2, ram: 4, disk: 25 },
     estimatedTime: "~4-6 mins",
     adminUsername: "admin",
+    accessNote: "Web LMS learning management dashboard at http://<ip>:80 with automated LAMP stack.",
     instructions: "Access Moodle LMS at http://${ip}/ and administrator login at http://${ip}/login/index.php.",
     configFields: [
       {
@@ -439,6 +442,7 @@ ${appInfoCmd}
     minSpecs: { cpu: 1, ram: 2, disk: 20 },
     estimatedTime: "~5-8 mins",
     adminUsername: "paneluser",
+    accessNote: "Web control panel dashboard at http://<ip>:8888. Login credentials auto-generated on deployment.",
     instructions: "Access aaPanel at http://${ip}:8888/login. Log in using the system-generated credentials shown below.",
     getInstallScript: (ip, rootPassword, config = {}) => {
       const port = Number(config.panelPort) || 8888;
@@ -550,6 +554,7 @@ EOF
     minSpecs: { cpu: 2, ram: 2, disk: 30 },
     estimatedTime: "~3-5 mins",
     adminUsername: "root",
+    accessNote: "Self-hosted PaaS web dashboard at http://<ip>:8000 for managing apps, databases, and Docker.",
     instructions: "Navigate to http://${ip}:8000 to complete initial registration and cluster configuration.",
     getInstallScript: (ip, rootPassword) => {
       const appInfoCmd = buildAppInfoJson({
@@ -591,6 +596,7 @@ ${appInfoCmd}
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
     estimatedTime: "~10-15 mins",
     adminUsername: "root",
+    accessNote: "Plesk Obsidian web admin console at https://<ip>:8443 with automated one-time login link.",
     instructions: "Log into Plesk at https://${ip}:8443 using your VPS root password.",
     getInstallScript: (ip, rootPassword, config = {}) => {
       const pass = config.adminPassword || rootPassword;
@@ -635,6 +641,7 @@ ${appInfoCmd}
     minSpecs: { cpu: 2, ram: 4, disk: 40 },
     estimatedTime: "~12-18 mins",
     adminUsername: "root",
+    accessNote: "WHM server management console at https://<ip>:2087 and cPanel user portal at https://<ip>:2083.",
     instructions: "Access WHM at https://${ip}:2087 and cPanel at https://${ip}:2083 using username 'root' and your VPS root password.",
     configFields: [
       {
@@ -724,6 +731,7 @@ ${appInfoCmd}
     minSpecs: { cpu: 2, ram: 4, disk: 30 },
     estimatedTime: "~4-6 mins",
     adminUsername: "admin",
+    accessNote: "Pterodactyl game server panel at http://<ip>:80 with Wings daemon pre-configured.",
     instructions: "Access the Pterodactyl web panel with username 'admin' and your VPS root password.",
     getInstallScript: (ip, rootPassword, config = {}) => {
       const user = config.adminUsername || "admin";
@@ -820,6 +828,7 @@ ${appInfoCmd}
     minSpecs: { cpu: 2, ram: 2, disk: 30 },
     estimatedTime: "~3-5 mins",
     adminUsername: "admin",
+    accessNote: "Private cloud storage & file sync web dashboard at http://<ip>:8080 with Redis caching.",
     instructions: "Access Nextcloud at http://${ip}:8080. Log in with username 'admin' and your VPS root password.",
     getInstallScript: (ip, rootPassword, config = {}) => {
       const user = config.adminUsername || "admin";
@@ -871,6 +880,7 @@ ${appInfoCmd}
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
     estimatedTime: "~2-4 mins",
     adminUsername: "admin",
+    accessNote: "Workflow automation web dashboard at http://<ip>:5678 with webhook listeners pre-configured.",
     instructions: "Access n8n automation canvas at http://${ip}:5678. Login with username 'admin' and your VPS root password.",
     getInstallScript: (ip, rootPassword, config = {}) => {
       const pass = config.adminPassword || rootPassword;
@@ -917,6 +927,7 @@ ${appInfoCmd}
     minSpecs: { cpu: 1, ram: 1, disk: 20 },
     estimatedTime: "~2-3 mins",
     adminUsername: "admin",
+    accessNote: "To-do & project management web dashboard at http://<ip>:3456 with REST API.",
     instructions: "Access Vikunja at http://${ip}:3456 to register your administrator account and start managing projects.",
     configFields: [
       {
@@ -1111,7 +1122,7 @@ ${appInfoCmd}
     defaultProtocol: "http",
     isWebAccess: true,
     accessType: "web",
-    accessNote: "Web dashboard and OpenAI-compatible gateway at http://${ip}:20128 (API endpoint: http://${ip}:20128/v1). CLI command '9router' also available.",
+    accessNote: "Web dashboard & AI routing gateway at http://<ip>:20128. CLI '9router' also available via SSH.",
     osBase: "Ubuntu 26.04",
     appVersion: "v0.5",
     versions: [
@@ -1214,7 +1225,7 @@ ${appInfoCmd}
     defaultProtocol: "http",
     isWebAccess: true,
     accessType: "web",
-    accessNote: "Terminal AI coding agent CLI via SSH ('opencode') or web server at port 4096.",
+    accessNote: "Web dashboard & coding server at http://<ip>:4096. Terminal CLI also accessible via SSH ('opencode').",
     osBase: "Ubuntu 26.04",
     appVersion: "v2.2.7",
     versions: [
@@ -1674,6 +1685,7 @@ ${appInfoCmd}
     minSpecs: { cpu: 1, ram: 1, disk: 20 },
     estimatedTime: "~2-3 mins",
     adminUsername: "root",
+    accessNote: "High-performance PHP runtime web server at http://<ip>:80 with Caddy 103 Early Hints.",
     instructions: "FrankenPHP server running on port 80/443. Web root at /var/www/html with PHP 8.3/8.4.",
     configFields: [
       {
@@ -1767,6 +1779,7 @@ ${appInfoCmd}
     minSpecs: { cpu: 1, ram: 1, disk: 20 },
     estimatedTime: "~1-2 mins",
     adminUsername: "root",
+    accessNote: "HTTP web server & reverse proxy at http://<ip>:80 with HTTP/2 and gzip pre-configured.",
     instructions: "Nginx HTTP web server active on port 80. Default web root configured at /var/www/html.",
     getInstallScript: (ip, rootPassword) => {
       const appInfoCmd = buildAppInfoJson({
@@ -1809,6 +1822,7 @@ ${appInfoCmd}
     minSpecs: { cpu: 1, ram: 2, disk: 20 },
     estimatedTime: "~2-3 mins",
     adminUsername: "admin",
+    accessNote: "Metrics & monitoring web dashboard at http://<ip>:3000 with pre-loaded system dashboards.",
     instructions: "Access Grafana web portal at http://${ip}:3000. Login with username 'admin' and your VPS root password.",
     getInstallScript: (ip, rootPassword, config = {}) => {
       const user = config.adminUsername || "admin";
@@ -1859,6 +1873,7 @@ ${appInfoCmd}
     minSpecs: { cpu: 1, ram: 1, disk: 20 },
     estimatedTime: "~2-3 mins",
     adminUsername: "admin",
+    accessNote: "WebFig management interface at http://<ip>:80 and WinBox management via port 8291.",
     instructions: "Access MikroTik WebFig at http://${ip}/webfig/ or WinBox on port 8291. Username: 'admin', Password: your VPS root password.",
     getInstallScript: (ip, rootPassword, config = {}) => {
       const user = config.adminUsername || "admin";
@@ -1905,6 +1920,7 @@ ${appInfoCmd}
     minSpecs: { cpu: 1, ram: 1, disk: 20 },
     estimatedTime: "~1-2 mins",
     adminUsername: "root",
+    accessNote: "Apache 2.4 HTTP web server at http://<ip>:80 with mod_rewrite & SSL modules enabled.",
     instructions: "Apache2 HTTP web server running on port 80. Document root is at /var/www/html.",
     getInstallScript: (ip, rootPassword) => {
       const appInfoCmd = buildAppInfoJson({
@@ -1946,6 +1962,7 @@ ${appInfoCmd}
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
     estimatedTime: "~8-12 mins",
     adminUsername: "admin",
+    accessNote: "OpenLiteSpeed control panel web console at https://<ip>:8090 with LSCache pre-configured.",
     instructions: "Access CyberPanel web console at https://${ip}:8090. Username: 'admin', Password: your VPS root password.",
     getInstallScript: (ip, rootPassword, config = {}) => {
       const pass = config.adminPassword || rootPassword;

@@ -421,13 +421,21 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
                           )}
                         </div>
 
-                        {/* Note for Non-Browser (CLI/Database) Apps */}
-                        {app.isWebAccess === false && (
-                          <div className="p-2.5 rounded-xl border border-amber-500/20 bg-amber-500/5 text-[11px] text-amber-800 dark:text-amber-300 flex items-start gap-2 mb-4">
+                        {/* Note for Non-Browser (CLI/Database) Apps & Browser Web Apps */}
+                        {app.isWebAccess === false ? (
+                          <div className="p-2.5 rounded-xl border border-amber-500/20 bg-amber-500/5 text-[11px] text-amber-800 dark:text-amber-300 flex items-start gap-2 mb-4 min-h-[50px]">
                             <Terminal className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                             <div className="leading-snug">
                               <strong className="font-semibold">No Browser UI:</strong>{" "}
                               <span>{app.accessNote || "This application is operated directly via SSH terminal or remote client (no browser required)."}</span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="p-2.5 rounded-xl border border-cyan-500/20 bg-cyan-500/5 text-[11px] text-cyan-800 dark:text-cyan-300 flex items-start gap-2 mb-4 min-h-[50px]">
+                            <Globe className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400 shrink-0 mt-0.5" />
+                            <div className="leading-snug">
+                              <strong className="font-semibold">Browser UI:</strong>{" "}
+                              <span>{app.accessNote || `Accessible via web browser at http://<ip>:${app.defaultPort}`}</span>
                             </div>
                           </div>
                         )}

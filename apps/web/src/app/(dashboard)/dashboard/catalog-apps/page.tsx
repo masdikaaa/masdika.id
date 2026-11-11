@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/ThemeProvider";
 import {
   Rocket, Search, Server, ArrowRight, ShieldCheck,
-  CheckCircle, Sparkles, X, Terminal, Cpu, HardDrive, Clock
+  CheckCircle, Sparkles, X, Terminal, Cpu, HardDrive, Clock, Globe
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VPS_APPS, APP_CATEGORIES, AppCategory, VpsAppDefinition } from "@/lib/vps-apps";
@@ -216,15 +216,25 @@ export default function CatalogAppsPage() {
                     {app.description}
                   </p>
 
-                  {/* Note for Non-Browser (CLI/Database) Apps */}
-                  {app.isWebAccess === false && (
+                  {/* Access Note for Both Browser UI & CLI/Database Apps */}
+                  {app.isWebAccess === false ? (
                     <div className={cn(
-                      "p-2 rounded-xl border text-[11px] flex items-start gap-1.5 mb-3",
+                      "p-2 rounded-xl border text-[11px] flex items-start gap-1.5 mb-3 min-h-[46px]",
                       isDark ? "bg-amber-950/20 border-amber-800/30 text-amber-300" : "bg-amber-50 border-amber-200 text-amber-900"
                     )}>
                       <Terminal className="w-3 h-3 text-amber-500 shrink-0 mt-0.5" />
                       <span className="leading-tight text-[10px]">
                         <strong className="font-semibold">No Browser UI:</strong> {app.accessNote || "Operated directly via SSH terminal."}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className={cn(
+                      "p-2 rounded-xl border text-[11px] flex items-start gap-1.5 mb-3 min-h-[46px]",
+                      isDark ? "bg-cyan-950/20 border-cyan-800/30 text-cyan-300" : "bg-cyan-50 border-cyan-200 text-cyan-900"
+                    )}>
+                      <Globe className="w-3 h-3 text-cyan-400 shrink-0 mt-0.5" />
+                      <span className="leading-tight text-[10px]">
+                        <strong className="font-semibold">Browser UI:</strong> {app.accessNote || `Accessible via web browser at http://<server-ip>:${app.defaultPort}`}
                       </span>
                     </div>
                   )}
