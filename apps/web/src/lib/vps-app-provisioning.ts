@@ -304,6 +304,7 @@ export class VpsAppProvisioningService {
         `(iptables -I INPUT -p tcp --dport ${app.defaultPort} -j ACCEPT 2>/dev/null || true); ` +
         `echo '${encodedScript}' | base64 -d > /tmp/install-app.sh && ` +
         `chmod +x /tmp/install-app.sh && ` +
+        `export HOME=/root USER=root LOGNAME=root SHELL=/bin/bash TERM=xterm PATH="/root/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH" && ` +
         `bash /tmp/install-app.sh > /var/log/app-install.log 2>&1; ` +
         `INSTALL_EXIT=$?; ` +
         `tail -n 60 /var/log/app-install.log; ` +

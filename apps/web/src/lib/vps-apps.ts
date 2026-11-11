@@ -1014,26 +1014,68 @@ ${appInfoCmd}
       return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
-apt-get update && apt-get install -y curl git ca-certificates tar gzip build-essential python3 python3-pip python3-venv
+export HOME="/root"
+export USER="root"
+export LOGNAME="root"
+export SHELL="/bin/bash"
+export TERM="xterm"
+export HERMES_HOME="/root/.hermes"
+export HERMES_INSTALL_DIR="/root/.hermes/hermes-agent"
+export PATH="/root/.local/bin:/root/.hermes/bin:/root/.hermes/hermes-agent/.hermes/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+mkdir -p /root/.local/bin /root/.hermes /tmp
 
-# 1. Install official Nous Research Hermes Agent via curl installer (non-interactive)
-echo "[HERMES] Installing Hermes Agent via curl https://hermes-agent.nousresearch.com/install.sh..."
-curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --non-interactive --skip-browser
+apt-get update && apt-get install -y curl git ca-certificates tar gzip build-essential python3 python3-pip python3-venv libatomic1 sudo
 
-# 2. Globally link hermes binary to /usr/local/bin for all users
-for p in /root/.local/bin/hermes /root/.hermes/hermes-agent/.hermes/bin/hermes /root/.hermes/bin/hermes; do
+# 1. Install official Nous Research Hermes Agent via bootstrap installer
+echo "[HERMES] Downloading Nous Research Hermes Agent installer..."
+curl -fsSL https://hermes-agent.nousresearch.com/install.sh -o /tmp/hermes-install.sh
+chmod +x /tmp/hermes-install.sh
+
+echo "[HERMES] Running Hermes Agent bootstrap installer (non-interactive)..."
+bash /tmp/hermes-install.sh --non-interactive --skip-browser --skip-computer-use --hermes-home /root/.hermes --dir /root/.hermes/hermes-agent || true
+rm -f /tmp/hermes-install.sh
+
+# 2. Globally link hermes binary to /usr/local/bin and /usr/bin for all users
+for p in /root/.local/bin/hermes /root/.hermes/hermes-agent/.hermes/bin/hermes /root/.hermes/bin/hermes /root/.hermes/hermes-agent/bin/hermes; do
   if [ -f "$p" ]; then
     ln -sf "$p" /usr/local/bin/hermes
+    ln -sf "$p" /usr/bin/hermes 2>/dev/null || true
+    chmod +x "$p" 2>/dev/null || true
     chmod +x /usr/local/bin/hermes 2>/dev/null || true
     break
   fi
 done
 
-# 3. Add system-wide PATH profile
+# Fallback: if hermes binary was not created by installer, install hermes-agent via clean Python venv
+if ! command -v hermes >/dev/null 2>&1 && [ ! -x /usr/local/bin/hermes ]; then
+  echo "[HERMES] Installer was incomplete. Installing hermes-agent via PyPI fallback..."
+  mkdir -p /opt/hermes-agent
+  python3 -m venv /opt/hermes-agent/venv
+  /opt/hermes-agent/venv/bin/pip install --upgrade pip
+  /opt/hermes-agent/venv/bin/pip install hermes-agent || true
+  if [ -f /opt/hermes-agent/venv/bin/hermes ]; then
+    ln -sf /opt/hermes-agent/venv/bin/hermes /usr/local/bin/hermes
+    ln -sf /opt/hermes-agent/venv/bin/hermes /usr/bin/hermes 2>/dev/null || true
+    chmod +x /usr/local/bin/hermes 2>/dev/null || true
+  fi
+fi
+
+# 3. Add system-wide PATH profile so all users (root and SSH users) have hermes on PATH
 cat << 'EOF' > /etc/profile.d/hermes.sh
-export PATH="$HOME/.local/bin:/root/.local/bin:/usr/local/bin:$PATH"
+export PATH="$HOME/.local/bin:/root/.local/bin:/root/.hermes/bin:/root/.hermes/hermes-agent/.hermes/bin:/usr/local/bin:$PATH"
 EOF
 chmod +x /etc/profile.d/hermes.sh 2>/dev/null || true
+
+# Also symlink for any user in /home
+for userdir in /home/*; do
+  if [ -d "$userdir" ]; then
+    mkdir -p "$userdir/.local/bin"
+    if [ -x /usr/local/bin/hermes ]; then
+      ln -sf /usr/local/bin/hermes "$userdir/.local/bin/hermes"
+    fi
+    chown -R "$(basename "$userdir")":"$(basename "$userdir")" "$userdir/.local" 2>/dev/null || true
+  fi
+done
 
 ${appInfoCmd}
 `;
@@ -1077,33 +1119,66 @@ ${appInfoCmd}
       return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
+export HOME="/root"
+export USER="root"
+export LOGNAME="root"
+export SHELL="/bin/bash"
+export TERM="xterm"
+export PATH="/root/.local/bin:/root/.npm-global/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+mkdir -p /root/.local/bin /root/.npm-global/bin /tmp
 apt-get update && apt-get install -y curl ca-certificates tar gzip build-essential
 
 # 1. Install Node.js 22 LTS or newer if not present
 which node || (curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && apt-get install -y nodejs)
 
 # 2. Run official OpenClaw curl installer with non-interactive flags
-echo "[OPENCLAW] Installing OpenClaw via curl https://openclaw.ai/install.sh..."
+echo "[OPENCLAW] Downloading OpenClaw installer..."
 export OPENCLAW_NO_ONBOARD=1
 export OPENCLAW_NO_PROMPT=1
-curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-onboard --no-prompt || (
+curl -fsSL https://openclaw.ai/install.sh -o /tmp/openclaw-install.sh
+chmod +x /tmp/openclaw-install.sh
+bash /tmp/openclaw-install.sh --no-onboard --no-prompt || (
   npm install -g openclaw@latest
 )
+rm -f /tmp/openclaw-install.sh
 
-# 3. Ensure openclaw binary is globally accessible in /usr/local/bin for all users
+# 3. Ensure openclaw binary is globally accessible in /usr/local/bin and /usr/bin for all users
 for p in /root/.local/bin/openclaw /root/.npm-global/bin/openclaw /usr/local/bin/openclaw /usr/bin/openclaw $(which openclaw 2>/dev/null); do
   if [ -f "$p" ]; then
     ln -sf "$p" /usr/local/bin/openclaw
+    ln -sf "$p" /usr/bin/openclaw 2>/dev/null || true
+    chmod +x "$p" 2>/dev/null || true
     chmod +x /usr/local/bin/openclaw 2>/dev/null || true
     break
   fi
 done
+
+# Fallback: if openclaw is still not on path, install via npm globally
+if ! command -v openclaw >/dev/null 2>&1 && [ ! -x /usr/local/bin/openclaw ]; then
+  echo "[OPENCLAW] Installing openclaw via global npm fallback..."
+  npm install -g openclaw@latest || true
+  npmp=$(which openclaw 2>/dev/null || true)
+  if [ -n "$npmp" ]; then
+    ln -sf "$npmp" /usr/local/bin/openclaw
+    ln -sf "$npmp" /usr/bin/openclaw 2>/dev/null || true
+  fi
+fi
 
 # 4. Add system-wide PATH profile
 cat << 'EOF' > /etc/profile.d/openclaw.sh
 export PATH="$HOME/.local/bin:$HOME/.npm-global/bin:/usr/local/bin:$PATH"
 EOF
 chmod +x /etc/profile.d/openclaw.sh 2>/dev/null || true
+
+for userdir in /home/*; do
+  if [ -d "$userdir" ]; then
+    mkdir -p "$userdir/.local/bin"
+    if [ -x /usr/local/bin/openclaw ]; then
+      ln -sf /usr/local/bin/openclaw "$userdir/.local/bin/openclaw"
+    fi
+    chown -R "$(basename "$userdir")":"$(basename "$userdir")" "$userdir/.local" 2>/dev/null || true
+  fi
+done
 
 ${appInfoCmd}
 `;
@@ -1354,18 +1429,48 @@ ${appInfoCmd}
       return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
+export HOME="/root"
+export USER="root"
+export LOGNAME="root"
+export SHELL="/bin/bash"
+export TERM="xterm"
+export PATH="/root/.local/bin:/root/.antigravity/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+mkdir -p /root/.local/bin /root/.antigravity/bin /tmp
 apt-get update && apt-get install -y curl ca-certificates tar gzip
 
 # 1. Install Antigravity CLI via official curl installer
-echo "[ANTIGRAVITY] Installing Antigravity CLI v1.5.3..."
-curl -fsSL https://antigravity.google/cli/install.sh | bash
+echo "[ANTIGRAVITY] Downloading Antigravity CLI v1.5.3 installer..."
+curl -fsSL https://antigravity.google/cli/install.sh -o /tmp/antigravity-install.sh
+chmod +x /tmp/antigravity-install.sh
+bash /tmp/antigravity-install.sh || true
+rm -f /tmp/antigravity-install.sh
 
 # 2. Ensure antigravity and agy binaries are globally accessible in PATH
 for p in /root/.antigravity/bin/antigravity /root/.antigravity/bin/agy /root/.local/bin/antigravity /root/.local/bin/agy; do
   if [ -f "$p" ]; then
     b=$(basename "$p")
     ln -sf "$p" "/usr/local/bin/$b"
+    ln -sf "$p" "/usr/bin/$b" 2>/dev/null || true
+    chmod +x "$p" 2>/dev/null || true
     chmod +x "/usr/local/bin/$b" 2>/dev/null || true
+  fi
+done
+
+cat << 'EOF' > /etc/profile.d/antigravity.sh
+export PATH="$HOME/.local/bin:$HOME/.antigravity/bin:/usr/local/bin:$PATH"
+EOF
+chmod +x /etc/profile.d/antigravity.sh 2>/dev/null || true
+
+for userdir in /home/*; do
+  if [ -d "$userdir" ]; then
+    mkdir -p "$userdir/.local/bin"
+    if [ -x /usr/local/bin/antigravity ]; then
+      ln -sf /usr/local/bin/antigravity "$userdir/.local/bin/antigravity"
+    fi
+    if [ -x /usr/local/bin/agy ]; then
+      ln -sf /usr/local/bin/agy "$userdir/.local/bin/agy"
+    fi
+    chown -R "$(basename "$userdir")":"$(basename "$userdir")" "$userdir/.local" 2>/dev/null || true
   fi
 done
 
