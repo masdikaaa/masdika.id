@@ -40,20 +40,20 @@ import {
 } from "@/lib/vps-apps";
 
 const APP_TERMINAL_LOGS = [
-  { time: "00:01", module: "CONFIG", message: "Parsing instance specifications..." },
-  { time: "00:02", module: "REGION", message: "Initializing resources in Sidoarjo Data Center..." },
-  { time: "00:03", module: "COMPUTE", message: "Allocating scalable vCPU and RAM..." },
-  { time: "00:04", module: "STORAGE", message: "Attaching high-speed SSD block storage..." },
-  { time: "00:05", module: "NET", message: "Configuring VPC, NAT Gateway, and Firewall Rules..." },
-  { time: "00:06", module: "BOOT", message: "Booting instance and passing health checks..." },
+  { time: "00:01", module: "CATALOG", message: "Resolving 1-Click application blueprint and requirements..." },
+  { time: "00:02", module: "OS BASE", message: "Initializing Ubuntu 26.04 LTS minimal cloud environment..." },
+  { time: "00:03", module: "RUNTIME", message: "Setting up container engine and package dependencies..." },
+  { time: "00:04", module: "DEPLOY", message: "Pulling verified application stack and mounting volumes..." },
+  { time: "00:05", module: "CONFIG", message: "Injecting environment variables and generating admin credentials..." },
+  { time: "00:06", module: "NETWORK", message: "Configuring application ports and firewall routing rules..." },
   { time: "00:07", module: "READY", message: "ssh root@masdika.node", isCommand: true },
 ];
 
 const APP_TERMINAL_STATS = [
-  { value: "Custom", label: "FIREWALL" },
-  { value: "Included", label: "NAT GATEWAY" },
-  { value: "Included", label: "VPC PEERING" },
-  { value: "Any", label: "OPEN PORTS" },
+  { value: "1-Click", label: "AUTOMATION" },
+  { value: "Cloud-Init", label: "PROVISIONER" },
+  { value: "Auto-Config", label: "PORTS & SSL" },
+  { value: "Full Root", label: "SSH ACCESS" },
 ];
 
 function formatCatalogVersion(ver?: string | null): string {
@@ -512,7 +512,7 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
               {
                 step: "01",
                 title: "Choose Application",
-                desc: "Pick your desired software stack from aaPanel to Ollama AI. Pre-filled with optimal defaults or customizable inputs.",
+                desc: "Pick your desired software stack from aaPanel to Antigravity CLI. Pre-filled with optimal defaults or customizable inputs.",
               },
               {
                 step: "02",
@@ -521,8 +521,8 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
               },
               {
                 step: "03",
-                title: "Instant Web Access",
-                desc: "Cloud-Init automatically boots, installs vendor packages, opens ports, and serves your live web login link.",
+                title: "Instant Access & Credentials",
+                desc: "Cloud-Init automatically boots, installs vendor packages, opens ports, and outputs your login link and SSH command.",
               },
             ].map((st, i) => (
               <FadeIn key={i} delay={i * 0.15} direction="up" className="h-full">
@@ -550,17 +550,17 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
 
         {/* ── 4. PROVISIONING SECTION (Live Terminal) ───────────────────── */}
         <ProvisioningSection
-          subtitle="AUTOMATED PROVISIONING"
-          title="One-click, instant cloud server deployment."
-          description="Our control panel manages backend virtualization, disk attachments, and network routing seamlessly. Simply choose your specs and connect via SSH instantly."
-          buttonText="Open Dashboard"
-          buttonHref="/dashboard"
+          subtitle="AUTOMATED 1-CLICK DEPLOYMENT"
+          title="One-click, instant application stack deployment."
+          description="Our automated Cloud-Init engine handles repository provisioning, runtime dependencies, firewall routing, and credential generation automatically. Simply select your software and launch."
+          buttonText="Explore All Apps"
+          buttonHref="#catalog"
           logs={APP_TERMINAL_LOGS}
           stats={APP_TERMINAL_STATS}
-          terminalTitle="PROVISIONING CLOUD VPS"
+          terminalTitle="PROVISIONING 1-CLICK APP"
           iconType="vps"
           targetServer="Dell PowerEdge R630 • Sidoarjo DC"
-          provisionEstimate="Backend: KVM Hypervisor (Estimasi ~5 Menit)"
+          provisionEstimate="Stack: Cloud-Init Automated Blueprint (Estimasi ~2-3 Menit)"
         />
 
         {/* ── 5. FAQS SECTION ─────────────────────────────────────────── */}
