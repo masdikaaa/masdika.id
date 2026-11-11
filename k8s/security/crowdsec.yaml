@@ -24,6 +24,12 @@ spec:
         - namespace: kube-system
           podName: traefik-*
           program: traefik
+      persistentVolume:
+        config:
+          enabled: true
+          accessModes:
+            - ReadWriteOnce
+          size: 100Mi
       resources:
         requests:
           cpu: 100m
