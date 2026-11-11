@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAuth } from '@/lib/auth-middleware';
 import { prisma } from "@/lib/prisma";
 import { JobQueueService } from "@/lib/job-queue";
-import { getAppById, matchTemplateForApp } from "@/lib/vps-apps";
+import { getAppById, matchTemplateForApp, sanitizeAppConfig } from "@/lib/vps-apps";
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -38,11 +38,25 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const body = await req.json();
     const { templateName, password, appId, appConfig } = body;
 
+    // Security: Validate password length & complexity bounds if provided
+    if (password) {
+      if (typeof password !== "string" || password.length < 8 || password.length > 128) {
+        return NextResponse.json({ error: "Password must be between 8 and 128 characters long." }, { status: 400 });
+      }
+      if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
+        return NextResponse.json({ error: "Password must contain both letters and numbers." }, { status: 400 });
+      }
+    }
+
     let targetTemplateName = templateName;
     const app = appId ? getAppById(appId) : null;
     if (appId && !app) {
       return NextResponse.json({ error: "Invalid application selected" }, { status: 400 });
     }
+
+    const cleanAppConfig = app
+      ? sanitizeAppConfig(app, appConfig, { email: user.email, password, vpsUsername: vps.username || undefined })
+      : undefined;
 
     const activeTemplates = await prisma.vpsTemplate.findMany({
       where: { isActive: true },
@@ -102,7 +116,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       templateName: template.name,
       password,
       appId: app ? app.id : undefined,
-      appConfig: appConfig || undefined,
+      appConfig: cleanAppConfig,
     });
 
     return NextResponse.json({

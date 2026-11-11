@@ -100,6 +100,83 @@ export function buildAppInfoJson(info: {
   return `cat << 'MASDIKA_APP_INFO_EOF' > /root/masdika-app-info.json\n${jsonStr}\nMASDIKA_APP_INFO_EOF`;
 }
 
+/**
+ * Strict server-side sanitization and validation for user-supplied app configuration
+ * to prevent command injection, parameter tampering, and corrupted shell payloads.
+ */
+export function sanitizeAppConfig(
+  app: VpsAppDefinition,
+  rawCfg?: Record<string, any> | null,
+  fallback?: { email?: string; password?: string; vpsUsername?: string }
+): Record<string, any> {
+  const sanitized: Record<string, any> = {};
+  const isCli = app.isWebAccess === false || app.accessType === "cli";
+  const defaultUser = isCli
+    ? (fallback?.vpsUsername || "root")
+    : (app.adminUsername || "admin");
+
+  if (!rawCfg || typeof rawCfg !== "object") {
+    if (fallback?.email) sanitized.adminEmail = fallback.email;
+    if (fallback?.password) sanitized.adminPassword = fallback.password;
+    if (fallback?.vpsUsername) sanitized.vpsUsername = fallback.vpsUsername;
+    sanitized.adminUsername = defaultUser;
+    return sanitized;
+  }
+
+  // 1. adminUsername: letters, numbers, dash, underscore only, max 32 chars
+  if (rawCfg.adminUsername && typeof rawCfg.adminUsername === "string" && rawCfg.adminUsername.trim()) {
+    const trimmed = rawCfg.adminUsername.trim();
+    sanitized.adminUsername = /^[a-zA-Z0-9_-]{1,32}$/.test(trimmed) ? trimmed : defaultUser;
+  } else {
+    sanitized.adminUsername = defaultUser;
+  }
+
+  // 2. adminPassword: no control characters, max 128 chars
+  if (rawCfg.adminPassword && typeof rawCfg.adminPassword === "string" && rawCfg.adminPassword.trim()) {
+    sanitized.adminPassword = rawCfg.adminPassword.trim().slice(0, 128).replace(/[\r\n\0]/g, "");
+  } else if (fallback?.password) {
+    sanitized.adminPassword = fallback.password.slice(0, 128).replace(/[\r\n\0]/g, "");
+  }
+
+  // 3. adminEmail: standard email validation
+  if (rawCfg.adminEmail && typeof rawCfg.adminEmail === "string") {
+    const trimmed = rawCfg.adminEmail.trim();
+    sanitized.adminEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed) ? trimmed : (fallback?.email || "admin@masdika.id");
+  } else if (fallback?.email) {
+    sanitized.adminEmail = fallback.email;
+  }
+
+  // 4. domain: valid hostname format (RFC 1123)
+  if (rawCfg.domain && typeof rawCfg.domain === "string") {
+    const trimmed = rawCfg.domain.trim().toLowerCase();
+    sanitized.domain = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/.test(trimmed) ? trimmed : undefined;
+  }
+
+  // 5. panelPort: integer 1-65535
+  if (rawCfg.panelPort !== undefined) {
+    const parsedPort = parseInt(String(rawCfg.panelPort), 10);
+    sanitized.panelPort = (!isNaN(parsedPort) && parsedPort >= 1 && parsedPort <= 65535) ? parsedPort : app.defaultPort;
+  }
+
+  // 6. siteTitle: clean text, no HTML or command injection characters
+  if (rawCfg.siteTitle && typeof rawCfg.siteTitle === "string") {
+    sanitized.siteTitle = rawCfg.siteTitle.trim().slice(0, 80).replace(/[<>"'`\\;\r\n$]/g, "");
+  }
+
+  // 7. serverPassword: game server / palworld
+  if (rawCfg.serverPassword && typeof rawCfg.serverPassword === "string") {
+    sanitized.serverPassword = rawCfg.serverPassword.trim().slice(0, 64).replace(/[\r\n\0"'\\]/g, "");
+  }
+
+  // 8. vpsUsername: customer linux user
+  const userVal = String(rawCfg.vpsUsername || fallback?.vpsUsername || "").trim();
+  if (userVal && /^[a-z_][a-z0-9_-]{0,31}$/.test(userVal)) {
+    sanitized.vpsUsername = userVal;
+  }
+
+  return sanitized;
+}
+
 export const VPS_APPS: VpsAppDefinition[] = [
   // 1. WordPress (CMS)
   {

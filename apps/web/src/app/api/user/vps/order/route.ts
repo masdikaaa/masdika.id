@@ -7,7 +7,7 @@ import { ProxmoxClient } from "@/lib/proxmox";
 import { Address4 } from "ip-address";
 import { getBandwidthOptions, bandwidthHourlyCost, BASE_BANDWIDTH_MBPS } from "@/lib/vps-bandwidth";
 import { JobQueueService } from "@/lib/job-queue";
-import { getAppById, matchTemplateForApp } from "@/lib/vps-apps";
+import { getAppById, matchTemplateForApp, sanitizeAppConfig } from "@/lib/vps-apps";
 
 // Security: Hostname validation regex (RFC 1123)
 const HOSTNAME_REGEX = /^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
@@ -191,44 +191,11 @@ export async function POST(req: NextRequest) {
     // Build strictly sanitized app configuration for 1-Click Applications
     let cleanAppConfig: Record<string, any> | null = null;
     if (targetApp) {
-      const rawCfg = typeof appConfig === "object" && appConfig !== null ? appConfig : {};
-      const sanitized: Record<string, any> = { ...rawCfg };
-
-      if (rawCfg.adminUsername && typeof rawCfg.adminUsername === "string") {
-        const trimmed = rawCfg.adminUsername.trim();
-        sanitized.adminUsername = /^[a-zA-Z0-9_.-]{3,32}$/.test(trimmed) ? trimmed : targetApp.adminUsername;
-      } else {
-        sanitized.adminUsername = targetApp.adminUsername;
-      }
-
-      if (rawCfg.adminPassword && typeof rawCfg.adminPassword === "string" && rawCfg.adminPassword.trim()) {
-        sanitized.adminPassword = rawCfg.adminPassword.trim().slice(0, 128);
-      } else {
-        sanitized.adminPassword = finalPassword;
-      }
-
-      if (rawCfg.adminEmail && typeof rawCfg.adminEmail === "string") {
-        const trimmed = rawCfg.adminEmail.trim();
-        sanitized.adminEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed) ? trimmed : user.email;
-      } else {
-        sanitized.adminEmail = user.email;
-      }
-
-      if (rawCfg.domain && typeof rawCfg.domain === "string") {
-        const trimmed = rawCfg.domain.trim().toLowerCase();
-        sanitized.domain = /^[a-z0-9.-]{3,253}$/.test(trimmed) ? trimmed : undefined;
-      }
-
-      if (rawCfg.panelPort !== undefined) {
-        const parsedPort = parseInt(String(rawCfg.panelPort), 10);
-        sanitized.panelPort = (parsedPort >= 1 && parsedPort <= 65535) ? parsedPort : targetApp.defaultPort;
-      }
-
-      if (rawCfg.siteTitle && typeof rawCfg.siteTitle === "string") {
-        sanitized.siteTitle = rawCfg.siteTitle.trim().slice(0, 80).replace(/[<>"'`\\]/g, "");
-      }
-
-      cleanAppConfig = sanitized;
+      cleanAppConfig = sanitizeAppConfig(targetApp, appConfig, {
+        email: user.email,
+        password: finalPassword,
+        vpsUsername: username
+      });
     }
 
     let vpsData: any = {

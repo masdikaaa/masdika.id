@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { ProxmoxClient } from "./proxmox";
-import { getAppById, VpsAppDefinition } from "./vps-apps";
+import { getAppById, VpsAppDefinition, sanitizeAppConfig } from "./vps-apps";
 import { decryptDeterministic } from "@/lib/encryption";
 
 export class VpsAppProvisioningService {
@@ -272,19 +272,12 @@ export class VpsAppProvisioningService {
         }
       }
 
-      // Automatically supply real registered customer email if not provided
-      if (customerEmail && !appConfig.adminEmail) {
-        appConfig.adminEmail = customerEmail;
-      }
-
-      // Automatically supply real customer username from VPS record if not explicitly set
-      if (vps.username && vps.username.trim()) {
-        appConfig.vpsUsername = vps.username.trim();
-        const isCli = app.isWebAccess === false || app.accessType === "cli";
-        if (isCli && !appConfig.adminUsername) {
-          appConfig.adminUsername = vps.username.trim();
-        }
-      }
+      // Defense-in-depth: Strictly sanitize and normalize all appConfig fields
+      appConfig = sanitizeAppConfig(app, appConfig, {
+        email: customerEmail || undefined,
+        password: rootPassword,
+        vpsUsername: vps.username || undefined
+      });
 
       const script = app.getInstallScript(primaryIp, rootPassword, appConfig);
       console.log(`[AppProvisioning] Executing install script for ${app.name} on VMID ${vps.vmid}...`);
