@@ -1746,7 +1746,10 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                                 referrerPolicy="no-referrer"
                                 src={appMeta.icon}
                                 alt={vps.appName}
-                                className="w-full h-full object-contain"
+                                className={cn(
+                                  "w-full h-full object-contain",
+                                  (appMeta?.id === "mikrotik-chr" || vps.appName?.toLowerCase().includes("mikrotik")) && "dark:brightness-0 dark:invert"
+                                )}
                               />
                             ) : (
                               <HardDrive className="w-6 h-6 text-cyan-400" />
@@ -3527,7 +3530,10 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                                             referrerPolicy="no-referrer"
                                             src={app.icon}
                                             alt={app.name}
-                                            className="w-full h-full object-contain"
+                                            className={cn(
+                                              "w-full h-full object-contain",
+                                              app.id === "mikrotik-chr" && "dark:brightness-0 dark:invert"
+                                            )}
                                             loading="lazy"
                                           />
                                         </div>

@@ -174,7 +174,10 @@ export default function CatalogAppsPage() {
                           referrerPolicy="no-referrer"
                           src={app.icon}
                           alt={app.name}
-                          className="w-full h-full object-contain"
+                          className={cn(
+                            "w-full h-full object-contain",
+                            app.id === "mikrotik-chr" && "dark:brightness-0 dark:invert"
+                          )}
                           loading="lazy"
                         />
                       </div>
