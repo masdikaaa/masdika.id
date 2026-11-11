@@ -1483,7 +1483,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
   };
 
   return (
-    <div className="w-full space-y-4 md:space-y-6 pb-10 animate-in fade-in slide-in-from-bottom-4 duration-700 overflow-x-hidden">
+    <div className="w-full space-y-4 md:space-y-6 pb-28 sm:pb-16 animate-in fade-in slide-in-from-bottom-4 duration-700 overflow-x-hidden">
 
       {vps.status === 'PENDING_PAYMENT' ? (
         <div className={cn("flex flex-col items-center justify-center py-16 md:py-24 px-4 md:px-8 border rounded-2xl md:rounded-3xl shadow-2xs relative overflow-hidden mt-4 md:mt-8 w-full", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
@@ -2110,20 +2110,20 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                 <div className="lg:col-span-2 space-y-6">
 
                   {/* CPU Chart */}
-                  <div className={cn("border rounded-2xl p-6 shadow-2xs", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
-                    <div className="flex justify-between items-center mb-6">
-                      <h3 className={cn("font-bold", isDark ? "text-white" : "text-slate-950")}>CPU Usage (%)</h3>
+                  <div className={cn("border rounded-2xl p-4 sm:p-6 shadow-2xs", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                    <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4 mb-4 sm:mb-6">
+                      <h3 className={cn("font-bold text-sm sm:text-base whitespace-nowrap", isDark ? "text-white" : "text-slate-950")}>CPU Usage (%)</h3>
                       <div className="flex items-center gap-2">
-                        <div className="w-2.5 h-2.5 rounded-full bg-cyan-500"></div>
-                        <span className={cn("text-xs font-semibold", isDark ? "text-zinc-400" : "text-slate-700")}>Last Hour</span>
+                        <div className="w-2.5 h-2.5 rounded-full bg-cyan-500 shrink-0"></div>
+                        <span className={cn("text-xs font-semibold whitespace-nowrap", isDark ? "text-zinc-400" : "text-slate-700")}>Last Hour</span>
                       </div>
                     </div>
-                    <div className="h-[200px] w-full">
+                    <div className="h-[220px] sm:h-[240px] w-full">
                       {metricsLoading && metrics.length === 0 ? (
                         <div className={cn("w-full h-full flex items-center justify-center text-sm font-medium", isDark ? "text-zinc-500" : "text-slate-600")}>Loading graph...</div>
                       ) : isMounted ? (
-                        <ResponsiveContainer width="100%" height={200} minWidth={1} minHeight={1}>
-                          <AreaChart data={metrics} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
+                        <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+                          <AreaChart data={metrics} margin={{ top: 5, right: 10, left: -15, bottom: 0 }}>
                             <defs>
                               <linearGradient id="colorCpu" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.3} />
@@ -2142,6 +2142,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                               tick={{ fill: '#64748b', fontSize: 11 }}
                               domain={[0, 100]}
                               tickFormatter={(v) => `${v}%`}
+                              width={45}
                             />
                             <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
                             <Tooltip
@@ -2157,26 +2158,26 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                   </div>
 
                   {/* Network Chart */}
-                  <div className={cn("border rounded-2xl p-6 shadow-2xs", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
-                    <div className="flex justify-between items-center mb-6">
-                      <h3 className={cn("font-bold", isDark ? "text-white" : "text-slate-950")}>Network Speed (Bytes/s)</h3>
-                      <div className="flex gap-4">
+                  <div className={cn("border rounded-2xl p-4 sm:p-6 shadow-2xs", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                    <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4 mb-4 sm:mb-6">
+                      <h3 className={cn("font-bold text-sm sm:text-base whitespace-nowrap", isDark ? "text-white" : "text-slate-950")}>Network Speed <span className={cn("text-xs font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(Bytes/s)</span></h3>
+                      <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
                         <div className="flex items-center gap-2">
-                          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
-                          <span className={cn("text-xs font-semibold", isDark ? "text-zinc-400" : "text-slate-700")}>Download</span>
+                          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></div>
+                          <span className={cn("text-xs font-semibold whitespace-nowrap", isDark ? "text-zinc-400" : "text-slate-700")}>Download</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="w-2.5 h-2.5 rounded-full bg-indigo-500"></div>
-                          <span className={cn("text-xs font-semibold", isDark ? "text-zinc-400" : "text-slate-700")}>Upload</span>
+                          <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 shrink-0"></div>
+                          <span className={cn("text-xs font-semibold whitespace-nowrap", isDark ? "text-zinc-400" : "text-slate-700")}>Upload</span>
                         </div>
                       </div>
                     </div>
-                    <div className="h-[200px] w-full">
+                    <div className="h-[220px] sm:h-[240px] w-full">
                       {metricsLoading && metrics.length === 0 ? (
-                        <div className={cn("w-full h-full flex items-center justify-center  text-sm", isDark ? "text-zinc-500" : "text-slate-400")}>Loading graph...</div>
+                        <div className={cn("w-full h-full flex items-center justify-center text-sm font-medium", isDark ? "text-zinc-500" : "text-slate-400")}>Loading graph...</div>
                       ) : isMounted ? (
-                        <ResponsiveContainer width="100%" height={200} minWidth={1} minHeight={1}>
-                          <AreaChart data={metrics} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
+                        <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+                          <AreaChart data={metrics} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
                             <defs>
                               <linearGradient id="colorNetIn" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#34d399" stopOpacity={0.3} />
@@ -2198,7 +2199,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                               stroke="#334155"
                               tick={{ fill: '#64748b', fontSize: 11 }}
                               tickFormatter={formatBytesPerSecond}
-                              width={90}
+                              width={68}
                             />
                             <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
                             <Tooltip
@@ -2226,26 +2227,26 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
               <div className="space-y-6 animate-in fade-in duration-500">
                 {/* Top Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className={cn("border rounded-2xl p-6 shadow-2xs", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
-                    <div className="flex justify-between items-center mb-6">
-                      <h3 className={cn("font-bold", isDark ? "text-white" : "text-slate-950")}>Disk I/O (Bytes/s)</h3>
-                      <div className="flex gap-4">
+                  <div className={cn("border rounded-2xl p-4 sm:p-6 shadow-2xs", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                    <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4 mb-4 sm:mb-6">
+                      <h3 className={cn("font-bold text-sm sm:text-base whitespace-nowrap", isDark ? "text-white" : "text-slate-950")}>Disk I/O <span className={cn("text-xs font-normal", isDark ? "text-zinc-400" : "text-slate-500")}>(Bytes/s)</span></h3>
+                      <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
                         <div className="flex items-center gap-2">
-                          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
-                          <span className={cn("text-xs font-semibold", isDark ? "text-zinc-400" : "text-slate-700")}>Read</span>
+                          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></div>
+                          <span className={cn("text-xs font-semibold whitespace-nowrap", isDark ? "text-zinc-400" : "text-slate-700")}>Read</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="w-2.5 h-2.5 rounded-full bg-orange-500"></div>
-                          <span className={cn("text-xs font-semibold", isDark ? "text-zinc-400" : "text-slate-700")}>Write</span>
+                          <div className="w-2.5 h-2.5 rounded-full bg-orange-500 shrink-0"></div>
+                          <span className={cn("text-xs font-semibold whitespace-nowrap", isDark ? "text-zinc-400" : "text-slate-700")}>Write</span>
                         </div>
                       </div>
                     </div>
-                    <div className="h-[250px] w-full">
+                    <div className="h-[220px] sm:h-[240px] w-full">
                       {metricsLoading && metrics.length === 0 ? (
                         <div className={cn("w-full h-full flex items-center justify-center text-sm font-medium", isDark ? "text-zinc-500" : "text-slate-600")}>Loading graph...</div>
                       ) : (
-                        <ResponsiveContainer width="100%" height={250} minWidth={1} minHeight={1}>
-                          <AreaChart data={metrics} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
+                        <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+                          <AreaChart data={metrics} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
                             <defs>
                               <linearGradient id="colorDiskRead" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#34d399" stopOpacity={0.3} />
@@ -2257,7 +2258,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                               </linearGradient>
                             </defs>
                             <XAxis dataKey="time" tickFormatter={formatTime} stroke="#334155" tick={{ fill: '#64748b', fontSize: 11 }} minTickGap={30} />
-                            <YAxis stroke="#334155" tick={{ fill: '#64748b', fontSize: 11 }} tickFormatter={formatBytesPerSecond} width={90} />
+                            <YAxis stroke="#334155" tick={{ fill: '#64748b', fontSize: 11 }} tickFormatter={formatBytesPerSecond} width={68} />
                             <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
                             <Tooltip 
                               contentStyle={{ backgroundColor: '#0a0a0c', borderColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', color: '#fff', fontSize: '12px' }} 
@@ -2272,26 +2273,26 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                     </div>
                   </div>
 
-                  <div className={cn("border rounded-2xl p-6 shadow-2xs", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
-                    <div className="flex justify-between items-center mb-6">
-                      <h3 className={cn("font-bold", isDark ? "text-white" : "text-slate-950")}>System Statistics</h3>
-                      <div className="flex gap-4">
+                  <div className={cn("border rounded-2xl p-4 sm:p-6 shadow-2xs", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                    <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4 mb-4 sm:mb-6">
+                      <h3 className={cn("font-bold text-sm sm:text-base whitespace-nowrap", isDark ? "text-white" : "text-slate-950")}>System Statistics</h3>
+                      <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
                         <div className="flex items-center gap-2">
-                          <div className="w-2.5 h-2.5 rounded-full bg-cyan-400"></div>
-                          <span className={cn("text-xs font-semibold", isDark ? "text-zinc-400" : "text-slate-700")}>CPU Usage (%)</span>
+                          <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 shrink-0"></div>
+                          <span className={cn("text-xs font-semibold whitespace-nowrap", isDark ? "text-zinc-400" : "text-slate-700")}>CPU Usage (%)</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="w-2.5 h-2.5 rounded-full bg-purple-500"></div>
-                          <span className={cn("text-xs font-semibold", isDark ? "text-zinc-400" : "text-slate-700")}>RAM Usage (%)</span>
+                          <div className="w-2.5 h-2.5 rounded-full bg-purple-500 shrink-0"></div>
+                          <span className={cn("text-xs font-semibold whitespace-nowrap", isDark ? "text-zinc-400" : "text-slate-700")}>RAM Usage (%)</span>
                         </div>
                       </div>
                     </div>
-                    <div className="h-[250px] w-full">
+                    <div className="h-[220px] sm:h-[240px] w-full">
                       {metricsLoading && metrics.length === 0 ? (
                         <div className={cn("w-full h-full flex items-center justify-center text-sm font-medium", isDark ? "text-zinc-500" : "text-slate-600")}>Loading graph...</div>
                       ) : (
-                        <ResponsiveContainer width="100%" height={250} minWidth={1} minHeight={1}>
-                          <AreaChart data={metrics} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
+                        <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+                          <AreaChart data={metrics} margin={{ top: 5, right: 10, left: -15, bottom: 0 }}>
                             <defs>
                               <linearGradient id="colorSysCpu" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.3} />
@@ -2303,7 +2304,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                               </linearGradient>
                             </defs>
                             <XAxis dataKey="time" tickFormatter={formatTime} stroke="#334155" tick={{ fill: '#64748b', fontSize: 11 }} minTickGap={30} />
-                            <YAxis stroke="#334155" tick={{ fill: '#64748b', fontSize: 11 }} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
+                            <YAxis stroke="#334155" tick={{ fill: '#64748b', fontSize: 11 }} domain={[0, 100]} tickFormatter={(v) => `${v}%`} width={45} />
                             <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
                             <Tooltip
                               contentStyle={{ backgroundColor: '#0a0a0c', borderColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', color: '#fff', fontSize: '12px' }}
@@ -2323,22 +2324,34 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
 
             {/* FIREWALL TAB */}
             {activeTab === "firewall" && (
-              <div className={cn("border rounded-2xl p-6 shadow-2xs animate-in fade-in duration-500", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+              <div className={cn("border rounded-2xl p-4 sm:p-6 shadow-2xs animate-in fade-in duration-500", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
                 <div className="space-y-6">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
                     <div>
-                      <h3 className={cn("font-bold text-lg", isDark ? "text-white" : "text-slate-950")}>Firewall (Security Group)</h3>
+                      <h3 className={cn("font-bold text-base sm:text-lg", isDark ? "text-white" : "text-slate-950")}>Firewall (Security Group)</h3>
                       <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-600 font-medium")}>Manage inbound traffic rules for this instance.</p>
                     </div>
-                    <button
-                      onClick={() => {
-                        setEditingRule(null);
-                        setShowFirewallModal(true);
-                      }}
-                      className="px-4 py-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 text-slate-950 shadow-2xs cursor-pointer"
-                    >
-                      <Plus className="w-4 h-4" /> Add Rule
-                    </button>
+                    <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+                      <button
+                        onClick={fetchFirewallRules}
+                        disabled={firewallLoading}
+                        className={cn("group h-9 w-9 rounded-xl transition-all shrink-0 border flex items-center justify-center cursor-pointer",
+                          firewallLoading ? "opacity-50" : "",
+                          isDark ? "bg-white/5 border-white/10 hover:bg-white/10 text-zinc-400" : "bg-slate-50 border-slate-300 hover:bg-slate-100 text-slate-800 shadow-2xs")}
+                        title="Refresh Firewall Rules"
+                      >
+                        <RefreshCw className={cn("w-4 h-4 transition-transform duration-700 ease-in-out group-hover:rotate-180", firewallLoading && "animate-spin")} />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setEditingRule(null);
+                          setShowFirewallModal(true);
+                        }}
+                        className="h-9 px-3.5 sm:px-4 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 text-slate-950 shadow-2xs cursor-pointer flex-1 sm:flex-initial shrink-0"
+                      >
+                        <Plus className="w-4 h-4 shrink-0" /> Add Rule
+                      </button>
+                    </div>
                   </div>
 
                   {firewallLoading ? (
@@ -4022,8 +4035,25 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                 )}
 
                 {/* Backups List */}
-                <div className={cn("border rounded-2xl p-6", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
-                  <h3 className={cn("text-lg font-bold mb-6", isDark ? "text-white" : "text-slate-950")}>Backup Archives</h3>
+                <div className={cn("border rounded-2xl p-4 sm:p-6 shadow-2xs", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-6">
+                    <h3 className={cn("text-base sm:text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-950")}>
+                      <Archive className={cn("w-5 h-5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-700")} />
+                      Backup Archives
+                    </h3>
+                    <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+                      <button 
+                        onClick={() => fetchBackups(true)}
+                        disabled={backupsLoading}
+                        className={cn("group h-9 w-9 rounded-xl transition-all shrink-0 border flex items-center justify-center cursor-pointer", 
+                          backupsLoading ? "opacity-50" : "",
+                          isDark ? "bg-white/5 border-white/10 hover:bg-white/10 text-zinc-400" : "bg-slate-50 border-slate-300 hover:bg-slate-100 text-slate-800 shadow-2xs")}
+                        title="Refresh Backups"
+                      >
+                        <RefreshCw className={cn("w-4 h-4 transition-transform duration-700 ease-in-out group-hover:rotate-180", backupsLoading && "animate-spin")} />
+                      </button>
+                    </div>
+                  </div>
 
                   <div className="overflow-x-auto w-full">
                     <table className="w-full text-sm text-left min-w-[600px]">
@@ -4085,36 +4115,38 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
             {/* SNAPSHOTS TAB */}
             {activeTab === "snapshots" && (
               <div className="animate-in fade-in duration-500 space-y-6">
-                <div className={cn("border rounded-2xl p-6", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
-                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-                    <div className={cn("text-lg font-bold flex flex-wrap items-center gap-2", isDark ? "text-white" : "text-slate-950")}>
+                <div className={cn("border rounded-2xl p-4 sm:p-6 shadow-2xs", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-6">
+                    <div className={cn("text-base sm:text-lg font-bold flex flex-wrap items-center gap-2", isDark ? "text-white" : "text-slate-950")}>
                       <Copy className={cn("w-5 h-5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-700")} />
                       <span>VM Snapshots</span>
-                      <button 
-                        onClick={() => fetchSnapshots(true)}
-                        disabled={snapshotsLoading}
-                        className={cn("group p-1.5 sm:p-2 rounded-lg transition-all shrink-0 border ml-1", 
-                          snapshotsLoading ? "opacity-50" : "",
-                          isDark ? "bg-white/5 border-white/10 hover:bg-white/10 text-zinc-400" : "bg-slate-50 border-slate-300 hover:bg-slate-100 text-slate-800")}
-                        title="Refresh Snapshots"
-                      >
-                        <RefreshCw className={cn("w-4 h-4 transition-transform duration-700 ease-in-out group-hover:rotate-180", snapshotsLoading && "animate-spin")} />
-                      </button>
                       {['snapshot', 'rollback', 'snapshot-delete'].includes(status?.lock) && (
-                        <span className={cn("px-2.5 py-1 rounded-full text-xs font-bold border animate-pulse flex items-center gap-1.5 whitespace-nowrap mt-2 sm:mt-0", isDark ? "bg-orange-500/10 text-orange-400 border-orange-500/20" : "bg-orange-100 text-orange-950 border-orange-300")}>
+                        <span className={cn("px-2.5 py-1 rounded-full text-xs font-bold border animate-pulse flex items-center gap-1.5 whitespace-nowrap", isDark ? "bg-orange-500/10 text-orange-400 border-orange-500/20" : "bg-orange-100 text-orange-950 border-orange-300")}>
                           <RefreshCw className="w-3.5 h-3.5 animate-spin shrink-0" /> 
                           {status?.lock === 'rollback' ? 'Rolling back...' : status?.lock === 'snapshot-delete' ? 'Deleting...' : 'Processing Snapshot...'}
                         </span>
                       )}
                     </div>
-                    <button
-                      onClick={() => setShowSnapshotModal(true)}
-                      disabled={snapshots.length >= 2 || ['snapshot', 'rollback', 'snapshot-delete'].includes(status?.lock)}
-                      className="px-3.5 py-2 md:py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 w-full md:w-auto shrink-0 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 disabled:opacity-50 shadow-sm"
-                    >
-                      <Plus className="w-4 h-4 shrink-0" />
-                      Take Snapshot
-                    </button>
+                    <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+                      <button 
+                        onClick={() => fetchSnapshots(true)}
+                        disabled={snapshotsLoading}
+                        className={cn("group h-9 w-9 rounded-xl transition-all shrink-0 border flex items-center justify-center cursor-pointer", 
+                          snapshotsLoading ? "opacity-50" : "",
+                          isDark ? "bg-white/5 border-white/10 hover:bg-white/10 text-zinc-400" : "bg-slate-50 border-slate-300 hover:bg-slate-100 text-slate-800 shadow-2xs")}
+                        title="Refresh Snapshots"
+                      >
+                        <RefreshCw className={cn("w-4 h-4 transition-transform duration-700 ease-in-out group-hover:rotate-180", snapshotsLoading && "animate-spin")} />
+                      </button>
+                      <button
+                        onClick={() => setShowSnapshotModal(true)}
+                        disabled={snapshots.length >= 2 || ['snapshot', 'rollback', 'snapshot-delete'].includes(status?.lock)}
+                        className="h-9 px-3.5 sm:px-4 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 flex-1 sm:flex-initial shrink-0 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 disabled:opacity-50 shadow-2xs cursor-pointer"
+                      >
+                        <Plus className="w-4 h-4 shrink-0" />
+                        Take Snapshot
+                      </button>
+                    </div>
                   </div>
 
                   <div className="w-full overflow-x-auto pb-4">
@@ -4193,23 +4225,23 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
             {/* TASKS TAB */}
             {activeTab === "tasks" && (
               <div className="animate-in fade-in duration-500 space-y-6">
-                <div className={cn("border rounded-2xl p-6", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                    <h3 className={cn("text-lg font-bold flex items-center gap-2 whitespace-nowrap shrink-0", isDark ? "text-white" : "text-slate-950")}>
+                <div className={cn("border rounded-2xl p-4 sm:p-6 shadow-2xs", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-6">
+                    <h3 className={cn("text-base sm:text-lg font-bold flex items-center gap-2 whitespace-nowrap shrink-0", isDark ? "text-white" : "text-slate-950")}>
                       <Terminal className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />
                       Tasks and Logs
                     </h3>
-                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                    <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
                       <input
                         type="text"
                         placeholder="Search logs..."
                         value={taskFilter}
                         onChange={(e) => { setTaskFilter(e.target.value); setTaskPage(1); }}
-                        className={cn("border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-cyan-500/50 flex-1 sm:w-48 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder-zinc-500" : "bg-slate-50 border-slate-200/90 text-slate-950 font-medium placeholder:text-slate-400 shadow-2xs")}
+                        className={cn("border rounded-xl px-3.5 h-9 text-xs sm:text-sm focus:outline-none focus:border-cyan-500/50 flex-1 sm:w-48 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder-zinc-500" : "bg-slate-50 border-slate-200/90 text-slate-950 font-medium placeholder:text-slate-400 shadow-2xs")}
                       />
                       <button
                         onClick={fetchTasks}
-                        className={cn("group p-2 rounded-lg transition-colors shrink-0", isDark ? "bg-white/5 hover:bg-white/10 text-zinc-400" : "bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300")}
+                        className={cn("group h-9 w-9 rounded-xl border transition-all shrink-0 flex items-center justify-center cursor-pointer", isDark ? "bg-white/5 border-white/10 hover:bg-white/10 text-zinc-400" : "bg-slate-50 border-slate-300 hover:bg-slate-100 text-slate-800 shadow-2xs")}
                         title="Refresh Tasks"
                       >
                         <RefreshCw className="w-4 h-4 transition-transform duration-700 ease-in-out group-hover:rotate-180" />

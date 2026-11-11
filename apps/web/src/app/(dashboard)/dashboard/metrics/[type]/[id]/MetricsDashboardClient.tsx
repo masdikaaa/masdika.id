@@ -98,25 +98,25 @@ export default function MetricsDashboardClient({ type, id }: MetricsDashboardCli
 
   const renderChart = (title: string, icon: any, dataKey1: string, dataKey2: string | null, color1: string, color2: string | null, unit: string) => (
     <div className={cn("border rounded-2xl p-4 sm:p-5", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
-      <div className="flex justify-between items-center mb-5">
+      <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4 mb-4 sm:mb-5">
         <div className="flex items-center gap-3">
-          <h3 className={cn("font-semibold text-sm sm:text-base", isDark ? "text-white" : "text-slate-900")}>{title}</h3>
+          <h3 className={cn("font-semibold text-sm sm:text-base whitespace-nowrap", isDark ? "text-white" : "text-slate-900")}>{title}</h3>
         </div>
-        <div className="flex gap-4">
+        <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color1 }}></div>
-            <span className={cn("text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>{dataKey1 === 'cpu' ? 'CPU' : dataKey1 === 'memory' ? 'Memory' : dataKey1 === 'netin' ? 'Download' : 'Read'}</span>
+            <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color1 }}></div>
+            <span className={cn("text-xs font-semibold whitespace-nowrap", isDark ? "text-zinc-400" : "text-slate-500")}>{dataKey1 === 'cpu' ? 'CPU' : dataKey1 === 'memory' ? 'Memory' : dataKey1 === 'netin' ? 'Download' : 'Read'}</span>
           </div>
           {dataKey2 && color2 && (
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color2 }}></div>
-              <span className={cn("text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>{dataKey2 === 'netout' ? 'Upload' : 'Write'}</span>
+              <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color2 }}></div>
+              <span className={cn("text-xs font-semibold whitespace-nowrap", isDark ? "text-zinc-400" : "text-slate-500")}>{dataKey2 === 'netout' ? 'Upload' : 'Write'}</span>
             </div>
           )}
         </div>
       </div>
 
-      <div className="h-[250px] w-full">
+      <div className="h-[220px] sm:h-[250px] w-full">
         {loading ? (
           <div className="w-full h-full flex items-center justify-center">
             <RefreshCw className="w-6 h-6 text-cyan-500 animate-spin" />
@@ -127,7 +127,7 @@ export default function MetricsDashboardClient({ type, id }: MetricsDashboardCli
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={metricsData} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
+            <AreaChart data={metricsData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
               <defs>
                 <linearGradient id={`color${dataKey1}`} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor={color1} stopOpacity={0.3} />
@@ -142,7 +142,7 @@ export default function MetricsDashboardClient({ type, id }: MetricsDashboardCli
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#27272a" : "#e2e8f0"} vertical={false} />
               <XAxis dataKey="time" stroke={isDark ? "#27272a" : "#cbd5e1"} tick={{ fill: isDark ? '#71717a' : '#94a3b8', fontSize: 11 }} minTickGap={30} />
-              <YAxis stroke={isDark ? "#27272a" : "#cbd5e1"} tick={{ fill: isDark ? '#71717a' : '#94a3b8', fontSize: 11 }} width={90} tickFormatter={(val) => `${val} ${unit}`} />
+              <YAxis stroke={isDark ? "#27272a" : "#cbd5e1"} tick={{ fill: isDark ? '#71717a' : '#94a3b8', fontSize: 11 }} width={68} tickFormatter={(val) => `${val} ${unit}`} />
               <Tooltip 
                 contentStyle={{ backgroundColor: isDark ? '#0a0a0c' : '#ffffff', borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0', borderRadius: '12px', color: isDark ? '#fff' : '#0f172a', fontSize: '12px' }} 
               />
