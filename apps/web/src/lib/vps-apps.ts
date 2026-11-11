@@ -1041,16 +1041,16 @@ ${appInfoCmd}
     defaultProtocol: "http",
     isWebAccess: false,
     accessType: "cli",
-    accessNote: "CLI assistant agent accessed via SSH. Run 'openclaw' in terminal to launch interactive wizard (No web browser required).",
+    accessNote: "CLI assistant agent accessed via SSH. Run 'openclaw' in terminal to configure and chat (No web browser required).",
     osBase: "Ubuntu 26.04",
-    appVersion: "v2.0",
+    appVersion: "v2026.11",
     versions: [
-      { id: "20-ubu26", label: "OpenClaw v2.0 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v2.0" },
+      { id: "202611-ubu26", label: "OpenClaw 2026.11 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v2026.11" },
     ],
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
     estimatedTime: "~2-3 mins",
     adminUsername: "root",
-    instructions: "Connect via SSH ('ssh root@${ip}') and run 'openclaw' to configure and interact with the assistant.",
+    instructions: "Connect via SSH ('ssh root@${ip}') and run 'openclaw' in any directory to start interacting.",
     getInstallScript: (ip, rootPassword) => {
       const appInfoCmd = buildAppInfoJson({
         appId: "openclaw",
@@ -1066,20 +1066,33 @@ ${appInfoCmd}
       return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
-apt-get update && apt-get install -y curl ca-certificates tar gzip nodejs npm
+apt-get update && apt-get install -y curl ca-certificates tar gzip build-essential
 
-# 1. Install OpenClaw via official curl installer or npm
+# 1. Install Node.js 22 LTS or newer if not present
+which node || (curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && apt-get install -y nodejs)
+
+# 2. Run official OpenClaw curl installer with non-interactive flags
 echo "[OPENCLAW] Installing OpenClaw via curl https://openclaw.ai/install.sh..."
-curl -fsSL https://openclaw.ai/install.sh | bash || npm install -g openclaw@latest || true
+export OPENCLAW_NO_ONBOARD=1
+export OPENCLAW_NO_PROMPT=1
+curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-onboard --no-prompt || (
+  npm install -g openclaw@latest
+)
 
-# 2. Globally link openclaw binary to /usr/local/bin
-for p in /root/.openclaw/bin/openclaw /root/.local/bin/openclaw; do
+# 3. Ensure openclaw binary is globally accessible in /usr/local/bin for all users
+for p in /root/.local/bin/openclaw /root/.npm-global/bin/openclaw /usr/local/bin/openclaw /usr/bin/openclaw $(which openclaw 2>/dev/null); do
   if [ -f "$p" ]; then
     ln -sf "$p" /usr/local/bin/openclaw
     chmod +x /usr/local/bin/openclaw 2>/dev/null || true
     break
   fi
 done
+
+# 4. Add system-wide PATH profile
+cat << 'EOF' > /etc/profile.d/openclaw.sh
+export PATH="$HOME/.local/bin:$HOME/.npm-global/bin:/usr/local/bin:$PATH"
+EOF
+chmod +x /etc/profile.d/openclaw.sh 2>/dev/null || true
 
 ${appInfoCmd}
 `;
@@ -1091,10 +1104,14 @@ ${appInfoCmd}
     id: "9router",
     name: "9ROUTER",
     category: "Artificial Intelligence",
-    description: "Free AI routing with smart fallback for Claude, Codex & 40+ providers. Token saver with RTK optimization.",
+    secondaryCategories: ["Developer"],
+    description: "Connect every CLI/IDE to 60+ AI providers through one OpenAI-compatible endpoint with smart 3-tier fallback and RTK token optimization.",
     icon: "/images/apps/9router.png",
     defaultPort: 20128,
     defaultProtocol: "http",
+    isWebAccess: true,
+    accessType: "web",
+    accessNote: "Web dashboard and OpenAI-compatible gateway at http://${ip}:20128 (API endpoint: http://${ip}:20128/v1). CLI command '9router' also available.",
     osBase: "Ubuntu 26.04",
     appVersion: "v0.5",
     versions: [
@@ -1103,7 +1120,7 @@ ${appInfoCmd}
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
     estimatedTime: "~2-3 mins",
     adminUsername: "admin",
-    instructions: "Access the 9Router web dashboard at http://${ip}:20128 to manage model keys, fallback rules, and tokens.",
+    instructions: "Access the 9Router web dashboard at http://${ip}:20128 to manage model keys, fallback rules, and tokens. OpenAI endpoint: http://${ip}:20128/v1",
     getInstallScript: (ip, rootPassword) => {
       const appInfoCmd = buildAppInfoJson({
         appId: "9router",
@@ -1119,11 +1136,66 @@ ${appInfoCmd}
       return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
-apt-get update && apt-get install -y curl
+apt-get update && apt-get install -y curl ufw
+
+# 1. Install Node.js runtime and Docker
+which node || (curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && apt-get install -y nodejs)
 which docker || (curl -fsSL https://get.docker.com | sh)
-systemctl enable --now docker
+systemctl enable --now docker 2>/dev/null || true
 for i in {1..30}; do docker info >/dev/null 2>&1 && break || sleep 1; done
-docker run -d --name 9router --restart always -p 20128:20128 -v 9router_data:/app/data ghcr.io/decolua/9router:latest || true
+
+# 2. Deploy 9Router via official Docker image (decolua/9router:latest)
+mkdir -p /opt/9router/data
+if docker info >/dev/null 2>&1; then
+  echo "[9ROUTER] Deploying official decolua/9router Docker container..."
+  docker pull decolua/9router:latest || true
+  docker run -d --name 9router --restart always -p 20128:20128 \\
+    -v /opt/9router/data:/app/data \\
+    -e DATA_DIR=/app/data \\
+    -e PORT=20128 \\
+    -e HOSTNAME=0.0.0.0 \\
+    decolua/9router:latest || true
+fi
+
+# 3. Also install 9router CLI globally via npm so '9router' command is available in terminal
+npm install -g 9router || true
+
+# 4. If container is not running, run 9router via systemd background daemon
+if ! docker ps 2>/dev/null | grep -q "9router"; then
+  cat << 'EOF' > /etc/systemd/system/9router.service
+[Unit]
+Description=9Router - 60+ AI Providers Smart Router & Gateway
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root
+Environment="PORT=20128"
+Environment="HOSTNAME=0.0.0.0"
+ExecStart=/usr/bin/env 9router
+Restart=always
+RestartSec=5
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target
+EOF
+  systemctl daemon-reload
+  systemctl enable --now 9router
+fi
+
+# 5. Open firewall port 20128
+(ufw allow 20128/tcp 2>/dev/null || true)
+(iptables -I INPUT -p tcp --dport 20128 -j ACCEPT 2>/dev/null || true)
+
+# 6. Wait briefly for endpoint to bind
+for i in {1..15}; do
+  if ss -tulpn | grep -q ":20128" || curl -s http://127.0.0.1:20128 >/dev/null 2>&1; then
+    break
+  fi
+  sleep 1
+done
 
 ${appInfoCmd}
 `;
