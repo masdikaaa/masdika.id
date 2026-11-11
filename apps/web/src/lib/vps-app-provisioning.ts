@@ -387,9 +387,11 @@ export class VpsAppProvisioningService {
       const customerSshUser = (vps.username && vps.username.trim() && vps.username !== "root")
         ? vps.username.trim()
         : (appConfig.vpsUsername || appConfig.adminUsername || "root");
-      const username = isCliApp
-        ? customerSshUser
-        : (verifiedInfo?.username || appConfig.adminUsername || app.adminUsername);
+      const username = app.id === "9router"
+        ? "None (Password Only)"
+        : isCliApp
+          ? customerSshUser
+          : (verifiedInfo?.username || appConfig.adminUsername || app.adminUsername);
       const password = verifiedInfo?.password || appConfig.adminPassword || rootPassword;
       const email = verifiedInfo?.email || appConfig.adminEmail || customerEmail;
       // Re-read latest appCredentials & assignedIps from DB

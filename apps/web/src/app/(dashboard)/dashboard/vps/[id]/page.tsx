@@ -1733,13 +1733,16 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                     }
                   })();
 
+                  const isNineRouter = appMeta?.id === "9router" || vps?.appName?.toLowerCase().includes("9router");
                   const isCliApp = appMeta?.isWebAccess === false || appMeta?.accessType === "cli";
                   const customerSshUser = (vps?.username && vps.username.trim() && vps.username !== "root")
                     ? vps.username.trim()
                     : (isCliApp && credentials?.username && credentials.username !== "root" ? credentials.username : (vps?.username || "root"));
-                  const displayUsername = isCliApp
-                    ? customerSshUser
-                    : (credentials?.username || appMeta?.adminUsername || customerSshUser);
+                  const displayUsername = isNineRouter
+                    ? "None (Password Only)"
+                    : isCliApp
+                      ? customerSshUser
+                      : (credentials?.username || appMeta?.adminUsername || customerSshUser);
 
                   return (
                     <div className={cn("border rounded-2xl p-5 sm:p-6 relative overflow-hidden", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
@@ -1903,7 +1906,9 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                           )}
                         </div>
                         <div>
-                          <span className={cn("block text-[11px] mb-0.5", isDark ? "text-zinc-500" : "text-slate-400")}>Admin Username</span>
+                          <span className={cn("block text-[11px] mb-0.5", isDark ? "text-zinc-500" : "text-slate-400")}>
+                            {isNineRouter ? "Authentication" : "Admin Username"}
+                          </span>
                           <span className={cn("font-mono font-semibold", isDark ? "text-zinc-200" : "text-slate-800")}>
                             {displayUsername}
                           </span>

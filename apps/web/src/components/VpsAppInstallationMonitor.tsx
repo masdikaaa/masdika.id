@@ -116,13 +116,16 @@ export function VpsAppInstallationMonitor({
     effectiveAppName
   );
 
+  const isNineRouter = appDef?.id === "9router" || effectiveAppName?.toLowerCase().includes("9router");
   const isCliApp = appDef?.isWebAccess === false || appDef?.accessType === "cli";
   const customerSshUser = (statusData?.username && statusData.username.trim() && statusData.username !== "root")
     ? statusData.username.trim()
     : (isCliApp && credentialsObj?.username && credentialsObj.username !== "root" ? credentialsObj.username : (statusData?.username || "root"));
-  const username = isCliApp
-    ? customerSshUser
-    : (credentialsObj?.username || appDef?.adminUsername || "admin");
+  const username = isNineRouter
+    ? "None (Password Only)"
+    : isCliApp
+      ? customerSshUser
+      : (credentialsObj?.username || appDef?.adminUsername || "admin");
   const password = credentialsObj?.password || fallbackPassword || "Configured VPS Root Password";
   const email = credentialsObj?.email || null;
 
@@ -908,7 +911,7 @@ export function VpsAppInstallationMonitor({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className={cn("block text-[11px] font-semibold uppercase tracking-wider mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>
-                        Default User
+                        {isNineRouter ? "Authentication" : "Default User"}
                       </label>
                       <div className={cn(
                         "flex items-center justify-between gap-2 p-2.5 rounded-xl border font-mono text-xs",

@@ -1225,7 +1225,7 @@ ${appInfoCmd}
     defaultProtocol: "http",
     isWebAccess: true,
     accessType: "web",
-    accessNote: "Web dashboard & AI routing gateway at http://<ip>:20128. CLI '9router' also available via SSH.",
+    accessNote: "Web dashboard & AI routing gateway at http://<ip>:20128 (Password-only authentication, no username required). CLI '9router' also available via SSH.",
     osBase: "Ubuntu 26.04",
     appVersion: "v0.5",
     versions: [
@@ -1233,17 +1233,18 @@ ${appInfoCmd}
     ],
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
     estimatedTime: "~2-3 mins",
-    adminUsername: "admin",
-    instructions: "Access the 9Router web dashboard at http://${ip}:20128 to manage model keys, fallback rules, and tokens. OpenAI endpoint: http://${ip}:20128/v1",
-    getInstallScript: (ip, rootPassword) => {
+    adminUsername: "None (Password Only)",
+    instructions: "Access the 9Router web dashboard at http://${ip}:20128. Authentication requires Password only (no username required). Password: VPS Root Password. OpenAI endpoint: http://${ip}:20128/v1",
+    getInstallScript: (ip, rootPassword, config = {}) => {
+      const adminPassword = config.adminPassword || rootPassword;
       const appInfoCmd = buildAppInfoJson({
         appId: "9router",
         appName: "9Router",
         port: 20128,
         protocol: "http",
         path: "",
-        username: "admin",
-        password: rootPassword,
+        username: "None (Password Only)",
+        password: adminPassword,
         url: `http://${ip}:20128`
       });
 
@@ -1258,16 +1259,19 @@ which docker || (curl -fsSL https://get.docker.com | sh)
 systemctl enable --now docker 2>/dev/null || true
 for i in {1..30}; do docker info >/dev/null 2>&1 && break || sleep 1; done
 
-# 2. Deploy 9Router via official Docker image (decolua/9router:latest)
+# 2. Deploy 9Router via official Docker image (decolua/9router:latest) with INITIAL_PASSWORD configured
 mkdir -p /opt/9router/data
 if docker info >/dev/null 2>&1; then
   echo "[9ROUTER] Deploying official decolua/9router Docker container..."
   docker pull decolua/9router:latest || true
+  docker stop 9router 2>/dev/null || true
+  docker rm 9router 2>/dev/null || true
   docker run -d --name 9router --restart always -p 20128:20128 \\
     -v /opt/9router/data:/app/data \\
     -e DATA_DIR=/app/data \\
     -e PORT=20128 \\
     -e HOSTNAME=0.0.0.0 \\
+    -e INITIAL_PASSWORD="${adminPassword}" \\
     decolua/9router:latest || true
 fi
 
@@ -1287,6 +1291,7 @@ User=root
 WorkingDirectory=/root
 Environment="PORT=20128"
 Environment="HOSTNAME=0.0.0.0"
+Environment="INITIAL_PASSWORD=${adminPassword}"
 ExecStart=/usr/bin/env 9router
 Restart=always
 RestartSec=5
