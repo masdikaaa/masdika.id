@@ -41,6 +41,7 @@ interface QuickVpsStatus {
   hostname: string;
   status: string; // PENDING | PROVISIONING | ACTIVE | ERROR
   vmid?: number;
+  username?: string | null;
   assignedIps?: Array<string | { ipAddress: string; publicIp?: string }>;
   appName?: string | null;
   appVersion?: string | null;
@@ -115,7 +116,13 @@ export function VpsAppInstallationMonitor({
     effectiveAppName
   );
 
-  const username = credentialsObj?.username || appDef?.adminUsername || "admin";
+  const isCliApp = appDef?.isWebAccess === false || appDef?.accessType === "cli";
+  const customerSshUser = (statusData?.username && statusData.username.trim() && statusData.username !== "root")
+    ? statusData.username.trim()
+    : (isCliApp && credentialsObj?.username && credentialsObj.username !== "root" ? credentialsObj.username : (statusData?.username || "root"));
+  const username = isCliApp
+    ? customerSshUser
+    : (credentialsObj?.username || appDef?.adminUsername || "admin");
   const password = credentialsObj?.password || fallbackPassword || "Configured VPS Root Password";
   const email = credentialsObj?.email || null;
 
@@ -654,7 +661,7 @@ export function VpsAppInstallationMonitor({
                         <span className="font-bold text-cyan-400 truncate">
                           {appDef?.accessType === "database"
                             ? (webUrl || `${appDef.id}://${username || "root"}:${password || "your-pass"}@${primaryIp || "your-ip"}:${appDef.defaultPort}`)
-                            : `ssh root@${primaryIp || "your-ip"}`}
+                            : `ssh ${customerSshUser}@${primaryIp || "your-ip"}`}
                         </span>
                         <div className="flex items-center gap-2 shrink-0">
                           <button
@@ -662,7 +669,7 @@ export function VpsAppInstallationMonitor({
                             onClick={() => {
                               const val = appDef?.accessType === "database"
                                 ? (webUrl || `${appDef.id}://${username || "root"}:${password || "your-pass"}@${primaryIp || "your-ip"}:${appDef.defaultPort}`)
-                                : `ssh root@${primaryIp || "your-ip"}`;
+                                : `ssh ${customerSshUser}@${primaryIp || "your-ip"}`;
                               copyToClipboard(val, "ssh-cmd");
                             }}
                             className={cn(
@@ -881,11 +888,11 @@ export function VpsAppInstallationMonitor({
                       isDark ? "bg-[#07080b] border-white/10" : "bg-white border-slate-200"
                     )}>
                       <span className="text-zinc-300 truncate">
-                        ssh {username}@{primaryIp || "your-ip"}
+                        ssh {customerSshUser}@{primaryIp || "your-ip"}
                       </span>
                       <button
                         type="button"
-                        onClick={() => copyToClipboard(`ssh ${username}@${primaryIp}`, "ssh")}
+                        onClick={() => copyToClipboard(`ssh ${customerSshUser}@${primaryIp || "your-ip"}`, "ssh")}
                         className={cn(
                           "p-1.5 rounded-lg border transition-colors cursor-pointer",
                           isDark ? "border-white/10 hover:bg-white/10 text-zinc-300" : "border-slate-200 hover:bg-slate-100 text-slate-700"

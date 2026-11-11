@@ -1733,6 +1733,14 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                     }
                   })();
 
+                  const isCliApp = appMeta?.isWebAccess === false || appMeta?.accessType === "cli";
+                  const customerSshUser = (vps?.username && vps.username.trim() && vps.username !== "root")
+                    ? vps.username.trim()
+                    : (isCliApp && credentials?.username && credentials.username !== "root" ? credentials.username : (vps?.username || "root"));
+                  const displayUsername = isCliApp
+                    ? customerSshUser
+                    : (credentials?.username || appMeta?.adminUsername || customerSshUser);
+
                   return (
                     <div className={cn("border rounded-2xl p-5 sm:p-6 relative overflow-hidden", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
                       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -1794,7 +1802,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                           <button
                             type="button"
                             onClick={() => {
-                              const cmd = `ssh root@${primaryPublicIp || "ip"}`;
+                              const cmd = `ssh ${customerSshUser}@${primaryPublicIp || "ip"}`;
                               navigator.clipboard.writeText(cmd);
                               toast.success("SSH Command copied to clipboard");
                             }}
@@ -1855,15 +1863,15 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                             <div className="flex items-center gap-1.5">
                               <code className="font-mono font-bold text-cyan-400 truncate">
                                 {appMeta.accessType === "database"
-                                  ? (targetUrl || `${appMeta.id}://${credentials?.username || "root"}:${credentials?.password || "password"}@${primaryPublicIp || "ip"}:${appMeta.defaultPort}`)
-                                  : `ssh root@${primaryPublicIp || "ip"}`}
+                                  ? (targetUrl || `${appMeta.id}://${credentials?.username || customerSshUser}:${credentials?.password || "password"}@${primaryPublicIp || "ip"}:${appMeta.defaultPort}`)
+                                  : `ssh ${customerSshUser}@${primaryPublicIp || "ip"}`}
                               </code>
                               <button
                                 type="button"
                                 onClick={() => {
                                   const val = appMeta.accessType === "database"
-                                    ? (targetUrl || `${appMeta.id}://${credentials?.username || "root"}:${credentials?.password || "password"}@${primaryPublicIp || "ip"}:${appMeta.defaultPort}`)
-                                    : `ssh root@${primaryPublicIp || "ip"}`;
+                                    ? (targetUrl || `${appMeta.id}://${credentials?.username || customerSshUser}:${credentials?.password || "password"}@${primaryPublicIp || "ip"}:${appMeta.defaultPort}`)
+                                    : `ssh ${customerSshUser}@${primaryPublicIp || "ip"}`;
                                   navigator.clipboard.writeText(val);
                                   toast.success("Copied to clipboard");
                                 }}
@@ -1897,7 +1905,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                         <div>
                           <span className={cn("block text-[11px] mb-0.5", isDark ? "text-zinc-500" : "text-slate-400")}>Admin Username</span>
                           <span className={cn("font-mono font-semibold", isDark ? "text-zinc-200" : "text-slate-800")}>
-                            {credentials?.username || appMeta?.adminUsername || "admin"}
+                            {displayUsername}
                           </span>
                         </div>
                         <div>

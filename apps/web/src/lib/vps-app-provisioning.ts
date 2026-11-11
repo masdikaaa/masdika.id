@@ -277,6 +277,15 @@ export class VpsAppProvisioningService {
         appConfig.adminEmail = customerEmail;
       }
 
+      // Automatically supply real customer username from VPS record if not explicitly set
+      if (vps.username && vps.username.trim()) {
+        appConfig.vpsUsername = vps.username.trim();
+        const isCli = app.isWebAccess === false || app.accessType === "cli";
+        if (isCli && !appConfig.adminUsername) {
+          appConfig.adminUsername = vps.username.trim();
+        }
+      }
+
       const script = app.getInstallScript(primaryIp, rootPassword, appConfig);
       console.log(`[AppProvisioning] Executing install script for ${app.name} on VMID ${vps.vmid}...`);
       await this.updateAppProgress(
@@ -374,7 +383,13 @@ export class VpsAppProvisioningService {
       const port = Number(verifiedInfo?.port) || Number(appConfig.panelPort) || app.defaultPort;
       const protocol = verifiedInfo?.protocol || app.defaultProtocol;
       const path = verifiedInfo?.path !== undefined ? verifiedInfo.path : (app.loginPath || "");
-      const username = verifiedInfo?.username || appConfig.adminUsername || app.adminUsername;
+      const isCliApp = app.isWebAccess === false || app.accessType === "cli";
+      const customerSshUser = (vps.username && vps.username.trim() && vps.username !== "root")
+        ? vps.username.trim()
+        : (appConfig.vpsUsername || appConfig.adminUsername || "root");
+      const username = isCliApp
+        ? customerSshUser
+        : (verifiedInfo?.username || appConfig.adminUsername || app.adminUsername);
       const password = verifiedInfo?.password || appConfig.adminPassword || rootPassword;
       const email = verifiedInfo?.email || appConfig.adminEmail || customerEmail;
       // Re-read latest appCredentials & assignedIps from DB
@@ -420,8 +435,10 @@ export class VpsAppProvisioningService {
         password,
         email,
         port,
-        loginUrl: appUrl,
-        instructions: app.instructions.replace(/\$\{ip\}/g, effectiveBrowserIp),
+        loginUrl: isCliApp ? `ssh://${customerSshUser}@${effectiveBrowserIp}` : appUrl,
+        instructions: isCliApp
+          ? app.instructions.replace(/\$\{ip\}/g, effectiveBrowserIp).replace(/ssh root@/g, `ssh ${customerSshUser}@`)
+          : app.instructions.replace(/\$\{ip\}/g, effectiveBrowserIp),
         error: null,
         installFailed: false
       });

@@ -998,17 +998,21 @@ ${appInfoCmd}
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
     estimatedTime: "~2-4 mins",
     adminUsername: "root",
-    instructions: "Connect via SSH ('ssh root@${ip}') and run 'hermes model' to configure models, then run 'hermes' to chat.",
-    getInstallScript: (ip, rootPassword) => {
+    instructions: "Connect via SSH ('ssh ${ip}') and run 'hermes model' to configure models, then run 'hermes' to chat.",
+    getInstallScript: (ip, rootPassword, config = {}) => {
+      const sshUser = (config.vpsUsername && config.vpsUsername !== "root")
+        ? config.vpsUsername
+        : (config.adminUsername || "root");
+
       const appInfoCmd = buildAppInfoJson({
         appId: "hermes-agent",
         appName: "Hermes Agent",
         port: 22,
         protocol: "http",
         path: "",
-        username: "root",
+        username: sshUser,
         password: rootPassword,
-        url: `ssh://root@${ip}`
+        url: `ssh://${sshUser}@${ip}`
       });
 
       return `
@@ -1019,10 +1023,10 @@ export USER="root"
 export LOGNAME="root"
 export SHELL="/bin/bash"
 export TERM="xterm"
-export HERMES_HOME="/root/.hermes"
-export HERMES_INSTALL_DIR="/root/.hermes/hermes-agent"
-export PATH="/root/.local/bin:/root/.hermes/bin:/root/.hermes/hermes-agent/.hermes/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-mkdir -p /root/.local/bin /root/.hermes /tmp
+export HERMES_HOME="/opt/hermes"
+export HERMES_INSTALL_DIR="/opt/hermes/hermes-agent"
+export PATH="/root/.local/bin:/opt/hermes/hermes-agent/.hermes/bin:/opt/hermes/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+mkdir -p /opt/hermes /root/.local/bin /tmp
 
 apt-get update && apt-get install -y curl git ca-certificates tar gzip build-essential python3 python3-pip python3-venv libatomic1 sudo
 
@@ -1032,16 +1036,16 @@ curl -fsSL https://hermes-agent.nousresearch.com/install.sh -o /tmp/hermes-insta
 chmod +x /tmp/hermes-install.sh
 
 echo "[HERMES] Running Hermes Agent bootstrap installer (non-interactive)..."
-bash /tmp/hermes-install.sh --non-interactive --skip-browser --skip-computer-use --hermes-home /root/.hermes --dir /root/.hermes/hermes-agent || true
+bash /tmp/hermes-install.sh --non-interactive --skip-browser --skip-computer-use --hermes-home /opt/hermes --dir /opt/hermes/hermes-agent || true
 rm -f /tmp/hermes-install.sh
 
 # 2. Globally link hermes binary to /usr/local/bin and /usr/bin for all users
-for p in /root/.local/bin/hermes /root/.hermes/hermes-agent/.hermes/bin/hermes /root/.hermes/bin/hermes /root/.hermes/hermes-agent/bin/hermes; do
+for p in /opt/hermes/hermes-agent/.hermes/bin/hermes /opt/hermes/bin/hermes /opt/hermes/hermes-agent/bin/hermes /root/.local/bin/hermes; do
   if [ -f "$p" ]; then
+    chmod a+rx "$p" 2>/dev/null || true
     ln -sf "$p" /usr/local/bin/hermes
     ln -sf "$p" /usr/bin/hermes 2>/dev/null || true
-    chmod +x "$p" 2>/dev/null || true
-    chmod +x /usr/local/bin/hermes 2>/dev/null || true
+    chmod a+rx /usr/local/bin/hermes 2>/dev/null || true
     break
   fi
 done
@@ -1054,15 +1058,20 @@ if ! command -v hermes >/dev/null 2>&1 && [ ! -x /usr/local/bin/hermes ]; then
   /opt/hermes-agent/venv/bin/pip install --upgrade pip
   /opt/hermes-agent/venv/bin/pip install hermes-agent || true
   if [ -f /opt/hermes-agent/venv/bin/hermes ]; then
+    chmod a+rx /opt/hermes-agent/venv/bin/hermes 2>/dev/null || true
     ln -sf /opt/hermes-agent/venv/bin/hermes /usr/local/bin/hermes
     ln -sf /opt/hermes-agent/venv/bin/hermes /usr/bin/hermes 2>/dev/null || true
-    chmod +x /usr/local/bin/hermes 2>/dev/null || true
+    chmod a+rx /usr/local/bin/hermes 2>/dev/null || true
   fi
 fi
 
+# Ensure /opt/hermes and /opt/hermes-agent have read/execute permissions for all users
+chmod -R a+rX /opt/hermes 2>/dev/null || true
+chmod -R a+rX /opt/hermes-agent 2>/dev/null || true
+
 # 3. Add system-wide PATH profile so all users (root and SSH users) have hermes on PATH
 cat << 'EOF' > /etc/profile.d/hermes.sh
-export PATH="$HOME/.local/bin:/root/.local/bin:/root/.hermes/bin:/root/.hermes/hermes-agent/.hermes/bin:/usr/local/bin:$PATH"
+export PATH="$HOME/.local/bin:/opt/hermes/hermes-agent/.hermes/bin:/opt/hermes/bin:/usr/local/bin:$PATH"
 EOF
 chmod +x /etc/profile.d/hermes.sh 2>/dev/null || true
 
@@ -1076,6 +1085,10 @@ for userdir in /home/*; do
     chown -R "$(basename "$userdir")":"$(basename "$userdir")" "$userdir/.local" 2>/dev/null || true
   fi
 done
+
+if [ -n "${sshUser}" ] && [ "${sshUser}" != "root" ] && id "${sshUser}" >/dev/null 2>&1; then
+  usermod -aG sudo "${sshUser}" 2>/dev/null || true
+fi
 
 ${appInfoCmd}
 `;
@@ -1103,17 +1116,21 @@ ${appInfoCmd}
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
     estimatedTime: "~2-3 mins",
     adminUsername: "root",
-    instructions: "Connect via SSH ('ssh root@${ip}') and run 'openclaw' in any directory to start interacting.",
-    getInstallScript: (ip, rootPassword) => {
+    instructions: "Connect via SSH ('ssh ${ip}') and run 'openclaw' in any directory to start interacting.",
+    getInstallScript: (ip, rootPassword, config = {}) => {
+      const sshUser = (config.vpsUsername && config.vpsUsername !== "root")
+        ? config.vpsUsername
+        : (config.adminUsername || "root");
+
       const appInfoCmd = buildAppInfoJson({
         appId: "openclaw",
         appName: "Open Claw",
         port: 22,
         protocol: "http",
         path: "",
-        username: "root",
+        username: sshUser,
         password: rootPassword,
-        url: `ssh://root@${ip}`
+        url: `ssh://${sshUser}@${ip}`
       });
 
       return `
@@ -1126,7 +1143,7 @@ export SHELL="/bin/bash"
 export TERM="xterm"
 export PATH="/root/.local/bin:/root/.npm-global/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 mkdir -p /root/.local/bin /root/.npm-global/bin /tmp
-apt-get update && apt-get install -y curl ca-certificates tar gzip build-essential
+apt-get update && apt-get install -y curl ca-certificates tar gzip build-essential sudo
 
 # 1. Install Node.js 22 LTS or newer if not present
 which node || (curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && apt-get install -y nodejs)
@@ -1179,6 +1196,10 @@ for userdir in /home/*; do
     chown -R "$(basename "$userdir")":"$(basename "$userdir")" "$userdir/.local" 2>/dev/null || true
   fi
 done
+
+if [ -n "${sshUser}" ] && [ "${sshUser}" != "root" ] && id "${sshUser}" >/dev/null 2>&1; then
+  usermod -aG sudo "${sshUser}" 2>/dev/null || true
+fi
 
 ${appInfoCmd}
 `;
@@ -1413,17 +1434,21 @@ ${appInfoCmd}
     minSpecs: { cpu: 1, ram: 2, disk: 20 },
     estimatedTime: "~1-2 mins",
     adminUsername: "root",
-    instructions: "Connect via SSH ('ssh root@${ip}') and run 'antigravity' or 'agy' in any directory to start coding.",
-    getInstallScript: (ip, rootPassword) => {
+    instructions: "Connect via SSH ('ssh ${ip}') and run 'antigravity' or 'agy' in any directory to start coding.",
+    getInstallScript: (ip, rootPassword, config = {}) => {
+      const sshUser = (config.vpsUsername && config.vpsUsername !== "root")
+        ? config.vpsUsername
+        : (config.adminUsername || "root");
+
       const appInfoCmd = buildAppInfoJson({
         appId: "antigravity-cli",
         appName: "Antigravity CLI",
         port: 22,
         protocol: "http",
         path: "",
-        username: "root",
+        username: sshUser,
         password: rootPassword,
-        url: `ssh://root@${ip}`
+        url: `ssh://${sshUser}@${ip}`
       });
 
       return `
@@ -1436,7 +1461,7 @@ export SHELL="/bin/bash"
 export TERM="xterm"
 export PATH="/root/.local/bin:/root/.antigravity/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 mkdir -p /root/.local/bin /root/.antigravity/bin /tmp
-apt-get update && apt-get install -y curl ca-certificates tar gzip
+apt-get update && apt-get install -y curl ca-certificates tar gzip sudo
 
 # 1. Install Antigravity CLI via official curl installer
 echo "[ANTIGRAVITY] Downloading Antigravity CLI v1.5.3 installer..."
@@ -1474,6 +1499,10 @@ for userdir in /home/*; do
   fi
 done
 
+if [ -n "${sshUser}" ] && [ "${sshUser}" != "root" ] && id "${sshUser}" >/dev/null 2>&1; then
+  usermod -aG sudo "${sshUser}" 2>/dev/null || true
+fi
+
 ${appInfoCmd}
 `;
     }
@@ -1500,16 +1529,20 @@ ${appInfoCmd}
     estimatedTime: "~1-2 mins",
     adminUsername: "root",
     instructions: "Docker Engine and Docker Compose are installed and active. Access via SSH terminal.",
-    getInstallScript: (ip, rootPassword) => {
+    getInstallScript: (ip, rootPassword, config = {}) => {
+      const sshUser = (config.vpsUsername && config.vpsUsername !== "root")
+        ? config.vpsUsername
+        : (config.adminUsername || "root");
+
       const appInfoCmd = buildAppInfoJson({
         appId: "docker",
         appName: "Docker Engine",
         port: 22,
         protocol: "http",
         path: "",
-        username: "root",
+        username: sshUser,
         password: rootPassword,
-        url: `ssh://root@${ip}`
+        url: `ssh://${sshUser}@${ip}`
       });
 
       return `
@@ -1520,6 +1553,11 @@ curl -fsSL https://get.docker.com -o get-docker.sh
 sh get-docker.sh
 systemctl enable --now docker
 docker --version
+
+if [ -n "${sshUser}" ] && [ "${sshUser}" != "root" ] && id "${sshUser}" >/dev/null 2>&1; then
+  usermod -aG docker "${sshUser}" 2>/dev/null || true
+  usermod -aG sudo "${sshUser}" 2>/dev/null || true
+fi
 
 ${appInfoCmd}
 `;
@@ -1547,25 +1585,33 @@ ${appInfoCmd}
     estimatedTime: "~1-2 mins",
     adminUsername: "root",
     instructions: "Node.js 22 LTS, npm, pnpm, yarn, and PM2 are globally available via SSH.",
-    getInstallScript: (ip, rootPassword) => {
+    getInstallScript: (ip, rootPassword, config = {}) => {
+      const sshUser = (config.vpsUsername && config.vpsUsername !== "root")
+        ? config.vpsUsername
+        : (config.adminUsername || "root");
+
       const appInfoCmd = buildAppInfoJson({
         appId: "nodejs",
         appName: "Node.js 22 LTS",
         port: 22,
         protocol: "http",
         path: "",
-        username: "root",
+        username: sshUser,
         password: rootPassword,
-        url: `ssh://root@${ip}`
+        url: `ssh://${sshUser}@${ip}`
       });
 
       return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
-apt-get update && apt-get install -y curl
+apt-get update && apt-get install -y curl sudo
 curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
 apt-get install -y nodejs
 npm install -g pnpm yarn pm2
+
+if [ -n "${sshUser}" ] && [ "${sshUser}" != "root" ] && id "${sshUser}" >/dev/null 2>&1; then
+  usermod -aG sudo "${sshUser}" 2>/dev/null || true
+fi
 
 ${appInfoCmd}
 `;
