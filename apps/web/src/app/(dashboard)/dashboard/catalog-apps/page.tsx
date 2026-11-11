@@ -57,7 +57,7 @@ export default function CatalogAppsPage() {
   }, [filteredApps, currentPage]);
 
   const handleDeployApp = (app: VpsAppDefinition) => {
-    router.push(`/dashboard/checkout?service=vps&app=${encodeURIComponent(app.id)}`);
+    router.push(`/dashboard/checkout?service=APP_CATALOG&app=${encodeURIComponent(app.id)}`);
   };
 
   return (

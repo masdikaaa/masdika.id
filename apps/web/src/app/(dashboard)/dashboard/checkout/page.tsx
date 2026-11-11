@@ -701,8 +701,9 @@ function CheckoutContent() {
 
         {/* Service Checkout Content */}
         {selectedService === "VPS" || selectedService === "KUBERNETES" || selectedService === "APP_CATALOG" ? (
-          <div key="vps-flow" className="w-full max-w-full min-w-0 transition-all duration-200">
+          <div key={`vps-flow-${selectedService}`} className="w-full max-w-full min-w-0 transition-all duration-200">
             <VpsCheckoutFlow
+              key={selectedService}
               serviceType={selectedService}
               onServiceChange={(newService) => {
                 setSelectedService(newService);

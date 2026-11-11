@@ -468,12 +468,13 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
             setSelectedTemplate(firstTpl.id);
           }
 
-          // Check if an application was requested via query parameter (e.g. ?app=wordpress or ?appId=aapanel)
+          // Check if an application was requested via query parameter (e.g. ?app=wordpress or ?appId=aapanel) or if service is APP_CATALOG
           const urlApp = searchParams.get("app") || searchParams.get("appId");
-          if (urlApp) {
-            const matchedApp = getAppById(urlApp) || getAppByName(urlApp);
+          if (serviceType === "APP_CATALOG" || urlApp) {
+            const matchedApp = (urlApp ? getAppById(urlApp) || getAppByName(urlApp) : null) || VPS_APPS[0];
             if (matchedApp) {
               setImageMode("apps");
+              setSelectedAppCategory("All Apps");
               selectApp(matchedApp);
             }
           }
@@ -545,12 +546,14 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
     if (serviceType === "APP_CATALOG") {
       setImageMode("apps");
       setSelectedAppCategory("All Apps");
-      if (!selectedAppId && VPS_APPS.length > 0) {
-        selectApp(VPS_APPS[0]);
+      const urlApp = searchParams.get("app") || searchParams.get("appId");
+      const targetApp = (urlApp ? getAppById(urlApp) || getAppByName(urlApp) : null) || (selectedAppId ? getAppById(selectedAppId) : null) || VPS_APPS[0];
+      if (targetApp) {
+        selectApp(targetApp);
       }
     } else if (serviceType === "VPS") {
       const urlApp = searchParams.get("app") || searchParams.get("appId");
-      if (!urlApp && imageMode === "apps") {
+      if (!urlApp) {
         setImageMode("os");
         setSelectedAppId(null);
         setSelectedAppVersion(null);
