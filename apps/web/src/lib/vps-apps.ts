@@ -971,39 +971,58 @@ ${appInfoCmd}
     id: "hermes-agent",
     name: "HERMES AGENT",
     category: "Artificial Intelligence",
-    description: "Official Nous Research Hermes reasoning agent runtime with local model orchestration and tool calling.",
+    secondaryCategories: ["Developer"],
+    description: "Official Nous Research Hermes reasoning agent runtime with local model orchestration, tool calling, and autonomous skills.",
     icon: "/images/apps/hermes-agent.png",
-    defaultPort: 8080,
+    defaultPort: 22,
     defaultProtocol: "http",
+    isWebAccess: false,
+    accessType: "cli",
+    accessNote: "CLI reasoning agent accessed via SSH. Run 'hermes model' to configure AI providers and 'hermes' to chat (No web browser required).",
     osBase: "Ubuntu 26.04",
     appVersion: "v1.0",
     versions: [
       { id: "10-ubu26", label: "Hermes Agent v1.0 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v1.0" },
     ],
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
-    estimatedTime: "~3-5 mins",
-    adminUsername: "admin",
-    instructions: "Hermes Agent endpoint running on port 8080. Ready for API and tool execution calls.",
+    estimatedTime: "~2-4 mins",
+    adminUsername: "root",
+    instructions: "Connect via SSH ('ssh root@${ip}') and run 'hermes model' to configure models, then run 'hermes' to chat.",
     getInstallScript: (ip, rootPassword) => {
       const appInfoCmd = buildAppInfoJson({
         appId: "hermes-agent",
         appName: "Hermes Agent",
-        port: 8080,
+        port: 22,
         protocol: "http",
         path: "",
-        username: "admin",
+        username: "root",
         password: rootPassword,
-        url: `http://${ip}:8080`
+        url: `ssh://root@${ip}`
       });
 
       return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
-apt-get update && apt-get install -y curl
-which docker || (curl -fsSL https://get.docker.com | sh)
-systemctl enable --now docker
-for i in {1..30}; do docker info >/dev/null 2>&1 && break || sleep 1; done
-docker run -d --name hermes-agent --restart always -p 8080:8080 ghcr.io/nousresearch/hermes-function-calling:latest || docker run -d --name hermes-agent --restart always -p 8080:8080 nginx:alpine
+apt-get update && apt-get install -y curl git ca-certificates tar gzip build-essential python3 python3-pip python3-venv
+
+# 1. Install official Nous Research Hermes Agent via curl installer (non-interactive)
+echo "[HERMES] Installing Hermes Agent via curl https://hermes-agent.nousresearch.com/install.sh..."
+curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --non-interactive --skip-browser
+
+# 2. Globally link hermes binary to /usr/local/bin for all users
+for p in /root/.local/bin/hermes /root/.hermes/hermes-agent/.hermes/bin/hermes /root/.hermes/bin/hermes; do
+  if [ -f "$p" ]; then
+    ln -sf "$p" /usr/local/bin/hermes
+    chmod +x /usr/local/bin/hermes 2>/dev/null || true
+    break
+  fi
+done
+
+# 3. Add system-wide PATH profile
+cat << 'EOF' > /etc/profile.d/hermes.sh
+export PATH="$HOME/.local/bin:/root/.local/bin:/usr/local/bin:$PATH"
+EOF
+chmod +x /etc/profile.d/hermes.sh 2>/dev/null || true
 
 ${appInfoCmd}
 `;
@@ -1015,39 +1034,52 @@ ${appInfoCmd}
     id: "openclaw",
     name: "OPEN CLAW",
     category: "Artificial Intelligence",
+    secondaryCategories: ["Developer"],
     description: "Autonomous open-source AI assistant framework running locally across all your chats and devices.",
     icon: "/images/apps/openclaw.png",
-    defaultPort: 3000,
+    defaultPort: 22,
     defaultProtocol: "http",
+    isWebAccess: false,
+    accessType: "cli",
+    accessNote: "CLI assistant agent accessed via SSH. Run 'openclaw' in terminal to launch interactive wizard (No web browser required).",
     osBase: "Ubuntu 26.04",
     appVersion: "v2.0",
     versions: [
       { id: "20-ubu26", label: "OpenClaw v2.0 - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "v2.0" },
     ],
     minSpecs: { cpu: 2, ram: 2, disk: 20 },
-    estimatedTime: "~3-5 mins",
-    adminUsername: "admin",
-    instructions: "OpenClaw agent dashboard available at http://${ip}:3000.",
+    estimatedTime: "~2-3 mins",
+    adminUsername: "root",
+    instructions: "Connect via SSH ('ssh root@${ip}') and run 'openclaw' to configure and interact with the assistant.",
     getInstallScript: (ip, rootPassword) => {
       const appInfoCmd = buildAppInfoJson({
         appId: "openclaw",
         appName: "Open Claw",
-        port: 3000,
+        port: 22,
         protocol: "http",
         path: "",
-        username: "admin",
+        username: "root",
         password: rootPassword,
-        url: `http://${ip}:3000`
+        url: `ssh://root@${ip}`
       });
 
       return `
 set -e
 export DEBIAN_FRONTEND=noninteractive
-apt-get update && apt-get install -y curl
-which docker || (curl -fsSL https://get.docker.com | sh)
-systemctl enable --now docker
-for i in {1..30}; do docker info >/dev/null 2>&1 && break || sleep 1; done
-docker run -d --name openclaw --restart always -p 3000:3000 ghcr.io/openclaw/openclaw:latest || docker run -d --name openclaw --restart always -p 3000:3000 nginx:alpine
+apt-get update && apt-get install -y curl ca-certificates tar gzip nodejs npm
+
+# 1. Install OpenClaw via official curl installer or npm
+echo "[OPENCLAW] Installing OpenClaw via curl https://openclaw.ai/install.sh..."
+curl -fsSL https://openclaw.ai/install.sh | bash || npm install -g openclaw@latest || true
+
+# 2. Globally link openclaw binary to /usr/local/bin
+for p in /root/.openclaw/bin/openclaw /root/.local/bin/openclaw; do
+  if [ -f "$p" ]; then
+    ln -sf "$p" /usr/local/bin/openclaw
+    chmod +x /usr/local/bin/openclaw 2>/dev/null || true
+    break
+  fi
+done
 
 ${appInfoCmd}
 `;

@@ -1787,24 +1787,79 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                           </div>
                         </div>
 
-                        {targetUrl && (
-                          <a
-                            href={targetUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                        {appMeta?.isWebAccess === false ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const cmd = `ssh root@${primaryPublicIp || "ip"}`;
+                              navigator.clipboard.writeText(cmd);
+                              toast.success("SSH Command copied to clipboard");
+                            }}
                             className="px-5 py-2.5 rounded-xl font-bold text-xs bg-cyan-400 hover:bg-cyan-300 text-slate-950 flex items-center gap-2 transition-all shrink-0 shadow-xs cursor-pointer"
                           >
-                            <span>Open Web Dashboard</span>
-                            <ArrowRight className="w-3.5 h-3.5" />
-                          </a>
+                            <Terminal className="w-3.5 h-3.5" />
+                            <span>Copy SSH Command</span>
+                          </button>
+                        ) : (
+                          targetUrl && (
+                            <a
+                              href={targetUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-5 py-2.5 rounded-xl font-bold text-xs bg-cyan-400 hover:bg-cyan-300 text-slate-950 flex items-center gap-2 transition-all shrink-0 shadow-xs cursor-pointer"
+                            >
+                              <span>Open Web Dashboard</span>
+                              <ArrowRight className="w-3.5 h-3.5" />
+                            </a>
+                          )
                         )}
                       </div>
+
+                      {/* No Browser UI Notice Banner */}
+                      {appMeta?.isWebAccess === false && (
+                        <div className={cn(
+                          "mt-3.5 p-3 rounded-xl border text-xs flex items-start gap-2.5",
+                          isDark ? "bg-amber-950/20 border-amber-800/40 text-amber-300" : "bg-amber-50 border-amber-200 text-amber-900"
+                        )}>
+                          <Terminal className="w-4 h-4 shrink-0 text-amber-500 mt-0.5" />
+                          <div className="leading-relaxed">
+                            <strong className="font-semibold">No Browser UI:</strong>{" "}
+                            <span>{appMeta.accessNote || "This application is operated directly via SSH terminal or remote client (no web browser dashboard)."}</span>
+                          </div>
+                        </div>
+                      )}
 
                       {/* Access Details Bar */}
                       <div className={cn("mt-4 pt-4 border-t grid gap-3 text-xs", credentials?.email ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" : "grid-cols-1 sm:grid-cols-3", isDark ? "border-white/[0.06]" : "border-slate-100")}>
                         <div>
-                          <span className={cn("block text-[11px] mb-0.5", isDark ? "text-zinc-500" : "text-slate-400")}>Web Access URL</span>
-                          {targetUrl ? (
+                          <span className={cn("block text-[11px] mb-0.5", isDark ? "text-zinc-500" : "text-slate-400")}>
+                            {appMeta?.isWebAccess === false
+                              ? (appMeta.accessType === "database" ? "Database Endpoint" : "SSH Terminal Access")
+                              : "Web Access URL"}
+                          </span>
+                          {appMeta?.isWebAccess === false ? (
+                            <div className="flex items-center gap-1.5">
+                              <code className="font-mono font-bold text-cyan-400 truncate">
+                                {appMeta.accessType === "database"
+                                  ? (targetUrl || `${appMeta.id}://${credentials?.username || "root"}:${credentials?.password || "password"}@${primaryPublicIp || "ip"}:${appMeta.defaultPort}`)
+                                  : `ssh root@${primaryPublicIp || "ip"}`}
+                              </code>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const val = appMeta.accessType === "database"
+                                    ? (targetUrl || `${appMeta.id}://${credentials?.username || "root"}:${credentials?.password || "password"}@${primaryPublicIp || "ip"}:${appMeta.defaultPort}`)
+                                    : `ssh root@${primaryPublicIp || "ip"}`;
+                                  navigator.clipboard.writeText(val);
+                                  toast.success("Copied to clipboard");
+                                }}
+                                className="p-1 rounded hover:bg-white/10 text-zinc-400 hover:text-white cursor-pointer"
+                                title="Copy"
+                              >
+                                <Copy className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ) : targetUrl ? (
                             <div className="flex items-center gap-1.5">
                               <a href={targetUrl} target="_blank" rel="noopener noreferrer" className="font-mono font-bold text-cyan-400 hover:underline truncate">
                                 {targetUrl}
