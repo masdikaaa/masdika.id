@@ -106,11 +106,11 @@ export async function getK8sClusterConfig(forceRefresh = false): Promise<K8sClus
   const skipTlsVerify = skipTlsSetting !== undefined ? skipTlsSetting === 'true' : true;
   const caCert = settingMap.get('managed_db_ca_cert') || process.env.MANAGED_DB_CA_CERT || '';
 
-  const publicDomain = settingMap.get('managed_db_public_domain') || process.env.MANAGED_DB_PUBLIC_DOMAIN || '';
-  const publicIp = settingMap.get('managed_db_public_ip') || process.env.MANAGED_DB_PUBLIC_IP || '';
-  const pmaUrl = settingMap.get('managed_db_pma_url') || process.env.MANAGED_DB_PMA_URL || '';
-  const pgadminUrl = settingMap.get('managed_db_pgadmin_url') || process.env.MANAGED_DB_PGADMIN_URL || '';
-  const mongoUrl = settingMap.get('managed_db_mongo_url') || process.env.MANAGED_DB_MONGO_URL || '';
+  const publicDomain = settingMap.get('managed_db_public_domain') || process.env.MANAGED_DB_PUBLIC_DOMAIN || 'db.masdika.id';
+  const publicIp = settingMap.get('managed_db_public_ip') || process.env.MANAGED_DB_PUBLIC_IP || '103.247.10.61';
+  const pmaUrl = settingMap.get('managed_db_pma_url') || process.env.MANAGED_DB_PMA_URL || 'https://pma.db.masdika.id';
+  const pgadminUrl = settingMap.get('managed_db_pgadmin_url') || process.env.MANAGED_DB_PGADMIN_URL || 'https://pgadmin.db.masdika.id';
+  const mongoUrl = settingMap.get('managed_db_mongo_url') || process.env.MANAGED_DB_MONGO_URL || 'https://mongo.db.masdika.id';
 
   cachedClusterConfig = {
     authMode,
@@ -130,11 +130,11 @@ export async function getK8sClusterConfig(forceRefresh = false): Promise<K8sClus
   return cachedClusterConfig;
 }
 
-export const MANAGED_DB_PUBLIC_DOMAIN = process.env.MANAGED_DB_PUBLIC_DOMAIN || '';
-export const MANAGED_DB_PUBLIC_IP = process.env.MANAGED_DB_PUBLIC_IP || '';
-export const MANAGED_DB_PMA_URL = process.env.MANAGED_DB_PMA_URL || '';
-export const MANAGED_DB_PGADMIN_URL = process.env.MANAGED_DB_PGADMIN_URL || '';
-export const MANAGED_DB_MONGO_URL = process.env.MANAGED_DB_MONGO_URL || '';
+export const MANAGED_DB_PUBLIC_DOMAIN = process.env.MANAGED_DB_PUBLIC_DOMAIN || 'db.masdika.id';
+export const MANAGED_DB_PUBLIC_IP = process.env.MANAGED_DB_PUBLIC_IP || '103.247.10.61';
+export const MANAGED_DB_PMA_URL = process.env.MANAGED_DB_PMA_URL || 'https://pma.db.masdika.id';
+export const MANAGED_DB_PGADMIN_URL = process.env.MANAGED_DB_PGADMIN_URL || 'https://pgadmin.db.masdika.id';
+export const MANAGED_DB_MONGO_URL = process.env.MANAGED_DB_MONGO_URL || 'https://mongo.db.masdika.id';
 
 /**
  * Build an authenticated KubeConfig instance from DB settings
@@ -366,10 +366,14 @@ export function parseDatabasePlanLimits(planSpecsJson?: string | null): {
     const shared = parsed.shared !== undefined ? Boolean(parsed.shared) : undefined;
     let cpuShares = 0.5;
     if (parsed.cpu) {
-      const cpuStr = String(parsed.cpu).toLowerCase();
-      if (cpuStr.includes('m')) {
-        const milli = parseInt(cpuStr.replace(/[^0-9]/g, ''), 10);
-        cpuShares = isNaN(milli) ? 0.5 : milli / 1000;
+      const cpuStr = String(parsed.cpu).trim();
+      const milliMatch = cpuStr.match(/(\d+)\s*m(?:illi)?\b/i);
+      const vcpuMatch = cpuStr.match(/([\d.]+)\s*(?:v?cpu|cores?)/i);
+
+      if (milliMatch) {
+        cpuShares = parseInt(milliMatch[1], 10) / 1000;
+      } else if (vcpuMatch) {
+        cpuShares = parseFloat(vcpuMatch[1]);
       } else {
         const val = parseFloat(cpuStr.replace(/[^0-9.]/g, ''));
         cpuShares = isNaN(val) ? 0.5 : val;
@@ -793,7 +797,10 @@ export async function exportDatabaseDump(
       return { success: false, error: 'Database pod is not running' };
     }
 
-    const podName = pod.metadata?.name!;
+    const podName = pod.metadata?.name;
+    if (!podName) {
+      return { success: false, error: 'Pod name not found' };
+    }
     const typeUpper = db.type.toUpperCase();
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
 
@@ -856,7 +863,10 @@ export async function importDatabaseDump(
       return { success: false, error: 'Database pod is not running' };
     }
 
-    const podName = pod.metadata?.name!;
+    const podName = pod.metadata?.name;
+    if (!podName) {
+      return { success: false, error: 'Pod name not found' };
+    }
     const typeUpper = db.type.toUpperCase();
 
     let command: string[] = [];

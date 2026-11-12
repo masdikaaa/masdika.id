@@ -359,7 +359,6 @@ export default function LoginPage() {
                     <div className={cn("flex-grow border-t", isDark ? "border-white/10" : "border-slate-200")} />
                   </div>
 
-                  {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
                   <a
                     href="/api/auth/google/login"
                     className={cn(

@@ -283,6 +283,15 @@ app.prepare().then(async () => {
       console.warn('> [Invoice Standardizer] Failed to load module:', err?.message || err);
     });
 
+    // 🗄️ Ensure all 6 Managed Database plans (1 Shared + 5 Dedicated tiers) are seeded & ready
+    import("./lib/database-plans").then(({ ensureDatabasePlansExist }) => {
+      ensureDatabasePlansExist().then(() => {
+        console.log('> [Database Plans] Managed database plan catalog verified and active.');
+      }).catch((err) => {
+        console.warn('> [Database Plans] Startup catalog check note:', err?.message || err);
+      });
+    }).catch(() => {});
+
     // 🛡️ Auto-recover any VPS reinstalls or background jobs interrupted by previous container restart / deployment
     import("./lib/stale-service-recovery").then(({ recoverStaleReinstalls }) => {
       recoverStaleReinstalls().then((count) => {

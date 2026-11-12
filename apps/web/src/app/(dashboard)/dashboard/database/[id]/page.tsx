@@ -133,7 +133,12 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
 
   const handleDownloadDump = () => {
     toast.info("Preparing SQL dump download from container...");
-    window.location.href = `/api/user/database/${dbId}/export`;
+    const link = document.createElement("a");
+    link.href = `/api/user/database/${dbId}/export`;
+    link.setAttribute("download", "");
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
   };
 
   const handleImport = async (e: React.FormEvent) => {

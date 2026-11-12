@@ -51,11 +51,11 @@ export async function GET() {
     settingsObj['managed_db_service_token'] = hasServiceToken ? MASKED_SECRET : '';
     settingsObj['managed_db_skip_tls'] = settingsObj['managed_db_skip_tls'] ?? 'true';
     settingsObj['managed_db_ca_cert'] = settingsObj['managed_db_ca_cert'] || '';
-    settingsObj['managed_db_public_domain'] = settingsObj['managed_db_public_domain'] || process.env.MANAGED_DB_PUBLIC_DOMAIN || '';
-    settingsObj['managed_db_public_ip'] = settingsObj['managed_db_public_ip'] || process.env.MANAGED_DB_PUBLIC_IP || '';
-    settingsObj['managed_db_pma_url'] = settingsObj['managed_db_pma_url'] || process.env.MANAGED_DB_PMA_URL || '';
-    settingsObj['managed_db_pgadmin_url'] = settingsObj['managed_db_pgadmin_url'] || process.env.MANAGED_DB_PGADMIN_URL || '';
-    settingsObj['managed_db_mongo_url'] = settingsObj['managed_db_mongo_url'] || process.env.MANAGED_DB_MONGO_URL || '';
+    settingsObj['managed_db_public_domain'] = settingsObj['managed_db_public_domain'] || process.env.MANAGED_DB_PUBLIC_DOMAIN || 'db.masdika.id';
+    settingsObj['managed_db_public_ip'] = settingsObj['managed_db_public_ip'] || process.env.MANAGED_DB_PUBLIC_IP || '103.247.10.61';
+    settingsObj['managed_db_pma_url'] = settingsObj['managed_db_pma_url'] || process.env.MANAGED_DB_PMA_URL || 'https://pma.db.masdika.id';
+    settingsObj['managed_db_pgadmin_url'] = settingsObj['managed_db_pgadmin_url'] || process.env.MANAGED_DB_PGADMIN_URL || 'https://pgadmin.db.masdika.id';
+    settingsObj['managed_db_mongo_url'] = settingsObj['managed_db_mongo_url'] || process.env.MANAGED_DB_MONGO_URL || 'https://mongo.db.masdika.id';
 
     return NextResponse.json({
       user: {

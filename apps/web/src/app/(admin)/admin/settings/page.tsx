@@ -2060,7 +2060,7 @@ export default function SettingsPage() {
                             name="managed_db_pgadmin_url"
                             value={formData.managed_db_pgadmin_url}
                             onChange={handleChange}
-                            placeholder="e.g. https://pgadmin.example.com"
+                            placeholder="e.g. https://pgadmin.db.masdika.id"
                             className={inputClass}
                           />
                           <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Web panel URL for PostgreSQL instances</p>
@@ -2073,7 +2073,7 @@ export default function SettingsPage() {
                             name="managed_db_mongo_url"
                             value={formData.managed_db_mongo_url}
                             onChange={handleChange}
-                            placeholder="e.g. https://mongo.example.com"
+                            placeholder="e.g. https://mongo.db.masdika.id"
                             className={inputClass}
                           />
                           <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Web panel URL for MongoDB collections & documents</p>
