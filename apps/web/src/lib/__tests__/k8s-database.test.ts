@@ -1,4 +1,45 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+vi.mock('@/lib/prisma', () => ({
+  prisma: {
+    plan: {
+      findFirst: vi.fn(),
+      findMany: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+    },
+    setting: {
+      findMany: vi.fn(),
+      findUnique: vi.fn(),
+      upsert: vi.fn(),
+    },
+    subscription: {
+      count: vi.fn(),
+    },
+  },
+}));
+
+vi.mock('../prisma', () => ({
+  prisma: {
+    plan: {
+      findFirst: vi.fn(),
+      findMany: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+    },
+    setting: {
+      findMany: vi.fn(),
+      findUnique: vi.fn(),
+      upsert: vi.fn(),
+    },
+    subscription: {
+      count: vi.fn(),
+    },
+  },
+}));
+
 import {
   buildConnectionDetails,
   parseDatabasePlanLimits,

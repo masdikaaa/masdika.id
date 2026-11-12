@@ -28,7 +28,7 @@ if (!process.env.DATABASE_URL) {
   }
 }
 
-const dbUrlString = process.env.DATABASE_URL;
+const dbUrlString = process.env.DATABASE_URL || (process.env.NODE_ENV === 'test' || process.env.VITEST ? 'postgresql://dummy:dummy@localhost:5432/dummy?schema=public' : undefined);
 if (!dbUrlString) {
   throw new Error('Please define the DATABASE_URL environment variable inside .env');
 }
