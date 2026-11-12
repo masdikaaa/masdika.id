@@ -653,7 +653,7 @@ export default function DatabaseCheckoutFlow() {
                     Storage Size
                   </h2>
                   <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
-                    Choose disk quota on ultra-fast NVMe storage. Scale up anytime.
+                    Choose disk quota on ultra-fast SSD storage. Scale up anytime.
                   </p>
                 </div>
 
@@ -819,7 +819,7 @@ export default function DatabaseCheckoutFlow() {
                     Storage Size
                   </div>
                   <div className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>
-                    {storageGb} GB NVMe
+                    {storageGb} GB SSD
                   </div>
                 </div>
 
@@ -877,7 +877,7 @@ export default function DatabaseCheckoutFlow() {
                     Storage Size
                   </div>
                   <div className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>
-                    {storageGb} GB NVMe
+                    {storageGb} GB SSD
                   </div>
                 </div>
 

@@ -126,7 +126,7 @@ const SERVICES: ServiceDef[] = [
     name: "Managed Database",
     category: "DATABASE",
     icon: Database,
-    desc: "Production-ready MySQL, MariaDB, PostgreSQL & MongoDB with NVMe storage & web GUI in Sidoarjo.",
+    desc: "Production-ready MySQL, MariaDB, PostgreSQL & MongoDB with SSD storage & web GUI in Sidoarjo.",
     badge: "Cloud DB",
     tags: ["MySQL/PG/Mongo", "phpMyAdmin/pgAdmin", "Pay As You Go", "Sidoarjo Region"]
   },

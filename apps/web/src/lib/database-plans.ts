@@ -28,7 +28,7 @@ export const OFFICIAL_DATABASE_PLANS: DatabasePlanDefinition[] = [
   {
     name: 'Shared Database',
     service: 'DATABASE',
-    description: 'Shared multi-tenant database with isolated container runtime and NVMe storage. Billed per GB starting from 1 GB.',
+    description: 'Shared multi-tenant database with isolated container runtime and SSD storage. Billed per GB starting from 1 GB.',
     price: 10000,
     hourlyPrice: 14,
     limits: {

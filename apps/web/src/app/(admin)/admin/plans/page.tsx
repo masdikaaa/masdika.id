@@ -160,7 +160,7 @@ export default function AdminPlansPage() {
       name: initialService === "DATABASE" ? "Shared Database" : "Starter",
       service: initialService,
       description: initialService === "DATABASE" 
-        ? "High-performance shared managed database with isolated container & NVMe storage in Sidoarjo."
+        ? "High-performance shared managed database with isolated container & SSD storage in Sidoarjo."
         : "Standard microservice pricing tier.",
       price: initialService === "DATABASE" ? 20000 : 45000,
       hourlyPrice: initialService === "DATABASE" ? 28 : 62,
@@ -1035,7 +1035,7 @@ export default function AdminPlansPage() {
                   type="text"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="e.g. High-performance shared managed database with isolated container & NVMe storage in Sidoarjo."
+                  placeholder="e.g. High-performance shared managed database with isolated container & SSD storage in Sidoarjo."
                   className={cn("w-full border rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-all font-medium", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
@@ -1182,7 +1182,7 @@ export default function AdminPlansPage() {
                       </div>
                       <div>
                         <label className={cn("text-[11px] font-bold block mb-1", isDark ? "text-zinc-400" : "text-slate-600")}>
-                          NVMe Storage
+                          SSD Storage
                         </label>
                         <input
                           type="text"

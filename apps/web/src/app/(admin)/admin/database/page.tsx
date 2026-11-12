@@ -287,7 +287,7 @@ export default function AdminDatabasePage() {
         <div className={cn("rounded-2xl border p-5 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-xs")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-[11px] font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
-              NVME DISK QUOTA
+              SSD DISK QUOTA
             </span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-amber-500/15 border-amber-500/25 text-amber-400" : "bg-amber-50 border-amber-200 text-amber-700")}>
               <HardDrive className="w-4 h-4" />

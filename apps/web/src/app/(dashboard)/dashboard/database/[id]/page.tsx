@@ -652,7 +652,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                     </span>
                   </div>
                   <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
-                    Dedicated instance utilization for vCPU compute, RAM memory, and persistent NVMe disk storage.
+                    Dedicated instance utilization for vCPU compute, RAM memory, and persistent SSD disk storage.
                   </p>
                 </div>
 
@@ -734,7 +734,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                   </div>
                 </button>
 
-                {/* NVMe Disk Card */}
+                {/* SSD Disk Card */}
                 <button
                   type="button"
                   onClick={() => setActiveMetricTab("DISK")}
@@ -748,7 +748,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                   <div className="flex items-center justify-between mb-1">
                     <span className={cn("text-[10px] font-bold uppercase tracking-wider flex items-center gap-1", isDark ? "text-zinc-400" : "text-slate-500")}>
                       <HardDrive className="w-3.5 h-3.5 text-emerald-400" />
-                      NVMe Storage
+                      SSD Storage
                     </span>
                     <span className="text-[10px] font-mono text-emerald-400 font-bold">{db.storageGb} GB Quota</span>
                   </div>
@@ -769,7 +769,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                   {activeMetricTab === "ALL" && "All Resource Metrics Combined (%)"}
                   {activeMetricTab === "CPU" && `CPU Load Over Time (${db.cpuShares} vCPU Dedicated)`}
                   {activeMetricTab === "RAM" && `Memory Consumption Over Time (Allocated: ${db.memoryMb} MB)`}
-                  {activeMetricTab === "DISK" && `Persistent NVMe Disk Utilization (Allocated: ${db.storageGb} GB)`}
+                  {activeMetricTab === "DISK" && `Persistent SSD Disk Utilization (Allocated: ${db.storageGb} GB)`}
                 </span>
 
                 <div className="flex items-center gap-1">
@@ -823,7 +823,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                       formatter={(value: any, name: any) => {
                         if (name === "CPU %" || name === "cpu") return [`${value}%`, "CPU Load"];
                         if (name === "RAM %" || name === "memory") return [`${value}%`, "RAM Memory"];
-                        if (name === "Disk %" || name === "disk") return [`${value}%`, "NVMe Disk"];
+                        if (name === "Disk %" || name === "disk") return [`${value}%`, "SSD Disk"];
                         return [value, name];
                       }}
                       labelFormatter={(label) => `Timestamp: ${label}`}
@@ -986,7 +986,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
 
               <div className="flex items-center justify-between text-xs">
                 <span className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Storage Volume</span>
-                <span className="font-semibold">{db.storageGb} GB NVMe</span>
+                <span className="font-semibold">{db.storageGb} GB SSD</span>
               </div>
 
               <div className="flex items-center justify-between text-xs">

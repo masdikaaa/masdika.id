@@ -294,7 +294,7 @@ export default function DatabaseListingPage() {
             </span>
           </div>
           <p className={cn("text-xs sm:text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
-            High-performance managed MySQL, MariaDB, PostgreSQL & MongoDB with isolated containers, NVMe storage & web GUI.
+            High-performance managed MySQL, MariaDB, PostgreSQL & MongoDB with isolated containers, SSD storage & web GUI.
           </p>
         </div>
 
@@ -417,7 +417,7 @@ export default function DatabaseListingPage() {
             No Managed Databases Provisioned
           </h2>
           <p className={cn("text-xs sm:text-sm max-w-md mx-auto mb-6 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
-            Deploy isolated MySQL, MariaDB, PostgreSQL or MongoDB containers with persistent NVMe storage, automated PAYG billing at Rp 20.000 / month, and web admin panels.
+            Deploy isolated MySQL, MariaDB, PostgreSQL or MongoDB containers with persistent SSD storage, automated PAYG billing at Rp 20.000 / month, and web admin panels.
           </p>
           <Link
             href="/dashboard/database/new"
@@ -521,7 +521,7 @@ export default function DatabaseListingPage() {
                       <Layers className="w-3 h-3 text-purple-400" /> {db.memoryMb >= 1024 ? `${db.memoryMb / 1024} GB` : `${db.memoryMb} MB`} RAM
                     </span>
                     <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-semibold border flex items-center gap-1", isDark ? "bg-white/[0.04] text-zinc-300 border-white/[0.08]" : "bg-slate-100 text-slate-700 border-slate-200")}>
-                      <HardDrive className="w-3 h-3 text-amber-400" /> {db.storageGb} GB NVMe
+                      <HardDrive className="w-3 h-3 text-amber-400" /> {db.storageGb} GB SSD
                     </span>
                     <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-semibold border", isDark ? "bg-white/[0.04] text-zinc-300 border-white/[0.08]" : "bg-slate-100 text-slate-700 border-slate-200")}>
                       📍 {db.region}
