@@ -6,19 +6,40 @@ metadata:
 data:
   config.user.inc.php: |
     <?php
-    // Automatically parse host:port into 'host port' for phpMyAdmin arbitrary server support
-    if (isset($_REQUEST['pma_servername'])) {
-        $server = trim($_REQUEST['pma_servername']);
-        if (strpos($server, ':') !== false) {
-            [$h, $p] = explode(':', $server, 2);
-            $_REQUEST['pma_servername'] = $h . ' ' . $p;
+    // Normalize colon to space for arbitrary server in all request arrays
+    foreach (['_REQUEST', '_POST', '_GET'] as $src) {
+        if (isset($GLOBALS[$src]['pma_servername'])) {
+            $GLOBALS[$src]['pma_servername'] = str_replace(':', ' ', trim($GLOBALS[$src]['pma_servername']));
         }
     }
-    if (isset($_REQUEST['pma_port']) && !empty($_REQUEST['pma_port']) && isset($_REQUEST['pma_servername'])) {
-        if (strpos($_REQUEST['pma_servername'], ' ') === false) {
-            $_REQUEST['pma_servername'] .= ' ' . trim($_REQUEST['pma_port']);
-        }
+    if (!empty($_GET['pma_servername'])) {
+        $GLOBALS['pma_auth_server'] = str_replace(':', ' ', trim($_GET['pma_servername']));
     }
+
+    // Auto-fill javascript for login page
+    register_shutdown_function(function() {
+        if (isset($_GET['pma_servername']) || isset($_GET['pma_username'])) {
+            $server = htmlspecialchars($_GET['pma_servername'] ?? '', ENT_QUOTES);
+            $user = htmlspecialchars($_GET['pma_username'] ?? '', ENT_QUOTES);
+            echo "<script>
+            (function() {
+                function prefill() {
+                    var s = document.getElementById('serverNameInput');
+                    var u = document.getElementById('input_username');
+                    if (s && '{$server}') s.value = '{$server}'.replace(':', ' ');
+                    if (u && '{$user}') u.value = '{$user}';
+                }
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', prefill);
+                } else {
+                    prefill();
+                }
+                setTimeout(prefill, 200);
+                setTimeout(prefill, 500);
+            })();
+            </script>";
+        }
+    });
 ---
 apiVersion: apps/v1
 kind: Deployment

@@ -1104,6 +1104,24 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                 </div>
               </div>
 
+              {/* Contextual Web GUI Guidance */}
+              <div className={cn("p-2.5 rounded-xl border text-[11px] leading-relaxed mb-4 flex items-start gap-2", isDark ? "bg-cyan-950/20 border-cyan-500/20 text-cyan-300" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
+                <span className="shrink-0 mt-0.5">💡</span>
+                {db.type?.toUpperCase().includes('MONGO') ? (
+                  <span>
+                    <strong>Login Mongo Express:</strong> Saat browser membuka halaman dan menampilkan jendela <em>&quot;Sign in&quot;</em>, masukkan <strong>User</strong> dan <strong>Pass</strong> di atas (bukan email akun web). Database Anda otomatis terisolasi.
+                  </span>
+                ) : db.type?.toUpperCase().includes('POSTGRES') ? (
+                  <span>
+                    <strong>Login pgAdmin 4:</strong> Masukkan <strong>User</strong> dan <strong>Pass</strong> di atas untuk login. Server database instance Anda telah otomatis terdaftar dan diisolasi di dalam workspace pgAdmin.
+                  </span>
+                ) : (
+                  <span>
+                    <strong>Login phpMyAdmin:</strong> Host dan Username akan otomatis terisi saat mengklik tombol <em>Launch phpMyAdmin</em>. Cukup salin <strong>Pass</strong> di atas lalu klik <strong>Log in</strong>.
+                  </span>
+                )}
+              </div>
+
               {isProvisioning ? (
                 <button
                   type="button"

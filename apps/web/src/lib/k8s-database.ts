@@ -522,6 +522,26 @@ export function generateDatabaseManifest(db: DatabaseServiceRecord): string {
   }
 
   const isMongo = typeUpper === 'MONGODB' || typeUpper === 'MONGO';
+  const mongoConfigMap = isMongo
+    ? `---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cm-mongo-${name}
+  namespace: ${ns}
+  labels:
+    app: ${name}
+    managed-by: masdika-cloud
+data:
+  config.js: |
+    export default {
+      mongodb: {
+        whitelist: ['${db.dbName}']
+      }
+    };
+`
+    : '';
+
   const mongoExpressContainer = isMongo
     ? `
       - name: mongo-express
@@ -531,6 +551,8 @@ export function generateDatabaseManifest(db: DatabaseServiceRecord): string {
         - containerPort: 8081
           name: web-gui
         env:
+        - name: ME_CONFIG_MONGODB_URL
+          value: "mongodb://127.0.0.1:27017"
         - name: ME_CONFIG_MONGODB_SERVER
           value: "127.0.0.1"
         - name: ME_CONFIG_MONGODB_PORT
@@ -559,6 +581,10 @@ export function generateDatabaseManifest(db: DatabaseServiceRecord): string {
           value: "masdika-cookie-${db.id}"
         - name: ME_CONFIG_SITE_SESSIONSECRET
           value: "masdika-session-${db.id}"
+        volumeMounts:
+        - name: mongo-config
+          mountPath: /app/config.js
+          subPath: config.js
         resources:
           requests:
             cpu: 50m
@@ -635,7 +661,7 @@ spec:
     requests:
       storage: ${db.storageGb}Gi
   storageClassName: local-path
----
+${mongoConfigMap}---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -704,7 +730,10 @@ ${envYaml}
       volumes:
       - name: db-storage
         persistentVolumeClaim:
-          claimName: ${pvcName}
+          claimName: ${pvcName}${isMongo ? `
+      - name: mongo-config
+        configMap:
+          name: cm-mongo-${name}` : ''}
 ---
 apiVersion: v1
 kind: Service
@@ -792,6 +821,39 @@ export async function syncPgAdminUser(
 }
 
 /**
+ * Ensure MongoDB initial collection is registered so it immediately shows up in Mongo Express & disk
+ */
+export async function initMongoDatabase(db: DatabaseServiceRecord): Promise<void> {
+  try {
+    const kc = await getK8sKubeConfig();
+    const coreApi = kc.makeApiClient(k8s.CoreV1Api);
+    const ns = db.k8sNamespace || 'managed-db';
+    const podLabel = `app=db-${db.id}`;
+
+    let podName = '';
+    for (let i = 0; i < 15; i++) {
+      const podList = await coreApi.listNamespacedPod({
+        namespace: ns,
+        labelSelector: podLabel,
+      });
+      const p = podList.items?.find((item) => item.status?.phase === 'Running');
+      if (p?.metadata?.name) {
+        podName = p.metadata.name;
+        break;
+      }
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+
+    if (!podName) return;
+
+    const cmd = `mongosh -u ${escapeShellArg(db.username)} -p ${escapeShellArg(db.password)} --authenticationDatabase admin --eval "db.getSiblingDB('${escapeShellArg(db.dbName)}').createCollection('_init')"`;
+    await execInPod(kc, ns, podName, 'database', ['sh', '-c', cmd]);
+  } catch (err) {
+    console.error('[initMongoDatabase Error]', err);
+  }
+}
+
+/**
  * Deploy a database instance onto Kubernetes using the native Kubernetes API
  */
 export async function deployDatabase(db: DatabaseServiceRecord): Promise<{ success: boolean; error?: string }> {
@@ -806,6 +868,8 @@ export async function deployDatabase(db: DatabaseServiceRecord): Promise<{ succe
     const typeUpper = db.type.toUpperCase();
     if (typeUpper === 'POSTGRES' || typeUpper === 'POSTGRESQL') {
       syncPgAdminUser(db, 'create').catch((e) => console.error('[pgAdmin Auto-Provision Failed]', e));
+    } else if (typeUpper === 'MONGODB' || typeUpper === 'MONGO') {
+      initMongoDatabase(db).catch((e) => console.error('[Mongo Auto-Init Failed]', e));
     }
 
     return { success: true };
