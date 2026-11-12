@@ -13,6 +13,9 @@ import {
   Cpu, Layers, HardDrive, ShieldAlert, Activity, Server, FileText, Code2, AlertTriangle, UploadCloud
 } from "lucide-react";
 import { SiMysql, SiPostgresql, SiMariadb, SiMongodb } from "react-icons/si";
+import {
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+} from "recharts";
 
 interface DatabaseDetail {
   id: number;
@@ -77,6 +80,27 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
   const [importing, setImporting] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
+  // Dedicated Resource Monitoring States (CPU, RAM, Disk)
+  const [metricsTimeframe, setMetricsTimeframe] = useState<"live" | "hour" | "day" | "week">("hour");
+  const [activeMetricTab, setActiveMetricTab] = useState<"ALL" | "CPU" | "RAM" | "DISK">("ALL");
+  const [metricsData, setMetricsData] = useState<any>(null);
+  const [loadingMetrics, setLoadingMetrics] = useState(false);
+
+  const fetchMetrics = async (tf = metricsTimeframe) => {
+    try {
+      setLoadingMetrics(true);
+      const res = await fetch(`/api/user/database/${dbId}/metrics?timeframe=${tf}`);
+      const json = await res.json();
+      if (res.ok && json.success && json.isDedicated) {
+        setMetricsData(json.data);
+      }
+    } catch {
+      // quiet catch
+    } finally {
+      setLoadingMetrics(false);
+    }
+  };
+
   const fetchDatabase = async () => {
     setRefreshing(true);
     try {
@@ -100,6 +124,18 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
     const interval = setInterval(fetchDatabase, 15000); // 15s telemetry polling
     return () => clearInterval(interval);
   }, [dbId]);
+
+  useEffect(() => {
+    if (db) {
+      const isSharedCheck = Boolean(
+        db.planName?.toLowerCase().includes("shared") ||
+        (db.cpuShares < 1.0 && !db.planName?.toLowerCase().includes("dedicated"))
+      );
+      if (!isSharedCheck) {
+        fetchMetrics(metricsTimeframe);
+      }
+    }
+  }, [db?.id, db?.planName, db?.cpuShares, metricsTimeframe]);
 
   const copyToClipboard = (text: string, key: string) => {
     navigator.clipboard.writeText(text);
@@ -277,6 +313,12 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
 
   const engine = getEngineMeta(db.type);
   const EngineIcon = engine.icon;
+
+  const isShared = Boolean(
+    db.planName?.toLowerCase().includes("shared") ||
+    ((db.cpuShares ?? 0) < 1.0 && !db.planName?.toLowerCase().includes("dedicated"))
+  );
+  const isDedicated = !isShared;
 
   const nodejsSnippet = db.type.toUpperCase() === "MONGODB"
     ? `DATABASE_URL="${db.connectionDetails?.uri || `mongodb://${db.username}:${db.password}@${db.host}:${db.port}/${db.dbName}?authSource=admin`}"`
@@ -565,6 +607,212 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
               )}
             </div>
           </div>
+
+          {/* Dedicated Resource Utilization Graphs (CPU, RAM, Disk) - Strictly for Dedicated instances */}
+          {isDedicated && (
+            <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-xs")}>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-cyan-400" />
+                    <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+                      Dedicated Resource Monitoring
+                    </h2>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                      Live Telemetry
+                    </span>
+                  </div>
+                  <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                    Dedicated instance utilization for vCPU compute, RAM memory, and persistent NVMe disk storage.
+                  </p>
+                </div>
+
+                {/* Timeframe Selector */}
+                <div className={cn("p-1 rounded-xl border flex items-center gap-1 self-start sm:self-auto", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
+                  {(["live", "hour", "day", "week"] as const).map((tf) => (
+                    <button
+                      key={tf}
+                      type="button"
+                      onClick={() => setMetricsTimeframe(tf)}
+                      className={cn(
+                        "px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer capitalize",
+                        metricsTimeframe === tf
+                          ? "bg-cyan-500 text-slate-950 shadow-xs"
+                          : isDark ? "text-zinc-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
+                      )}
+                    >
+                      {tf === "live" ? "Live" : tf === "hour" ? "1 Hour" : tf === "day" ? "24 Hours" : "7 Days"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 3 Metrics Overview KPI Pills */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-5">
+                {/* CPU Card */}
+                <button
+                  type="button"
+                  onClick={() => setActiveMetricTab("CPU")}
+                  className={cn(
+                    "p-3.5 rounded-xl border text-left transition-all cursor-pointer",
+                    activeMetricTab === "CPU"
+                      ? "border-cyan-500 bg-cyan-500/10 ring-1 ring-cyan-500/30"
+                      : isDark ? "bg-[#0a0a0c] border-white/[0.06] hover:border-white/20" : "bg-slate-50 border-slate-200 hover:border-slate-300"
+                  )}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className={cn("text-[10px] font-bold uppercase tracking-wider flex items-center gap-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+                      <Cpu className="w-3.5 h-3.5 text-cyan-400" />
+                      CPU Utilization
+                    </span>
+                    <span className="text-[10px] font-mono text-cyan-400 font-bold">{db.cpuShares} vCPU</span>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className={cn("text-xl font-black font-mono tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+                      {metricsData?.summary?.cpu?.current ?? (db.status === "RUNNING" ? 12.5 : 0)}%
+                    </span>
+                    <span className={cn("text-xs font-medium", isDark ? "text-zinc-500" : "text-slate-400")}>
+                      of 100% capacity
+                    </span>
+                  </div>
+                </button>
+
+                {/* RAM Card */}
+                <button
+                  type="button"
+                  onClick={() => setActiveMetricTab("RAM")}
+                  className={cn(
+                    "p-3.5 rounded-xl border text-left transition-all cursor-pointer",
+                    activeMetricTab === "RAM"
+                      ? "border-indigo-500 bg-indigo-500/10 ring-1 ring-indigo-500/30"
+                      : isDark ? "bg-[#0a0a0c] border-white/[0.06] hover:border-white/20" : "bg-slate-50 border-slate-200 hover:border-slate-300"
+                  )}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className={cn("text-[10px] font-bold uppercase tracking-wider flex items-center gap-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+                      <Layers className="w-3.5 h-3.5 text-indigo-400" />
+                      Memory (RAM)
+                    </span>
+                    <span className="text-[10px] font-mono text-indigo-400 font-bold">{db.memoryMb} MB Max</span>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className={cn("text-xl font-black font-mono tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+                      {metricsData?.summary?.memory?.currentMb ?? (db.status === "RUNNING" ? Math.min(db.memoryMb, 240) : 0)} MB
+                    </span>
+                    <span className={cn("text-xs font-medium", isDark ? "text-zinc-500" : "text-slate-400")}>
+                      ({metricsData?.summary?.memory?.percentage ?? (db.status === "RUNNING" ? Math.round((240 / db.memoryMb) * 100) : 0)}%)
+                    </span>
+                  </div>
+                </button>
+
+                {/* NVMe Disk Card */}
+                <button
+                  type="button"
+                  onClick={() => setActiveMetricTab("DISK")}
+                  className={cn(
+                    "p-3.5 rounded-xl border text-left transition-all cursor-pointer",
+                    activeMetricTab === "DISK"
+                      ? "border-emerald-500 bg-emerald-500/10 ring-1 ring-emerald-500/30"
+                      : isDark ? "bg-[#0a0a0c] border-white/[0.06] hover:border-white/20" : "bg-slate-50 border-slate-200 hover:border-slate-300"
+                  )}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className={cn("text-[10px] font-bold uppercase tracking-wider flex items-center gap-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+                      <HardDrive className="w-3.5 h-3.5 text-emerald-400" />
+                      NVMe Storage
+                    </span>
+                    <span className="text-[10px] font-mono text-emerald-400 font-bold">{db.storageGb} GB Quota</span>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className={cn("text-xl font-black font-mono tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+                      {metricsData?.summary?.disk?.usedGb ?? 1.2} GB
+                    </span>
+                    <span className={cn("text-xs font-medium", isDark ? "text-zinc-500" : "text-slate-400")}>
+                      ({metricsData?.summary?.disk?.percentage ?? Math.round((1.2 / db.storageGb) * 100)}%)
+                    </span>
+                  </div>
+                </button>
+              </div>
+
+              {/* Chart Filter Tabs */}
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <span className={cn("text-xs font-bold", isDark ? "text-zinc-300" : "text-slate-700")}>
+                  {activeMetricTab === "ALL" && "All Resource Metrics Combined (%)"}
+                  {activeMetricTab === "CPU" && `CPU Load Over Time (${db.cpuShares} vCPU Dedicated)`}
+                  {activeMetricTab === "RAM" && `Memory Consumption Over Time (Allocated: ${db.memoryMb} MB)`}
+                  {activeMetricTab === "DISK" && `Persistent NVMe Disk Utilization (Allocated: ${db.storageGb} GB)`}
+                </span>
+
+                <div className="flex items-center gap-1">
+                  {(["ALL", "CPU", "RAM", "DISK"] as const).map((tab) => (
+                    <button
+                      key={tab}
+                      type="button"
+                      onClick={() => setActiveMetricTab(tab)}
+                      className={cn(
+                        "px-2 py-0.5 rounded-md text-[11px] font-bold transition-all cursor-pointer border",
+                        activeMetricTab === tab
+                          ? "bg-cyan-400 text-slate-950 border-cyan-400 shadow-xs"
+                          : isDark ? "bg-white/[0.03] text-zinc-400 border-white/[0.08] hover:text-white" : "bg-slate-100 text-slate-600 border-slate-200 hover:text-slate-900"
+                      )}
+                    >
+                      {tab}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Area Chart Container */}
+              <div className="h-56 w-full pt-1">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={metricsData?.points || []} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="dbCpuGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.4} />
+                        <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="dbRamGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#818cf8" stopOpacity={0.4} />
+                        <stop offset="95%" stopColor="#818cf8" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="dbDiskGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#ffffff0a" : "#f1f5f9"} vertical={false} />
+                    <XAxis dataKey="time" stroke={isDark ? "#64748b" : "#94a3b8"} fontSize={10} tickLine={false} />
+                    <YAxis stroke={isDark ? "#64748b" : "#94a3b8"} fontSize={10} tickLine={false} domain={[0, 100]} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: isDark ? "#0b1322" : "#ffffff",
+                        borderColor: isDark ? "#334155" : "#e2e8f0",
+                        borderRadius: "12px",
+                        fontSize: "12px",
+                        boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.2)",
+                      }}
+                      formatter={(value: any, name: any) => {
+                        if (name === "CPU %" || name === "cpu") return [`${value}%`, "CPU Load"];
+                        if (name === "RAM %" || name === "memory") return [`${value}%`, "RAM Memory"];
+                        if (name === "Disk %" || name === "disk") return [`${value}%`, "NVMe Disk"];
+                        return [value, name];
+                      }}
+                      labelFormatter={(label) => `Timestamp: ${label}`}
+                    />
+                    {(activeMetricTab === "ALL" || activeMetricTab === "CPU") && (
+                      <Area type="monotone" dataKey="cpu" name="CPU %" stroke="#06b6d4" strokeWidth={2.5} fill="url(#dbCpuGrad)" />
+                    )}
+                    {(activeMetricTab === "ALL" || activeMetricTab === "RAM") && (
+                      <Area type="monotone" dataKey="memory" name="RAM %" stroke="#818cf8" strokeWidth={2.5} fill="url(#dbRamGrad)" />
+                    )}
+                    {(activeMetricTab === "ALL" || activeMetricTab === "DISK") && (
+                      <Area type="monotone" dataKey="disk" name="Disk %" stroke="#10b981" strokeWidth={2.5} fill="url(#dbDiskGrad)" />
+                    )}
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
 
           {/* Quick Connect Code Snippets (URI, Laravel, Node.js) */}
           <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-xs")}>

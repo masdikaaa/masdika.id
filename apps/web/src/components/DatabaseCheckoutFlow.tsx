@@ -82,6 +82,7 @@ const SHARED_DATABASE_TYPES = [
   { id: "mysql-8", engine: "MYSQL", version: "8.0", name: "MySQL 8 (Shared)", ratePerGb: 10000, icon: SiMysql, color: "text-[#00758F]", isOutOfStock: false },
   { id: "mariadb-11", engine: "MARIADB", version: "10.11", name: "MariaDB 11 (Shared)", ratePerGb: 10000, icon: SiMariadb, color: "text-[#C0765A]", isOutOfStock: false },
   { id: "mongo-7", engine: "MONGODB", version: "7.0", name: "MongoDB 7 (Shared)", ratePerGb: 10000, icon: SiMongodb, color: "text-[#47A248]", isOutOfStock: false },
+  { id: "mongo-6", engine: "MONGODB", version: "6.0", name: "MongoDB 6 (Shared)", ratePerGb: 10000, icon: SiMongodb, color: "text-[#47A248]", isOutOfStock: false },
   { id: "postgres-postgis", engine: "POSTGRES", version: "16", name: "PostgreSQL 16 + PostGIS (Shared)", ratePerGb: 12500, icon: SiPostgresql, color: "text-[#336791]", isOutOfStock: false },
   { id: "postgres-vector", engine: "POSTGRES", version: "16", name: "PostgreSQL 16 + pgvector (Shared)", ratePerGb: 12500, icon: SiPostgresql, color: "text-[#336791]", isOutOfStock: false },
   { id: "postgres-full", engine: "POSTGRES", version: "16", name: "PostgreSQL 16 + PostGIS + pgvector (Shared)", ratePerGb: 15000, icon: SiPostgresql, color: "text-[#336791]", isOutOfStock: false },
@@ -729,60 +730,60 @@ export default function DatabaseCheckoutFlow() {
             {selectedTier === "DEDICATED" ? (
               <>
                 <div className="space-y-1">
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                  <div className={cn("text-[11px] font-bold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
                     Engine & Version
                   </div>
-                  <div className="flex items-center gap-2 font-bold text-sm text-white">
+                  <div className={cn("flex items-center gap-2 font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>
                     <activeEngineMeta.icon className={cn("w-4 h-4", activeEngineMeta.color)} />
                     <span>{activeEngineMeta.name} {selectedVersion}</span>
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                  <div className={cn("text-[11px] font-bold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
                     Flavor
                   </div>
-                  <div className="font-bold text-sm text-white">
+                  <div className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>
                     {activeFlavor.vcpu} / {activeFlavor.ram} RAM
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                  <div className={cn("text-[11px] font-bold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
                     Storage Size
                   </div>
-                  <div className="font-bold text-sm text-white">
-                    {storageGb} GB
+                  <div className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>
+                    {storageGb} GB NVMe
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                  <div className={cn("text-[11px] font-bold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
                     Region
                   </div>
-                  <div className="font-bold text-sm text-white">
-                    Sidoarjo
+                  <div className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>
+                    Sidoarjo (ID-SDA)
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-white/[0.08] space-y-2 text-xs">
-                  <div className="flex items-center justify-between text-zinc-400">
+                <div className={cn("pt-4 border-t space-y-2 text-xs", isDark ? "border-white/[0.08]" : "border-slate-100")}>
+                  <div className={cn("flex items-center justify-between", isDark ? "text-zinc-400" : "text-slate-500")}>
                     <span>Flavor ({activeFlavor.vcpu} / {activeFlavor.ram})</span>
-                    <span className="font-mono text-white">{formatRupiah(activeFlavor.price)}</span>
+                    <span className={cn("font-mono font-bold", isDark ? "text-white" : "text-slate-900")}>{formatRupiah(activeFlavor.price)}</span>
                   </div>
-                  <div className="flex items-center justify-between text-zinc-400">
+                  <div className={cn("flex items-center justify-between", isDark ? "text-zinc-400" : "text-slate-500")}>
                     <span>Storage ({storageGb} GB × Rp 5.000)</span>
-                    <span className="font-mono text-white">{formatRupiah(dedicatedStorageCost)}</span>
+                    <span className={cn("font-mono font-bold", isDark ? "text-white" : "text-slate-900")}>{formatRupiah(dedicatedStorageCost)}</span>
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-white/[0.08] flex items-baseline justify-between">
-                  <span className="text-sm font-bold text-zinc-400">Total</span>
+                <div className={cn("pt-4 border-t flex items-baseline justify-between", isDark ? "border-white/[0.08]" : "border-slate-100")}>
+                  <span className={cn("text-sm font-bold", isDark ? "text-zinc-400" : "text-slate-500")}>Total</span>
                   <div className="text-right">
                     <span className="text-xl sm:text-2xl font-black text-cyan-400 font-mono tracking-tight">
                       {formatRupiah(dedicatedTotalMonthly)}/month
                     </span>
-                    <span className="block text-[11px] text-zinc-500 mt-0.5">
+                    <span className={cn("block text-[11px] mt-0.5", isDark ? "text-zinc-500" : "text-slate-400")}>
                       ~{formatRupiah(dedicatedHourlyRate)} / jam (PAYG)
                     </span>
                   </div>
@@ -791,54 +792,54 @@ export default function DatabaseCheckoutFlow() {
             ) : (
               /* SHARED SUMMARY (Gambar 2) */
               <>
-                <div className="text-base font-bold text-white mb-2">
+                <div className={cn("text-base font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>
                   Summary
                 </div>
 
                 <div className="space-y-1">
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                  <div className={cn("text-[11px] font-bold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
                     Database Type
                   </div>
-                  <div className="font-bold text-sm text-white">
+                  <div className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>
                     {activeSharedType.name}
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                  <div className={cn("text-[11px] font-bold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
                     Storage Size
                   </div>
-                  <div className="font-bold text-sm text-white">
-                    {storageGb} GB
+                  <div className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>
+                    {storageGb} GB NVMe
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                  <div className={cn("text-[11px] font-bold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
                     Region
                   </div>
-                  <div className="font-bold text-sm text-white">
-                    Sidoarjo
+                  <div className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>
+                    Sidoarjo (ID-SDA)
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
-                    Type
+                  <div className={cn("text-[11px] font-bold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
+                    Tier Mode
                   </div>
-                  <div className="font-bold text-sm text-white">
-                    Shared
+                  <div className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>
+                    Shared Multi-Tenant
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-white/[0.08] space-y-2">
+                <div className={cn("pt-4 border-t space-y-2", isDark ? "border-white/[0.08]" : "border-slate-100")}>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold text-zinc-400">Storage Cost</span>
+                    <span className={cn("text-sm font-bold", isDark ? "text-zinc-400" : "text-slate-500")}>Storage Cost</span>
                     <span className="text-xl sm:text-2xl font-black text-cyan-400 font-mono tracking-tight">
                       {formatRupiah(sharedTotalMonthly)}/month
                     </span>
                   </div>
-                  <div className="text-[11px] text-zinc-500">
+                  <div className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-400")}>
                     {formatRupiah(activeSharedType.ratePerGb)} per GB/month · ~{formatRupiah(sharedHourlyRate)}/jam (PAYG)
                   </div>
                 </div>
@@ -846,7 +847,7 @@ export default function DatabaseCheckoutFlow() {
             )}
 
             {/* Balance check & Deploy button */}
-            <div className="pt-4 border-t border-white/[0.08] space-y-3">
+            <div className={cn("pt-4 border-t space-y-3", isDark ? "border-white/[0.08]" : "border-slate-100")}>
               <div className="flex items-center justify-between text-xs">
                 <span className="text-zinc-400">Your Balance:</span>
                 <span className={cn("font-bold font-mono", userBalance >= requiredUpfront ? "text-emerald-400" : "text-red-400")}>

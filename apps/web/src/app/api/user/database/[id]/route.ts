@@ -38,6 +38,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       data: {
         ...db,
         liveStatus,
+        k8sStatus: liveStatus,
         connection,
         connectionDetails: connection,
       },
