@@ -1,3 +1,16 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pgadmin-data
+  namespace: managed-db
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: local-path
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -7,6 +20,8 @@ metadata:
     app: pgadmin
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: pgadmin
@@ -14,7 +29,12 @@ spec:
     metadata:
       labels:
         app: pgadmin
+      annotations:
+        container.apparmor.security.beta.kubernetes.io/pgadmin: "unconfined"
     spec:
+      securityContext:
+        appArmorProfile:
+          type: Unconfined
       containers:
       - name: pgadmin
         image: dpage/pgadmin4:latest
@@ -30,9 +50,12 @@ spec:
               name: pgadmin-secret
               key: password
         - name: PGADMIN_CONFIG_SERVER_MODE
-          value: "False"
+          value: "True"
         - name: PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED
           value: "False"
+        volumeMounts:
+        - name: pgadmin-storage
+          mountPath: /var/lib/pgadmin
         resources:
           requests:
             cpu: 100m
@@ -40,6 +63,10 @@ spec:
           limits:
             cpu: 500m
             memory: 512Mi
+      volumes:
+      - name: pgadmin-storage
+        persistentVolumeClaim:
+          claimName: pgadmin-data
 ---
 apiVersion: v1
 kind: Service

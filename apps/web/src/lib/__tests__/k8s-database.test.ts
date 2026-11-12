@@ -104,8 +104,8 @@ describe('Managed Database K3s Engine - k8s-database.ts', () => {
       const details = buildConnectionDetails(mongoDb);
       expect(details.uri.startsWith('mongodb://')).toBe(true);
       expect(details.uri).toContain(`${mongoDb.username}:${mongoDb.password}@db.masdika.id:30557/db_myapp_123?authSource=admin`);
-      expect(details.mongoUrl).toBe('https://mongo.db.masdika.id');
-      expect(details.mongoExpressUrl).toBe('https://mongo.db.masdika.id');
+      expect(details.mongoUrl).toBe(`https://db-${mongoDb.id}-mongo.db.masdika.id`);
+      expect(details.mongoExpressUrl).toBe(`https://db-${mongoDb.id}-mongo.db.masdika.id`);
       expect(details.laravelEnv).toContain('DB_CONNECTION=mongodb');
     });
   });

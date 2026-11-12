@@ -650,8 +650,8 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
               </p>
 
               <div className={cn("p-3 rounded-xl border text-xs font-mono mb-4 space-y-1", isDark ? "bg-[#0a0a0c] border-white/[0.06] text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-700")}>
-                <div><strong>Server:</strong> {db.host}:{db.port}</div>
-                <div><strong>User:</strong> {db.username}</div>
+                <div><strong>Server:</strong> {db.type?.toUpperCase().includes('MONGO') ? `db-${db.id}-mongo.db.masdika.id` : `${db.host}:${db.port}`}</div>
+                <div><strong>User:</strong> {db.type?.toUpperCase().includes('POSTGRES') ? `${db.username}@db.masdika.id` : db.username}</div>
                 <div><strong>Pass:</strong> ••••••••</div>
               </div>
 

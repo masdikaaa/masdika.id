@@ -511,6 +511,92 @@ export function generateDatabaseManifest(db: DatabaseServiceRecord): string {
 `;
   }
 
+  const isMongo = typeUpper === 'MONGODB' || typeUpper === 'MONGO';
+  const mongoExpressContainer = isMongo
+    ? `
+      - name: mongo-express
+        image: mongo-express:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8081
+          name: web-gui
+        env:
+        - name: ME_CONFIG_MONGODB_SERVER
+          value: "127.0.0.1"
+        - name: ME_CONFIG_MONGODB_PORT
+          value: "27017"
+        - name: ME_CONFIG_MONGODB_ENABLE_ADMIN
+          value: "true"
+        - name: ME_CONFIG_MONGODB_AUTH_DATABASE
+          value: "admin"
+        - name: ME_CONFIG_MONGODB_AUTH_USERNAME
+          value: "${db.username}"
+        - name: ME_CONFIG_MONGODB_AUTH_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ${secretName}
+              key: password
+        - name: ME_CONFIG_BASICAUTH
+          value: "true"
+        - name: ME_CONFIG_BASICAUTH_USERNAME
+          value: "${db.username}"
+        - name: ME_CONFIG_BASICAUTH_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ${secretName}
+              key: password
+        - name: ME_CONFIG_SITE_COOKIESECRET
+          value: "masdika-cookie-${db.id}"
+        - name: ME_CONFIG_SITE_SESSIONSECRET
+          value: "masdika-session-${db.id}"
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi`
+    : '';
+
+  const mongoExpressServicePort = isMongo
+    ? `
+  - name: web-gui
+    port: 8081
+    targetPort: 8081`
+    : '';
+
+  const mongoExpressIngress = isMongo
+    ? `---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-${name}
+  namespace: ${ns}
+  labels:
+    app: ${name}
+    managed-by: masdika-cloud
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - ${name}-mongo.db.masdika.id
+    secretName: tls-${name}-mongo
+  rules:
+  - host: ${name}-mongo.db.masdika.id
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ${svcName}
+            port:
+              number: 8081
+`
+    : '';
+
   return `apiVersion: v1
 kind: Secret
 metadata:
@@ -604,7 +690,7 @@ ${envYaml}
             port: ${containerPort}
           initialDelaySeconds: 15
           periodSeconds: 20
-          timeoutSeconds: 5
+          timeoutSeconds: 5${mongoExpressContainer}
       volumes:
       - name: db-storage
         persistentVolumeClaim:
@@ -626,8 +712,72 @@ spec:
   - name: db-port
     port: ${containerPort}
     targetPort: ${containerPort}
-    nodePort: ${db.port}
-`;
+    nodePort: ${db.port}${mongoExpressServicePort}
+${mongoExpressIngress}`;
+}
+
+/**
+ * Automatically synchronize isolated customer database credentials and server registration into pgAdmin
+ */
+export async function syncPgAdminUser(
+  db: DatabaseServiceRecord,
+  action: 'create' | 'delete' = 'create'
+): Promise<void> {
+  try {
+    const kc = await getK8sKubeConfig();
+    const coreApi = kc.makeApiClient(k8s.CoreV1Api);
+    const ns = 'managed-db';
+
+    const podList = await coreApi.listNamespacedPod({
+      namespace: ns,
+      labelSelector: 'app=pgadmin',
+    });
+    const pgAdminPod = podList.items?.find((p) => p.status?.phase === 'Running');
+    if (!pgAdminPod || !pgAdminPod.metadata?.name) return;
+
+    const podName = pgAdminPod.metadata.name;
+    const userEmail = `${db.username}@db.masdika.id`;
+
+    if (action === 'create') {
+      // 1. Add user into pgAdmin in Server Mode
+      await execInPod(kc, ns, podName, 'pgadmin', [
+        '/venv/bin/python3',
+        '/pgadmin4/setup.py',
+        'add-user',
+        userEmail,
+        db.password || 'Masdika123!',
+      ]);
+
+      // 2. Load dedicated server registration for this user
+      const serverConfig = {
+        Servers: {
+          '1': {
+            Name: `${db.name} (${db.dbName})`,
+            Group: 'Managed Databases',
+            Port: 5432,
+            Username: db.username,
+            Host: `svc-db-${db.id}`,
+            SSLMode: 'prefer',
+            MaintenanceDB: db.dbName,
+          },
+        },
+      };
+
+      const b64 = Buffer.from(JSON.stringify(serverConfig)).toString('base64');
+      const loadCmd = `echo "${b64}" | base64 -d > /tmp/srv_${db.id}.json && /venv/bin/python3 /pgadmin4/setup.py load-servers --user "${userEmail}" /tmp/srv_${db.id}.json; rm -f /tmp/srv_${db.id}.json`;
+      await execInPod(kc, ns, podName, 'pgadmin', ['sh', '-c', loadCmd]);
+    } else {
+      // Clean up user from pgAdmin
+      await execInPod(kc, ns, podName, 'pgadmin', [
+        '/venv/bin/python3',
+        '/pgadmin4/setup.py',
+        'delete-user',
+        userEmail,
+      ]);
+    }
+  } catch (err) {
+    console.error('[pgAdmin Sync Error]', err);
+  }
 }
 
 /**
@@ -641,6 +791,11 @@ export async function deployDatabase(db: DatabaseServiceRecord): Promise<{ succe
 
     const manifestYaml = generateDatabaseManifest(db);
     await applyKubernetesManifests(kc, manifestYaml);
+
+    const typeUpper = db.type.toUpperCase();
+    if (typeUpper === 'POSTGRES' || typeUpper === 'POSTGRESQL') {
+      syncPgAdminUser(db, 'create').catch((e) => console.error('[pgAdmin Auto-Provision Failed]', e));
+    }
 
     return { success: true };
   } catch (err: any) {
@@ -737,12 +892,21 @@ export async function deleteDatabase(id: number, ns = 'managed-db'): Promise<{ s
     const kc = await getK8sKubeConfig();
     const coreApi = kc.makeApiClient(k8s.CoreV1Api);
     const appsApi = kc.makeApiClient(k8s.AppsV1Api);
+    const networkingApi = kc.makeApiClient(k8s.NetworkingV1Api);
+
+    try {
+      const dbRecord = await prisma.databaseService.findUnique({ where: { id } });
+      if (dbRecord && (dbRecord.type.toUpperCase().includes('POSTGRES'))) {
+        await syncPgAdminUser(dbRecord, 'delete').catch(() => {});
+      }
+    } catch {}
 
     await Promise.allSettled([
       appsApi.deleteNamespacedDeployment({ name: `db-${id}`, namespace: ns }),
       coreApi.deleteNamespacedService({ name: `svc-db-${id}`, namespace: ns }),
       coreApi.deleteNamespacedSecret({ name: `secret-db-${id}`, namespace: ns }),
       coreApi.deleteNamespacedPersistentVolumeClaim({ name: `data-db-${id}`, namespace: ns }),
+      networkingApi.deleteNamespacedIngress({ name: `ingress-db-${id}`, namespace: ns }),
     ]);
 
     return { success: true };
@@ -977,7 +1141,7 @@ export function buildConnectionDetails(db: DatabaseServiceRecord, clusterConfig?
   let laravelEnv = '';
 
   if (typeUpper === 'MYSQL' || typeUpper === 'MARIADB') {
-    pmaUrl = pmaBase ? `${pmaBase}/?pma_servername=${encodeURIComponent(directIp || host)}&pma_port=${port}&pma_username=${encodeURIComponent(db.username)}` : null;
+    pmaUrl = pmaBase ? `${pmaBase}/?pma_servername=${encodeURIComponent((host || directIp) + ':' + port)}&pma_username=${encodeURIComponent(db.username)}` : null;
     connectionUri = `mysql://${db.username}:${db.password}@${host}:${port}/${db.dbName}`;
     laravelEnv = `DB_CONNECTION=mysql\nDB_HOST=${host}\nDB_PORT=${port}\nDB_DATABASE=${db.dbName}\nDB_USERNAME=${db.username}\nDB_PASSWORD=${db.password}`;
   } else if (typeUpper === 'POSTGRES' || typeUpper === 'POSTGRESQL') {
@@ -985,7 +1149,7 @@ export function buildConnectionDetails(db: DatabaseServiceRecord, clusterConfig?
     connectionUri = `postgresql://${db.username}:${db.password}@${host}:${port}/${db.dbName}?sslmode=prefer`;
     laravelEnv = `DB_CONNECTION=pgsql\nDB_HOST=${host}\nDB_PORT=${port}\nDB_DATABASE=${db.dbName}\nDB_USERNAME=${db.username}\nDB_PASSWORD=${db.password}`;
   } else if (typeUpper === 'MONGODB' || typeUpper === 'MONGO') {
-    mongoUrl = mongoBase || null;
+    mongoUrl = `https://db-${db.id}-mongo.db.masdika.id`;
     connectionUri = `mongodb://${db.username}:${db.password}@${host}:${port}/${db.dbName}?authSource=admin`;
     laravelEnv = `DB_CONNECTION=mongodb\nDB_URI=${connectionUri}`;
   }
