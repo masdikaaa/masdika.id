@@ -117,20 +117,21 @@ describe('Managed Database K3s Engine - k8s-database.ts', () => {
   });
 
   describe('Official Managed Database Plan Catalog', () => {
-    it('should have exactly 6 official tiers (1 Shared + 5 Dedicated)', () => {
-      expect(OFFICIAL_DATABASE_PLANS).toHaveLength(6);
+    it('should have official tiers matching SumoPod flavors (1 Shared + 6 Dedicated)', () => {
+      expect(OFFICIAL_DATABASE_PLANS).toHaveLength(7);
       const names = OFFICIAL_DATABASE_PLANS.map((p) => p.name);
       expect(names).toEqual([
         'Shared Database',
-        'Dedicated Nano',
-        'Dedicated Micro',
-        'Dedicated Small',
-        'Dedicated Medium',
-        'Dedicated Pro',
+        'Dedicated 1 vCPU / 1 GB',
+        'Dedicated 1 vCPU / 2 GB',
+        'Dedicated 2 vCPU / 2 GB',
+        'Dedicated 2 vCPU / 4 GB',
+        'Dedicated 2 vCPU / 8 GB',
+        'Dedicated 4 vCPU / 8 GB',
       ]);
     });
 
-    it('should include MongoDB engine in all 6 plans', () => {
+    it('should include MongoDB engine in all plans', () => {
       for (const plan of OFFICIAL_DATABASE_PLANS) {
         expect(plan.limits.engines).toContain('MongoDB');
         expect(plan.limits.engines).toContain('MySQL');
@@ -140,14 +141,14 @@ describe('Managed Database K3s Engine - k8s-database.ts', () => {
     });
 
     it('should match accurate pricing and resource scaling', () => {
-      const nano = OFFICIAL_DATABASE_PLANS.find((p) => p.name === 'Dedicated Nano')!;
-      expect(nano.price).toBe(25000);
-      expect(nano.hourlyPrice).toBe(35);
-      expect(nano.limits.cpu).toBe('500m Dedicated');
+      const nano = OFFICIAL_DATABASE_PLANS.find((p) => p.name === 'Dedicated 1 vCPU / 1 GB')!;
+      expect(nano.price).toBe(30000);
+      expect(nano.hourlyPrice).toBe(42);
+      expect(nano.limits.cpu).toBe('1 vCPU');
 
-      const pro = OFFICIAL_DATABASE_PLANS.find((p) => p.name === 'Dedicated Pro')!;
-      expect(pro.price).toBe(150000);
-      expect(pro.hourlyPrice).toBe(208);
+      const pro = OFFICIAL_DATABASE_PLANS.find((p) => p.name === 'Dedicated 4 vCPU / 8 GB')!;
+      expect(pro.price).toBe(400000);
+      expect(pro.hourlyPrice).toBe(555);
       expect(pro.limits.ram).toBe('8 GB');
     });
   });

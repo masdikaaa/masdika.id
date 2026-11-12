@@ -79,33 +79,51 @@ export async function POST(req: NextRequest) {
     // Default fallbacks if no plan specified
     let cpuShares = 0.5;
     let memoryMb = 1024;
-    let storageGb = 10;
+    let storageGb = 1;
     let effectiveTier = "SHARED";
     let effectivePlanName = "Shared Database";
-    let monthlyPrice = 20000;
-    let hourlyRate = 28;
+    let monthlyPrice = 10000;
+    let hourlyRate = 14;
+
+    const requestedStorage = typeof body.storageGb === 'number' || typeof body.storageGb === 'string'
+      ? Math.max(1, Math.min(100, parseInt(String(body.storageGb), 10) || 1))
+      : null;
 
     if (selectedPlan && selectedPlan.service === "DATABASE") {
       const parsed = parseDatabasePlanLimits(selectedPlan.limits);
       cpuShares = parsed.cpuShares;
       memoryMb = parsed.memoryMb;
-      storageGb = parsed.storageGb;
       effectiveTier = parsed.shared ? "SHARED" : "DEDICATED";
-      effectivePlanName = selectedPlan.name;
-      monthlyPrice = selectedPlan.price;
-      hourlyRate = selectedPlan.hourlyPrice > 0 ? selectedPlan.hourlyPrice : Math.ceil(selectedPlan.price / 720);
+
+      if (effectiveTier === "SHARED") {
+        storageGb = requestedStorage ?? 1;
+        monthlyPrice = storageGb * 10000;
+        hourlyRate = Math.max(1, Math.ceil(monthlyPrice / 720));
+        effectivePlanName = `Shared Database (${storageGb} GB)`;
+      } else {
+        storageGb = requestedStorage ?? 1;
+        const storageCost = storageGb * 5000;
+        monthlyPrice = selectedPlan.price + storageCost;
+        hourlyRate = Math.max(1, Math.ceil(monthlyPrice / 720));
+        effectivePlanName = `${selectedPlan.name} (${storageGb} GB)`;
+      }
     } else {
       const isDedicated =
         (typeof tier === 'string' && tier.toUpperCase() === 'DEDICATED') ||
         (typeof planName === 'string' && planName.toLowerCase().includes('dedi'));
       if (isDedicated) {
         effectiveTier = "DEDICATED";
-        effectivePlanName = "Dedicated Nano";
+        effectivePlanName = "Dedicated 1 vCPU / 2 GB";
         cpuShares = 1.0;
-        memoryMb = 1024;
-        storageGb = 10;
-        monthlyPrice = 35000;
-        hourlyRate = 49;
+        memoryMb = 2048;
+        storageGb = requestedStorage ?? 1;
+        const storageCost = storageGb * 5000;
+        monthlyPrice = 45000 + storageCost;
+        hourlyRate = Math.max(1, Math.ceil(monthlyPrice / 720));
+      } else {
+        storageGb = requestedStorage ?? 1;
+        monthlyPrice = storageGb * 10000;
+        hourlyRate = Math.max(1, Math.ceil(monthlyPrice / 720));
       }
     }
 

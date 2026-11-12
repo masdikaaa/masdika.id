@@ -13,109 +13,139 @@ export interface DatabasePlanDefinition {
     region: string;
     shared: boolean;
     engines: string[];
+    pricePerGb?: number;
   };
   isActive: boolean;
   isPopular: boolean;
 }
 
+/**
+ * Official Managed Database Plans matching SumoPod Flavors & Pay-Per-GB Storage:
+ * - Shared Database: Burstable compute, billed per GB storage (Rp 10.000/GB/month)
+ * - 6 Dedicated Flavors: Reserved vCPU & RAM + Rp 5.000/GB/month storage slider
+ */
 export const OFFICIAL_DATABASE_PLANS: DatabasePlanDefinition[] = [
   {
     name: 'Shared Database',
     service: 'DATABASE',
-    description: 'High-performance shared managed database with isolated container & NVMe storage in Sidoarjo.',
-    price: 20000,
-    hourlyPrice: 28,
+    description: 'Shared multi-tenant database with isolated container runtime and NVMe storage. Billed per GB starting from 1 GB.',
+    price: 10000,
+    hourlyPrice: 14,
     limits: {
       cpu: '0.5 vCPU',
       ram: '1 GB',
-      storage: '10 GB',
+      storage: '1 GB',
       region: 'Sidoarjo',
       shared: true,
+      pricePerGb: 10000,
       engines: ['MySQL', 'MariaDB', 'PostgreSQL', 'MongoDB'],
     },
     isActive: true,
     isPopular: true,
   },
   {
-    name: 'Dedicated Nano',
+    name: 'Dedicated 1 vCPU / 1 GB',
     service: 'DATABASE',
-    description: 'Dedicated 500m CPU core with guaranteed memory. Great for personal projects, microservices, and lightweight databases.',
-    price: 25000,
-    hourlyPrice: 35,
+    description: 'Reserved 1 vCPU & 1 GB RAM dedicated compute for lightweight databases and background microservices.',
+    price: 30000,
+    hourlyPrice: 42,
     limits: {
-      cpu: '500m Dedicated',
+      cpu: '1 vCPU',
       ram: '1 GB',
-      storage: '10 GB',
+      storage: '1 GB',
       region: 'Sidoarjo',
       shared: false,
+      pricePerGb: 5000,
       engines: ['MySQL', 'MariaDB', 'PostgreSQL', 'MongoDB'],
     },
     isActive: true,
     isPopular: false,
   },
   {
-    name: 'Dedicated Micro',
+    name: 'Dedicated 1 vCPU / 2 GB',
     service: 'DATABASE',
-    description: 'Dedicated 1 vCPU with 2 GB RAM. Excellent for Laravel apps, WordPress, and growing web services.',
+    description: 'Reserved 1 vCPU & 2 GB RAM dedicated compute. Ideal for Laravel, Node.js, and growing web applications.',
     price: 45000,
     hourlyPrice: 62,
     limits: {
-      cpu: '1 vCPU (1000m)',
+      cpu: '1 vCPU',
       ram: '2 GB',
-      storage: '15 GB',
+      storage: '1 GB',
       region: 'Sidoarjo',
       shared: false,
+      pricePerGb: 5000,
       engines: ['MySQL', 'MariaDB', 'PostgreSQL', 'MongoDB'],
     },
     isActive: true,
     isPopular: true,
   },
   {
-    name: 'Dedicated Small',
+    name: 'Dedicated 2 vCPU / 2 GB',
     service: 'DATABASE',
-    description: 'Dedicated 2 vCPU cores with 4 GB RAM. High throughput and caching for active web services.',
-    price: 75000,
-    hourlyPrice: 104,
+    description: 'Reserved 2 vCPU cores & 2 GB RAM. Great concurrency for active transactional database workloads.',
+    price: 55000,
+    hourlyPrice: 76,
     limits: {
-      cpu: '2 vCPU (2000m)',
-      ram: '4 GB',
-      storage: '25 GB',
+      cpu: '2 vCPU',
+      ram: '2 GB',
+      storage: '1 GB',
       region: 'Sidoarjo',
       shared: false,
+      pricePerGb: 5000,
       engines: ['MySQL', 'MariaDB', 'PostgreSQL', 'MongoDB'],
     },
     isActive: true,
     isPopular: false,
   },
   {
-    name: 'Dedicated Medium',
+    name: 'Dedicated 2 vCPU / 4 GB',
     service: 'DATABASE',
-    description: 'Dedicated 3 vCPU cores with 6 GB RAM & 40 GB NVMe. Heavy read/write operations with zero lag.',
-    price: 110000,
-    hourlyPrice: 153,
-    limits: {
-      cpu: '3 vCPU (3000m)',
-      ram: '6 GB',
-      storage: '40 GB',
-      region: 'Sidoarjo',
-      shared: false,
-      engines: ['MySQL', 'MariaDB', 'PostgreSQL', 'MongoDB'],
-    },
-    isActive: true,
-    isPopular: false,
-  },
-  {
-    name: 'Dedicated Pro',
-    service: 'DATABASE',
-    description: 'Full dedicated VM host capacity (4 CPU, 8 GB RAM, 60 GB NVMe). Maximum performance and zero noisy neighbors.',
+    description: 'Reserved 2 vCPU cores & 4 GB RAM. High throughput with large buffer pool for production apps.',
     price: 150000,
     hourlyPrice: 208,
     limits: {
-      cpu: '4 vCPU (4000m)',
-      ram: '8 GB',
-      storage: '60 GB',
+      cpu: '2 vCPU',
+      ram: '4 GB',
+      storage: '1 GB',
       region: 'Sidoarjo',
       shared: false,
+      pricePerGb: 5000,
+      engines: ['MySQL', 'MariaDB', 'PostgreSQL', 'MongoDB'],
+    },
+    isActive: true,
+    isPopular: false,
+  },
+  {
+    name: 'Dedicated 2 vCPU / 8 GB',
+    service: 'DATABASE',
+    description: 'Reserved 2 vCPU cores & 8 GB RAM. Heavy read/write operations and in-memory caching capacity.',
+    price: 250000,
+    hourlyPrice: 347,
+    limits: {
+      cpu: '2 vCPU',
+      ram: '8 GB',
+      storage: '1 GB',
+      region: 'Sidoarjo',
+      shared: false,
+      pricePerGb: 5000,
+      engines: ['MySQL', 'MariaDB', 'PostgreSQL', 'MongoDB'],
+    },
+    isActive: true,
+    isPopular: false,
+  },
+  {
+    name: 'Dedicated 4 vCPU / 8 GB',
+    service: 'DATABASE',
+    description: 'Maximum performance host capacity with 4 vCPU cores & 8 GB RAM. Zero noisy neighbors guaranteed.',
+    price: 400000,
+    hourlyPrice: 555,
+    limits: {
+      cpu: '4 vCPU',
+      ram: '8 GB',
+      storage: '1 GB',
+      region: 'Sidoarjo',
+      shared: false,
+      pricePerGb: 5000,
       engines: ['MySQL', 'MariaDB', 'PostgreSQL', 'MongoDB'],
     },
     isActive: true,
@@ -124,11 +154,13 @@ export const OFFICIAL_DATABASE_PLANS: DatabasePlanDefinition[] = [
 ];
 
 /**
- * Ensures all 6 official database plans exist and are active in the database.
- * Also cleans up any obsolete duplicate plans (such as legacy 'Dedicated Database').
+ * Ensures all official database plans exist and are active in the database.
+ * Also cleans up any obsolete duplicate plans.
  */
 export async function ensureDatabasePlansExist(): Promise<void> {
   try {
+    const officialNames = OFFICIAL_DATABASE_PLANS.map((p) => p.name);
+
     for (const def of OFFICIAL_DATABASE_PLANS) {
       const existing = await prisma.plan.findFirst({
         where: { service: 'DATABASE', name: def.name },
@@ -150,7 +182,6 @@ export async function ensureDatabasePlansExist(): Promise<void> {
           },
         });
       } else {
-        // Ensure engines include MongoDB and specs match current definitions
         await prisma.plan.update({
           where: { id: existing.id },
           data: {
@@ -164,11 +195,11 @@ export async function ensureDatabasePlansExist(): Promise<void> {
       }
     }
 
-    // Clean up obsolete duplicate 'Dedicated Database' plan if Dedicated Pro exists
+    // Clean up obsolete legacy plans outside the official flavor catalog
     const obsoletePlans = await prisma.plan.findMany({
       where: {
         service: 'DATABASE',
-        name: 'Dedicated Database',
+        name: { notIn: officialNames },
       },
     });
 
@@ -177,12 +208,12 @@ export async function ensureDatabasePlansExist(): Promise<void> {
         where: { planId: obs.id },
       });
       if (subCount === 0) {
-        await prisma.plan.delete({ where: { id: obs.id } });
+        await prisma.plan.delete({ where: { id: obs.id } }).catch(() => {});
       } else {
         await prisma.plan.update({
           where: { id: obs.id },
           data: { isActive: false },
-        });
+        }).catch(() => {});
       }
     }
   } catch (error) {

@@ -8,12 +8,29 @@ import { cn } from "@/lib/utils";
 import { formatRupiah } from "@/lib/billing";
 import { toast } from "sonner";
 import {
-  Database, Check, Sparkles, Server, HardDrive,
-  Cpu, Layers, ShieldCheck, Zap, AlertCircle, RefreshCw, Key, Eye, EyeOff, MapPin
+  Database, Check, Server, HardDrive,
+  Cpu, Layers, ShieldCheck, Zap, RefreshCw, Eye, EyeOff, MapPin
 } from "lucide-react";
 import { SiMysql, SiPostgresql, SiMariadb, SiMongodb } from "react-icons/si";
 
+// Dedicated database engines & versions
 const DATABASE_ENGINES = [
+  {
+    id: "POSTGRES",
+    name: "PostgreSQL",
+    icon: SiPostgresql,
+    color: "text-[#336791]",
+    borderHover: "hover:border-[#336791]/50",
+    borderActive: "border-[#336791]",
+    bgActive: "bg-[#336791]/10",
+    defaultPort: 5432,
+    versions: [
+      { id: "16", name: "16 LTS", default: true },
+      { id: "17", name: "17 (Latest)" },
+      { id: "15", name: "15 LTS" },
+    ],
+    webPanel: "pgAdmin 4",
+  },
   {
     id: "MYSQL",
     name: "MySQL",
@@ -22,10 +39,9 @@ const DATABASE_ENGINES = [
     borderHover: "hover:border-[#00758F]/50",
     borderActive: "border-[#00758F]",
     bgActive: "bg-[#00758F]/10",
-    desc: "The world's most popular open-source relational database. Great for web apps, CMS, and Laravel.",
     defaultPort: 3306,
     versions: [
-      { id: "8.0", name: "8.0 (Recommended LTS)", default: true },
+      { id: "8.0", name: "8.0 LTS", default: true },
       { id: "8.4", name: "8.4 LTS" },
     ],
     webPanel: "phpMyAdmin",
@@ -38,29 +54,12 @@ const DATABASE_ENGINES = [
     borderHover: "hover:border-[#C0765A]/50",
     borderActive: "border-[#C0765A]",
     bgActive: "bg-[#C0765A]/10",
-    desc: "Fast, drop-in replacement for MySQL created by the original developers with advanced storage engines.",
     defaultPort: 3306,
     versions: [
-      { id: "10.11", name: "10.11 LTS (Recommended)", default: true },
+      { id: "10.11", name: "10.11 LTS", default: true },
       { id: "11.4", name: "11.4 LTS" },
     ],
     webPanel: "phpMyAdmin",
-  },
-  {
-    id: "POSTGRES",
-    name: "PostgreSQL",
-    icon: SiPostgresql,
-    color: "text-[#336791]",
-    borderHover: "hover:border-[#336791]/50",
-    borderActive: "border-[#336791]",
-    bgActive: "bg-[#336791]/10",
-    desc: "Advanced object-relational database known for reliability, robust feature set, and high concurrency.",
-    defaultPort: 5432,
-    versions: [
-      { id: "16", name: "16.x Alpine (Latest)", default: true },
-      { id: "15", name: "15.x Alpine" },
-    ],
-    webPanel: "pgAdmin 4",
   },
   {
     id: "MONGODB",
@@ -70,7 +69,6 @@ const DATABASE_ENGINES = [
     borderHover: "hover:border-[#47A248]/50",
     borderActive: "border-[#47A248]",
     bgActive: "bg-[#47A248]/10",
-    desc: "Document-oriented NoSQL database designed for modern web apps, JSON storage, and flexible schemas.",
     defaultPort: 27017,
     versions: [
       { id: "7.0", name: "7.0 (Current)", default: true },
@@ -80,97 +78,25 @@ const DATABASE_ENGINES = [
   },
 ];
 
-const FALLBACK_PLANS = [
-  {
-    id: 62,
-    name: "Shared Database",
-    service: "DATABASE",
-    price: 20000,
-    hourlyPrice: 28,
-    shared: true,
-    tier: "SHARED" as const,
-    cpu: "500m Shared",
-    ram: "1 GB RAM",
-    storage: "10 GB NVMe",
-    badge: "Shared Multi-Tenant",
-    badgeColor: "bg-cyan-500/15 text-cyan-300 border-cyan-500/30",
-    desc: "Isolated container runtime with burstable 500m shared compute. Ideal for small-to-medium web projects, Laravel, CMS, and staging."
-  },
-  {
-    id: 64,
-    name: "Dedicated Nano",
-    service: "DATABASE",
-    price: 25000,
-    hourlyPrice: 35,
-    shared: false,
-    tier: "DEDICATED" as const,
-    cpu: "500m Dedicated",
-    ram: "1 GB RAM",
-    storage: "10 GB NVMe",
-    badge: "Dedicated Tier 1",
-    badgeColor: "bg-purple-500/15 text-purple-300 border-purple-500/30",
-    desc: "Dedicated 500m CPU core with guaranteed memory. Great for personal projects, microservices, and lightweight databases."
-  },
-  {
-    id: 65,
-    name: "Dedicated Micro",
-    service: "DATABASE",
-    price: 45000,
-    hourlyPrice: 62,
-    shared: false,
-    tier: "DEDICATED" as const,
-    cpu: "1 vCPU (1000m)",
-    ram: "2 GB RAM",
-    storage: "15 GB NVMe",
-    badge: "Dedicated Tier 2",
-    badgeColor: "bg-purple-500/15 text-purple-300 border-purple-500/30",
-    desc: "Dedicated 1 vCPU with 2 GB RAM. Excellent for Laravel apps, WordPress, and growing web services."
-  },
-  {
-    id: 66,
-    name: "Dedicated Small",
-    service: "DATABASE",
-    price: 75000,
-    hourlyPrice: 104,
-    shared: false,
-    tier: "DEDICATED" as const,
-    cpu: "2 vCPU (2000m)",
-    ram: "4 GB RAM",
-    storage: "25 GB NVMe",
-    badge: "Dedicated Tier 3",
-    badgeColor: "bg-purple-500/15 text-purple-300 border-purple-500/30",
-    desc: "Dedicated 2 vCPU cores with 4 GB RAM. High throughput and caching for active web services."
-  },
-  {
-    id: 67,
-    name: "Dedicated Medium",
-    service: "DATABASE",
-    price: 110000,
-    hourlyPrice: 153,
-    shared: false,
-    tier: "DEDICATED" as const,
-    cpu: "3 vCPU (3000m)",
-    ram: "6 GB RAM",
-    storage: "40 GB NVMe",
-    badge: "Dedicated Tier 4",
-    badgeColor: "bg-purple-500/15 text-purple-300 border-purple-500/30",
-    desc: "Dedicated 3 vCPU cores with 6 GB RAM & 40 GB NVMe. Heavy read/write operations with zero lag."
-  },
-  {
-    id: 68,
-    name: "Dedicated Pro",
-    service: "DATABASE",
-    price: 150000,
-    hourlyPrice: 208,
-    shared: false,
-    tier: "DEDICATED" as const,
-    cpu: "4 vCPU (4000m)",
-    ram: "8 GB RAM",
-    storage: "60 GB NVMe",
-    badge: "Full Host Capacity",
-    badgeColor: "bg-amber-500/15 text-amber-300 border-amber-500/30",
-    desc: "Full dedicated VM host capacity (4 CPU, 8 GB RAM, 60 GB NVMe). Maximum performance and zero noisy neighbors."
-  }
+// Dedicated Flavors matching SumoPod (Gambar 1)
+const DEDICATED_FLAVORS = [
+  { id: "flavor-1vcpu-1gb", vcpu: "1 vCPU", ram: "1 GB", price: 30000, hourlyPrice: 42, isOutOfStock: false, planName: "Dedicated 1 vCPU / 1 GB" },
+  { id: "flavor-1vcpu-2gb", vcpu: "1 vCPU", ram: "2 GB", price: 45000, hourlyPrice: 62, isOutOfStock: false, planName: "Dedicated 1 vCPU / 2 GB" },
+  { id: "flavor-2vcpu-2gb", vcpu: "2 vCPU", ram: "2 GB", price: 55000, hourlyPrice: 76, isOutOfStock: false, planName: "Dedicated 2 vCPU / 2 GB" },
+  { id: "flavor-2vcpu-4gb", vcpu: "2 vCPU", ram: "4 GB", price: 150000, hourlyPrice: 208, isOutOfStock: false, planName: "Dedicated 2 vCPU / 4 GB" },
+  { id: "flavor-2vcpu-8gb", vcpu: "2 vCPU", ram: "8 GB", price: 250000, hourlyPrice: 347, isOutOfStock: false, planName: "Dedicated 2 vCPU / 8 GB" },
+  { id: "flavor-4vcpu-8gb", vcpu: "4 vCPU", ram: "8 GB", price: 400000, hourlyPrice: 555, isOutOfStock: false, planName: "Dedicated 4 vCPU / 8 GB" },
+];
+
+// Shared Database Types matching SumoPod (Gambar 2)
+const SHARED_DATABASE_TYPES = [
+  { id: "postgres-16", engine: "POSTGRES", version: "16", name: "PostgreSQL 16 (Shared)", ratePerGb: 10000, icon: SiPostgresql, color: "text-[#336791]", isOutOfStock: false },
+  { id: "mysql-8", engine: "MYSQL", version: "8.0", name: "MySQL 8 (Shared)", ratePerGb: 10000, icon: SiMysql, color: "text-[#00758F]", isOutOfStock: false },
+  { id: "mariadb-11", engine: "MARIADB", version: "10.11", name: "MariaDB 11 (Shared)", ratePerGb: 10000, icon: SiMariadb, color: "text-[#C0765A]", isOutOfStock: false },
+  { id: "mongo-7", engine: "MONGODB", version: "7.0", name: "MongoDB 7 (Shared)", ratePerGb: 10000, icon: SiMongodb, color: "text-[#47A248]", isOutOfStock: false },
+  { id: "postgres-postgis", engine: "POSTGRES", version: "16", name: "PostgreSQL 16 + PostGIS (Shared)", ratePerGb: 12500, icon: SiPostgresql, color: "text-[#336791]", isOutOfStock: false },
+  { id: "postgres-vector", engine: "POSTGRES", version: "16", name: "PostgreSQL 16 + pgvector (Shared)", ratePerGb: 12500, icon: SiPostgresql, color: "text-[#336791]", isOutOfStock: false },
+  { id: "postgres-full", engine: "POSTGRES", version: "16", name: "PostgreSQL 16 + PostGIS + pgvector (Shared)", ratePerGb: 15000, icon: SiPostgresql, color: "text-[#336791]", isOutOfStock: false },
 ];
 
 export default function DatabaseCheckoutFlow() {
@@ -178,35 +104,40 @@ export default function DatabaseCheckoutFlow() {
   const isDark = theme === "dark";
   const router = useRouter();
 
-  // Selection states
-  const [selectedEngine, setSelectedEngine] = useState("MYSQL");
-  const [selectedVersion, setSelectedVersion] = useState("8.0");
-  const [selectedTier, setSelectedTier] = useState<"SHARED" | "DEDICATED">("SHARED");
-  const [plans, setPlans] = useState<any[]>(FALLBACK_PLANS);
-  const [selectedPlanId, setSelectedPlanId] = useState<number>(62);
+  // Tier switcher: DEDICATED (Gambar 1) vs SHARED (Gambar 2)
+  const [selectedTier, setSelectedTier] = useState<"DEDICATED" | "SHARED">("DEDICATED");
+
+  // Dedicated states
+  const [selectedEngine, setSelectedEngine] = useState("POSTGRES");
+  const [selectedVersion, setSelectedVersion] = useState("16");
+  const [selectedFlavorId, setSelectedFlavorId] = useState("flavor-1vcpu-2gb");
+
+  // Shared states
+  const [selectedSharedId, setSelectedSharedId] = useState("postgres-16");
+
+  // Universal Storage scale bar (Min 1 GB, Max 20 GB)
+  const [storageGb, setStorageGb] = useState<number>(1);
+
+  // Configuration form fields
   const [instanceName, setInstanceName] = useState("");
   const [customDbName, setCustomDbName] = useState("");
   const [customUsername, setCustomUsername] = useState("");
   const [customPassword, setCustomPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  // User balance & submission state
   const [userBalance, setUserBalance] = useState<number>(0);
   const [loadingBalance, setLoadingBalance] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  const handleEngineChange = (engineId: string) => {
-    setSelectedEngine(engineId);
-    const eng = DATABASE_ENGINES.find(e => e.id === engineId);
-    if (eng && eng.versions.length > 0) {
-      const def = eng.versions.find(v => v.default) || eng.versions[0];
-      setSelectedVersion(def.id);
-    }
-  };
+  // Catalog plans mapping for API submission
+  const [catalogPlans, setCatalogPlans] = useState<any[]>([]);
 
   useEffect(() => {
-    // 1. Fetch user balance
+    // Fetch user balance
     fetch("/api/user/billing")
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         if (data.data?.balance !== undefined) {
           setUserBalance(data.data.balance);
         }
@@ -214,83 +145,66 @@ export default function DatabaseCheckoutFlow() {
       .catch(() => {})
       .finally(() => setLoadingBalance(false));
 
-    // 2. Fetch live plans from database (includes any custom plans created by admin)
+    // Fetch official plans from DB
     fetch("/api/public/plans")
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         if (data.success && Array.isArray(data.data)) {
-          const dbCatalogPlans = data.data
-            .filter((p: any) => p.service === "DATABASE")
-            .map((p: any) => {
-              let limits: any = {};
-              try {
-                limits = typeof p.limits === "string" ? JSON.parse(p.limits) : p.limits || {};
-              } catch {
-                limits = {};
-              }
-              const isShared = limits.shared !== false && !limits.tier?.toUpperCase().includes("DEDICATED");
-              return {
-                id: p.id,
-                name: p.name,
-                service: p.service,
-                price: p.price,
-                hourlyPrice: p.hourlyPrice || Math.ceil(p.price / 720),
-                shared: isShared,
-                tier: isShared ? ("SHARED" as const) : ("DEDICATED" as const),
-                cpu: limits.cpu || (isShared ? "0.5 vCPU" : "1 vCPU"),
-                ram: limits.ram || (isShared ? "1 GB RAM" : "2 GB RAM"),
-                storage: limits.storage || "10 GB NVMe",
-                badge: isShared ? "Shared Multi-Tenant" : "Dedicated Resources",
-                badgeColor: isShared ? "bg-cyan-500/15 text-cyan-300 border-cyan-500/30" : "bg-purple-500/15 text-purple-300 border-purple-500/30",
-                desc: p.description || (isShared ? "Isolated container runtime with burstable compute." : "Dedicated CPU and RAM capacity.")
-              };
-            });
-
-          if (dbCatalogPlans.length > 0) {
-            setPlans(dbCatalogPlans);
-            // Default to first shared plan
-            const firstShared = dbCatalogPlans.find((p: any) => p.shared);
-            if (firstShared) setSelectedPlanId(firstShared.id);
-          }
+          setCatalogPlans(data.data.filter((p: any) => p.service === "DATABASE"));
         }
       })
       .catch(() => {});
   }, []);
 
-  const sharedPlans = plans.filter(p => p.shared);
-  const dedicatedPlans = plans.filter(p => !p.shared);
-
-  // Switch tier and auto-select appropriate plan
-  const handleTierSwitch = (tier: "SHARED" | "DEDICATED") => {
-    setSelectedTier(tier);
-    if (tier === "SHARED") {
-      const first = sharedPlans[0] || plans[0];
-      if (first) setSelectedPlanId(first.id);
-    } else {
-      const first = dedicatedPlans[0] || plans[0];
-      if (first) setSelectedPlanId(first.id);
+  const handleEngineChange = (engineId: string) => {
+    setSelectedEngine(engineId);
+    const eng = DATABASE_ENGINES.find((e) => e.id === engineId);
+    if (eng && eng.versions.length > 0) {
+      const def = eng.versions.find((v) => v.default) || eng.versions[0];
+      setSelectedVersion(def.id);
     }
   };
 
-  const currentPlan = plans.find(p => p.id === selectedPlanId) || plans[0] || FALLBACK_PLANS[0];
-  const currentEngineMeta = DATABASE_ENGINES.find(e => e.id === selectedEngine) || DATABASE_ENGINES[0];
-  const requiredUpfront = currentPlan.hourlyPrice;
+  // Calculations for Dedicated (Gambar 1)
+  const activeFlavor = DEDICATED_FLAVORS.find((f) => f.id === selectedFlavorId) || DEDICATED_FLAVORS[1];
+  const activeEngineMeta = DATABASE_ENGINES.find((e) => e.id === selectedEngine) || DATABASE_ENGINES[0];
+  const dedicatedStorageCost = storageGb * 5000;
+  const dedicatedTotalMonthly = activeFlavor.price + dedicatedStorageCost;
+  const dedicatedHourlyRate = Math.max(1, Math.ceil(dedicatedTotalMonthly / 720));
+
+  // Calculations for Shared (Gambar 2)
+  const activeSharedType = SHARED_DATABASE_TYPES.find((s) => s.id === selectedSharedId) || SHARED_DATABASE_TYPES[0];
+  const sharedStorageCost = storageGb * activeSharedType.ratePerGb;
+  const sharedTotalMonthly = sharedStorageCost;
+  const sharedHourlyRate = Math.max(1, Math.ceil(sharedTotalMonthly / 720));
+
+  // Overall selection totals
+  const currentTotalMonthly = selectedTier === "DEDICATED" ? dedicatedTotalMonthly : sharedTotalMonthly;
+  const currentHourlyRate = selectedTier === "DEDICATED" ? dedicatedHourlyRate : sharedHourlyRate;
+  const requiredUpfront = currentHourlyRate;
+
+  // Resolve DB Plan for submission
+  const matchedPlan = catalogPlans.find((p) => {
+    if (selectedTier === "SHARED") return p.name.toLowerCase().includes("shared");
+    return p.name === activeFlavor.planName;
+  });
 
   const handleDeploy = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!instanceName.trim()) {
-      toast.error("Please provide an instance name");
+      toast.error("Please enter a database instance name");
       return;
     }
 
     if (userBalance < requiredUpfront) {
-      toast.error(`Insufficient balance. ${currentPlan.name} requires at least ${formatRupiah(requiredUpfront)} (1 hour PAYG) balance.`);
+      toast.error(`Insufficient balance. Requires at least ${formatRupiah(requiredUpfront)} (1 hour PAYG) balance.`);
       return;
     }
 
     setSubmitting(true);
-    const toastId = toast.loading(`Provisioning ${currentPlan.name} on K3s cluster...`);
+    const deployName = selectedTier === "DEDICATED" ? `${activeFlavor.planName} (${storageGb} GB)` : `Shared Database (${storageGb} GB)`;
+    const toastId = toast.loading(`Provisioning ${deployName} on Kubernetes...`);
 
     try {
       const res = await fetch("/api/user/database", {
@@ -298,16 +212,17 @@ export default function DatabaseCheckoutFlow() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: instanceName.trim(),
-          type: selectedEngine,
-          version: selectedVersion,
-          tier: currentPlan.tier,
-          planId: currentPlan.id,
-          planName: currentPlan.name,
+          type: selectedTier === "DEDICATED" ? selectedEngine : activeSharedType.engine,
+          version: selectedTier === "DEDICATED" ? selectedVersion : activeSharedType.version,
+          tier: selectedTier,
+          planId: matchedPlan?.id,
+          planName: selectedTier === "DEDICATED" ? activeFlavor.planName : "Shared Database",
+          storageGb,
           billingMode: "PAYG",
           customDbName: customDbName.trim() || undefined,
           customUsername: customUsername.trim() || undefined,
           customPassword: customPassword.trim() || undefined,
-        })
+        }),
       });
 
       const json = await res.json();
@@ -325,400 +240,612 @@ export default function DatabaseCheckoutFlow() {
   };
 
   return (
-    <form onSubmit={handleDeploy} className="space-y-6 w-full max-w-full min-w-0">
-      {/* Step 1: Database Engine Selector */}
-      <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-xs")}>
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <span className={cn("text-[11px] font-bold uppercase tracking-wider block", isDark ? "text-cyan-400" : "text-cyan-700")}>
-              STEP 1
-            </span>
-            <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-              Select Database Engine
-            </h2>
-          </div>
-          <span className={cn("text-xs font-semibold px-2.5 py-1 rounded-full border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-800 border-cyan-200")}>
-            K3s Container Native
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {DATABASE_ENGINES.map((engine) => {
-            const EngineIcon = engine.icon;
-            const isSelected = selectedEngine === engine.id;
-
-            return (
-              <button
-                type="button"
-                key={engine.id}
-                onClick={() => handleEngineChange(engine.id)}
-                className={cn(
-                  "rounded-2xl border p-5 text-left transition-all relative flex flex-col justify-between cursor-pointer",
-                  isSelected
-                    ? `${engine.borderActive} ${isDark ? engine.bgActive : "bg-slate-50"} ring-1 ring-cyan-500/30 shadow-md`
-                    : isDark
-                      ? "border-white/[0.08] bg-[#0a0a0c] hover:border-white/20"
-                      : "border-slate-200 bg-white hover:border-slate-300 shadow-2xs"
-                )}
-              >
-                <div>
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center", isDark ? "bg-white/[0.04] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
-                      <EngineIcon className={cn("w-6 h-6", engine.color)} />
-                    </div>
-                    <div className={cn("w-5 h-5 rounded-full border flex items-center justify-center transition-all", isSelected ? "bg-cyan-500 border-cyan-500 text-slate-950" : isDark ? "border-zinc-700" : "border-slate-300")}>
-                      {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
-                    </div>
-                  </div>
-
-                  <h3 className={cn("text-base font-bold mb-1", isDark ? "text-white" : "text-slate-900")}>
-                    {engine.name}
-                  </h3>
-                  <p className={cn("text-xs leading-relaxed line-clamp-3", isDark ? "text-zinc-400" : "text-slate-500")}>
-                    {engine.desc}
-                  </p>
-                </div>
-
-                <div className={cn("pt-4 mt-4 border-t flex items-center justify-between text-[11px]", isDark ? "border-white/[0.06]" : "border-slate-100")}>
-                  <span className={cn("font-medium", isDark ? "text-zinc-500" : "text-slate-400")}>
-                    Web GUI:
-                  </span>
-                  <span className={cn("font-bold", isDark ? "text-zinc-300" : "text-slate-700")}>
-                    {engine.webPanel || "Direct / CLI"}
-                  </span>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Step 2: Version & Region Selector */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Version Selection */}
-        <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-xs")}>
-          <span className={cn("text-[11px] font-bold uppercase tracking-wider block mb-1", isDark ? "text-cyan-400" : "text-cyan-700")}>
-            STEP 2
-          </span>
-          <h2 className={cn("text-base sm:text-lg font-bold tracking-tight mb-4", isDark ? "text-white" : "text-slate-900")}>
-            Select {currentEngineMeta.name} Version
-          </h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {currentEngineMeta.versions.map((ver) => {
-              const isSelected = selectedVersion === ver.id;
-              return (
-                <button
-                  type="button"
-                  key={ver.id}
-                  onClick={() => setSelectedVersion(ver.id)}
-                  className={cn(
-                    "p-3.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer",
-                    isSelected
-                      ? "bg-cyan-500/15 border-cyan-500 text-cyan-300 font-bold"
-                      : isDark
-                        ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300 hover:border-white/20"
-                        : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
-                  )}
-                >
-                  <span className="text-sm font-semibold">{ver.name}</span>
-                  <div className={cn("w-4 h-4 rounded-full border flex items-center justify-center shrink-0", isSelected ? "bg-cyan-500 border-cyan-500 text-slate-950" : isDark ? "border-zinc-700" : "border-slate-300")}>
-                    {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Region & Datacenter */}
-        <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-xs")}>
-          <span className={cn("text-[11px] font-bold uppercase tracking-wider block mb-1", isDark ? "text-cyan-400" : "text-cyan-700")}>
-            STEP 3
-          </span>
-          <h2 className={cn("text-base sm:text-lg font-bold tracking-tight mb-4", isDark ? "text-white" : "text-slate-900")}>
-            Datacenter & Region
-          </h2>
-
-          <div className={cn("p-4 rounded-xl border flex items-center justify-between", isDark ? "bg-cyan-500/10 border-cyan-500/30" : "bg-cyan-50 border-cyan-200")}>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
-                <MapPin className="w-5 h-5 text-cyan-400" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>
-                    Sidoarjo, Jawa Timur (ID-SDA)
-                  </span>
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                </div>
-                <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-600")}>
-                  Direct BGP Peering, ultra-low latency &lt; 5ms local ping.
-                </p>
-              </div>
-            </div>
-            <span className={cn("px-2.5 py-1 rounded-lg text-xs font-bold border", isDark ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" : "bg-emerald-100 text-emerald-800 border-emerald-200")}>
-              Active
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Step 4: Hardware Resource Plan (Shared vs Dedicated Selection) */}
-      <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-xs")}>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-          <div>
-            <span className={cn("text-[11px] font-bold uppercase tracking-wider block", isDark ? "text-cyan-400" : "text-cyan-700")}>
-              STEP 4
-            </span>
-            <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-              Choose Architecture & Resource Plan
-            </h2>
-          </div>
-
-          {/* Architecture Switcher */}
-          <div className={cn("inline-flex p-1 rounded-xl border self-start sm:self-auto", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
-            <button
-              type="button"
-              onClick={() => handleTierSwitch("SHARED")}
-              className={cn(
-                "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5",
-                selectedTier === "SHARED"
-                  ? "bg-cyan-500 text-slate-950 shadow-xs"
-                  : isDark ? "text-zinc-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
-              )}
-            >
-              <span>Shared Multi-Tenant</span>
-              <span className={cn("px-1.5 py-0.2 rounded text-[10px] font-extrabold", selectedTier === "SHARED" ? "bg-cyan-900/30 text-slate-950" : isDark ? "bg-white/10 text-zinc-300" : "bg-slate-200 text-slate-700")}>
-                {sharedPlans.length}
-              </span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleTierSwitch("DEDICATED")}
-              className={cn(
-                "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5",
-                selectedTier === "DEDICATED"
-                  ? "bg-purple-500 text-white shadow-xs"
-                  : isDark ? "text-zinc-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
-              )}
-            >
-              <span>Dedicated Host Resources</span>
-              <span className={cn("px-1.5 py-0.2 rounded text-[10px] font-extrabold", selectedTier === "DEDICATED" ? "bg-purple-900/30 text-white" : isDark ? "bg-white/10 text-zinc-300" : "bg-slate-200 text-slate-700")}>
-                {dedicatedPlans.length}
-              </span>
-            </button>
-          </div>
-        </div>
-
-        {/* Selected Tier Banner Description */}
-        <div className={cn("p-3.5 rounded-xl border mb-5 flex items-center justify-between text-xs", selectedTier === "SHARED" ? (isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800") : (isDark ? "bg-purple-500/10 border-purple-500/20 text-purple-200" : "bg-purple-50 border-purple-200 text-purple-800"))}>
-          <div className="flex items-center gap-2">
-            <span className="font-bold uppercase tracking-wider text-[10px] px-2 py-0.5 rounded border border-current">
-              {selectedTier === "SHARED" ? "Burstable Shared Pool" : "Isolated Dedicated Hardware"}
-            </span>
-            <span>
-              {selectedTier === "SHARED"
-                ? "Optimal cost efficiency for personal apps, testing, and microservices with noisy-neighbor isolation."
-                : "Guaranteed CPU cores & memory limits provisioned directly into Kubernetes pods with zero resource contention."}
-            </span>
-          </div>
-        </div>
-
-        {/* Plan Cards Grid */}
-        <div className={cn("grid gap-4", selectedTier === "SHARED" ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3")}>
-          {(selectedTier === "SHARED" ? sharedPlans : dedicatedPlans).map((plan) => {
-            const isSelected = selectedPlanId === plan.id;
-            return (
-              <button
-                type="button"
-                key={plan.id}
-                onClick={() => {
-                  setSelectedPlanId(plan.id);
-                  setSelectedTier(plan.tier);
-                }}
-                className={cn(
-                  "rounded-2xl border p-5 text-left transition-all relative flex flex-col justify-between cursor-pointer",
-                  isSelected
-                    ? plan.shared
-                      ? "border-cyan-500 bg-cyan-500/10 ring-1 ring-cyan-500/30 shadow-md"
-                      : "border-purple-500 bg-purple-500/10 ring-1 ring-purple-500/30 shadow-md"
-                    : isDark
-                      ? "border-white/[0.08] bg-[#0a0a0c] hover:border-white/20"
-                      : "border-slate-200 bg-white hover:border-slate-300 shadow-2xs"
-                )}
-              >
-                <div>
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <span className={cn("text-[10px] font-bold px-2.5 py-1 rounded-md border", plan.badgeColor)}>
-                      {plan.badge}
-                    </span>
-                    <div className={cn("w-5 h-5 rounded-full border flex items-center justify-center transition-all", isSelected ? (plan.shared ? "bg-cyan-500 border-cyan-500 text-slate-950" : "bg-purple-500 border-purple-500 text-slate-950") : isDark ? "border-zinc-700" : "border-slate-300")}>
-                      {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
-                    </div>
-                  </div>
-
-                  <h3 className={cn("text-base font-bold mb-1", isDark ? "text-white" : "text-slate-900")}>
-                    {plan.name}
-                  </h3>
-                  <p className={cn("text-xs leading-relaxed mb-4 line-clamp-2", isDark ? "text-zinc-400" : "text-slate-500")}>
-                    {plan.desc}
-                  </p>
-
-                  <div className="flex flex-wrap items-center gap-1.5 mb-4">
-                    <span className={cn("px-2 py-0.5 rounded-lg text-xs font-semibold border flex items-center gap-1", isDark ? "bg-white/[0.03] text-zinc-300 border-white/[0.08]" : "bg-slate-100 text-slate-700 border-slate-200")}>
-                      <Cpu className="w-3 h-3 text-cyan-400" /> {plan.cpu}
-                    </span>
-                    <span className={cn("px-2 py-0.5 rounded-lg text-xs font-semibold border flex items-center gap-1", isDark ? "bg-white/[0.03] text-zinc-300 border-white/[0.08]" : "bg-slate-100 text-slate-700 border-slate-200")}>
-                      <Layers className="w-3 h-3 text-purple-400" /> {plan.ram}
-                    </span>
-                    <span className={cn("px-2 py-0.5 rounded-lg text-xs font-semibold border flex items-center gap-1", isDark ? "bg-white/[0.03] text-zinc-300 border-white/[0.08]" : "bg-slate-100 text-slate-700 border-slate-200")}>
-                      <HardDrive className="w-3 h-3 text-amber-400" /> {plan.storage}
-                    </span>
-                  </div>
-                </div>
-
-                <div className={cn("pt-4 border-t flex items-baseline justify-between", isDark ? "border-white/[0.06]" : "border-slate-100")}>
-                  <div>
-                    <span className={cn("text-lg font-black", plan.shared ? (isDark ? "text-cyan-400" : "text-cyan-700") : (isDark ? "text-purple-400" : "text-purple-700"))}>
-                      {formatRupiah(plan.price)}
-                    </span>
-                    <span className={cn("text-xs ml-1", isDark ? "text-zinc-500" : "text-slate-400")}>/bln</span>
-                  </div>
-                  <span className={cn("text-xs font-bold", isDark ? "text-zinc-300" : "text-slate-600")}>
-                    ~{formatRupiah(plan.hourlyPrice)} / jam (PAYG)
-                  </span>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Step 5: Database Instance Details */}
-      <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-xs")}>
-        <span className={cn("text-[11px] font-bold uppercase tracking-wider block mb-1", isDark ? "text-cyan-400" : "text-cyan-700")}>
-          STEP 5
-        </span>
-        <h2 className={cn("text-base sm:text-lg font-bold tracking-tight mb-4", isDark ? "text-white" : "text-slate-900")}>
-          Instance Configuration & Credentials
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className={cn("text-xs font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-600")}>
-              Instance Display Name <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              required
-              value={instanceName}
-              onChange={(e) => setInstanceName(e.target.value)}
-              placeholder="e.g. production-crm-database"
-              className={cn("w-full border rounded-xl px-3.5 py-2.5 text-sm font-medium focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className={cn("text-xs font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-600")}>
-              Initial Database Name (Optional)
-            </label>
-            <input
-              type="text"
-              value={customDbName}
-              onChange={(e) => setCustomDbName(e.target.value)}
-              placeholder="Leave blank to auto-generate"
-              className={cn("w-full border rounded-xl px-3.5 py-2.5 text-sm font-mono focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className={cn("text-xs font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-600")}>
-              Database Username (Optional)
-            </label>
-            <input
-              type="text"
-              value={customUsername}
-              onChange={(e) => setCustomUsername(e.target.value)}
-              placeholder="Leave blank to auto-generate"
-              className={cn("w-full border rounded-xl px-3.5 py-2.5 text-sm font-mono focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className={cn("text-xs font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-600")}>
-              Custom Password (Optional)
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                value={customPassword}
-                onChange={(e) => setCustomPassword(e.target.value)}
-                placeholder="Leave blank to auto-generate securely"
-                className={cn("w-full border rounded-xl px-3.5 py-2.5 pr-10 text-sm font-mono focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className={cn("absolute right-3 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-white")}
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Step 6: Confirmation & Deploy Button */}
-      <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-xs")}>
-        <div className="flex items-center gap-3">
-          <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center shrink-0", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
-            <ShieldCheck className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className={cn("text-xs font-semibold", isDark ? "text-zinc-400" : "text-slate-500")}>
-                Your Balance:
-              </span>
-              <span className={cn("font-bold text-sm", userBalance >= requiredUpfront ? (isDark ? "text-emerald-400" : "text-emerald-700") : "text-red-500")}>
-                {loadingBalance ? "..." : formatRupiah(userBalance)}
-              </span>
-              <span className={cn("text-[11px] px-2 py-0.5 rounded font-bold border", isDark ? "bg-white/[0.04] text-zinc-300 border-white/[0.08]" : "bg-slate-100 text-slate-700 border-slate-200")}>
-                Need: {formatRupiah(requiredUpfront)}
-              </span>
-            </div>
-            <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-500" : "text-slate-400")}>
-              Selected: <strong className={isDark ? "text-white" : "text-slate-900"}>{currentPlan.name}</strong> • 1st hr PAYG: {formatRupiah(requiredUpfront)}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {userBalance < requiredUpfront && (
-            <Link
-              href="/dashboard/topup"
-              className="px-4 py-2.5 rounded-xl text-xs font-semibold border border-amber-500/30 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 transition-all"
-            >
-              Top Up Balance
-            </Link>
-          )}
+    <form onSubmit={handleDeploy} className="space-y-6 w-full max-w-7xl mx-auto">
+      {/* Top Architecture Mode Selector */}
+      <div className={cn("p-1.5 rounded-2xl border flex items-center justify-between gap-3 flex-wrap", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
+        <div className="flex items-center gap-2">
           <button
-            type="submit"
-            disabled={submitting || userBalance < requiredUpfront}
-            className="w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-xs bg-cyan-400 hover:bg-cyan-300 active:scale-95 text-slate-950 transition-all shadow-md cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+            type="button"
+            onClick={() => setSelectedTier("DEDICATED")}
+            className={cn(
+              "px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2",
+              selectedTier === "DEDICATED"
+                ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
+                : isDark ? "text-zinc-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
+            )}
           >
-            {submitting ? (
+            <Server className="w-4 h-4" />
+            <span>Dedicated Host Resources</span>
+            <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-extrabold uppercase", selectedTier === "DEDICATED" ? "bg-white/20 text-white" : isDark ? "bg-white/5 text-zinc-400" : "bg-slate-200 text-slate-700")}>
+              6 Flavors
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSelectedTier("SHARED")}
+            className={cn(
+              "px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2",
+              selectedTier === "SHARED"
+                ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
+                : isDark ? "text-zinc-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
+            )}
+          >
+            <Database className="w-4 h-4" />
+            <span>Shared Multi-Tenant</span>
+            <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-extrabold uppercase", selectedTier === "SHARED" ? "bg-white/20 text-white" : isDark ? "bg-white/5 text-zinc-400" : "bg-slate-200 text-slate-700")}>
+              Per-GB Storage
+            </span>
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2 text-xs font-medium px-3 text-zinc-400">
+          <MapPin className="w-3.5 h-3.5 text-blue-400" />
+          <span>Region: Sidoarjo (K3s Cluster)</span>
+        </div>
+      </div>
+
+      {/* Main Grid: Left Options + Right Sticky Summary */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Column (8 cols): Options & Sliders */}
+        <div className="lg:col-span-8 space-y-6">
+
+          {/* DEDICATED MODE (Gambar 1) */}
+          {selectedTier === "DEDICATED" && (
+            <>
+              {/* Step 1: Engine & Version */}
+              <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200 shadow-xs")}>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+                      Select Database Engine
+                    </h2>
+                    <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                      Dedicated container with isolated resources & web GUI viewer
+                    </p>
+                  </div>
+                  <span className={cn("text-xs font-semibold px-2.5 py-1 rounded-full border", isDark ? "bg-blue-500/10 text-blue-400 border-blue-500/20" : "bg-blue-50 text-blue-800 border-blue-200")}>
+                    K8s Native
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                  {DATABASE_ENGINES.map((engine) => {
+                    const EngineIcon = engine.icon;
+                    const isSelected = selectedEngine === engine.id;
+                    return (
+                      <button
+                        type="button"
+                        key={engine.id}
+                        onClick={() => handleEngineChange(engine.id)}
+                        className={cn(
+                          "rounded-xl border p-3.5 text-left transition-all cursor-pointer flex items-center gap-3",
+                          isSelected
+                            ? `${engine.borderActive} ${isDark ? engine.bgActive : "bg-blue-50/50"} ring-1 ring-blue-500/30 shadow-xs`
+                            : isDark
+                              ? "border-white/[0.08] bg-[#0a0a0c] hover:border-white/20"
+                              : "border-slate-200 bg-white hover:border-slate-300"
+                        )}
+                      >
+                        <div className={cn("w-9 h-9 rounded-lg border flex items-center justify-center shrink-0", isDark ? "bg-white/[0.04] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
+                          <EngineIcon className={cn("w-5 h-5", engine.color)} />
+                        </div>
+                        <div className="min-w-0">
+                          <span className={cn("text-sm font-bold block truncate", isDark ? "text-white" : "text-slate-900")}>
+                            {engine.name}
+                          </span>
+                          <span className={cn("text-[11px] block truncate", isDark ? "text-zinc-500" : "text-slate-400")}>
+                            {engine.webPanel}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Version Selector for Active Engine */}
+                <div className="flex items-center gap-2 pt-2 border-t border-white/[0.06]">
+                  <span className={cn("text-xs font-semibold", isDark ? "text-zinc-400" : "text-slate-600")}>Version:</span>
+                  <div className="flex flex-wrap gap-2">
+                    {activeEngineMeta.versions.map((ver) => (
+                      <button
+                        type="button"
+                        key={ver.id}
+                        onClick={() => setSelectedVersion(ver.id)}
+                        className={cn(
+                          "px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer border",
+                          selectedVersion === ver.id
+                            ? "bg-blue-600 text-white border-blue-500 shadow-xs"
+                            : isDark
+                              ? "bg-white/[0.03] text-zinc-400 border-white/[0.08] hover:text-white"
+                              : "bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200"
+                        )}
+                      >
+                        {ver.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 2: Select Flavor (Exact Table from Gambar 1) */}
+              <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200 shadow-xs")}>
+                <div className="mb-4">
+                  <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+                    Select Flavor
+                  </h2>
+                  <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                    Reserved vCPU & RAM for this database instance. Storage is configured separately below.
+                  </p>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className={cn("border-b text-[11px] font-bold uppercase tracking-wider", isDark ? "border-white/[0.08] text-zinc-500" : "border-slate-200 text-slate-500")}>
+                        <th className="py-2.5 px-3 w-8"></th>
+                        <th className="py-2.5 px-3">ENGINE</th>
+                        <th className="py-2.5 px-3">VERSION</th>
+                        <th className="py-2.5 px-3">VCPU</th>
+                        <th className="py-2.5 px-3">RAM</th>
+                        <th className="py-2.5 px-3 text-right">PRICE</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/[0.04]">
+                      {DEDICATED_FLAVORS.map((flavor) => {
+                        const isSelected = selectedFlavorId === flavor.id;
+                        const EngineIcon = activeEngineMeta.icon;
+
+                        return (
+                          <tr
+                            key={flavor.id}
+                            onClick={() => !flavor.isOutOfStock && setSelectedFlavorId(flavor.id)}
+                            className={cn(
+                              "transition-all cursor-pointer font-medium",
+                              flavor.isOutOfStock ? "opacity-50 cursor-not-allowed" : "",
+                              isSelected
+                                ? isDark
+                                  ? "bg-blue-600/10 text-white"
+                                  : "bg-blue-50/80 text-slate-900"
+                                : isDark
+                                  ? "hover:bg-white/[0.02] text-zinc-300"
+                                  : "hover:bg-slate-50 text-slate-700"
+                            )}
+                          >
+                            <td className="py-3 px-3">
+                              <input
+                                type="radio"
+                                name="dedicatedFlavor"
+                                checked={isSelected}
+                                onChange={() => setSelectedFlavorId(flavor.id)}
+                                disabled={flavor.isOutOfStock}
+                                className="w-4 h-4 accent-blue-600 cursor-pointer"
+                              />
+                            </td>
+                            <td className="py-3 px-3">
+                              <div className="flex items-center gap-2">
+                                <EngineIcon className={cn("w-4 h-4", activeEngineMeta.color)} />
+                                <span className="font-bold">{activeEngineMeta.name}</span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-3 text-zinc-400">{selectedVersion}</td>
+                            <td className="py-3 px-3">
+                              <span className={cn("px-2 py-0.5 rounded font-mono text-[11px]", isDark ? "bg-white/5 text-zinc-200" : "bg-slate-100 text-slate-800")}>
+                                {flavor.vcpu}
+                              </span>
+                            </td>
+                            <td className="py-3 px-3">
+                              <span className={cn("px-2 py-0.5 rounded font-mono text-[11px]", isDark ? "bg-white/5 text-zinc-200" : "bg-slate-100 text-slate-800")}>
+                                {flavor.ram}
+                              </span>
+                            </td>
+                            <td className="py-3 px-3 text-right">
+                              {flavor.isOutOfStock ? (
+                                <div className="text-right">
+                                  <span className="text-zinc-500 line-through">{formatRupiah(flavor.price)}/mo</span>
+                                  <span className="block text-[10px] text-amber-500 font-bold">(Out of Stock)</span>
+                                </div>
+                              ) : (
+                                <span className={cn("font-bold text-sm", isSelected ? "text-blue-400" : isDark ? "text-blue-400/90" : "text-blue-600")}>
+                                  {formatRupiah(flavor.price)}/mo
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Step 3: Storage Size Scale Bar (Gambar 1) */}
+              <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200 shadow-xs")}>
+                <div className="mb-4">
+                  <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+                    Storage Size
+                  </h2>
+                  <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                    Freely adjustable, billed per GB on top of the flavor price above.
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className={cn("text-sm font-bold", isDark ? "text-white" : "text-slate-900")}>
+                      Storage: {storageGb} GB
+                    </span>
+                    <span className={cn("text-xs font-semibold", isDark ? "text-zinc-500" : "text-slate-500")}>
+                      Max: 20 GB
+                    </span>
+                  </div>
+
+                  {/* Range Slider */}
+                  <div className="relative py-2">
+                    <input
+                      type="range"
+                      min={1}
+                      max={20}
+                      step={1}
+                      value={storageGb}
+                      onChange={(e) => setStorageGb(parseInt(e.target.value, 10))}
+                      className="w-full h-2.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-blue-600 transition-all"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs text-zinc-500 font-mono">
+                    <span>1 GB</span>
+                    <span>20 GB</span>
+                  </div>
+
+                  <div className={cn("pt-2 text-xs", isDark ? "text-zinc-400" : "text-slate-600")}>
+                    Rp 5.000/GB/month · Storage cost: <strong className={isDark ? "text-white" : "text-slate-900"}>{formatRupiah(dedicatedStorageCost)}/month</strong>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* SHARED MODE (Gambar 2) */}
+          {selectedTier === "SHARED" && (
+            <>
+              {/* Step 1: Select Database Type Grid */}
+              <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200 shadow-xs")}>
+                <div className="mb-4">
+                  <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+                    Select Database Type
+                  </h2>
+                  <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                    Shared multi-tenant containers with burstable 0.5 vCPU pool. Billed purely on storage capacity.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  {SHARED_DATABASE_TYPES.map((typeOption) => {
+                    const isSelected = selectedSharedId === typeOption.id;
+                    const EngineIcon = typeOption.icon;
+
+                    return (
+                      <button
+                        type="button"
+                        key={typeOption.id}
+                        disabled={typeOption.isOutOfStock}
+                        onClick={() => setSelectedSharedId(typeOption.id)}
+                        className={cn(
+                          "rounded-2xl border p-4 text-left transition-all cursor-pointer relative flex flex-col justify-between",
+                          typeOption.isOutOfStock ? "opacity-40 cursor-not-allowed" : "",
+                          isSelected
+                            ? "border-blue-600 bg-blue-600/10 ring-1 ring-blue-500/30 shadow-md"
+                            : isDark
+                              ? "border-white/[0.08] bg-[#0a0a0c] hover:border-white/20"
+                              : "border-slate-200 bg-white hover:border-slate-300"
+                        )}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center shrink-0", isDark ? "bg-white/[0.04] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
+                            <EngineIcon className={cn("w-5 h-5", typeOption.color)} />
+                          </div>
+                          <div>
+                            <span className={cn("text-sm font-bold block", isDark ? "text-white" : "text-slate-900")}>
+                              {typeOption.name}
+                            </span>
+                            <span className={cn("text-xs font-semibold mt-1 block", isDark ? "text-zinc-400" : "text-slate-500")}>
+                              {formatRupiah(typeOption.ratePerGb)}/GB
+                            </span>
+                          </div>
+                        </div>
+
+                        {isSelected && (
+                          <div className="absolute top-3.5 right-3.5 w-5 h-5 rounded-full bg-blue-600 flex items-center justify-center text-white">
+                            <Check className="w-3 h-3 stroke-[3]" />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Step 2: Storage Size Scale Bar (Gambar 2) */}
+              <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200 shadow-xs")}>
+                <div className="mb-4">
+                  <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+                    Storage Size
+                  </h2>
+                  <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                    Choose disk quota on ultra-fast NVMe storage. Scale up anytime.
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className={cn("text-sm font-bold", isDark ? "text-white" : "text-slate-900")}>
+                      Storage: {storageGb} GB
+                    </span>
+                    <span className={cn("text-xs font-semibold", isDark ? "text-zinc-500" : "text-slate-500")}>
+                      Max: 20 GB
+                    </span>
+                  </div>
+
+                  {/* Range Slider */}
+                  <div className="relative py-2">
+                    <input
+                      type="range"
+                      min={1}
+                      max={20}
+                      step={1}
+                      value={storageGb}
+                      onChange={(e) => setStorageGb(parseInt(e.target.value, 10))}
+                      className="w-full h-2.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-blue-600 transition-all"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs text-zinc-500 font-mono">
+                    <span>1 GB</span>
+                    <span>20 GB</span>
+                  </div>
+
+                  <div className={cn("pt-2 text-xs", isDark ? "text-zinc-400" : "text-slate-600")}>
+                    Storage cost: <strong className={isDark ? "text-white" : "text-slate-900"}>{formatRupiah(sharedStorageCost)}/month</strong>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Instance Configuration & Credentials */}
+          <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200 shadow-xs")}>
+            <h2 className={cn("text-base sm:text-lg font-bold tracking-tight mb-4", isDark ? "text-white" : "text-slate-900")}>
+              Instance Configuration & Credentials
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className={cn("text-xs font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-600")}>
+                  Instance Display Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={instanceName}
+                  onChange={(e) => setInstanceName(e.target.value)}
+                  placeholder="e.g. production-database"
+                  className={cn("w-full border rounded-xl px-3.5 py-2.5 text-sm font-medium focus:outline-none focus:border-blue-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className={cn("text-xs font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-600")}>
+                  Initial Database Name (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={customDbName}
+                  onChange={(e) => setCustomDbName(e.target.value)}
+                  placeholder="Leave blank to auto-generate"
+                  className={cn("w-full border rounded-xl px-3.5 py-2.5 text-sm font-mono focus:outline-none focus:border-blue-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className={cn("text-xs font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-600")}>
+                  Database Username (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={customUsername}
+                  onChange={(e) => setCustomUsername(e.target.value)}
+                  placeholder="Leave blank to auto-generate"
+                  className={cn("w-full border rounded-xl px-3.5 py-2.5 text-sm font-mono focus:outline-none focus:border-blue-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className={cn("text-xs font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-600")}>
+                  Custom Password (Optional)
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={customPassword}
+                    onChange={(e) => setCustomPassword(e.target.value)}
+                    placeholder="Leave blank to auto-generate"
+                    className={cn("w-full border rounded-xl px-3.5 py-2.5 pr-10 text-sm font-mono focus:outline-none focus:border-blue-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-white cursor-pointer"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column (4 cols): Sticky Summary Box (Gambar 1 & Gambar 2) */}
+        <div className="lg:col-span-4 sticky top-6">
+          <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all space-y-5", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-xl" : "bg-white border-slate-200 shadow-md")}>
+
+            {/* DEDICATED SUMMARY (Gambar 1) */}
+            {selectedTier === "DEDICATED" ? (
               <>
-                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                <span>Provisioning {currentPlan.name}...</span>
+                <div className="space-y-1">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                    Engine & Version
+                  </div>
+                  <div className="flex items-center gap-2 font-bold text-sm text-white">
+                    <activeEngineMeta.icon className={cn("w-4 h-4", activeEngineMeta.color)} />
+                    <span>{activeEngineMeta.name} {selectedVersion}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                    Flavor
+                  </div>
+                  <div className="font-bold text-sm text-white">
+                    {activeFlavor.vcpu} / {activeFlavor.ram} RAM
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                    Storage Size
+                  </div>
+                  <div className="font-bold text-sm text-white">
+                    {storageGb} GB
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                    Region
+                  </div>
+                  <div className="font-bold text-sm text-white">
+                    Sidoarjo
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-white/[0.08] space-y-2 text-xs">
+                  <div className="flex items-center justify-between text-zinc-400">
+                    <span>Flavor ({activeFlavor.vcpu} / {activeFlavor.ram})</span>
+                    <span className="font-mono text-white">{formatRupiah(activeFlavor.price)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-zinc-400">
+                    <span>Storage ({storageGb} GB × Rp 5.000)</span>
+                    <span className="font-mono text-white">{formatRupiah(dedicatedStorageCost)}</span>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-white/[0.08] flex items-baseline justify-between">
+                  <span className="text-sm font-bold text-zinc-400">Total</span>
+                  <div className="text-right">
+                    <span className="text-xl sm:text-2xl font-black text-blue-500">
+                      {formatRupiah(dedicatedTotalMonthly)}/month
+                    </span>
+                    <span className="block text-[11px] text-zinc-500 mt-0.5">
+                      ~{formatRupiah(dedicatedHourlyRate)} / jam (PAYG)
+                    </span>
+                  </div>
+                </div>
               </>
             ) : (
+              /* SHARED SUMMARY (Gambar 2) */
               <>
-                <Zap className="w-4 h-4 fill-current" />
-                <span>Deploy {currentPlan.name}</span>
+                <div className="text-base font-bold text-white mb-2">
+                  Summary
+                </div>
+
+                <div className="space-y-1">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                    Database Type
+                  </div>
+                  <div className="font-bold text-sm text-white">
+                    {activeSharedType.name}
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                    Storage Size
+                  </div>
+                  <div className="font-bold text-sm text-white">
+                    {storageGb} GB
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                    Region
+                  </div>
+                  <div className="font-bold text-sm text-white">
+                    Sidoarjo
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                    Type
+                  </div>
+                  <div className="font-bold text-sm text-white">
+                    Shared
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-white/[0.08] space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-bold text-zinc-400">Storage Cost</span>
+                    <span className="text-lg font-black text-blue-500">
+                      {formatRupiah(sharedTotalMonthly)}/month
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-zinc-500">
+                    {formatRupiah(activeSharedType.ratePerGb)} per GB/month · ~{formatRupiah(sharedHourlyRate)}/jam (PAYG)
+                  </div>
+                </div>
               </>
             )}
-          </button>
+
+            {/* Balance check & Deploy button */}
+            <div className="pt-4 border-t border-white/[0.08] space-y-3">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-zinc-400">Your Balance:</span>
+                <span className={cn("font-bold", userBalance >= requiredUpfront ? "text-emerald-400" : "text-red-400")}>
+                  {loadingBalance ? "..." : formatRupiah(userBalance)}
+                </span>
+              </div>
+
+              {userBalance < requiredUpfront && (
+                <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs flex items-center justify-between">
+                  <span>Insufficient balance</span>
+                  <Link href="/dashboard/topup" className="font-bold underline hover:text-white">
+                    Top Up
+                  </Link>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={submitting || userBalance < requiredUpfront}
+                className="w-full py-3 rounded-xl font-bold text-sm bg-blue-600 hover:bg-blue-500 active:scale-95 text-white transition-all shadow-lg shadow-blue-600/30 cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {submitting ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>Provisioning Database...</span>
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-4 h-4 fill-current" />
+                    <span>Create Database</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </form>
