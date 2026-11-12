@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phpmyadmin
+  namespace: managed-db
+  labels:
+    app: phpmyadmin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: phpmyadmin
+  template:
+    metadata:
+      labels:
+        app: phpmyadmin
+    spec:
+      containers:
+      - name: phpmyadmin
+        image: phpmyadmin/phpmyadmin:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        env:
+        - name: PMA_ARBITRARY
+          value: "1"
+        - name: UPLOAD_LIMIT
+          value: 128M
+        - name: MEMORY_LIMIT
+          value: 256M
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: phpmyadmin
+  namespace: managed-db
+spec:
+  selector:
+    app: phpmyadmin
+  ports:
+  - port: 80
+    targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: phpmyadmin-ingress
+  namespace: managed-db
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - pma.db.masdika.id
+    secretName: pma-tls
+  rules:
+  - host: pma.db.masdika.id
+    http:
+      paths:
+      - backend:
+          service:
+            name: phpmyadmin
+            port:
+              number: 80
+        path: /
+        pathType: Prefix

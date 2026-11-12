@@ -1,5 +1,9 @@
 import * as k8s from '@kubernetes/client-node';
 import { Writable, Readable } from 'stream';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as os from 'os';
+import tarStream from 'tar-stream';
 import { prisma } from './prisma';
 import { decryptDeterministic, encryptDeterministic } from './encryption';
 
@@ -303,11 +307,14 @@ export async function execInPod(
           const stdout = Buffer.concat(stdoutChunks).toString('utf-8');
           const stderr = Buffer.concat(stderrChunks).toString('utf-8');
           const isSuccess = !statusResult || statusResult.status === 'Success';
+          const errorMsg = !isSuccess
+            ? (stderr?.trim() ? stderr.trim() : statusResult?.message || 'Command execution failed')
+            : undefined;
           resolve({
             stdout,
             stderr,
             success: isSuccess,
-            error: isSuccess ? undefined : statusResult?.message || stderr || 'Command failed',
+            error: errorMsg,
           });
         }, 50);
       };
@@ -470,7 +477,7 @@ export function generateDatabaseManifest(db: DatabaseServiceRecord): string {
 `;
   } else if (typeUpper === 'POSTGRES' || typeUpper === 'POSTGRESQL') {
     const version = db.version || '16';
-    image = `postgres:${version}-alpine`;
+    image = `postgres:${version}`;
     containerPort = 5432;
     mountPath = '/var/lib/postgresql/data';
     envYaml = `
@@ -555,7 +562,12 @@ spec:
         app: ${name}
         managed-by: masdika-cloud
         db-type: ${typeUpper.toLowerCase()}
+      annotations:
+        container.apparmor.security.beta.kubernetes.io/database: "unconfined"
     spec:
+      securityContext:
+        appArmorProfile:
+          type: Unconfined
       containers:
       - name: database
         image: ${image}
@@ -575,16 +587,22 @@ ${envYaml}
           limits:
             cpu: ${cpuMillicores}m
             memory: ${memMb}Mi
+        startupProbe:
+          tcpSocket:
+            port: ${containerPort}
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          failureThreshold: 30
         readinessProbe:
           tcpSocket:
             port: ${containerPort}
-          initialDelaySeconds: 10
+          initialDelaySeconds: 5
           periodSeconds: 10
           timeoutSeconds: 3
         livenessProbe:
           tcpSocket:
             port: ${containerPort}
-          initialDelaySeconds: 30
+          initialDelaySeconds: 15
           periodSeconds: 20
           timeoutSeconds: 5
       volumes:
@@ -636,15 +654,22 @@ export async function deployDatabase(db: DatabaseServiceRecord): Promise<{ succe
 export async function stopDatabase(id: number, ns = 'managed-db'): Promise<{ success: boolean; error?: string }> {
   try {
     const kc = await getK8sKubeConfig();
-    const appsApi = kc.makeApiClient(k8s.AppsV1Api);
-    await appsApi.patchNamespacedDeploymentScale({
-      name: `db-${id}`,
-      namespace: ns,
-      body: { spec: { replicas: 0 } },
+    const objApi = k8s.KubernetesObjectApi.makeApiClient(kc);
+    await objApi.patch({
+      apiVersion: 'apps/v1',
+      kind: 'Deployment',
+      metadata: {
+        name: `db-${id}`,
+        namespace: ns,
+      },
+      spec: {
+        replicas: 0,
+      },
     });
     return { success: true };
   } catch (err: any) {
-    return { success: false, error: err?.message || 'Scale down failed' };
+    const msg = err?.response?.body?.message || err?.body?.message || err?.message || 'Scale down failed';
+    return { success: false, error: msg };
   }
 }
 
@@ -654,35 +679,44 @@ export async function stopDatabase(id: number, ns = 'managed-db'): Promise<{ suc
 export async function startDatabase(id: number, ns = 'managed-db'): Promise<{ success: boolean; error?: string }> {
   try {
     const kc = await getK8sKubeConfig();
-    const appsApi = kc.makeApiClient(k8s.AppsV1Api);
-    await appsApi.patchNamespacedDeploymentScale({
-      name: `db-${id}`,
-      namespace: ns,
-      body: { spec: { replicas: 1 } },
+    const objApi = k8s.KubernetesObjectApi.makeApiClient(kc);
+    await objApi.patch({
+      apiVersion: 'apps/v1',
+      kind: 'Deployment',
+      metadata: {
+        name: `db-${id}`,
+        namespace: ns,
+      },
+      spec: {
+        replicas: 1,
+      },
     });
     return { success: true };
   } catch (err: any) {
-    return { success: false, error: err?.message || 'Scale up failed' };
+    const msg = err?.response?.body?.message || err?.body?.message || err?.message || 'Scale up failed';
+    return { success: false, error: msg };
   }
 }
 
 /**
- * Restart database by trigger rolling restart via Kubernetes API
+ * Restart database by triggering rolling restart via Kubernetes API
  */
 export async function restartDatabase(id: number, ns = 'managed-db'): Promise<{ success: boolean; error?: string }> {
   try {
     const kc = await getK8sKubeConfig();
-    const appsApi = kc.makeApiClient(k8s.AppsV1Api);
-    await appsApi.patchNamespacedDeployment({
-      name: `db-${id}`,
-      namespace: ns,
-      body: {
-        spec: {
-          template: {
-            metadata: {
-              annotations: {
-                'kubectl.kubernetes.io/restartedAt': new Date().toISOString(),
-              },
+    const objApi = k8s.KubernetesObjectApi.makeApiClient(kc);
+    await objApi.patch({
+      apiVersion: 'apps/v1',
+      kind: 'Deployment',
+      metadata: {
+        name: `db-${id}`,
+        namespace: ns,
+      },
+      spec: {
+        template: {
+          metadata: {
+            annotations: {
+              'kubectl.kubernetes.io/restartedAt': new Date().toISOString(),
             },
           },
         },
@@ -690,7 +724,8 @@ export async function restartDatabase(id: number, ns = 'managed-db'): Promise<{ 
     });
     return { success: true };
   } catch (err: any) {
-    return { success: false, error: err?.message || 'Rollout restart failed' };
+    const msg = err?.response?.body?.message || err?.body?.message || err?.message || 'Rollout restart failed';
+    return { success: false, error: msg };
   }
 }
 
@@ -812,15 +847,16 @@ export async function exportDatabaseDump(
       command = ['mysqldump', `-u${db.username}`, `-p${db.password}`, db.dbName];
     } else if (typeUpper === 'POSTGRES' || typeUpper === 'POSTGRESQL') {
       filename = `${db.dbName}-${timestamp}.sql`;
-      command = ['sh', '-c', `PGPASSWORD="${db.password}" pg_dump -U "${db.username}" -d "${db.dbName}"`];
+      command = ['sh', '-c', `PGPASSWORD="${db.password}" pg_dump -h 127.0.0.1 -U "${db.username}" -d "${db.dbName}"`];
     } else if (typeUpper === 'MONGODB' || typeUpper === 'MONGO') {
       filename = `${db.dbName}-${timestamp}.json`;
       command = [
-        'mongoexport',
+        'mongodump',
         `--username=${db.username}`,
         `--password=${db.password}`,
         '--authenticationDatabase=admin',
         `--db=${db.dbName}`,
+        '--archive',
       ];
     } else {
       return { success: false, error: `Unsupported database engine for dump: ${db.type}` };
@@ -842,7 +878,7 @@ export async function exportDatabaseDump(
 }
 
 /**
- * Run database import (.sql or .json) inside the pod via native K8s Exec stdin stream
+ * Run database import (.sql or .json) inside the pod by staging file into container /tmp
  */
 export async function importDatabaseDump(
   db: DatabaseServiceRecord,
@@ -869,25 +905,45 @@ export async function importDatabaseDump(
     }
     const typeUpper = db.type.toUpperCase();
 
-    let command: string[] = [];
+    // Stage dump file into container /tmp via in-memory tar stream to avoid host disk race condition & stdin pipe termination
+    const dumpFileName = `import_${Date.now()}_dump`;
+    const pack = tarStream.pack();
+    const chunks: Buffer[] = [];
+    pack.on('data', (c: any) => chunks.push(Buffer.isBuffer(c) ? c : Buffer.from(c)));
+    const tarPromise = new Promise<Buffer>((resolve, reject) => {
+      pack.on('end', () => resolve(Buffer.concat(chunks)));
+      pack.on('error', reject);
+    });
+
+    const rawBuf = Buffer.isBuffer(fileContent) ? fileContent : Buffer.from(fileContent, 'utf-8');
+    pack.entry({ name: dumpFileName, mode: 0o644 }, rawBuf);
+    pack.finalize();
+
+    const tarBuffer = await tarPromise;
+
+    // Upload & extract tar archive inside container /tmp
+    const stageRes = await execInPod(kc, ns, podName, 'database', ['tar', 'xf', '-', '-C', '/tmp'], tarBuffer);
+    if (!stageRes.success) {
+      return {
+        success: false,
+        error: stageRes.error || stageRes.stderr || 'Failed to stage database dump into container',
+      };
+    }
+
+    const remoteFile = `/tmp/${dumpFileName}`;
+    let execCmd = '';
 
     if (typeUpper === 'MYSQL' || typeUpper === 'MARIADB') {
-      command = ['mysql', `-u${db.username}`, `-p${db.password}`, db.dbName];
+      execCmd = `mysql -u"${db.username}" -p"${db.password}" "${db.dbName}" < "${remoteFile}"; STATUS=$?; rm -f "${remoteFile}"; exit $STATUS`;
     } else if (typeUpper === 'POSTGRES' || typeUpper === 'POSTGRESQL') {
-      command = ['sh', '-c', `PGPASSWORD="${db.password}" psql -U "${db.username}" -d "${db.dbName}"`];
+      execCmd = `PGPASSWORD="${db.password}" psql -h 127.0.0.1 -U "${db.username}" -d "${db.dbName}" -f "${remoteFile}"; STATUS=$?; rm -f "${remoteFile}"; exit $STATUS`;
     } else if (typeUpper === 'MONGODB' || typeUpper === 'MONGO') {
-      command = [
-        'mongoimport',
-        `--username=${db.username}`,
-        `--password=${db.password}`,
-        '--authenticationDatabase=admin',
-        `--db=${db.dbName}`,
-      ];
+      execCmd = `mongorestore --username="${db.username}" --password="${db.password}" --authenticationDatabase=admin --db="${db.dbName}" --archive="${remoteFile}" || mongoimport --username="${db.username}" --password="${db.password}" --authenticationDatabase=admin --db="${db.dbName}" --file="${remoteFile}"; STATUS=$?; rm -f "${remoteFile}"; exit $STATUS`;
     } else {
       return { success: false, error: `Unsupported database engine for import: ${db.type}` };
     }
 
-    const res = await execInPod(kc, ns, podName, 'database', command, fileContent);
+    const res = await execInPod(kc, ns, podName, 'database', ['sh', '-c', execCmd]);
     if (!res.success) {
       return { success: false, error: res.error || res.stderr || 'Database import execution failed' };
     }

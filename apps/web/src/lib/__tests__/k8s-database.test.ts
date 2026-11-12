@@ -193,4 +193,13 @@ describe('Managed Database K3s Engine - k8s-database.ts', () => {
       expect(pro.limits.ram).toBe('8 GB');
     });
   });
+
+  describe('Database Lifecycle Actions (Power & Restart)', () => {
+    it('should export restartDatabase, stopDatabase, startDatabase functions', async () => {
+      const { restartDatabase, stopDatabase, startDatabase } = await import('../k8s-database');
+      expect(typeof restartDatabase).toBe('function');
+      expect(typeof stopDatabase).toBe('function');
+      expect(typeof startDatabase).toBe('function');
+    });
+  });
 });
