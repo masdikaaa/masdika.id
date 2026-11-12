@@ -56,6 +56,16 @@ export async function GET(req: NextRequest) {
       }
     });
 
+    const activeDatabases = await prisma.databaseService.findMany({
+      where: {
+        status: { in: ['RUNNING', 'STOPPED', 'SUSPENDED'] },
+        hourlyRate: { gt: 0 }
+      },
+      include: {
+        user: { select: { id: true, name: true, email: true, image: true, balance: true } }
+      }
+    });
+
     // 3. Group by customer
     const customersMap = new Map<number, any>();
 
@@ -132,6 +142,21 @@ export async function GET(req: NextRequest) {
         accumulatedCost,
         status: sub.status,
         createdAt: sub.createdAt
+      });
+    }
+
+    for (const db of activeDatabases) {
+      addServiceToCustomer(db.user.id, db.user, {
+        id: `db-${db.id}`,
+        type: 'Database',
+        name: `${db.name} (${db.type} ${db.version})`,
+        ipAddress: `${db.host}:${db.port}`,
+        publicIp: db.host || null,
+        hourlyRate: db.status === 'SUSPENDED' ? 0 : db.hourlyRate,
+        fullHourlyRate: db.hourlyRate,
+        accumulatedCost: db.accumulatedCost || 0,
+        status: db.status,
+        createdAt: db.createdAt
       });
     }
 

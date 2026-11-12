@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/ThemeProvider";
@@ -10,7 +10,8 @@ import { toast } from "sonner";
 import {
   Database, ChevronLeft, Check, Copy, ExternalLink, RefreshCw,
   Power, Square, Play, RotateCw, Download, Upload, Trash2, Eye, EyeOff,
-  Cpu, Layers, HardDrive, ShieldAlert, Activity, Server, FileText, Code2, AlertTriangle, UploadCloud
+  Cpu, Layers, HardDrive, ShieldAlert, Activity, Server, FileText, Code2, AlertTriangle, UploadCloud,
+  Loader2, CheckCircle2, Zap
 } from "lucide-react";
 import { SiMysql, SiPostgresql, SiMariadb, SiMongodb } from "react-icons/si";
 import {
@@ -39,6 +40,8 @@ interface DatabaseDetail {
   hourlyRate: number;
   accumulatedCost: number;
   status: "RUNNING" | "STOPPED" | "PROVISIONING" | "SUSPENDED" | "TERMINATED";
+  suspendReason?: string | null;
+  terminationDate?: string | null;
   createdAt: string;
   lastBilledAt?: string;
   k8sStatus?: {
@@ -109,13 +112,23 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
     }
   };
 
+  const prevStatusRef = useRef<string | null>(null);
+
   const fetchDatabase = async () => {
     setRefreshing(true);
     try {
       const res = await fetch(`/api/user/database/${dbId}`);
       const json = await res.json();
       if (res.ok && json.success) {
-        setDb(json.data);
+        const newDb = json.data;
+        if (prevStatusRef.current === "PROVISIONING" && newDb.status === "RUNNING") {
+          toast.success("Database telah siap dan aktif digunakan!", {
+            duration: 6000,
+            icon: "🚀",
+          });
+        }
+        prevStatusRef.current = newDb.status;
+        setDb(newDb);
       } else {
         toast.error(json.error || "Failed to load database details");
       }
@@ -129,9 +142,11 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
 
   useEffect(() => {
     fetchDatabase();
-    const interval = setInterval(fetchDatabase, 15000); // 15s telemetry polling
+    // Fast polling (2.5s) if provisioning, normal 15s otherwise
+    const pollInterval = (db?.status === "PROVISIONING") ? 2500 : 15000;
+    const interval = setInterval(fetchDatabase, pollInterval);
     return () => clearInterval(interval);
-  }, [dbId]);
+  }, [dbId, db?.status]);
 
   useEffect(() => {
     if (db) {
@@ -328,6 +343,9 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
   );
   const isDedicated = !isShared;
 
+  const isProvisioning = db.status === "PROVISIONING";
+  const isSuspended = db.status === "SUSPENDED";
+
   const nodejsSnippet = db.type.toUpperCase() === "MONGODB"
     ? `DATABASE_URL="${db.connectionDetails?.uri || `mongodb://${db.username}:${db.password}@${db.host}:${db.port}/${db.dbName}?authSource=admin`}"`
     : `DATABASE_URL="${db.connectionDetails?.uri || `mysql://${db.username}:${db.password}@${db.host}:${db.port}/${db.dbName}`}"`;
@@ -360,8 +378,19 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
               <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-md border", engine.badgeBg)}>
                 {engine.name} {db.version}
               </span>
-              <span className={cn("px-2.5 py-0.5 rounded-full text-[11px] font-bold border", db.status === "RUNNING" ? (isDark ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200") : (isDark ? "bg-zinc-500/15 text-zinc-400 border-zinc-500/30" : "bg-slate-100 text-slate-600 border-slate-200"))}>
-                {db.status === "RUNNING" && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block mr-1.5" />}
+              <span className={cn(
+                "px-2.5 py-0.5 rounded-full text-[11px] font-bold border flex items-center gap-1.5",
+                db.status === "RUNNING"
+                  ? (isDark ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200")
+                  : db.status === "PROVISIONING"
+                    ? (isDark ? "bg-amber-500/15 text-amber-400 border-amber-500/30" : "bg-amber-50 text-amber-700 border-amber-200")
+                    : db.status === "SUSPENDED"
+                      ? (isDark ? "bg-red-500/15 text-red-400 border-red-500/30" : "bg-red-50 text-red-700 border-red-200")
+                      : (isDark ? "bg-zinc-500/15 text-zinc-400 border-zinc-500/30" : "bg-slate-100 text-slate-600 border-slate-200")
+              )}>
+                {db.status === "RUNNING" && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />}
+                {db.status === "PROVISIONING" && <Loader2 className="w-3 h-3 animate-spin text-amber-400" />}
+                {db.status === "SUSPENDED" && <AlertTriangle className="w-3 h-3 text-red-400" />}
                 {db.status}
               </span>
             </div>
@@ -398,12 +427,12 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                   variant: "warning",
                   icon: <RotateCw className="w-8 h-8" />
                 })}
-                disabled={actionLoading}
+                disabled={actionLoading || isProvisioning || isSuspended}
                 className={cn(
-                  "px-3 py-2 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer",
+                  "px-3 py-2 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed",
                   isDark ? "bg-white/5 border-white/10 text-zinc-300 hover:text-white" : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
                 )}
-                title="Restart container"
+                title={isProvisioning ? "Database sedang diprovision..." : isSuspended ? "Database di-suspend" : "Restart container"}
               >
                 <RotateCw className="w-3.5 h-3.5" />
                 <span>Restart</span>
@@ -417,12 +446,12 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                   variant: "warning",
                   icon: <Square className="w-8 h-8 fill-current" />
                 })}
-                disabled={actionLoading}
+                disabled={actionLoading || isProvisioning || isSuspended}
                 className={cn(
-                  "px-3 py-2 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer",
+                  "px-3 py-2 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed",
                   isDark ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20" : "bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100"
                 )}
-                title="Stop container"
+                title={isProvisioning ? "Database sedang diprovision..." : isSuspended ? "Database di-suspend" : "Stop container"}
               >
                 <Square className="w-3.5 h-3.5" />
                 <span>Stop</span>
@@ -438,12 +467,12 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                 variant: "success",
                 icon: <Play className="w-8 h-8 fill-current" />,
               })}
-              disabled={actionLoading}
+              disabled={actionLoading || isProvisioning || isSuspended}
               className={cn(
-                "px-3.5 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer",
+                "px-3.5 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed",
                 isDark ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25" : "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
               )}
-              title="Start container"
+              title={isProvisioning ? "Database sedang diprovision..." : isSuspended ? "Database di-suspend" : "Start container"}
             >
               <Play className="w-3.5 h-3.5 fill-current" />
               <span>Start</span>
@@ -453,13 +482,14 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
           {/* Import Dump Button */}
           <button
             onClick={() => setImportModalOpen(true)}
+            disabled={isProvisioning || isSuspended}
             className={cn(
-              "px-3.5 py-2 rounded-xl text-xs font-bold border flex items-center gap-1.5 transition-all cursor-pointer shadow-xs",
+              "px-3.5 py-2 rounded-xl text-xs font-bold border flex items-center gap-1.5 transition-all cursor-pointer shadow-xs disabled:opacity-40 disabled:cursor-not-allowed",
               isDark
                 ? "bg-white/5 border-white/10 text-zinc-200 hover:text-white hover:bg-white/10"
                 : "bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200"
             )}
-            title="Import SQL / data dump file"
+            title={isProvisioning ? "Database belum siap..." : "Import SQL / data dump file"}
           >
             <Upload className="w-3.5 h-3.5" />
             <span>Import Data</span>
@@ -468,14 +498,116 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
           {/* Export Dump Button */}
           <button
             onClick={handleDownloadDump}
-            className="px-3.5 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 active:scale-95 text-slate-950 flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
-            title="Download SQL / data dump"
+            disabled={isProvisioning || isSuspended}
+            className="px-3.5 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 active:scale-95 text-slate-950 flex items-center gap-1.5 transition-all shadow-md cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            title={isProvisioning ? "Database belum siap..." : "Download SQL / data dump"}
           >
             <Download className="w-3.5 h-3.5" />
             <span>Export Dump</span>
           </button>
         </div>
       </div>
+
+      {/* Active Provisioning State with Step Animations */}
+      {isProvisioning && (
+        <div className={cn(
+          "rounded-2xl border p-5 sm:p-6 transition-all relative overflow-hidden",
+          isDark
+            ? "bg-gradient-to-r from-amber-500/10 via-cyan-500/10 to-transparent border-amber-500/30"
+            : "bg-gradient-to-r from-amber-50 via-cyan-50 to-white border-amber-300 shadow-sm"
+        )}>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-start gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center shrink-0">
+                <Loader2 className="w-5 h-5 text-amber-400 animate-spin" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className={cn("text-base font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+                    Sedang Melakukan Provisioning Database di Cluster K3s...
+                  </h3>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-400 border border-amber-500/30 animate-pulse">
+                    Initializing
+                  </span>
+                </div>
+                <p className={cn("text-xs mt-1", isDark ? "text-zinc-400" : "text-slate-600")}>
+                  Kubernetes sedang mengalokasikan persistent SSD volume, mem-pull container image {engine.name}, dan menyiapkan endpoint. Tombol kontrol terkunci sementara sampai container siap digunakan.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 self-start md:self-auto shrink-0">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/20 border border-white/10 text-xs font-mono text-zinc-300">
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping inline-block" />
+                <span>Auto-refreshing live...</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Provisioning Progress Steps */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4 pt-4 border-t border-white/[0.08]">
+            <div className="flex items-center gap-2.5 text-xs font-semibold text-emerald-400">
+              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+              <span>1. Alokasi Port & Config Secret</span>
+            </div>
+            <div className="flex items-center gap-2.5 text-xs font-semibold text-emerald-400">
+              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+              <span>2. Mount Persistent Volume SSD</span>
+            </div>
+            <div className="flex items-center gap-2.5 text-xs font-semibold text-cyan-400">
+              <Loader2 className="w-4 h-4 shrink-0 animate-spin text-cyan-400" />
+              <span>3. Start Pod & Readiness Check</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Suspended Alert Banner with 3-Day Grace Period */}
+      {isSuspended && (
+        <div className={cn(
+          "rounded-2xl border p-5 sm:p-6 transition-all relative overflow-hidden",
+          isDark
+            ? "bg-gradient-to-r from-red-500/15 via-amber-500/10 to-transparent border-red-500/30"
+            : "bg-gradient-to-r from-red-50 via-amber-50 to-white border-red-300 shadow-sm"
+        )}>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-start gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-red-500/20 border border-red-500/30 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5 text-red-400" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className={cn("text-base font-bold tracking-tight text-red-400")}>
+                    Layanan Database Ditangguhkan (SUSPENDED)
+                  </h3>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-red-500/20 text-red-400 border border-red-500/30">
+                    Low Balance
+                  </span>
+                </div>
+                <p className={cn("text-xs mt-1 leading-relaxed", isDark ? "text-zinc-300" : "text-slate-700")}>
+                  {db.suspendReason || "Saldo akun tidak mencukupi untuk pemotongan biaya Pay-As-You-Go per jam."}{" "}
+                  {db.terminationDate && (
+                    <strong className="text-amber-400">
+                      Masa tenggang 3 hari sampai {new Date(db.terminationDate).toLocaleDateString("id-ID", { weekday: "long", year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })} WIB.
+                    </strong>
+                  )}{" "}
+                  Jika masa tenggang habis tanpa top up, instance database dan seluruh volume SSD akan dihapus permanen (TERMINATED).
+                </p>
+              </div>
+            </div>
+
+            <div className="shrink-0">
+              <Link
+                href="/dashboard/topup"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all shadow-md shadow-cyan-500/20 cursor-pointer"
+              >
+                <Zap className="w-4 h-4 fill-current" />
+                <span>Top Up Saldo Sekarang</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Grid: Left Column (Credentials & Snippets) + Right Column (Web GUI & Telemetry & Actions) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -932,15 +1064,37 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                 <div><strong>Pass:</strong> ••••••••</div>
               </div>
 
-              <a
-                href={engine.webToolUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-2.5 rounded-xl font-bold text-xs bg-cyan-400 hover:bg-cyan-300 active:scale-95 text-slate-950 flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer"
-              >
-                <span>Launch {engine.webToolName}</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
+              {isProvisioning ? (
+                <button
+                  type="button"
+                  disabled
+                  className="w-full py-2.5 rounded-xl font-bold text-xs bg-white/5 border border-white/10 text-zinc-500 flex items-center justify-center gap-2 cursor-not-allowed opacity-60"
+                  title="Web GUI akan aktif setelah container database running"
+                >
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-400" />
+                  <span>Menyiapkan {engine.webToolName}...</span>
+                </button>
+              ) : isSuspended ? (
+                <button
+                  type="button"
+                  disabled
+                  className="w-full py-2.5 rounded-xl font-bold text-xs bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center gap-2 cursor-not-allowed"
+                  title="Database ditangguhkan karena saldo tidak cukup"
+                >
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                  <span>Terkunci (Akun Suspended)</span>
+                </button>
+              ) : (
+                <a
+                  href={engine.webToolUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2.5 rounded-xl font-bold text-xs bg-cyan-400 hover:bg-cyan-300 active:scale-95 text-slate-950 flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer"
+                >
+                  <span>Launch {engine.webToolName}</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              )}
             </div>
           )}
 
@@ -1012,6 +1166,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
 
             <button
               type="button"
+              disabled={deleting || isProvisioning}
               onClick={() => setConfirmPowerModal({
                 action: "delete",
                 title: "Terminate Database Instance",
@@ -1020,7 +1175,8 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                 variant: "danger",
                 icon: <Trash2 className="w-8 h-8" />,
               })}
-              className="w-full py-2.5 rounded-xl font-bold text-xs bg-red-600 hover:bg-red-700 text-white flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
+              className="w-full py-2.5 rounded-xl font-bold text-xs bg-red-600 hover:bg-red-700 text-white flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
+              title={isProvisioning ? "Tunggu sampai proses provisioning selesai" : "Terminate database"}
             >
               <Trash2 className="w-3.5 h-3.5" />
               <span>Terminate & Delete Database</span>

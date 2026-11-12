@@ -3,7 +3,7 @@ import { useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 import React, { useState, useEffect, Fragment } from "react";
 import { toast } from "sonner";
-import { Activity, Clock, Loader2, Save, RefreshCw, Terminal, Network, Globe, Package, Info, Users, Layers, Wallet, CheckCircle2, AlertTriangle, XCircle, AlertCircle, ChevronDown, Zap, Mail, Send } from "lucide-react";
+import { Activity, Clock, Loader2, Save, RefreshCw, Terminal, Network, Globe, Package, Info, Users, Layers, Wallet, CheckCircle2, AlertTriangle, XCircle, AlertCircle, ChevronDown, Zap, Mail, Send, Database } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { formatRupiah } from "@/lib/billing";
 import { Pagination } from "@/components/ui/Pagination";
@@ -156,6 +156,7 @@ export default function PaygMonitorPage() {
     switch (type) {
       case 'VPS': return <Terminal className={cn("w-4 h-4 sm:w-5 sm:h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />;
       case 'Reserved IP': return <Network className={cn("w-4 h-4 sm:w-5 sm:h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />;
+      case 'Database': return <Database className={cn("w-4 h-4 sm:w-5 sm:h-5", isDark ? "text-emerald-400" : "text-emerald-700")} />;
       default: return <Package className={cn("w-4 h-4 sm:w-5 sm:h-5", isDark ? "text-purple-400" : "text-purple-700")} />;
     }
   };

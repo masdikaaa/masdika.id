@@ -627,6 +627,24 @@ export async function GET(req: Request) {
           } catch (stopErr) {
             console.error(`Failed to stop database pod for DB ${db.id}:`, stopErr);
           }
+
+          // Send 3-day grace period suspension email
+          try {
+            const { sendDatabaseSuspendedGracePeriodEmail } = await import('@/lib/email');
+            const email = decryptDeterministic(db.user.email) || db.user.email;
+            const name = decryptDeterministic(db.user.name) || db.user.name;
+            await sendDatabaseSuspendedGracePeriodEmail({
+              email,
+              userName: name,
+              dbName: db.name,
+              dbType: `${db.type} ${db.version}`,
+              terminationDate: defaultTermination,
+              hourlyRate: db.hourlyRate,
+              reason: 'Insufficient balance for Pay as You Go hourly database billing'
+            });
+          } catch (emailErr) {
+            console.error(`Failed to send database suspension email for DB ${db.id}:`, emailErr);
+          }
         }
       }
     }

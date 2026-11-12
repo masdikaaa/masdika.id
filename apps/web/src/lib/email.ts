@@ -345,6 +345,116 @@ export const sendVpsSuspendedGracePeriodEmail = async ({
   });
 };
 
+export interface DatabaseSuspendedGracePeriodEmailParams {
+  email: string;
+  userName: string;
+  dbName: string;
+  dbType: string;
+  terminationDate: Date;
+  hourlyRate: number;
+  reason?: string;
+}
+
+export const sendDatabaseSuspendedGracePeriodEmail = async ({
+  email,
+  userName,
+  dbName,
+  dbType,
+  terminationDate,
+  hourlyRate,
+  reason,
+}: DatabaseSuspendedGracePeriodEmailParams) => {
+  const decEmail = decryptDeterministic(email) || email;
+  const decName = decryptDeterministic(userName) || userName;
+
+  const deadlineStr = terminationDate.toLocaleString('id-ID', {
+    timeZone: 'Asia/Jakarta',
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }) + ' WIB';
+
+  const formattedRate = hourlyRate && hourlyRate > 0
+    ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(hourlyRate) + '/jam'
+    : null;
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://masdika.id';
+
+  const content = `
+    <div style="margin-bottom: 20px;">
+      <span style="display: inline-block; background-color: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 700; text-transform: uppercase;">
+        ⚠️ Pemberitahuan Penangguhan (Suspended)
+      </span>
+    </div>
+
+    <h2 style="color: #ef4444; margin-top: 0; margin-bottom: 16px; font-size: 22px;">Layanan Managed Database Di-Suspend: Saldo Tidak Mencukupi</h2>
+    
+    <p style="color: #e2e8f0; font-size: 15px; line-height: 1.6;">
+      Halo <strong>${decName}</strong>,
+    </p>
+
+    <p style="color: #cbd5e1; font-size: 14px; line-height: 1.6;">
+      Layanan Managed Database Anda (<strong style="color: #38bdf8; font-family: monospace;">${dbName}</strong> - ${dbType}) saat ini telah ditangguhkan (<strong>SUSPENDED</strong>) karena saldo akun Masdika Anda tidak mencukupi untuk pemotongan biaya hourly Pay-As-You-Go (${reason || 'Billing failed due to insufficient balance'}).
+    </p>
+
+    <div style="background-color: #030712; padding: 20px 24px; border-radius: 12px; margin: 25px 0; border: 1px solid #1e293b; border-left: 4px solid #f59e0b;">
+      <h3 style="color: #f59e0b; margin-top: 0; margin-bottom: 14px; font-size: 15px; font-weight: 700; text-transform: uppercase;">Masa Tenggang 3 Hari (Grace Period)</h3>
+      <table width="100%" cellpadding="0" cellspacing="0" style="color: #e2e8f0; font-size: 14px;">
+        <tr>
+          <td style="padding: 6px 0; color: #94a3b8;" width="160">Nama Database:</td>
+          <td style="padding: 6px 0; color: #38bdf8; font-weight: 700; font-family: monospace;">${dbName} (${dbType})</td>
+        </tr>
+        ${formattedRate ? `
+        <tr>
+          <td style="padding: 6px 0; color: #94a3b8;">Tarif Hourly (PAYG):</td>
+          <td style="padding: 6px 0; color: #e2e8f0; font-weight: 600;">${formattedRate}</td>
+        </tr>
+        ` : ''}
+        <tr>
+          <td style="padding: 6px 0; color: #94a3b8;">Status Layanan:</td>
+          <td style="padding: 6px 0; color: #ef4444; font-weight: 700;">SUSPENDED (Pod Dimatikan Sementara)</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #f59e0b; font-weight: 700;">Batas Waktu Top Up:</td>
+          <td style="padding: 8px 0; color: #f59e0b; font-weight: 800; font-size: 15px;">${deadlineStr}</td>
+        </tr>
+      </table>
+    </div>
+
+    <div style="background-color: #0c1a2e; border: 1px solid #1e3a8a; border-radius: 10px; padding: 18px 20px; margin: 25px 0;">
+      <h3 style="color: #38bdf8; margin-top: 0; margin-bottom: 10px; font-size: 15px;">💡 Auto-Unsuspend (Reaktivasi Otomatis)</h3>
+      <ul style="color: #cbd5e1; font-size: 13.5px; line-height: 1.6; margin: 0; padding-left: 20px;">
+        <li style="margin-bottom: 8px;"><strong>Data Database Aman:</strong> Seluruh tabel, data, dan volume persistent SSD database Anda tetap tersimpan utuh selama masa tenggang 3 hari ini. Container pod hanya dimatikan sementara agar tidak terus memotong saldo.</li>
+        <li style="margin-bottom: 8px;"><strong>Cukup Top Up Saldo:</strong> Begitu Anda melakukan top up saldo dan nominalnya mencukupi, sistem kami akan <strong>secara otomatis mengaktifkan kembali (unsuspend)</strong> dan menyalakan pod database Anda tanpa tindakan manual.</li>
+      </ul>
+    </div>
+
+    <div style="background-color: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 10px; padding: 16px 20px; margin: 25px 0;">
+      <p style="color: #f87171; margin: 0; font-size: 13px; line-height: 1.5;">
+        ⚠️ <strong>PENTING:</strong> Apabila akun tidak di-top up hingga batas waktu <strong>${deadlineStr}</strong> (3 hari), layanan Database beserta seluruh volume penyimpanan SSD dan data di dalamnya akan <strong>dihapus permanen (TERMINATED)</strong>. Data yang telah dihapus tidak dapat dipulihkan kembali.
+      </p>
+    </div>
+
+    <div style="text-align: center; margin: 35px 0;">
+      <a href="${appUrl}/dashboard/topup" style="background-color: #06b6d4; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 15px; display: inline-block;">Top Up Saldo Sekarang</a>
+    </div>
+
+    <p style="color: #94a3b8; font-size: 13px; line-height: 1.5;">
+      Jika Anda membutuhkan bantuan atau pertanyaan terkait layanan, silakan hubungi tim dukungan kami melalui menu Tiket Bantuan di dashboard.
+    </p>
+  `;
+
+  await getTransporter().sendMail({
+    from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
+    to: decEmail,
+    subject: `[PENTING] Layanan Database ${dbName} Ditangguhkan (Grace Period 3 Hari) - Masdika Cloud`,
+    html: getBaseHtml(content),
+  });
+};
+
 export const sendRenewalInvoiceEmail = async (email: string, userName: string, planName: string, serviceName: string, expiresAt: Date, invoiceNumber: string, amount: number) => {
   const dateStr = expiresAt.toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
   const formattedAmount = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
