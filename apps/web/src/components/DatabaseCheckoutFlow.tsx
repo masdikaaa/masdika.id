@@ -222,6 +222,38 @@ export default function DatabaseCheckoutFlow() {
       return;
     }
 
+    if (!/^[a-zA-Z0-9_\-\.\s]{2,50}$/.test(instanceName.trim())) {
+      toast.error("Instance name can only contain letters, numbers, spaces, dots, hyphens, and underscores (2-50 characters).");
+      return;
+    }
+
+    if (customDbName.trim() && !/^[a-zA-Z][a-zA-Z0-9_]{1,31}$/.test(customDbName.trim())) {
+      toast.error("Database name must start with a letter and contain only alphanumeric characters and underscores (2-32 characters).");
+      return;
+    }
+
+    if (customUsername.trim() && !/^[a-zA-Z][a-zA-Z0-9_]{1,31}$/.test(customUsername.trim())) {
+      toast.error("Username must start with a letter and contain only alphanumeric characters and underscores (2-32 characters).");
+      return;
+    }
+
+    const reservedUsers = ["root", "admin", "administrator", "postgres", "mysql", "system", "sys"];
+    if (customUsername.trim() && reservedUsers.includes(customUsername.trim().toLowerCase())) {
+      toast.error(`Username cannot be a reserved user (${reservedUsers.join(", ")}).`);
+      return;
+    }
+
+    if (customPassword.trim()) {
+      if (customPassword.trim().length < 8) {
+        toast.error("Password must be at least 8 characters.");
+        return;
+      }
+      if (!/^[a-zA-Z0-9@#%^+=_\-\.]{8,64}$/.test(customPassword.trim())) {
+        toast.error("Password can only contain letters, numbers, and safe symbols (@#%^+=_-.). Quotes and shell metacharacters are disallowed.");
+        return;
+      }
+    }
+
     if (userBalance < requiredUpfront) {
       toast.error(`Insufficient balance. Requires at least ${formatRupiah(requiredUpfront)} (1 hour PAYG) balance.`);
       return;
@@ -735,6 +767,7 @@ export default function DatabaseCheckoutFlow() {
                   placeholder="e.g. production-database"
                   className={cn("w-full border rounded-xl px-3.5 py-2.5 text-sm font-medium focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
+                <p className="text-[11px] text-zinc-500">Alphanumeric, spasi, titik, strip & underscore (2-50 chars)</p>
               </div>
 
               <div className="space-y-1.5">
@@ -748,6 +781,7 @@ export default function DatabaseCheckoutFlow() {
                   placeholder="Leave blank to auto-generate"
                   className={cn("w-full border rounded-xl px-3.5 py-2.5 text-sm font-mono focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
+                <p className="text-[11px] text-zinc-500">Awali huruf, alphanumeric & underscore (2-32 chars)</p>
               </div>
 
               <div className="space-y-1.5">
@@ -761,6 +795,7 @@ export default function DatabaseCheckoutFlow() {
                   placeholder="Leave blank to auto-generate"
                   className={cn("w-full border rounded-xl px-3.5 py-2.5 text-sm font-mono focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
+                <p className="text-[11px] text-zinc-500">Awali huruf, alphanumeric & underscore (non-root)</p>
               </div>
 
               <div className="space-y-1.5">
@@ -783,6 +818,7 @@ export default function DatabaseCheckoutFlow() {
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+                <p className="text-[11px] text-zinc-500">Min 8 karakter (@#%^+=_-. aman), tanpa kutip atau shell</p>
               </div>
             </div>
           </div>

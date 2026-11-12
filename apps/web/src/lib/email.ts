@@ -455,6 +455,168 @@ export const sendDatabaseSuspendedGracePeriodEmail = async ({
   });
 };
 
+export interface DatabaseProvisionedEmailParams {
+  email: string;
+  userName: string;
+  instanceName: string;
+  dbType: string;
+  version: string;
+  host: string;
+  port: number;
+  databaseName: string;
+  username: string;
+  password: string;
+  rootPassword?: string | null;
+  planName: string;
+  storageGb: number;
+  hourlyRate?: number;
+  monthlyPrice?: number;
+  webToolName?: string | null;
+  webToolUrl?: string | null;
+  connectionUri?: string;
+  databaseId: number;
+}
+
+export const sendDatabaseProvisionedEmail = async ({
+  email,
+  userName,
+  instanceName,
+  dbType,
+  version,
+  host,
+  port,
+  databaseName,
+  username,
+  password,
+  rootPassword,
+  planName,
+  storageGb,
+  webToolName,
+  webToolUrl,
+  connectionUri,
+  databaseId,
+}: DatabaseProvisionedEmailParams) => {
+  const decEmail = decryptDeterministic(email) || email;
+  const decName = decryptDeterministic(userName) || userName;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://masdika.id';
+
+  const content = `
+    <div style="margin-bottom: 20px;">
+      <span style="display: inline-block; background-color: rgba(6, 182, 212, 0.15); color: #06b6d4; border: 1px solid rgba(6, 182, 212, 0.3); padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 700; text-transform: uppercase;">
+        🚀 Managed Database Ready
+      </span>
+    </div>
+
+    <h2 style="color: #06b6d4; margin-top: 0; margin-bottom: 16px; font-size: 22px;">Layanan Database Anda Telah Aktif!</h2>
+    
+    <p style="color: #e2e8f0; font-size: 15px; line-height: 1.6;">
+      Halo <strong>${decName}</strong>,
+    </p>
+    
+    <p style="color: #cbd5e1; font-size: 14px; line-height: 1.6;">
+      Layanan Managed Database Anda (<strong style="color: #38bdf8;">${instanceName}</strong>) berbasis <strong>${dbType} ${version}</strong> di klaster Kubernetes telah berhasil di-deploy dan siap menerima koneksi aplikasi.
+    </p>
+
+    <!-- Credential Box -->
+    <div style="background-color: #030712; padding: 22px 24px; border-radius: 12px; margin: 25px 0; border: 1px solid #1e293b; border-left: 4px solid #06b6d4;">
+      <h3 style="color: #38bdf8; margin-top: 0; margin-bottom: 16px; font-size: 16px; font-weight: 700;">
+        🔑 Kredensial Koneksi Database Langsung (Direct TCP)
+      </h3>
+      <table width="100%" cellpadding="0" cellspacing="0" style="color: #e2e8f0; font-family: 'JetBrains Mono', 'Plus Jakarta Sans', monospace; font-size: 13px;">
+        <tr>
+          <td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #94a3b8;" width="180">Host / Server:</td>
+          <td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #ffffff; font-weight: 700; text-align: right;">${host}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #94a3b8;">Port:</td>
+          <td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #38bdf8; font-weight: 700; text-align: right;">${port}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #94a3b8;">Nama Database:</td>
+          <td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #ffffff; font-weight: 700; text-align: right;">${databaseName}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #94a3b8;">Username:</td>
+          <td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #ffffff; font-weight: 700; text-align: right;">${username}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #94a3b8;">Password:</td>
+          <td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #fbbf24; font-weight: 700; text-align: right;">${password}</td>
+        </tr>
+        ${rootPassword ? `
+        <tr>
+          <td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #94a3b8;">Root / Admin Password:</td>
+          <td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #fbbf24; font-weight: 700; text-align: right;">${rootPassword}</td>
+        </tr>
+        ` : ''}
+        <tr>
+          <td style="padding: 8px 0; color: #94a3b8;">Paket & Storage:</td>
+          <td style="padding: 8px 0; color: #ffffff; font-weight: 600; text-align: right;">${planName} (${storageGb} GB SSD)</td>
+        </tr>
+      </table>
+    </div>
+
+    ${webToolUrl && webToolName ? `
+    <!-- Web GUI Box -->
+    <div style="background-color: #082f49; padding: 20px 22px; border-radius: 12px; margin: 25px 0; border: 1px solid #0284c7; border-left: 4px solid #38bdf8;">
+      <h3 style="color: #38bdf8; margin-top: 0; margin-bottom: 12px; font-size: 15px; font-weight: 700;">
+        🌐 Akses Web GUI (${webToolName})
+      </h3>
+      <p style="margin: 0 0 12px 0; color: #e2e8f0; font-size: 13px; line-height: 1.5;">
+        Kelola database secara visual melalui browser tanpa perlu install software klien lokal:
+      </p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="color: #e2e8f0; font-family: 'JetBrains Mono', monospace; font-size: 13px;">
+        <tr>
+          <td style="padding: 6px 0; color: #94a3b8;" width="180">URL Web GUI:</td>
+          <td style="padding: 6px 0; text-align: right;"><a href="${webToolUrl}" target="_blank" style="color: #38bdf8; font-weight: 700; text-decoration: underline;">${webToolUrl}</a></td>
+        </tr>
+        <tr>
+          <td style="padding: 6px 0; color: #94a3b8;">Login Server:</td>
+          <td style="padding: 6px 0; color: #ffffff; text-align: right;">${host}:${port}</td>
+        </tr>
+        <tr>
+          <td style="padding: 6px 0; color: #94a3b8;">Login Username:</td>
+          <td style="padding: 6px 0; color: #ffffff; text-align: right;">${username}</td>
+        </tr>
+        <tr>
+          <td style="padding: 6px 0; color: #94a3b8;">Login Password:</td>
+          <td style="padding: 6px 0; color: #fbbf24; font-weight: 700; text-align: right;">${password}</td>
+        </tr>
+      </table>
+    </div>
+    ` : ''}
+
+    ${connectionUri ? `
+    <!-- Quick Connection URI -->
+    <div style="background-color: #0a0a0c; padding: 18px 20px; border-radius: 10px; margin: 20px 0; border: 1px solid #27272a;">
+      <div style="color: #a1a1aa; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">
+        Quick Connection String (URI):
+      </div>
+      <div style="background-color: #18181b; padding: 10px 14px; border-radius: 8px; font-family: monospace; font-size: 12px; color: #38bdf8; word-break: break-all;">
+        ${connectionUri}
+      </div>
+    </div>
+    ` : ''}
+
+    <div style="text-align: center; margin: 35px 0;">
+      <a href="${appUrl}/dashboard/database/${databaseId}" style="background-color: #06b6d4; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 15px; display: inline-block;">
+        Buka Panel Managed Database
+      </a>
+    </div>
+
+    <p style="color: #94a3b8; font-size: 12px; line-height: 1.5; border-top: 1px solid #1e293b; padding-top: 16px;">
+      🔒 <strong>Keamanan:</strong> Harap simpan kredensial ini di tempat yang aman. Anda dapat memantau penggunaan vCPU, memori RAM, SSD, melakukan import/export data dump, dan kontrol container kapan saja melalui dashboard Masdika Cloud.
+    </p>
+  `;
+
+  await getTransporter().sendMail({
+    from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
+    to: decEmail,
+    subject: `[Kredensial] Layanan Managed Database ${instanceName} Telah Siap - Masdika Cloud`,
+    html: getBaseHtml(content),
+  });
+};
+
 export const sendRenewalInvoiceEmail = async (email: string, userName: string, planName: string, serviceName: string, expiresAt: Date, invoiceNumber: string, amount: number) => {
   const dateStr = expiresAt.toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
   const formattedAmount = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);

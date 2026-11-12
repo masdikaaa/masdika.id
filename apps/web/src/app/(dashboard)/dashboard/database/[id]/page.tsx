@@ -1058,10 +1058,50 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                 Visual database management interface via browser. Log in using your instance host, port, username, and password.
               </p>
 
-              <div className={cn("p-3 rounded-xl border text-xs font-mono mb-4 space-y-1", isDark ? "bg-[#0a0a0c] border-white/[0.06] text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-700")}>
-                <div><strong>Server:</strong> {db.type?.toUpperCase().includes('MONGO') ? `db-${db.id}-mongo.db.masdika.id` : `${db.host}:${db.port}`}</div>
-                <div><strong>User:</strong> {db.type?.toUpperCase().includes('POSTGRES') ? `${db.username}@db.masdika.id` : db.username}</div>
-                <div><strong>Pass:</strong> ••••••••</div>
+              <div className={cn("p-3 rounded-xl border text-xs font-mono mb-4 space-y-2", isDark ? "bg-[#0a0a0c] border-white/[0.06] text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-700")}>
+                <div className="flex items-center justify-between">
+                  <div><strong>Server:</strong> {db.type?.toUpperCase().includes('MONGO') ? `db-${db.id}-mongo.db.masdika.id` : `${db.host}:${db.port}`}</div>
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(db.type?.toUpperCase().includes('MONGO') ? `db-${db.id}-mongo.db.masdika.id` : `${db.host}:${db.port}`, "webgui-server")}
+                    className={cn("p-1 rounded hover:bg-white/10 transition-colors cursor-pointer", copiedKey === "webgui-server" ? "text-emerald-400" : "text-zinc-400 hover:text-white")}
+                    title="Copy server endpoint"
+                  >
+                    {copiedKey === "webgui-server" ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div><strong>User:</strong> {db.type?.toUpperCase().includes('POSTGRES') ? `${db.username}@db.masdika.id` : db.username}</div>
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(db.type?.toUpperCase().includes('POSTGRES') ? `${db.username}@db.masdika.id` : db.username, "webgui-user")}
+                    className={cn("p-1 rounded hover:bg-white/10 transition-colors cursor-pointer", copiedKey === "webgui-user" ? "text-emerald-400" : "text-zinc-400 hover:text-white")}
+                    title="Copy username"
+                  >
+                    {copiedKey === "webgui-user" ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div><strong>Pass:</strong> {showPassword ? db.password : "••••••••••••"}</div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="p-1 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                      title={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => db.password && copyToClipboard(db.password, "webgui-pass")}
+                      className={cn("p-1 rounded hover:bg-white/10 transition-colors cursor-pointer", copiedKey === "webgui-pass" ? "text-emerald-400" : "text-zinc-400 hover:text-white")}
+                      title="Copy password"
+                    >
+                      {copiedKey === "webgui-pass" ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {isProvisioning ? (

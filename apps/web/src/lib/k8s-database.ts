@@ -238,6 +238,16 @@ export async function applyKubernetesManifests(kc: k8s.KubeConfig, manifestYaml:
 }
 
 /**
+ * Safely escape an argument for POSIX shell (sh / bash) execution.
+ * Wraps in single quotes and safely escapes internal single quotes to prevent command & shell injection.
+ */
+export function escapeShellArg(arg: string | number | undefined | null): string {
+  if (arg === undefined || arg === null) return "''";
+  const str = String(arg);
+  return "'" + str.replace(/'/g, "'\\''") + "'";
+}
+
+/**
  * Execute a command inside a Kubernetes pod container using the native WebSocket Exec API
  */
 export async function execInPod(
@@ -763,8 +773,9 @@ export async function syncPgAdminUser(
         },
       };
 
+      const safeId = parseInt(String(db.id), 10);
       const b64 = Buffer.from(JSON.stringify(serverConfig)).toString('base64');
-      const loadCmd = `echo "${b64}" | base64 -d > /tmp/srv_${db.id}.json && /venv/bin/python3 /pgadmin4/setup.py load-servers --user "${userEmail}" /tmp/srv_${db.id}.json; rm -f /tmp/srv_${db.id}.json`;
+      const loadCmd = `echo ${escapeShellArg(b64)} | base64 -d > /tmp/srv_${safeId}.json && /venv/bin/python3 /pgadmin4/setup.py load-servers --user ${escapeShellArg(userEmail)} /tmp/srv_${safeId}.json; rm -f /tmp/srv_${safeId}.json`;
       await execInPod(kc, ns, podName, 'pgadmin', ['sh', '-c', loadCmd]);
     } else {
       // Clean up user from pgAdmin
@@ -1004,16 +1015,17 @@ export async function exportDatabaseDump(
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
 
     let command: string[] = [];
-    let filename = `${db.name}-${timestamp}.sql`;
+    const safeDbName = (db.dbName || 'db').replace(/[^a-zA-Z0-9_-]/g, '');
+    let filename = `${safeDbName}-${timestamp}.sql`;
 
     if (typeUpper === 'MYSQL' || typeUpper === 'MARIADB') {
-      filename = `${db.dbName}-${timestamp}.sql`;
+      filename = `${safeDbName}-${timestamp}.sql`;
       command = ['mysqldump', `-u${db.username}`, `-p${db.password}`, db.dbName];
     } else if (typeUpper === 'POSTGRES' || typeUpper === 'POSTGRESQL') {
-      filename = `${db.dbName}-${timestamp}.sql`;
-      command = ['sh', '-c', `PGPASSWORD="${db.password}" pg_dump -h 127.0.0.1 -U "${db.username}" -d "${db.dbName}"`];
+      filename = `${safeDbName}-${timestamp}.sql`;
+      command = ['sh', '-c', `PGPASSWORD=${escapeShellArg(db.password)} pg_dump -h 127.0.0.1 -U ${escapeShellArg(db.username)} -d ${escapeShellArg(db.dbName)}`];
     } else if (typeUpper === 'MONGODB' || typeUpper === 'MONGO') {
-      filename = `${db.dbName}-${timestamp}.json`;
+      filename = `${safeDbName}-${timestamp}.json`;
       command = [
         'mongodump',
         `--username=${db.username}`,
@@ -1098,11 +1110,11 @@ export async function importDatabaseDump(
     let execCmd = '';
 
     if (typeUpper === 'MYSQL' || typeUpper === 'MARIADB') {
-      execCmd = `mysql -u"${db.username}" -p"${db.password}" "${db.dbName}" < "${remoteFile}"; STATUS=$?; rm -f "${remoteFile}"; exit $STATUS`;
+      execCmd = `mysql -u${escapeShellArg(db.username)} -p${escapeShellArg(db.password)} ${escapeShellArg(db.dbName)} < ${escapeShellArg(remoteFile)}; STATUS=$?; rm -f ${escapeShellArg(remoteFile)}; exit $STATUS`;
     } else if (typeUpper === 'POSTGRES' || typeUpper === 'POSTGRESQL') {
-      execCmd = `PGPASSWORD="${db.password}" psql -h 127.0.0.1 -U "${db.username}" -d "${db.dbName}" -f "${remoteFile}"; STATUS=$?; rm -f "${remoteFile}"; exit $STATUS`;
+      execCmd = `PGPASSWORD=${escapeShellArg(db.password)} psql -h 127.0.0.1 -U ${escapeShellArg(db.username)} -d ${escapeShellArg(db.dbName)} -f ${escapeShellArg(remoteFile)}; STATUS=$?; rm -f ${escapeShellArg(remoteFile)}; exit $STATUS`;
     } else if (typeUpper === 'MONGODB' || typeUpper === 'MONGO') {
-      execCmd = `mongorestore --username="${db.username}" --password="${db.password}" --authenticationDatabase=admin --db="${db.dbName}" --archive="${remoteFile}" || mongoimport --username="${db.username}" --password="${db.password}" --authenticationDatabase=admin --db="${db.dbName}" --file="${remoteFile}"; STATUS=$?; rm -f "${remoteFile}"; exit $STATUS`;
+      execCmd = `mongorestore --username=${escapeShellArg(db.username)} --password=${escapeShellArg(db.password)} --authenticationDatabase=admin --db=${escapeShellArg(db.dbName)} --archive=${escapeShellArg(remoteFile)} || mongoimport --username=${escapeShellArg(db.username)} --password=${escapeShellArg(db.password)} --authenticationDatabase=admin --db=${escapeShellArg(db.dbName)} --file=${escapeShellArg(remoteFile)}; STATUS=$?; rm -f ${escapeShellArg(remoteFile)}; exit $STATUS`;
     } else {
       return { success: false, error: `Unsupported database engine for import: ${db.type}` };
     }

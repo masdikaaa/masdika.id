@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
 import { allocateAvailablePort, deployDatabase, parseDatabasePlanLimits, getK8sClusterConfig, buildConnectionDetails } from "@/lib/k8s-database";
+import { sendDatabaseProvisionedEmail } from "@/lib/email";
 import crypto from "crypto";
 
 export async function GET(req: NextRequest) {
@@ -53,14 +54,69 @@ export async function POST(req: NextRequest) {
       ratePerGb,
     } = body;
 
-    if (!name || typeof name !== "string" || name.trim().length === 0) {
+    // Strict Input Validation & Shell Metacharacter Protection
+    const cleanName = typeof name === "string" ? name.trim() : "";
+    if (!cleanName) {
       return NextResponse.json({ error: "Instance name is required" }, { status: 400 });
     }
+    if (!/^[a-zA-Z0-9_\-\.\s]{2,50}$/.test(cleanName)) {
+      return NextResponse.json({
+        error: "Instance name can only contain letters, numbers, spaces, dots, hyphens, and underscores (2-50 characters)."
+      }, { status: 400 });
+    }
 
-    const typeUpper = type.toUpperCase();
+    const typeUpper = (type || "").toUpperCase();
     const allowedTypes = ["MYSQL", "MARIADB", "POSTGRES", "MONGODB"];
     if (!allowedTypes.includes(typeUpper)) {
       return NextResponse.json({ error: `Invalid database type. Allowed: ${allowedTypes.join(", ")}` }, { status: 400 });
+    }
+
+    const allowedVersions: Record<string, string[]> = {
+      MYSQL: ["8.0", "8.4"],
+      MARIADB: ["10.11", "11.2", "11.4"],
+      POSTGRES: ["15", "16", "17"],
+      MONGODB: ["6.0", "7.0"],
+    };
+    const validVersions = allowedVersions[typeUpper] || ["latest"];
+    const requestedVersion = String(version || "").trim();
+    const cleanVersion = validVersions.includes(requestedVersion) ? requestedVersion : validVersions[0];
+
+    if (customDbName && typeof customDbName === "string" && customDbName.trim()) {
+      const cleanDb = customDbName.trim();
+      if (!/^[a-zA-Z][a-zA-Z0-9_]{1,31}$/.test(cleanDb)) {
+        return NextResponse.json({
+          error: "Database name must begin with a letter and contain only alphanumeric characters and underscores (2-32 characters)."
+        }, { status: 400 });
+      }
+    }
+
+    if (customUsername && typeof customUsername === "string" && customUsername.trim()) {
+      const cleanUser = customUsername.trim();
+      if (!/^[a-zA-Z][a-zA-Z0-9_]{1,31}$/.test(cleanUser)) {
+        return NextResponse.json({
+          error: "Username must begin with a letter and contain only alphanumeric characters and underscores (2-32 characters)."
+        }, { status: 400 });
+      }
+      const reservedUsers = ["root", "admin", "administrator", "postgres", "mysql", "system", "sys"];
+      if (reservedUsers.includes(cleanUser.toLowerCase())) {
+        return NextResponse.json({
+          error: `Username cannot be a reserved system user (${reservedUsers.join(", ")}).`
+        }, { status: 400 });
+      }
+    }
+
+    if (customPassword && typeof customPassword === "string" && customPassword.trim()) {
+      const cleanPass = customPassword.trim();
+      if (cleanPass.length < 8 || cleanPass.length > 64) {
+        return NextResponse.json({
+          error: "Password must be between 8 and 64 characters."
+        }, { status: 400 });
+      }
+      if (!/^[a-zA-Z0-9@#%^+=_\-\.]{8,64}$/.test(cleanPass)) {
+        return NextResponse.json({
+          error: "Password can only contain alphanumeric characters and safe symbols (@#%^+=_-.). Shell metacharacters, quotes, and whitespace are prohibited."
+        }, { status: 400 });
+      }
     }
 
     // Dynamic Plan Lookup (supports standard & any admin-created custom plan)
@@ -157,9 +213,9 @@ export async function POST(req: NextRequest) {
     // Allocate unique NodePort
     const port = await allocateAvailablePort();
 
-    // Generate or sanitize credentials
+    // Generate or sanitize credentials safely
     const randSuffix = crypto.randomBytes(3).toString("hex");
-    const sanitizedName = name.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 8) || "db";
+    const sanitizedName = cleanName.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 8) || "db";
     const dbName = customDbName && customDbName.trim()
       ? customDbName.trim().replace(/[^a-zA-Z0-9_]/g, "").slice(0, 32)
       : `db_${sanitizedName}_${randSuffix}`;
@@ -168,8 +224,8 @@ export async function POST(req: NextRequest) {
       : `u_${sanitizedName}_${randSuffix}`;
     const password = customPassword && customPassword.trim().length >= 8
       ? customPassword.trim()
-      : crypto.randomBytes(12).toString("base64").replace(/[^a-zA-Z0-9]/g, "X").slice(0, 16);
-    const rootPassword = crypto.randomBytes(12).toString("base64").replace(/[^a-zA-Z0-9]/g, "Y").slice(0, 16);
+      : crypto.randomBytes(9).toString("base64").replace(/[^a-zA-Z0-9]/g, "X").slice(0, 12) + "A1!";
+    const rootPassword = crypto.randomBytes(9).toString("base64").replace(/[^a-zA-Z0-9]/g, "Y").slice(0, 12) + "R9!";
 
     const clusterConfig = await getK8sClusterConfig().catch(() => null);
     const clusterPublicHost = clusterConfig?.publicDomain || clusterConfig?.publicIp || process.env.MANAGED_DB_PUBLIC_DOMAIN || "";
@@ -178,9 +234,9 @@ export async function POST(req: NextRequest) {
     const dbRecord = await prisma.databaseService.create({
       data: {
         userId: user.id,
-        name: name.trim(),
+        name: cleanName,
         type: typeUpper,
-        version: String(version).trim(),
+        version: cleanVersion,
         planName: effectivePlanName,
         region: "Sidoarjo",
         node: "managed-database",
@@ -202,6 +258,56 @@ export async function POST(req: NextRequest) {
         lastBilledAt: new Date(),
       },
     });
+
+    // Dispatch Database Credentials Email to user asynchronously
+    (async () => {
+      try {
+        const userRecord = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { email: true, name: true },
+        });
+
+        if (userRecord?.email) {
+          const connDetails = buildConnectionDetails(dbRecord, clusterConfig || undefined);
+          let webToolName: string | null = null;
+          let webToolUrl: string | null = null;
+          if (typeUpper === "MYSQL" || typeUpper === "MARIADB") {
+            webToolName = "phpMyAdmin";
+            webToolUrl = connDetails.pmaUrl;
+          } else if (typeUpper === "POSTGRES" || typeUpper === "POSTGRESQL") {
+            webToolName = "pgAdmin 4";
+            webToolUrl = connDetails.pgAdminUrl;
+          } else if (typeUpper === "MONGODB" || typeUpper === "MONGO") {
+            webToolName = "Mongo Express";
+            webToolUrl = connDetails.mongoUrl;
+          }
+
+          await sendDatabaseProvisionedEmail({
+            email: userRecord.email,
+            userName: userRecord.name || "Pelanggan Masdika",
+            instanceName: dbRecord.name,
+            dbType: typeUpper,
+            version: dbRecord.version,
+            host: dbRecord.host,
+            port: dbRecord.port,
+            databaseName: dbRecord.dbName,
+            username: dbRecord.username,
+            password: dbRecord.password,
+            rootPassword: dbRecord.rootPassword || undefined,
+            planName: dbRecord.planName,
+            storageGb: dbRecord.storageGb,
+            hourlyRate: dbRecord.hourlyRate,
+            monthlyPrice: dbRecord.monthlyPrice,
+            webToolName,
+            webToolUrl,
+            connectionUri: connDetails.uri,
+            databaseId: dbRecord.id,
+          });
+        }
+      } catch (mailErr) {
+        console.warn("[ManagedDB] Failed to dispatch credentials email:", mailErr);
+      }
+    })();
 
     // Trigger Kubernetes deployment asynchronously
     (async () => {
