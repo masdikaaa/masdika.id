@@ -50,6 +50,7 @@ export async function POST(req: NextRequest) {
       customDbName,
       customUsername,
       customPassword,
+      ratePerGb,
     } = body;
 
     if (!name || typeof name !== "string" || name.trim().length === 0) {
@@ -97,9 +98,12 @@ export async function POST(req: NextRequest) {
 
       if (effectiveTier === "SHARED") {
         storageGb = requestedStorage ?? 1;
-        monthlyPrice = storageGb * 10000;
+        const rate = typeof ratePerGb === 'number' && ratePerGb > 0 ? ratePerGb : 10000;
+        monthlyPrice = storageGb * rate;
         hourlyRate = Math.max(1, Math.ceil(monthlyPrice / 720));
-        effectivePlanName = `Shared Database (${storageGb} GB)`;
+        effectivePlanName = typeof planName === 'string' && planName.trim().length > 0
+          ? `${planName.trim()} (${storageGb} GB)`
+          : `Shared Database (${storageGb} GB)`;
       } else {
         storageGb = requestedStorage ?? 1;
         const storageCost = storageGb * 5000;
@@ -122,8 +126,12 @@ export async function POST(req: NextRequest) {
         hourlyRate = Math.max(1, Math.ceil(monthlyPrice / 720));
       } else {
         storageGb = requestedStorage ?? 1;
-        monthlyPrice = storageGb * 10000;
+        const rate = typeof ratePerGb === 'number' && ratePerGb > 0 ? ratePerGb : 10000;
+        monthlyPrice = storageGb * rate;
         hourlyRate = Math.max(1, Math.ceil(monthlyPrice / 720));
+        effectivePlanName = typeof planName === 'string' && planName.trim().length > 0
+          ? `${planName.trim()} (${storageGb} GB)`
+          : `Shared Database (${storageGb} GB)`;
       }
     }
 

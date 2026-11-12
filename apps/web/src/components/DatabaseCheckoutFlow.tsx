@@ -76,17 +76,39 @@ const DEDICATED_FLAVORS = [
   { id: "flavor-4vcpu-8gb", vcpu: "4 vCPU", ram: "8 GB", price: 400000, hourlyPrice: 555, isOutOfStock: false, planName: "Dedicated 4 vCPU / 8 GB" },
 ];
 
-// Shared Database Types matching SumoPod (Gambar 2)
-const SHARED_DATABASE_TYPES = [
-  { id: "postgres-16", engine: "POSTGRES", version: "16", name: "PostgreSQL 16 (Shared)", ratePerGb: 10000, icon: SiPostgresql, color: "text-[#336791]", isOutOfStock: false },
-  { id: "mysql-8", engine: "MYSQL", version: "8.0", name: "MySQL 8 (Shared)", ratePerGb: 10000, icon: SiMysql, color: "text-[#00758F]", isOutOfStock: false },
-  { id: "mariadb-11", engine: "MARIADB", version: "10.11", name: "MariaDB 11 (Shared)", ratePerGb: 10000, icon: SiMariadb, color: "text-[#C0765A]", isOutOfStock: false },
-  { id: "mongo-7", engine: "MONGODB", version: "7.0", name: "MongoDB 7 (Shared)", ratePerGb: 10000, icon: SiMongodb, color: "text-[#47A248]", isOutOfStock: false },
-  { id: "mongo-6", engine: "MONGODB", version: "6.0", name: "MongoDB 6 (Shared)", ratePerGb: 10000, icon: SiMongodb, color: "text-[#47A248]", isOutOfStock: false },
-  { id: "postgres-postgis", engine: "POSTGRES", version: "16", name: "PostgreSQL 16 + PostGIS (Shared)", ratePerGb: 12500, icon: SiPostgresql, color: "text-[#336791]", isOutOfStock: false },
-  { id: "postgres-vector", engine: "POSTGRES", version: "16", name: "PostgreSQL 16 + pgvector (Shared)", ratePerGb: 12500, icon: SiPostgresql, color: "text-[#336791]", isOutOfStock: false },
-  { id: "postgres-full", engine: "POSTGRES", version: "16", name: "PostgreSQL 16 + PostGIS + pgvector (Shared)", ratePerGb: 15000, icon: SiPostgresql, color: "text-[#336791]", isOutOfStock: false },
-];
+// Shared Database Variants grouped by Engine (matching Gambar 2 Dedicated Engine style)
+const SHARED_DATABASE_VARIANTS: Record<string, Array<{
+  id: string;
+  name: string;
+  version: string;
+  engine: string;
+  ratePerGb: number;
+  badge?: string;
+  default?: boolean;
+}>> = {
+  POSTGRES: [
+    { id: "postgres-16", name: "16 LTS", version: "16", engine: "POSTGRES", ratePerGb: 10000, default: true },
+    { id: "postgres-17", name: "17 (Latest)", version: "17", engine: "POSTGRES", ratePerGb: 10000 },
+    { id: "postgres-15", name: "15 LTS", version: "15", engine: "POSTGRES", ratePerGb: 10000 },
+    { id: "postgres-postgis", name: "16 + PostGIS", version: "16", engine: "POSTGRES", ratePerGb: 12500, badge: "GIS" },
+    { id: "postgres-vector", name: "16 + pgvector", version: "16", engine: "POSTGRES", ratePerGb: 12500, badge: "AI" },
+    { id: "postgres-full", name: "16 + PostGIS + pgvector", version: "16", engine: "POSTGRES", ratePerGb: 15000, badge: "Full" },
+  ],
+  MYSQL: [
+    { id: "mysql-8", name: "8.0 LTS", version: "8.0", engine: "MYSQL", ratePerGb: 10000, default: true },
+    { id: "mysql-8.4", name: "8.4 LTS", version: "8.4", engine: "MYSQL", ratePerGb: 10000 },
+  ],
+  MARIADB: [
+    { id: "mariadb-11", name: "10.11 LTS", version: "10.11", engine: "MARIADB", ratePerGb: 10000, default: true },
+    { id: "mariadb-11.4", name: "11.4 LTS", version: "11.4", engine: "MARIADB", ratePerGb: 10000 },
+  ],
+  MONGODB: [
+    { id: "mongo-7", name: "7.0 (Current)", version: "7.0", engine: "MONGODB", ratePerGb: 10000, default: true },
+    { id: "mongo-6", name: "6.0 LTS", version: "6.0", engine: "MONGODB", ratePerGb: 10000 },
+  ],
+};
+
+const ALL_SHARED_VARIANTS = Object.values(SHARED_DATABASE_VARIANTS).flat();
 
 const STORAGE_PRESETS = [1, 2, 5, 10, 15, 20];
 
@@ -104,6 +126,7 @@ export default function DatabaseCheckoutFlow() {
   const [selectedFlavorId, setSelectedFlavorId] = useState("flavor-1vcpu-2gb");
 
   // Shared states
+  const [selectedSharedEngine, setSelectedSharedEngine] = useState("POSTGRES");
   const [selectedSharedId, setSelectedSharedId] = useState("postgres-16");
 
   // Universal Storage scale bar (Min 1 GB, Max 20 GB)
@@ -156,6 +179,15 @@ export default function DatabaseCheckoutFlow() {
     }
   };
 
+  const handleSharedEngineChange = (engineId: string) => {
+    setSelectedSharedEngine(engineId);
+    const variants = SHARED_DATABASE_VARIANTS[engineId] || [];
+    if (variants.length > 0) {
+      const def = variants.find((v) => v.default) || variants[0];
+      setSelectedSharedId(def.id);
+    }
+  };
+
   // Calculations for Dedicated (Gambar 1)
   const activeFlavor = DEDICATED_FLAVORS.find((f) => f.id === selectedFlavorId) || DEDICATED_FLAVORS[1];
   const activeEngineMeta = DATABASE_ENGINES.find((e) => e.id === selectedEngine) || DATABASE_ENGINES[0];
@@ -163,8 +195,10 @@ export default function DatabaseCheckoutFlow() {
   const dedicatedTotalMonthly = activeFlavor.price + dedicatedStorageCost;
   const dedicatedHourlyRate = Math.max(1, Math.ceil(dedicatedTotalMonthly / 720));
 
-  // Calculations for Shared (Gambar 2)
-  const activeSharedType = SHARED_DATABASE_TYPES.find((s) => s.id === selectedSharedId) || SHARED_DATABASE_TYPES[0];
+  // Calculations for Shared (Gambar 2 Dedicated-style Engine & Version selector)
+  const activeSharedEngineMeta = DATABASE_ENGINES.find((e) => e.id === selectedSharedEngine) || DATABASE_ENGINES[0];
+  const activeSharedType = ALL_SHARED_VARIANTS.find((s) => s.id === selectedSharedId) || ALL_SHARED_VARIANTS[0];
+  const currentSharedVariants = SHARED_DATABASE_VARIANTS[selectedSharedEngine] || [];
   const sharedStorageCost = storageGb * activeSharedType.ratePerGb;
   const sharedTotalMonthly = sharedStorageCost;
   const sharedHourlyRate = Math.max(1, Math.ceil(sharedTotalMonthly / 720));
@@ -194,7 +228,9 @@ export default function DatabaseCheckoutFlow() {
     }
 
     setSubmitting(true);
-    const deployName = selectedTier === "DEDICATED" ? `${activeFlavor.planName} (${storageGb} GB)` : `Shared Database (${storageGb} GB)`;
+    const deployName = selectedTier === "DEDICATED"
+      ? `${activeFlavor.planName} (${storageGb} GB)`
+      : `Shared ${activeSharedEngineMeta.name} ${activeSharedType.name} (${storageGb} GB)`;
     const toastId = toast.loading(`Provisioning ${deployName} on Kubernetes...`);
 
     try {
@@ -207,8 +243,9 @@ export default function DatabaseCheckoutFlow() {
           version: selectedTier === "DEDICATED" ? selectedVersion : activeSharedType.version,
           tier: selectedTier,
           planId: matchedPlan?.id,
-          planName: selectedTier === "DEDICATED" ? activeFlavor.planName : "Shared Database",
+          planName: selectedTier === "DEDICATED" ? activeFlavor.planName : `Shared ${activeSharedEngineMeta.name} ${activeSharedType.name}`,
           storageGb,
+          ratePerGb: selectedTier === "SHARED" ? activeSharedType.ratePerGb : undefined,
           billingMode: "PAYG",
           customDbName: customDbName.trim() || undefined,
           customUsername: customUsername.trim() || undefined,
@@ -520,67 +557,96 @@ export default function DatabaseCheckoutFlow() {
             </>
           )}
 
-          {/* SHARED MODE (Gambar 2) */}
+          {/* SHARED MODE (Matching Dedicated Engine + Version selector style) */}
           {selectedTier === "SHARED" && (
             <>
-              {/* Step 1: Select Database Type Grid */}
+              {/* Step 1: Engine & Version / Edition */}
               <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all w-full max-w-full min-w-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
-                <div className="mb-4">
-                  <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-                    Select Database Type
-                  </h2>
-                  <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
-                    Shared multi-tenant containers with burstable 0.5 vCPU pool. Billed purely on storage capacity.
-                  </p>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+                      Select Database Engine
+                    </h2>
+                    <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                      Shared multi-tenant containers with burstable 0.5 vCPU pool. Billed purely on storage capacity.
+                    </p>
+                  </div>
+                  <span className={cn("text-xs font-bold px-2.5 py-1 rounded-full border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+                    Shared Multi-Tenant
+                  </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                  {SHARED_DATABASE_TYPES.map((typeOption) => {
-                    const isSelected = selectedSharedId === typeOption.id;
-                    const EngineIcon = typeOption.icon;
-
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                  {DATABASE_ENGINES.map((engine) => {
+                    const EngineIcon = engine.icon;
+                    const isSelected = selectedSharedEngine === engine.id;
                     return (
                       <button
                         type="button"
-                        key={typeOption.id}
-                        disabled={typeOption.isOutOfStock}
-                        onClick={() => setSelectedSharedId(typeOption.id)}
+                        key={engine.id}
+                        onClick={() => handleSharedEngineChange(engine.id)}
                         className={cn(
-                          "rounded-2xl border p-4 text-left transition-all cursor-pointer relative flex flex-col justify-between",
-                          typeOption.isOutOfStock ? "opacity-40 cursor-not-allowed" : "",
+                          "rounded-xl border p-3.5 text-left transition-all cursor-pointer flex items-center gap-3",
                           isSelected
-                            ? "border-cyan-500 bg-cyan-500/10 ring-1 ring-cyan-500/40 shadow-xs"
+                            ? "border-cyan-500 bg-cyan-500/10 ring-1 ring-cyan-500/40 shadow-xs text-white"
                             : isDark
-                              ? "border-white/[0.08] bg-[#0a0a0c] hover:border-white/20 hover:bg-white/[0.02]"
+                              ? "border-white/[0.08] bg-[#0c0c0e] hover:border-white/20 hover:bg-white/[0.02]"
                               : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/60"
                         )}
                       >
-                        <div className="flex items-start gap-3">
-                          <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center shrink-0", isDark ? "bg-white/[0.04] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
-                            <EngineIcon className={cn("w-5 h-5", typeOption.color)} />
-                          </div>
-                          <div>
-                            <span className={cn("text-sm font-bold block", isDark ? "text-white" : "text-slate-900")}>
-                              {typeOption.name}
-                            </span>
-                            <span className="text-xs font-mono font-bold mt-1 block text-cyan-400">
-                              {formatRupiah(typeOption.ratePerGb)}/GB
-                            </span>
-                          </div>
+                        <div className={cn("w-9 h-9 rounded-lg border flex items-center justify-center shrink-0", isDark ? "bg-white/[0.04] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
+                          <EngineIcon className={cn("w-5 h-5", engine.color)} />
                         </div>
-
-                        {isSelected && (
-                          <div className="absolute top-3.5 right-3.5 w-5 h-5 rounded-full bg-cyan-400 flex items-center justify-center text-slate-950 shadow-xs">
-                            <Check className="w-3 h-3 stroke-[3]" />
-                          </div>
-                        )}
+                        <div className="min-w-0">
+                          <span className={cn("text-sm font-bold block truncate", isDark ? "text-white" : "text-slate-900")}>
+                            {engine.name}
+                          </span>
+                          <span className={cn("text-[11px] block truncate", isDark ? "text-zinc-500" : "text-slate-400")}>
+                            {engine.webPanel}
+                          </span>
+                        </div>
                       </button>
                     );
                   })}
                 </div>
+
+                {/* Version & Edition Selector for Active Shared Engine */}
+                <div className="flex items-center gap-2 pt-3 border-t border-white/[0.06] flex-wrap">
+                  <span className={cn("text-xs font-semibold mr-1 shrink-0", isDark ? "text-zinc-400" : "text-slate-600")}>Version:</span>
+                  <div className="flex flex-wrap gap-2">
+                    {currentSharedVariants.map((ver) => {
+                      const isSelected = selectedSharedId === ver.id;
+                      return (
+                        <button
+                          type="button"
+                          key={ver.id}
+                          onClick={() => setSelectedSharedId(ver.id)}
+                          className={cn(
+                            "px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer border flex items-center gap-1.5",
+                            isSelected
+                              ? "bg-cyan-400 text-slate-950 border-cyan-400 font-bold shadow-xs"
+                              : isDark
+                                ? "bg-white/[0.03] text-zinc-400 border-white/[0.08] hover:text-white hover:bg-white/[0.06]"
+                                : "bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200"
+                          )}
+                        >
+                          <span>{ver.name}</span>
+                          {ver.ratePerGb > 10000 && (
+                            <span className={cn(
+                              "text-[10px] px-1.5 py-0.2 rounded font-mono font-bold",
+                              isSelected ? "bg-slate-950/20 text-slate-950" : isDark ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20" : "bg-cyan-100 text-cyan-800"
+                            )}>
+                              {formatRupiah(ver.ratePerGb)}/GB
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
 
-              {/* Step 2: Storage Size Scale Bar (Gambar 2) */}
+              {/* Step 2: Storage Size Scale Bar */}
               <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all w-full max-w-full min-w-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
                 <div className="mb-4">
                   <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
@@ -643,7 +709,7 @@ export default function DatabaseCheckoutFlow() {
                   </div>
 
                   <div className={cn("pt-2 text-xs border-t border-white/[0.06]", isDark ? "text-zinc-400" : "text-slate-600")}>
-                    Storage cost: <strong className="text-cyan-400 font-mono">{formatRupiah(sharedStorageCost)}/month</strong>
+                    {formatRupiah(activeSharedType.ratePerGb)}/GB/month · Storage cost: <strong className="text-cyan-400 font-mono">{formatRupiah(sharedStorageCost)}/month</strong>
                   </div>
                 </div>
               </div>
@@ -798,10 +864,11 @@ export default function DatabaseCheckoutFlow() {
 
                 <div className="space-y-1">
                   <div className={cn("text-[11px] font-bold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
-                    Database Type
+                    Engine & Version
                   </div>
-                  <div className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>
-                    {activeSharedType.name}
+                  <div className={cn("flex items-center gap-2 font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>
+                    <activeSharedEngineMeta.icon className={cn("w-4 h-4", activeSharedEngineMeta.color)} />
+                    <span>{activeSharedEngineMeta.name} {activeSharedType.name}</span>
                   </div>
                 </div>
 
