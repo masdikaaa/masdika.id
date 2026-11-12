@@ -125,11 +125,13 @@ export default function SettingsPage() {
     rustfs_ticket_bucket: "masdika-ticket",
     rustfs_enabled: false,
 
-    // Managed Database (K3s) Cluster Settings
-    managed_db_k3s_host: "",
-    managed_db_k3s_port: "22",
-    managed_db_k3s_user: "",
-    managed_db_k3s_password: "",
+    // Managed Database (Kubernetes API) Cluster Settings
+    managed_db_auth_mode: "KUBECONFIG",
+    managed_db_api_server: "",
+    managed_db_kubeconfig: "",
+    managed_db_service_token: "",
+    managed_db_skip_tls: true,
+    managed_db_ca_cert: "",
     managed_db_public_domain: "",
     managed_db_public_ip: "",
     managed_db_pma_url: "",
@@ -193,10 +195,12 @@ export default function SettingsPage() {
             rustfs_ticket_bucket: data.settings?.rustfs_ticket_bucket || "masdika-ticket",
             rustfs_enabled: data.settings?.rustfs_enabled !== undefined ? (data.settings.rustfs_enabled === "true" || data.settings.rustfs_enabled === true) : false,
 
-            managed_db_k3s_host: data.settings?.managed_db_k3s_host || "",
-            managed_db_k3s_port: data.settings?.managed_db_k3s_port || "22",
-            managed_db_k3s_user: data.settings?.managed_db_k3s_user || "",
-            managed_db_k3s_password: data.settings?.managed_db_k3s_password || "",
+            managed_db_auth_mode: data.settings?.managed_db_auth_mode || "KUBECONFIG",
+            managed_db_api_server: data.settings?.managed_db_api_server || "",
+            managed_db_kubeconfig: data.settings?.managed_db_kubeconfig || "",
+            managed_db_service_token: data.settings?.managed_db_service_token || "",
+            managed_db_skip_tls: data.settings?.managed_db_skip_tls !== undefined ? (data.settings.managed_db_skip_tls === "true" || data.settings.managed_db_skip_tls === true) : true,
+            managed_db_ca_cert: data.settings?.managed_db_ca_cert || "",
             managed_db_public_domain: data.settings?.managed_db_public_domain || "",
             managed_db_public_ip: data.settings?.managed_db_public_ip || "",
             managed_db_pma_url: data.settings?.managed_db_pma_url || "",
@@ -293,16 +297,16 @@ export default function SettingsPage() {
   const handleTestK3s = async () => {
     setTestingK3s(true);
     setK3sTestResult(null);
-    const toastId = toast.loading("Connecting to K3s cluster & verifying nodes via SSH...");
+    const toastId = toast.loading("Connecting to Kubernetes API (port 6443) & verifying cluster nodes...");
     try {
       const res = await fetch('/api/admin/database/test-connection', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          host: formData.managed_db_k3s_host,
-          port: formData.managed_db_k3s_port,
-          username: formData.managed_db_k3s_user,
-          password: formData.managed_db_k3s_password,
+          apiServer: formData.managed_db_api_server,
+          kubeconfig: formData.managed_db_kubeconfig,
+          serviceToken: formData.managed_db_service_token,
+          skipTlsVerify: formData.managed_db_skip_tls,
         })
       });
       const data = await res.json();
@@ -311,7 +315,7 @@ export default function SettingsPage() {
         setK3sTestResult({ success: true, message: data.message, latencyMs: data.latencyMs, nodes: data.nodes });
       } else {
         toast.error(data.message || "Connection failed", { id: toastId });
-        setK3sTestResult({ success: false, message: data.message || "Failed to connect to K3s cluster", latencyMs: data.latencyMs });
+        setK3sTestResult({ success: false, message: data.message || "Failed to connect to Kubernetes cluster", latencyMs: data.latencyMs });
       }
     } catch (e: any) {
       toast.error(e?.message || "Connection failed", { id: toastId });
@@ -1883,9 +1887,9 @@ export default function SettingsPage() {
                         <Database className="w-7 h-7" />
                       </div>
                       <div>
-                        <h2 className={cn("text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>Managed Database & K3s Cluster</h2>
+                        <h2 className={cn("text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>Managed Database & Kubernetes Cluster</h2>
                         <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
-                          Configure K3s server SSH endpoint, public wildcard routing, and web viewer panels (phpMyAdmin, pgAdmin, Mongo Express).
+                          Configure native Kubernetes API (port 6443 / kubeconfig), public wildcard routing, and web viewer panels (phpMyAdmin, pgAdmin, Mongo Express).
                         </p>
                       </div>
                     </div>
@@ -1897,7 +1901,7 @@ export default function SettingsPage() {
                         className={cn("px-3.5 py-2 rounded-xl text-xs font-bold transition-all border flex items-center gap-2 cursor-pointer", isDark ? "bg-white/5 border-white/10 hover:bg-white/10 text-zinc-300 hover:text-white" : "bg-slate-100 border-slate-200 hover:bg-slate-200 text-slate-700")}
                       >
                         <RefreshCw className={cn("w-3.5 h-3.5", testingK3s && "animate-spin text-cyan-400")} />
-                        <span>{testingK3s ? "Testing SSH..." : "Test K3s Connection"}</span>
+                        <span>{testingK3s ? "Testing API..." : "Test K8s API Connection"}</span>
                       </button>
                     </div>
                   </div>
@@ -1907,7 +1911,7 @@ export default function SettingsPage() {
                       {k3sTestResult.success ? <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" /> : <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />}
                       <div className="text-xs md:text-sm space-y-1">
                         <div>
-                          <span className="font-bold">{k3sTestResult.success ? "Connection Verified" : "Connection Failed"}: </span>
+                          <span className="font-bold">{k3sTestResult.success ? "API Verified" : "Connection Failed"}: </span>
                           <span>{k3sTestResult.message}</span>
                           {k3sTestResult.latencyMs !== undefined && (
                             <span className="ml-2 font-mono text-xs opacity-80">({k3sTestResult.latencyMs}ms)</span>
@@ -1925,71 +1929,73 @@ export default function SettingsPage() {
                   )}
 
                   <div className="space-y-6 relative z-20">
-                    {/* Section 1: K3s Cluster SSH Access */}
+                    {/* Section 1: Native Kubernetes REST API (Port 6443) */}
                     <div>
                       <h3 className={cn("text-sm font-bold uppercase tracking-wider mb-3 flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                        <Server className="w-4 h-4" /> 1. K3s Cluster SSH Node Access
+                        <Server className="w-4 h-4" /> 1. Native Kubernetes API Access (Port 6443 - Gold Standard)
                       </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2 md:col-span-2">
-                          <label className={labelClass}>Cluster Host (Local or Public IP) *</label>
+                          <label className={labelClass}>Kubernetes API Server URL *</label>
                           <input
                             type="text"
-                            name="managed_db_k3s_host"
-                            value={formData.managed_db_k3s_host}
+                            name="managed_db_api_server"
+                            value={formData.managed_db_api_server}
                             onChange={handleChange}
-                            placeholder="e.g. 192.168.1.50 or k3s.internal"
+                            placeholder="e.g. https://192.168.1.50:6443 or https://k8s.example.com:6443"
                             className={inputClass}
                           />
-                          <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>IP address of the K3s server reachable by the panel</p>
+                          <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>
+                            Kubernetes API server endpoint (port 6443). Overrides the internal server URL in Kubeconfig if set.
+                          </p>
+                        </div>
+
+                        <div className="space-y-2 md:col-span-2">
+                          <label className={labelClass}>Kubeconfig Content (YAML / /etc/rancher/k3s/k3s.yaml) *</label>
+                          <textarea
+                            name="managed_db_kubeconfig"
+                            value={formData.managed_db_kubeconfig}
+                            onChange={handleChange}
+                            rows={6}
+                            placeholder={formData.managed_db_kubeconfig === "••••••••" ? "•••••••• (Configured and encrypted)" : "apiVersion: v1\nclusters:\n- cluster: ..."}
+                            className={cn(inputClass, "font-mono text-xs leading-relaxed resize-y")}
+                          />
+                          <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>
+                            Paste full content of /etc/rancher/k3s/k3s.yaml from your cluster. Stored securely with AES-256 encryption. Leave as •••••••• to keep current.
+                          </p>
                         </div>
 
                         <div className="space-y-2">
-                          <label className={labelClass}>SSH Port *</label>
+                          <label className={labelClass}>ServiceAccount Token (Optional Alternative)</label>
                           <input
-                            type="text"
-                            name="managed_db_k3s_port"
-                            value={formData.managed_db_k3s_port}
+                            type="password"
+                            name="managed_db_service_token"
+                            value={formData.managed_db_service_token}
                             onChange={handleChange}
-                            placeholder="22"
-                            className={inputClass}
+                            placeholder="••••••••"
+                            className={cn(inputClass, "font-mono")}
                           />
-                          <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Default SSH port (usually 22)</p>
+                          <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>
+                            Bearer token if using a dedicated ServiceAccount instead of full Kubeconfig.
+                          </p>
                         </div>
 
-                        <div className="space-y-2">
-                          <label className={labelClass}>SSH Username *</label>
-                          <input
-                            type="text"
-                            name="managed_db_k3s_user"
-                            value={formData.managed_db_k3s_user}
-                            onChange={handleChange}
-                            placeholder="e.g. k3s-admin or root"
-                            className={inputClass}
-                          />
-                          <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Linux user with sudo / k3s permissions</p>
-                        </div>
-
-                        <div className="space-y-2 md:col-span-4">
-                          <label className={labelClass}>SSH Password *</label>
-                          <div className="relative">
+                        <div className="space-y-2 flex flex-col justify-center pt-2">
+                          <label className="flex items-center gap-2 cursor-pointer select-none">
                             <input
-                              type={showK3sPassword ? "text" : "password"}
-                              name="managed_db_k3s_password"
-                              value={formData.managed_db_k3s_password}
-                              onChange={handleChange}
-                              placeholder="••••••••"
-                              className={cn(inputClass, "pr-10 font-mono")}
+                              type="checkbox"
+                              name="managed_db_skip_tls"
+                              checked={formData.managed_db_skip_tls}
+                              onChange={(e) => setFormData(prev => ({ ...prev, managed_db_skip_tls: e.target.checked }))}
+                              className="w-4 h-4 rounded text-cyan-500 focus:ring-cyan-400 bg-black/20 border-white/10"
                             />
-                            <button
-                              type="button"
-                              onClick={() => setShowK3sPassword(!showK3sPassword)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white p-1 cursor-pointer"
-                            >
-                              {showK3sPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                            </button>
-                          </div>
-                          <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Stored securely with AES-256 encryption in the database. Leave as •••••••• to keep current.</p>
+                            <span className={cn("text-xs font-semibold", isDark ? "text-zinc-300" : "text-slate-700")}>
+                              Skip TLS Verification (Recommended for K3s self-signed certs)
+                            </span>
+                          </label>
+                          <p className={cn("text-[11px] pl-6", isDark ? "text-zinc-500" : "text-slate-500")}>
+                            Bypasses x509 self-signed certificate warnings when connecting to K3s port 6443.
+                          </p>
                         </div>
                       </div>
                     </div>

@@ -1,6 +1,7 @@
-import { Client } from 'ssh2';
+import * as k8s from '@kubernetes/client-node';
+import { Writable, Readable } from 'stream';
 import { prisma } from './prisma';
-import { decryptDeterministic } from './encryption';
+import { decryptDeterministic, encryptDeterministic } from './encryption';
 
 export interface DatabaseServiceRecord {
   id: number;
@@ -8,27 +9,36 @@ export interface DatabaseServiceRecord {
   name: string;
   type: string;
   version: string;
-  planName: string;
+  planName?: string | null;
   region: string;
   node: string;
   host: string;
   port: number;
   dbName: string;
   username: string;
-  password: string;
+  password?: string | null;
   rootPassword?: string | null;
   cpuShares: number;
   memoryMb: number;
   storageGb: number;
+  billingMode?: string;
+  monthlyPrice?: number;
+  hourlyRate?: number;
+  accumulatedCost?: number;
   status: string;
   k8sNamespace?: string | null;
+  lastBilledAt?: Date | null;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface K8sClusterConfig {
-  host: string;
-  port: number;
-  username: string;
-  password: string;
+  authMode: 'KUBECONFIG' | 'TOKEN';
+  apiServer: string;
+  kubeconfig?: string;
+  serviceToken?: string;
+  skipTlsVerify: boolean;
+  caCert?: string;
   publicDomain: string;
   publicIp: string;
   pmaUrl: string;
@@ -49,7 +59,7 @@ export function invalidateK8sClusterConfigCache(): void {
 }
 
 /**
- * Dynamically retrieve K3s cluster credentials from Database Settings (`Setting` table).
+ * Dynamically retrieve Kubernetes cluster credentials from Database Settings (`Setting` table).
  * Never store hardcoded plaintext IP or passwords in source scripts.
  */
 export async function getK8sClusterConfig(forceRefresh = false): Promise<K8sClusterConfig> {
@@ -62,10 +72,12 @@ export async function getK8sClusterConfig(forceRefresh = false): Promise<K8sClus
     where: {
       key: {
         in: [
-          'managed_db_k3s_host',
-          'managed_db_k3s_port',
-          'managed_db_k3s_user',
-          'managed_db_k3s_password',
+          'managed_db_auth_mode',
+          'managed_db_api_server',
+          'managed_db_kubeconfig',
+          'managed_db_service_token',
+          'managed_db_skip_tls',
+          'managed_db_ca_cert',
           'managed_db_public_domain',
           'managed_db_public_ip',
           'managed_db_pma_url',
@@ -81,12 +93,18 @@ export async function getK8sClusterConfig(forceRefresh = false): Promise<K8sClus
     settingMap.set(s.key, s.value);
   }
 
-  const host = settingMap.get('managed_db_k3s_host') || process.env.MANAGED_DB_HOST || '';
-  const port = parseInt(settingMap.get('managed_db_k3s_port') || process.env.MANAGED_DB_SSH_PORT || '22', 10);
-  const username = settingMap.get('managed_db_k3s_user') || process.env.MANAGED_DB_SSH_USER || '';
+  const authMode = (settingMap.get('managed_db_auth_mode') || 'KUBECONFIG') as 'KUBECONFIG' | 'TOKEN';
+  const apiServer = settingMap.get('managed_db_api_server') || process.env.MANAGED_DB_API_SERVER || '';
 
-  const rawPw = settingMap.get('managed_db_k3s_password') || process.env.MANAGED_DB_SSH_PASSWORD || '';
-  const password = rawPw.startsWith('enc:') ? (decryptDeterministic(rawPw) || rawPw) : rawPw;
+  const rawKubeconfig = settingMap.get('managed_db_kubeconfig') || process.env.MANAGED_DB_KUBECONFIG || '';
+  const kubeconfig = rawKubeconfig.startsWith('enc:') ? (decryptDeterministic(rawKubeconfig) || rawKubeconfig) : rawKubeconfig;
+
+  const rawToken = settingMap.get('managed_db_service_token') || process.env.MANAGED_DB_SERVICE_TOKEN || '';
+  const serviceToken = rawToken.startsWith('enc:') ? (decryptDeterministic(rawToken) || rawToken) : rawToken;
+
+  const skipTlsSetting = settingMap.get('managed_db_skip_tls');
+  const skipTlsVerify = skipTlsSetting !== undefined ? skipTlsSetting === 'true' : true;
+  const caCert = settingMap.get('managed_db_ca_cert') || process.env.MANAGED_DB_CA_CERT || '';
 
   const publicDomain = settingMap.get('managed_db_public_domain') || process.env.MANAGED_DB_PUBLIC_DOMAIN || '';
   const publicIp = settingMap.get('managed_db_public_ip') || process.env.MANAGED_DB_PUBLIC_IP || '';
@@ -94,15 +112,13 @@ export async function getK8sClusterConfig(forceRefresh = false): Promise<K8sClus
   const pgadminUrl = settingMap.get('managed_db_pgadmin_url') || process.env.MANAGED_DB_PGADMIN_URL || '';
   const mongoUrl = settingMap.get('managed_db_mongo_url') || process.env.MANAGED_DB_MONGO_URL || '';
 
-  if (!host || !username) {
-    throw new Error('K3s cluster SSH credentials not configured in DB settings or environment variables.');
-  }
-
   cachedClusterConfig = {
-    host,
-    port,
-    username,
-    password,
+    authMode,
+    apiServer,
+    kubeconfig,
+    serviceToken,
+    skipTlsVerify,
+    caCert,
     publicDomain,
     publicIp,
     pmaUrl,
@@ -121,262 +137,382 @@ export const MANAGED_DB_PGADMIN_URL = process.env.MANAGED_DB_PGADMIN_URL || '';
 export const MANAGED_DB_MONGO_URL = process.env.MANAGED_DB_MONGO_URL || '';
 
 /**
- * Execute command on K3s node via SSH with promise
+ * Build an authenticated KubeConfig instance from DB settings
  */
-export async function execSsh(cmd: string): Promise<{ stdout: string; stderr: string; code: number }> {
+export async function getK8sKubeConfig(): Promise<k8s.KubeConfig> {
   const config = await getK8sClusterConfig();
+  const kc = new k8s.KubeConfig();
 
-  return new Promise((resolve, reject) => {
-    const conn = new Client();
-    conn.on('ready', () => {
-      conn.exec(cmd, (err: any, stream: any) => {
-        if (err) {
-          conn.end();
-          return reject(err);
-        }
-        let stdout = '';
-        let stderr = '';
-        stream.on('data', (d: Buffer) => (stdout += d.toString()));
-        stream.stderr.on('data', (d: Buffer) => (stderr += d.toString()));
-        stream.on('close', (code: number) => {
-          conn.end();
-          resolve({ stdout, stderr, code: code ?? 0 });
-        });
-      });
-    });
-    conn.on('error', (err: any) => {
-      reject(err);
-    });
-    conn.connect({
-      host: config.host,
-      port: config.port,
-      username: config.username,
-      password: config.password,
-      readyTimeout: 15000,
-    });
-  });
-}
-
-/**
- * Execute command on K3s node via SSH with stdin stream (for SQL import / restore)
- */
-export async function execSshWithStdin(
-  cmd: string,
-  stdinData: Buffer | string
-): Promise<{ stdout: string; stderr: string; code: number }> {
-  const config = await getK8sClusterConfig();
-
-  return new Promise((resolve, reject) => {
-    const conn = new Client();
-    conn.on('ready', () => {
-      conn.exec(cmd, (err: any, stream: any) => {
-        if (err) {
-          conn.end();
-          return reject(err);
-        }
-        let stdout = '';
-        let stderr = '';
-        stream.on('data', (d: Buffer) => (stdout += d.toString()));
-        stream.stderr.on('data', (d: Buffer) => (stderr += d.toString()));
-        stream.on('close', (code: number) => {
-          conn.end();
-          resolve({ stdout, stderr, code: code ?? 0 });
-        });
-        stream.write(stdinData);
-        stream.end();
-      });
-    });
-    conn.on('error', (err: any) => {
-      reject(err);
-    });
-    conn.connect({
-      host: config.host,
-      port: config.port,
-      username: config.username,
-      password: config.password,
-      readyTimeout: 30000,
-    });
-  });
-}
-
-/**
- * Allocate next available NodePort between 30001 and 32767
- */
-export async function allocateAvailablePort(): Promise<number> {
-  const START_PORT = 30001;
-  const END_PORT = 32767;
-
-  // Reserved ports used by system or tools
-  const reservedPorts = new Set([30005]);
-
-  const existingDbs = await prisma.databaseService.findMany({
-    select: { port: true },
-    where: { status: { not: 'TERMINATED' } },
-  });
-
-  for (const db of existingDbs) {
-    reservedPorts.add(db.port);
+  if (config.authMode === 'KUBECONFIG' && config.kubeconfig && config.kubeconfig.trim().length > 0) {
+    kc.loadFromString(config.kubeconfig.trim());
+    if (config.apiServer && config.apiServer.trim().length > 0) {
+      const cluster = kc.getCurrentCluster();
+      if (cluster) {
+        (cluster as any).server = config.apiServer.trim();
+        if (config.skipTlsVerify) (cluster as any).skipTLSVerify = true;
+      }
+    }
+  } else if (config.serviceToken && config.apiServer) {
+    kc.loadFromClusterAndUser(
+      {
+        name: 'k3s-cluster',
+        server: config.apiServer.trim(),
+        skipTLSVerify: config.skipTlsVerify,
+        caData: config.caCert ? Buffer.from(config.caCert).toString('base64') : undefined,
+      },
+      {
+        name: 'k3s-service-account',
+        token: config.serviceToken.trim(),
+      }
+    );
+  } else {
+    // In-cluster fallback
+    try {
+      kc.loadFromCluster();
+    } catch {
+      throw new Error('Kubernetes API configuration is missing. Please configure Kubeconfig or API Server in Admin Settings.');
+    }
   }
 
-  for (let port = START_PORT; port <= END_PORT; port++) {
-    if (!reservedPorts.has(port)) {
+  return kc;
+}
+
+/**
+ * Ensure the target Kubernetes namespace exists
+ */
+export async function ensureNamespace(kc: k8s.KubeConfig, ns = 'managed-db'): Promise<void> {
+  const coreApi = kc.makeApiClient(k8s.CoreV1Api);
+  try {
+    await coreApi.readNamespace({ name: ns });
+  } catch (err: any) {
+    const status = err.statusCode || err.code || err.response?.statusCode || err.body?.code;
+    if (status === 404) {
+      await coreApi.createNamespace({
+        body: {
+          metadata: {
+            name: ns,
+            labels: {
+              'managed-by': 'masdika-cloud',
+            },
+          },
+        },
+      });
+    }
+  }
+}
+
+/**
+ * Dynamically apply multi-document Kubernetes YAML manifests using native K8s API
+ */
+export async function applyKubernetesManifests(kc: k8s.KubeConfig, manifestYaml: string): Promise<void> {
+  const objApi = k8s.KubernetesObjectApi.makeApiClient(kc);
+  const specs = k8s.loadAllYaml(manifestYaml) as k8s.KubernetesObject[];
+
+  for (const spec of specs) {
+    if (!spec || !spec.kind || !spec.metadata?.name) continue;
+
+    spec.metadata = spec.metadata || {};
+    spec.metadata.annotations = spec.metadata.annotations || {};
+    delete (spec.metadata.annotations as any)['kubectl.kubernetes.io/last-applied-configuration'];
+    spec.metadata.annotations['kubectl.kubernetes.io/last-applied-configuration'] = JSON.stringify(spec);
+
+    try {
+      await objApi.create(spec);
+    } catch (createErr: any) {
+      const status = createErr.statusCode || createErr.code || createErr.response?.statusCode || createErr.body?.code;
+      if (status === 409) {
+        try {
+          await objApi.patch(spec);
+        } catch {
+          await objApi.replace(spec);
+        }
+      } else {
+        throw createErr;
+      }
+    }
+  }
+}
+
+/**
+ * Execute a command inside a Kubernetes pod container using the native WebSocket Exec API
+ */
+export async function execInPod(
+  kc: k8s.KubeConfig,
+  namespace: string,
+  podName: string,
+  containerName: string,
+  command: string[],
+  stdinData?: Buffer | string
+): Promise<{ stdout: string; stderr: string; success: boolean; error?: string }> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const exec = new k8s.Exec(kc);
+      const stdoutChunks: Buffer[] = [];
+      const stderrChunks: Buffer[] = [];
+
+      const stdoutStream = new Writable({
+        write(chunk, encoding, callback) {
+          stdoutChunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+          callback();
+        },
+      });
+
+      const stderrStream = new Writable({
+        write(chunk, encoding, callback) {
+          stderrChunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+          callback();
+        },
+      });
+
+      let stdinStream: Readable | null = null;
+      if (stdinData) {
+        stdinStream = Readable.from([Buffer.isBuffer(stdinData) ? stdinData : Buffer.from(stdinData)]);
+      }
+
+      let statusResult: any = null;
+
+      const ws = await exec.exec(
+        namespace,
+        podName,
+        containerName,
+        command,
+        stdoutStream,
+        stderrStream,
+        stdinStream,
+        false, // tty
+        (status) => {
+          statusResult = status;
+        }
+      );
+
+      const timeout = setTimeout(() => {
+        try {
+          ws.close();
+        } catch {}
+        resolve({
+          stdout: Buffer.concat(stdoutChunks).toString('utf-8'),
+          stderr: 'Command execution timed out after 120 seconds',
+          success: false,
+          error: 'Execution timed out',
+        });
+      }, 120000);
+
+      const finish = () => {
+        clearTimeout(timeout);
+        setTimeout(() => {
+          const stdout = Buffer.concat(stdoutChunks).toString('utf-8');
+          const stderr = Buffer.concat(stderrChunks).toString('utf-8');
+          const isSuccess = !statusResult || statusResult.status === 'Success';
+          resolve({
+            stdout,
+            stderr,
+            success: isSuccess,
+            error: isSuccess ? undefined : statusResult?.message || stderr || 'Command failed',
+          });
+        }, 50);
+      };
+
+      if (typeof (ws as any).on === 'function') {
+        (ws as any).on('close', finish);
+        (ws as any).on('error', (err: any) => {
+          clearTimeout(timeout);
+          reject(err);
+        });
+      } else {
+        (ws as any).onclose = finish;
+        (ws as any).onerror = (err: any) => {
+          clearTimeout(timeout);
+          reject(err);
+        };
+      }
+    } catch (err: any) {
+      reject(err);
+    }
+  });
+}
+
+/**
+ * Allocate a unique NodePort (30000 - 32767) for direct TCP database access
+ */
+export async function allocateAvailablePort(min = 30500, max = 32000): Promise<number> {
+  const usedDbs = await prisma.databaseService.findMany({
+    where: { status: { not: 'TERMINATED' } },
+    select: { port: true },
+  });
+  const usedPorts = new Set(usedDbs.map((d) => d.port));
+
+  for (let port = min; port <= max; port++) {
+    if (!usedPorts.has(port)) {
       return port;
     }
   }
-
-  throw new Error('All database ports in range 30001-32767 are occupied');
+  throw new Error('No available NodePort in allocated database port range (30500-32000)');
 }
 
 /**
- * Parse CPU, RAM, Storage, and Tier from plan limits (JSON or string).
- * Allows admin to create ANY custom plan, and K8s will automatically adapt.
+ * Helper to parse resource limits from a plan's specs JSON or string
  */
-export function parseDatabasePlanLimits(limitsRaw: string | object | null | undefined): {
+export function parseDatabasePlanLimits(planSpecsJson?: string | null): {
   cpuShares: number;
   memoryMb: number;
   storageGb: number;
-  shared: boolean;
-  region: string;
+  shared?: boolean;
 } {
-  let limits: any = {};
-  if (typeof limitsRaw === 'string') {
-    try {
-      limits = JSON.parse(limitsRaw);
-    } catch {
-      limits = {};
-    }
-  } else if (limitsRaw && typeof limitsRaw === 'object') {
-    limits = limitsRaw;
-  }
+  const fallback = { cpuShares: 0.5, memoryMb: 1024, storageGb: 10, shared: true };
+  if (!planSpecsJson) return fallback;
 
-  const isShared = limits.shared !== false && !limits.tier?.toUpperCase?.().includes('DEDICATED');
-
-  // Parse CPU (e.g. "500m", "500m CPU", "0.5 vCPU", "1 vCPU", "2", 4)
-  let cpuShares = isShared ? 0.5 : 1.0;
-  if (typeof limits.cpuShares === 'number') {
-    cpuShares = limits.cpuShares >= 50 ? limits.cpuShares / 1000 : limits.cpuShares;
-  } else if (typeof limits.cpu === 'string') {
-    const str = limits.cpu.trim();
-    const milliMatch = str.match(/^([\d.]+)\s*m/i);
-    if (milliMatch) {
-      cpuShares = parseFloat(milliMatch[1]) / 1000;
-    } else {
-      const match = str.match(/([\d.]+)/);
-      if (match) {
-        const val = parseFloat(match[1]);
-        cpuShares = val >= 50 ? val / 1000 : val;
+  try {
+    const parsed = typeof planSpecsJson === 'string' ? JSON.parse(planSpecsJson) : planSpecsJson;
+    const shared = parsed.shared !== undefined ? Boolean(parsed.shared) : undefined;
+    let cpuShares = 0.5;
+    if (parsed.cpu) {
+      const cpuStr = String(parsed.cpu).toLowerCase();
+      if (cpuStr.includes('m')) {
+        const milli = parseInt(cpuStr.replace(/[^0-9]/g, ''), 10);
+        cpuShares = isNaN(milli) ? 0.5 : milli / 1000;
+      } else {
+        const val = parseFloat(cpuStr.replace(/[^0-9.]/g, ''));
+        cpuShares = isNaN(val) ? 0.5 : val;
       }
     }
-  } else if (typeof limits.cpu === 'number') {
-    cpuShares = limits.cpu >= 50 ? limits.cpu / 1000 : limits.cpu;
-  }
 
-  // Parse RAM (e.g. "512 MB", "1 GB", "2 GB", "500 MB", 1024)
-  let memoryMb = 1024;
-  if (typeof limits.memoryMb === 'number') {
-    memoryMb = limits.memoryMb;
-  } else if (typeof limits.ram === 'string') {
-    const match = limits.ram.match(/([\d.]+)\s*(GB|MB)?/i);
-    if (match) {
-      const val = parseFloat(match[1]);
-      const unit = (match[2] || (val <= 16 ? 'GB' : 'MB')).toUpperCase();
-      memoryMb = unit === 'MB' ? Math.round(val) : Math.round(val * 1024);
+    let memoryMb = 1024;
+    if (parsed.ram) {
+      const ramStr = String(parsed.ram).toLowerCase();
+      if (ramStr.includes('gb')) {
+        memoryMb = (parseFloat(ramStr.replace(/[^0-9.]/g, '')) || 1) * 1024;
+      } else {
+        memoryMb = parseInt(ramStr.replace(/[^0-9]/g, ''), 10) || 1024;
+      }
     }
-  } else if (typeof limits.ram === 'number') {
-    memoryMb = limits.ram <= 16 ? limits.ram * 1024 : limits.ram;
+
+    let storageGb = 10;
+    if (parsed.storage || parsed.disk) {
+      const stStr = String(parsed.storage || parsed.disk).toLowerCase();
+      storageGb = parseInt(stStr.replace(/[^0-9]/g, ''), 10) || 10;
+    }
+
+    return { cpuShares, memoryMb, storageGb, shared };
+  } catch {
+    return fallback;
   }
-
-  // Parse Storage (e.g. "10 GB", "60", 60)
-  let storageGb = 10;
-  if (typeof limits.storageGb === 'number') {
-    storageGb = limits.storageGb;
-  } else if (typeof limits.storage === 'string') {
-    const match = limits.storage.match(/([\d.]+)/);
-    if (match) storageGb = Math.round(parseFloat(match[1]));
-  } else if (typeof limits.storage === 'number') {
-    storageGb = limits.storage;
-  }
-
-  const shared = limits.shared !== false && !limits.tier?.toUpperCase().includes('DEDICATED');
-  const region = limits.region || 'Sidoarjo';
-
-  return {
-    cpuShares: Math.max(0.25, cpuShares),
-    memoryMb: Math.max(256, memoryMb),
-    storageGb: Math.max(5, storageGb),
-    shared,
-    region,
-  };
 }
 
 /**
- * Generate Kubernetes YAML for a database instance
+ * Generate Kubernetes YAML manifest for MySQL, MariaDB, PostgreSQL, or MongoDB
  */
 export function generateDatabaseManifest(db: DatabaseServiceRecord): string {
+  const typeUpper = db.type.toUpperCase();
   const ns = db.k8sNamespace || 'managed-db';
   const name = `db-${db.id}`;
-  const svcName = `svc-db-${db.id}`;
-  const pvcName = `data-db-${db.id}`;
+  const svcName = `svc-${name}`;
+  const pvcName = `data-${name}`;
+  const secretName = `secret-${name}`;
 
-  const isDedicated = db.cpuShares >= 1.0 || (db.planName && db.planName.toLowerCase().includes('dedi'));
-  const cpuMillicores = Math.round(db.cpuShares * 1000);
-  const memMb = db.memoryMb;
-  const reqCpu = isDedicated ? Math.max(250, Math.round(cpuMillicores * 0.75)) : Math.max(50, Math.round(cpuMillicores * 0.2));
-  const reqMem = isDedicated ? Math.max(256, Math.round(memMb * 0.75)) : Math.max(128, Math.round(memMb * 0.25));
+  const cpuMillicores = Math.max(250, Math.round((db.cpuShares || 0.5) * 1000));
+  const reqCpu = Math.max(100, Math.round(cpuMillicores * 0.4));
+  const memMb = db.memoryMb || 1024;
+  const reqMem = Math.max(256, Math.round(memMb * 0.5));
 
-  let containerPort = 3306;
   let image = 'mysql:8.0';
-  let envList: { name: string; value: string }[] = [];
+  let containerPort = 3306;
   let mountPath = '/var/lib/mysql';
+  let envYaml = '';
 
-  const typeUpper = db.type.toUpperCase();
+  const passwordBase64 = Buffer.from(db.password || 'SecretDbPass123!').toString('base64');
+  const rootPasswordBase64 = Buffer.from(db.rootPassword || 'RootSecret123!').toString('base64');
 
   if (typeUpper === 'MYSQL') {
+    const version = db.version || '8.0';
+    image = `mysql:${version}`;
     containerPort = 3306;
-    image = db.version ? `mysql:${db.version}` : 'mysql:8.0';
     mountPath = '/var/lib/mysql';
-    envList = [
-      { name: 'MYSQL_ROOT_PASSWORD', value: db.rootPassword || db.password },
-      { name: 'MYSQL_DATABASE', value: db.dbName },
-      { name: 'MYSQL_USER', value: db.username },
-      { name: 'MYSQL_PASSWORD', value: db.password },
-    ];
+    envYaml = `
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ${secretName}
+              key: root-password
+        - name: MYSQL_DATABASE
+          value: "${db.dbName}"
+        - name: MYSQL_USER
+          value: "${db.username}"
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ${secretName}
+              key: password
+`;
   } else if (typeUpper === 'MARIADB') {
+    const version = db.version || '10.11';
+    image = `mariadb:${version}`;
     containerPort = 3306;
-    image = db.version ? `mariadb:${db.version}` : 'mariadb:10.11';
     mountPath = '/var/lib/mysql';
-    envList = [
-      { name: 'MARIADB_ROOT_PASSWORD', value: db.rootPassword || db.password },
-      { name: 'MARIADB_DATABASE', value: db.dbName },
-      { name: 'MARIADB_USER', value: db.username },
-      { name: 'MARIADB_PASSWORD', value: db.password },
-    ];
+    envYaml = `
+        - name: MARIADB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ${secretName}
+              key: root-password
+        - name: MARIADB_DATABASE
+          value: "${db.dbName}"
+        - name: MARIADB_USER
+          value: "${db.username}"
+        - name: MARIADB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ${secretName}
+              key: password
+`;
   } else if (typeUpper === 'POSTGRES' || typeUpper === 'POSTGRESQL') {
+    const version = db.version || '16';
+    image = `postgres:${version}-alpine`;
     containerPort = 5432;
-    image = db.version ? `postgres:${db.version}-alpine` : 'postgres:16-alpine';
     mountPath = '/var/lib/postgresql/data';
-    envList = [
-      { name: 'POSTGRES_DB', value: db.dbName },
-      { name: 'POSTGRES_USER', value: db.username },
-      { name: 'POSTGRES_PASSWORD', value: db.password },
-      { name: 'PGDATA', value: '/var/lib/postgresql/data/pgdata' },
-    ];
+    envYaml = `
+        - name: POSTGRES_DB
+          value: "${db.dbName}"
+        - name: POSTGRES_USER
+          value: "${db.username}"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ${secretName}
+              key: password
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+`;
   } else if (typeUpper === 'MONGODB' || typeUpper === 'MONGO') {
+    const version = db.version || '7.0';
+    image = `mongo:${version}`;
     containerPort = 27017;
-    image = db.version ? `mongo:${db.version}` : 'mongo:7.0';
     mountPath = '/data/db';
-    envList = [
-      { name: 'MONGO_INITDB_ROOT_USERNAME', value: db.username },
-      { name: 'MONGO_INITDB_ROOT_PASSWORD', value: db.password },
-      { name: 'MONGO_INITDB_DATABASE', value: db.dbName },
-    ];
+    envYaml = `
+        - name: MONGO_INITDB_ROOT_USERNAME
+          value: "${db.username}"
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ${secretName}
+              key: password
+        - name: MONGO_INITDB_DATABASE
+          value: "${db.dbName}"
+`;
   }
 
-  const envYaml = envList
-    .map((e) => `        - name: ${e.name}\n          value: "${e.value.replace(/"/g, '\\"')}"`)
-    .join('\n');
-
-  return `
+  return `apiVersion: v1
+kind: Secret
+metadata:
+  name: ${secretName}
+  namespace: ${ns}
+  labels:
+    app: ${name}
+    managed-by: masdika-cloud
+type: Opaque
+data:
+  password: ${passwordBase64}
+  root-password: ${rootPasswordBase64}
+---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -473,86 +609,111 @@ spec:
 }
 
 /**
- * Deploy a database instance onto K3s
+ * Deploy a database instance onto Kubernetes using the native Kubernetes API
  */
 export async function deployDatabase(db: DatabaseServiceRecord): Promise<{ success: boolean; error?: string }> {
   try {
-    const yaml = generateDatabaseManifest(db);
-    const remotePath = `/tmp/db-${db.id}.yaml`;
+    const kc = await getK8sKubeConfig();
+    const ns = db.k8sNamespace || 'managed-db';
+    await ensureNamespace(kc, ns);
 
-    const applyCmd = `
-      cat << 'EOF' > ${remotePath}
-${yaml}
-EOF
-      kubectl apply -f ${remotePath}
-      rm -f ${remotePath}
-    `;
-
-    const res = await execSsh(applyCmd);
-    if (res.code !== 0) {
-      return { success: false, error: res.stderr || res.stdout || 'Failed to apply K8s manifest' };
-    }
+    const manifestYaml = generateDatabaseManifest(db);
+    await applyKubernetesManifests(kc, manifestYaml);
 
     return { success: true };
   } catch (err: any) {
-    return { success: false, error: err?.message || 'SSH communication error' };
+    return { success: false, error: err?.message || 'Kubernetes API deployment failed' };
   }
 }
 
 /**
- * Stop database by scaling deployment to 0 replicas
+ * Stop database by scaling deployment to 0 replicas via Kubernetes API
  */
 export async function stopDatabase(id: number, ns = 'managed-db'): Promise<{ success: boolean; error?: string }> {
   try {
-    const res = await execSsh(`kubectl scale deployment db-${id} -n ${ns} --replicas=0`);
-    if (res.code !== 0) return { success: false, error: res.stderr || 'Scale down failed' };
+    const kc = await getK8sKubeConfig();
+    const appsApi = kc.makeApiClient(k8s.AppsV1Api);
+    await appsApi.patchNamespacedDeploymentScale({
+      name: `db-${id}`,
+      namespace: ns,
+      body: { spec: { replicas: 0 } },
+    });
     return { success: true };
   } catch (err: any) {
-    return { success: false, error: err?.message };
+    return { success: false, error: err?.message || 'Scale down failed' };
   }
 }
 
 /**
- * Start database by scaling deployment to 1 replica
+ * Start database by scaling deployment to 1 replica via Kubernetes API
  */
 export async function startDatabase(id: number, ns = 'managed-db'): Promise<{ success: boolean; error?: string }> {
   try {
-    const res = await execSsh(`kubectl scale deployment db-${id} -n ${ns} --replicas=1`);
-    if (res.code !== 0) return { success: false, error: res.stderr || 'Scale up failed' };
+    const kc = await getK8sKubeConfig();
+    const appsApi = kc.makeApiClient(k8s.AppsV1Api);
+    await appsApi.patchNamespacedDeploymentScale({
+      name: `db-${id}`,
+      namespace: ns,
+      body: { spec: { replicas: 1 } },
+    });
     return { success: true };
   } catch (err: any) {
-    return { success: false, error: err?.message };
+    return { success: false, error: err?.message || 'Scale up failed' };
   }
 }
 
 /**
- * Restart database by rollout restart
+ * Restart database by trigger rolling restart via Kubernetes API
  */
 export async function restartDatabase(id: number, ns = 'managed-db'): Promise<{ success: boolean; error?: string }> {
   try {
-    const res = await execSsh(`kubectl rollout restart deployment db-${id} -n ${ns}`);
-    if (res.code !== 0) return { success: false, error: res.stderr || 'Restart failed' };
+    const kc = await getK8sKubeConfig();
+    const appsApi = kc.makeApiClient(k8s.AppsV1Api);
+    await appsApi.patchNamespacedDeployment({
+      name: `db-${id}`,
+      namespace: ns,
+      body: {
+        spec: {
+          template: {
+            metadata: {
+              annotations: {
+                'kubectl.kubernetes.io/restartedAt': new Date().toISOString(),
+              },
+            },
+          },
+        },
+      },
+    });
     return { success: true };
   } catch (err: any) {
-    return { success: false, error: err?.message };
+    return { success: false, error: err?.message || 'Rollout restart failed' };
   }
 }
 
 /**
- * Permanently delete database deployment, service, and PVC
+ * Permanently delete database deployment, service, secret, and PVC via Kubernetes API
  */
 export async function deleteDatabase(id: number, ns = 'managed-db'): Promise<{ success: boolean; error?: string }> {
   try {
-    const cmd = `kubectl delete deployment db-${id} service svc-db-${id} pvc data-db-${id} -n ${ns} --ignore-not-found=true`;
-    const res = await execSsh(cmd);
-    return { success: res.code === 0, error: res.code !== 0 ? res.stderr : undefined };
+    const kc = await getK8sKubeConfig();
+    const coreApi = kc.makeApiClient(k8s.CoreV1Api);
+    const appsApi = kc.makeApiClient(k8s.AppsV1Api);
+
+    await Promise.allSettled([
+      appsApi.deleteNamespacedDeployment({ name: `db-${id}`, namespace: ns }),
+      coreApi.deleteNamespacedService({ name: `svc-db-${id}`, namespace: ns }),
+      coreApi.deleteNamespacedSecret({ name: `secret-db-${id}`, namespace: ns }),
+      coreApi.deleteNamespacedPersistentVolumeClaim({ name: `data-db-${id}`, namespace: ns }),
+    ]);
+
+    return { success: true };
   } catch (err: any) {
-    return { success: false, error: err?.message };
+    return { success: false, error: err?.message || 'Failed to delete database resources' };
   }
 }
 
 /**
- * Get live status and metrics of a database instance
+ * Get live status and metrics of a database instance via Kubernetes API
  */
 export async function getDatabaseStatus(
   id: number,
@@ -567,85 +728,100 @@ export async function getDatabaseStatus(
   uptime?: string;
 }> {
   try {
-    const podRes = await execSsh(
-      `kubectl get pods -l app=db-${id} -n ${ns} -o jsonpath='{range .items[*]}{.metadata.name}{"|"}{.status.phase}{"|"}{.status.containerStatuses[0].ready}{"|"}{.status.containerStatuses[0].restartCount}{"|"}{.metadata.creationTimestamp}{"\\n"}{end}'`
-    );
+    const kc = await getK8sKubeConfig();
+    const coreApi = kc.makeApiClient(k8s.CoreV1Api);
 
-    const line = podRes.stdout.trim().split('\n')[0];
-    if (!line) {
+    const podList = await coreApi.listNamespacedPod({
+      namespace: ns,
+      labelSelector: `app=db-${id}`,
+    });
+
+    const pod = podList.items?.[0];
+    if (!pod) {
       return { status: 'STOPPED', ready: false, cpu: '0m', memory: '0Mi', restarts: 0 };
     }
 
-    const [podName, phase, readyStr, restartsStr, creationTimestamp] = line.split('|');
-    const ready = readyStr === 'true';
+    const podName = pod.metadata?.name;
+    const phase = pod.status?.phase;
+    const containerStatus = pod.status?.containerStatuses?.[0];
+    const ready = containerStatus?.ready ?? false;
+    const restarts = containerStatus?.restartCount ?? 0;
+    const uptime = pod.metadata?.creationTimestamp ? new Date(pod.metadata.creationTimestamp).toISOString() : undefined;
 
-    // Get live metrics from metrics-server
-    let cpu = '0m';
-    let memory = '0Mi';
-    try {
-      const topRes = await execSsh(`kubectl top pod ${podName} -n ${ns} --no-headers 2>/dev/null`);
-      if (topRes.code === 0 && topRes.stdout.trim()) {
-        const parts = topRes.stdout.trim().split(/\s+/);
-        if (parts.length >= 3) {
-          cpu = parts[1];
-          memory = parts[2];
-        }
-      }
-    } catch {
-      // Ignore metrics error
-    }
+    const container = pod.spec?.containers?.[0];
+    const cpuLimit = container?.resources?.limits?.cpu || '500m';
+    const memoryLimit = container?.resources?.limits?.memory || '1024Mi';
 
     let status: 'RUNNING' | 'STOPPED' | 'PENDING' | 'ERROR' = 'PENDING';
     if (phase === 'Running' && ready) status = 'RUNNING';
     else if (phase === 'Running' && !ready) status = 'PENDING';
     else if (phase === 'Failed') status = 'ERROR';
-    else if (!podName) status = 'STOPPED';
+    else if (phase === 'Succeeded' || !podName) status = 'STOPPED';
 
     return {
       status,
       podName,
       ready,
-      cpu,
-      memory,
-      restarts: parseInt(restartsStr || '0', 10),
-      uptime: creationTimestamp,
+      cpu: cpuLimit,
+      memory: memoryLimit,
+      restarts,
+      uptime,
     };
-  } catch (err) {
+  } catch {
     return { status: 'ERROR', ready: false, cpu: '0m', memory: '0Mi', restarts: 0 };
   }
 }
 
 /**
- * Run database dump (mysqldump / pg_dump / mongodump) inside the pod
+ * Run database dump (mysqldump / pg_dump / mongodump) inside the pod via native K8s Exec
  */
 export async function exportDatabaseDump(
   db: DatabaseServiceRecord
 ): Promise<{ success: boolean; data?: string; filename?: string; error?: string }> {
   try {
+    const kc = await getK8sKubeConfig();
+    const coreApi = kc.makeApiClient(k8s.CoreV1Api);
     const ns = db.k8sNamespace || 'managed-db';
+
+    const podList = await coreApi.listNamespacedPod({
+      namespace: ns,
+      labelSelector: `app=db-${db.id}`,
+    });
+
+    const pod = podList.items?.[0];
+    if (!pod || pod.status?.phase !== 'Running') {
+      return { success: false, error: 'Database pod is not running' };
+    }
+
+    const podName = pod.metadata?.name!;
     const typeUpper = db.type.toUpperCase();
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
 
-    let cmd = '';
+    let command: string[] = [];
     let filename = `${db.name}-${timestamp}.sql`;
 
     if (typeUpper === 'MYSQL' || typeUpper === 'MARIADB') {
       filename = `${db.dbName}-${timestamp}.sql`;
-      const passEscaped = (db.password || '').replace(/"/g, '\\"');
-      cmd = `kubectl exec -n ${ns} deployment/db-${db.id} -- mysqldump -u"${db.username}" -p"${passEscaped}" "${db.dbName}"`;
+      command = ['mysqldump', `-u${db.username}`, `-p${db.password}`, db.dbName];
     } else if (typeUpper === 'POSTGRES' || typeUpper === 'POSTGRESQL') {
       filename = `${db.dbName}-${timestamp}.sql`;
-      cmd = `kubectl exec -n ${ns} deployment/db-${db.id} -- pg_dump -U "${db.username}" -d "${db.dbName}"`;
+      command = ['sh', '-c', `PGPASSWORD="${db.password}" pg_dump -U "${db.username}" -d "${db.dbName}"`];
     } else if (typeUpper === 'MONGODB' || typeUpper === 'MONGO') {
       filename = `${db.dbName}-${timestamp}.json`;
-      cmd = `kubectl exec -n ${ns} deployment/db-${db.id} -- mongoexport --username "${db.username}" --password "${db.password}" --authenticationDatabase admin --db "${db.dbName}"`;
+      command = [
+        'mongoexport',
+        `--username=${db.username}`,
+        `--password=${db.password}`,
+        '--authenticationDatabase=admin',
+        `--db=${db.dbName}`,
+      ];
     } else {
       return { success: false, error: `Unsupported database engine for dump: ${db.type}` };
     }
 
-    const res = await execSsh(cmd);
-    if (res.code !== 0 && !res.stdout) {
-      return { success: false, error: res.stderr || 'Database dump failed' };
+    const res = await execInPod(kc, ns, podName, 'database', command);
+    if (!res.success && !res.stdout) {
+      return { success: false, error: res.error || res.stderr || 'Database dump failed' };
     }
 
     return {
@@ -659,32 +835,51 @@ export async function exportDatabaseDump(
 }
 
 /**
- * Run database import (.sql or .json) inside the pod via SSH stdin
+ * Run database import (.sql or .json) inside the pod via native K8s Exec stdin stream
  */
 export async function importDatabaseDump(
   db: DatabaseServiceRecord,
   fileContent: Buffer | string
 ): Promise<{ success: boolean; message?: string; error?: string }> {
   try {
+    const kc = await getK8sKubeConfig();
+    const coreApi = kc.makeApiClient(k8s.CoreV1Api);
     const ns = db.k8sNamespace || 'managed-db';
+
+    const podList = await coreApi.listNamespacedPod({
+      namespace: ns,
+      labelSelector: `app=db-${db.id}`,
+    });
+
+    const pod = podList.items?.[0];
+    if (!pod || pod.status?.phase !== 'Running') {
+      return { success: false, error: 'Database pod is not running' };
+    }
+
+    const podName = pod.metadata?.name!;
     const typeUpper = db.type.toUpperCase();
 
-    let cmd = '';
+    let command: string[] = [];
 
     if (typeUpper === 'MYSQL' || typeUpper === 'MARIADB') {
-      const passEscaped = (db.password || '').replace(/"/g, '\\"');
-      cmd = `kubectl exec -i -n ${ns} deployment/db-${db.id} -- mysql -u"${db.username}" -p"${passEscaped}" "${db.dbName}"`;
+      command = ['mysql', `-u${db.username}`, `-p${db.password}`, db.dbName];
     } else if (typeUpper === 'POSTGRES' || typeUpper === 'POSTGRESQL') {
-      cmd = `kubectl exec -i -n ${ns} deployment/db-${db.id} -- psql -U "${db.username}" -d "${db.dbName}"`;
+      command = ['sh', '-c', `PGPASSWORD="${db.password}" psql -U "${db.username}" -d "${db.dbName}"`];
     } else if (typeUpper === 'MONGODB' || typeUpper === 'MONGO') {
-      cmd = `kubectl exec -i -n ${ns} deployment/db-${db.id} -- mongoimport --username "${db.username}" --password "${db.password}" --authenticationDatabase admin --db "${db.dbName}"`;
+      command = [
+        'mongoimport',
+        `--username=${db.username}`,
+        `--password=${db.password}`,
+        '--authenticationDatabase=admin',
+        `--db=${db.dbName}`,
+      ];
     } else {
       return { success: false, error: `Unsupported database engine for import: ${db.type}` };
     }
 
-    const res = await execSshWithStdin(cmd, fileContent);
-    if (res.code !== 0) {
-      return { success: false, error: res.stderr || 'Database import execution failed' };
+    const res = await execInPod(kc, ns, podName, 'database', command, fileContent);
+    if (!res.success) {
+      return { success: false, error: res.error || res.stderr || 'Database import execution failed' };
     }
 
     return {
@@ -705,7 +900,6 @@ export function buildConnectionDetails(db: DatabaseServiceRecord, clusterConfig?
   const pmaBase = clusterConfig?.pmaUrl || cachedClusterConfig?.pmaUrl || MANAGED_DB_PMA_URL;
   const pgadminBase = clusterConfig?.pgadminUrl || cachedClusterConfig?.pgadminUrl || MANAGED_DB_PGADMIN_URL;
   const mongoBase = clusterConfig?.mongoUrl || cachedClusterConfig?.mongoUrl || MANAGED_DB_MONGO_URL;
-  const clusterHost = clusterConfig?.host || cachedClusterConfig?.host || '127.0.0.1';
 
   const port = db.port;
   const typeUpper = db.type.toUpperCase();
@@ -717,15 +911,15 @@ export function buildConnectionDetails(db: DatabaseServiceRecord, clusterConfig?
   let laravelEnv = '';
 
   if (typeUpper === 'MYSQL' || typeUpper === 'MARIADB') {
-    pmaUrl = `${pmaBase}/?pma_servername=${encodeURIComponent(clusterHost)}&pma_port=${port}&pma_username=${encodeURIComponent(db.username)}`;
+    pmaUrl = pmaBase ? `${pmaBase}/?pma_servername=${encodeURIComponent(directIp || host)}&pma_port=${port}&pma_username=${encodeURIComponent(db.username)}` : null;
     connectionUri = `mysql://${db.username}:${db.password}@${host}:${port}/${db.dbName}`;
     laravelEnv = `DB_CONNECTION=mysql\nDB_HOST=${host}\nDB_PORT=${port}\nDB_DATABASE=${db.dbName}\nDB_USERNAME=${db.username}\nDB_PASSWORD=${db.password}`;
   } else if (typeUpper === 'POSTGRES' || typeUpper === 'POSTGRESQL') {
-    pgAdminUrl = pgadminBase;
+    pgAdminUrl = pgadminBase || null;
     connectionUri = `postgresql://${db.username}:${db.password}@${host}:${port}/${db.dbName}?sslmode=prefer`;
     laravelEnv = `DB_CONNECTION=pgsql\nDB_HOST=${host}\nDB_PORT=${port}\nDB_DATABASE=${db.dbName}\nDB_USERNAME=${db.username}\nDB_PASSWORD=${db.password}`;
   } else if (typeUpper === 'MONGODB' || typeUpper === 'MONGO') {
-    mongoUrl = mongoBase;
+    mongoUrl = mongoBase || null;
     connectionUri = `mongodb://${db.username}:${db.password}@${host}:${port}/${db.dbName}?authSource=admin`;
     laravelEnv = `DB_CONNECTION=mongodb\nDB_URI=${connectionUri}`;
   }
@@ -749,13 +943,13 @@ export function buildConnectionDetails(db: DatabaseServiceRecord, clusterConfig?
 }
 
 /**
- * Test SSH & Kubernetes connectivity to the K3s host
+ * Test connectivity directly to the Kubernetes API Server (CoreV1Api.listNode)
  */
 export async function testK8sClusterConnection(customConfig?: {
-  host?: string;
-  port?: number | string;
-  username?: string;
-  password?: string;
+  apiServer?: string;
+  kubeconfig?: string;
+  serviceToken?: string;
+  skipTlsVerify?: boolean;
 }): Promise<{
   success: boolean;
   message: string;
@@ -764,86 +958,99 @@ export async function testK8sClusterConnection(customConfig?: {
 }> {
   const startTime = Date.now();
   try {
-    let host = customConfig?.host;
-    let port = typeof customConfig?.port === 'string' ? parseInt(customConfig.port, 10) : customConfig?.port;
-    let username = customConfig?.username;
-    let password = customConfig?.password;
+    const kc = new k8s.KubeConfig();
 
-    // If any config is missing or masked, resolve from DB settings
-    if (!host || !username || !password || password === '••••••••') {
+    let kubeconfig = customConfig?.kubeconfig;
+    let apiServer = customConfig?.apiServer;
+    let serviceToken = customConfig?.serviceToken;
+    let skipTls = customConfig?.skipTlsVerify ?? true;
+
+    // If missing from request, read from DB settings
+    if (!kubeconfig && !serviceToken && !apiServer) {
       const activeConfig = await getK8sClusterConfig();
-      if (!host) host = activeConfig.host;
-      if (!port) port = activeConfig.port;
-      if (!username) username = activeConfig.username;
-      if (!password || password === '••••••••') password = activeConfig.password;
+      kubeconfig = activeConfig.kubeconfig;
+      apiServer = activeConfig.apiServer;
+      serviceToken = activeConfig.serviceToken;
+      skipTls = activeConfig.skipTlsVerify;
     }
 
-    if (!host || !username) {
-      return { success: false, message: 'Host and SSH username are required.' };
-    }
-
-    const { stdout, stderr, code } = await new Promise<{ stdout: string; stderr: string; code: number }>((resolve, reject) => {
-      const conn = new Client();
-      const timeout = setTimeout(() => {
-        conn.end();
-        reject(new Error('Connection timed out after 10 seconds'));
-      }, 10000);
-
-      conn.on('ready', () => {
-        conn.exec('k3s kubectl get nodes -o wide --no-headers', (err: any, stream: any) => {
-          if (err) {
-            clearTimeout(timeout);
-            conn.end();
-            return reject(err);
+    if (kubeconfig && kubeconfig !== '••••••••' && kubeconfig.trim().length > 0) {
+      kc.loadFromString(kubeconfig.trim());
+      if (apiServer && apiServer.trim().length > 0) {
+        const cluster = kc.getCurrentCluster();
+        if (cluster) {
+          (cluster as any).server = apiServer.trim();
+          if (skipTls) (cluster as any).skipTLSVerify = true;
+        }
+      }
+    } else if (serviceToken && serviceToken !== '••••••••' && apiServer) {
+      kc.loadFromClusterAndUser(
+        {
+          name: 'k3s-cluster',
+          server: apiServer.trim(),
+          skipTLSVerify: skipTls,
+        },
+        {
+          name: 'k3s-user',
+          token: serviceToken.trim(),
+        }
+      );
+    } else {
+      const activeConfig = await getK8sClusterConfig();
+      if (activeConfig.kubeconfig) {
+        kc.loadFromString(activeConfig.kubeconfig);
+        if (activeConfig.apiServer) {
+          const cluster = kc.getCurrentCluster();
+          if (cluster) {
+            (cluster as any).server = activeConfig.apiServer;
+            if (activeConfig.skipTlsVerify) (cluster as any).skipTLSVerify = true;
           }
-          let out = '';
-          let errStr = '';
-          stream.on('data', (d: Buffer) => (out += d.toString()));
-          stream.stderr.on('data', (d: Buffer) => (errStr += d.toString()));
-          stream.on('close', (exitCode: number) => {
-            clearTimeout(timeout);
-            conn.end();
-            resolve({ stdout: out, stderr: errStr, code: exitCode ?? 0 });
-          });
-        });
-      });
+        }
+      } else if (activeConfig.serviceToken && activeConfig.apiServer) {
+        kc.loadFromClusterAndUser(
+          {
+            name: 'k3s-cluster',
+            server: activeConfig.apiServer,
+            skipTLSVerify: activeConfig.skipTlsVerify,
+          },
+          {
+            name: 'k3s-user',
+            token: activeConfig.serviceToken,
+          }
+        );
+      } else {
+        return {
+          success: false,
+          message: 'No Kubeconfig YAML or API Server configuration provided.',
+          latencyMs: Date.now() - startTime,
+        };
+      }
+    }
 
-      conn.on('error', (err: any) => {
-        clearTimeout(timeout);
-        reject(err);
-      });
+    const coreApi = kc.makeApiClient(k8s.CoreV1Api);
+    const nodesRes = await coreApi.listNode();
+    const latencyMs = Date.now() - startTime;
 
-      conn.connect({
-        host,
-        port: port || 22,
-        username,
-        password: password || undefined,
-        readyTimeout: 8000,
-      });
+    const items = nodesRes.items || [];
+    const nodeSummaries = items.map((node) => {
+      const name = node.metadata?.name || 'unknown';
+      const version = node.status?.nodeInfo?.kubeletVersion || 'v1.x';
+      const os = `${node.status?.nodeInfo?.operatingSystem || 'linux'}/${node.status?.nodeInfo?.architecture || 'amd64'}`;
+      const isReady = node.status?.conditions?.some((c) => c.type === 'Ready' && c.status === 'True');
+      return `${name} (${version}, ${isReady ? 'Ready' : 'NotReady'}, ${os})`;
     });
 
-    const latencyMs = Date.now() - startTime;
-    if (code !== 0) {
-      return {
-        success: false,
-        message: `K3s kubectl command returned error code ${code}: ${stderr || stdout}`,
-        latencyMs,
-      };
-    }
-
-    const rawLines = stdout.trim().split('\n').filter(Boolean);
     return {
       success: true,
-      message: `Successfully connected to K3s cluster! Found ${rawLines.length} node(s).`,
-      nodes: rawLines,
+      message: `Successfully connected to Kubernetes API! Found ${items.length} node(s).`,
+      nodes: nodeSummaries,
       latencyMs,
     };
   } catch (err: any) {
     return {
       success: false,
-      message: err?.message || 'Failed to connect to K3s cluster',
+      message: err?.message || 'Failed to connect to Kubernetes API',
       latencyMs: Date.now() - startTime,
     };
   }
 }
-
