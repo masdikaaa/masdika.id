@@ -9,10 +9,11 @@ import { toast } from "sonner";
 import {
   Database, Plus, RefreshCw, Server, ExternalLink, Power,
   Copy, Check, Activity, ShieldCheck, HardDrive, Cpu, Layers,
-  AlertTriangle, ArrowRight, Play, Square, RotateCw
+  AlertTriangle, ArrowRight, Play, Square, RotateCw, Trash2
 } from "lucide-react";
 import { SiMysql, SiPostgresql, SiMariadb, SiMongodb } from "react-icons/si";
 import { motion } from "framer-motion";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 interface DatabaseServiceItem {
   id: number;
@@ -57,6 +58,75 @@ export default function DatabaseListingPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [actionLoadingId, setActionLoadingId] = useState<number | null>(null);
+  const [confirmModal, setConfirmModal] = useState<{
+    dbId: number;
+    action: "start" | "stop" | "restart" | "delete";
+    name: string;
+  } | null>(null);
+
+  const getSingleActionModalConfig = (item: { dbId: number; action: string; name: string }) => {
+    switch (item.action) {
+      case "start":
+        return {
+          title: "Start Database Container",
+          description: `Are you sure you want to boot up ${item.name}? The container pod will start up and database connections will resume.`,
+          confirmText: "Start Database",
+          variant: "success" as const,
+          icon: <Play className="w-8 h-8 fill-current" />,
+        };
+      case "stop":
+        return {
+          title: "Stop Database Container",
+          description: `Are you sure you want to stop ${item.name}? The container pod will be paused. Persistent volume data on disk will remain safe.`,
+          confirmText: "Stop Database",
+          variant: "warning" as const,
+          icon: <Square className="w-8 h-8 fill-current" />,
+        };
+      case "restart":
+        return {
+          title: "Restart Database Container",
+          description: `Are you sure you want to restart ${item.name}? Active database client connections will drop momentarily while the container restarts.`,
+          confirmText: "Restart Database",
+          variant: "warning" as const,
+          icon: <RotateCw className="w-8 h-8" />,
+        };
+      case "delete":
+        return {
+          title: "Terminate Database Instance",
+          description: `WARNING: Are you sure you want to permanently delete ${item.name}? All persistent volume storage and database data will be destroyed immediately and cannot be recovered.`,
+          confirmText: "Delete Database",
+          variant: "danger" as const,
+          icon: <Trash2 className="w-8 h-8" />,
+        };
+      default:
+        return {
+          title: `${item.action} Database`,
+          description: `Are you sure you want to execute ${item.action} on ${item.name}?`,
+          confirmText: "Confirm",
+          variant: "warning" as const,
+          icon: <AlertTriangle className="w-8 h-8" />,
+        };
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    setActionLoadingId(id);
+    const toastId = toast.loading("Deleting database instance...");
+    try {
+      const res = await fetch(`/api/user/database/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(data.message || "Database terminated successfully", { id: toastId });
+        fetchDatabases();
+      } else {
+        toast.error(data.error || "Failed to delete database", { id: toastId });
+      }
+    } catch {
+      toast.error("An error occurred", { id: toastId });
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
 
   const fetchDatabases = async () => {
     setRefreshing(true);
@@ -493,19 +563,29 @@ export default function DatabaseListingPage() {
                       </a>
                     )}
 
-                    {/* Power Toggle Button */}
+                    {/* Power Action Buttons */}
                     {db.status === "RUNNING" ? (
-                      <button
-                        onClick={() => handlePowerAction(db.id, "stop")}
-                        disabled={isActing}
-                        className={cn("p-1.5 rounded-xl border transition-all cursor-pointer", isDark ? "bg-white/5 border-white/10 text-zinc-400 hover:text-amber-400" : "bg-slate-50 border-slate-200 text-slate-500 hover:text-amber-600")}
-                        title="Stop Database"
-                      >
-                        <Square className="w-3.5 h-3.5" />
-                      </button>
+                      <>
+                        <button
+                          onClick={() => setConfirmModal({ dbId: db.id, action: "restart", name: db.name })}
+                          disabled={isActing}
+                          className={cn("p-1.5 rounded-xl border transition-all cursor-pointer", isDark ? "bg-white/5 border-white/10 text-zinc-400 hover:text-white" : "bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-900")}
+                          title="Restart Database"
+                        >
+                          <RotateCw className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => setConfirmModal({ dbId: db.id, action: "stop", name: db.name })}
+                          disabled={isActing}
+                          className={cn("p-1.5 rounded-xl border transition-all cursor-pointer", isDark ? "bg-white/5 border-white/10 text-zinc-400 hover:text-amber-400" : "bg-slate-50 border-slate-200 text-slate-500 hover:text-amber-600")}
+                          title="Stop Database"
+                        >
+                          <Square className="w-3.5 h-3.5" />
+                        </button>
+                      </>
                     ) : (
                       <button
-                        onClick={() => handlePowerAction(db.id, "start")}
+                        onClick={() => setConfirmModal({ dbId: db.id, action: "start", name: db.name })}
                         disabled={isActing}
                         className={cn("p-1.5 rounded-xl border transition-all cursor-pointer", isDark ? "bg-white/5 border-white/10 text-zinc-400 hover:text-emerald-400" : "bg-slate-50 border-slate-200 text-slate-500 hover:text-emerald-600")}
                         title="Start Database"
@@ -527,6 +607,29 @@ export default function DatabaseListingPage() {
             );
           })}
         </div>
+      )}
+
+      {/* Action Confirmation Modal (Consistent with VPS) */}
+      {confirmModal && (
+        <ConfirmModal
+          isOpen={!!confirmModal}
+          onClose={() => setConfirmModal(null)}
+          onConfirm={async () => {
+            if (confirmModal.action === "delete") {
+              await handleDelete(confirmModal.dbId);
+            } else {
+              await handlePowerAction(confirmModal.dbId, confirmModal.action);
+            }
+            setConfirmModal(null);
+          }}
+          title={getSingleActionModalConfig(confirmModal).title}
+          description={getSingleActionModalConfig(confirmModal).description}
+          confirmText={getSingleActionModalConfig(confirmModal).confirmText}
+          cancelText="Cancel"
+          variant={getSingleActionModalConfig(confirmModal).variant}
+          icon={getSingleActionModalConfig(confirmModal).icon}
+          isLoading={actionLoadingId === confirmModal.dbId}
+        />
       )}
     </div>
   );

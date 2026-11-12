@@ -12,6 +12,7 @@ import {
   AlertTriangle, ArrowRight, Play, Square, RotateCw, Trash2, Search, Settings, ShieldAlert
 } from "lucide-react";
 import { SiMysql, SiPostgresql, SiMariadb, SiMongodb } from "react-icons/si";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 interface AdminDatabaseItem {
   id: number;
@@ -533,44 +534,20 @@ export default function AdminDatabasePage() {
 
       {/* Delete / Terminate Confirmation Modal */}
       {deleteModalItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className={cn("rounded-2xl border p-6 max-w-md w-full shadow-2xl space-y-4", isDark ? "bg-[#0c0c0e] border-white/10" : "bg-white border-slate-200")}>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-red-500/15 border border-red-500/30 flex items-center justify-center text-red-400 shrink-0">
-                <ShieldAlert className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className={cn("text-base font-bold", isDark ? "text-white" : "text-slate-900")}>
-                  Terminate Database Instance
-                </h3>
-                <p className="text-xs text-red-400 font-medium">Irreversible Administrative Action</p>
-              </div>
-            </div>
-
-            <p className={cn("text-xs leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
-              Are you sure you want to terminate <strong>{deleteModalItem.name}</strong> belonging to <strong>{deleteModalItem.customerEmail}</strong>? This will permanently delete the Kubernetes container pod and PV/PVC disk volume.
-            </p>
-
-            <div className="flex items-center justify-end gap-2.5 pt-2">
-              <button
-                type="button"
-                onClick={() => setDeleteModalItem(null)}
-                className={cn("px-4 py-2 rounded-xl text-xs font-semibold border cursor-pointer", isDark ? "border-white/10 text-zinc-300 hover:bg-white/5" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleDelete}
-                disabled={deleting}
-                className="px-4 py-2 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-700 text-white cursor-pointer transition-all shadow-md"
-              >
-                {deleting ? "Terminating..." : "Terminate Instance"}
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmModal
+          isOpen={!!deleteModalItem}
+          onClose={() => setDeleteModalItem(null)}
+          onConfirm={handleDelete}
+          title="Terminate Database Instance"
+          description={`Are you sure you want to terminate ${deleteModalItem.name} belonging to ${deleteModalItem.customerEmail}? This will permanently delete the Kubernetes container pod and PV/PVC disk volume.`}
+          confirmText="Terminate Instance"
+          cancelText="Cancel"
+          variant="danger"
+          icon={<Trash2 className="w-8 h-8" />}
+          isLoading={deleting}
+        />
       )}
     </div>
   );
 }
+

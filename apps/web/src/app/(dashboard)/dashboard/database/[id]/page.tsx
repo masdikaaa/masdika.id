@@ -16,6 +16,7 @@ import { SiMysql, SiPostgresql, SiMariadb, SiMongodb } from "react-icons/si";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from "recharts";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 interface DatabaseDetail {
   id: number;
@@ -74,7 +75,14 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
   const [showRootPassword, setShowRootPassword] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [activeSnippetTab, setActiveSnippetTab] = useState<"URI" | "LARAVEL" | "NODE">("URI");
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [confirmPowerModal, setConfirmPowerModal] = useState<{
+    action: "start" | "stop" | "restart" | "delete";
+    title: string;
+    description: string;
+    confirmText: string;
+    variant: "danger" | "warning" | "success";
+    icon: React.ReactNode;
+  } | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [importing, setImporting] = useState(false);
@@ -225,7 +233,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
       toast.error("An error occurred", { id: toastId });
     } finally {
       setDeleting(false);
-      setDeleteModalOpen(false);
+      setConfirmPowerModal(null);
     }
   };
 
@@ -382,7 +390,14 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
           {db.status === "RUNNING" ? (
             <>
               <button
-                onClick={() => handlePowerAction("restart")}
+                onClick={() => setConfirmPowerModal({
+                  action: "restart",
+                  title: "Restart Database Container",
+                  description: `Are you sure you want to restart ${db.name}? Active database client connections will briefly reconnect while the container pod restarts.`,
+                  confirmText: "Restart Database",
+                  variant: "warning",
+                  icon: <RotateCw className="w-8 h-8" />
+                })}
                 disabled={actionLoading}
                 className={cn(
                   "px-3 py-2 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer",
@@ -394,7 +409,14 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                 <span>Restart</span>
               </button>
               <button
-                onClick={() => handlePowerAction("stop")}
+                onClick={() => setConfirmPowerModal({
+                  action: "stop",
+                  title: "Stop Database Container",
+                  description: `Are you sure you want to stop ${db.name}? Database clients will not be able to connect until restarted. Persistent storage data on disk will remain safe.`,
+                  confirmText: "Stop Database",
+                  variant: "warning",
+                  icon: <Square className="w-8 h-8 fill-current" />
+                })}
                 disabled={actionLoading}
                 className={cn(
                   "px-3 py-2 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer",
@@ -408,7 +430,14 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
             </>
           ) : (
             <button
-              onClick={() => handlePowerAction("start")}
+              onClick={() => setConfirmPowerModal({
+                action: "start",
+                title: "Start Database Container",
+                description: `Are you sure you want to start ${db.name}? The container pod will start up and allow database connections.`,
+                confirmText: "Start Database",
+                variant: "success",
+                icon: <Play className="w-8 h-8 fill-current" />,
+              })}
               disabled={actionLoading}
               className={cn(
                 "px-3.5 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer",
@@ -983,7 +1012,14 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
 
             <button
               type="button"
-              onClick={() => setDeleteModalOpen(true)}
+              onClick={() => setConfirmPowerModal({
+                action: "delete",
+                title: "Terminate Database Instance",
+                description: `WARNING: Are you sure you want to permanently delete ${db.name}? All persistent volume storage and database data will be destroyed immediately and cannot be recovered.`,
+                confirmText: "Delete Database",
+                variant: "danger",
+                icon: <Trash2 className="w-8 h-8" />,
+              })}
               className="w-full py-2.5 rounded-xl font-bold text-xs bg-red-600 hover:bg-red-700 text-white flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -993,46 +1029,27 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
         </div>
       </div>
 
-      {/* Delete Confirmation Modal */}
-      {deleteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => !deleting && setDeleteModalOpen(false)} />
-          <div className={cn("relative border rounded-2xl w-full max-w-md p-6 overflow-hidden shadow-2xl z-10", isDark ? "bg-[#0c0c0e] border-white/[0.1] text-white" : "bg-white border-slate-200 text-slate-900")}>
-            <div className="flex flex-col items-center text-center">
-              <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center mb-4 border", isDark ? "bg-red-500/10 border-red-500/20 text-red-400" : "bg-red-50 border-red-200 text-red-600")}>
-                <ShieldAlert className="w-7 h-7" />
-              </div>
-              <h3 className="text-base font-bold mb-2">Terminate {db.name}?</h3>
-              <p className={cn("text-xs leading-relaxed mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>
-                Are you sure you want to permanently delete this database? All stored tables, records, and configurations will be irreversibly erased from NVMe storage.
-              </p>
-
-              <div className="flex w-full gap-3">
-                <button
-                  type="button"
-                  onClick={() => setDeleteModalOpen(false)}
-                  disabled={deleting}
-                  className={cn("flex-1 py-2.5 rounded-xl text-xs font-semibold transition-colors disabled:opacity-50 border", isDark ? "border-white/[0.08] text-zinc-300 hover:bg-white/5" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDelete}
-                  disabled={deleting}
-                  className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-700 text-white disabled:opacity-50 transition-all flex justify-center items-center gap-2 cursor-pointer shadow-md"
-                >
-                  {deleting ? (
-                    <>
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                      <span>Deleting...</span>
-                    </>
-                  ) : "Terminate Instance"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* Action Confirmation Modal (Consistent with VPS) */}
+      {confirmPowerModal && (
+        <ConfirmModal
+          isOpen={!!confirmPowerModal}
+          onClose={() => setConfirmPowerModal(null)}
+          onConfirm={async () => {
+            if (confirmPowerModal.action === "delete") {
+              await handleDelete();
+            } else {
+              await handlePowerAction(confirmPowerModal.action);
+            }
+            setConfirmPowerModal(null);
+          }}
+          title={confirmPowerModal.title}
+          description={confirmPowerModal.description}
+          confirmText={confirmPowerModal.confirmText}
+          cancelText="Cancel"
+          variant={confirmPowerModal.variant}
+          icon={confirmPowerModal.icon}
+          isLoading={actionLoading || deleting}
+        />
       )}
 
       {/* Import Database Modal */}
