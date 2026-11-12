@@ -7,6 +7,7 @@ import path from 'path';
 import { requireAuth } from '@/lib/auth-middleware';
 import { getUploadsDir } from '@/lib/file-utils';
 import { invalidateRustFSCache } from '@/lib/rustfs';
+import { invalidateK8sClusterConfigCache } from '@/lib/k8s-database';
 import { invalidatePublicSettingsCache } from '@/lib/settings';
 import { revalidatePath } from 'next/cache';
 import { checkRateLimit } from '@/lib/rate-limit';
@@ -41,6 +42,18 @@ export async function GET() {
     settingsObj['rustfs_ticket_bucket'] = settingsObj['rustfs_ticket_bucket'] || process.env.RUSTFS_TICKET_BUCKET || 'masdika-ticket';
     settingsObj['rustfs_enabled'] = settingsObj['rustfs_enabled'] ?? (process.env.RUSTFS_ENABLED ?? 'false');
 
+    // Managed Database (K3s) Cluster Settings
+    const hasK3sPassword = Boolean(settingsObj['managed_db_k3s_password'] || process.env.MANAGED_DB_SSH_PASSWORD);
+    settingsObj['managed_db_k3s_host'] = settingsObj['managed_db_k3s_host'] || process.env.MANAGED_DB_HOST || '';
+    settingsObj['managed_db_k3s_port'] = settingsObj['managed_db_k3s_port'] || process.env.MANAGED_DB_SSH_PORT || '22';
+    settingsObj['managed_db_k3s_user'] = settingsObj['managed_db_k3s_user'] || process.env.MANAGED_DB_SSH_USER || '';
+    settingsObj['managed_db_k3s_password'] = hasK3sPassword ? MASKED_SECRET : '';
+    settingsObj['managed_db_public_domain'] = settingsObj['managed_db_public_domain'] || process.env.MANAGED_DB_PUBLIC_DOMAIN || '';
+    settingsObj['managed_db_public_ip'] = settingsObj['managed_db_public_ip'] || process.env.MANAGED_DB_PUBLIC_IP || '';
+    settingsObj['managed_db_pma_url'] = settingsObj['managed_db_pma_url'] || process.env.MANAGED_DB_PMA_URL || '';
+    settingsObj['managed_db_pgadmin_url'] = settingsObj['managed_db_pgadmin_url'] || process.env.MANAGED_DB_PGADMIN_URL || '';
+    settingsObj['managed_db_mongo_url'] = settingsObj['managed_db_mongo_url'] || process.env.MANAGED_DB_MONGO_URL || '';
+
     return NextResponse.json({
       user: {
         name: decryptDeterministic(user?.name) || '',
@@ -64,7 +77,7 @@ export async function PUT(req: Request) {
 
   try {
     const body = await req.json();
-    const { name, email, bio, twoFactorEnabled, disable2FACode, profileImage, cv_url, setup2FA, verify2FA, social_facebook, social_twitter, social_linkedin, social_instagram, social_github, contact_email, contact_location, contact_phone, hero_title, hero_description, hero_typing_text, meta_description, meta_description_blog, meta_description_portfolio, meta_description_services, meta_description_opportunities, meta_description_resume, meta_description_contact, meta_description_community, meta_description_events, meta_description_vacancies, maintenance_mode, maintenance_message, vps_enabled, k3s_enabled, cdn_enabled, promo_banner_image, promo_banner_url, promo_banner_active, tax_rate, rustfs_endpoint, rustfs_access_key, rustfs_secret_key, rustfs_bucket, rustfs_media_bucket, rustfs_ticket_bucket, rustfs_enabled } = body;
+    const { name, email, bio, twoFactorEnabled, disable2FACode, profileImage, cv_url, setup2FA, verify2FA, social_facebook, social_twitter, social_linkedin, social_instagram, social_github, contact_email, contact_location, contact_phone, hero_title, hero_description, hero_typing_text, meta_description, meta_description_blog, meta_description_portfolio, meta_description_services, meta_description_opportunities, meta_description_resume, meta_description_contact, meta_description_community, meta_description_events, meta_description_vacancies, maintenance_mode, maintenance_message, vps_enabled, k3s_enabled, cdn_enabled, promo_banner_image, promo_banner_url, promo_banner_active, tax_rate, rustfs_endpoint, rustfs_access_key, rustfs_secret_key, rustfs_bucket, rustfs_media_bucket, rustfs_ticket_bucket, rustfs_enabled, managed_db_k3s_host, managed_db_k3s_port, managed_db_k3s_user, managed_db_k3s_password, managed_db_public_domain, managed_db_public_ip, managed_db_pma_url, managed_db_pgadmin_url, managed_db_mongo_url } = body;
 
     if (tax_rate !== undefined) {
       const parsedTax = Number(tax_rate);
@@ -143,6 +156,19 @@ export async function PUT(req: Request) {
     if (rustfs_ticket_bucket !== undefined) settingsToUpdate.push({ key: 'rustfs_ticket_bucket', value: String(rustfs_ticket_bucket) });
     if (rustfs_enabled !== undefined) settingsToUpdate.push({ key: 'rustfs_enabled', value: String(rustfs_enabled) });
 
+    // Managed Database (K3s) Cluster Settings
+    if (managed_db_k3s_host !== undefined) settingsToUpdate.push({ key: 'managed_db_k3s_host', value: String(managed_db_k3s_host).trim() });
+    if (managed_db_k3s_port !== undefined) settingsToUpdate.push({ key: 'managed_db_k3s_port', value: String(managed_db_k3s_port).trim() });
+    if (managed_db_k3s_user !== undefined) settingsToUpdate.push({ key: 'managed_db_k3s_user', value: String(managed_db_k3s_user).trim() });
+    if (managed_db_k3s_password !== undefined && managed_db_k3s_password !== MASKED_SECRET && managed_db_k3s_password.trim() !== '') {
+      settingsToUpdate.push({ key: 'managed_db_k3s_password', value: encryptDeterministic(String(managed_db_k3s_password)) });
+    }
+    if (managed_db_public_domain !== undefined) settingsToUpdate.push({ key: 'managed_db_public_domain', value: String(managed_db_public_domain).trim() });
+    if (managed_db_public_ip !== undefined) settingsToUpdate.push({ key: 'managed_db_public_ip', value: String(managed_db_public_ip).trim() });
+    if (managed_db_pma_url !== undefined) settingsToUpdate.push({ key: 'managed_db_pma_url', value: String(managed_db_pma_url).trim() });
+    if (managed_db_pgadmin_url !== undefined) settingsToUpdate.push({ key: 'managed_db_pgadmin_url', value: String(managed_db_pgadmin_url).trim() });
+    if (managed_db_mongo_url !== undefined) settingsToUpdate.push({ key: 'managed_db_mongo_url', value: String(managed_db_mongo_url).trim() });
+
     for (const setting of settingsToUpdate) {
       await prisma.setting.upsert({
         where: { key: setting.key },
@@ -152,6 +178,7 @@ export async function PUT(req: Request) {
     }
 
     invalidateRustFSCache();
+    invalidateK8sClusterConfigCache();
     await invalidatePublicSettingsCache();
     try {
       revalidatePath('/', 'layout');

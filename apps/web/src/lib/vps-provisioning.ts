@@ -2,7 +2,6 @@ import { prisma } from "@/lib/prisma";
 import { ProxmoxClient } from "@/lib/proxmox";
 import { sendVpsProvisionedEmail } from "@/lib/email";
 import { decryptDeterministic, encryptDeterministic } from "@/lib/encryption";
-import { K3sProvisioningService } from "@/lib/k3s-provisioning";
 import { VpsAppProvisioningService } from "@/lib/vps-app-provisioning";
 import { getAppByName, getAppById } from "@/lib/vps-apps";
 import fs from "fs";
@@ -727,17 +726,9 @@ export class VpsProvisioningService {
       console.error(`Failed to send VPS provisioned email to ${vps.user.email}:`, emailErr);
     }
 
-    // 8. Trigger Kubernetes Provisioning if applicable
+    // 8. Legacy Kubernetes Provisioning check (discontinued)
     if (vps.kubernetesClusterId) {
-      const rootPassword = decryptDeterministic(vps.rootPassword) || vps.rootPassword;
-      // Run in background without awaiting so the order completes fast
-      K3sProvisioningService.installK3s(
-        vps.id,
-        vps.kubernetesClusterId,
-        primaryIp || "",
-        rootPassword,
-        (vps.kubernetesRole as "MASTER" | "WORKER") || "MASTER"
-      ).catch(err => console.error("Background K3s Provisioning failed:", err));
+      console.log(`[VPS Provisioning] VPS ${vps.id} has legacy kubernetesClusterId (K3s auto-provision skipped)`);
     }
 
     // 8.5 Trigger 1-Click App Provisioning if applicable
@@ -1127,21 +1118,9 @@ export class VpsProvisioningService {
         console.error(`Warning: Failed to reapply some firewall rules for VMID ${vps.vmid}:`, err);
       }
 
-      // 6. Trigger K3s Reinstallation if applicable
+      // 6. Legacy K3s Reinstallation check (discontinued)
       if (vps.kubernetesClusterId) {
-        console.log(`VPS ${vps.id} belongs to K3s cluster. Starting async K3s provisioning...`);
-        const targetPassword = newPassword || decryptDeterministic(vps.rootPassword) || vps.rootPassword;
-        const targetIp = vps.assignedIps.length > 0 ? vps.assignedIps[0].ipAddress : vps.vpcIp || '';
-
-        K3sProvisioningService.installK3s(
-          vps.id,
-          vps.kubernetesClusterId,
-          targetIp,
-          targetPassword,
-          (vps.kubernetesRole as "MASTER" | "WORKER") || "WORKER"
-        ).catch(err => {
-          console.error(`Failed async K3s re-provision for VPS ${vps.id}:`, err);
-        });
+        console.log(`[VPS Reinstall] VPS ${vps.id} belongs to legacy K3s cluster (re-provision skipped)`);
       }
 
       // 7. Trigger 1-Click App Provisioning if reinstalling with an app

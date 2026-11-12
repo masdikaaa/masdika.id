@@ -839,9 +839,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
         window.location.href = data.paymentUrl;
       } else if (res.ok && data.success) {
         toast.success("Server deployment started!");
-        if (data.k3sClusterId) {
-          router.push(`/dashboard/k3s/${data.k3sClusterId}`);
-        } else if (is1ClickApp) {
+        if (is1ClickApp) {
           // Open Live 1-Click App Installation Monitor modal so customer can track until finished
           setInstalledVpsId(data.vpsId);
           setShowAppInstallationModal(true);

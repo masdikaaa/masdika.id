@@ -18,6 +18,7 @@ export default function MyServicesPage() {
   const [subscriptions, setSubscriptions] = useState<any[]>([]);
   const [vpsServices, setVpsServices] = useState<any[]>([]);
   const [k3sServices, setK3sServices] = useState<any[]>([]);
+  const [databaseServices, setDatabaseServices] = useState<any[]>([]);
   const [plans, setPlans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useUrlNumber("page", 1);
@@ -28,10 +29,11 @@ export default function MyServicesPage() {
 
   const fetchServices = async () => {
     try {
-      const [billingRes, vpsRes, k3sRes, plansRes] = await Promise.all([
+      const [billingRes, vpsRes, k3sRes, dbRes, plansRes] = await Promise.all([
         fetch("/api/user/billing"),
         fetch("/api/user/vps"),
         fetch("/api/user/k3s"),
+        fetch("/api/user/database"),
         fetch("/api/public/plans")
       ]);
 
@@ -48,6 +50,13 @@ export default function MyServicesPage() {
       if (k3sRes.ok) {
         const k3sData = await k3sRes.json();
         setK3sServices(Array.isArray(k3sData) ? k3sData : []);
+      }
+
+      if (dbRes.ok) {
+        const dbData = await dbRes.json();
+        if (dbData.success && Array.isArray(dbData.data)) {
+          setDatabaseServices(dbData.data);
+        }
       }
 
       if (plansRes.ok) {
@@ -124,7 +133,7 @@ export default function MyServicesPage() {
     return higherPlans.length > 0;
   };
 
-  const allServices = [...subscriptions, ...vpsServices, ...k3sServices];
+  const allServices = [...subscriptions, ...vpsServices, ...k3sServices, ...databaseServices];
 
   const totalHourlyBurnRate = allServices.reduce((sum, service) => {
     if (service.status === 'TERMINATED' || service.status === 'SUSPENDED') return sum;
@@ -430,6 +439,79 @@ export default function MyServicesPage() {
                           className="flex-1 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 px-3.5 py-2 rounded-xl text-xs sm:text-xs font-bold flex items-center justify-center transition-all text-slate-950"
                         >
                           Manage Cluster
+                        </Link>
+                      ) : (
+                        <div className="flex-1 bg-red-500/5 text-red-500/40 border border-red-500/10 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center cursor-not-allowed">
+                          Terminated
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              } else if (item.port !== undefined && item.type !== undefined) {
+                const db = item;
+                const colorClass = "from-cyan-500/20 text-cyan-400 border-cyan-500/30";
+                return (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    key={`db-${db.id}`}
+                    className={cn(
+                      "group border rounded-2xl p-5 sm:p-6 transition-all flex flex-col h-full relative overflow-hidden",
+                      isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/[0.16]" : "bg-white border-slate-200/90 shadow-2xs hover:border-slate-300",
+                      db.status === 'TERMINATED' && "opacity-75 grayscale-[30%]"
+                    )}
+                  >
+                    <div className="flex justify-between items-start mb-6 relative z-10">
+                      <div className="flex gap-3.5 items-center min-w-0">
+                        <div className={cn("w-12 h-12 rounded-xl bg-gradient-to-br border flex items-center justify-center shrink-0", colorClass)}>
+                          <Database className="w-6 h-6 text-cyan-400 group-hover:scale-110 transition-transform duration-300" strokeWidth={1.5} />
+                        </div>
+                        <div className="min-w-0">
+                          <h3 className={cn("text-base sm:text-lg font-bold group-hover:text-cyan-400 transition-colors leading-tight mb-1 truncate", isDark ? "text-white" : "text-slate-900")}>{db.name}</h3>
+                          <p className={cn("text-[10px] font-black uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-400")}>
+                            MANAGED {db.type} DB
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 flex-1 relative z-10">
+                      <div className={cn("col-span-2 border p-3.5 rounded-xl flex justify-between items-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
+                        <span className={cn("text-[10px] font-black uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-400")}>Status</span>
+                        {getStatusBadge(db.status)}
+                      </div>
+
+                      <div className={cn("border p-3.5 rounded-xl flex flex-col justify-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
+                        <span className={cn("text-[10px] font-black uppercase tracking-widest mb-1", isDark ? "text-zinc-500" : "text-slate-400")}>Endpoint</span>
+                        <span className={cn("text-xs font-mono font-bold tracking-wide truncate", isDark ? "text-white" : "text-slate-900")}>{db.host}:{db.port}</span>
+                      </div>
+
+                      <div className={cn("border p-3.5 rounded-xl flex flex-col justify-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
+                        <span className={cn("text-[10px] font-black uppercase tracking-widest mb-1", isDark ? "text-zinc-500" : "text-slate-400")}>Region</span>
+                        <span className={cn("text-xs font-bold tracking-wide", isDark ? "text-white" : "text-slate-900")}>{db.region}</span>
+                      </div>
+
+                      <div className={cn("col-span-2 border p-3.5 rounded-xl flex justify-between items-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
+                        <div className="flex flex-col">
+                          <span className={cn("text-[10px] font-black uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-400")}>Hourly Rate</span>
+                          <span className="text-xs text-cyan-400 font-bold mt-1">{formatRupiah(db.hourlyRate || 28)}/hr (PAYG)</span>
+                        </div>
+                        <span className={cn("text-lg font-black tracking-tight text-right", isDark ? "text-white" : "text-slate-900")}>
+                          {formatRupiah(db.monthlyPrice || 20000)}
+                          <span className={cn("text-xs font-bold ml-1", isDark ? "text-zinc-500" : "text-slate-400")}>/mo</span>
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 pt-5 border-t border-white/[0.08] flex items-center gap-3 relative z-10">
+                      {db.status !== 'TERMINATED' ? (
+                        <Link
+                          href={`/dashboard/database/${db.id}`}
+                          className="flex-1 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 px-3.5 py-2 rounded-xl text-xs sm:text-xs font-bold flex items-center justify-center transition-all text-slate-950"
+                        >
+                          Manage Database
                         </Link>
                       ) : (
                         <div className="flex-1 bg-red-500/5 text-red-500/40 border border-red-500/10 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center cursor-not-allowed">

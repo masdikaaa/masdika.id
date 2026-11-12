@@ -84,6 +84,7 @@ const SIDEBAR_LINKS = [
   { name: "Virtual Private Cloud", href: "/dashboard/vpc", icon: VpcIcon, color: "text-cyan-400", group: "Compute & Network" },
   { name: "Cloudflared", href: "/dashboard/cloudflared", icon: SiCloudflare, color: "text-[#F38020]", group: "Compute & Network" },
   { name: "Firewalls", href: "/dashboard/firewalls", icon: FirewallIcon, color: "text-orange-500", group: "Compute & Network" },
+  { name: "Managed Database", href: "/dashboard/database", icon: Database, color: "text-cyan-400", group: "Storage & Data" },
   { name: "File CDN", href: "/dashboard/cdn", icon: UploadCloud, color: "text-cyan-400", group: "Storage & Data" },
   { name: "API Keys", href: "/dashboard/api-keys", icon: Key, color: "text-amber-400", group: "Tools" },
   { name: "Reseller API", href: "/dashboard/reseller-api", icon: Code2, color: "text-cyan-400", group: "Tools" },

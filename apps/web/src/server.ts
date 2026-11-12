@@ -283,22 +283,14 @@ app.prepare().then(async () => {
       console.warn('> [Invoice Standardizer] Failed to load module:', err?.message || err);
     });
 
-    // 🛡️ Auto-recover any reinstalls, K3s clusters, or background jobs interrupted by previous container restart / deployment
-    import("./lib/stale-service-recovery").then(({ recoverStaleReinstalls, recoverStaleK3sClusters }) => {
+    // 🛡️ Auto-recover any VPS reinstalls or background jobs interrupted by previous container restart / deployment
+    import("./lib/stale-service-recovery").then(({ recoverStaleReinstalls }) => {
       recoverStaleReinstalls().then((count) => {
         if (count > 0) {
           console.log(`> [Reinstall Recovery] Safely recovered ${count} stuck provisioning VM(s) after restart`);
         }
       }).catch((err) => {
         console.warn('> [Reinstall Recovery] Startup check note:', err?.message || err);
-      });
-
-      recoverStaleK3sClusters().then((count) => {
-        if (count > 0) {
-          console.log(`> [K3s Recovery] Safely recovered ${count} stuck K3s cluster(s) after restart`);
-        }
-      }).catch((err) => {
-        console.warn('> [K3s Recovery] Startup check note:', err?.message || err);
       });
     }).catch(() => {});
 

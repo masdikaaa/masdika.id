@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, Suspense } from "react";
 import { useTheme } from "@/components/ThemeProvider";
 import {
   Check, ChevronRight, ChevronLeft, ShieldCheck,
-  Wallet, Code2, Cloud,
+  Wallet, Code2, Cloud, Database,
   UploadCloud, Server, FileVideo, Music, PlaySquare,
   FileText, Activity, X, ArrowUpCircle, ShoppingCart, Loader2, BadgeCheck, RefreshCw, Terminal, Plus, Rocket
 } from "lucide-react";
@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import VpsCheckoutFlow from "@/components/VpsCheckoutFlow";
+import DatabaseCheckoutFlow from "@/components/DatabaseCheckoutFlow";
 import { EnterpriseInfraBanner, EnterpriseInfraSidebarCard } from "@/components/EnterpriseInfraBadges";
 
 function Pager({
@@ -96,6 +97,7 @@ interface ServiceDef {
 
 const CATEGORIES = [
   { id: "COMPUTE", name: "Cloud Compute", icon: Server },
+  { id: "DATABASE", name: "Managed Database", icon: Database },
   { id: "STORAGE_CDN", name: "File CDN", icon: UploadCloud },
   { id: "DEVELOPER_API", name: "API Hub", icon: Code2 }
 ];
@@ -118,6 +120,15 @@ const SERVICES: ServiceDef[] = [
     desc: "1-Click automated stack deployment for Docker, aaPanel, WordPress, Databases & AI.",
     badge: "1-Click",
     tags: ["Auto-Install", "Pre-configured", "Cloud VPS"]
+  },
+  {
+    id: "DATABASE",
+    name: "Managed Database",
+    category: "DATABASE",
+    icon: Database,
+    desc: "Production-ready MySQL, MariaDB, PostgreSQL & MongoDB with NVMe storage & web GUI in Sidoarjo.",
+    badge: "Cloud DB",
+    tags: ["MySQL/PG/Mongo", "phpMyAdmin/pgAdmin", "Pay As You Go", "Sidoarjo Region"]
   },
   {
     id: "CDN",
@@ -700,7 +711,11 @@ function CheckoutContent() {
         )}
 
         {/* Service Checkout Content */}
-        {selectedService === "VPS" || selectedService === "KUBERNETES" || selectedService === "APP_CATALOG" ? (
+        {selectedService === "DATABASE" ? (
+          <div key="database-flow" className="w-full max-w-full min-w-0 transition-all duration-200">
+            <DatabaseCheckoutFlow />
+          </div>
+        ) : selectedService === "VPS" || selectedService === "KUBERNETES" || selectedService === "APP_CATALOG" ? (
           <div key={`vps-flow-${selectedService}`} className="w-full max-w-full min-w-0 transition-all duration-200">
             <VpsCheckoutFlow
               key={selectedService}

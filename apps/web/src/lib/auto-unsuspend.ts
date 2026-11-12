@@ -427,9 +427,61 @@ export async function attemptAutoUnsuspendSubscription(subscriptionId: number) {
  * Attempts to unsuspend all suspended services (VPS + Subscriptions) for a given user.
  * Typically triggered right after balance top-up payment confirmation.
  */
+/**
+ * Attempts to unsuspend a Managed Database service if user has sufficient balance.
+ */
+export async function attemptAutoUnsuspendDatabase(dbId: number) {
+  try {
+    const db = await prisma.databaseService.findUnique({
+      where: { id: dbId },
+      include: { user: true }
+    });
+
+    if (!db) return { success: false, message: 'Database not found' };
+    if (db.status !== 'SUSPENDED') return { success: false, message: 'Database is not suspended' };
+
+    const hourlyRate = db.hourlyRate || 28;
+    if (db.user.balance < hourlyRate) {
+      return { success: false, unsuspended: false, reason: 'INSUFFICIENT_BALANCE' };
+    }
+
+    await prisma.$transaction(async (tx) => {
+      const updateResult = await tx.user.updateMany({
+        where: { id: db.userId, balance: { gte: hourlyRate } },
+        data: { balance: { decrement: hourlyRate } }
+      });
+      if (updateResult.count === 0) throw new Error("INSUFFICIENT_BALANCE");
+
+      await tx.databaseService.update({
+        where: { id: db.id },
+        data: {
+          status: 'RUNNING',
+          suspendReason: null,
+          terminationDate: null,
+          accumulatedCost: { increment: hourlyRate },
+          lastBilledAt: new Date()
+        }
+      });
+    });
+
+    // Scale up K8s pod
+    try {
+      const { startDatabase } = await import('@/lib/k8s-database');
+      await startDatabase(db.id, db.k8sNamespace || 'managed-db');
+    } catch (startErr) {
+      console.error(`[Auto-Unsuspend] Failed to start K8s pod for DB ${db.id}:`, startErr);
+    }
+
+    return { success: true, unsuspended: true };
+  } catch (err: any) {
+    return { success: false, message: err.message };
+  }
+}
+
 export async function attemptAutoUnsuspendAllForUser(userId: number) {
   let vpsCount = 0;
   let subCount = 0;
+  let dbCount = 0;
   const errors: any[] = [];
 
   try {
@@ -466,12 +518,25 @@ export async function attemptAutoUnsuspendAllForUser(userId: number) {
         errors.push({ type: 'SUBSCRIPTION', id: sub.id, message: res.message });
       }
     }
+
+    const suspendedDbs = await prisma.databaseService.findMany({
+      where: {
+        userId,
+        status: 'SUSPENDED'
+      },
+      select: { id: true }
+    });
+
+    for (const db of suspendedDbs) {
+      const res = await attemptAutoUnsuspendDatabase(db.id);
+      if (res.unsuspended) dbCount++;
+    }
   } catch (err) {
     console.error(`[Auto-Unsuspend] Failed to auto-unsuspend all for user ${userId}:`, err);
     errors.push(err);
   }
 
-  return { vpsCount, subCount, errors };
+  return { vpsCount, subCount, dbCount, errors };
 }
 
 /**
@@ -481,6 +546,7 @@ export async function attemptAutoUnsuspendAllForUser(userId: number) {
 export async function attemptAutoUnsuspendAll() {
   let vpsCount = 0;
   let subCount = 0;
+  let dbCount = 0;
   const errors: any[] = [];
 
   try {
@@ -507,10 +573,22 @@ export async function attemptAutoUnsuspendAll() {
       const res = await attemptAutoUnsuspendSubscription(sub.id);
       if (res.unsuspended) subCount++;
     }
+
+    const suspendedDbs = await prisma.databaseService.findMany({
+      where: {
+        status: 'SUSPENDED'
+      },
+      select: { id: true }
+    });
+
+    for (const db of suspendedDbs) {
+      const res = await attemptAutoUnsuspendDatabase(db.id);
+      if (res.unsuspended) dbCount++;
+    }
   } catch (err) {
     console.error('[Auto-Unsuspend] Global auto-unsuspend batch failed:', err);
     errors.push(err);
   }
 
-  return { vpsCount, subCount, errors };
+  return { vpsCount, subCount, dbCount, errors };
 }

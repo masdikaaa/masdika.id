@@ -651,7 +651,7 @@ export const sendVpsProvisionedEmail = async (
     </div>
     <p>Please visit your dashboard to download your kube config file for remote access.</p>
     <div style="text-align: center; margin: 35px 0;">
-      <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://masdika.id'}/dashboard/k3s${clusterId ? '/' + clusterId : ''}" style="background-color: #06b6d4; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">Go to Dashboard</a>
+      <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://masdika.id'}/dashboard/vps" style="background-color: #06b6d4; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">Go to Dashboard</a>
     </div>
   ` : `
     <h2 style="color: #06b6d4; margin-bottom: 20px;">Your VPS is Ready! 🚀</h2>

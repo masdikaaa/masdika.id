@@ -74,6 +74,18 @@ export async function checkAndSendLowBalanceAlerts(): Promise<LowBalanceCheckRes
       },
     });
 
+    // Category D: Managed Databases (Running or Stopped with hourlyRate > 0)
+    const activeDatabases = await prisma.databaseService.findMany({
+      where: {
+        status: { in: ["RUNNING", "STOPPED"] },
+        hourlyRate: { gt: 0 },
+        user: { isSuspended: false },
+      },
+      include: {
+        user: { select: { id: true, name: true, email: true, balance: true } },
+      },
+    });
+
     // 3. Pricing lookup for effective rates (e.g. stopped VPS storage rate)
     const pricingItems = await prisma.vpsPricing.findMany();
     const pricing: Record<string, number> = {};
@@ -158,6 +170,14 @@ export async function checkAndSendLowBalanceAlerts(): Promise<LowBalanceCheckRes
         name: `${sub.plan.name} (${sub.plan.service.replace("_", " ")})`,
         type: "Subscription",
         hourlyRate: sub.plan.hourlyPrice,
+      });
+    }
+
+    for (const db of activeDatabases) {
+      addService(db.user, {
+        name: `${db.name} (${db.type} ${db.version})`,
+        type: "Database",
+        hourlyRate: db.hourlyRate,
       });
     }
 

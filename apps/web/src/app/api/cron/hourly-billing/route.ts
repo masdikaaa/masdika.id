@@ -568,6 +568,92 @@ export async function GET(req: Request) {
     }
 
     // ----------------------------------------------------
+    // PROCESS MANAGED DATABASES (HOURLY PAYG BILLING)
+    // ----------------------------------------------------
+    let dbProcessed = 0;
+    let dbSuspended = 0;
+    let dbTerminated = 0;
+
+    // 1. Process active databases for hourly burn
+    const activeDatabases = await prisma.databaseService.findMany({
+      where: {
+        status: { in: ['RUNNING', 'STOPPED'] },
+        hourlyRate: { gt: 0 }
+      },
+      include: { user: true }
+    });
+
+    for (const db of activeDatabases) {
+      const costThisHour = db.hourlyRate;
+      let paymentSuccess = false;
+
+      try {
+        await prisma.$transaction(async (tx) => {
+          const updateResult = await tx.user.updateMany({
+            where: { id: db.userId, balance: { gte: costThisHour } },
+            data: { balance: { decrement: costThisHour } }
+          });
+          if (updateResult.count === 0) throw new Error("INSUFFICIENT_BALANCE");
+
+          await tx.databaseService.update({
+            where: { id: db.id },
+            data: {
+              accumulatedCost: { increment: costThisHour },
+              lastBilledAt: now
+            }
+          });
+          paymentSuccess = true;
+        });
+        dbProcessed++;
+      } catch (e: any) {
+        if (e.message === "INSUFFICIENT_BALANCE") {
+          dbSuspended++;
+          const defaultTermination = new Date(now);
+          defaultTermination.setDate(defaultTermination.getDate() + 3);
+
+          await prisma.databaseService.update({
+            where: { id: db.id },
+            data: {
+              status: 'SUSPENDED',
+              suspendReason: 'Insufficient balance for Pay as You Go hourly database billing.',
+              terminationDate: defaultTermination
+            }
+          });
+
+          // Stop database pod on K8s
+          try {
+            const { stopDatabase } = await import('@/lib/k8s-database');
+            await stopDatabase(db.id, db.k8sNamespace || 'managed-db');
+          } catch (stopErr) {
+            console.error(`Failed to stop database pod for DB ${db.id}:`, stopErr);
+          }
+        }
+      }
+    }
+
+    // 2. Terminate suspended databases that reached 3-day grace period
+    const expiredDatabases = await prisma.databaseService.findMany({
+      where: {
+        status: 'SUSPENDED',
+        terminationDate: { lte: now }
+      }
+    });
+
+    for (const expDb of expiredDatabases) {
+      try {
+        const { deleteDatabase } = await import('@/lib/k8s-database');
+        await deleteDatabase(expDb.id, expDb.k8sNamespace || 'managed-db');
+        await prisma.databaseService.update({
+          where: { id: expDb.id },
+          data: { status: 'TERMINATED' }
+        });
+        dbTerminated++;
+      } catch (termErr) {
+        console.error(`Failed to terminate expired database ${expDb.id}:`, termErr);
+      }
+    }
+
+    // ----------------------------------------------------
     // LOW BALANCE NOTIFICATIONS (ALL PAYG SERVICES)
     // Checks all active services (VPS, IPs, Subscriptions)
     // and sends warning email to customers with remaining runtime <= 24 hours.

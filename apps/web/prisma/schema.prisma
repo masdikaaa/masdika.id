@@ -58,6 +58,7 @@ model User {
   emailLogs          EmailLog[]
   activityLogs       ClientActivityLog[]
   sshKeys            UserSshKey[]
+  databaseServices   DatabaseService[]
 
   @@index([createdAt])
 }
@@ -1143,6 +1144,56 @@ model UserSshKey {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([createdAt])
+}
+
+model DatabaseService {
+  id              Int       @id @default(autoincrement())
+  userId          Int
+  name            String
+  type            String    // "MYSQL", "MARIADB", "POSTGRES", "MONGODB"
+  version         String    // "8.0", "10.11", "16", "7.0"
+  planName        String    @default("Shared")
+  region          String    @default("Sidoarjo")
+  node            String    @default("managed-database")
+  host            String    @default("db.masdika.id")
+  port            Int       // NodePort (30000..32767)
+  dbName          String
+  username        String
+  password        String
+  rootPassword    String?
+  
+  // Resources
+  cpuShares       Float     @default(0.5)
+  memoryMb        Int       @default(1024)
+  storageGb       Int       @default(10)
+  
+  // Billing
+  billingMode     String    @default("PAYG") // "PAYG" | "MONTHLY"
+  monthlyPrice    Int       @default(20000)
+  hourlyRate      Int       @default(28)
+  accumulatedCost Int       @default(0)
+  
+  // Lifecycle
+  status          String    @default("PROVISIONING") // "PROVISIONING", "RUNNING", "STOPPED", "SUSPENDED", "TERMINATED"
+  suspendReason   String?
+  terminationDate DateTime?
+  lastBilledAt    DateTime?
+  
+  // Kubernetes metadata
+  k8sNamespace    String    @default("managed-db")
+  k8sDeployment   String?
+  k8sService      String?
+  k8sPvc          String?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([port])
   @@index([createdAt])
 }
 

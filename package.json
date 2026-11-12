@@ -37,5 +37,8 @@
   },
   "dependencies": {
     "lru-cache": "^10.4.3"
+  },
+  "devDependencies": {
+    "@types/ssh2": "^1.15.6"
   }
 }

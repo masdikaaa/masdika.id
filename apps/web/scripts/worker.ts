@@ -8,7 +8,6 @@ loadEnvConfig(projectRoot);
 async function start() {
   const { JobQueueService } = await import("@/lib/job-queue");
   const { VpsProvisioningService } = await import("@/lib/vps-provisioning");
-  const { reinstallK3sCluster } = await import("@/lib/k3s-reinstall");
   const { prisma } = await import("@/lib/prisma");
   const { startKafkaConsumer, stopKafkaConsumer } = await import("@/lib/kafka-consumer");
 
@@ -109,7 +108,7 @@ async function start() {
             throw err;
           }
         } else if (job.type === 'REINSTALL_K3S') {
-          await reinstallK3sCluster(payload);
+          console.warn(`[Worker] Skipping REINSTALL_K3S job #${job.id} (Legacy K3s product discontinued)`);
         } else if (job.type === 'REINSTALL_VPS') {
           const { vpsId, templateName, password, appId, appConfig } = payload;
           await VpsProvisioningService.reinstallVps(vpsId, templateName, password, appId, appConfig);

@@ -3,7 +3,7 @@ import { useUrlTab } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from "react";
-import { User, Shield, Key, Save, Camera, CheckCircle2, XCircle, Trash2, X, Share2, Layout, Phone, FileText, Search, Check, CheckCircle, Settings, RefreshCw, Info, HardDrive, Eye, EyeOff, Server, AlertCircle, ArrowLeftRight, Rocket } from "lucide-react";
+import { User, Shield, Key, Save, Camera, CheckCircle2, XCircle, Trash2, X, Share2, Layout, Phone, FileText, Search, Check, CheckCircle, Settings, RefreshCw, Info, HardDrive, Eye, EyeOff, Server, AlertCircle, ArrowLeftRight, Rocket, Database } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,7 +19,7 @@ export default function SettingsPage() {
   const isDark = theme === "dark";
   const inputClass = isDark ? inputClassDark : inputClassLight;
   const labelClass = isDark ? labelClassDark : labelClassLight;
-  const [activeTab, setActiveTab] = useUrlTab<'profile' | 'contact' | 'website' | 'seo' | 'security' | 'services' | 'storage'>('profile', { allowed: ['profile', 'contact', 'website', 'seo', 'security', 'services', 'storage'] as const });
+  const [activeTab, setActiveTab] = useUrlTab<'profile' | 'contact' | 'website' | 'seo' | 'security' | 'services' | 'storage' | 'database'>('profile', { allowed: ['profile', 'contact', 'website', 'seo', 'security', 'services', 'storage', 'database'] as const });
 
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User, desc: 'Manage personal info' },
@@ -29,6 +29,7 @@ export default function SettingsPage() {
     { id: 'security', label: 'Security', icon: Shield, desc: 'Passwords & 2FA' },
     { id: 'services', label: 'Services', icon: Settings, desc: 'Service Management' },
     { id: 'storage', label: 'RustFS Storage', icon: HardDrive, desc: 'S3-Compatible CDN Storage' },
+    { id: 'database', label: 'Managed DB (K3s)', icon: Database, desc: 'K3s Cluster, PMA, pgAdmin & Mongo' },
   ];
 
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
@@ -71,6 +72,11 @@ export default function SettingsPage() {
   const [deleteSourceAfterTransfer, setDeleteSourceAfterTransfer] = useState(false);
   const [updateActiveConfigAfterTransfer, setUpdateActiveConfigAfterTransfer] = useState(true);
   const [bucketMigrationResult, setBucketMigrationResult] = useState<any | null>(null);
+
+  // Managed Database (K3s) State
+  const [testingK3s, setTestingK3s] = useState(false);
+  const [k3sTestResult, setK3sTestResult] = useState<{ success: boolean; message: string; latencyMs?: number; nodes?: string[] } | null>(null);
+  const [showK3sPassword, setShowK3sPassword] = useState(false);
 
 
 
@@ -117,7 +123,18 @@ export default function SettingsPage() {
     rustfs_bucket: "masdika-cdn",
     rustfs_media_bucket: "masdika-media",
     rustfs_ticket_bucket: "masdika-ticket",
-    rustfs_enabled: false
+    rustfs_enabled: false,
+
+    // Managed Database (K3s) Cluster Settings
+    managed_db_k3s_host: "",
+    managed_db_k3s_port: "22",
+    managed_db_k3s_user: "",
+    managed_db_k3s_password: "",
+    managed_db_public_domain: "",
+    managed_db_public_ip: "",
+    managed_db_pma_url: "",
+    managed_db_pgadmin_url: "",
+    managed_db_mongo_url: ""
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -174,7 +191,17 @@ export default function SettingsPage() {
             rustfs_bucket: data.settings?.rustfs_cdn_bucket || data.settings?.rustfs_bucket || "masdika-cdn",
             rustfs_media_bucket: data.settings?.rustfs_media_bucket || "masdika-media",
             rustfs_ticket_bucket: data.settings?.rustfs_ticket_bucket || "masdika-ticket",
-            rustfs_enabled: data.settings?.rustfs_enabled !== undefined ? (data.settings.rustfs_enabled === "true" || data.settings.rustfs_enabled === true) : false
+            rustfs_enabled: data.settings?.rustfs_enabled !== undefined ? (data.settings.rustfs_enabled === "true" || data.settings.rustfs_enabled === true) : false,
+
+            managed_db_k3s_host: data.settings?.managed_db_k3s_host || "",
+            managed_db_k3s_port: data.settings?.managed_db_k3s_port || "22",
+            managed_db_k3s_user: data.settings?.managed_db_k3s_user || "",
+            managed_db_k3s_password: data.settings?.managed_db_k3s_password || "",
+            managed_db_public_domain: data.settings?.managed_db_public_domain || "",
+            managed_db_public_ip: data.settings?.managed_db_public_ip || "",
+            managed_db_pma_url: data.settings?.managed_db_pma_url || "",
+            managed_db_pgadmin_url: data.settings?.managed_db_pgadmin_url || "",
+            managed_db_mongo_url: data.settings?.managed_db_mongo_url || ""
           });
           if (data.settings?.profileImage) {
             setProfilePreview(data.settings?.profileImage);
@@ -260,6 +287,37 @@ export default function SettingsPage() {
       setRustFSTestResult({ success: false, message: e?.message || "Connection failed" });
     } finally {
       setTestingRustFS(false);
+    }
+  };
+
+  const handleTestK3s = async () => {
+    setTestingK3s(true);
+    setK3sTestResult(null);
+    const toastId = toast.loading("Connecting to K3s cluster & verifying nodes via SSH...");
+    try {
+      const res = await fetch('/api/admin/database/test-connection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          host: formData.managed_db_k3s_host,
+          port: formData.managed_db_k3s_port,
+          username: formData.managed_db_k3s_user,
+          password: formData.managed_db_k3s_password,
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(data.message, { id: toastId });
+        setK3sTestResult({ success: true, message: data.message, latencyMs: data.latencyMs, nodes: data.nodes });
+      } else {
+        toast.error(data.message || "Connection failed", { id: toastId });
+        setK3sTestResult({ success: false, message: data.message || "Failed to connect to K3s cluster", latencyMs: data.latencyMs });
+      }
+    } catch (e: any) {
+      toast.error(e?.message || "Connection failed", { id: toastId });
+      setK3sTestResult({ success: false, message: e?.message || "Connection failed" });
+    } finally {
+      setTestingK3s(false);
     }
   };
 
@@ -1806,6 +1864,228 @@ export default function SettingsPage() {
                         <ArrowLeftRight className="w-4 h-4 text-slate-950" />
                       )}
                       <span>{migratingBucket ? "Migrating Media Objects..." : "Start Server / Bucket Migration"}</span>
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+
+            {activeTab === 'database' && (
+              <motion.div key="database" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }} className="space-y-6">
+                {/* Managed Database K3s Cluster Configuration Card */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                >
+                  <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-6 relative z-10", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                    <div className="flex items-center gap-4">
+                      <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+                        <Database className="w-7 h-7" />
+                      </div>
+                      <div>
+                        <h2 className={cn("text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>Managed Database & K3s Cluster</h2>
+                        <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                          Configure K3s server SSH endpoint, public wildcard routing, and web viewer panels (phpMyAdmin, pgAdmin, Mongo Express).
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleTestK3s}
+                        disabled={testingK3s}
+                        className={cn("px-3.5 py-2 rounded-xl text-xs font-bold transition-all border flex items-center gap-2 cursor-pointer", isDark ? "bg-white/5 border-white/10 hover:bg-white/10 text-zinc-300 hover:text-white" : "bg-slate-100 border-slate-200 hover:bg-slate-200 text-slate-700")}
+                      >
+                        <RefreshCw className={cn("w-3.5 h-3.5", testingK3s && "animate-spin text-cyan-400")} />
+                        <span>{testingK3s ? "Testing SSH..." : "Test K3s Connection"}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {k3sTestResult && (
+                    <div className={cn("p-4 rounded-xl border flex items-start gap-3", k3sTestResult.success ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" : "bg-red-500/10 border-red-500/30 text-red-400")}>
+                      {k3sTestResult.success ? <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" /> : <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />}
+                      <div className="text-xs md:text-sm space-y-1">
+                        <div>
+                          <span className="font-bold">{k3sTestResult.success ? "Connection Verified" : "Connection Failed"}: </span>
+                          <span>{k3sTestResult.message}</span>
+                          {k3sTestResult.latencyMs !== undefined && (
+                            <span className="ml-2 font-mono text-xs opacity-80">({k3sTestResult.latencyMs}ms)</span>
+                          )}
+                        </div>
+                        {k3sTestResult.nodes && k3sTestResult.nodes.length > 0 && (
+                          <div className="font-mono text-[11px] opacity-90 pt-1">
+                            {k3sTestResult.nodes.map((n, i) => (
+                              <div key={i}>• {n}</div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-6 relative z-20">
+                    {/* Section 1: K3s Cluster SSH Access */}
+                    <div>
+                      <h3 className={cn("text-sm font-bold uppercase tracking-wider mb-3 flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                        <Server className="w-4 h-4" /> 1. K3s Cluster SSH Node Access
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="space-y-2 md:col-span-2">
+                          <label className={labelClass}>Cluster Host (Local or Public IP) *</label>
+                          <input
+                            type="text"
+                            name="managed_db_k3s_host"
+                            value={formData.managed_db_k3s_host}
+                            onChange={handleChange}
+                            placeholder="e.g. 192.168.1.50 or k3s.internal"
+                            className={inputClass}
+                          />
+                          <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>IP address of the K3s server reachable by the panel</p>
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className={labelClass}>SSH Port *</label>
+                          <input
+                            type="text"
+                            name="managed_db_k3s_port"
+                            value={formData.managed_db_k3s_port}
+                            onChange={handleChange}
+                            placeholder="22"
+                            className={inputClass}
+                          />
+                          <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Default SSH port (usually 22)</p>
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className={labelClass}>SSH Username *</label>
+                          <input
+                            type="text"
+                            name="managed_db_k3s_user"
+                            value={formData.managed_db_k3s_user}
+                            onChange={handleChange}
+                            placeholder="e.g. k3s-admin or root"
+                            className={inputClass}
+                          />
+                          <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Linux user with sudo / k3s permissions</p>
+                        </div>
+
+                        <div className="space-y-2 md:col-span-4">
+                          <label className={labelClass}>SSH Password *</label>
+                          <div className="relative">
+                            <input
+                              type={showK3sPassword ? "text" : "password"}
+                              name="managed_db_k3s_password"
+                              value={formData.managed_db_k3s_password}
+                              onChange={handleChange}
+                              placeholder="••••••••"
+                              className={cn(inputClass, "pr-10 font-mono")}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowK3sPassword(!showK3sPassword)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white p-1 cursor-pointer"
+                            >
+                              {showK3sPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                          </div>
+                          <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Stored securely with AES-256 encryption in the database. Leave as •••••••• to keep current.</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section 2: Public DNS & IP Routing */}
+                    <div className="pt-4 border-t border-white/[0.06]">
+                      <h3 className={cn("text-sm font-bold uppercase tracking-wider mb-3 flex items-center gap-2", isDark ? "text-purple-400" : "text-purple-700")}>
+                        <HardDrive className="w-4 h-4" /> 2. Public Networking & Domain Routing
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className={labelClass}>Public Wildcard Domain *</label>
+                          <input
+                            type="text"
+                            name="managed_db_public_domain"
+                            value={formData.managed_db_public_domain}
+                            onChange={handleChange}
+                            placeholder="e.g. db.example.com"
+                            className={inputClass}
+                          />
+                          <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Host domain used for user connection strings</p>
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className={labelClass}>Public NodePort IP *</label>
+                          <input
+                            type="text"
+                            name="managed_db_public_ip"
+                            value={formData.managed_db_public_ip}
+                            onChange={handleChange}
+                            placeholder="e.g. 203.0.113.1"
+                            className={inputClass}
+                          />
+                          <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Public IP address mapped to K3s cluster for direct TCP NodePort access</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section 3: Web Database Panels */}
+                    <div className="pt-4 border-t border-white/[0.06]">
+                      <h3 className={cn("text-sm font-bold uppercase tracking-wider mb-3 flex items-center gap-2", isDark ? "text-emerald-400" : "text-emerald-700")}>
+                        <Layout className="w-4 h-4" /> 3. Database Web Viewers & GUI Panels
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                          <label className={labelClass}>phpMyAdmin URL (MySQL / MariaDB) *</label>
+                          <input
+                            type="text"
+                            name="managed_db_pma_url"
+                            value={formData.managed_db_pma_url}
+                            onChange={handleChange}
+                            placeholder="e.g. https://pma.example.com"
+                            className={inputClass}
+                          />
+                          <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Web panel URL for MySQL & MariaDB users</p>
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className={labelClass}>pgAdmin 4 URL (PostgreSQL) *</label>
+                          <input
+                            type="text"
+                            name="managed_db_pgadmin_url"
+                            value={formData.managed_db_pgadmin_url}
+                            onChange={handleChange}
+                            placeholder="e.g. https://pgadmin.example.com"
+                            className={inputClass}
+                          />
+                          <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Web panel URL for PostgreSQL instances</p>
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className={labelClass}>Mongo Express URL (MongoDB) *</label>
+                          <input
+                            type="text"
+                            name="managed_db_mongo_url"
+                            value={formData.managed_db_mongo_url}
+                            onChange={handleChange}
+                            placeholder="e.g. https://mongo.example.com"
+                            className={inputClass}
+                          />
+                          <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Web panel URL for MongoDB collections & documents</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Save Button */}
+                  <div className={cn("pt-6 border-t flex items-center justify-end gap-3", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                    <button
+                      type="button"
+                      onClick={handleSave}
+                      disabled={saving}
+                      className="px-6 py-2.5 rounded-xl font-bold text-xs bg-cyan-400 hover:bg-cyan-300 active:scale-95 text-slate-950 transition-all shadow-md cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                    >
+                      <Save className="w-3.5 h-3.5" />
+                      <span>{saving ? "Saving Changes..." : "Save Database Settings"}</span>
                     </button>
                   </div>
                 </motion.div>

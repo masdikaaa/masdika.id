@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
 
 export const VALID_SERVICES = [
+  'DATABASE',
   'CDN',
   'TIKTOK',
   'SPOTIFY',
@@ -16,6 +17,54 @@ export async function GET(req: NextRequest) {
   try {
     const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
     if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
+
+    // Seed default Shared Database plan if none exists
+    const sharedDbPlan = await prisma.plan.findFirst({ where: { service: 'DATABASE', name: 'Shared Database' } });
+    if (!sharedDbPlan) {
+      await prisma.plan.create({
+        data: {
+          name: 'Shared Database',
+          service: 'DATABASE',
+          description: 'High-performance shared managed database with isolated container & NVMe storage in Sidoarjo.',
+          price: 20000,
+          hourlyPrice: 28,
+          limits: JSON.stringify({
+            cpu: '0.5 vCPU',
+            ram: '1 GB',
+            storage: '10 GB',
+            region: 'Sidoarjo',
+            shared: true,
+            engines: ['MySQL', 'MariaDB', 'PostgreSQL', 'MongoDB']
+          }),
+          isActive: true,
+          isPopular: true
+        }
+      });
+    }
+
+    // Seed default Dedicated Database plan (4 vCPU, 8 GB RAM, 60 GB NVMe) if none exists
+    const dedicatedDbPlan = await prisma.plan.findFirst({ where: { service: 'DATABASE', name: 'Dedicated Database' } });
+    if (!dedicatedDbPlan) {
+      await prisma.plan.create({
+        data: {
+          name: 'Dedicated Database',
+          service: 'DATABASE',
+          description: 'High-performance dedicated managed database with 4 vCPU, 8 GB RAM, and 60 GB NVMe storage in Sidoarjo.',
+          price: 150000,
+          hourlyPrice: 208,
+          limits: JSON.stringify({
+            cpu: '4 vCPU',
+            ram: '8 GB',
+            storage: '60 GB',
+            region: 'Sidoarjo',
+            shared: false,
+            engines: ['MySQL', 'MariaDB', 'PostgreSQL', 'MongoDB']
+          }),
+          isActive: true,
+          isPopular: false
+        }
+      });
+    }
 
     // Auto-purge any lingering obsolete plans outside the official active services
     prisma.plan.deleteMany({
