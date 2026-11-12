@@ -9,7 +9,7 @@ import { formatRupiah } from "@/lib/billing";
 import { toast } from "sonner";
 import {
   Database, Check, Server, HardDrive,
-  Cpu, Layers, ShieldCheck, Zap, RefreshCw, Eye, EyeOff, MapPin
+  Cpu, Layers, ShieldCheck, Zap, RefreshCw, Eye, EyeOff, MapPin, Sparkles, CheckCircle2
 } from "lucide-react";
 import { SiMysql, SiPostgresql, SiMariadb, SiMongodb } from "react-icons/si";
 
@@ -20,9 +20,6 @@ const DATABASE_ENGINES = [
     name: "PostgreSQL",
     icon: SiPostgresql,
     color: "text-[#336791]",
-    borderHover: "hover:border-[#336791]/50",
-    borderActive: "border-[#336791]",
-    bgActive: "bg-[#336791]/10",
     defaultPort: 5432,
     versions: [
       { id: "16", name: "16 LTS", default: true },
@@ -36,9 +33,6 @@ const DATABASE_ENGINES = [
     name: "MySQL",
     icon: SiMysql,
     color: "text-[#00758F]",
-    borderHover: "hover:border-[#00758F]/50",
-    borderActive: "border-[#00758F]",
-    bgActive: "bg-[#00758F]/10",
     defaultPort: 3306,
     versions: [
       { id: "8.0", name: "8.0 LTS", default: true },
@@ -51,9 +45,6 @@ const DATABASE_ENGINES = [
     name: "MariaDB",
     icon: SiMariadb,
     color: "text-[#C0765A]",
-    borderHover: "hover:border-[#C0765A]/50",
-    borderActive: "border-[#C0765A]",
-    bgActive: "bg-[#C0765A]/10",
     defaultPort: 3306,
     versions: [
       { id: "10.11", name: "10.11 LTS", default: true },
@@ -66,9 +57,6 @@ const DATABASE_ENGINES = [
     name: "MongoDB",
     icon: SiMongodb,
     color: "text-[#47A248]",
-    borderHover: "hover:border-[#47A248]/50",
-    borderActive: "border-[#47A248]",
-    bgActive: "bg-[#47A248]/10",
     defaultPort: 27017,
     versions: [
       { id: "7.0", name: "7.0 (Current)", default: true },
@@ -98,6 +86,8 @@ const SHARED_DATABASE_TYPES = [
   { id: "postgres-vector", engine: "POSTGRES", version: "16", name: "PostgreSQL 16 + pgvector (Shared)", ratePerGb: 12500, icon: SiPostgresql, color: "text-[#336791]", isOutOfStock: false },
   { id: "postgres-full", engine: "POSTGRES", version: "16", name: "PostgreSQL 16 + PostGIS + pgvector (Shared)", ratePerGb: 15000, icon: SiPostgresql, color: "text-[#336791]", isOutOfStock: false },
 ];
+
+const STORAGE_PRESETS = [1, 2, 5, 10, 15, 20];
 
 export default function DatabaseCheckoutFlow() {
   const { theme } = useTheme();
@@ -240,9 +230,9 @@ export default function DatabaseCheckoutFlow() {
   };
 
   return (
-    <form onSubmit={handleDeploy} className="space-y-6 w-full max-w-7xl mx-auto">
+    <form onSubmit={handleDeploy} className="space-y-6 w-full max-w-full min-w-0">
       {/* Top Architecture Mode Selector */}
-      <div className={cn("p-1.5 rounded-2xl border flex items-center justify-between gap-3 flex-wrap", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
+      <div className={cn("p-1.5 rounded-2xl border flex items-center justify-between gap-3 flex-wrap w-full max-w-full min-w-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -250,13 +240,13 @@ export default function DatabaseCheckoutFlow() {
             className={cn(
               "px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2",
               selectedTier === "DEDICATED"
-                ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
-                : isDark ? "text-zinc-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
+                ? "bg-cyan-400 text-slate-950 shadow-md shadow-cyan-500/20"
+                : isDark ? "text-zinc-400 hover:text-white hover:bg-white/[0.04]" : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
             )}
           >
             <Server className="w-4 h-4" />
             <span>Dedicated Host Resources</span>
-            <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-extrabold uppercase", selectedTier === "DEDICATED" ? "bg-white/20 text-white" : isDark ? "bg-white/5 text-zinc-400" : "bg-slate-200 text-slate-700")}>
+            <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-extrabold uppercase", selectedTier === "DEDICATED" ? "bg-slate-950/20 text-slate-950" : isDark ? "bg-white/5 text-zinc-400" : "bg-slate-200 text-slate-700")}>
               6 Flavors
             </span>
           </button>
@@ -267,34 +257,34 @@ export default function DatabaseCheckoutFlow() {
             className={cn(
               "px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2",
               selectedTier === "SHARED"
-                ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
-                : isDark ? "text-zinc-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
+                ? "bg-cyan-400 text-slate-950 shadow-md shadow-cyan-500/20"
+                : isDark ? "text-zinc-400 hover:text-white hover:bg-white/[0.04]" : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
             )}
           >
             <Database className="w-4 h-4" />
             <span>Shared Multi-Tenant</span>
-            <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-extrabold uppercase", selectedTier === "SHARED" ? "bg-white/20 text-white" : isDark ? "bg-white/5 text-zinc-400" : "bg-slate-200 text-slate-700")}>
+            <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-extrabold uppercase", selectedTier === "SHARED" ? "bg-slate-950/20 text-slate-950" : isDark ? "bg-white/5 text-zinc-400" : "bg-slate-200 text-slate-700")}>
               Per-GB Storage
             </span>
           </button>
         </div>
 
         <div className="flex items-center gap-2 text-xs font-medium px-3 text-zinc-400">
-          <MapPin className="w-3.5 h-3.5 text-blue-400" />
+          <MapPin className="w-3.5 h-3.5 text-cyan-400" />
           <span>Region: Sidoarjo (K3s Cluster)</span>
         </div>
       </div>
 
-      {/* Main Grid: Left Options + Right Sticky Summary */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column (8 cols): Options & Sliders */}
-        <div className="lg:col-span-8 space-y-6">
+      {/* Main Grid: Left Options (2 col) + Right Sticky Summary (1 col) */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 w-full max-w-full min-w-0 items-start">
+        {/* Left Column (2 cols): Options & Sliders */}
+        <div className="xl:col-span-2 space-y-6 w-full max-w-full min-w-0">
 
           {/* DEDICATED MODE (Gambar 1) */}
           {selectedTier === "DEDICATED" && (
             <>
               {/* Step 1: Engine & Version */}
-              <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200 shadow-xs")}>
+              <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all w-full max-w-full min-w-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
@@ -304,7 +294,7 @@ export default function DatabaseCheckoutFlow() {
                       Dedicated container with isolated resources & web GUI viewer
                     </p>
                   </div>
-                  <span className={cn("text-xs font-semibold px-2.5 py-1 rounded-full border", isDark ? "bg-blue-500/10 text-blue-400 border-blue-500/20" : "bg-blue-50 text-blue-800 border-blue-200")}>
+                  <span className={cn("text-xs font-bold px-2.5 py-1 rounded-full border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
                     K8s Native
                   </span>
                 </div>
@@ -321,10 +311,10 @@ export default function DatabaseCheckoutFlow() {
                         className={cn(
                           "rounded-xl border p-3.5 text-left transition-all cursor-pointer flex items-center gap-3",
                           isSelected
-                            ? `${engine.borderActive} ${isDark ? engine.bgActive : "bg-blue-50/50"} ring-1 ring-blue-500/30 shadow-xs`
+                            ? "border-cyan-500 bg-cyan-500/10 ring-1 ring-cyan-500/40 shadow-xs text-white"
                             : isDark
-                              ? "border-white/[0.08] bg-[#0a0a0c] hover:border-white/20"
-                              : "border-slate-200 bg-white hover:border-slate-300"
+                              ? "border-white/[0.08] bg-[#0c0c0e] hover:border-white/20 hover:bg-white/[0.02]"
+                              : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/60"
                         )}
                       >
                         <div className={cn("w-9 h-9 rounded-lg border flex items-center justify-center shrink-0", isDark ? "bg-white/[0.04] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
@@ -344,7 +334,7 @@ export default function DatabaseCheckoutFlow() {
                 </div>
 
                 {/* Version Selector for Active Engine */}
-                <div className="flex items-center gap-2 pt-2 border-t border-white/[0.06]">
+                <div className="flex items-center gap-2 pt-3 border-t border-white/[0.06]">
                   <span className={cn("text-xs font-semibold", isDark ? "text-zinc-400" : "text-slate-600")}>Version:</span>
                   <div className="flex flex-wrap gap-2">
                     {activeEngineMeta.versions.map((ver) => (
@@ -353,11 +343,11 @@ export default function DatabaseCheckoutFlow() {
                         key={ver.id}
                         onClick={() => setSelectedVersion(ver.id)}
                         className={cn(
-                          "px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer border",
+                          "px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer border",
                           selectedVersion === ver.id
-                            ? "bg-blue-600 text-white border-blue-500 shadow-xs"
+                            ? "bg-cyan-400 text-slate-950 border-cyan-400 font-bold shadow-xs"
                             : isDark
-                              ? "bg-white/[0.03] text-zinc-400 border-white/[0.08] hover:text-white"
+                              ? "bg-white/[0.03] text-zinc-400 border-white/[0.08] hover:text-white hover:bg-white/[0.06]"
                               : "bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200"
                         )}
                       >
@@ -368,8 +358,8 @@ export default function DatabaseCheckoutFlow() {
                 </div>
               </div>
 
-              {/* Step 2: Select Flavor (Exact Table from Gambar 1) */}
-              <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200 shadow-xs")}>
+              {/* Step 2: Select Flavor (SumoPod Style Table Gambar 1) */}
+              <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all w-full max-w-full min-w-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
                 <div className="mb-4">
                   <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                     Select Flavor
@@ -401,26 +391,26 @@ export default function DatabaseCheckoutFlow() {
                             key={flavor.id}
                             onClick={() => !flavor.isOutOfStock && setSelectedFlavorId(flavor.id)}
                             className={cn(
-                              "transition-all cursor-pointer font-medium",
-                              flavor.isOutOfStock ? "opacity-50 cursor-not-allowed" : "",
+                              "group transition-all cursor-pointer font-medium border-l-2",
+                              flavor.isOutOfStock ? "opacity-50 cursor-not-allowed border-l-transparent" : "",
                               isSelected
                                 ? isDark
-                                  ? "bg-blue-600/10 text-white"
-                                  : "bg-blue-50/80 text-slate-900"
+                                  ? "bg-cyan-500/10 text-white border-l-cyan-400"
+                                  : "bg-cyan-50/70 text-slate-900 border-l-cyan-500"
                                 : isDark
-                                  ? "hover:bg-white/[0.02] text-zinc-300"
-                                  : "hover:bg-slate-50 text-slate-700"
+                                  ? "border-l-transparent hover:bg-white/[0.02] text-zinc-300"
+                                  : "border-l-transparent hover:bg-slate-50 text-slate-700"
                             )}
                           >
                             <td className="py-3 px-3">
-                              <input
-                                type="radio"
-                                name="dedicatedFlavor"
-                                checked={isSelected}
-                                onChange={() => setSelectedFlavorId(flavor.id)}
-                                disabled={flavor.isOutOfStock}
-                                className="w-4 h-4 accent-blue-600 cursor-pointer"
-                              />
+                              <div className={cn(
+                                "w-4 h-4 rounded-full border flex items-center justify-center transition-all shrink-0",
+                                isSelected
+                                  ? "border-cyan-400 bg-cyan-400/20 shadow-xs"
+                                  : isDark ? "border-zinc-600 group-hover:border-zinc-400" : "border-slate-300 group-hover:border-slate-400"
+                              )}>
+                                {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-xs shadow-cyan-400/60" />}
+                              </div>
                             </td>
                             <td className="py-3 px-3">
                               <div className="flex items-center gap-2">
@@ -446,7 +436,7 @@ export default function DatabaseCheckoutFlow() {
                                   <span className="block text-[10px] text-amber-500 font-bold">(Out of Stock)</span>
                                 </div>
                               ) : (
-                                <span className={cn("font-bold text-sm", isSelected ? "text-blue-400" : isDark ? "text-blue-400/90" : "text-blue-600")}>
+                                <span className={cn("font-bold text-sm font-mono", isSelected ? "text-cyan-400" : isDark ? "text-zinc-300" : "text-slate-800")}>
                                   {formatRupiah(flavor.price)}/mo
                                 </span>
                               )}
@@ -460,7 +450,7 @@ export default function DatabaseCheckoutFlow() {
               </div>
 
               {/* Step 3: Storage Size Scale Bar (Gambar 1) */}
-              <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200 shadow-xs")}>
+              <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all w-full max-w-full min-w-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
                 <div className="mb-4">
                   <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                     Storage Size
@@ -470,10 +460,11 @@ export default function DatabaseCheckoutFlow() {
                   </p>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className={cn("text-sm font-bold", isDark ? "text-white" : "text-slate-900")}>
-                      Storage: {storageGb} GB
+                    <span className={cn("text-sm font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                      <span>Storage:</span>
+                      <span className="text-cyan-400 font-mono text-base">{storageGb} GB</span>
                     </span>
                     <span className={cn("text-xs font-semibold", isDark ? "text-zinc-500" : "text-slate-500")}>
                       Max: 20 GB
@@ -489,17 +480,39 @@ export default function DatabaseCheckoutFlow() {
                       step={1}
                       value={storageGb}
                       onChange={(e) => setStorageGb(parseInt(e.target.value, 10))}
-                      className="w-full h-2.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-blue-600 transition-all"
+                      className="w-full h-2.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-cyan-400 transition-all"
                     />
                   </div>
 
-                  <div className="flex items-center justify-between text-xs text-zinc-500 font-mono">
+                  {/* Quick Preset Buttons */}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 mr-1">Presets:</span>
+                    {STORAGE_PRESETS.map((preset) => (
+                      <button
+                        type="button"
+                        key={preset}
+                        onClick={() => setStorageGb(preset)}
+                        className={cn(
+                          "px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer border",
+                          storageGb === preset
+                            ? "bg-cyan-400 text-slate-950 border-cyan-400 shadow-xs"
+                            : isDark
+                              ? "bg-white/[0.03] text-zinc-400 border-white/[0.08] hover:text-white hover:bg-white/[0.06]"
+                              : "bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200"
+                        )}
+                      >
+                        {preset} GB
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs text-zinc-500 font-mono pt-1">
                     <span>1 GB</span>
                     <span>20 GB</span>
                   </div>
 
-                  <div className={cn("pt-2 text-xs", isDark ? "text-zinc-400" : "text-slate-600")}>
-                    Rp 5.000/GB/month · Storage cost: <strong className={isDark ? "text-white" : "text-slate-900"}>{formatRupiah(dedicatedStorageCost)}/month</strong>
+                  <div className={cn("pt-2 text-xs border-t border-white/[0.06]", isDark ? "text-zinc-400" : "text-slate-600")}>
+                    Rp 5.000/GB/month · Storage cost: <strong className="text-cyan-400 font-mono">{formatRupiah(dedicatedStorageCost)}/month</strong>
                   </div>
                 </div>
               </div>
@@ -510,7 +523,7 @@ export default function DatabaseCheckoutFlow() {
           {selectedTier === "SHARED" && (
             <>
               {/* Step 1: Select Database Type Grid */}
-              <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200 shadow-xs")}>
+              <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all w-full max-w-full min-w-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
                 <div className="mb-4">
                   <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                     Select Database Type
@@ -535,10 +548,10 @@ export default function DatabaseCheckoutFlow() {
                           "rounded-2xl border p-4 text-left transition-all cursor-pointer relative flex flex-col justify-between",
                           typeOption.isOutOfStock ? "opacity-40 cursor-not-allowed" : "",
                           isSelected
-                            ? "border-blue-600 bg-blue-600/10 ring-1 ring-blue-500/30 shadow-md"
+                            ? "border-cyan-500 bg-cyan-500/10 ring-1 ring-cyan-500/40 shadow-xs"
                             : isDark
-                              ? "border-white/[0.08] bg-[#0a0a0c] hover:border-white/20"
-                              : "border-slate-200 bg-white hover:border-slate-300"
+                              ? "border-white/[0.08] bg-[#0a0a0c] hover:border-white/20 hover:bg-white/[0.02]"
+                              : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/60"
                         )}
                       >
                         <div className="flex items-start gap-3">
@@ -549,14 +562,14 @@ export default function DatabaseCheckoutFlow() {
                             <span className={cn("text-sm font-bold block", isDark ? "text-white" : "text-slate-900")}>
                               {typeOption.name}
                             </span>
-                            <span className={cn("text-xs font-semibold mt-1 block", isDark ? "text-zinc-400" : "text-slate-500")}>
+                            <span className="text-xs font-mono font-bold mt-1 block text-cyan-400">
                               {formatRupiah(typeOption.ratePerGb)}/GB
                             </span>
                           </div>
                         </div>
 
                         {isSelected && (
-                          <div className="absolute top-3.5 right-3.5 w-5 h-5 rounded-full bg-blue-600 flex items-center justify-center text-white">
+                          <div className="absolute top-3.5 right-3.5 w-5 h-5 rounded-full bg-cyan-400 flex items-center justify-center text-slate-950 shadow-xs">
                             <Check className="w-3 h-3 stroke-[3]" />
                           </div>
                         )}
@@ -567,7 +580,7 @@ export default function DatabaseCheckoutFlow() {
               </div>
 
               {/* Step 2: Storage Size Scale Bar (Gambar 2) */}
-              <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200 shadow-xs")}>
+              <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all w-full max-w-full min-w-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
                 <div className="mb-4">
                   <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                     Storage Size
@@ -577,10 +590,11 @@ export default function DatabaseCheckoutFlow() {
                   </p>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className={cn("text-sm font-bold", isDark ? "text-white" : "text-slate-900")}>
-                      Storage: {storageGb} GB
+                    <span className={cn("text-sm font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                      <span>Storage:</span>
+                      <span className="text-cyan-400 font-mono text-base">{storageGb} GB</span>
                     </span>
                     <span className={cn("text-xs font-semibold", isDark ? "text-zinc-500" : "text-slate-500")}>
                       Max: 20 GB
@@ -596,17 +610,39 @@ export default function DatabaseCheckoutFlow() {
                       step={1}
                       value={storageGb}
                       onChange={(e) => setStorageGb(parseInt(e.target.value, 10))}
-                      className="w-full h-2.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-blue-600 transition-all"
+                      className="w-full h-2.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-cyan-400 transition-all"
                     />
                   </div>
 
-                  <div className="flex items-center justify-between text-xs text-zinc-500 font-mono">
+                  {/* Quick Preset Buttons */}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 mr-1">Presets:</span>
+                    {STORAGE_PRESETS.map((preset) => (
+                      <button
+                        type="button"
+                        key={preset}
+                        onClick={() => setStorageGb(preset)}
+                        className={cn(
+                          "px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer border",
+                          storageGb === preset
+                            ? "bg-cyan-400 text-slate-950 border-cyan-400 shadow-xs"
+                            : isDark
+                              ? "bg-white/[0.03] text-zinc-400 border-white/[0.08] hover:text-white hover:bg-white/[0.06]"
+                              : "bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200"
+                        )}
+                      >
+                        {preset} GB
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs text-zinc-500 font-mono pt-1">
                     <span>1 GB</span>
                     <span>20 GB</span>
                   </div>
 
-                  <div className={cn("pt-2 text-xs", isDark ? "text-zinc-400" : "text-slate-600")}>
-                    Storage cost: <strong className={isDark ? "text-white" : "text-slate-900"}>{formatRupiah(sharedStorageCost)}/month</strong>
+                  <div className={cn("pt-2 text-xs border-t border-white/[0.06]", isDark ? "text-zinc-400" : "text-slate-600")}>
+                    Storage cost: <strong className="text-cyan-400 font-mono">{formatRupiah(sharedStorageCost)}/month</strong>
                   </div>
                 </div>
               </div>
@@ -614,7 +650,7 @@ export default function DatabaseCheckoutFlow() {
           )}
 
           {/* Instance Configuration & Credentials */}
-          <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200 shadow-xs")}>
+          <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all w-full max-w-full min-w-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
             <h2 className={cn("text-base sm:text-lg font-bold tracking-tight mb-4", isDark ? "text-white" : "text-slate-900")}>
               Instance Configuration & Credentials
             </h2>
@@ -630,7 +666,7 @@ export default function DatabaseCheckoutFlow() {
                   value={instanceName}
                   onChange={(e) => setInstanceName(e.target.value)}
                   placeholder="e.g. production-database"
-                  className={cn("w-full border rounded-xl px-3.5 py-2.5 text-sm font-medium focus:outline-none focus:border-blue-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-3.5 py-2.5 text-sm font-medium focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
 
@@ -643,7 +679,7 @@ export default function DatabaseCheckoutFlow() {
                   value={customDbName}
                   onChange={(e) => setCustomDbName(e.target.value)}
                   placeholder="Leave blank to auto-generate"
-                  className={cn("w-full border rounded-xl px-3.5 py-2.5 text-sm font-mono focus:outline-none focus:border-blue-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-3.5 py-2.5 text-sm font-mono focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
 
@@ -656,7 +692,7 @@ export default function DatabaseCheckoutFlow() {
                   value={customUsername}
                   onChange={(e) => setCustomUsername(e.target.value)}
                   placeholder="Leave blank to auto-generate"
-                  className={cn("w-full border rounded-xl px-3.5 py-2.5 text-sm font-mono focus:outline-none focus:border-blue-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-3.5 py-2.5 text-sm font-mono focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
 
@@ -670,7 +706,7 @@ export default function DatabaseCheckoutFlow() {
                     value={customPassword}
                     onChange={(e) => setCustomPassword(e.target.value)}
                     placeholder="Leave blank to auto-generate"
-                    className={cn("w-full border rounded-xl px-3.5 py-2.5 pr-10 text-sm font-mono focus:outline-none focus:border-blue-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                    className={cn("w-full border rounded-xl px-3.5 py-2.5 pr-10 text-sm font-mono focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   />
                   <button
                     type="button"
@@ -685,9 +721,9 @@ export default function DatabaseCheckoutFlow() {
           </div>
         </div>
 
-        {/* Right Column (4 cols): Sticky Summary Box (Gambar 1 & Gambar 2) */}
-        <div className="lg:col-span-4 sticky top-6">
-          <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all space-y-5", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-xl" : "bg-white border-slate-200 shadow-md")}>
+        {/* Right Column (1 col): Sticky Summary Box (Gambar 1 & Gambar 2) */}
+        <div className="xl:col-span-1 sticky top-6 space-y-6 w-full">
+          <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all space-y-5", isDark ? "bg-[#0a0a0c] border-white/[0.08] shadow-xl" : "bg-white border-slate-200/90 shadow-md")}>
 
             {/* DEDICATED SUMMARY (Gambar 1) */}
             {selectedTier === "DEDICATED" ? (
@@ -743,7 +779,7 @@ export default function DatabaseCheckoutFlow() {
                 <div className="pt-4 border-t border-white/[0.08] flex items-baseline justify-between">
                   <span className="text-sm font-bold text-zinc-400">Total</span>
                   <div className="text-right">
-                    <span className="text-xl sm:text-2xl font-black text-blue-500">
+                    <span className="text-xl sm:text-2xl font-black text-cyan-400 font-mono tracking-tight">
                       {formatRupiah(dedicatedTotalMonthly)}/month
                     </span>
                     <span className="block text-[11px] text-zinc-500 mt-0.5">
@@ -798,7 +834,7 @@ export default function DatabaseCheckoutFlow() {
                 <div className="pt-4 border-t border-white/[0.08] space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-bold text-zinc-400">Storage Cost</span>
-                    <span className="text-lg font-black text-blue-500">
+                    <span className="text-xl sm:text-2xl font-black text-cyan-400 font-mono tracking-tight">
                       {formatRupiah(sharedTotalMonthly)}/month
                     </span>
                   </div>
@@ -813,7 +849,7 @@ export default function DatabaseCheckoutFlow() {
             <div className="pt-4 border-t border-white/[0.08] space-y-3">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-zinc-400">Your Balance:</span>
-                <span className={cn("font-bold", userBalance >= requiredUpfront ? "text-emerald-400" : "text-red-400")}>
+                <span className={cn("font-bold font-mono", userBalance >= requiredUpfront ? "text-emerald-400" : "text-red-400")}>
                   {loadingBalance ? "..." : formatRupiah(userBalance)}
                 </span>
               </div>
@@ -830,16 +866,16 @@ export default function DatabaseCheckoutFlow() {
               <button
                 type="submit"
                 disabled={submitting || userBalance < requiredUpfront}
-                className="w-full py-3 rounded-xl font-bold text-sm bg-blue-600 hover:bg-blue-500 active:scale-95 text-white transition-all shadow-lg shadow-blue-600/30 cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full py-3.5 rounded-xl font-bold text-sm bg-cyan-400 hover:bg-cyan-300 active:scale-95 text-slate-950 transition-all shadow-lg shadow-cyan-500/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {submitting ? (
                   <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <RefreshCw className="w-4 h-4 animate-spin text-slate-950" />
                     <span>Provisioning Database...</span>
                   </>
                 ) : (
                   <>
-                    <Zap className="w-4 h-4 fill-current" />
+                    <Zap className="w-4 h-4 fill-current text-slate-950" />
                     <span>Create Database</span>
                   </>
                 )}
