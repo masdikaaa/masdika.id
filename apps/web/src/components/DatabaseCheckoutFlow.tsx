@@ -12,21 +12,12 @@ import {
   Cpu, Layers, ShieldCheck, Rocket, RefreshCw, Eye, EyeOff, MapPin, Sparkles, CheckCircle2, Loader2,
   AlertTriangle, AlertCircle
 } from "lucide-react";
-import { SiMysql, SiPostgresql, SiMariadb, SiMongodb, SiRedis } from "react-icons/si";
-
-// Dedicated database engines & versions
+// Dedicated database engines & versions (Using authentic official SVG icons & Masdika Cyan theme)
 const DATABASE_ENGINES = [
   {
     id: "POSTGRES",
     name: "PostgreSQL",
-    icon: SiPostgresql,
-    color: "text-sky-400 dark:text-sky-400",
-    colorDark: "text-sky-400",
-    colorLight: "text-sky-700",
-    boxDark: "bg-sky-500/10 border-sky-500/30 text-sky-400 shadow-sm shadow-sky-500/10",
-    boxLight: "bg-sky-50 border-sky-200 text-sky-700 shadow-2xs",
-    badgeDark: "bg-sky-500/15 border-sky-500/30 text-sky-300",
-    badgeLight: "bg-sky-50 border-sky-200 text-sky-700",
+    icon: "/images/apps/postgresql.svg",
     defaultPort: 5432,
     versions: [
       { id: "16", name: "16 LTS", default: true },
@@ -38,14 +29,7 @@ const DATABASE_ENGINES = [
   {
     id: "MYSQL",
     name: "MySQL",
-    icon: SiMysql,
-    color: "text-cyan-400 dark:text-cyan-400",
-    colorDark: "text-cyan-400",
-    colorLight: "text-cyan-700",
-    boxDark: "bg-cyan-500/10 border-cyan-500/30 text-cyan-400 shadow-sm shadow-cyan-500/10",
-    boxLight: "bg-cyan-50 border-cyan-200 text-cyan-700 shadow-2xs",
-    badgeDark: "bg-cyan-500/15 border-cyan-500/30 text-cyan-300",
-    badgeLight: "bg-cyan-50 border-cyan-200 text-cyan-700",
+    icon: "/images/apps/mysql.svg",
     defaultPort: 3306,
     versions: [
       { id: "8.0", name: "8.0 LTS", default: true },
@@ -56,14 +40,7 @@ const DATABASE_ENGINES = [
   {
     id: "MARIADB",
     name: "MariaDB",
-    icon: SiMariadb,
-    color: "text-amber-400 dark:text-amber-400",
-    colorDark: "text-amber-400",
-    colorLight: "text-amber-700",
-    boxDark: "bg-amber-500/10 border-amber-500/30 text-amber-400 shadow-sm shadow-amber-500/10",
-    boxLight: "bg-amber-50 border-amber-200 text-amber-700 shadow-2xs",
-    badgeDark: "bg-amber-500/15 border-amber-500/30 text-amber-300",
-    badgeLight: "bg-amber-50 border-amber-200 text-amber-700",
+    icon: "/images/apps/mariadb.svg",
     defaultPort: 3306,
     versions: [
       { id: "10.11", name: "10.11 LTS", default: true },
@@ -74,14 +51,7 @@ const DATABASE_ENGINES = [
   {
     id: "MONGODB",
     name: "MongoDB",
-    icon: SiMongodb,
-    color: "text-emerald-400 dark:text-emerald-400",
-    colorDark: "text-emerald-400",
-    colorLight: "text-emerald-700",
-    boxDark: "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-sm shadow-emerald-500/10",
-    boxLight: "bg-emerald-50 border-emerald-200 text-emerald-700 shadow-2xs",
-    badgeDark: "bg-emerald-500/15 border-emerald-500/30 text-emerald-300",
-    badgeLight: "bg-emerald-50 border-emerald-200 text-emerald-700",
+    icon: "/images/apps/mongodb.svg",
     defaultPort: 27017,
     versions: [
       { id: "7.0", name: "7.0 (Current)", default: true },
@@ -92,14 +62,7 @@ const DATABASE_ENGINES = [
   {
     id: "REDIS",
     name: "Redis",
-    icon: SiRedis,
-    color: "text-red-400 dark:text-red-400",
-    colorDark: "text-red-400",
-    colorLight: "text-red-700",
-    boxDark: "bg-red-500/10 border-red-500/30 text-red-400 shadow-sm shadow-red-500/10",
-    boxLight: "bg-red-50 border-red-200 text-red-700 shadow-2xs",
-    badgeDark: "bg-red-500/15 border-red-500/30 text-red-300",
-    badgeLight: "bg-red-50 border-red-200 text-red-700",
+    icon: "/images/apps/redis.svg",
     defaultPort: 6379,
     versions: [
       { id: "7.2", name: "7.2 LTS", default: true },
@@ -572,9 +535,8 @@ export default function DatabaseCheckoutFlow() {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-4">
                   {DATABASE_ENGINES.map((engine) => {
-                    const EngineIcon = engine.icon;
                     const isSelected = selectedEngine === engine.id;
                     return (
                       <button
@@ -592,15 +554,19 @@ export default function DatabaseCheckoutFlow() {
                       >
                         <div className={cn(
                           "w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 transition-transform group-hover:scale-105",
-                          isDark ? engine.boxDark : engine.boxLight
+                          isSelected
+                            ? "border-cyan-500/30 bg-cyan-500/15"
+                            : isDark
+                              ? "border-white/[0.08] bg-white/[0.04]"
+                              : "border-slate-200 bg-slate-50"
                         )}>
-                          <EngineIcon className={cn("w-5 h-5", isDark ? engine.colorDark : engine.colorLight)} />
+                          <img src={engine.icon} alt={engine.name} className="w-6 h-6 object-contain pointer-events-none select-none" />
                         </div>
                         <div className="min-w-0">
                           <span className={cn("text-sm font-bold block truncate", isDark ? "text-white" : "text-slate-900")}>
                             {engine.name}
                           </span>
-                          <span className={cn("text-[11px] block truncate", isDark ? "text-zinc-500" : "text-slate-400")}>
+                          <span className="text-[11px] block truncate text-cyan-500 dark:text-cyan-400 font-semibold mt-0.5">
                             {engine.webPanel}
                           </span>
                         </div>
@@ -660,7 +626,6 @@ export default function DatabaseCheckoutFlow() {
                     <tbody className="divide-y divide-white/[0.04]">
                       {DEDICATED_FLAVORS.map((flavor) => {
                         const isSelected = selectedFlavorId === flavor.id;
-                        const EngineIcon = activeEngineMeta.icon;
                         const flavorRamMb = flavor.ram.includes("8 GB") ? 8192 : flavor.ram.includes("4 GB") ? 4096 : flavor.ram.includes("2 GB") ? 2048 : 1024;
                         const isFlavorFull = isClusterFull || Boolean(
                           clusterCapacity &&
@@ -697,7 +662,7 @@ export default function DatabaseCheckoutFlow() {
                             </td>
                             <td className="py-3 px-3">
                               <div className="flex items-center gap-2">
-                                <EngineIcon className={cn("w-4 h-4", activeEngineMeta.color)} />
+                                <img src={activeEngineMeta.icon} alt={activeEngineMeta.name} className="w-4 h-4 object-contain" />
                                 <span className="font-bold">{activeEngineMeta.name}</span>
                               </div>
                             </td>
@@ -823,9 +788,8 @@ export default function DatabaseCheckoutFlow() {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-4">
                   {DATABASE_ENGINES.map((engine) => {
-                    const EngineIcon = engine.icon;
                     const isSelected = selectedSharedEngine === engine.id;
                     return (
                       <button
@@ -843,15 +807,19 @@ export default function DatabaseCheckoutFlow() {
                       >
                         <div className={cn(
                           "w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 transition-transform group-hover:scale-105",
-                          isDark ? engine.boxDark : engine.boxLight
+                          isSelected
+                            ? "border-cyan-500/30 bg-cyan-500/15"
+                            : isDark
+                              ? "border-white/[0.08] bg-white/[0.04]"
+                              : "border-slate-200 bg-slate-50"
                         )}>
-                          <EngineIcon className={cn("w-5 h-5", isDark ? engine.colorDark : engine.colorLight)} />
+                          <img src={engine.icon} alt={engine.name} className="w-6 h-6 object-contain pointer-events-none select-none" />
                         </div>
                         <div className="min-w-0">
                           <span className={cn("text-sm font-bold block truncate", isDark ? "text-white" : "text-slate-900")}>
                             {engine.name}
                           </span>
-                          <span className={cn("text-[11px] block truncate", isDark ? "text-zinc-500" : "text-slate-400")}>
+                          <span className="text-[11px] block truncate text-cyan-500 dark:text-cyan-400 font-semibold mt-0.5">
                             {engine.webPanel}
                           </span>
                         </div>
@@ -1054,7 +1022,7 @@ export default function DatabaseCheckoutFlow() {
                     Engine & Version
                   </div>
                   <div className={cn("flex items-center gap-2 font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>
-                    <activeEngineMeta.icon className={cn("w-4 h-4", activeEngineMeta.color)} />
+                    <img src={activeEngineMeta.icon} alt={activeEngineMeta.name} className="w-4 h-4 object-contain" />
                     <span>{activeEngineMeta.name} {selectedVersion}</span>
                   </div>
                 </div>
@@ -1121,7 +1089,7 @@ export default function DatabaseCheckoutFlow() {
                     Engine & Version
                   </div>
                   <div className={cn("flex items-center gap-2 font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>
-                    <activeSharedEngineMeta.icon className={cn("w-4 h-4", activeSharedEngineMeta.color)} />
+                    <img src={activeSharedEngineMeta.icon} alt={activeSharedEngineMeta.name} className="w-4 h-4 object-contain" />
                     <span>{activeSharedEngineMeta.name} {activeSharedType.name}</span>
                   </div>
                 </div>
@@ -1250,11 +1218,11 @@ export default function DatabaseCheckoutFlow() {
             <div className="relative mx-auto w-20 h-20 flex items-center justify-center">
               <div className="absolute inset-0 rounded-2xl bg-cyan-400/20 animate-ping opacity-30" />
               <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-cyan-500/20 to-cyan-400/10 border border-cyan-400/40 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-                {selectedTier === "DEDICATED" ? (
-                  <activeEngineMeta.icon className={cn("w-10 h-10 animate-pulse", activeEngineMeta.color)} />
-                ) : (
-                  <activeSharedEngineMeta.icon className={cn("w-10 h-10 animate-pulse", activeSharedEngineMeta.color)} />
-                )}
+                <img 
+                  src={selectedTier === "DEDICATED" ? activeEngineMeta.icon : activeSharedEngineMeta.icon} 
+                  alt="Engine" 
+                  className="w-10 h-10 object-contain animate-pulse select-none pointer-events-none" 
+                />
               </div>
             </div>
 

@@ -11,7 +11,6 @@ import {
   Copy, Check, Activity, ShieldCheck, HardDrive, Cpu, Layers,
   AlertTriangle, ArrowRight, Play, Square, RotateCw, Trash2, Search, Settings, ShieldAlert
 } from "lucide-react";
-import { SiMysql, SiPostgresql, SiMariadb, SiMongodb } from "react-icons/si";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 interface AdminDatabaseItem {
@@ -121,67 +120,80 @@ export default function AdminDatabasePage() {
       case "MYSQL":
         return {
           name: "MySQL",
-          icon: SiMysql,
+          icon: "/images/apps/mysql.svg",
           color: "text-cyan-400 dark:text-cyan-400",
           colorDark: "text-cyan-400",
           colorLight: "text-cyan-700",
-          boxDark: "bg-cyan-500/10 border-cyan-500/30 text-cyan-400 shadow-sm shadow-cyan-500/10",
-          boxLight: "bg-cyan-50 border-cyan-200 text-cyan-700 shadow-2xs",
-          badgeBg: "bg-cyan-500/15 border-cyan-500/30 text-cyan-300 dark:bg-cyan-500/15 dark:border-cyan-500/30 dark:text-cyan-300",
+          boxDark: "bg-cyan-500/10 border-cyan-500/25 shadow-sm shadow-cyan-500/10",
+          boxLight: "bg-cyan-50 border-cyan-200 shadow-2xs",
+          badgeBg: "bg-cyan-500/15 border-cyan-500/30 text-cyan-300",
           badgeDark: "bg-cyan-500/15 border-cyan-500/30 text-cyan-300",
           badgeLight: "bg-cyan-50 border-cyan-200 text-cyan-700",
         };
       case "MARIADB":
         return {
           name: "MariaDB",
-          icon: SiMariadb,
-          color: "text-amber-400 dark:text-amber-400",
-          colorDark: "text-amber-400",
-          colorLight: "text-amber-700",
-          boxDark: "bg-amber-500/10 border-amber-500/30 text-amber-400 shadow-sm shadow-amber-500/10",
-          boxLight: "bg-amber-50 border-amber-200 text-amber-700 shadow-2xs",
-          badgeBg: "bg-amber-500/15 border-amber-500/30 text-amber-300 dark:bg-amber-500/15 dark:border-amber-500/30 dark:text-amber-300",
-          badgeDark: "bg-amber-500/15 border-amber-500/30 text-amber-300",
-          badgeLight: "bg-amber-50 border-amber-200 text-amber-700",
+          icon: "/images/apps/mariadb.svg",
+          color: "text-cyan-400 dark:text-cyan-400",
+          colorDark: "text-cyan-400",
+          colorLight: "text-cyan-700",
+          boxDark: "bg-cyan-500/10 border-cyan-500/25 shadow-sm shadow-cyan-500/10",
+          boxLight: "bg-cyan-50 border-cyan-200 shadow-2xs",
+          badgeBg: "bg-cyan-500/15 border-cyan-500/30 text-cyan-300",
+          badgeDark: "bg-cyan-500/15 border-cyan-500/30 text-cyan-300",
+          badgeLight: "bg-cyan-50 border-cyan-200 text-cyan-700",
         };
       case "POSTGRES":
       case "POSTGRESQL":
         return {
           name: "PostgreSQL",
-          icon: SiPostgresql,
-          color: "text-sky-400 dark:text-sky-400",
-          colorDark: "text-sky-400",
-          colorLight: "text-sky-700",
-          boxDark: "bg-sky-500/10 border-sky-500/30 text-sky-400 shadow-sm shadow-sky-500/10",
-          boxLight: "bg-sky-50 border-sky-200 text-sky-700 shadow-2xs",
-          badgeBg: "bg-sky-500/15 border-sky-500/30 text-sky-300 dark:bg-sky-500/15 dark:border-sky-500/30 dark:text-sky-300",
-          badgeDark: "bg-sky-500/15 border-sky-500/30 text-sky-300",
-          badgeLight: "bg-sky-50 border-sky-200 text-sky-700",
+          icon: "/images/apps/postgresql.svg",
+          color: "text-cyan-400 dark:text-cyan-400",
+          colorDark: "text-cyan-400",
+          colorLight: "text-cyan-700",
+          boxDark: "bg-cyan-500/10 border-cyan-500/25 shadow-sm shadow-cyan-500/10",
+          boxLight: "bg-cyan-50 border-cyan-200 shadow-2xs",
+          badgeBg: "bg-cyan-500/15 border-cyan-500/30 text-cyan-300",
+          badgeDark: "bg-cyan-500/15 border-cyan-500/30 text-cyan-300",
+          badgeLight: "bg-cyan-50 border-cyan-200 text-cyan-700",
         };
       case "MONGODB":
       case "MONGO":
         return {
           name: "MongoDB",
-          icon: SiMongodb,
-          color: "text-emerald-400 dark:text-emerald-400",
-          colorDark: "text-emerald-400",
-          colorLight: "text-emerald-700",
-          boxDark: "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-sm shadow-emerald-500/10",
-          boxLight: "bg-emerald-50 border-emerald-200 text-emerald-700 shadow-2xs",
-          badgeBg: "bg-emerald-500/15 border-emerald-500/30 text-emerald-300 dark:bg-emerald-500/15 dark:border-emerald-500/30 dark:text-emerald-300",
-          badgeDark: "bg-emerald-500/15 border-emerald-500/30 text-emerald-300",
-          badgeLight: "bg-emerald-50 border-emerald-200 text-emerald-700",
+          icon: "/images/apps/mongodb.svg",
+          color: "text-cyan-400 dark:text-cyan-400",
+          colorDark: "text-cyan-400",
+          colorLight: "text-cyan-700",
+          boxDark: "bg-cyan-500/10 border-cyan-500/25 shadow-sm shadow-cyan-500/10",
+          boxLight: "bg-cyan-50 border-cyan-200 shadow-2xs",
+          badgeBg: "bg-cyan-500/15 border-cyan-500/30 text-cyan-300",
+          badgeDark: "bg-cyan-500/15 border-cyan-500/30 text-cyan-300",
+          badgeLight: "bg-cyan-50 border-cyan-200 text-cyan-700",
+        };
+      case "REDIS":
+        return {
+          name: "Redis",
+          icon: "/images/apps/redis.svg",
+          color: "text-cyan-400 dark:text-cyan-400",
+          colorDark: "text-cyan-400",
+          colorLight: "text-cyan-700",
+          boxDark: "bg-cyan-500/10 border-cyan-500/25 shadow-sm shadow-cyan-500/10",
+          boxLight: "bg-cyan-50 border-cyan-200 shadow-2xs",
+          badgeBg: "bg-cyan-500/15 border-cyan-500/30 text-cyan-300",
+          badgeDark: "bg-cyan-500/15 border-cyan-500/30 text-cyan-300",
+          badgeLight: "bg-cyan-50 border-cyan-200 text-cyan-700",
         };
       default:
         return {
           name: type,
-          icon: Database,
+          icon: "/images/apps/postgresql.svg",
           color: "text-cyan-400 dark:text-cyan-400",
           colorDark: "text-cyan-400",
           colorLight: "text-cyan-700",
-          boxDark: "bg-cyan-500/10 border-cyan-500/30 text-cyan-400 shadow-sm shadow-cyan-500/10",
-          boxLight: "bg-cyan-50 border-cyan-200 text-cyan-700 shadow-2xs",
-          badgeBg: "bg-cyan-500/15 border-cyan-500/30 text-cyan-300 dark:bg-cyan-500/15 dark:border-cyan-500/30 dark:text-cyan-300",
+          boxDark: "bg-cyan-500/10 border-cyan-500/25 shadow-sm shadow-cyan-500/10",
+          boxLight: "bg-cyan-50 border-cyan-200 shadow-2xs",
+          badgeBg: "bg-cyan-500/15 border-cyan-500/30 text-cyan-300",
           badgeDark: "bg-cyan-500/15 border-cyan-500/30 text-cyan-300",
           badgeLight: "bg-cyan-50 border-cyan-200 text-cyan-700",
         };
@@ -451,7 +463,6 @@ export default function AdminDatabasePage() {
               ) : (
                 filteredDatabases.map((db) => {
                   const engine = getEngineMeta(db.type);
-                  const EngineIcon = engine.icon;
                   const endpoint = `${db.host}:${db.port}`;
 
                   return (
@@ -466,7 +477,7 @@ export default function AdminDatabasePage() {
                             "w-9 h-9 rounded-xl border flex items-center justify-center shrink-0 shadow-2xs",
                             isDark ? engine.boxDark : engine.boxLight
                           )}>
-                            <EngineIcon className={cn("w-5 h-5", isDark ? engine.colorDark : engine.colorLight)} />
+                            <img src={engine.icon} alt={engine.name} className="w-5 h-5 object-contain pointer-events-none select-none" />
                           </div>
                           <div>
                             <span className={cn("font-extrabold text-sm block", isDark ? "text-white" : "text-slate-900")}>
