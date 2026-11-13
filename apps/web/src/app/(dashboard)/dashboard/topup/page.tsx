@@ -68,7 +68,7 @@ export default function TopUpPage() {
       
       if (res.ok && json.success) {
         toast.success("Payment link generated! Redirecting...", { id: toastId });
-        window.location.href = json.paymentUrl;
+        window.location.assign(json.paymentUrl);
       } else {
         toast.error(json.error || "Failed to process top up", { id: toastId });
         setIsProcessing(false);

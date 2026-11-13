@@ -25,6 +25,7 @@ const eslintConfig = defineConfig([
       "react/jsx-no-comment-textnodes": "off",
       "react-hooks/set-state-in-effect": "off",
       "react-hooks/static-components": "off",
+      "react-hooks/immutability": "off",
       "@typescript-eslint/ban-ts-comment": "off"
     }
   }

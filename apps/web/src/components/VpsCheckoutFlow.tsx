@@ -874,7 +874,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
       const data = await res.json();
       if (res.ok && data.paymentUrl) {
         toast.success("Order created! Redirecting to payment...");
-        window.location.href = data.paymentUrl;
+        window.location.assign(data.paymentUrl);
       } else if (res.ok && data.success) {
         toast.success("Server deployment started!");
         if (is1ClickApp) {

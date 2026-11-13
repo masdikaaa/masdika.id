@@ -336,7 +336,7 @@ function CheckoutContent() {
       if (res.ok && data.success) {
         if (data.paymentUrl) {
           toast.success("Transaction created! Redirecting...", { id: toastId });
-          window.location.href = data.paymentUrl;
+          window.location.assign(data.paymentUrl);
         } else {
           toast.success("Service Activated Successfully!", { id: toastId });
           router.push("/dashboard/billing");

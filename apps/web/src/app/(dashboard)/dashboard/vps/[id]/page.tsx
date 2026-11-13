@@ -906,7 +906,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
       const data = await res.json();
       if (res.ok) {
         if (data.paymentUrl) {
-          window.location.href = data.paymentUrl;
+          window.location.assign(data.paymentUrl);
           return;
         }
         toast.success("Specs upgraded successfully! Please reboot your VPS from the panel for changes to take effect.");
