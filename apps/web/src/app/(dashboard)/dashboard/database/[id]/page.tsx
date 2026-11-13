@@ -378,6 +378,18 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                 {engine.name} {db.version}
               </span>
               <span className={cn(
+                "text-[10px] font-bold px-2 py-0.5 rounded-md border",
+                isDedicated
+                  ? isDark
+                    ? "bg-cyan-500/15 text-cyan-300 border-cyan-500/30"
+                    : "bg-cyan-50 text-cyan-700 border-cyan-200"
+                  : isDark
+                    ? "bg-white/[0.04] text-zinc-300 border-white/[0.08]"
+                    : "bg-slate-100 text-slate-600 border-slate-200"
+              )}>
+                {isDedicated ? "Dedicated" : "Shared"}
+              </span>
+              <span className={cn(
                 "px-2.5 py-0.5 rounded-full text-[11px] font-bold border flex items-center gap-1.5",
                 db.status === "RUNNING"
                   ? (isDark ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200")
@@ -394,7 +406,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
               </span>
             </div>
             <p className={cn("text-xs sm:text-sm font-medium mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
-              Endpoint: <span className="font-mono text-cyan-400">{db.host}:{db.port}</span> • Region: {db.region} • PAYG: {formatRupiah(db.hourlyRate || 28)}/hr
+              Endpoint: <span className="font-mono text-cyan-400">{db.host}:{db.port}</span> • Region: {db.region} • PAYG: {formatRupiah(db.hourlyRate || 14)}/hr
             </p>
           </div>
         </div>
@@ -1186,7 +1198,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
               <div className="flex items-center justify-between text-xs">
                 <span className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Tier Architecture</span>
                 <span className="font-bold text-cyan-400">
-                  {db.planName || (db.cpuShares >= 2.0 ? "Dedicated Database" : "Shared Database")}
+                  {db.planName || (isDedicated ? "Dedicated Database" : "Shared Database")}
                 </span>
               </div>
 
@@ -1203,7 +1215,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
               <div className="flex items-center justify-between text-xs">
                 <span className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Hourly Burn</span>
                 <span className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                  {formatRupiah(db.hourlyRate || 28)}/hr
+                  {formatRupiah(db.hourlyRate || 14)}/hr
                 </span>
               </div>
             </div>

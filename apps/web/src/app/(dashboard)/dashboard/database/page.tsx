@@ -424,7 +424,7 @@ export default function DatabaseListingPage() {
             No Managed Databases Provisioned
           </h2>
           <p className={cn("text-xs sm:text-sm max-w-md mx-auto mb-6 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
-            Deploy isolated MySQL, MariaDB, PostgreSQL or MongoDB containers with persistent SSD storage, automated PAYG billing at Rp 20.000 / month, and web admin panels.
+            Deploy isolated MySQL, MariaDB, PostgreSQL or MongoDB containers with persistent SSD storage, automated PAYG billing starting from Rp 10.000 / month, and web admin panels.
           </p>
           <Link
             href="/dashboard/database/new"
@@ -444,6 +444,11 @@ export default function DatabaseListingPage() {
             const isProvisioning = db.status === "PROVISIONING";
             const isSuspended = db.status === "SUSPENDED";
             const fullEndpoint = `${db.host}:${db.port}`;
+            const isShared = Boolean(
+              db.planName?.toLowerCase().includes("shared") ||
+              ((db.cpuShares ?? 0) < 1.0 && !db.planName?.toLowerCase().includes("dedicated"))
+            );
+            const isDedicated = !isShared;
 
             return (
               <motion.div
@@ -477,8 +482,17 @@ export default function DatabaseListingPage() {
                           <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-md border", engine.badgeBg)}>
                             {engine.name} {db.version}
                           </span>
-                          <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-md border", db.cpuShares >= 2.0 ? "bg-cyan-500/15 text-cyan-300 border-cyan-500/30" : "bg-white/[0.04] text-zinc-300 border-white/[0.08]")}>
-                            {db.cpuShares >= 2.0 ? "Dedicated" : "Shared"}
+                          <span className={cn(
+                            "text-[10px] font-bold px-2 py-0.5 rounded-md border",
+                            isDedicated
+                              ? isDark
+                                ? "bg-cyan-500/15 text-cyan-300 border-cyan-500/30"
+                                : "bg-cyan-50 text-cyan-700 border-cyan-200"
+                              : isDark
+                                ? "bg-white/[0.04] text-zinc-300 border-white/[0.08]"
+                                : "bg-slate-100 text-slate-600 border-slate-200"
+                          )}>
+                            {isDedicated ? "Dedicated" : "Shared"}
                           </span>
                         </div>
                         <h3 className={cn("text-base font-bold tracking-tight mt-1 truncate max-w-[170px]", isDark ? "text-white" : "text-slate-900")}>
@@ -577,10 +591,10 @@ export default function DatabaseListingPage() {
                     </span>
                     <div className="text-right">
                       <span className={cn("font-black", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                        {formatRupiah(db.monthlyPrice || 20000)}
+                        {formatRupiah(db.monthlyPrice || 10000)}
                       </span>
                       <span className={cn("text-[10px] ml-1", isDark ? "text-zinc-500" : "text-slate-500")}>
-                        /mo (~Rp {db.hourlyRate || 28}/hr)
+                        /mo (~Rp {db.hourlyRate || 14}/hr)
                       </span>
                     </div>
                   </div>
