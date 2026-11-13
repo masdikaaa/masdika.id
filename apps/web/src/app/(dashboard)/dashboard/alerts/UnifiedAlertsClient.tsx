@@ -108,7 +108,7 @@ export default function UnifiedAlertsClient({ vpsList, k3sClusters }: UnifiedAle
             </span>
           </div>
           <p className={cn("text-xs sm:text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-            Centralized monitoring and alerts configuration for your active Cloud VPS and Managed K3s clusters.
+            Centralized monitoring and alerts configuration for your active Cloud VPS and Managed Kubernetes clusters.
           </p>
         </div>
 
@@ -133,14 +133,14 @@ export default function UnifiedAlertsClient({ vpsList, k3sClusters }: UnifiedAle
           </div>
           <h3 className={cn("text-lg sm:text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No Active Resources Found</h3>
           <p className={cn("text-xs sm:text-sm max-w-md mx-auto mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>
-            You don't have any active Cloud VPS or K3s clusters running. Deploy a service to start monitoring and configuring alerts.
+            You don't have any active Cloud VPS or Kubernetes clusters running. Deploy a service to start monitoring and configuring alerts.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Link href="/dashboard/checkout?service=vps" className="px-3.5 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-xs sm:text-xs transition-all shadow-sm inline-flex items-center gap-2">
               Deploy VPS
             </Link>
             <Link href="/dashboard/k3s" className={cn("px-3.5 py-2 rounded-xl border font-medium text-xs sm:text-xs transition-all inline-flex items-center gap-2", isDark ? "bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.06] text-white" : "bg-slate-50/80 border-slate-200/90 hover:bg-slate-100 text-slate-700")}>
-              Deploy K3s
+              Deploy Kubernetes Cluster
             </Link>
           </div>
         </div>
@@ -190,7 +190,7 @@ export default function UnifiedAlertsClient({ vpsList, k3sClusters }: UnifiedAle
                           {item.type === 'k3s' ? (
                             <>
                               <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 shrink-0"></span>
-                              <span className={cn("font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>Managed K3s</span>
+                              <span className={cn("font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>Managed Kubernetes</span>
                             </>
                           ) : (
                             <>

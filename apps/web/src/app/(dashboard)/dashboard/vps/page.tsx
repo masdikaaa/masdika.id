@@ -1190,7 +1190,7 @@ export default function MyVpsPage() {
                               )}
                             >
                               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
-                              {vps.kubernetesRole ? "K3s Node" : "Cloud VPS"}
+                              {vps.kubernetesRole ? "Kubernetes Node" : "Cloud VPS"}
                             </span>
                             <span
                               className={cn(

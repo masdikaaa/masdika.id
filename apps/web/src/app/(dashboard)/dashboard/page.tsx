@@ -564,7 +564,7 @@ export default function DashboardOverview() {
                     isDark ? "text-zinc-400 group-hover:text-zinc-200" : "text-slate-600 group-hover:text-slate-900"
                   )}
                 >
-                  Managed K3s
+                  Managed Kubernetes
                 </span>
               </div>
               <ArrowUpRight
@@ -1309,7 +1309,7 @@ export default function DashboardOverview() {
                   Managed Kubernetes Clusters
                 </h2>
                 <p className={cn("text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>
-                  Your K3s control planes and worker node pools.
+                  Your Kubernetes control planes and worker node pools.
                 </p>
               </div>
             </div>

@@ -185,7 +185,7 @@ export default function ReservedIpsPage() {
             </span>
           </div>
           <p className={cn("text-xs sm:text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-            Reserve static IPv4 and IPv6 addresses to use with your Cloud VPS or Managed K3s deployments.
+            Reserve static IPv4 and IPv6 addresses to use with your Cloud VPS or Managed Kubernetes deployments.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">

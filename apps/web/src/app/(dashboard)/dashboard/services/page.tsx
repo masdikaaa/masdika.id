@@ -397,7 +397,7 @@ export default function MyServicesPage() {
                         <div className="min-w-0">
                           <h3 className={cn("text-base sm:text-lg font-bold group-hover:text-cyan-400 transition-colors leading-tight mb-1 truncate", isDark ? "text-white" : "text-slate-900")}>{k3s.name}</h3>
                           <p className={cn("text-[10px] font-black uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-400")}>
-                            MANAGED K3S CLUSTER
+                            MANAGED KUBERNETES CLUSTER
                           </p>
                         </div>
                       </div>
