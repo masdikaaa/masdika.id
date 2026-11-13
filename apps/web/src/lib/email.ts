@@ -254,7 +254,7 @@ export const sendVpsSuspendedGracePeriodEmail = async ({
   const decEmail = decryptDeterministic(email) || email;
   const decName = decryptDeterministic(userName) || userName;
 
-  const deadlineStr = terminationDate.toLocaleString('id-ID', {
+  const deadlineStr = terminationDate.toLocaleString('en-US', {
     timeZone: 'Asia/Jakarta',
     weekday: 'long',
     year: 'numeric',
@@ -265,82 +265,82 @@ export const sendVpsSuspendedGracePeriodEmail = async ({
   }) + ' WIB';
 
   const formattedRate = hourlyRate && hourlyRate > 0
-    ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(hourlyRate) + '/jam'
+    ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(hourlyRate) + '/hr'
     : null;
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://masdika.id';
 
   const vpcNotice = vpcName
-    ? `<li style="margin-bottom: 8px;"><strong>Jaringan VPC (${vpcName}):</strong> Jaringan VPC privat Anda akan tetap diamankan selama masa tenggang. Namun jika masa tenggang 3 hari berakhir tanpa top up dan VPS ini dihapus, VPC juga akan <strong>otomatis dihapus</strong> oleh sistem demi efisiensi resource.</li>`
-    : `<li style="margin-bottom: 8px;"><strong>Jaringan VPC Terkait:</strong> Jika server ini terhubung ke VPC privat dan tidak ada server aktif lain di dalamnya, VPC juga akan <strong>otomatis dihapus</strong> setelah VPS dihapus.</li>`;
+    ? `<li style="margin-bottom: 8px;"><strong>Private VPC Network (${vpcName}):</strong> Your private VPC network will remain secured during the grace period. However, if the 3-day grace period expires without top up and this VPS is deleted, the VPC will also be <strong>automatically deleted</strong> to free resources.</li>`
+    : `<li style="margin-bottom: 8px;"><strong>Associated VPC Network:</strong> If this server is connected to a private VPC and no other active servers remain, the VPC will also be <strong>automatically deleted</strong> upon VPS termination.</li>`;
 
   const content = `
     <div style="margin-bottom: 20px;">
       <span style="display: inline-block; background-color: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 700; text-transform: uppercase;">
-        ⚠️ Pemberitahuan Penangguhan (Suspended)
+        Suspension Notice (Suspended)
       </span>
     </div>
 
-    <h2 style="color: #ef4444; margin-top: 0; margin-bottom: 16px; font-size: 22px;">Layanan VPS Di-Suspend: Saldo Tidak Mencukupi</h2>
+    <h2 style="color: #ef4444; margin-top: 0; margin-bottom: 16px; font-size: 22px;">VPS Service Suspended: Insufficient Balance</h2>
     
     <p style="color: #e2e8f0; font-size: 15px; line-height: 1.6;">
-      Halo <strong>${decName}</strong>,
+      Hello <strong>${decName}</strong>,
     </p>
 
     <p style="color: #cbd5e1; font-size: 14px; line-height: 1.6;">
-      Layanan Cloud VPS Anda dengan hostname <strong style="color: #38bdf8; font-family: monospace;">${vpsHostname}</strong> saat ini telah ditangguhkan (<strong>SUSPENDED</strong>) karena saldo akun Masdika Anda tidak mencukupi untuk pemotongan biaya berkala (${reason || 'Billing cycle failed due to insufficient balance'}).
+      Your Cloud VPS service with hostname <strong style="color: #38bdf8; font-family: monospace;">${vpsHostname}</strong> has been suspended (<strong>SUSPENDED</strong>) because your Masdika account balance is insufficient for recurring billing deductions (${reason || 'Billing cycle failed due to insufficient balance'}).
     </p>
 
     <div style="background-color: #030712; padding: 20px 24px; border-radius: 12px; margin: 25px 0; border: 1px solid #1e293b; border-left: 4px solid #f59e0b;">
-      <h3 style="color: #f59e0b; margin-top: 0; margin-bottom: 14px; font-size: 15px; font-weight: 700; text-transform: uppercase;">Masa Tenggang 3 Hari (Grace Period)</h3>
+      <h3 style="color: #f59e0b; margin-top: 0; margin-bottom: 14px; font-size: 15px; font-weight: 700; text-transform: uppercase;">3-Day Grace Period</h3>
       <table width="100%" cellpadding="0" cellspacing="0" style="color: #e2e8f0; font-size: 14px;">
         <tr>
-          <td style="padding: 6px 0; color: #94a3b8;" width="160">Hostname VPS:</td>
+          <td style="padding: 6px 0; color: #94a3b8;" width="160">VPS Hostname:</td>
           <td style="padding: 6px 0; color: #38bdf8; font-weight: 700; font-family: monospace;">${vpsHostname}</td>
         </tr>
         ${formattedRate ? `<tr>
-          <td style="padding: 6px 0; color: #94a3b8;">Tarif Layanan:</td>
+          <td style="padding: 6px 0; color: #94a3b8;">Service Rate:</td>
           <td style="padding: 6px 0; color: #e2e8f0; font-weight: 600;">${formattedRate}</td>
         </tr>` : ''}
         <tr>
-          <td style="padding: 6px 0; color: #94a3b8;">Status Saat Ini:</td>
+          <td style="padding: 6px 0; color: #94a3b8;">Current Status:</td>
           <td style="padding: 6px 0; color: #ef4444; font-weight: 700;">SUSPENDED (VM Stopped)</td>
         </tr>
         <tr>
-          <td style="padding: 8px 0; color: #f59e0b; font-weight: 700;">Batas Waktu Top Up:</td>
+          <td style="padding: 8px 0; color: #f59e0b; font-weight: 700;">Top Up Deadline:</td>
           <td style="padding: 8px 0; color: #f59e0b; font-weight: 800; font-size: 15px;">${deadlineStr}</td>
         </tr>
       </table>
     </div>
 
     <div style="background-color: #0c1a2e; border: 1px solid #1e3a8a; border-radius: 10px; padding: 18px 20px; margin: 25px 0;">
-      <h3 style="color: #38bdf8; margin-top: 0; margin-bottom: 10px; font-size: 15px;">💡 Auto-Unsuspend (Reaktivasi Otomatis)</h3>
+      <h3 style="color: #38bdf8; margin-top: 0; margin-bottom: 10px; font-size: 15px;">Auto-Unsuspend (Automatic Reactivation)</h3>
       <ul style="color: #cbd5e1; font-size: 13.5px; line-height: 1.6; margin: 0; padding-left: 20px;">
-        <li style="margin-bottom: 8px;"><strong>Data Server Aman:</strong> Seluruh konfigurasi, disk storage, dan IP server Anda tetap tersimpan utuh selama masa tenggang 3 hari ini. Server hanya dimatikan sementara agar tidak terus memotong saldo.</li>
-        <li style="margin-bottom: 8px;"><strong>Cukup Top Up Saldo:</strong> Begitu Anda melakukan top up saldo dan nominalnya mencukupi, sistem kami akan <strong>secara otomatis mengaktifkan kembali (unsuspend)</strong> dan menyalakan VM Anda tanpa tindakan manual.</li>
+        <li style="margin-bottom: 8px;"><strong>Server Data is Safe:</strong> All server configurations, disk storage, and IP addresses remain completely intact during this 3-day grace period. The server is only temporarily powered off to prevent ongoing charges.</li>
+        <li style="margin-bottom: 8px;"><strong>Simply Top Up:</strong> As soon as you top up your account balance with sufficient funds, our system will <strong>automatically unsuspend and boot up your VM</strong> with no manual intervention required.</li>
         ${vpcNotice}
       </ul>
     </div>
 
     <div style="background-color: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 10px; padding: 16px 20px; margin: 25px 0;">
       <p style="color: #f87171; margin: 0; font-size: 13px; line-height: 1.5;">
-        ⚠️ <strong>PENTING:</strong> Apabila akun tidak di-top up hingga batas waktu <strong>${deadlineStr}</strong> (3 hari), layanan VPS beserta seluruh file di dalamnya akan <strong>dihapus permanen (TERMINATED)</strong>. Jaringan VPC yang kosong juga akan dihapus. Data yang telah dihapus tidak dapat dipulihkan kembali.
+        <strong>IMPORTANT:</strong> If your account is not topped up before <strong>${deadlineStr}</strong> (3 days), the VPS service along with all stored data will be <strong>permanently terminated</strong>. Any empty VPC network will also be removed. Terminated data cannot be recovered.
       </p>
     </div>
 
     <div style="text-align: center; margin: 35px 0;">
-      <a href="${appUrl}/dashboard/billing/topup" style="background-color: #06b6d4; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 15px; display: inline-block;">Top Up Saldo Sekarang</a>
+      <a href="${appUrl}/dashboard/billing/topup" style="background-color: #06b6d4; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 15px; display: inline-block;">Top Up Balance Now</a>
     </div>
 
     <p style="color: #94a3b8; font-size: 13px; line-height: 1.5;">
-      Jika Anda membutuhkan bantuan atau perpanjangan waktu khusus, silakan hubungi tim dukungan kami melalui menu Tiket Bantuan di dashboard.
+      If you need assistance or special grace arrangements, please contact our support team via Support Tickets in your dashboard.
     </p>
   `;
 
   await getTransporter().sendMail({
     from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
     to: decEmail,
-    subject: `[PENTING] Layanan VPS ${vpsHostname} Ditangguhkan (Grace Period 3 Hari) - Masdika Cloud`,
+    subject: `[IMPORTANT] VPS Service ${vpsHostname} Suspended (3-Day Grace Period) - Masdika Cloud`,
     html: getBaseHtml(content),
   });
 };
@@ -367,7 +367,7 @@ export const sendDatabaseSuspendedGracePeriodEmail = async ({
   const decEmail = decryptDeterministic(email) || email;
   const decName = decryptDeterministic(userName) || userName;
 
-  const deadlineStr = terminationDate.toLocaleString('id-ID', {
+  const deadlineStr = terminationDate.toLocaleString('en-US', {
     timeZone: 'Asia/Jakarta',
     weekday: 'long',
     year: 'numeric',
@@ -378,7 +378,7 @@ export const sendDatabaseSuspendedGracePeriodEmail = async ({
   }) + ' WIB';
 
   const formattedRate = hourlyRate && hourlyRate > 0
-    ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(hourlyRate) + '/jam'
+    ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(hourlyRate) + '/hr'
     : null;
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://masdika.id';
@@ -386,71 +386,71 @@ export const sendDatabaseSuspendedGracePeriodEmail = async ({
   const content = `
     <div style="margin-bottom: 20px;">
       <span style="display: inline-block; background-color: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 700; text-transform: uppercase;">
-        ⚠️ Pemberitahuan Penangguhan (Suspended)
+        Suspension Notice (Suspended)
       </span>
     </div>
 
-    <h2 style="color: #ef4444; margin-top: 0; margin-bottom: 16px; font-size: 22px;">Layanan Managed Database Di-Suspend: Saldo Tidak Mencukupi</h2>
+    <h2 style="color: #ef4444; margin-top: 0; margin-bottom: 16px; font-size: 22px;">Managed Database Suspended: Insufficient Balance</h2>
     
     <p style="color: #e2e8f0; font-size: 15px; line-height: 1.6;">
-      Halo <strong>${decName}</strong>,
+      Hello <strong>${decName}</strong>,
     </p>
 
     <p style="color: #cbd5e1; font-size: 14px; line-height: 1.6;">
-      Layanan Managed Database Anda (<strong style="color: #38bdf8; font-family: monospace;">${dbName}</strong> - ${dbType}) saat ini telah ditangguhkan (<strong>SUSPENDED</strong>) karena saldo akun Masdika Anda tidak mencukupi untuk pemotongan biaya hourly Pay-As-You-Go (${reason || 'Billing failed due to insufficient balance'}).
+      Your Managed Database service (<strong style="color: #38bdf8; font-family: monospace;">${dbName}</strong> - ${dbType}) has been suspended (<strong>SUSPENDED</strong>) because your Masdika account balance is insufficient for hourly Pay-As-You-Go deductions (${reason || 'Billing failed due to insufficient balance'}).
     </p>
 
     <div style="background-color: #030712; padding: 20px 24px; border-radius: 12px; margin: 25px 0; border: 1px solid #1e293b; border-left: 4px solid #f59e0b;">
-      <h3 style="color: #f59e0b; margin-top: 0; margin-bottom: 14px; font-size: 15px; font-weight: 700; text-transform: uppercase;">Masa Tenggang 3 Hari (Grace Period)</h3>
+      <h3 style="color: #f59e0b; margin-top: 0; margin-bottom: 14px; font-size: 15px; font-weight: 700; text-transform: uppercase;">3-Day Grace Period</h3>
       <table width="100%" cellpadding="0" cellspacing="0" style="color: #e2e8f0; font-size: 14px;">
         <tr>
-          <td style="padding: 6px 0; color: #94a3b8;" width="160">Nama Database:</td>
+          <td style="padding: 6px 0; color: #94a3b8;" width="160">Database Name:</td>
           <td style="padding: 6px 0; color: #38bdf8; font-weight: 700; font-family: monospace;">${dbName} (${dbType})</td>
         </tr>
         ${formattedRate ? `
         <tr>
-          <td style="padding: 6px 0; color: #94a3b8;">Tarif Hourly (PAYG):</td>
+          <td style="padding: 6px 0; color: #94a3b8;">Hourly Rate (PAYG):</td>
           <td style="padding: 6px 0; color: #e2e8f0; font-weight: 600;">${formattedRate}</td>
         </tr>
         ` : ''}
         <tr>
-          <td style="padding: 6px 0; color: #94a3b8;">Status Layanan:</td>
-          <td style="padding: 6px 0; color: #ef4444; font-weight: 700;">SUSPENDED (Pod Dimatikan Sementara)</td>
+          <td style="padding: 6px 0; color: #94a3b8;">Service Status:</td>
+          <td style="padding: 6px 0; color: #ef4444; font-weight: 700;">SUSPENDED (Pod Paused)</td>
         </tr>
         <tr>
-          <td style="padding: 8px 0; color: #f59e0b; font-weight: 700;">Batas Waktu Top Up:</td>
+          <td style="padding: 8px 0; color: #f59e0b; font-weight: 700;">Top Up Deadline:</td>
           <td style="padding: 8px 0; color: #f59e0b; font-weight: 800; font-size: 15px;">${deadlineStr}</td>
         </tr>
       </table>
     </div>
 
     <div style="background-color: #0c1a2e; border: 1px solid #1e3a8a; border-radius: 10px; padding: 18px 20px; margin: 25px 0;">
-      <h3 style="color: #38bdf8; margin-top: 0; margin-bottom: 10px; font-size: 15px;">💡 Auto-Unsuspend (Reaktivasi Otomatis)</h3>
+      <h3 style="color: #38bdf8; margin-top: 0; margin-bottom: 10px; font-size: 15px;">Auto-Unsuspend (Automatic Reactivation)</h3>
       <ul style="color: #cbd5e1; font-size: 13.5px; line-height: 1.6; margin: 0; padding-left: 20px;">
-        <li style="margin-bottom: 8px;"><strong>Data Database Aman:</strong> Seluruh tabel, data, dan volume persistent SSD database Anda tetap tersimpan utuh selama masa tenggang 3 hari ini. Container pod hanya dimatikan sementara agar tidak terus memotong saldo.</li>
-        <li style="margin-bottom: 8px;"><strong>Cukup Top Up Saldo:</strong> Begitu Anda melakukan top up saldo dan nominalnya mencukupi, sistem kami akan <strong>secara otomatis mengaktifkan kembali (unsuspend)</strong> dan menyalakan pod database Anda tanpa tindakan manual.</li>
+        <li style="margin-bottom: 8px;"><strong>Database Data is Safe:</strong> All your tables, database records, and persistent SSD storage volumes remain completely intact during this 3-day grace period. The container pod is only temporarily paused to stop ongoing billing charges.</li>
+        <li style="margin-bottom: 8px;"><strong>Simply Top Up:</strong> As soon as you top up your account balance with sufficient funds, our system will <strong>automatically unsuspend and resume your database pod</strong> with no manual intervention required.</li>
       </ul>
     </div>
 
     <div style="background-color: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 10px; padding: 16px 20px; margin: 25px 0;">
       <p style="color: #f87171; margin: 0; font-size: 13px; line-height: 1.5;">
-        ⚠️ <strong>PENTING:</strong> Apabila akun tidak di-top up hingga batas waktu <strong>${deadlineStr}</strong> (3 hari), layanan Database beserta seluruh volume penyimpanan SSD dan data di dalamnya akan <strong>dihapus permanen (TERMINATED)</strong>. Data yang telah dihapus tidak dapat dipulihkan kembali.
+        <strong>IMPORTANT:</strong> If your account is not topped up before <strong>${deadlineStr}</strong> (3 days), the Database service along with all persistent SSD storage volumes and data will be <strong>permanently terminated</strong>. Terminated data cannot be recovered.
       </p>
     </div>
 
     <div style="text-align: center; margin: 35px 0;">
-      <a href="${appUrl}/dashboard/topup" style="background-color: #06b6d4; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 15px; display: inline-block;">Top Up Saldo Sekarang</a>
+      <a href="${appUrl}/dashboard/topup" style="background-color: #06b6d4; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 15px; display: inline-block;">Top Up Balance Now</a>
     </div>
 
     <p style="color: #94a3b8; font-size: 13px; line-height: 1.5;">
-      Jika Anda membutuhkan bantuan atau pertanyaan terkait layanan, silakan hubungi tim dukungan kami melalui menu Tiket Bantuan di dashboard.
+      If you need assistance or have questions regarding your service, please contact our support team via Support Tickets in your dashboard.
     </p>
   `;
 
   await getTransporter().sendMail({
     from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
     to: decEmail,
-    subject: `[PENTING] Layanan Database ${dbName} Ditangguhkan (Grace Period 3 Hari) - Masdika Cloud`,
+    subject: `[IMPORTANT] Database Service ${dbName} Suspended (3-Day Grace Period) - Masdika Cloud`,
     html: getBaseHtml(content),
   });
 };
@@ -503,24 +503,24 @@ export const sendDatabaseProvisionedEmail = async ({
   const content = `
     <div style="margin-bottom: 20px;">
       <span style="display: inline-block; background-color: rgba(6, 182, 212, 0.15); color: #06b6d4; border: 1px solid rgba(6, 182, 212, 0.3); padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 700; text-transform: uppercase;">
-        🚀 Managed Database Ready
+        Managed Database Ready
       </span>
     </div>
 
-    <h2 style="color: #06b6d4; margin-top: 0; margin-bottom: 16px; font-size: 22px;">Layanan Database Anda Telah Aktif!</h2>
+    <h2 style="color: #06b6d4; margin-top: 0; margin-bottom: 16px; font-size: 22px;">Your Database Service is Active!</h2>
     
     <p style="color: #e2e8f0; font-size: 15px; line-height: 1.6;">
-      Halo <strong>${decName}</strong>,
+      Hello <strong>${decName}</strong>,
     </p>
     
     <p style="color: #cbd5e1; font-size: 14px; line-height: 1.6;">
-      Layanan Managed Database Anda (<strong style="color: #38bdf8;">${instanceName}</strong>) berbasis <strong>${dbType} ${version}</strong> di klaster Kubernetes telah berhasil di-deploy dan siap menerima koneksi aplikasi.
+      Your Managed Database instance (<strong style="color: #38bdf8;">${instanceName}</strong>) running <strong>${dbType} ${version}</strong> on our Kubernetes cluster has been successfully provisioned and is ready to accept application connections.
     </p>
 
     <!-- Credential Box -->
     <div style="background-color: #030712; padding: 22px 24px; border-radius: 12px; margin: 25px 0; border: 1px solid #1e293b; border-left: 4px solid #06b6d4;">
       <h3 style="color: #38bdf8; margin-top: 0; margin-bottom: 16px; font-size: 16px; font-weight: 700;">
-        🔑 Kredensial Koneksi Database Langsung (Direct TCP)
+        Direct Database Connection Credentials (TCP)
       </h3>
       <table width="100%" cellpadding="0" cellspacing="0" style="color: #e2e8f0; font-family: 'JetBrains Mono', 'Plus Jakarta Sans', monospace; font-size: 13px;">
         <tr>
@@ -532,7 +532,7 @@ export const sendDatabaseProvisionedEmail = async ({
           <td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #38bdf8; font-weight: 700; text-align: right;">${port}</td>
         </tr>
         <tr>
-          <td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #94a3b8;">Nama Database:</td>
+          <td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #94a3b8;">Database Name:</td>
           <td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #ffffff; font-weight: 700; text-align: right;">${databaseName}</td>
         </tr>
         <tr>
@@ -550,7 +550,7 @@ export const sendDatabaseProvisionedEmail = async ({
         </tr>
         ` : ''}
         <tr>
-          <td style="padding: 8px 0; color: #94a3b8;">Paket & Storage:</td>
+          <td style="padding: 8px 0; color: #94a3b8;">Plan & Storage:</td>
           <td style="padding: 8px 0; color: #ffffff; font-weight: 600; text-align: right;">${planName} (${storageGb} GB SSD)</td>
         </tr>
       </table>
@@ -560,14 +560,14 @@ export const sendDatabaseProvisionedEmail = async ({
     <!-- Web GUI Box -->
     <div style="background-color: #082f49; padding: 20px 22px; border-radius: 12px; margin: 25px 0; border: 1px solid #0284c7; border-left: 4px solid #38bdf8;">
       <h3 style="color: #38bdf8; margin-top: 0; margin-bottom: 12px; font-size: 15px; font-weight: 700;">
-        🌐 Akses Web GUI (${webToolName})
+        Web GUI Access (${webToolName})
       </h3>
       <p style="margin: 0 0 12px 0; color: #e2e8f0; font-size: 13px; line-height: 1.5;">
-        Kelola database secara visual melalui browser tanpa perlu install software klien lokal:
+        Visually manage your database from your web browser without installing local client software:
       </p>
       <table width="100%" cellpadding="0" cellspacing="0" style="color: #e2e8f0; font-family: 'JetBrains Mono', monospace; font-size: 13px;">
         <tr>
-          <td style="padding: 6px 0; color: #94a3b8;" width="180">URL Web GUI:</td>
+          <td style="padding: 6px 0; color: #94a3b8;" width="180">Web GUI URL:</td>
           <td style="padding: 6px 0; text-align: right;"><a href="${webToolUrl}" target="_blank" style="color: #38bdf8; font-weight: 700; text-decoration: underline;">${webToolUrl}</a></td>
         </tr>
         <tr>
@@ -600,19 +600,19 @@ export const sendDatabaseProvisionedEmail = async ({
 
     <div style="text-align: center; margin: 35px 0;">
       <a href="${appUrl}/dashboard/database/${databaseId}" style="background-color: #06b6d4; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 15px; display: inline-block;">
-        Buka Panel Managed Database
+        Open Managed Database Panel
       </a>
     </div>
 
     <p style="color: #94a3b8; font-size: 12px; line-height: 1.5; border-top: 1px solid #1e293b; padding-top: 16px;">
-      🔒 <strong>Keamanan:</strong> Harap simpan kredensial ini di tempat yang aman. Anda dapat memantau penggunaan vCPU, memori RAM, SSD, melakukan import/export data dump, dan kontrol container kapan saja melalui dashboard Masdika Cloud.
+      <strong>Security:</strong> Please keep these credentials confidential. You can monitor vCPU, RAM, SSD usage, import/export data dumps, and perform container power actions anytime via the Masdika Cloud dashboard.
     </p>
   `;
 
   await getTransporter().sendMail({
     from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
     to: decEmail,
-    subject: `[Kredensial] Layanan Managed Database ${instanceName} Telah Siap - Masdika Cloud`,
+    subject: `[Credentials] Managed Database ${instanceName} is Ready - Masdika Cloud`,
     html: getBaseHtml(content),
   });
 };
