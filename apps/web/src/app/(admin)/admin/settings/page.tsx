@@ -11,8 +11,8 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 const inputClassDark = 'w-full bg-[#0a0a0c] border border-white/[0.08] rounded-xl px-3.5 py-2 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-500 transition-all';
 const inputClassLight = 'w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-cyan-500 transition-all';
-const labelClassDark = 'block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2';
-const labelClassLight = 'block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2';
+const labelClassDark = 'block text-[11px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5 sm:mb-2';
+const labelClassLight = 'block text-[11px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 sm:mb-2';
 
 export default function SettingsPage() {
   const { theme } = useTheme();
@@ -725,26 +725,36 @@ export default function SettingsPage() {
         </div>
       </motion.div>
 
-      <div className="flex flex-col md:flex-row gap-6 md:gap-8">
+      <div className="flex flex-col md:flex-row gap-5 md:gap-8">
         {/* Navigation Sidebar */}
-        <div className="w-full md:w-60 shrink-0 sticky top-0 md:top-4 z-20 min-w-0 py-2 -my-2 md:py-0 md:my-0 bg-[#f8fafb]/90 dark:bg-[#000000]/90 md:bg-transparent md:dark:bg-transparent backdrop-blur-md md:backdrop-blur-none transition-all">
-          <div className={cn("border rounded-2xl p-2 flex flex-row md:flex-col gap-1 overflow-x-auto md:overflow-visible", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
+        <div className="w-full md:w-60 lg:w-64 shrink-0 sticky top-0 md:top-4 z-20 min-w-0 py-2 -my-2 md:py-0 md:my-0 bg-[#f8fafb]/95 dark:bg-[#000000]/95 md:bg-transparent md:dark:bg-transparent backdrop-blur-md md:backdrop-blur-none transition-all">
+          <div className={cn("border rounded-2xl p-1.5 sm:p-2 flex flex-row md:flex-col gap-1.5 overflow-x-auto md:overflow-visible no-scrollbar", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={cn("relative flex items-center gap-3 px-4 py-4 rounded-xl transition-all text-left shrink-0 w-full border", isActive ? (isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-800 border-cyan-200") : (isDark ? "text-slate-400 hover:text-white hover:bg-slate-800/50 border-transparent" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50 border-transparent"))}
+                  className={cn(
+                    "relative flex items-center gap-2.5 px-3 py-2 sm:px-3.5 sm:py-2.5 md:px-4 md:py-3 rounded-xl transition-all text-left shrink-0 whitespace-nowrap md:whitespace-normal md:w-full border cursor-pointer",
+                    isActive
+                      ? (isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/25 shadow-xs" : "bg-cyan-50 text-cyan-800 border-cyan-200 shadow-2xs")
+                      : (isDark ? "text-slate-400 hover:text-white hover:bg-white/[0.04] border-transparent" : "text-slate-600 hover:text-slate-900 hover:bg-slate-50 border-transparent")
+                  )}
                 >
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${isActive ? 'bg-cyan-500/20 border border-cyan-500/30' : isDark ? "bg-white/5" : "bg-slate-100"}`}>
-                    <tab.icon className={cn("w-4 h-4", isActive ? (isDark ? "text-cyan-400" : "text-slate-900") : (isDark ? "text-zinc-500" : "text-slate-400"))} />
+                  <div className={cn(
+                    "w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 border transition-colors",
+                    isActive
+                      ? "bg-cyan-500/20 border-cyan-500/30 text-cyan-400"
+                      : (isDark ? "bg-white/5 border-white/[0.08] text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-500")
+                  )}>
+                    <tab.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
                   </div>
-                  <div className="hidden md:block">
-                    <div className={`text-sm font-bold leading-none ${isActive ? 'text-white' : 'text-zinc-300'}`}>{tab.label}</div>
-                    <div className={cn("text-[10px] mt-1", isDark ? "text-zinc-500" : "text-slate-500")}>{tab.desc}</div>
+                  <div className="hidden md:block min-w-0">
+                    <div className={cn("text-xs sm:text-sm font-bold leading-none truncate", isActive ? "text-white" : "text-zinc-300")}>{tab.label}</div>
+                    <div className={cn("text-[10px] mt-1 truncate", isDark ? "text-zinc-500" : "text-slate-500")}>{tab.desc}</div>
                   </div>
-                  <span className="md:hidden text-sm font-bold">{tab.label}</span>
+                  <span className="md:hidden text-xs sm:text-sm font-bold tracking-tight">{tab.label}</span>
                 </button>
               );
             })}
@@ -759,29 +769,26 @@ export default function SettingsPage() {
                 {/* Profile Section */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                  className={cn("rounded-2xl p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
                 >
-
-
-
-                  <div className="flex items-center gap-4 border-b border-cyan-500/10 pb-6 relative z-10">
-                    <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
-                      <User className="w-6 h-6" />
+                  <div className="flex items-start sm:items-center gap-3 sm:gap-4 border-b border-cyan-500/10 pb-4 sm:pb-6 relative z-10">
+                    <div className={cn("w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
+                      <User className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
-                    <div>
-                      <h2 className={cn("text-2xl font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>Profile Information</h2>
-                      <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Update your account details and profile photo.</p>
+                    <div className="min-w-0">
+                      <h2 className={cn("text-lg sm:text-xl md:text-2xl font-bold tracking-tight", isDark ? "text-cyan-400" : "text-cyan-700")}>Profile Information</h2>
+                      <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>Update your account details and profile photo.</p>
                     </div>
                   </div>
 
-                  <div className="flex flex-col md:flex-row gap-10 relative z-10">
+                  <div className="flex flex-col md:flex-row gap-6 md:gap-10 relative z-10">
                     <div className="flex flex-col items-center gap-4">
                       <div className="relative group/avatar">
                         <div className={cn("w-36 h-36 rounded-full border-4 border-black overflow-hidden flex items-center justify-center group-hover/-[0_0_0_4px_rgba(6,182,212,0.5)] transition-all", isDark ? "bg-zinc-900" : "bg-slate-50")}>
                           {profilePreview ? (
                             <img referrerPolicy="no-referrer" src={profilePreview} alt="Profile" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                           ) : (
-                            <span className={cn("text-2xl sm:text-xl sm:text-2xl font-bold", isDark ? "text-transparent bg-clip-text bg-gradient-to-br from-cyan-400 to-cyan-600" : "text-cyan-600")}>
+                            <span className={cn("text-2xl sm:text-3xl font-bold", isDark ? "text-transparent bg-clip-text bg-gradient-to-br from-cyan-400 to-cyan-600" : "text-cyan-600")}>
                               {formData.name ? formData.name.charAt(0).toUpperCase() : 'M'}
                             </span>
                           )}
@@ -846,15 +853,15 @@ export default function SettingsPage() {
                 {/* Contact Information Section */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.14 }}
-                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                  className={cn("rounded-2xl p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
                 >
-                  <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-white/[0.08]" : "border-slate-200")}>
-                    <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
-                      <Phone className="w-6 h-6" />
+                  <div className={cn("flex items-start sm:items-center gap-3 sm:gap-4 border-b pb-4 sm:pb-6 relative z-10 mb-6 sm:mb-8", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                    <div className={cn("w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
+                      <Phone className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
-                    <div>
-                      <h2 className={cn("text-2xl font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>Contact Information</h2>
-                      <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Update the contact details on your Contact page.</p>
+                    <div className="min-w-0">
+                      <h2 className={cn("text-lg sm:text-xl md:text-2xl font-bold tracking-tight", isDark ? "text-cyan-400" : "text-cyan-700")}>Contact Information</h2>
+                      <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>Update the contact details on your Contact page.</p>
                     </div>
                   </div>
 
@@ -882,15 +889,15 @@ export default function SettingsPage() {
                 {/* Social Links Section */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                  className={cn("rounded-2xl p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
                 >
-                  <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-white/[0.08]" : "border-slate-200")}>
-                    <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
-                      <Share2 className="w-6 h-6" />
+                  <div className={cn("flex items-start sm:items-center gap-3 sm:gap-4 border-b pb-4 sm:pb-6 relative z-10 mb-6 sm:mb-8", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                    <div className={cn("w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
+                      <Share2 className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
-                    <div>
-                      <h2 className={cn("text-2xl font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>Social Media Links</h2>
-                      <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Update the links that appear in your Navbar and Footer.</p>
+                    <div className="min-w-0">
+                      <h2 className={cn("text-lg sm:text-xl md:text-2xl font-bold tracking-tight", isDark ? "text-cyan-400" : "text-cyan-700")}>Social Media Links</h2>
+                      <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>Update the links that appear in your Navbar and Footer.</p>
                     </div>
                   </div>
 
@@ -931,15 +938,15 @@ export default function SettingsPage() {
                 {/* Website Content Section */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}
-                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                  className={cn("rounded-2xl p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
                 >
-                  <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-white/[0.08]" : "border-slate-200")}>
-                    <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
-                      <Layout className="w-6 h-6" />
+                  <div className={cn("flex items-start sm:items-center gap-3 sm:gap-4 border-b pb-4 sm:pb-6 relative z-10 mb-6 sm:mb-8", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                    <div className={cn("w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
+                      <Layout className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
-                    <div>
-                      <h2 className={cn("text-2xl font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>Website Content</h2>
-                      <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Update the hero section on your homepage.</p>
+                    <div className="min-w-0">
+                      <h2 className={cn("text-lg sm:text-xl md:text-2xl font-bold tracking-tight", isDark ? "text-cyan-400" : "text-cyan-700")}>Website Content</h2>
+                      <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>Update the hero section on your homepage.</p>
                     </div>
                   </div>
 
@@ -967,28 +974,28 @@ export default function SettingsPage() {
                 {/* Resume / CV Section */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.13 }}
-                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                  className={cn("rounded-2xl p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
                 >
-                  <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-white/[0.08]" : "border-slate-200")}>
-                    <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
-                      <FileText className="w-6 h-6" />
+                  <div className={cn("flex items-start sm:items-center gap-3 sm:gap-4 border-b pb-4 sm:pb-6 relative z-10 mb-6 sm:mb-8", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                    <div className={cn("w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
+                      <FileText className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
-                    <div>
-                      <h2 className={cn("text-2xl font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>Resume / CV</h2>
-                      <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Upload your latest CV (PDF format, max 10MB).</p>
+                    <div className="min-w-0">
+                      <h2 className={cn("text-lg sm:text-xl md:text-2xl font-bold tracking-tight", isDark ? "text-cyan-400" : "text-cyan-700")}>Resume / CV</h2>
+                      <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>Upload your latest CV (PDF format, max 10MB).</p>
                     </div>
                   </div>
 
                   <div className="space-y-4 relative z-10">
-                    <div className="flex items-center gap-4">
-                      <label className={cn("relative inline-flex items-center justify-center px-8 py-3.5 border hover:border-cyan-500/50 rounded-xl font-bold cursor-pointer transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white hover:border-slate-700" : "bg-white border-slate-200 text-slate-900 hover:border-slate-300")}>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+                      <label className={cn("relative inline-flex items-center justify-center w-full sm:w-auto px-6 sm:px-8 py-3 border hover:border-cyan-500/50 rounded-xl font-bold cursor-pointer transition-all text-xs sm:text-sm", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white hover:border-slate-700" : "bg-white border-slate-200 text-slate-900 hover:border-slate-300")}>
                         <input type="file" accept="application/pdf" className="hidden" onChange={handleCVUpload} />
                         <FileText className={cn("w-4 h-4 mr-2", isDark ? "text-cyan-400" : "text-cyan-700")} />
                         Upload New CV
                       </label>
                       {formData.cv_url && (
                         <div className="flex items-center gap-3">
-                          <a href={formData.cv_url} target="_blank" rel="noopener noreferrer" className={cn("hover:text-cyan-300 font-bold text-sm underline underline-offset-4 transition-colors", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                          <a href={formData.cv_url} target="_blank" rel="noopener noreferrer" className={cn("hover:text-cyan-300 font-bold text-xs sm:text-sm underline underline-offset-4 transition-colors", isDark ? "text-cyan-400" : "text-cyan-700")}>
                             View Current CV
                           </a>
                           <button
@@ -1022,15 +1029,15 @@ export default function SettingsPage() {
                 {/* SEO & Favicon Section */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}
-                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                  className={cn("rounded-2xl p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
                 >
-                  <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-white/[0.08]" : "border-slate-200")}>
-                    <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
-                      <Search className="w-6 h-6" />
+                  <div className={cn("flex items-start sm:items-center gap-3 sm:gap-4 border-b pb-4 sm:pb-6 relative z-10 mb-6 sm:mb-8", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                    <div className={cn("w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
+                      <Search className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
-                    <div>
-                      <h2 className={cn("text-2xl font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>SEO & Favicon</h2>
-                      <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Manage your website's meta description and favicon.</p>
+                    <div className="min-w-0">
+                      <h2 className={cn("text-lg sm:text-xl md:text-2xl font-bold tracking-tight", isDark ? "text-cyan-400" : "text-cyan-700")}>SEO & Favicon</h2>
+                      <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>Manage your website's meta description and favicon.</p>
                     </div>
                   </div>
 
@@ -1127,22 +1134,21 @@ export default function SettingsPage() {
                 {/* Security Section */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                  className={cn("rounded-2xl p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
                 >
-
-                  <div className="flex items-center gap-4 border-b border-cyan-500/10 pb-6 relative z-10">
-                    <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")} >
-                      <Shield className="w-6 h-6" />
+                  <div className="flex items-start sm:items-center gap-3 sm:gap-4 border-b border-cyan-500/10 pb-4 sm:pb-6 relative z-10">
+                    <div className={cn("w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")} >
+                      <Shield className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
-                    <div>
-                      <h2 className={cn("text-2xl font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>Security & 2FA</h2>
-                      <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Manage your password and Two-Factor Authentication.</p>
+                    <div className="min-w-0">
+                      <h2 className={cn("text-lg sm:text-xl md:text-2xl font-bold tracking-tight", isDark ? "text-cyan-400" : "text-cyan-700")}>Security & 2FA</h2>
+                      <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>Manage your password and Two-Factor Authentication.</p>
                     </div>
                   </div>
 
                   <div className="space-y-8 relative z-10">
                     <div className="flex flex-col gap-4">
-                      <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl border transition-colors group", isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-slate-700" : "bg-slate-50 border-slate-200 hover:border-slate-300")}>
+                      <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-6 rounded-2xl border transition-colors group", isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-slate-700" : "bg-slate-50 border-slate-200 hover:border-slate-300")}>
                         <div>
                           <h3 className={cn("font-bold flex items-center gap-2 text-lg", isDark ? "text-cyan-400" : "text-cyan-700")}>
                             <Key className={cn("w-4 h-4 group-hover:rotate-12 transition-transform", isDark ? "text-cyan-400" : "text-cyan-700")} />
@@ -1280,20 +1286,20 @@ export default function SettingsPage() {
                 {/* System Maintenance Section */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.17 }}
-                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                  className={cn("rounded-2xl p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
                 >
-                  <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-white/[0.08]" : "border-slate-200")}>
-                    <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
-                      <Shield className="w-6 h-6" />
+                  <div className={cn("flex items-start sm:items-center gap-3 sm:gap-4 border-b pb-4 sm:pb-6 relative z-10 mb-6 sm:mb-8", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                    <div className={cn("w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
+                      <Shield className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
-                    <div>
-                      <h2 className={cn("text-2xl font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>System Maintenance</h2>
+                    <div className="min-w-0">
+                      <h2 className={cn("text-lg sm:text-xl md:text-2xl font-bold tracking-tight", isDark ? "text-cyan-400" : "text-cyan-700")}>System Maintenance</h2>
                       <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>Put the customer panel in maintenance mode. Admins can still access the dashboard.</p>
                     </div>
                   </div>
 
                   <div className="space-y-6 relative z-20">
-                    <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl border transition-colors group", isDark ? "bg-white/5 border-cyan-500/10 hover:border-cyan-500/30" : "bg-slate-50 border-slate-200 hover:border-cyan-500/30")}>
+                    <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-6 rounded-2xl border transition-colors group", isDark ? "bg-white/5 border-cyan-500/10 hover:border-cyan-500/30" : "bg-slate-50 border-slate-200 hover:border-cyan-500/30")}>
                       <div className="pr-4">
                         <h3 className={cn("font-bold flex items-center gap-2 text-lg", isDark ? "text-cyan-400" : "text-cyan-700")}>
                           <Shield className={cn("w-4 h-4 group-hover:rotate-12 transition-transform", isDark ? "text-cyan-400" : "text-cyan-700")} />
@@ -1339,22 +1345,22 @@ export default function SettingsPage() {
                 {/* Service Management */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}
-                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                  className={cn("rounded-2xl p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
                 >
-                  <div className={cn("flex items-center gap-5 border-b pb-6 relative z-10 mb-8", isDark ? "border-white/[0.08]" : "border-slate-200")}>
-                    <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
-                      <Settings className="w-6 h-6" />
+                  <div className={cn("flex items-start sm:items-center gap-3 sm:gap-4 border-b pb-4 sm:pb-6 relative z-10 mb-6 sm:mb-8", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                    <div className={cn("w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-white border-slate-200 text-slate-900")}>
+                      <Settings className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
-                    <div>
-                      <h2 className={cn("text-2xl font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>Service Management</h2>
+                    <div className="min-w-0">
+                      <h2 className={cn("text-lg sm:text-xl md:text-2xl font-bold tracking-tight", isDark ? "text-cyan-400" : "text-cyan-700")}>Service Management</h2>
                       <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>Enable or disable specific services. Disabled services will show as "Coming Soon".</p>
                     </div>
                   </div>
 
                   <div className="space-y-6 relative z-20">
-                    <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl border transition-colors group", isDark ? "bg-white/5 border-cyan-500/10 hover:border-cyan-500/30" : "bg-slate-50 border-slate-200 hover:border-cyan-500/30")}>
+                    <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-6 rounded-2xl border transition-colors group", isDark ? "bg-white/5 border-cyan-500/10 hover:border-cyan-500/30" : "bg-slate-50 border-slate-200 hover:border-cyan-500/30")}>
                       <div className="pr-4">
-                        <h3 className={cn("font-bold flex items-center gap-2 text-lg", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                        <h3 className={cn("font-bold flex items-center gap-2 text-base sm:text-lg", isDark ? "text-cyan-400" : "text-cyan-700")}>
                           <Settings className={cn("w-4 h-4 group-hover:rotate-45 transition-transform", isDark ? "text-cyan-400" : "text-cyan-700")} />
                           Enable Cloud VPS
                         </h3>
@@ -1370,9 +1376,9 @@ export default function SettingsPage() {
                       </button>
                     </div>
 
-                    <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl border transition-colors group", isDark ? "bg-white/5 border-cyan-500/10 hover:border-cyan-500/30" : "bg-slate-50 border-slate-200 hover:border-cyan-500/30")}>
+                    <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-6 rounded-2xl border transition-colors group", isDark ? "bg-white/5 border-cyan-500/10 hover:border-cyan-500/30" : "bg-slate-50 border-slate-200 hover:border-cyan-500/30")}>
                       <div className="pr-4">
-                        <h3 className={cn("font-bold flex items-center gap-2 text-lg", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                        <h3 className={cn("font-bold flex items-center gap-2 text-base sm:text-lg", isDark ? "text-cyan-400" : "text-cyan-700")}>
                           <Rocket className={cn("w-4 h-4 group-hover:rotate-45 transition-transform", isDark ? "text-cyan-400" : "text-cyan-700")} />
                           Enable 1-Click Apps
                         </h3>
@@ -1390,9 +1396,9 @@ export default function SettingsPage() {
 
 
 
-                    <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl border transition-colors group", isDark ? "bg-white/5 border-cyan-500/10 hover:border-cyan-500/30" : "bg-slate-50 border-slate-200 hover:border-cyan-500/30")}>
+                    <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-6 rounded-2xl border transition-colors group", isDark ? "bg-white/5 border-cyan-500/10 hover:border-cyan-500/30" : "bg-slate-50 border-slate-200 hover:border-cyan-500/30")}>
                       <div className="pr-4">
-                        <h3 className={cn("font-bold flex items-center gap-2 text-lg", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                        <h3 className={cn("font-bold flex items-center gap-2 text-base sm:text-lg", isDark ? "text-cyan-400" : "text-cyan-700")}>
                           <Settings className={cn("w-4 h-4 group-hover:rotate-45 transition-transform", isDark ? "text-cyan-400" : "text-cyan-700")} />
                           Enable CDN
                         </h3>
@@ -1441,26 +1447,26 @@ export default function SettingsPage() {
                 {/* RustFS Configuration Card */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                  className={cn("rounded-2xl p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
                 >
-                  <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-6 relative z-10", isDark ? "border-white/[0.08]" : "border-slate-200")}>
-                    <div className="flex items-center gap-4">
-                      <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
-                        <HardDrive className="w-7 h-7" />
+                  <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 sm:pb-6 relative z-10", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                    <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
+                      <div className={cn("w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+                        <HardDrive className="w-5 h-5 sm:w-6 sm:h-6" />
                       </div>
-                      <div>
-                        <h2 className={cn("text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>RustFS S3 Object Storage</h2>
+                      <div className="min-w-0">
+                        <h2 className={cn("text-lg sm:text-xl md:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>RustFS S3 Object Storage</h2>
                         <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
                           Distributed S3-compatible high-performance object storage for File CDN & videos.
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
                       <button
                         type="button"
                         onClick={handleTestRustFS}
                         disabled={testingRustFS}
-                        className={cn("px-3.5 py-2 rounded-xl text-xs font-bold transition-all border flex items-center gap-2 cursor-pointer", isDark ? "bg-white/5 border-white/10 hover:bg-white/10 text-zinc-300 hover:text-white" : "bg-slate-100 border-slate-200 hover:bg-slate-200 text-slate-700")}
+                        className={cn("w-full sm:w-auto justify-center px-3.5 py-2 rounded-xl text-xs font-bold transition-all border flex items-center gap-2 cursor-pointer", isDark ? "bg-white/5 border-white/10 hover:bg-white/10 text-zinc-300 hover:text-white" : "bg-slate-100 border-slate-200 hover:bg-slate-200 text-slate-700")}
                       >
                         <RefreshCw className={cn("w-3.5 h-3.5", testingRustFS && "animate-spin")} />
                         <span>{testingRustFS ? "Testing..." : "Test Connection"}</span>
@@ -1605,15 +1611,15 @@ export default function SettingsPage() {
                 {/* Cross-Server & Bucket Migration Card */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-                  className={cn("rounded-2xl p-6 md:p-10 space-y-6 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                  className={cn("rounded-2xl p-4 sm:p-6 md:p-8 space-y-6 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
                 >
-                  <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-6", isDark ? "border-white/[0.08]" : "border-slate-200")}>
-                    <div className="flex items-center gap-4">
-                      <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
-                        <ArrowLeftRight className="w-6 h-6" />
+                  <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 sm:pb-6", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                    <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
+                      <div className={cn("w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+                        <ArrowLeftRight className="w-5 h-5 sm:w-6 sm:h-6" />
                       </div>
-                      <div>
-                        <h3 className={cn("text-sm sm:text-base font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>Cross-Server & Bucket Migration</h3>
+                      <div className="min-w-0">
+                        <h3 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>Cross-Server & Bucket Migration</h3>
                         <p className={cn("text-xs md:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
                           Seamlessly transfer all media & videos between RustFS servers or buckets at any time.
                         </p>
@@ -1879,26 +1885,28 @@ export default function SettingsPage() {
                 {/* Managed Database K3s Cluster Configuration Card */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-                  className={cn("rounded-2xl p-6 md:p-10 space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                  className={cn("rounded-2xl p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
                 >
-                  <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-6 relative z-10", isDark ? "border-white/[0.08]" : "border-slate-200")}>
-                    <div className="flex items-center gap-4">
-                      <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
-                        <Database className="w-7 h-7" />
+                  <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 sm:pb-6 relative z-10", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                    <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
+                      <div className={cn("w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+                        <Database className="w-5 h-5 sm:w-6 sm:h-6" />
                       </div>
-                      <div>
-                        <h2 className={cn("text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>Managed Database & Kubernetes Cluster</h2>
-                        <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                      <div className="min-w-0">
+                        <h2 className={cn("text-lg sm:text-xl md:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+                          Managed Database & Kubernetes Cluster
+                        </h2>
+                        <p className={cn("text-xs sm:text-sm mt-0.5 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
                           Configure native Kubernetes API (port 6443 / kubeconfig), public wildcard routing, and web viewer panels (phpMyAdmin, pgAdmin, Mongo Express).
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
                       <button
                         type="button"
                         onClick={handleTestK3s}
                         disabled={testingK3s}
-                        className={cn("px-3.5 py-2 rounded-xl text-xs font-bold transition-all border flex items-center gap-2 cursor-pointer", isDark ? "bg-white/5 border-white/10 hover:bg-white/10 text-zinc-300 hover:text-white" : "bg-slate-100 border-slate-200 hover:bg-slate-200 text-slate-700")}
+                        className={cn("w-full sm:w-auto justify-center px-3.5 py-2 rounded-xl text-xs font-bold transition-all border flex items-center gap-2 cursor-pointer", isDark ? "bg-white/5 border-white/10 hover:bg-white/10 text-zinc-300 hover:text-white" : "bg-slate-100 border-slate-200 hover:bg-slate-200 text-slate-700")}
                       >
                         <RefreshCw className={cn("w-3.5 h-3.5", testingK3s && "animate-spin text-cyan-400")} />
                         <span>{testingK3s ? "Testing API..." : "Test K8s API Connection"}</span>
@@ -2083,12 +2091,12 @@ export default function SettingsPage() {
                   </div>
 
                   {/* Save Button */}
-                  <div className={cn("pt-6 border-t flex items-center justify-end gap-3", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                  <div className={cn("pt-6 border-t flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                     <button
                       type="button"
                       onClick={handleSave}
                       disabled={saving}
-                      className="px-6 py-2.5 rounded-xl font-bold text-xs bg-cyan-400 hover:bg-cyan-300 active:scale-95 text-slate-950 transition-all shadow-md cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                      className="w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-xs bg-cyan-400 hover:bg-cyan-300 active:scale-95 text-slate-950 transition-all shadow-md cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                       <Save className="w-3.5 h-3.5" />
                       <span>{saving ? "Saving Changes..." : "Save Database Settings"}</span>
