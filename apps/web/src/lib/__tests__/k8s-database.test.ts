@@ -17,6 +17,10 @@ vi.mock('@/lib/prisma', () => ({
     subscription: {
       count: vi.fn(),
     },
+    databaseService: {
+      findMany: vi.fn().mockResolvedValue([]),
+      count: vi.fn().mockResolvedValue(0),
+    },
   },
 }));
 
@@ -30,12 +34,16 @@ vi.mock('../prisma', () => ({
       delete: vi.fn(),
     },
     setting: {
-      findMany: vi.fn(),
+      findMany: vi.fn().mockResolvedValue([]),
       findUnique: vi.fn(),
       upsert: vi.fn(),
     },
     subscription: {
       count: vi.fn(),
+    },
+    databaseService: {
+      findMany: vi.fn().mockResolvedValue([]),
+      count: vi.fn().mockResolvedValue(0),
     },
   },
 }));
@@ -225,6 +233,46 @@ describe('Managed Database K3s Engine - k8s-database.ts', () => {
 
       // Environment variable expansion
       expect(escapeShellArg('$SECRET_KEY')).toBe("'$SECRET_KEY'");
+    });
+  });
+
+  describe('Database Cluster Capacity & Resource Pre-Flight Checks', () => {
+    it('should accurately parse Kubernetes memory strings (Ki, Mi, Gi, Ti, bytes)', async () => {
+      const { parseK8sMemoryToMb } = await import('../k8s-database');
+      expect(parseK8sMemoryToMb('7981016Ki')).toBe(7794);
+      expect(parseK8sMemoryToMb('1024Mi')).toBe(1024);
+      expect(parseK8sMemoryToMb('8Gi')).toBe(8192);
+      expect(parseK8sMemoryToMb('1Ti')).toBe(1048576);
+      expect(parseK8sMemoryToMb('1073741824')).toBe(1024);
+      expect(parseK8sMemoryToMb(null)).toBe(0);
+    });
+
+    it('should accurately parse Kubernetes CPU strings (millicores, cores)', async () => {
+      const { parseK8sCpuToCores } = await import('../k8s-database');
+      expect(parseK8sCpuToCores('4')).toBe(4);
+      expect(parseK8sCpuToCores('4000m')).toBe(4);
+      expect(parseK8sCpuToCores('500m')).toBe(0.5);
+      expect(parseK8sCpuToCores('1.5')).toBe(1.5);
+      expect(parseK8sCpuToCores(null)).toBe(0);
+    });
+
+    it('should validate capacity and reject orders exceeding cluster capacity', async () => {
+      const { checkDatabaseClusterCapacity } = await import('../k8s-database');
+      const normal = await checkDatabaseClusterCapacity(1, 1024, 1);
+      expect(normal.available).toBe(true);
+      expect(normal.status).toBe('HEALTHY');
+
+      // Exceeding CPU capacity
+      const excessCpu = await checkDatabaseClusterCapacity(999, 1024, 1);
+      expect(excessCpu.available).toBe(false);
+      expect(excessCpu.status).toBe('FULL');
+      expect(excessCpu.userMessage).toContain('Managed Database cluster cannot accommodate');
+
+      // Exceeding RAM capacity
+      const excessRam = await checkDatabaseClusterCapacity(1, 999999, 1);
+      expect(excessRam.available).toBe(false);
+      expect(excessRam.status).toBe('FULL');
+      expect(excessRam.userMessage).toContain('Managed Database cluster cannot accommodate');
     });
   });
 });

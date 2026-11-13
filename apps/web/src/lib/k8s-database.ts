@@ -1360,3 +1360,359 @@ export async function testK8sClusterConnection(customConfig?: {
     };
   }
 }
+
+/**
+ * Parsers for Kubernetes resource units (Ki, Mi, Gi, Ti, m, vCPU)
+ */
+export function parseK8sMemoryToMb(memStr?: string | null): number {
+  if (!memStr) return 0;
+  const s = String(memStr).trim();
+  if (s.endsWith('Ki')) {
+    return Math.round(parseFloat(s.slice(0, -2)) / 1024);
+  }
+  if (s.endsWith('Mi')) {
+    return Math.round(parseFloat(s.slice(0, -2)));
+  }
+  if (s.endsWith('Gi')) {
+    return Math.round(parseFloat(s.slice(0, -2)) * 1024);
+  }
+  if (s.endsWith('Ti')) {
+    return Math.round(parseFloat(s.slice(0, -2)) * 1024 * 1024);
+  }
+  const bytes = parseFloat(s);
+  return !isNaN(bytes) ? Math.round(bytes / (1024 * 1024)) : 0;
+}
+
+export function parseK8sCpuToCores(cpuStr?: string | null): number {
+  if (!cpuStr) return 0;
+  const s = String(cpuStr).trim();
+  if (s.endsWith('m')) {
+    return parseFloat(s.slice(0, -1)) / 1000;
+  }
+  const cores = parseFloat(s);
+  return !isNaN(cores) ? cores : 0;
+}
+
+export interface DatabaseClusterCapacity {
+  available: boolean;
+  status: 'HEALTHY' | 'NEAR_CAPACITY' | 'FULL' | 'OFFLINE';
+  capacityPercent: number;
+  activeInstances: number;
+  maxInstances: number;
+  allocatedCpu: number;
+  totalCpu: number;
+  cpuPercent: number;
+  allocatedMemoryMb: number;
+  totalMemoryMb: number;
+  memoryPercent: number;
+  availablePorts: number;
+  totalPorts: number;
+  reason?: string;
+  userMessage?: string;
+}
+
+interface CachedNodeCapacity {
+  timestamp: number;
+  totalCpu: number;
+  totalMemoryMb: number;
+  maxPods: number;
+  nodeCount: number;
+  allNodesReady: boolean;
+}
+
+let cachedNodeCapacity: CachedNodeCapacity | null = null;
+
+async function getNodeClusterCapacity(): Promise<{
+  totalCpu: number;
+  totalMemoryMb: number;
+  maxPods: number;
+  nodeCount: number;
+  allNodesReady: boolean;
+}> {
+  const now = Date.now();
+  if (cachedNodeCapacity && now - cachedNodeCapacity.timestamp < 60000) {
+    return cachedNodeCapacity;
+  }
+
+  try {
+    const kc = await getK8sKubeConfig();
+    const coreApi = kc.makeApiClient(k8s.CoreV1Api);
+    const nodesRes = await coreApi.listNode();
+    const items = nodesRes.items || [];
+
+    if (items.length === 0) {
+      return { totalCpu: 4, totalMemoryMb: 8192, maxPods: 100, nodeCount: 0, allNodesReady: false };
+    }
+
+    let sumCpu = 0;
+    let sumMemoryMb = 0;
+    let sumPods = 0;
+    let allReady = true;
+
+    for (const node of items) {
+      const isReady = node.status?.conditions?.some((c) => c.type === 'Ready' && c.status === 'True') ?? false;
+      if (!isReady) allReady = false;
+
+      const alloc = node.status?.allocatable || {};
+      sumCpu += parseK8sCpuToCores(alloc.cpu);
+      sumMemoryMb += parseK8sMemoryToMb(alloc.memory);
+      sumPods += parseInt(alloc.pods || '110', 10) || 110;
+    }
+
+    cachedNodeCapacity = {
+      timestamp: now,
+      totalCpu: sumCpu > 0 ? parseFloat(sumCpu.toFixed(1)) : 4,
+      totalMemoryMb: sumMemoryMb > 0 ? sumMemoryMb : 8192,
+      maxPods: sumPods > 0 ? sumPods : 100,
+      nodeCount: items.length,
+      allNodesReady: allReady,
+    };
+
+    return cachedNodeCapacity;
+  } catch (err) {
+    console.warn('[ManagedDB] Failed to query K8s node capacity, using cached/default:', err);
+    if (cachedNodeCapacity) return cachedNodeCapacity;
+    return { totalCpu: 4, totalMemoryMb: 8192, maxPods: 100, nodeCount: 1, allNodesReady: true };
+  }
+}
+
+/**
+ * Pre-flight cluster resource and capacity validator.
+ * Checks hardware allocatable CPU/RAM, active database instance counts, and NodePort availability.
+ */
+export async function checkDatabaseClusterCapacity(
+  requestedCpu = 0,
+  requestedRamMb = 0,
+  _requestedDiskGb = 0
+): Promise<DatabaseClusterCapacity> {
+  // 1. Check Admin Settings overrides
+  const settings = await prisma.setting.findMany({
+    where: {
+      key: {
+        in: [
+          'managed_db_capacity_full',
+          'managed_db_maintenance_mode',
+          'managed_db_max_instances',
+          'managed_db_max_cpu',
+          'managed_db_max_ram_gb',
+        ],
+      },
+    },
+  });
+
+  const settingMap = new Map<string, string>();
+  for (const s of settings) {
+    settingMap.set(s.key, s.value);
+  }
+
+  const isManuallyFull = settingMap.get('managed_db_capacity_full') === 'true' || settingMap.get('managed_db_maintenance_mode') === 'true';
+
+  // 2. Query Node hardware limits
+  const nodeInfo = await getNodeClusterCapacity();
+
+  // Admin overrides if specified
+  const customMaxInstances = parseInt(settingMap.get('managed_db_max_instances') || '', 10);
+  const customMaxCpu = parseFloat(settingMap.get('managed_db_max_cpu') || '');
+  const customMaxRamGb = parseFloat(settingMap.get('managed_db_max_ram_gb') || '');
+
+  const totalCpu = !isNaN(customMaxCpu) && customMaxCpu > 0 ? customMaxCpu : nodeInfo.totalCpu;
+  const totalMemoryMb = !isNaN(customMaxRamGb) && customMaxRamGb > 0 ? customMaxRamGb * 1024 : nodeInfo.totalMemoryMb;
+  const maxInstances = !isNaN(customMaxInstances) && customMaxInstances > 0 ? customMaxInstances : Math.max(10, nodeInfo.maxPods - 15);
+
+  // 3. Query active databases from database
+  const activeDatabases = await prisma.databaseService.findMany({
+    where: { status: { not: 'TERMINATED' } },
+    select: { id: true, port: true, cpuShares: true, memoryMb: true, storageGb: true },
+  });
+
+  const activeInstances = activeDatabases.length;
+  const allocatedCpu = parseFloat(activeDatabases.reduce((sum, d) => sum + (d.cpuShares || 0), 0).toFixed(1));
+  const allocatedMemoryMb = activeDatabases.reduce((sum, d) => sum + (d.memoryMb || 0), 0);
+  const usedPorts = new Set(activeDatabases.map((d) => d.port));
+  const totalPorts = 1501; // range 30500 - 32000
+  const availablePorts = Math.max(0, totalPorts - usedPorts.size);
+
+  const cpuPercent = totalCpu > 0 ? Math.min(100, Math.round((allocatedCpu / totalCpu) * 100)) : 100;
+  const memoryPercent = totalMemoryMb > 0 ? Math.min(100, Math.round((allocatedMemoryMb / totalMemoryMb) * 100)) : 100;
+  const instancePercent = maxInstances > 0 ? Math.min(100, Math.round((activeInstances / maxInstances) * 100)) : 100;
+
+  const capacityPercent = Math.max(cpuPercent, memoryPercent, instancePercent);
+
+  // 4. Evaluate status & conditions
+  if (isManuallyFull) {
+    return {
+      available: false,
+      status: 'FULL',
+      capacityPercent: 100,
+      activeInstances,
+      maxInstances,
+      allocatedCpu,
+      totalCpu,
+      cpuPercent: 100,
+      allocatedMemoryMb,
+      totalMemoryMb,
+      memoryPercent: 100,
+      availablePorts,
+      totalPorts,
+      reason: 'Database provisioning paused by administrator',
+      userMessage: 'The Managed Database cluster is temporarily undergoing maintenance or capacity expansion. New database deployments are temporarily paused.',
+    };
+  }
+
+  if (nodeInfo.nodeCount > 0 && !nodeInfo.allNodesReady) {
+    return {
+      available: false,
+      status: 'OFFLINE',
+      capacityPercent: 100,
+      activeInstances,
+      maxInstances,
+      allocatedCpu,
+      totalCpu,
+      cpuPercent,
+      allocatedMemoryMb,
+      totalMemoryMb,
+      memoryPercent,
+      availablePorts,
+      totalPorts,
+      reason: 'Kubernetes cluster nodes are not ready',
+      userMessage: 'The database cluster nodes are currently undergoing maintenance. Please try again in a few moments.',
+    };
+  }
+
+  if (availablePorts <= 0) {
+    return {
+      available: false,
+      status: 'FULL',
+      capacityPercent: 100,
+      activeInstances,
+      maxInstances,
+      allocatedCpu,
+      totalCpu,
+      cpuPercent,
+      allocatedMemoryMb,
+      totalMemoryMb,
+      memoryPercent,
+      availablePorts: 0,
+      totalPorts,
+      reason: 'No available NodePorts in cluster port pool',
+      userMessage: 'The database cluster has exhausted all available public network ports (30500-32000). Please contact support.',
+    };
+  }
+
+  // Check requested specs
+  if (requestedCpu > 0 && (allocatedCpu + requestedCpu) > totalCpu * 0.95) {
+    return {
+      available: false,
+      status: 'FULL',
+      capacityPercent,
+      activeInstances,
+      maxInstances,
+      allocatedCpu,
+      totalCpu,
+      cpuPercent,
+      allocatedMemoryMb,
+      totalMemoryMb,
+      memoryPercent,
+      availablePorts,
+      totalPorts,
+      reason: `Requested ${requestedCpu} vCPU exceeds available cluster CPU capacity (${(totalCpu - allocatedCpu).toFixed(1)} vCPU free)`,
+      userMessage: 'The Managed Database cluster cannot accommodate the requested compute resources. Please select a smaller flavor or try again later.',
+    };
+  }
+
+  if (requestedRamMb > 0 && (allocatedMemoryMb + requestedRamMb) > totalMemoryMb * 0.92) {
+    return {
+      available: false,
+      status: 'FULL',
+      capacityPercent,
+      activeInstances,
+      maxInstances,
+      allocatedCpu,
+      totalCpu,
+      cpuPercent,
+      allocatedMemoryMb,
+      totalMemoryMb,
+      memoryPercent,
+      availablePorts,
+      totalPorts,
+      reason: `Requested ${requestedRamMb} MB RAM exceeds available cluster memory capacity (${Math.max(0, totalMemoryMb - allocatedMemoryMb)} MB free)`,
+      userMessage: 'The Managed Database cluster cannot accommodate the requested RAM memory. Please select a smaller tier or try again later.',
+    };
+  }
+
+  if (activeInstances >= maxInstances) {
+    return {
+      available: false,
+      status: 'FULL',
+      capacityPercent: 100,
+      activeInstances,
+      maxInstances,
+      allocatedCpu,
+      totalCpu,
+      cpuPercent,
+      allocatedMemoryMb,
+      totalMemoryMb,
+      memoryPercent,
+      availablePorts,
+      totalPorts,
+      reason: 'Maximum concurrent database instances limit reached',
+      userMessage: 'The database cluster has reached its maximum concurrent instance capacity. New deployments are temporarily paused.',
+    };
+  }
+
+  if (capacityPercent >= 92) {
+    return {
+      available: false,
+      status: 'FULL',
+      capacityPercent,
+      activeInstances,
+      maxInstances,
+      allocatedCpu,
+      totalCpu,
+      cpuPercent,
+      allocatedMemoryMb,
+      totalMemoryMb,
+      memoryPercent,
+      availablePorts,
+      totalPorts,
+      reason: 'Cluster is at 92%+ capacity',
+      userMessage: 'The Managed Database cluster is currently at maximum capacity. New deployments are temporarily paused while additional cluster nodes are provisioned.',
+    };
+  }
+
+  if (capacityPercent >= 80) {
+    return {
+      available: true,
+      status: 'NEAR_CAPACITY',
+      capacityPercent,
+      activeInstances,
+      maxInstances,
+      allocatedCpu,
+      totalCpu,
+      cpuPercent,
+      allocatedMemoryMb,
+      totalMemoryMb,
+      memoryPercent,
+      availablePorts,
+      totalPorts,
+      userMessage: `Cluster resource utilization is currently high (${capacityPercent}% allocated). Limited deployment slots remaining.`,
+    };
+  }
+
+  return {
+    available: true,
+    status: 'HEALTHY',
+    capacityPercent,
+    activeInstances,
+    maxInstances,
+    allocatedCpu,
+    totalCpu,
+    cpuPercent,
+    allocatedMemoryMb,
+    totalMemoryMb,
+    memoryPercent,
+    availablePorts,
+    totalPorts,
+    userMessage: 'Cluster healthy and ready for deployment.',
+  };
+}

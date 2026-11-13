@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
-import { allocateAvailablePort, deployDatabase, parseDatabasePlanLimits, getK8sClusterConfig, buildConnectionDetails } from "@/lib/k8s-database";
+import { allocateAvailablePort, deployDatabase, parseDatabasePlanLimits, getK8sClusterConfig, buildConnectionDetails, checkDatabaseClusterCapacity } from "@/lib/k8s-database";
 import { sendDatabaseProvisionedEmail } from "@/lib/email";
 import crypto from "crypto";
 
@@ -193,7 +193,25 @@ export async function POST(req: NextRequest) {
 
     const upfrontCharge = billingMode === "MONTHLY" ? monthlyPrice : hourlyRate;
 
-    // Check & atomically decrement user balance with concurrency protection
+    // 1. Pre-flight Cluster Resource Capacity Check (prevents charging or errors if server is full)
+    const capacityCheck = await checkDatabaseClusterCapacity(cpuShares, memoryMb, storageGb);
+    if (!capacityCheck.available) {
+      return NextResponse.json({
+        error: capacityCheck.userMessage || capacityCheck.reason || "The Managed Database cluster is currently at full capacity. Please try again later.",
+      }, { status: 503 });
+    }
+
+    // 2. Pre-flight NodePort Allocation Check (before deducting balance)
+    let port: number;
+    try {
+      port = await allocateAvailablePort();
+    } catch (portErr: any) {
+      return NextResponse.json({
+        error: portErr.message || "No available network ports remaining in cluster port pool.",
+      }, { status: 503 });
+    }
+
+    // 3. Check & atomically decrement user balance with concurrency protection
     const balanceDeduct = await prisma.user.updateMany({
       where: {
         id: user.id,
@@ -209,9 +227,6 @@ export async function POST(req: NextRequest) {
         error: `Insufficient balance. ${effectivePlanName} requires at least Rp ${upfrontCharge.toLocaleString("id-ID")} balance.`,
       }, { status: 400 });
     }
-
-    // Allocate unique NodePort
-    const port = await allocateAvailablePort();
 
     // Generate or sanitize credentials safely
     const randSuffix = crypto.randomBytes(3).toString("hex");

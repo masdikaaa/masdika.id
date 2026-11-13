@@ -9,7 +9,8 @@ import { formatRupiah } from "@/lib/billing";
 import { toast } from "sonner";
 import {
   Database, Check, Server, HardDrive,
-  Cpu, Layers, ShieldCheck, Zap, RefreshCw, Eye, EyeOff, MapPin, Sparkles, CheckCircle2, Loader2
+  Cpu, Layers, ShieldCheck, Zap, RefreshCw, Eye, EyeOff, MapPin, Sparkles, CheckCircle2, Loader2,
+  AlertTriangle, AlertCircle
 } from "lucide-react";
 import { SiMysql, SiPostgresql, SiMariadb, SiMongodb } from "react-icons/si";
 
@@ -144,6 +145,26 @@ export default function DatabaseCheckoutFlow() {
   const [loadingBalance, setLoadingBalance] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
+  // Cluster resource capacity state
+  const [clusterCapacity, setClusterCapacity] = useState<{
+    available: boolean;
+    status: "HEALTHY" | "NEAR_CAPACITY" | "FULL" | "OFFLINE";
+    capacityPercent: number;
+    activeInstances: number;
+    maxInstances: number;
+    allocatedCpu: number;
+    totalCpu: number;
+    cpuPercent: number;
+    allocatedMemoryMb: number;
+    totalMemoryMb: number;
+    memoryPercent: number;
+    availablePorts: number;
+    totalPorts: number;
+    reason?: string;
+    userMessage?: string;
+  } | null>(null);
+  const [loadingCapacity, setLoadingCapacity] = useState(true);
+
   // Catalog plans mapping for API submission
   const [catalogPlans, setCatalogPlans] = useState<any[]>([]);
 
@@ -158,6 +179,17 @@ export default function DatabaseCheckoutFlow() {
       })
       .catch(() => {})
       .finally(() => setLoadingBalance(false));
+
+    // Fetch cluster capacity & resource limits
+    fetch("/api/user/database/capacity")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.data) {
+          setClusterCapacity(data.data);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoadingCapacity(false));
 
     // Fetch official plans from DB
     fetch("/api/public/plans")
@@ -208,6 +240,22 @@ export default function DatabaseCheckoutFlow() {
   const currentHourlyRate = selectedTier === "DEDICATED" ? dedicatedHourlyRate : sharedHourlyRate;
   const requiredUpfront = currentHourlyRate;
 
+  // Cluster resource capacity evaluation
+  const isClusterFull = Boolean(
+    clusterCapacity && (!clusterCapacity.available || clusterCapacity.status === "FULL" || clusterCapacity.status === "OFFLINE")
+  );
+
+  const selectedMemoryMb = selectedTier === "DEDICATED"
+    ? (activeFlavor.ram.includes("8 GB") ? 8192 : activeFlavor.ram.includes("4 GB") ? 4096 : activeFlavor.ram.includes("2 GB") ? 2048 : 1024)
+    : 1024;
+
+  const isFlavorExceedsCapacity = Boolean(
+    clusterCapacity &&
+    !isClusterFull &&
+    clusterCapacity.totalMemoryMb > 0 &&
+    (clusterCapacity.totalMemoryMb - clusterCapacity.allocatedMemoryMb < selectedMemoryMb)
+  );
+
   // Resolve DB Plan for submission
   const matchedPlan = catalogPlans.find((p) => {
     if (selectedTier === "SHARED") return p.name.toLowerCase().includes("shared");
@@ -216,6 +264,16 @@ export default function DatabaseCheckoutFlow() {
 
   const handleDeploy = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isClusterFull) {
+      toast.error(clusterCapacity?.userMessage || "The Managed Database cluster is currently at full capacity. New deployments are temporarily paused.");
+      return;
+    }
+
+    if (isFlavorExceedsCapacity) {
+      toast.error(`The requested flavor requires ${selectedMemoryMb / 1024} GB RAM, which exceeds available cluster memory. Please choose a smaller tier.`);
+      return;
+    }
 
     if (!instanceName.trim()) {
       toast.error("Please enter a database instance name");
@@ -301,6 +359,54 @@ export default function DatabaseCheckoutFlow() {
 
   return (
     <form onSubmit={handleDeploy} className="space-y-6 w-full max-w-full min-w-0">
+      {/* Cluster Resource Alert Banner if Full */}
+      {isClusterFull && (
+        <div className={cn(
+          "p-4 sm:p-5 rounded-2xl border flex items-start gap-3.5 transition-all shadow-md",
+          isDark ? "bg-amber-500/10 border-amber-500/30 text-amber-200" : "bg-amber-50 border-amber-300 text-amber-900"
+        )}>
+          <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+          <div className="space-y-1.5 flex-1">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <h4 className="font-bold text-sm text-amber-400">
+                Database Server Resource Capacity Reached
+              </h4>
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                Deployment Paused
+              </span>
+            </div>
+            <p className="text-xs leading-relaxed opacity-90">
+              {clusterCapacity?.userMessage || "The Managed Database cluster in Sidoarjo (ID-SDA) is currently at maximum resource capacity. New deployments are temporarily paused while our infrastructure team provisions additional cluster nodes."}
+            </p>
+            {clusterCapacity && (
+              <div className="pt-2 border-t border-amber-500/20 flex flex-wrap items-center gap-3 text-[11px] font-mono text-zinc-400">
+                <span>CPU Load: <strong className="text-amber-300">{clusterCapacity.cpuPercent}%</strong></span>
+                <span>•</span>
+                <span>RAM Allocated: <strong className="text-amber-300">{clusterCapacity.memoryPercent}%</strong></span>
+                <span>•</span>
+                <span>Region: <strong className="text-zinc-200">Sidoarjo (ID-SDA)</strong></span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* High Cluster Load Warning if Near Capacity */}
+      {clusterCapacity && clusterCapacity.status === "NEAR_CAPACITY" && !isClusterFull && (
+        <div className={cn(
+          "px-4 py-3 rounded-2xl border flex items-center justify-between gap-3 text-xs transition-all",
+          isDark ? "bg-amber-500/[0.07] border-amber-500/20 text-amber-300" : "bg-amber-50 border-amber-200 text-amber-800"
+        )}>
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+            <span>High cluster utilization ({clusterCapacity.capacityPercent}% allocated). Limited deployment slots remaining.</span>
+          </div>
+          <span className="text-[10px] font-mono text-amber-400 font-semibold shrink-0">
+            Region: ID-SDA
+          </span>
+        </div>
+      )}
+
       {/* Top Architecture Mode Selector */}
       <div className={cn("p-1.5 rounded-2xl border flex items-center justify-between gap-3 flex-wrap w-full max-w-full min-w-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
         <div className="flex items-center gap-2">
@@ -455,15 +561,22 @@ export default function DatabaseCheckoutFlow() {
                       {DEDICATED_FLAVORS.map((flavor) => {
                         const isSelected = selectedFlavorId === flavor.id;
                         const EngineIcon = activeEngineMeta.icon;
+                        const flavorRamMb = flavor.ram.includes("8 GB") ? 8192 : flavor.ram.includes("4 GB") ? 4096 : flavor.ram.includes("2 GB") ? 2048 : 1024;
+                        const isFlavorFull = isClusterFull || Boolean(
+                          clusterCapacity &&
+                          clusterCapacity.totalMemoryMb > 0 &&
+                          (clusterCapacity.totalMemoryMb - clusterCapacity.allocatedMemoryMb < flavorRamMb)
+                        );
+                        const isUnavailable = flavor.isOutOfStock || isFlavorFull;
 
                         return (
                           <tr
                             key={flavor.id}
-                            onClick={() => !flavor.isOutOfStock && setSelectedFlavorId(flavor.id)}
+                            onClick={() => !isUnavailable && setSelectedFlavorId(flavor.id)}
                             className={cn(
                               "group transition-all cursor-pointer font-medium border-l-2",
-                              flavor.isOutOfStock ? "opacity-50 cursor-not-allowed border-l-transparent" : "",
-                              isSelected
+                              isUnavailable ? "opacity-40 cursor-not-allowed border-l-transparent" : "",
+                              isSelected && !isUnavailable
                                 ? isDark
                                   ? "bg-cyan-500/10 text-white border-l-cyan-400"
                                   : "bg-cyan-50/70 text-slate-900 border-l-cyan-500"
@@ -475,11 +588,11 @@ export default function DatabaseCheckoutFlow() {
                             <td className="py-3 px-3">
                               <div className={cn(
                                 "w-4 h-4 rounded-full border flex items-center justify-center transition-all shrink-0",
-                                isSelected
+                                isSelected && !isUnavailable
                                   ? "border-cyan-400 bg-cyan-400/20 shadow-xs"
                                   : isDark ? "border-zinc-600 group-hover:border-zinc-400" : "border-slate-300 group-hover:border-slate-400"
                               )}>
-                                {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-xs shadow-cyan-400/60" />}
+                                {isSelected && !isUnavailable && <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-xs shadow-cyan-400/60" />}
                               </div>
                             </td>
                             <td className="py-3 px-3">
@@ -500,10 +613,12 @@ export default function DatabaseCheckoutFlow() {
                               </span>
                             </td>
                             <td className="py-3 px-3 text-right">
-                              {flavor.isOutOfStock ? (
+                              {isUnavailable ? (
                                 <div className="text-right">
                                   <span className="text-zinc-500 line-through">{formatRupiah(flavor.price)}/mo</span>
-                                  <span className="block text-[10px] text-amber-500 font-bold">(Out of Stock)</span>
+                                  <span className="block text-[10px] text-amber-500 font-bold">
+                                    {flavor.isOutOfStock ? "(Out of Stock)" : "(Full Capacity)"}
+                                  </span>
                                 </div>
                               ) : (
                                 <span className={cn("font-bold text-sm font-mono", isSelected ? "text-cyan-400" : isDark ? "text-zinc-300" : "text-slate-800")}>
@@ -967,15 +1082,44 @@ export default function DatabaseCheckoutFlow() {
                 </div>
               )}
 
+              {/* Cluster Full / Capacity Warnings */}
+              {isClusterFull && (
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-start gap-2.5">
+                  <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <span className="leading-snug">
+                    Cluster is currently at maximum capacity. New deployments are temporarily paused.
+                  </span>
+                </div>
+              )}
+
+              {isFlavorExceedsCapacity && !isClusterFull && (
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-start gap-2.5">
+                  <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <span className="leading-snug">
+                    Requested flavor requires {selectedMemoryMb / 1024} GB RAM, which exceeds remaining cluster memory. Please choose a smaller tier.
+                  </span>
+                </div>
+              )}
+
               <button
                 type="submit"
-                disabled={submitting || userBalance < requiredUpfront}
+                disabled={submitting || isClusterFull || isFlavorExceedsCapacity || userBalance < requiredUpfront}
                 className="w-full py-3.5 rounded-xl font-bold text-sm bg-cyan-400 hover:bg-cyan-300 active:scale-95 text-slate-950 transition-all shadow-lg shadow-cyan-500/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {submitting ? (
                   <>
                     <RefreshCw className="w-4 h-4 animate-spin text-slate-950" />
                     <span>Provisioning Database...</span>
+                  </>
+                ) : isClusterFull ? (
+                  <>
+                    <AlertTriangle className="w-4 h-4 text-slate-950" />
+                    <span>Cluster at Full Capacity</span>
+                  </>
+                ) : isFlavorExceedsCapacity ? (
+                  <>
+                    <AlertTriangle className="w-4 h-4 text-slate-950" />
+                    <span>Flavor Exceeds Available RAM</span>
                   </>
                 ) : (
                   <>
