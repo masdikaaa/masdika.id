@@ -6,6 +6,9 @@ metadata:
 data:
   config.user.inc.php: |
     <?php
+    $cfg['ExecTimeLimit'] = 600;
+    $cfg['MemoryLimit'] = '512M';
+
     // Normalize colon to space for arbitrary server in all request arrays
     foreach (['_REQUEST', '_POST', '_GET'] as $src) {
         if (isset($GLOBALS[$src]['pma_servername'])) {
@@ -68,9 +71,9 @@ spec:
         - name: PMA_ARBITRARY
           value: "1"
         - name: UPLOAD_LIMIT
-          value: 128M
+          value: 512M
         - name: MEMORY_LIMIT
-          value: 256M
+          value: 512M
         volumeMounts:
         - name: user-config
           mountPath: /etc/phpmyadmin/config.user.inc.php
@@ -81,7 +84,7 @@ spec:
             memory: 128Mi
           limits:
             cpu: 500m
-            memory: 512Mi
+            memory: 1024Mi
       volumes:
       - name: user-config
         configMap:

@@ -257,7 +257,7 @@ export async function execInPod(
   containerName: string,
   command: string[],
   stdinData?: Buffer | string
-): Promise<{ stdout: string; stderr: string; success: boolean; error?: string }> {
+): Promise<{ stdout: string; stdoutBuffer?: Buffer; stderr: string; success: boolean; error?: string }> {
   return new Promise(async (resolve, reject) => {
     try {
       const exec = new k8s.Exec(kc);
@@ -314,7 +314,8 @@ export async function execInPod(
       const finish = () => {
         clearTimeout(timeout);
         setTimeout(() => {
-          const stdout = Buffer.concat(stdoutChunks).toString('utf-8');
+          const stdoutBuffer = Buffer.concat(stdoutChunks);
+          const stdout = stdoutBuffer.toString('utf-8');
           const stderr = Buffer.concat(stderrChunks).toString('utf-8');
           const isSuccess = !statusResult || statusResult.status === 'Success';
           const errorMsg = !isSuccess
@@ -322,6 +323,7 @@ export async function execInPod(
             : undefined;
           resolve({
             stdout,
+            stdoutBuffer,
             stderr,
             success: isSuccess,
             error: errorMsg,
@@ -551,6 +553,7 @@ export function generateDatabaseManifest(db: DatabaseServiceRecord): string {
 `;
   }
 
+  const isMysqlLike = typeUpper === 'MYSQL' || typeUpper === 'MARIADB';
   const isMongo = typeUpper === 'MONGODB' || typeUpper === 'MONGO';
   const isRedis = typeUpper === 'REDIS';
   const isPostgres = typeUpper === 'POSTGRES' || typeUpper === 'POSTGRESQL';
@@ -558,6 +561,53 @@ export function generateDatabaseManifest(db: DatabaseServiceRecord): string {
   const isPostgis = isPostgres && (planCheck.includes('postgis') || planCheck.includes('gis'));
   const isVector = isPostgres && (planCheck.includes('vector') || planCheck.includes('pgvector'));
   const isPgVariant = isPostgres && (isPostgis || isVector);
+
+  // MySQL / MariaDB: grant full privileges to tenant user (single-tenant Pod, safe)
+  const rootPwEnv = typeUpper === 'MARIADB' ? 'MARIADB_ROOT_PASSWORD' : 'MYSQL_ROOT_PASSWORD';
+  const mysqlInitConfigMap = isMysqlLike
+    ? `---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cm-db-init-${name}
+  namespace: ${ns}
+  labels:
+    app: ${name}
+    managed-by: masdika-cloud
+data:
+  01-grant-admin.sql: |
+    GRANT ALL PRIVILEGES ON *.* TO '${db.username}'@'%' WITH GRANT OPTION;
+    FLUSH PRIVILEGES;
+`
+    : '';
+
+  const mysqlInitVolumeMount = isMysqlLike
+    ? `
+        - name: db-init-sql
+          mountPath: /docker-entrypoint-initdb.d/01-grant-admin.sql
+          subPath: 01-grant-admin.sql`
+    : '';
+
+  const mysqlInitVolume = isMysqlLike
+    ? `
+      - name: db-init-sql
+        configMap:
+          name: cm-db-init-${name}`
+    : '';
+
+  // lifecycle postStart: ensure grants even on restart when /docker-entrypoint-initdb.d is skipped (existing volume)
+  const mysqlPostStart = isMysqlLike
+    ? `
+        lifecycle:
+          postStart:
+            exec:
+              command:
+              - sh
+              - -c
+              - |
+                until mysqladmin ping -uroot -p"$${rootPwEnv}" --silent 2>/dev/null; do sleep 2; done
+                mysql -uroot -p"$${rootPwEnv}" -e "GRANT ALL PRIVILEGES ON *.* TO '${db.username}'@'%' WITH GRANT OPTION; FLUSH PRIVILEGES;" 2>/dev/null || true`
+    : '';
 
   const redisCommand = isRedis ? `
         command:
@@ -581,7 +631,7 @@ metadata:
     managed-by: masdika-cloud
 data:
   config.js: |
-    export default {
+    module.exports = {
       mongodb: {
         whitelist: ['${db.dbName}']
       }
@@ -668,8 +718,12 @@ ${isPostgis ? '    CREATE EXTENSION IF NOT EXISTS postgis;\n    CREATE EXTENSION
         env:
         - name: PORT
           value: "8081"
-        - name: REDIS_HOSTS
-          value: "local:127.0.0.1:6379:0"
+        - name: REDIS_HOST
+          value: "127.0.0.1"
+        - name: REDIS_PORT
+          value: "6379"
+        - name: REDIS_LABEL
+          value: "${name}"
         - name: REDIS_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -763,7 +817,7 @@ spec:
     requests:
       storage: ${db.storageGb}Gi
   storageClassName: local-path
-${mongoConfigMap}${pgInitConfigMap}---
+${mongoConfigMap}${pgInitConfigMap}${mysqlInitConfigMap}---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -806,7 +860,7 @@ ${envYaml}${redisCommand}
           mountPath: ${mountPath}${isPgVariant ? `
         - name: pg-init-sql
           mountPath: /docker-entrypoint-initdb.d/01-init-extensions.sql
-          subPath: 01-init-extensions.sql` : ''}
+          subPath: 01-init-extensions.sql` : ''}${mysqlInitVolumeMount}
         resources:
           requests:
             cpu: ${reqCpu}m
@@ -831,7 +885,7 @@ ${envYaml}${redisCommand}
             port: ${containerPort}
           initialDelaySeconds: 15
           periodSeconds: 20
-          timeoutSeconds: 5${webGuiContainer}
+          timeoutSeconds: 5${mysqlPostStart}${webGuiContainer}
       volumes:
       - name: db-storage
         persistentVolumeClaim:
@@ -841,7 +895,7 @@ ${envYaml}${redisCommand}
           name: cm-mongo-${name}` : ''}${isPgVariant ? `
       - name: pg-init-sql
         configMap:
-          name: cm-pg-init-${name}` : ''}
+          name: cm-pg-init-${name}` : ''}${mysqlInitVolume}
 ---
 apiVersion: v1
 kind: Service
@@ -1163,7 +1217,7 @@ export async function getDatabaseStatus(
  */
 export async function exportDatabaseDump(
   db: DatabaseServiceRecord
-): Promise<{ success: boolean; data?: string; filename?: string; error?: string }> {
+): Promise<{ success: boolean; data?: Buffer; filename?: string; contentType?: string; error?: string }> {
   try {
     const kc = await getK8sKubeConfig();
     const coreApi = kc.makeApiClient(k8s.CoreV1Api);
@@ -1189,6 +1243,7 @@ export async function exportDatabaseDump(
     let command: string[] = [];
     const safeDbName = (db.dbName || 'db').replace(/[^a-zA-Z0-9_-]/g, '');
     let filename = `${safeDbName}-${timestamp}.sql`;
+    let contentType = 'application/sql';
 
     if (typeUpper === 'MYSQL' || typeUpper === 'MARIADB') {
       filename = `${safeDbName}-${timestamp}.sql`;
@@ -1197,7 +1252,9 @@ export async function exportDatabaseDump(
       filename = `${safeDbName}-${timestamp}.sql`;
       command = ['sh', '-c', `PGPASSWORD=${escapeShellArg(db.password)} pg_dump -h 127.0.0.1 -U ${escapeShellArg(db.username)} -d ${escapeShellArg(db.dbName)}`];
     } else if (typeUpper === 'MONGODB' || typeUpper === 'MONGO') {
-      filename = `${safeDbName}-${timestamp}.json`;
+      // Binary BSON archive (restorable with `mongorestore --archive=<file>`)
+      filename = `${safeDbName}-${timestamp}.archive`;
+      contentType = 'application/octet-stream';
       command = [
         'mongodump',
         `--username=${db.username}`,
@@ -1205,23 +1262,36 @@ export async function exportDatabaseDump(
         '--authenticationDatabase=admin',
         `--db=${db.dbName}`,
         '--archive',
+        '--quiet',
       ];
     } else if (typeUpper === 'REDIS') {
-      filename = `${safeDbName}-${timestamp}.rdb`;
-      command = ['sh', '-c', `redis-cli -a ${escapeShellArg(db.password)} --rdb /tmp/dump.rdb > /dev/null 2>&1 && cat /tmp/dump.rdb`];
+      // Point-in-time RDB snapshot streamed from the live server (no downtime)
+      filename = `redis-${db.id}-${timestamp}.rdb`;
+      contentType = 'application/octet-stream';
+      const tmp = `/tmp/export_${Date.now()}.rdb`;
+      command = [
+        'sh',
+        '-c',
+        `redis-cli -a "$REDIS_PASSWORD" --no-auth-warning --rdb ${tmp} >/dev/null 2>&1 && cat ${tmp}; STATUS=$?; rm -f ${tmp}; exit $STATUS`,
+      ];
     } else {
       return { success: false, error: `Unsupported database engine for dump: ${db.type}` };
     }
 
     const res = await execInPod(kc, ns, podName, 'database', command);
-    if (!res.success && !res.stdout) {
+    const data = res.stdoutBuffer ?? Buffer.from(res.stdout || '', 'utf-8');
+    if (!res.success && data.length === 0) {
       return { success: false, error: res.error || res.stderr || 'Database dump failed' };
+    }
+    if (typeUpper === 'REDIS' && data.subarray(0, 5).toString('ascii') !== 'REDIS') {
+      return { success: false, error: res.stderr?.trim() || 'Failed to create Redis RDB snapshot' };
     }
 
     return {
       success: true,
-      data: res.stdout,
+      data,
       filename,
+      contentType,
     };
   } catch (err: any) {
     return { success: false, error: err?.message || 'Failed to export database' };
@@ -1229,13 +1299,121 @@ export async function exportDatabaseDump(
 }
 
 /**
+ * Restore a Redis RDB snapshot.
+ *
+ * Instances run with `appendonly yes` (Redis 7 multi-part AOF), so Redis ignores dump.rdb on boot.
+ * The validated RDB is therefore installed as the AOF *base* file, then Redis is restarted
+ * (SHUTDOWN NOSAVE -> kubelet restarts the container) and health-checked with PING.
+ * The previous AOF directory is kept until the new data set is confirmed online, then removed.
+ */
+async function restoreRedisSnapshot(
+  kc: k8s.KubeConfig,
+  ns: string,
+  podName: string,
+  db: DatabaseServiceRecord,
+  remoteFile: string
+): Promise<{ success: boolean; message?: string; error?: string }> {
+  const f = escapeShellArg(remoteFile);
+  const cli = 'redis-cli -a "$REDIS_PASSWORD" --no-auth-warning';
+
+  // 1. Validate snapshot compatibility with this Redis version (rejects corrupt / newer RDB formats)
+  const check = await execInPod(kc, ns, podName, 'database', [
+    'sh',
+    '-c',
+    `OUT=$(redis-check-rdb ${f} 2>&1); STATUS=$?; if [ $STATUS -ne 0 ]; then rm -f ${f}; echo "$OUT" | tail -5 >&2; fi; exit $STATUS`,
+  ]);
+  if (!check.success) {
+    const detail = (check.stderr || check.error || '').trim();
+    return {
+      success: false,
+      error: `The RDB snapshot is invalid or was created by a newer Redis version than this instance (${db.version || '7.x'}).${detail ? ' ' + detail.split('\n').pop() : ''}`,
+    };
+  }
+
+  // 2. Install snapshot as the new AOF base (atomic directory swap) and restart Redis without saving
+  const swap = await execInPod(kc, ns, podName, 'database', [
+    'sh',
+    '-c',
+    [
+      'set -e',
+      'rm -rf /data/.restore /data/appendonlydir.prev',
+      'mkdir -p /data/.restore',
+      `cp ${f} /data/.restore/appendonly.aof.1.base.rdb`,
+      ': > /data/.restore/appendonly.aof.1.incr.aof',
+      `printf 'file appendonly.aof.1.base.rdb seq 1 type b\\nfile appendonly.aof.1.incr.aof seq 1 type i\\n' > /data/.restore/appendonly.aof.manifest`,
+      `cp ${f} /data/dump.rdb`,
+      `rm -f ${f}`,
+      'if [ -d /data/appendonlydir ]; then mv /data/appendonlydir /data/appendonlydir.prev; fi',
+      'mv /data/.restore /data/appendonlydir',
+    ].join(' && '),
+  ]);
+  if (!swap.success) {
+    return { success: false, error: swap.stderr?.trim() || swap.error || 'Failed to stage Redis snapshot (storage full?)' };
+  }
+
+  // Container exits on SHUTDOWN, so the exec stream is expected to drop here
+  await execInPod(kc, ns, podName, 'database', ['sh', '-c', `${cli} SHUTDOWN NOSAVE || true`]).catch(() => null);
+
+  // 3. Wait for Redis to come back with the restored data set
+  const coreApi = kc.makeApiClient(k8s.CoreV1Api);
+  const deadline = Date.now() + 90_000;
+  while (Date.now() < deadline) {
+    await new Promise((r) => setTimeout(r, 3000));
+    try {
+      const pods = await coreApi.listNamespacedPod({ namespace: ns, labelSelector: `app=db-${db.id}` });
+      const p = pods.items?.find((it) => it.status?.phase === 'Running');
+      const name = p?.metadata?.name;
+      if (!name) continue;
+      const ping = await execInPod(kc, ns, name, 'database', [
+        'sh',
+        '-c',
+        `${cli} PING && ${cli} DBSIZE && rm -rf /data/appendonlydir.prev`,
+      ]);
+      const lines = ping.stdout.trim().split('\n');
+      if (ping.success && lines[0]?.trim() === 'PONG') {
+        const keys = parseInt(lines[1] || '0', 10);
+        return {
+          success: true,
+          message: `Redis snapshot restored successfully (${isNaN(keys) ? 0 : keys} keys in db0). Instance restarted with the restored data.`,
+        };
+      }
+    } catch {
+      // container still restarting
+    }
+  }
+
+  return {
+    success: false,
+    error: 'Snapshot was installed but Redis did not come back online within 90 seconds. Please check the instance status or contact support.',
+  };
+}
+
+/**
  * Run database import (.sql or .json) inside the pod by staging file into container /tmp
  */
 export async function importDatabaseDump(
   db: DatabaseServiceRecord,
-  fileContent: Buffer | string
+  fileContent: Buffer | string,
+  originalFileName?: string
 ): Promise<{ success: boolean; message?: string; error?: string }> {
   try {
+    const typeUpper = db.type.toUpperCase();
+    const rawBuf = Buffer.isBuffer(fileContent) ? fileContent : Buffer.from(fileContent, 'utf-8');
+
+    // Detect uploaded format from magic bytes (never trust the extension alone)
+    const isGzip = rawBuf.length > 2 && rawBuf[0] === 0x1f && rawBuf[1] === 0x8b;
+    const isMongoArchive = rawBuf.length > 4 && rawBuf.readUInt32LE(0) === 0x8199e26d;
+    const isRedisRdb = rawBuf.subarray(0, 5).toString('ascii') === 'REDIS';
+    const firstChar = rawBuf.subarray(0, 512).toString('utf-8').trimStart().charAt(0);
+    const isJson = firstChar === '[' || firstChar === '{';
+
+    if (typeUpper === 'REDIS' && !isRedisRdb) {
+      return { success: false, error: 'Invalid Redis snapshot. Please upload a valid .rdb file (e.g. created with BGSAVE or redis-cli --rdb).' };
+    }
+    if ((typeUpper === 'MONGODB' || typeUpper === 'MONGO') && !isMongoArchive && !isGzip && !isJson) {
+      return { success: false, error: 'Unsupported MongoDB file. Upload a mongodump archive (.archive / .archive.gz) or a JSON export (.json).' };
+    }
+
     const kc = await getK8sKubeConfig();
     const coreApi = kc.makeApiClient(k8s.CoreV1Api);
     const ns = db.k8sNamespace || 'managed-db';
@@ -1254,7 +1432,6 @@ export async function importDatabaseDump(
     if (!podName) {
       return { success: false, error: 'Pod name not found' };
     }
-    const typeUpper = db.type.toUpperCase();
 
     // Stage dump file into container /tmp via in-memory tar stream to avoid host disk race condition & stdin pipe termination
     const dumpFileName = `import_${Date.now()}_dump`;
@@ -1266,7 +1443,6 @@ export async function importDatabaseDump(
       pack.on('error', reject);
     });
 
-    const rawBuf = Buffer.isBuffer(fileContent) ? fileContent : Buffer.from(fileContent, 'utf-8');
     pack.entry({ name: dumpFileName, mode: 0o644 }, rawBuf);
     pack.finalize();
 
@@ -1285,13 +1461,37 @@ export async function importDatabaseDump(
     let execCmd = '';
 
     if (typeUpper === 'MYSQL' || typeUpper === 'MARIADB') {
-      execCmd = `mysql -u${escapeShellArg(db.username)} -p${escapeShellArg(db.password)} ${escapeShellArg(db.dbName)} < ${escapeShellArg(remoteFile)}; STATUS=$?; rm -f ${escapeShellArg(remoteFile)}; exit $STATUS`;
+      // Sanitize dump: strip DEFINER clauses and comment out SET @@SESSION.SQL_LOG_BIN / SET @@GLOBAL.GTID_PURGED
+      // that require SUPER / SET_USER_ID privileges the tenant user does not have.
+      // Then import as root (available inside the isolated single-tenant pod) for maximum compatibility.
+      const f = escapeShellArg(remoteFile);
+      const rootPwEnv = typeUpper === 'MARIADB' ? 'MARIADB_ROOT_PASSWORD' : 'MYSQL_ROOT_PASSWORD';
+      execCmd = [
+        `sed -i -E`,
+        `  -e 's|/\\*!50013 DEFINER=[^\\"]*\\*/||g'`,
+        `  -e 's|/\\*!50017 DEFINER=[^\\"]*\\*/||g'`,
+        `  -e 's|DEFINER[ ]*=[ ]*\`[^\`]*\`@\`[^\`]*\`||g'`,
+        `  -e 's|^SET @@SESSION\\.SQL_LOG_BIN.*|-- &|'`,
+        `  -e 's|^SET @@GLOBAL\\.GTID_PURGED.*|-- &|'`,
+        `  ${f}`,
+        `&& mysql --max_allowed_packet=512M --default-character-set=utf8mb4 --force -uroot -p"$${rootPwEnv}" ${escapeShellArg(db.dbName)} < ${f}`,
+        `; STATUS=$?; rm -f ${f}; exit $STATUS`,
+      ].join(' ');
     } else if (typeUpper === 'POSTGRES' || typeUpper === 'POSTGRESQL') {
       execCmd = `PGPASSWORD=${escapeShellArg(db.password)} psql -h 127.0.0.1 -U ${escapeShellArg(db.username)} -d ${escapeShellArg(db.dbName)} -f ${escapeShellArg(remoteFile)}; STATUS=$?; rm -f ${escapeShellArg(remoteFile)}; exit $STATUS`;
     } else if (typeUpper === 'MONGODB' || typeUpper === 'MONGO') {
-      execCmd = `mongorestore --username=${escapeShellArg(db.username)} --password=${escapeShellArg(db.password)} --authenticationDatabase=admin --db=${escapeShellArg(db.dbName)} --archive=${escapeShellArg(remoteFile)} || mongoimport --username=${escapeShellArg(db.username)} --password=${escapeShellArg(db.password)} --authenticationDatabase=admin --db=${escapeShellArg(db.dbName)} --file=${escapeShellArg(remoteFile)}; STATUS=$?; rm -f ${escapeShellArg(remoteFile)}; exit $STATUS`;
+      const auth = `--username=${escapeShellArg(db.username)} --password=${escapeShellArg(db.password)} --authenticationDatabase=admin`;
+      const f = escapeShellArg(remoteFile);
+      if (isMongoArchive || isGzip) {
+        // mongodump archive (optionally gzipped). Remap any source DB name into this instance's database.
+        execCmd = `mongorestore ${auth} ${isGzip ? '--gzip ' : ''}--archive=${f} --drop --nsExclude='admin.*' --nsExclude='config.*' --nsExclude='local.*' --nsFrom='$db$.$coll$' --nsTo=${escapeShellArg(`${db.dbName}.$coll$`)} 2>&1; STATUS=$?; rm -f ${f}; exit $STATUS`;
+      } else {
+        // JSON export -> one collection named after the uploaded file
+        const baseName = (originalFileName || 'imported').replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 60) || 'imported';
+        execCmd = `mongoimport ${auth} --db=${escapeShellArg(db.dbName)} --collection=${escapeShellArg(baseName)} ${firstChar === '[' ? '--jsonArray ' : ''}--file=${f} 2>&1; STATUS=$?; rm -f ${f}; exit $STATUS`;
+      }
     } else if (typeUpper === 'REDIS') {
-      execCmd = `cat ${escapeShellArg(remoteFile)} > /data/dump.rdb; rm -f ${escapeShellArg(remoteFile)}; exit 0`;
+      return await restoreRedisSnapshot(kc, ns, podName, db, remoteFile);
     } else {
       return { success: false, error: `Unsupported database engine for import: ${db.type}` };
     }

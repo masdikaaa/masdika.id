@@ -40,10 +40,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
 
     const fileName = file.name.toLowerCase();
-    const validExtensions = [".sql", ".dump", ".txt", ".json"];
+    const typeUpper = db.type.toUpperCase();
+    const validExtensions =
+      typeUpper === "REDIS"
+        ? [".rdb"]
+        : typeUpper === "MONGODB" || typeUpper === "MONGO"
+          ? [".archive", ".gz", ".json", ".dump", ".bson"]
+          : [".sql", ".dump", ".txt"];
     if (!validExtensions.some((ext) => fileName.endsWith(ext))) {
       return NextResponse.json(
-        { error: "Invalid file format. Please upload a .sql or .json file." },
+        { error: `Invalid file format. Supported for ${db.type}: ${validExtensions.join(", ")}` },
         { status: 400 }
       );
     }
@@ -73,7 +79,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         status: db.status,
         k8sNamespace: db.k8sNamespace,
       },
-      buffer
+      buffer,
+      file.name
     );
 
     if (!result.success) {

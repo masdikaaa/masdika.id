@@ -53,11 +53,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
     const filename = dumpResult.filename || `${db.name}-backup.sql`;
 
-    return new NextResponse(dumpResult.data, {
+    return new NextResponse(new Uint8Array(dumpResult.data), {
       status: 200,
       headers: {
-        "Content-Type": "application/sql",
+        "Content-Type": dumpResult.contentType || "application/sql",
         "Content-Disposition": `attachment; filename="${filename}"`,
+        "Content-Length": String(dumpResult.data.length),
         "Cache-Control": "no-cache",
       },
     });

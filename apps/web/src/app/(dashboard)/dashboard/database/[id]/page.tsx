@@ -90,6 +90,54 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
   const [importing, setImporting] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
+  // Engine-aware data transfer wording (Redis is a key-value store: snapshot backup/restore, not SQL import/export)
+  const engineUpper = (db?.type || "").toUpperCase();
+  const isRedisEngine = engineUpper.includes("REDIS");
+  const isMongoEngine = engineUpper.includes("MONGO");
+  const transferUi = isRedisEngine
+    ? {
+        importBtn: "Restore Snapshot",
+        exportBtn: "Download Snapshot",
+        importTitle: "Restore Redis Snapshot (.rdb)",
+        importSubtitle: "Replace all keys with an RDB snapshot",
+        warning:
+          "Restoring a snapshot REPLACES ALL existing keys in every logical database and restarts Redis (about 5–15 seconds of downtime). Download a fresh snapshot first if you may need to roll back.",
+        accept: ".rdb",
+        hint: "Supports .rdb snapshots from Redis 7.2 or older (Max 50MB)",
+        submit: "Restore Snapshot",
+        busy: "Restoring...",
+        exportTitle: "Download a point-in-time RDB snapshot (no downtime)",
+        importTooltip: "Restore an RDB snapshot (replaces all keys)",
+      }
+    : isMongoEngine
+      ? {
+          importBtn: "Import Data",
+          exportBtn: "Export Dump",
+          importTitle: "Import MongoDB Data",
+          importSubtitle: `Restore a mongodump archive or JSON export into ${db?.name ?? "this database"}`,
+          warning:
+            "mongodump archives replace (drop & restore) the collections they contain. JSON files are imported into a collection named after the file.",
+          accept: ".archive,.gz,.json,.dump,.bson",
+          hint: "Supports mongodump .archive / .archive.gz and .json (Max 50MB)",
+          submit: "Start Import",
+          busy: "Importing...",
+          exportTitle: "Download a mongodump archive (restore with mongorestore --archive)",
+          importTooltip: "Import a mongodump archive or JSON file",
+        }
+      : {
+          importBtn: "Import Data",
+          exportBtn: "Export Dump",
+          importTitle: "Import Database Dump",
+          importSubtitle: `Execute an SQL dump directly on ${db?.name ?? "this database"}`,
+          warning:
+            "Executing an import will run all statements against the active database. Make sure you have exported a recent backup if needed.",
+          accept: ".sql,.dump,.txt",
+          hint: "Supports .sql and .dump (Max 50MB)",
+          submit: "Start Import",
+          busy: "Importing...",
+          exportTitle: "Download SQL dump",
+          importTooltip: "Import SQL dump file",
+        };
   // Dedicated Resource Monitoring States (CPU, RAM, Disk)
   const [metricsTimeframe, setMetricsTimeframe] = useState<"live" | "hour" | "day" | "week">("hour");
   const [activeMetricTab, setActiveMetricTab] = useState<"ALL" | "CPU" | "RAM" | "DISK">("ALL");
@@ -189,7 +237,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
   };
 
   const handleDownloadDump = () => {
-    toast.info("Preparing SQL dump download from container...");
+    toast.info(isRedisEngine ? "Creating Redis RDB snapshot..." : "Preparing database dump download from container...");
     const link = document.createElement("a");
     link.href = `/api/user/database/${dbId}/export`;
     link.setAttribute("download", "");
@@ -201,11 +249,11 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
   const handleImport = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedFile) {
-      toast.error("Please select a .sql or .json file to import");
+      toast.error(`Please select a ${transferUi.accept.split(",").join(" / ")} file`);
       return;
     }
     setImporting(true);
-    const toastId = toast.loading("Uploading and executing database import...");
+    const toastId = toast.loading(isRedisEngine ? "Uploading snapshot, validating and restarting Redis..." : "Uploading and executing database import...");
     try {
       const formData = new FormData();
       formData.append("file", selectedFile);
@@ -549,10 +597,10 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                 ? "bg-white/5 border-white/10 text-zinc-200 hover:text-white hover:bg-white/10"
                 : "bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200"
             )}
-            title={isProvisioning ? "Database is not ready yet..." : "Import SQL / data dump file"}
+            title={isProvisioning ? "Database is not ready yet..." : transferUi.importTooltip}
           >
             <Upload className="w-3.5 h-3.5" />
-            <span>Import Data</span>
+            <span>{transferUi.importBtn}</span>
           </button>
 
           {/* Export Dump Button */}
@@ -560,10 +608,10 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
             onClick={handleDownloadDump}
             disabled={isProvisioning || isSuspended}
             className="px-3.5 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 active:scale-95 text-slate-950 flex items-center gap-1.5 transition-all shadow-md cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-            title={isProvisioning ? "Database is not ready yet..." : "Download SQL / data dump"}
+            title={isProvisioning ? "Database is not ready yet..." : transferUi.exportTitle}
           >
             <Download className="w-3.5 h-3.5" />
-            <span>Export Dump</span>
+            <span>{transferUi.exportBtn}</span>
           </button>
         </div>
       </div>
@@ -1177,7 +1225,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                   </span>
                 ) : db.type?.toUpperCase().includes('REDIS') ? (
                   <span>
-                    <strong>Redis Commander Login:</strong> Enter the <strong>User</strong> and <strong>Pass</strong> above in the HTTP authentication prompt to view your Redis keys and metrics with Let&apos;s Encrypt SSL.
+                    <strong>Redis Commander Login:</strong> Enter the <strong>User</strong> and <strong>Pass</strong> above on the Redis Commander sign-in screen to browse keys, run commands and view server info over Let&apos;s Encrypt SSL.
                   </span>
                 ) : (
                   <span>
@@ -1341,18 +1389,18 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                   <UploadCloud className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold">Import Database Dump</h3>
+                  <h3 className="text-base font-bold">{transferUi.importTitle}</h3>
                   <p className={cn("text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>
-                    Execute SQL or JSON dump directly on {db.name}
+                    {transferUi.importSubtitle}
                   </p>
                 </div>
               </div>
 
               {/* Notice */}
-              <div className={cn("p-3 rounded-xl border text-xs flex gap-2.5", isDark ? "bg-amber-500/10 border-amber-500/20 text-amber-300" : "bg-amber-50 border-amber-200 text-amber-800")}>
+              <div className={cn("p-3 rounded-xl border text-xs flex gap-2.5", isRedisEngine ? (isDark ? "bg-red-500/10 border-red-500/20 text-red-300" : "bg-red-50 border-red-200 text-red-800") : (isDark ? "bg-amber-500/10 border-amber-500/20 text-amber-300" : "bg-amber-50 border-amber-200 text-amber-800"))}>
                 <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                 <p className="leading-relaxed">
-                  Executing an import will run all statements against the active database. Make sure you have exported a recent backup if needed.
+                  {transferUi.warning}
                 </p>
               </div>
 
@@ -1361,7 +1409,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                 <input
                   type="file"
                   id="import-file-input"
-                  accept=".sql,.dump,.json,.txt"
+                  accept={transferUi.accept}
                   disabled={importing}
                   onChange={(e) => {
                     if (e.target.files && e.target.files[0]) {
@@ -1377,8 +1425,8 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                   </span>
                   <span className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-400")}>
                     {selectedFile
-                      ? `${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB • Ready to import`
-                      : "Supports .sql, .dump, .json (Max 50MB)"}
+                      ? `${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB • Ready to ${isRedisEngine ? "restore" : "import"}`
+                      : transferUi.hint}
                   </span>
                 </label>
               </div>
@@ -1403,12 +1451,12 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                   {importing ? (
                     <>
                       <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                      <span>Importing...</span>
+                      <span>{transferUi.busy}</span>
                     </>
                   ) : (
                     <>
                       <Upload className="w-3.5 h-3.5" />
-                      <span>Start Import</span>
+                      <span>{transferUi.submit}</span>
                     </>
                   )}
                 </button>
