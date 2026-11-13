@@ -9,7 +9,7 @@ import { formatRupiah } from "@/lib/billing";
 import { toast } from "sonner";
 import {
   Database, Check, Server, HardDrive,
-  Cpu, Layers, ShieldCheck, Rocket, RefreshCw, Eye, EyeOff, MapPin, Sparkles, CheckCircle2, Loader2,
+  Cpu, Layers, ShieldCheck, Rocket, RefreshCw, Eye, EyeOff, Sparkles, CheckCircle2, Loader2,
   AlertTriangle, AlertCircle
 } from "lucide-react";
 // Dedicated database engines & versions (Using authentic official SVG icons & Masdika Cyan theme)
@@ -468,51 +468,65 @@ export default function DatabaseCheckoutFlow() {
       )}
 
       {/* Top Architecture Mode Selector */}
-      <div className={cn("p-1.5 sm:p-2 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-3 w-full max-w-full min-w-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 w-full md:w-auto">
-          <button
-            type="button"
-            onClick={() => setSelectedTier("DEDICATED")}
-            className={cn(
-              "w-full px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center justify-between sm:justify-start gap-2",
-              selectedTier === "DEDICATED"
-                ? "bg-cyan-400 text-slate-950 shadow-md shadow-cyan-500/20"
-                : isDark ? "text-zinc-400 hover:text-white hover:bg-white/[0.04]" : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
-            )}
-          >
-            <div className="flex items-center gap-2 min-w-0">
-              <Server className="w-4 h-4 shrink-0" />
-              <span className="truncate">Dedicated Host</span>
-            </div>
-            <span className={cn("text-[10px] px-2 py-0.5 rounded font-extrabold uppercase shrink-0 whitespace-nowrap", selectedTier === "DEDICATED" ? "bg-slate-950/20 text-slate-950" : isDark ? "bg-white/5 text-zinc-400" : "bg-slate-200 text-slate-700")}>
-              6 Flavors
-            </span>
-          </button>
+      <div className={cn(
+        "p-1.5 rounded-2xl border grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 w-full max-w-full min-w-0",
+        isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200/80"
+      )}>
+        <button
+          type="button"
+          onClick={() => setSelectedTier("DEDICATED")}
+          className={cn(
+            "w-full px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center justify-between gap-3",
+            selectedTier === "DEDICATED"
+              ? "bg-cyan-400 text-slate-950 shadow-md shadow-cyan-500/20 font-bold"
+              : isDark
+                ? "text-zinc-400 hover:text-white hover:bg-white/[0.04]"
+                : "text-slate-600 hover:text-slate-900 hover:bg-white"
+          )}
+        >
+          <div className="flex items-center gap-2.5 min-w-0">
+            <Server className="w-4 h-4 shrink-0" />
+            <span className="truncate">Dedicated Host</span>
+          </div>
+          <span className={cn(
+            "text-[10px] px-2 py-0.5 rounded font-extrabold uppercase shrink-0 whitespace-nowrap",
+            selectedTier === "DEDICATED"
+              ? "bg-slate-950/20 text-slate-950"
+              : isDark
+                ? "bg-white/5 text-zinc-400 border border-white/[0.06]"
+                : "bg-slate-200 text-slate-700 border border-slate-300/60"
+          )}>
+            6 Flavors
+          </span>
+        </button>
 
-          <button
-            type="button"
-            onClick={() => setSelectedTier("SHARED")}
-            className={cn(
-              "w-full px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center justify-between sm:justify-start gap-2",
-              selectedTier === "SHARED"
-                ? "bg-cyan-400 text-slate-950 shadow-md shadow-cyan-500/20"
-                : isDark ? "text-zinc-400 hover:text-white hover:bg-white/[0.04]" : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
-            )}
-          >
-            <div className="flex items-center gap-2 min-w-0">
-              <Database className="w-4 h-4 shrink-0" />
-              <span className="truncate">Shared Multi-Tenant</span>
-            </div>
-            <span className={cn("text-[10px] px-2 py-0.5 rounded font-extrabold uppercase shrink-0 whitespace-nowrap", selectedTier === "SHARED" ? "bg-slate-950/20 text-slate-950" : isDark ? "bg-white/5 text-zinc-400" : "bg-slate-200 text-slate-700")}>
-              Per-GB Storage
-            </span>
-          </button>
-        </div>
-
-        <div className="flex items-center gap-2 text-xs font-medium px-2 text-zinc-400 shrink-0">
-          <MapPin className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-          <span>Region: Sidoarjo (K3s Cluster)</span>
-        </div>
+        <button
+          type="button"
+          onClick={() => setSelectedTier("SHARED")}
+          className={cn(
+            "w-full px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center justify-between gap-3",
+            selectedTier === "SHARED"
+              ? "bg-cyan-400 text-slate-950 shadow-md shadow-cyan-500/20 font-bold"
+              : isDark
+                ? "text-zinc-400 hover:text-white hover:bg-white/[0.04]"
+                : "text-slate-600 hover:text-slate-900 hover:bg-white"
+          )}
+        >
+          <div className="flex items-center gap-2.5 min-w-0">
+            <Database className="w-4 h-4 shrink-0" />
+            <span className="truncate">Shared Multi-Tenant</span>
+          </div>
+          <span className={cn(
+            "text-[10px] px-2 py-0.5 rounded font-extrabold uppercase shrink-0 whitespace-nowrap",
+            selectedTier === "SHARED"
+              ? "bg-slate-950/20 text-slate-950"
+              : isDark
+                ? "bg-white/5 text-zinc-400 border border-white/[0.06]"
+                : "bg-slate-200 text-slate-700 border border-slate-300/60"
+          )}>
+            Per-GB Storage
+          </span>
+        </button>
       </div>
 
       {/* Main Grid: Left Options (2 col) + Right Sticky Summary (1 col) */}

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
 import DatabaseCheckoutFlow from "@/components/DatabaseCheckoutFlow";
@@ -14,7 +14,7 @@ export default function NewDatabasePage() {
     <div className="space-y-6 max-w-full pb-14">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
+        <div className="flex items-center gap-3.5 min-w-0">
           <Link
             href="/dashboard/database"
             className={cn(
@@ -27,7 +27,7 @@ export default function NewDatabasePage() {
           >
             <ChevronLeft className="w-4 h-4" />
           </Link>
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className={cn("text-lg sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                 Deploy Managed Database
@@ -40,6 +40,18 @@ export default function NewDatabasePage() {
               Deploy a production-ready database engine with isolated storage and web viewer in Sidoarjo.
             </p>
           </div>
+        </div>
+
+        {/* Datacenter Region Status Badge */}
+        <div className={cn(
+          "inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold shrink-0 self-start sm:self-center transition-all",
+          isDark
+            ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300"
+            : "bg-white border-slate-200/90 text-slate-700 shadow-2xs"
+        )}>
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <MapPin className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+          <span>Region: <strong className={isDark ? "text-white" : "text-slate-900"}>Sidoarjo (ID-SDA)</strong></span>
         </div>
       </div>
 
