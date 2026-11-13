@@ -390,35 +390,35 @@ export default function AdminDatabasePage() {
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap max-w-full overflow-x-auto pb-1">
           {/* Engine Selector */}
-          <div className={cn("p-1 rounded-xl border flex items-center gap-1", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
-            {["ALL", "MYSQL", "POSTGRES", "MONGODB", "MARIADB"].map((eng) => (
+          <div className={cn("p-1 rounded-xl border flex items-center gap-1 shrink-0 overflow-x-auto", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
+            {["ALL", "MYSQL", "POSTGRES", "MONGODB", "MARIADB", "REDIS"].map((eng) => (
               <button
                 key={eng}
                 type="button"
                 onClick={() => setSelectedEngine(eng)}
                 className={cn(
-                  "px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer",
+                  "px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap",
                   selectedEngine === eng
                     ? "bg-cyan-500 text-slate-950 shadow-xs"
                     : isDark ? "text-zinc-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
                 )}
               >
-                {eng === "ALL" ? "All Engines" : eng === "POSTGRES" ? "Postgres" : eng}
+                {eng === "ALL" ? "All Engines" : eng === "POSTGRES" ? "Postgres" : eng === "REDIS" ? "Redis" : eng}
               </button>
             ))}
           </div>
 
           {/* Tier Selector */}
-          <div className={cn("p-1 rounded-xl border flex items-center gap-1", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
+          <div className={cn("p-1 rounded-xl border flex items-center gap-1 shrink-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
             {["ALL", "DEDICATED", "SHARED"].map((tier) => (
               <button
                 key={tier}
                 type="button"
                 onClick={() => setSelectedTier(tier)}
                 className={cn(
-                  "px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer",
+                  "px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap",
                   selectedTier === tier
                     ? "bg-cyan-500 text-slate-950 shadow-xs"
                     : isDark ? "text-zinc-400 hover:text-white" : "text-slate-600 hover:text-slate-900"

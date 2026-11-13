@@ -186,7 +186,7 @@ export default function DatabaseCheckoutFlow() {
     if (versionParam) {
       setSelectedVersion(versionParam);
       const variants = SHARED_DATABASE_VARIANTS[activeEngineId] || [];
-      const match = variants.find(v => v.version === versionParam);
+      const match = variants.find(v => v.version === versionParam || v.id === versionParam || (versionParam.includes("postgis") && v.id.includes("postgis")) || (versionParam.includes("vector") && v.id.includes("vector")) || (versionParam.includes("full") && v.id.includes("full")));
       if (match) {
         setSelectedSharedId(match.id);
       }
@@ -888,7 +888,53 @@ export default function DatabaseCheckoutFlow() {
                 </div>
               </div>
 
-              {/* Step 2: Storage Size Scale Bar */}
+              {/* Step 2: Shared Package Details (Spec Overview) */}
+              <div className={cn("rounded-2xl border p-4 sm:p-6 transition-all w-full max-w-full min-w-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                  <div>
+                    <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+                      Shared Package Details
+                    </h2>
+                    <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                      Burstable multi-tenant container specification on Kubernetes K3s
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={cn("text-xs font-mono font-bold px-2.5 py-1 rounded-full border shrink-0", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+                      {formatRupiah(activeSharedType.ratePerGb)}/GB/mo
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+                  <div className={cn("p-3 rounded-xl border flex flex-col justify-between", isDark ? "bg-white/[0.02] border-white/[0.06]" : "bg-slate-50 border-slate-200/80")}>
+                    <span className={cn("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-500")}>Compute</span>
+                    <span className={cn("text-xs sm:text-sm font-bold mt-1.5 flex items-center gap-1.5", isDark ? "text-zinc-200" : "text-slate-800")}>
+                      <Cpu className="w-3.5 h-3.5 text-cyan-400 shrink-0" /> 0.5 vCPU Pool
+                    </span>
+                  </div>
+                  <div className={cn("p-3 rounded-xl border flex flex-col justify-between", isDark ? "bg-white/[0.02] border-white/[0.06]" : "bg-slate-50 border-slate-200/80")}>
+                    <span className={cn("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-500")}>Memory</span>
+                    <span className={cn("text-xs sm:text-sm font-bold mt-1.5 flex items-center gap-1.5", isDark ? "text-zinc-200" : "text-slate-800")}>
+                      <Layers className="w-3.5 h-3.5 text-cyan-400 shrink-0" /> 1 GB RAM
+                    </span>
+                  </div>
+                  <div className={cn("p-3 rounded-xl border flex flex-col justify-between", isDark ? "bg-white/[0.02] border-white/[0.06]" : "bg-slate-50 border-slate-200/80")}>
+                    <span className={cn("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-500")}>Storage PVC</span>
+                    <span className={cn("text-xs sm:text-sm font-bold mt-1.5 flex items-center gap-1.5", isDark ? "text-zinc-200" : "text-slate-800")}>
+                      <HardDrive className="w-3.5 h-3.5 text-cyan-400 shrink-0" /> SATA SSD
+                    </span>
+                  </div>
+                  <div className={cn("p-3 rounded-xl border flex flex-col justify-between", isDark ? "bg-white/[0.02] border-white/[0.06]" : "bg-slate-50 border-slate-200/80")}>
+                    <span className={cn("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-500")}>Web Viewer</span>
+                    <span className="text-xs sm:text-sm font-bold text-cyan-500 dark:text-cyan-400 mt-1.5 flex items-center gap-1.5 truncate">
+                      {activeSharedEngineMeta.webPanel}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 3: Storage Size Scale Bar */}
               <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all w-full max-w-full min-w-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
                 <div className="mb-4">
                   <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>

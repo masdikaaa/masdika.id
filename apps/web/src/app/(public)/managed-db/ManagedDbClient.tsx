@@ -70,6 +70,33 @@ const DEDICATED_FLAVORS = [
   { id: "flavor-4vcpu-8gb", vcpu: "4 vCPU", ram: "8 GB", price: 400000, hourlyPrice: 555, planName: "Dedicated 4 vCPU / 8 GB" },
 ];
 
+const SHARED_ENGINE_VERSIONS: Record<string, Array<{ id: string; name: string; ratePerGb: number; badge?: string }>> = {
+  POSTGRESQL: [
+    { id: "16", name: "16 LTS", ratePerGb: 10000 },
+    { id: "17", name: "17 (Latest)", ratePerGb: 10000 },
+    { id: "15", name: "15 LTS", ratePerGb: 10000 },
+    { id: "postgres-postgis", name: "16 + PostGIS", ratePerGb: 12500, badge: "GIS" },
+    { id: "postgres-vector", name: "16 + pgvector", ratePerGb: 12500, badge: "AI" },
+    { id: "postgres-full", name: "16 + PostGIS + pgvector", ratePerGb: 15000, badge: "Full" },
+  ],
+  MYSQL: [
+    { id: "8.0", name: "8.0 LTS", ratePerGb: 10000 },
+    { id: "8.4", name: "8.4 LTS", ratePerGb: 10000 },
+  ],
+  MARIADB: [
+    { id: "10.11", name: "10.11 LTS", ratePerGb: 10000 },
+    { id: "11.4", name: "11.4 LTS", ratePerGb: 10000 },
+  ],
+  MONGODB: [
+    { id: "7.0", name: "7.0 (Current)", ratePerGb: 10000 },
+    { id: "6.0", name: "6.0 LTS", ratePerGb: 10000 },
+  ],
+  REDIS: [
+    { id: "7.2", name: "7.2 LTS", ratePerGb: 10000 },
+    { id: "7.0", name: "7.0 LTS", ratePerGb: 10000 },
+  ],
+};
+
 const SUPPORTED_ENGINES = [
   { 
     name: "PostgreSQL", 
@@ -214,22 +241,42 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
   const [storageGb, setStorageGb] = useState<number>(1);
   const storageSliderId = useId();
 
+  const isShared = selectedTier === "SHARED";
+  const activeEngineObj = SUPPORTED_ENGINES.find(e => e.type === selectedEngine) || SUPPORTED_ENGINES[0];
+
+  const availableVersions = isShared
+    ? (SHARED_ENGINE_VERSIONS[selectedEngine] || activeEngineObj.versions || [])
+    : (activeEngineObj.versions || []);
+
+  const activeSharedVersion = availableVersions.find(v => v.id === selectedVersion);
+  const effectiveSharedRate = (activeSharedVersion as any)?.ratePerGb || safePricing.sharedMonthlyPerGb;
+
   const handleSelectEngine = (engineType: string) => {
     setSelectedEngine(engineType);
     const eng = SUPPORTED_ENGINES.find(e => e.type === engineType);
     if (eng && eng.versions && eng.versions.length > 0) {
-      setSelectedVersion(eng.defaultVersion || eng.versions[0].id);
+      const vers = isShared ? (SHARED_ENGINE_VERSIONS[engineType] || eng.versions) : eng.versions;
+      setSelectedVersion(vers[0]?.id || eng.defaultVersion || "16");
+    }
+  };
+
+  const handleTierChange = (tier: "SHARED" | "DEDICATED") => {
+    setSelectedTier(tier);
+    if (tier === "DEDICATED") {
+      const dedicatedVers = activeEngineObj.versions || [];
+      if (!dedicatedVers.some(v => v.id === selectedVersion)) {
+        setSelectedVersion(activeEngineObj.defaultVersion || dedicatedVers[0]?.id || "16");
+      }
     }
   };
 
   const selectedFlavor = DEDICATED_FLAVORS.find(f => f.id === selectedFlavorId) || DEDICATED_FLAVORS[0];
 
   // Price Calculation exactly matching dashboard checkout:
-  // Shared: storageGb * ratePerGb (Rp 10.000/GB)
+  // Shared: storageGb * ratePerGb (Rp 10.000/GB base, or custom edition rate)
   // Dedicated: flavor.price + (storageGb * 5.000)
-  const isShared = selectedTier === "SHARED";
   const monthlyPrice = isShared 
-    ? storageGb * safePricing.sharedMonthlyPerGb
+    ? storageGb * effectiveSharedRate
     : selectedFlavor.price + (storageGb * safePricing.dedicatedStoragePerGbMonthly);
   
   const hourlyRate = Math.max(1, Math.ceil(monthlyPrice / 720));
@@ -393,8 +440,6 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
     const delta = direction === "left" ? -280 : 280;
     container.scrollBy({ left: delta, behavior: "smooth" });
   };
-
-  const activeEngineObj = SUPPORTED_ENGINES.find(e => e.type === selectedEngine) || SUPPORTED_ENGINES[0];
 
   return (
     <div className="flex flex-col min-h-screen pt-24 md:pt-32 pb-10 sm:pb-14 overflow-x-hidden">
@@ -713,49 +758,98 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
-                {SUPPORTED_ENGINES.map((eng) => {
+                {SUPPORTED_ENGINES.map((eng, idx) => {
                   const isSelected = selectedEngine === eng.type;
+                  const isLast = idx === SUPPORTED_ENGINES.length - 1;
                   return (
                     <button
                       key={eng.type}
                       type="button"
                       onClick={() => handleSelectEngine(eng.type)}
                       className={cn(
-                        "p-4 rounded-xl border text-left transition-all relative flex flex-col justify-between group cursor-pointer",
+                        "rounded-xl border text-left transition-all relative group cursor-pointer",
+                        isLast
+                          ? "col-span-2 sm:col-span-1 lg:col-span-1 p-3.5 sm:p-4 flex flex-row sm:flex-col items-center sm:items-start justify-between min-h-[72px] sm:min-h-[120px]"
+                          : "col-span-1 p-3.5 sm:p-4 flex flex-col justify-between min-h-[100px] sm:min-h-[120px]",
                         isSelected
                           ? "border-cyan-500 bg-cyan-500/10 shadow-sm ring-1 ring-cyan-500/30"
                           : "border-[var(--border-primary)] bg-[var(--surface-secondary)] hover:border-cyan-500/40"
                       )}
                     >
-                      <div className="flex items-center justify-between mb-3">
-                        <img src={eng.icon} alt={eng.name} className="w-8 h-8 object-contain" />
-                        {isSelected && (
-                          <div className="w-5 h-5 rounded-full bg-cyan-400 text-slate-950 flex items-center justify-center">
-                            <Check className="w-3 h-3 stroke-[3]" />
+                      {/* Mobile Row Layout for Last Item (Redis) when col-span-2 */}
+                      {isLast ? (
+                        <>
+                          {/* Mobile view (< sm): Horizontal row */}
+                          <div className="flex sm:hidden items-center justify-between w-full">
+                            <div className="flex items-center gap-3">
+                              <img src={eng.icon} alt={eng.name} className="w-8 h-8 object-contain shrink-0" />
+                              <div>
+                                <div className="text-sm font-bold text-[var(--text-primary)]">
+                                  {eng.name}
+                                </div>
+                                <div className="text-xs text-cyan-600 dark:text-cyan-400 font-semibold mt-0.5">
+                                  {eng.webTool}
+                                </div>
+                              </div>
+                            </div>
+                            {isSelected && (
+                              <div className="w-5 h-5 rounded-full bg-cyan-400 text-slate-950 flex items-center justify-center shrink-0">
+                                <Check className="w-3 h-3 stroke-[3]" />
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
-                      <div>
-                        <div className="text-sm sm:text-base font-bold text-[var(--text-primary)]">
-                          {eng.name}
-                        </div>
-                        <div className="text-xs text-cyan-600 dark:text-cyan-400 font-semibold mt-0.5">
-                          {eng.webTool}
-                        </div>
-                      </div>
+
+                          {/* Desktop & Tablet view (>= sm): Standard vertical card */}
+                          <div className="hidden sm:flex items-center justify-between mb-3 w-full">
+                            <img src={eng.icon} alt={eng.name} className="w-8 h-8 object-contain" />
+                            {isSelected && (
+                              <div className="w-5 h-5 rounded-full bg-cyan-400 text-slate-950 flex items-center justify-center">
+                                <Check className="w-3 h-3 stroke-[3]" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="hidden sm:block">
+                            <div className="text-sm sm:text-base font-bold text-[var(--text-primary)]">
+                              {eng.name}
+                            </div>
+                            <div className="text-xs text-cyan-600 dark:text-cyan-400 font-semibold mt-0.5">
+                              {eng.webTool}
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex items-center justify-between mb-3 w-full">
+                            <img src={eng.icon} alt={eng.name} className="w-8 h-8 object-contain" />
+                            {isSelected && (
+                              <div className="w-5 h-5 rounded-full bg-cyan-400 text-slate-950 flex items-center justify-center">
+                                <Check className="w-3 h-3 stroke-[3]" />
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <div className="text-sm sm:text-base font-bold text-[var(--text-primary)]">
+                              {eng.name}
+                            </div>
+                            <div className="text-xs text-cyan-600 dark:text-cyan-400 font-semibold mt-0.5">
+                              {eng.webTool}
+                            </div>
+                          </div>
+                        </>
+                      )}
                     </button>
                   );
                 })}
               </div>
 
               {/* Version Selector for Selected Engine */}
-              {activeEngineObj.versions && activeEngineObj.versions.length > 0 && (
+              {availableVersions && availableVersions.length > 0 && (
                 <div className="mt-4 pt-4 border-t border-[var(--border-primary)] flex flex-wrap items-center gap-3">
                   <span className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider shrink-0">
                     Engine Version:
                   </span>
                   <div className="flex flex-wrap items-center gap-2">
-                    {activeEngineObj.versions.map((ver) => {
+                    {availableVersions.map((ver: any) => {
                       const isVerSelected = selectedVersion === ver.id;
                       return (
                         <button
@@ -763,13 +857,23 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                           type="button"
                           onClick={() => setSelectedVersion(ver.id)}
                           className={cn(
-                            "px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all border cursor-pointer",
+                            "px-3 py-1.5 rounded-lg text-xs font-bold transition-all border cursor-pointer flex items-center gap-1.5",
                             isVerSelected
                               ? "bg-cyan-400 text-slate-950 border-cyan-400 shadow-sm"
                               : "border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-cyan-500/40"
                           )}
                         >
-                          {ver.name}
+                          <span>{ver.name}</span>
+                          {isShared && ver.ratePerGb && ver.ratePerGb > 10000 && (
+                            <span className={cn(
+                              "text-[10px] px-1.5 py-0.5 rounded font-mono font-bold",
+                              isVerSelected
+                                ? "bg-slate-950/20 text-slate-950"
+                                : "bg-cyan-500/15 text-cyan-400 border border-cyan-500/30"
+                            )}>
+                              {formatCurrency(ver.ratePerGb)}/GB
+                            </span>
+                          )}
                         </button>
                       );
                     })}
@@ -794,14 +898,11 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                 {/* Shared Tier */}
                 <button
                   type="button"
-                  onClick={() => {
-                    setSelectedTier("SHARED");
-                    if (storageGb > 20) setStorageGb(20);
-                  }}
+                  onClick={() => handleTierChange("SHARED")}
                   className={cn(
                     "p-4 sm:p-5 rounded-xl border text-left transition-all relative flex flex-col justify-between cursor-pointer",
                     isShared
-                      ? "border-cyan-500 bg-cyan-500/10 shadow-sm"
+                      ? "border-cyan-500 bg-cyan-500/10 shadow-sm ring-1 ring-cyan-500/30"
                       : "border-[var(--border-primary)] bg-[var(--surface-secondary)] hover:border-cyan-500/40"
                   )}
                 >
@@ -837,11 +938,11 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                 {/* Dedicated Tier */}
                 <button
                   type="button"
-                  onClick={() => setSelectedTier("DEDICATED")}
+                  onClick={() => handleTierChange("DEDICATED")}
                   className={cn(
                     "p-4 sm:p-5 rounded-xl border text-left transition-all relative flex flex-col justify-between cursor-pointer",
                     !isShared
-                      ? "border-cyan-500 bg-cyan-500/10 shadow-sm"
+                      ? "border-cyan-500 bg-cyan-500/10 shadow-sm ring-1 ring-cyan-500/30"
                       : "border-[var(--border-primary)] bg-[var(--surface-secondary)] hover:border-cyan-500/40"
                   )}
                 >
@@ -876,8 +977,77 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
               </div>
             </div>
 
-            {/* Step 2b: Dedicated Flavors (Only for Dedicated Tier) */}
-            {!isShared && (
+            {/* Step 2b: Architecture Flavor / Package Specification */}
+            {isShared ? (
+              <div className="mb-8">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2 mb-3">
+                  <label className="text-xs font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 flex items-center gap-2">
+                    <span className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px] shrink-0">2b</span>
+                    <span>Shared Database Package Specification</span>
+                  </label>
+                  <span className="text-xs text-[var(--text-muted)] font-medium pl-7 sm:pl-0">
+                    Burstable multi-tenant container on Kubernetes K3s
+                  </span>
+                </div>
+
+                <div className="p-4 sm:p-5 rounded-2xl border border-cyan-500/30 bg-cyan-500/[0.04] relative overflow-hidden">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-4 border-b border-[var(--border-primary)]">
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-base font-bold text-[var(--text-primary)]">
+                          Shared Multi-Tenant Package
+                        </span>
+                        <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                          Burstable Tier
+                        </span>
+                        <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/25">
+                          Active &amp; Ready
+                        </span>
+                      </div>
+                      <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">
+                        Isolated container Pod running on Dell PowerEdge hardware with Linux cgroup limits and persistent SATA SSD block storage.
+                      </p>
+                    </div>
+                    <div className="sm:text-right shrink-0">
+                      <div className="text-xl sm:text-2xl font-black text-cyan-600 dark:text-cyan-400">
+                        {formatCurrency(effectiveSharedRate)}
+                        <span className="text-xs font-normal text-[var(--text-muted)]">/GB/mo</span>
+                      </div>
+                      <div className="text-[11px] text-[var(--text-muted)] font-mono">
+                        ~{formatCurrency(Math.max(1, Math.ceil(effectiveSharedRate / 720)))}/GB/hr (PAYG)
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div className="p-3 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] flex flex-col justify-between">
+                      <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider">Compute</span>
+                      <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] mt-1.5 flex items-center gap-1.5">
+                        <Cpu className="w-3.5 h-3.5 text-cyan-400 shrink-0" /> 0.5 vCPU Pool
+                      </span>
+                    </div>
+                    <div className="p-3 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] flex flex-col justify-between">
+                      <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider">Memory</span>
+                      <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] mt-1.5 flex items-center gap-1.5">
+                        <Box className="w-3.5 h-3.5 text-cyan-400 shrink-0" /> 1 GB RAM
+                      </span>
+                    </div>
+                    <div className="p-3 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] flex flex-col justify-between">
+                      <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider">Storage Engine</span>
+                      <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] mt-1.5 flex items-center gap-1.5">
+                        <HardDrive className="w-3.5 h-3.5 text-cyan-400 shrink-0" /> SATA SSD PVC
+                      </span>
+                    </div>
+                    <div className="p-3 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] flex flex-col justify-between">
+                      <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider">Web Management</span>
+                      <span className="text-xs sm:text-sm font-bold text-cyan-600 dark:text-cyan-400 mt-1.5 flex items-center gap-1.5 truncate">
+                        <Globe className="w-3.5 h-3.5 shrink-0" /> {activeEngineObj.webTool}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
               <div className="mb-8">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2 mb-3">
                   <label className="text-xs font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 flex items-center gap-2">
@@ -935,7 +1105,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                     {storageGb} GB
                   </span>
                   <span className="text-xs text-[var(--text-muted)] whitespace-nowrap">
-                    SATA SSD PVC ({isShared ? "Rp 10.000/GB" : "Rp 5.000/GB"})
+                    SATA SSD PVC ({isShared ? `${formatCurrency(effectiveSharedRate)}/GB` : "Rp 5.000/GB"})
                   </span>
                 </div>
               </div>
@@ -1001,12 +1171,12 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                 </div>
                 {isShared ? (
                   <p className="text-xs text-[var(--text-secondary)] mt-1.5">
-                    Includes {activeEngineObj.name} {activeEngineObj.versions?.find(v => v.id === selectedVersion)?.name || selectedVersion}, 0.5 vCPU / 1GB RAM, {storageGb} GB SSD &amp; {activeEngineObj.webTool}.
+                    Includes {activeEngineObj.name} {(availableVersions.find((v: any) => v.id === selectedVersion) as any)?.name || selectedVersion}, 0.5 vCPU / 1GB RAM, {storageGb} GB SATA SSD &amp; {activeEngineObj.webTool}.
                   </p>
                 ) : (
                   <div className="text-xs text-[var(--text-secondary)] mt-1.5">
                     <p>
-                      Includes {activeEngineObj.name} {activeEngineObj.versions?.find(v => v.id === selectedVersion)?.name || selectedVersion}, {selectedFlavor.vcpu} / {selectedFlavor.ram}, {storageGb} GB SSD &amp; {activeEngineObj.webTool}.
+                      Includes {activeEngineObj.name} {activeEngineObj.versions?.find(v => v.id === selectedVersion)?.name || selectedVersion}, {selectedFlavor.vcpu} / {selectedFlavor.ram}, {storageGb} GB SATA SSD &amp; {activeEngineObj.webTool}.
                     </p>
                     <p className="text-[11px] text-[var(--text-muted)] mt-0.5 font-medium">
                       Flavor: {formatCurrency(selectedFlavor.price)} + Storage ({storageGb} GB × Rp 5.000): {formatCurrency(storageGb * 5000)}
