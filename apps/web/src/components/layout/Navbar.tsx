@@ -25,6 +25,7 @@ import {
   Rocket,
   Sun,
   Moon,
+  Database,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
@@ -144,6 +145,13 @@ const DEV_MENU_ITEMS: MenuItem[] = [
     href: "/app-catalog",
     icon: Rocket,
     badge: "1-Click",
+  },
+  {
+    title: "Managed DB",
+    description: "High-performance managed MySQL, MariaDB, PostgreSQL & MongoDB.",
+    href: "/managed-db",
+    icon: Database,
+    badge: "New",
   },
 ];
 
