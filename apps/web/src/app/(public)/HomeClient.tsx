@@ -163,7 +163,7 @@ const INFRASTRUCTURE_STACK = [
     category: "Core Database",
     description: "ACID-compliant relational database engine for high-concurrency state.",
     icon: SiPostgresql,
-    iconColor: "text-[#336791] dark:text-[#60a5fa]",
+    iconColor: "text-sky-600 dark:text-sky-400",
   },
 ];
 

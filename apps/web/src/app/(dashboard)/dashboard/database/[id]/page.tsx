@@ -258,8 +258,14 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
         return {
           name: "MySQL",
           icon: SiMysql,
-          color: "text-[#00758F]",
-          badgeBg: "bg-[#00758F]/15 border-[#00758F]/30 text-[#00758F]",
+          color: "text-cyan-400 dark:text-cyan-400",
+          colorDark: "text-cyan-400",
+          colorLight: "text-cyan-700",
+          boxDark: "bg-cyan-500/10 border-cyan-500/30 text-cyan-400 shadow-sm shadow-cyan-500/10",
+          boxLight: "bg-cyan-50 border-cyan-200 text-cyan-700 shadow-2xs",
+          badgeBg: "bg-cyan-500/15 border-cyan-500/30 text-cyan-300 dark:bg-cyan-500/15 dark:border-cyan-500/30 dark:text-cyan-300",
+          badgeDark: "bg-cyan-500/15 border-cyan-500/30 text-cyan-300",
+          badgeLight: "bg-cyan-50 border-cyan-200 text-cyan-700",
           webToolName: "phpMyAdmin",
           webToolUrl: db?.connectionDetails?.pmaUrl || ""
         };
@@ -267,8 +273,14 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
         return {
           name: "MariaDB",
           icon: SiMariadb,
-          color: "text-[#C0765A]",
-          badgeBg: "bg-[#C0765A]/15 border-[#C0765A]/30 text-[#C0765A]",
+          color: "text-amber-400 dark:text-amber-400",
+          colorDark: "text-amber-400",
+          colorLight: "text-amber-700",
+          boxDark: "bg-amber-500/10 border-amber-500/30 text-amber-400 shadow-sm shadow-amber-500/10",
+          boxLight: "bg-amber-50 border-amber-200 text-amber-700 shadow-2xs",
+          badgeBg: "bg-amber-500/15 border-amber-500/30 text-amber-300 dark:bg-amber-500/15 dark:border-amber-500/30 dark:text-amber-300",
+          badgeDark: "bg-amber-500/15 border-amber-500/30 text-amber-300",
+          badgeLight: "bg-amber-50 border-amber-200 text-amber-700",
           webToolName: "phpMyAdmin",
           webToolUrl: db?.connectionDetails?.pmaUrl || ""
         };
@@ -277,8 +289,14 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
         return {
           name: "PostgreSQL",
           icon: SiPostgresql,
-          color: "text-[#336791]",
-          badgeBg: "bg-[#336791]/15 border-[#336791]/30 text-[#336791]",
+          color: "text-sky-400 dark:text-sky-400",
+          colorDark: "text-sky-400",
+          colorLight: "text-sky-700",
+          boxDark: "bg-sky-500/10 border-sky-500/30 text-sky-400 shadow-sm shadow-sky-500/10",
+          boxLight: "bg-sky-50 border-sky-200 text-sky-700 shadow-2xs",
+          badgeBg: "bg-sky-500/15 border-sky-500/30 text-sky-300 dark:bg-sky-500/15 dark:border-sky-500/30 dark:text-sky-300",
+          badgeDark: "bg-sky-500/15 border-sky-500/30 text-sky-300",
+          badgeLight: "bg-sky-50 border-sky-200 text-sky-700",
           webToolName: "pgAdmin 4",
           webToolUrl: db?.connectionDetails?.pgadminUrl || ""
         };
@@ -287,8 +305,14 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
         return {
           name: "MongoDB",
           icon: SiMongodb,
-          color: "text-[#47A248]",
-          badgeBg: "bg-[#47A248]/15 border-[#47A248]/30 text-[#47A248]",
+          color: "text-emerald-400 dark:text-emerald-400",
+          colorDark: "text-emerald-400",
+          colorLight: "text-emerald-700",
+          boxDark: "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-sm shadow-emerald-500/10",
+          boxLight: "bg-emerald-50 border-emerald-200 text-emerald-700 shadow-2xs",
+          badgeBg: "bg-emerald-500/15 border-emerald-500/30 text-emerald-300 dark:bg-emerald-500/15 dark:border-emerald-500/30 dark:text-emerald-300",
+          badgeDark: "bg-emerald-500/15 border-emerald-500/30 text-emerald-300",
+          badgeLight: "bg-emerald-50 border-emerald-200 text-emerald-700",
           webToolName: "Mongo Express",
           webToolUrl: db?.connectionDetails?.mongoUrl || db?.connectionDetails?.mongoExpressUrl || ""
         };
@@ -296,8 +320,14 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
         return {
           name: type || "Database",
           icon: Database,
-          color: "text-cyan-400",
-          badgeBg: "bg-cyan-500/15 border-cyan-500/30 text-cyan-400",
+          color: "text-cyan-400 dark:text-cyan-400",
+          colorDark: "text-cyan-400",
+          colorLight: "text-cyan-700",
+          boxDark: "bg-cyan-500/10 border-cyan-500/30 text-cyan-400 shadow-sm shadow-cyan-500/10",
+          boxLight: "bg-cyan-50 border-cyan-200 text-cyan-700 shadow-2xs",
+          badgeBg: "bg-cyan-500/15 border-cyan-500/30 text-cyan-300 dark:bg-cyan-500/15 dark:border-cyan-500/30 dark:text-cyan-300",
+          badgeDark: "bg-cyan-500/15 border-cyan-500/30 text-cyan-300",
+          badgeLight: "bg-cyan-50 border-cyan-200 text-cyan-700",
           webToolName: "Web Panel",
           webToolUrl: db?.connectionDetails?.pmaUrl || ""
         };
@@ -367,18 +397,24 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
             <ChevronLeft className="w-4 h-4" />
           </Link>
           <div>
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <div className={cn("w-7 h-7 rounded-lg border flex items-center justify-center shrink-0", isDark ? "bg-white/[0.04] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
-                <EngineIcon className={cn("w-4 h-4", engine.color)} />
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className={cn(
+                "w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 shadow-xs",
+                isDark ? engine.boxDark : engine.boxLight
+              )}>
+                <EngineIcon className={cn("w-5 h-5", isDark ? engine.colorDark : engine.colorLight)} />
               </div>
-              <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+              <h1 className={cn("text-xl sm:text-2xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                 {db.name}
               </h1>
-              <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-md border", engine.badgeBg)}>
+              <span className={cn(
+                "text-[10px] sm:text-xs font-bold px-2.5 py-0.5 rounded-md border",
+                isDark ? engine.badgeDark : engine.badgeLight
+              )}>
                 {engine.name} {db.version}
               </span>
               <span className={cn(
-                "text-[10px] font-bold px-2 py-0.5 rounded-md border",
+                "text-[10px] sm:text-xs font-bold px-2.5 py-0.5 rounded-md border",
                 isDedicated
                   ? isDark
                     ? "bg-cyan-500/15 text-cyan-300 border-cyan-500/30"
@@ -405,8 +441,8 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                 {db.status}
               </span>
             </div>
-            <p className={cn("text-xs sm:text-sm font-medium mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
-              Endpoint: <span className="font-mono text-cyan-400">{db.host}:{db.port}</span> • Region: {db.region} • PAYG: {formatRupiah(db.hourlyRate || 14)}/hr
+            <p className={cn("text-xs sm:text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+              Endpoint: <span className="font-mono text-cyan-400 font-bold">{db.host}:{db.port}</span> • Region: {db.region} • PAYG: {formatRupiah(db.hourlyRate || 14)}/hr
             </p>
           </div>
         </div>
