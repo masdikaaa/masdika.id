@@ -46,7 +46,7 @@ spec:
         runAsGroup: 70
       containers:
         - name: postgres
-          image: postgres:18-alpine
+          image: postgres:18.7-alpine
           imagePullPolicy: IfNotPresent
           securityContext:
             capabilities:
