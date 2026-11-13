@@ -1,7 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
-import { allocateAvailablePort, deployDatabase, parseDatabasePlanLimits, getK8sClusterConfig, buildConnectionDetails, checkDatabaseClusterCapacity } from "@/lib/k8s-database";
+import {
+  allocateAvailablePort,
+  deployDatabase,
+  parseDatabasePlanLimits,
+  getK8sClusterConfig,
+  buildConnectionDetails,
+  checkDatabaseClusterCapacity,
+  getDatabaseStatus,
+} from "@/lib/k8s-database";
+import { assertSufficientCommitmentBalance } from "@/lib/billing-commitment";
 import { sendDatabaseProvisionedEmail } from "@/lib/email";
 import crypto from "crypto";
 
@@ -193,6 +202,21 @@ export async function POST(req: NextRequest) {
     }
 
     const upfrontCharge = billingMode === "MONTHLY" ? monthlyPrice : hourlyRate;
+    const newDbMonthly = billingMode === "MONTHLY" ? monthlyPrice : (monthlyPrice || Math.round(hourlyRate * 720));
+
+    // Security: Validate accumulated active services commitment + 1 month new database estimation
+    let requiredBalance = newDbMonthly;
+    try {
+      const commitmentCheck = await assertSufficientCommitmentBalance({
+        userId: user.id,
+        userBalance: user.balance,
+        newServiceMonthly: newDbMonthly,
+        serviceName: `${effectivePlanName} (${cleanName})`,
+      });
+      requiredBalance = commitmentCheck.requiredBalance;
+    } catch (commitmentErr: any) {
+      return NextResponse.json({ error: commitmentErr.message }, { status: 400 });
+    }
 
     // 1. Pre-flight Cluster Resource Capacity Check (prevents charging or errors if server is full)
     const capacityCheck = await checkDatabaseClusterCapacity(cpuShares, memoryMb, storageGb);
@@ -212,11 +236,11 @@ export async function POST(req: NextRequest) {
       }, { status: 503 });
     }
 
-    // 3. Check & atomically decrement user balance with concurrency protection
+    // 3. Check & atomically decrement user balance with concurrency protection and commitment check
     const balanceDeduct = await prisma.user.updateMany({
       where: {
         id: user.id,
-        balance: { gte: upfrontCharge },
+        balance: { gte: requiredBalance },
       },
       data: {
         balance: { decrement: upfrontCharge },
@@ -225,7 +249,7 @@ export async function POST(req: NextRequest) {
 
     if (balanceDeduct.count === 0) {
       return NextResponse.json({
-        error: `Insufficient balance. ${effectivePlanName} requires at least Rp ${upfrontCharge.toLocaleString("id-ID")} balance.`,
+        error: `Saldo akun tidak mencukupi untuk akumulasi komitmen layanan aktif (Dibutuhkan minimal saldo Rp ${requiredBalance.toLocaleString("id-ID")}).`,
       }, { status: 400 });
     }
 
@@ -354,15 +378,32 @@ export async function POST(req: NextRequest) {
         });
 
         if (deployRes.success) {
+          // Immediately register K8s resource identifiers while keeping status PROVISIONING until ready
           await prisma.databaseService.update({
             where: { id: dbRecord.id },
             data: {
-              status: "RUNNING",
               k8sDeployment: `db-${dbRecord.id}`,
               k8sService: `svc-db-${dbRecord.id}`,
               k8sPvc: `data-db-${dbRecord.id}`,
             },
           });
+
+          // Poll until K8s pod container readiness check passes before transitioning to RUNNING
+          const maxWaitMs = 180000;
+          const startTime = Date.now();
+          while (Date.now() - startTime < maxWaitMs) {
+            await new Promise((resolve) => setTimeout(resolve, 3000));
+            try {
+              const live = await getDatabaseStatus(dbRecord.id, dbRecord.k8sNamespace || "managed-db");
+              if (live.ready && live.status === "RUNNING") {
+                await prisma.databaseService.update({
+                  where: { id: dbRecord.id },
+                  data: { status: "RUNNING" },
+                });
+                break;
+              }
+            } catch {}
+          }
         } else {
           console.error(`[ManagedDB] Deploy failed for DB ${dbRecord.id}:`, deployRes.error);
           await prisma.databaseService.update({

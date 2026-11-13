@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth-middleware";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { assertSufficientCommitmentBalance } from "@/lib/billing-commitment";
 import { Address6 } from 'ip-address';
 
 const CANONICAL_IPV4_REGEX = /^(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/;
@@ -125,9 +126,18 @@ export async function POST(req: NextRequest) {
     if (!targetPoolId) return NextResponse.json({ error: "Invalid IP address or out of range." }, { status: 400 });
 
     const currentUser = await prisma.user.findUnique({ where: { id: user.id } });
-    const requiredBalance = ipPricePerHour * 730;
-    if ((currentUser?.balance || 0) < requiredBalance) {
-      return NextResponse.json({ error: `A minimum balance of Rp ${requiredBalance.toLocaleString('id-ID')} (1 month estimation) is required to reserve this IP address to prevent abuse. Please top up first.` }, { status: 400 });
+    const newIpMonthly = ipPricePerHour * 730;
+    let requiredBalance = newIpMonthly;
+    try {
+      const commitmentCheck = await assertSufficientCommitmentBalance({
+        userId: user.id,
+        userBalance: currentUser?.balance || 0,
+        newServiceMonthly: newIpMonthly,
+        serviceName: `Reserved IP (${ipAddress})`,
+      });
+      requiredBalance = commitmentCheck.requiredBalance;
+    } catch (commitmentErr: any) {
+      return NextResponse.json({ error: commitmentErr.message }, { status: 400 });
     }
 
     try {

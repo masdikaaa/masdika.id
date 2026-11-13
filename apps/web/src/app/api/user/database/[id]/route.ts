@@ -29,6 +29,19 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       console.warn(`[ManagedDB] Failed to get live status for DB ${db.id}:`, e?.message);
     }
 
+    // Auto-promote PROVISIONING -> RUNNING as soon as K8s container readiness probe succeeds
+    if (db.status === "PROVISIONING" && liveStatus?.ready === true && liveStatus?.status === "RUNNING") {
+      try {
+        await prisma.databaseService.update({
+          where: { id: db.id },
+          data: { status: "RUNNING" },
+        });
+        db.status = "RUNNING";
+      } catch (updErr: any) {
+        console.warn(`[ManagedDB] Failed to promote status to RUNNING for DB ${db.id}:`, updErr?.message);
+      }
+    }
+
     // Build connection snippets (Laravel, NodeJS, DBeaver, Web Panels, etc.)
     const clusterConfig = await getK8sClusterConfig().catch(() => undefined);
     const connection = buildConnectionDetails(db, clusterConfig);

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
+import { getUserServicesCommitment } from "@/lib/billing-commitment";
 
 export async function GET(req: NextRequest) {
   try {
@@ -40,12 +41,31 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: "desc" }
     });
 
+    const databases = await prisma.databaseService.findMany({
+      where: { userId, status: { not: "TERMINATED" } },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const commitment = await getUserServicesCommitment(userId);
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { balance: true }
     });
 
-    return NextResponse.json({ success: true, data: { subscriptions, invoices, vpsServices, reservedIps, balance: user?.balance || 0 } });
+    return NextResponse.json({
+      success: true,
+      data: {
+        subscriptions,
+        invoices,
+        vpsServices,
+        databases,
+        commitment,
+        activeMonthlyCommitment: commitment.totalMonthly,
+        reservedIps,
+        balance: user?.balance || 0,
+      },
+    });
   } catch (error) {
     console.error("Fetch billing error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

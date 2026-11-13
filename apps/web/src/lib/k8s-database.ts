@@ -1169,9 +1169,9 @@ export async function getDatabaseStatus(
 
     const podName = pod.metadata?.name;
     const phase = pod.status?.phase;
-    const containerStatus = pod.status?.containerStatuses?.[0];
-    const ready = containerStatus?.ready ?? false;
-    const restarts = containerStatus?.restartCount ?? 0;
+    const containerStatuses = pod.status?.containerStatuses || [];
+    const ready = containerStatuses.length > 0 && containerStatuses.every((c) => Boolean(c.ready));
+    const restarts = containerStatuses.reduce((acc, c) => acc + (c.restartCount || 0), 0);
     const uptime = pod.metadata?.creationTimestamp ? new Date(pod.metadata.creationTimestamp).toISOString() : undefined;
 
     const container = pod.spec?.containers?.[0];

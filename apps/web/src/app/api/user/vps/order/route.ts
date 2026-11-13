@@ -8,6 +8,7 @@ import { Address4 } from "ip-address";
 import { getBandwidthOptions, bandwidthHourlyCost, BASE_BANDWIDTH_MBPS } from "@/lib/vps-bandwidth";
 import { JobQueueService } from "@/lib/job-queue";
 import { getAppById, matchTemplateForApp, sanitizeAppConfig } from "@/lib/vps-apps";
+import { assertSufficientCommitmentBalance } from "@/lib/billing-commitment";
 
 // Security: Hostname validation regex (RFC 1123)
 const HOSTNAME_REGEX = /^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
@@ -339,10 +340,19 @@ export async function POST(req: NextRequest) {
       const hourlyRate = diskCost + backupCost + ipCost + bandwidthCost + cpuCost + ramCost;
       const stoppedRate = hourlyRate;
 
-      // Security: Prevent abuse by requiring 1 month equivalent balance upfront for PAYG
-      const requiredBalance = hourlyRate * 730;
-      if (user.balance < requiredBalance) {
-        return NextResponse.json({ error: `A minimum balance of Rp ${requiredBalance.toLocaleString('id-ID')} (1 month estimation) is required to deploy this specification to prevent abuse. Please top up first.` }, { status: 400 });
+      // Security: Enforce accumulated active services commitment + 1 month new VPS estimation
+      const newVpsMonthly = Math.round(hourlyRate * 730);
+      let requiredBalance = newVpsMonthly;
+      try {
+        const commitmentCheck = await assertSufficientCommitmentBalance({
+          userId,
+          userBalance: user.balance,
+          newServiceMonthly: newVpsMonthly,
+          serviceName: `Cloud VPS (${hostname})`,
+        });
+        requiredBalance = commitmentCheck.requiredBalance;
+      } catch (commitmentErr: any) {
+        return NextResponse.json({ error: commitmentErr.message }, { status: 400 });
       }
 
       vpsData.cpuCores = safeCpu;

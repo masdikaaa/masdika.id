@@ -42,7 +42,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       console.warn(`[ManagedDB] Metrics live status warning:`, e?.message);
     }
 
-    const isRunning = db.status === "RUNNING" && (liveStatus?.ready ?? true);
+    const isRunning = db.status === "RUNNING" && Boolean(liveStatus?.ready);
 
     const maxCpu = db.cpuShares || 1.0;
     const maxMemMb = db.memoryMb || 1024;
@@ -102,6 +102,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     return NextResponse.json({
       success: true,
       isDedicated: true,
+      isReady: isRunning,
       data: {
         summary: {
           cpu: {

@@ -375,6 +375,21 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
   const [paymentMethodPage, setPaymentMethodPage] = useState(1);
   const [plansPage, setPlansPage] = useState(1);
   const [balance, setBalance] = useState(0);
+  const [activeCommitment, setActiveCommitment] = useState<{
+    totalMonthly: number;
+    activeVpsCount: number;
+    activeDbCount: number;
+    activeSubCount: number;
+    activeIpCount: number;
+    totalActiveCount: number;
+  }>({
+    totalMonthly: 0,
+    activeVpsCount: 0,
+    activeDbCount: 0,
+    activeSubCount: 0,
+    activeIpCount: 0,
+    totalActiveCount: 0,
+  });
 
   // Proxmox Nodes
   const [nodes, setNodes] = useState<any[]>([]);
@@ -456,6 +471,18 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
       const billingData = await billingRes.json();
       if (billingData.success) {
         setBalance(billingData.data.balance || 0);
+        if (billingData.data.commitment) {
+          setActiveCommitment(billingData.data.commitment);
+        } else if (billingData.data.activeMonthlyCommitment !== undefined) {
+          setActiveCommitment({
+            totalMonthly: billingData.data.activeMonthlyCommitment,
+            activeVpsCount: billingData.data.vpsServices?.length || 0,
+            activeDbCount: billingData.data.databases?.length || 0,
+            activeSubCount: billingData.data.subscriptions?.length || 0,
+            activeIpCount: billingData.data.reservedIps?.length || 0,
+            totalActiveCount: (billingData.data.vpsServices?.length || 0) + (billingData.data.databases?.length || 0),
+          });
+        }
         if (billingData.data.balance > 0) {
           pms.unshift({ code: 'BALANCE', name: 'Account Balance', type: 'WALLET', fee: 0, isActive: true });
         }
@@ -634,6 +661,10 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
     return calculateHourlyPrice() * 730;
   };
 
+  const newVpsMonthly = Math.round(calculateHourlyPrice() * 730);
+  const totalRequiredBalance = (activeCommitment.totalMonthly || 0) + newVpsMonthly;
+  const isBalanceInsufficient = balance < totalRequiredBalance;
+
   // Password validation
   const validatePassword = (pass: string, confirm: string) => {
     if (!pass) return "";
@@ -731,6 +762,13 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
 
     if (!termsAccepted) {
       toast.error("You must agree to the Terms of Service to deploy a server.");
+      return;
+    }
+
+    if (isBalanceInsufficient) {
+      toast.error(
+        `Insufficient balance for accumulated services commitment. Required: Rp ${totalRequiredBalance.toLocaleString("id-ID")} (Active services: Rp ${activeCommitment.totalMonthly.toLocaleString("id-ID")} + New VPS: Rp ${newVpsMonthly.toLocaleString("id-ID")}). Your balance: Rp ${balance.toLocaleString("id-ID")}.`
+      );
       return;
     }
 
@@ -2780,12 +2818,43 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
               </label>
             </div>
 
-            {balance < 50000 && (
-              <div className="mb-4 p-3 rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 text-xs flex items-start gap-2">
-                <XCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                <span>
-                  A minimum balance of <strong>Rp 50.000</strong> is required to deploy Pay-As-You-Go instances. Please <Link href="/dashboard/billing" className="underline font-bold hover:text-red-300 transition-colors">Top Up</Link> first.
-                </span>
+            {isBalanceInsufficient && (
+              <div className="mb-4 p-3.5 rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 text-xs space-y-2">
+                <div className="flex items-start gap-2">
+                  <XCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-bold text-red-300">Insufficient Account Balance</p>
+                    <p className="text-[11px] text-zinc-300 mt-0.5 leading-relaxed">
+                      Deployments require sufficient balance to cover the accumulated monthly commitment of your active running services plus this new VPS.
+                    </p>
+                  </div>
+                </div>
+                <div className="pl-6 space-y-1 text-[11px] font-mono text-zinc-300 border-t border-red-500/20 pt-2">
+                  {activeCommitment.totalMonthly > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-zinc-400">Active Services Commitment:</span>
+                      <span>Rp {activeCommitment.totalMonthly.toLocaleString("id-ID")}/mo</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-zinc-400">Estimated New VPS:</span>
+                    <span>Rp {newVpsMonthly.toLocaleString("id-ID")}/mo</span>
+                  </div>
+                  <div className="flex justify-between border-t border-red-500/20 pt-1 font-bold text-red-300">
+                    <span>Total Required Balance:</span>
+                    <span>Rp {totalRequiredBalance.toLocaleString("id-ID")}</span>
+                  </div>
+                  <div className="flex justify-between text-zinc-400">
+                    <span>Your Current Balance:</span>
+                    <span className="text-red-400 font-bold">Rp {balance.toLocaleString("id-ID")}</span>
+                  </div>
+                </div>
+                <div className="pl-6 pt-1 flex items-center justify-between">
+                  <span className="text-[11px] text-zinc-400">Shortfall: Rp {(totalRequiredBalance - balance).toLocaleString("id-ID")}</span>
+                  <Link href="/dashboard/billing" className="underline font-bold text-red-300 hover:text-white transition-colors">
+                    Top Up Balance Now →
+                  </Link>
+                </div>
               </div>
             )}
 
@@ -2844,7 +2913,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
               onClick={handleOrder}
               disabled={
                 isDisabled || !termsAccepted || isSubmitting || !hostname || !username || (imageMode !== "apps" && selectedTemplate === null) ||
-                (!selectedPaymentMethod || balance < 50000) ||
+                (!selectedPaymentMethod || isBalanceInsufficient) ||
                 (!password || password !== passwordConfirm || !!passwordError) ||
                 (useVpc && (!selectedVpcId || !privateIpAddress.trim() || (() => {
                   const currentVpc = vpcs.find(v => v.id === selectedVpcId);

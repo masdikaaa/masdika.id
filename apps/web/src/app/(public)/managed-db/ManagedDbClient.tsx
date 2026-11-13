@@ -757,7 +757,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4">
                 {SUPPORTED_ENGINES.map((eng, idx) => {
                   const isSelected = selectedEngine === eng.type;
                   const isLast = idx === SUPPORTED_ENGINES.length - 1;
@@ -769,22 +769,22 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                       className={cn(
                         "rounded-xl border text-left transition-all relative group cursor-pointer",
                         isLast
-                          ? "col-span-2 sm:col-span-1 lg:col-span-1 p-3.5 sm:p-4 flex flex-row sm:flex-col items-center sm:items-start justify-between min-h-[72px] sm:min-h-[120px]"
+                          ? "col-span-2 sm:col-span-2 lg:col-span-1 p-3.5 sm:p-4 flex flex-row lg:flex-col items-center lg:items-start justify-between min-h-[72px] lg:min-h-[120px]"
                           : "col-span-1 p-3.5 sm:p-4 flex flex-col justify-between min-h-[100px] sm:min-h-[120px]",
                         isSelected
                           ? "border-cyan-500 bg-cyan-500/10 shadow-sm ring-1 ring-cyan-500/30"
                           : "border-[var(--border-primary)] bg-[var(--surface-secondary)] hover:border-cyan-500/40"
                       )}
                     >
-                      {/* Mobile Row Layout for Last Item (Redis) when col-span-2 */}
+                      {/* Full-width Row Layout for Last Item (Redis) when spanning 2 columns (< lg) */}
                       {isLast ? (
                         <>
-                          {/* Mobile view (< sm): Horizontal row */}
-                          <div className="flex sm:hidden items-center justify-between w-full">
+                          {/* Row view (< lg): Horizontal wide card taking full row width */}
+                          <div className="flex lg:hidden items-center justify-between w-full">
                             <div className="flex items-center gap-3">
                               <img src={eng.icon} alt={eng.name} className="w-8 h-8 object-contain shrink-0" />
                               <div>
-                                <div className="text-sm font-bold text-[var(--text-primary)]">
+                                <div className="text-sm sm:text-base font-bold text-[var(--text-primary)]">
                                   {eng.name}
                                 </div>
                                 <div className="text-xs text-cyan-600 dark:text-cyan-400 font-semibold mt-0.5">
@@ -799,8 +799,8 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                             )}
                           </div>
 
-                          {/* Desktop & Tablet view (>= sm): Standard vertical card */}
-                          <div className="hidden sm:flex items-center justify-between mb-3 w-full">
+                          {/* Desktop view (>= lg): Standard vertical card */}
+                          <div className="hidden lg:flex items-center justify-between mb-3 w-full">
                             <img src={eng.icon} alt={eng.name} className="w-8 h-8 object-contain" />
                             {isSelected && (
                               <div className="w-5 h-5 rounded-full bg-cyan-400 text-slate-950 flex items-center justify-center">
@@ -808,7 +808,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                               </div>
                             )}
                           </div>
-                          <div className="hidden sm:block">
+                          <div className="hidden lg:block">
                             <div className="text-sm sm:text-base font-bold text-[var(--text-primary)]">
                               {eng.name}
                             </div>

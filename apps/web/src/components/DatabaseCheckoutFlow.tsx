@@ -202,6 +202,21 @@ export default function DatabaseCheckoutFlow() {
 
   // User balance & submission state
   const [userBalance, setUserBalance] = useState<number>(0);
+  const [activeCommitment, setActiveCommitment] = useState<{
+    totalMonthly: number;
+    activeVpsCount: number;
+    activeDbCount: number;
+    activeSubCount: number;
+    activeIpCount: number;
+    totalActiveCount: number;
+  }>({
+    totalMonthly: 0,
+    activeVpsCount: 0,
+    activeDbCount: 0,
+    activeSubCount: 0,
+    activeIpCount: 0,
+    totalActiveCount: 0,
+  });
   const [loadingBalance, setLoadingBalance] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
@@ -229,12 +244,24 @@ export default function DatabaseCheckoutFlow() {
   const [catalogPlans, setCatalogPlans] = useState<any[]>([]);
 
   useEffect(() => {
-    // Fetch user balance
+    // Fetch user balance and active services commitment
     fetch("/api/user/billing")
       .then((res) => res.json())
       .then((data) => {
         if (data.data?.balance !== undefined) {
           setUserBalance(data.data.balance);
+        }
+        if (data.data?.commitment) {
+          setActiveCommitment(data.data.commitment);
+        } else if (data.data?.activeMonthlyCommitment !== undefined) {
+          setActiveCommitment({
+            totalMonthly: data.data.activeMonthlyCommitment,
+            activeVpsCount: data.data.vpsServices?.length || 0,
+            activeDbCount: data.data.databases?.length || 0,
+            activeSubCount: data.data.subscriptions?.length || 0,
+            activeIpCount: data.data.reservedIps?.length || 0,
+            totalActiveCount: (data.data.vpsServices?.length || 0) + (data.data.databases?.length || 0) + (data.data.subscriptions?.length || 0),
+          });
         }
       })
       .catch(() => {})
@@ -299,6 +326,8 @@ export default function DatabaseCheckoutFlow() {
   const currentTotalMonthly = selectedTier === "DEDICATED" ? dedicatedTotalMonthly : sharedTotalMonthly;
   const currentHourlyRate = selectedTier === "DEDICATED" ? dedicatedHourlyRate : sharedHourlyRate;
   const requiredUpfront = currentHourlyRate;
+  const totalRequiredBalance = (activeCommitment.totalMonthly || 0) + currentTotalMonthly;
+  const isBalanceInsufficient = userBalance < totalRequiredBalance;
 
   // Cluster resource capacity evaluation
   const isClusterFull = Boolean(
@@ -372,8 +401,10 @@ export default function DatabaseCheckoutFlow() {
       }
     }
 
-    if (userBalance < requiredUpfront) {
-      toast.error(`Insufficient balance. Requires at least ${formatRupiah(requiredUpfront)} (1 hour PAYG) balance.`);
+    if (isBalanceInsufficient) {
+      toast.error(
+        `Insufficient balance for accumulated services commitment. Required: ${formatRupiah(totalRequiredBalance)} (Active services: ${formatRupiah(activeCommitment.totalMonthly)} + New database: ${formatRupiah(currentTotalMonthly)}). Your balance: ${formatRupiah(userBalance)}.`
+      );
       return;
     }
 
@@ -553,7 +584,7 @@ export default function DatabaseCheckoutFlow() {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3 mb-4">
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3 mb-4">
                   {DATABASE_ENGINES.map((engine, idx) => {
                     const isSelected = selectedEngine === engine.id;
                     const isLastOdd = idx === DATABASE_ENGINES.length - 1;
@@ -565,7 +596,7 @@ export default function DatabaseCheckoutFlow() {
                         className={cn(
                           "rounded-xl border transition-all cursor-pointer group relative overflow-hidden",
                           "p-2.5 sm:p-3.5 flex flex-col sm:flex-row items-center sm:items-center text-center sm:text-left gap-2 sm:gap-3",
-                          isLastOdd ? "col-span-2 sm:col-span-1" : "col-span-1",
+                          isLastOdd ? "col-span-2 sm:col-span-2 lg:col-span-1" : "col-span-1",
                           isSelected
                             ? "border-cyan-500 bg-cyan-500/10 ring-1 ring-cyan-500/40 shadow-xs text-white"
                             : isDark
@@ -1207,19 +1238,48 @@ export default function DatabaseCheckoutFlow() {
 
             {/* Balance check & Deploy button */}
             <div className={cn("pt-4 border-t space-y-3", isDark ? "border-white/[0.08]" : "border-slate-100")}>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-zinc-400">Your Balance:</span>
-                <span className={cn("font-bold font-mono", userBalance >= requiredUpfront ? "text-emerald-400" : "text-red-400")}>
-                  {loadingBalance ? "..." : formatRupiah(userBalance)}
-                </span>
+              <div className="space-y-1.5 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-400">Account Balance:</span>
+                  <span className={cn("font-bold font-mono", !isBalanceInsufficient ? "text-emerald-400" : "text-red-400")}>
+                    {loadingBalance ? "..." : formatRupiah(userBalance)}
+                  </span>
+                </div>
+                {activeCommitment.totalMonthly > 0 && (
+                  <div className="flex items-center justify-between text-[11px] text-zinc-400">
+                    <span>Active Services Commitment:</span>
+                    <span className="font-mono">{formatRupiah(activeCommitment.totalMonthly)}/mo</span>
+                  </div>
+                )}
+                <div className="flex items-center justify-between text-[11px] text-zinc-400">
+                  <span>New Database Estimate:</span>
+                  <span className="font-mono">{formatRupiah(currentTotalMonthly)}/mo</span>
+                </div>
+                <div className="flex items-center justify-between text-xs pt-1.5 border-t border-white/[0.06] font-semibold">
+                  <span className={isDark ? "text-zinc-300" : "text-slate-700"}>Total Required Balance:</span>
+                  <span className={cn("font-mono font-bold", !isBalanceInsufficient ? "text-cyan-400" : "text-red-400")}>
+                    {formatRupiah(totalRequiredBalance)}
+                  </span>
+                </div>
               </div>
 
-              {userBalance < requiredUpfront && (
-                <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs flex items-center justify-between">
-                  <span>Insufficient balance</span>
-                  <Link href="/dashboard/topup" className="font-bold underline hover:text-white">
-                    Top Up
-                  </Link>
+              {isBalanceInsufficient && (
+                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-300 text-xs space-y-1.5">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-bold text-red-300">Insufficient Account Balance</p>
+                      <p className="text-[11px] text-zinc-300 mt-0.5 leading-relaxed">
+                        Orders require sufficient balance to cover the accumulated monthly commitment of your active services plus this database.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="pl-6 pt-1 flex items-center justify-between">
+                    <span className="text-[11px] text-zinc-400">Shortfall: {formatRupiah(totalRequiredBalance - userBalance)}</span>
+                    <Link href="/dashboard/topup" className="font-bold underline text-red-300 hover:text-white transition-colors">
+                      Top Up Balance →
+                    </Link>
+                  </div>
                 </div>
               )}
 
@@ -1244,7 +1304,7 @@ export default function DatabaseCheckoutFlow() {
 
               <button
                 type="submit"
-                disabled={submitting || isClusterFull || isFlavorExceedsCapacity || userBalance < requiredUpfront}
+                disabled={submitting || isClusterFull || isFlavorExceedsCapacity || isBalanceInsufficient}
                 className="w-full py-3.5 rounded-xl font-bold text-sm bg-cyan-400 hover:bg-cyan-300 active:scale-95 text-slate-950 transition-all shadow-lg shadow-cyan-500/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {submitting ? (

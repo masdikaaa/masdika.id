@@ -51,6 +51,15 @@ interface DatabaseDetail {
     cpuUsage: string;
     memoryUsage: string;
   };
+  liveStatus?: {
+    status: string;
+    ready: boolean;
+    podName?: string;
+    cpu?: string;
+    memory?: string;
+    restarts?: number;
+    uptime?: string;
+  };
   connectionDetails?: {
     uri: string;
     laravelEnv: string;
@@ -144,9 +153,9 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
   const [metricsData, setMetricsData] = useState<any>(null);
   const [loadingMetrics, setLoadingMetrics] = useState(false);
 
-  const fetchMetrics = async (tf = metricsTimeframe) => {
+  const fetchMetrics = async (tf = metricsTimeframe, isBackground = false) => {
     try {
-      setLoadingMetrics(true);
+      if (!isBackground) setLoadingMetrics(true);
       const res = await fetch(`/api/user/database/${dbId}/metrics?timeframe=${tf}`);
       const json = await res.json();
       if (res.ok && json.success && json.isDedicated) {
@@ -155,55 +164,81 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
     } catch {
       // quiet catch
     } finally {
-      setLoadingMetrics(false);
+      if (!isBackground) setLoadingMetrics(false);
     }
   };
 
-  const prevStatusRef = useRef<string | null>(null);
+  const wasReadyRef = useRef<boolean | null>(null);
 
-  const fetchDatabase = async () => {
-    setRefreshing(true);
+  const fetchDatabase = async (isBackground = false) => {
+    if (!isBackground) setRefreshing(true);
     try {
       const res = await fetch(`/api/user/database/${dbId}`);
       const json = await res.json();
       if (res.ok && json.success) {
         const newDb = json.data;
-        if (prevStatusRef.current === "PROVISIONING" && newDb.status === "RUNNING") {
-          toast.success("Database is ready and active for use!", {
+        const isDbReady = newDb.status === "RUNNING" && Boolean(newDb.liveStatus?.ready || newDb.k8sStatus?.ready);
+
+        // Notify user when engine transitions from initializing to ready
+        if (wasReadyRef.current === false && isDbReady) {
+          toast.success("Database engine is online and ready! Web GUI and live metrics are active.", {
             duration: 6000,
           });
+          // Immediately fetch fresh metrics
+          fetchMetrics(metricsTimeframe, true);
         }
-        prevStatusRef.current = newDb.status;
+
+        wasReadyRef.current = isDbReady;
         setDb(newDb);
-      } else {
+      } else if (!isBackground) {
         toast.error(json.error || "Failed to load database details");
       }
     } catch {
-      toast.error("Failed to connect to server");
+      if (!isBackground) toast.error("Failed to connect to server");
     } finally {
-      setLoading(false);
-      setTimeout(() => setRefreshing(false), 400);
+      if (!isBackground) {
+        setLoading(false);
+        setTimeout(() => setRefreshing(false), 400);
+      }
     }
   };
 
+  // Initial database fetch
   useEffect(() => {
-    fetchDatabase();
-    // Fast polling (2.5s) if provisioning, normal 15s otherwise
-    const pollInterval = (db?.status === "PROVISIONING") ? 2500 : 15000;
-    const interval = setInterval(fetchDatabase, pollInterval);
-    return () => clearInterval(interval);
-  }, [dbId, db?.status]);
+    fetchDatabase(false);
+  }, [dbId]);
 
+  // Realtime Database status polling (3s if initializing/provisioning, 12s if ready)
   useEffect(() => {
-    if (db) {
-      const isSharedCheck = Boolean(
-        db.planName?.toLowerCase().includes("shared") ||
-        (db.cpuShares < 1.0 && !db.planName?.toLowerCase().includes("dedicated"))
-      );
-      if (!isSharedCheck) {
-        fetchMetrics(metricsTimeframe);
-      }
-    }
+    const isDbReady = db?.status === "RUNNING" && Boolean(db?.liveStatus?.ready || db?.k8sStatus?.ready);
+    const isInit = db?.status === "PROVISIONING" || (db?.status === "RUNNING" && !isDbReady);
+    const pollInterval = isInit ? 3000 : 12000;
+    const interval = setInterval(() => {
+      fetchDatabase(true);
+    }, pollInterval);
+    return () => clearInterval(interval);
+  }, [dbId, db?.status, db?.liveStatus?.ready, db?.k8sStatus?.ready]);
+
+  // Realtime metrics polling without manual page refresh
+  useEffect(() => {
+    if (!db) return;
+    const isSharedCheck = Boolean(
+      db.planName?.toLowerCase().includes("shared") ||
+      ((db.cpuShares ?? 0) < 1.0 && !db.planName?.toLowerCase().includes("dedicated"))
+    );
+    if (isSharedCheck) return;
+
+    // Fetch initial metrics on timeframe change
+    fetchMetrics(metricsTimeframe, false);
+
+    // Continuous silent polling in realtime:
+    // Live: 5s, Hour: 15s, Day/Week: 60s
+    const metricsIntervalMs = metricsTimeframe === "live" ? 5000 : metricsTimeframe === "hour" ? 15000 : 60000;
+    const interval = setInterval(() => {
+      fetchMetrics(metricsTimeframe, true);
+    }, metricsIntervalMs);
+
+    return () => clearInterval(interval);
   }, [db?.id, db?.planName, db?.cpuShares, metricsTimeframe]);
 
   const copyToClipboard = (text: string, key: string) => {
@@ -433,6 +468,9 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
   );
   const isDedicated = !isShared;
 
+  const isLiveReady = Boolean(db.liveStatus?.ready || db.k8sStatus?.ready);
+  const isReady = db.status === "RUNNING" && isLiveReady;
+  const isInitializing = db.status === "PROVISIONING" || (db.status === "RUNNING" && !isLiveReady);
   const isProvisioning = db.status === "PROVISIONING";
   const isSuspended = db.status === "SUSPENDED";
 
@@ -488,18 +526,18 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
               </span>
               <span className={cn(
                 "px-2.5 py-0.5 rounded-full text-[11px] font-bold border flex items-center gap-1.5",
-                db.status === "RUNNING"
+                isReady
                   ? (isDark ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200")
-                  : db.status === "PROVISIONING"
+                  : isInitializing
                     ? (isDark ? "bg-amber-500/15 text-amber-400 border-amber-500/30" : "bg-amber-50 text-amber-700 border-amber-200")
-                    : db.status === "SUSPENDED"
+                    : isSuspended
                       ? (isDark ? "bg-red-500/15 text-red-400 border-red-500/30" : "bg-red-50 text-red-700 border-red-200")
                       : (isDark ? "bg-zinc-500/15 text-zinc-400 border-zinc-500/30" : "bg-slate-100 text-slate-600 border-slate-200")
               )}>
-                {db.status === "RUNNING" && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />}
-                {db.status === "PROVISIONING" && <Loader2 className="w-3 h-3 animate-spin text-amber-400" />}
-                {db.status === "SUSPENDED" && <AlertTriangle className="w-3 h-3 text-red-400" />}
-                {db.status}
+                {isReady && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />}
+                {isInitializing && <Loader2 className="w-3 h-3 animate-spin text-amber-400" />}
+                {isSuspended && <AlertTriangle className="w-3 h-3 text-red-400" />}
+                {isReady ? "ONLINE & READY" : isInitializing ? "INITIALIZING ENGINE..." : db.status}
               </span>
             </div>
             <p className={cn("text-xs sm:text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -511,7 +549,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
         {/* Header Action Controls */}
         <div className="flex items-center gap-2 flex-wrap">
           <button
-            onClick={fetchDatabase}
+            onClick={() => fetchDatabase(false)}
             disabled={refreshing}
             className={cn(
               "px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 border cursor-pointer",
@@ -540,7 +578,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                   "px-3 py-2 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed",
                   isDark ? "bg-white/5 border-white/10 text-zinc-300 hover:text-white" : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
                 )}
-                title={isProvisioning ? "Database is provisioning..." : isSuspended ? "Database is suspended" : "Restart container"}
+                title={isInitializing ? "Database engine is initializing..." : isSuspended ? "Database is suspended" : "Restart container"}
               >
                 <RotateCw className="w-3.5 h-3.5" />
                 <span>Restart</span>
@@ -554,12 +592,12 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                   variant: "warning",
                   icon: <Square className="w-8 h-8 fill-current" />
                 })}
-                disabled={actionLoading || isProvisioning || isSuspended}
+                disabled={actionLoading || isInitializing || isSuspended}
                 className={cn(
                   "px-3 py-2 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed",
                   isDark ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20" : "bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100"
                 )}
-                title={isProvisioning ? "Database is provisioning..." : isSuspended ? "Database is suspended" : "Stop container"}
+                title={isInitializing ? "Database engine is initializing..." : isSuspended ? "Database is suspended" : "Stop container"}
               >
                 <Square className="w-3.5 h-3.5" />
                 <span>Stop</span>
@@ -575,12 +613,12 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                 variant: "success",
                 icon: <Play className="w-8 h-8 fill-current" />,
               })}
-              disabled={actionLoading || isProvisioning || isSuspended}
+              disabled={actionLoading || isInitializing || isSuspended}
               className={cn(
                 "px-3.5 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed",
                 isDark ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25" : "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
               )}
-              title={isProvisioning ? "Database is provisioning..." : isSuspended ? "Database is suspended" : "Start container"}
+              title={isInitializing ? "Database engine is initializing..." : isSuspended ? "Database is suspended" : "Start container"}
             >
               <Play className="w-3.5 h-3.5 fill-current" />
               <span>Start</span>
@@ -590,14 +628,14 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
           {/* Import Dump Button */}
           <button
             onClick={() => setImportModalOpen(true)}
-            disabled={isProvisioning || isSuspended}
+            disabled={isInitializing || isSuspended}
             className={cn(
               "px-3.5 py-2 rounded-xl text-xs font-bold border flex items-center gap-1.5 transition-all cursor-pointer shadow-xs disabled:opacity-40 disabled:cursor-not-allowed",
               isDark
                 ? "bg-white/5 border-white/10 text-zinc-200 hover:text-white hover:bg-white/10"
                 : "bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200"
             )}
-            title={isProvisioning ? "Database is not ready yet..." : transferUi.importTooltip}
+            title={isInitializing ? "Database engine is still initializing..." : transferUi.importTooltip}
           >
             <Upload className="w-3.5 h-3.5" />
             <span>{transferUi.importBtn}</span>
@@ -606,9 +644,9 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
           {/* Export Dump Button */}
           <button
             onClick={handleDownloadDump}
-            disabled={isProvisioning || isSuspended}
+            disabled={isInitializing || isSuspended}
             className="px-3.5 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 active:scale-95 text-slate-950 flex items-center gap-1.5 transition-all shadow-md cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-            title={isProvisioning ? "Database is not ready yet..." : transferUi.exportTitle}
+            title={isInitializing ? "Database engine is still initializing..." : transferUi.exportTitle}
           >
             <Download className="w-3.5 h-3.5" />
             <span>{transferUi.exportBtn}</span>
@@ -616,8 +654,8 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
         </div>
       </div>
 
-      {/* Active Provisioning State with Step Animations */}
-      {isProvisioning && (
+      {/* Active Initializing / Provisioning State with Step Animations */}
+      {isInitializing && (
         <div className={cn(
           "rounded-2xl border p-5 sm:p-6 transition-all relative overflow-hidden",
           isDark
@@ -626,28 +664,28 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
         )}>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-start gap-3.5">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center shrink-0">
-                <Loader2 className="w-5 h-5 text-amber-400 animate-spin" />
+              <div className="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center shrink-0">
+                <Loader2 className="w-5 h-5 text-cyan-400 animate-spin" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className={cn("text-base font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-                    Provisioning Database on K3s Cluster...
+                    {isProvisioning ? "Provisioning Database on K3s Cluster..." : "Initializing Database Engine & Storage..."}
                   </h3>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-400 border border-amber-500/30 animate-pulse">
-                    Initializing
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 animate-pulse">
+                    Initializing Engine
                   </span>
                 </div>
                 <p className={cn("text-xs mt-1", isDark ? "text-zinc-400" : "text-slate-600")}>
-                  Kubernetes is allocating persistent SSD volume, pulling {engine.name} container image, and setting up endpoints. Control actions are temporarily disabled until the container is ready.
+                  Container {engine.name} is booting and initializing the database engine in Sidoarjo cluster. Web GUI ({engine.webToolName}), client connections, and realtime telemetry will automatically activate once ready without manual page refresh.
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-2 self-start md:self-auto shrink-0">
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/20 border border-white/10 text-xs font-mono text-zinc-300">
-                <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping inline-block" />
-                <span>Auto-refreshing live...</span>
+                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping inline-block" />
+                <span>Auto-refreshing realtime...</span>
               </div>
             </div>
           </div>
@@ -887,8 +925,23 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                     <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                       Dedicated Resource Monitoring
                     </h2>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                      Live Telemetry
+                    <span className={cn(
+                      "px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border flex items-center gap-1",
+                      isReady
+                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                        : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                    )}>
+                      {isReady ? (
+                        <>
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                          <span>Live Telemetry</span>
+                        </>
+                      ) : (
+                        <>
+                          <Loader2 className="w-3 h-3 animate-spin text-amber-400" />
+                          <span>Initializing Telemetry</span>
+                        </>
+                      )}
                     </span>
                   </div>
                   <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -1215,34 +1268,47 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
               {/* Contextual Web GUI Guidance */}
               <div className={cn("p-2.5 rounded-xl border text-[11px] leading-relaxed mb-4 flex items-start gap-2", isDark ? "bg-cyan-950/20 border-cyan-500/20 text-cyan-300" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
                 <Info className="w-3.5 h-3.5 text-cyan-400 shrink-0 mt-0.5" />
-                {db.type?.toUpperCase().includes('MONGO') ? (
-                  <span>
-                    <strong>Mongo Express Login:</strong> When your browser opens and displays the <em>&quot;Sign in&quot;</em> window, enter the <strong>User</strong> and <strong>Pass</strong> above (not your web portal email). Your database is automatically isolated.
-                  </span>
-                ) : db.type?.toUpperCase().includes('POSTGRES') ? (
-                  <span>
-                    <strong>pgAdmin 4 Login:</strong> Enter the <strong>User</strong> and <strong>Pass</strong> above to log in. Your database instance is automatically registered and isolated inside the pgAdmin workspace.
-                  </span>
-                ) : db.type?.toUpperCase().includes('REDIS') ? (
-                  <span>
-                    <strong>Redis Commander Login:</strong> Enter the <strong>User</strong> and <strong>Pass</strong> above on the Redis Commander sign-in screen to browse keys, run commands and view server info over Let&apos;s Encrypt SSL.
-                  </span>
-                ) : (
-                  <span>
-                    <strong>phpMyAdmin Login:</strong> Host and Username will be auto-filled when clicking <em>Launch phpMyAdmin</em>. Simply copy the <strong>Pass</strong> above and click <strong>Log in</strong>.
-                  </span>
-                )}
+                <div className="space-y-1">
+                  {db.type?.toUpperCase().includes('MONGO') ? (
+                    <div>
+                      <strong>Mongo Express Login:</strong> When the browser <em>Sign in</em> prompt appears, enter the <strong>User</strong> and <strong>Pass</strong> above (not your web portal email).
+                    </div>
+                  ) : db.type?.toUpperCase().includes('POSTGRES') ? (
+                    <div>
+                      <strong>pgAdmin 4 Login:</strong> Enter the <strong>User</strong> and <strong>Pass</strong> above to log in. Your database instance is pre-registered in pgAdmin.
+                    </div>
+                  ) : db.type?.toUpperCase().includes('REDIS') ? (
+                    <div>
+                      <strong>Redis Commander Login:</strong> Enter the <strong>User</strong> and <strong>Pass</strong> above in the sign-in modal to browse keys and telemetry over SSL.
+                    </div>
+                  ) : (
+                    <div>
+                      <strong>phpMyAdmin Login:</strong> Host and Username are auto-filled when clicking <em>Launch phpMyAdmin</em>. Simply copy the <strong>Pass</strong> above and click <strong>Log in</strong>.
+                    </div>
+                  )}
+                  {isInitializing ? (
+                    <p className="text-amber-400 font-semibold flex items-center gap-1.5 pt-0.5">
+                      <Loader2 className="w-3 h-3 animate-spin text-amber-400 shrink-0" />
+                      <span>Waiting for database engine to accept connections before Web GUI is enabled...</span>
+                    </p>
+                  ) : isReady ? (
+                    <p className="text-emerald-400 font-semibold flex items-center gap-1 pt-0.5">
+                      <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
+                      <span>Database engine is online and accepting connections!</span>
+                    </p>
+                  ) : null}
+                </div>
               </div>
 
-              {isProvisioning ? (
+              {isInitializing ? (
                 <button
                   type="button"
                   disabled
-                  className="w-full py-2.5 rounded-xl font-bold text-xs bg-white/5 border border-white/10 text-zinc-500 flex items-center justify-center gap-2 cursor-not-allowed opacity-60"
-                  title="Web GUI will be active once database container is running"
+                  className="w-full py-2.5 rounded-xl font-bold text-xs bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 flex items-center justify-center gap-2 cursor-not-allowed opacity-80"
+                  title="Web GUI will activate automatically once the database engine is ready"
                 >
-                  <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-400" />
-                  <span>Preparing {engine.webToolName}...</span>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-400" />
+                  <span>Starting {engine.webToolName} (Waiting for Engine)...</span>
                 </button>
               ) : isSuspended ? (
                 <button

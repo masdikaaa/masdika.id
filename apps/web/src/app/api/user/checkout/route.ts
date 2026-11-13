@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
 import { decryptDeterministic } from "@/lib/encryption";
+import { assertSufficientCommitmentBalance } from "@/lib/billing-commitment";
 import {
   sendCustomerInvoiceEmail,
   sendCustomerPaymentSuccessEmail,
@@ -107,11 +108,21 @@ export async function POST(req: NextRequest) {
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
     
-    // Security: Prevent PAYG abuse by requiring 1 month equivalent balance upfront
-    const requiredBalance = isBalancePayment ? Math.max(finalPrice, (plan.hourlyPrice || 0) * 730) : finalPrice;
-    
-    if (isBalancePayment && (user?.balance || 0) < requiredBalance) {
-      return NextResponse.json({ error: `A minimum balance of Rp ${requiredBalance.toLocaleString('id-ID')} (1 month estimation) is required to subscribe to this service to prevent abuse. Please top up first.` }, { status: 400 });
+    // Security: Enforce accumulated active services commitment + 1 month new plan estimation
+    const newServiceMonthly = Math.max(finalPrice, (plan.hourlyPrice || 0) * 730, plan.price || 0);
+    let requiredBalance = newServiceMonthly;
+    if (isBalancePayment) {
+      try {
+        const commitmentCheck = await assertSufficientCommitmentBalance({
+          userId,
+          userBalance: user?.balance || 0,
+          newServiceMonthly,
+          serviceName: `${plan.name} (${plan.service || 'Plan'})`,
+        });
+        requiredBalance = commitmentCheck.requiredBalance;
+      } catch (commitmentErr: any) {
+        return NextResponse.json({ error: commitmentErr.message }, { status: 400 });
+      }
     }
 
     const fee = finalPrice > 0 ? (paymentMethod.fee || 0) : 0;
