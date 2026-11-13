@@ -595,20 +595,6 @@ data:
           name: cm-db-init-${name}`
     : '';
 
-  // lifecycle postStart: ensure grants even on restart when /docker-entrypoint-initdb.d is skipped (existing volume)
-  const mysqlPostStart = isMysqlLike
-    ? `
-        lifecycle:
-          postStart:
-            exec:
-              command:
-              - sh
-              - -c
-              - |
-                until mysqladmin ping -uroot -p"$${rootPwEnv}" --silent 2>/dev/null; do sleep 2; done
-                mysql -uroot -p"$${rootPwEnv}" -e "GRANT ALL PRIVILEGES ON *.* TO '${db.username}'@'%' WITH GRANT OPTION; FLUSH PRIVILEGES;" 2>/dev/null || true`
-    : '';
-
   const redisCommand = isRedis ? `
         command:
         - redis-server
@@ -885,7 +871,7 @@ ${envYaml}${redisCommand}
             port: ${containerPort}
           initialDelaySeconds: 15
           periodSeconds: 20
-          timeoutSeconds: 5${mysqlPostStart}${webGuiContainer}
+          timeoutSeconds: 5${webGuiContainer}
       volumes:
       - name: db-storage
         persistentVolumeClaim:
