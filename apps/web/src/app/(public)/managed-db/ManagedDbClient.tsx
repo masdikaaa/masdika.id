@@ -45,7 +45,7 @@ import { AntiDdosWorkflowSection } from "@/components/infra/AntiDdosWorkflowSect
 import { cn } from "@/lib/utils";
 
 const DB_TERMINAL_LOGS = [
-  { time: "00:01", module: "CLUSTER", message: "Verifying Kubernetes K3s node capacity and cluster quotas..." },
+  { time: "00:01", module: "CLUSTER", message: "Verifying Kubernetes node capacity and cluster quotas..." },
   { time: "00:02", module: "STORAGE", message: "Provisioning persistent volume claim (PVC) on SATA SSD..." },
   { time: "00:03", module: "SECRETS", message: "Generating cryptographic passwords and isolation secrets..." },
   { time: "00:04", module: "POD", message: "Scheduling database container pod with resource limits..." },
@@ -188,7 +188,7 @@ const REPEATED_ENGINES = [
 const DB_FAQS = [
   {
     q: "How does Masdika Managed Database work?",
-    a: "Every managed database runs inside an isolated container Pod orchestrated by Kubernetes (K3s) on enterprise Dell PowerEdge nodes. Storage is bound via Persistent Volume Claims (PVC) on enterprise SSDs, ensuring zero data loss across Pod restarts or node maintenance."
+    a: "Every managed database runs inside an isolated container Pod orchestrated by Kubernetes on enterprise Dell PowerEdge nodes. Storage is bound via Persistent Volume Claims (PVC) on enterprise SSDs, ensuring zero data loss across Pod restarts or node maintenance."
   },
   {
     q: "Which database engines are supported?",
@@ -453,7 +453,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
             <div className="max-w-2xl relative z-30">
               <div className="mb-8">
                 <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase whitespace-nowrap">
-                  ENTERPRISE KUBERNETES K3S CLUSTER
+                  ENTERPRISE KUBERNETES CLUSTER
                 </Badge>
               </div>
 
@@ -465,7 +465,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
               </h1>
 
               <p className="text-lg md:text-xl mb-10 max-w-xl leading-relaxed text-[var(--text-secondary)] font-normal">
-                Deploy production-grade PostgreSQL, MySQL, MariaDB, Redis, and MongoDB clusters in seconds. Powered by Kubernetes K3s container isolation, persistent SATA SSD storage, instant data export &amp; import, browser web GUIs, and under 20ms local latency across Indonesia.
+                Deploy production-grade PostgreSQL, MySQL, MariaDB, Redis, and MongoDB clusters in seconds. Powered by Kubernetes container isolation, persistent SATA SSD storage, instant data export &amp; import, browser web GUIs, and under 20ms local latency across Indonesia.
               </p>
 
               <div className="flex flex-wrap items-center gap-4">
@@ -499,7 +499,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                   { icon: Database, label: "Database Engines", value: "Postgres, MySQL, Redis, Mongo" },
                   { icon: HardDrive, label: "Storage Engine", value: "SATA SSD Persistent PVC" },
                   { icon: Zap, label: "NodePort Access", value: "Direct Public TCP Port" },
-                  { icon: ShieldCheck, label: "Architecture", value: "Isolated K3s Pods" },
+                  { icon: ShieldCheck, label: "Architecture", value: "Isolated Kubernetes Pods" },
                 ]}
               />
             </div>
@@ -511,7 +511,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
         <section className="py-10 sm:py-14 relative z-10">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
             {[
-              { icon: Box, title: "K3s Pod Isolation", desc: "Every database runs inside dedicated container pods with strict CPU and memory resource quotas." },
+              { icon: Box, title: "Kubernetes Pod Isolation", desc: "Every database runs inside dedicated container pods with strict CPU and memory resource quotas." },
               { icon: Globe, title: "Browser Web GUIs", desc: "Built-in phpMyAdmin, pgAdmin 4, and Mongo Express with automatic SSL & secure authentication." },
               { icon: HardDrive, title: "Persistent SATA SSD PVC", desc: "Enterprise SSD block storage mounted via Kubernetes PVC guarantees zero data loss on restart." },
               { icon: Activity, title: "Local Sidoarjo DC", desc: "Under 20ms ultra-low ping across Indonesia with direct IIX, OpenIX, and CDIX peering." },
@@ -636,7 +636,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                   KUBERNETES CLUSTER ARCHITECTURE
                 </span>
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
-                  Built on Cloud-Native Kubernetes K3s
+                  Built on Cloud-Native Kubernetes
                 </h2>
                 <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed mb-8 max-w-xl">
                   Unlike traditional shared web hosting, each Masdika database instance runs in an isolated StatefulSet Pod with dedicated memory buffers, persistent block volumes, and automated self-healing.
@@ -986,7 +986,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                     <span>Shared Database Package Specification</span>
                   </label>
                   <span className="text-xs text-[var(--text-muted)] font-medium pl-7 sm:pl-0">
-                    Burstable multi-tenant container on Kubernetes K3s
+                    Burstable multi-tenant container on Kubernetes
                   </span>
                 </div>
 
@@ -1201,7 +1201,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
             {/* 4 Feature Badges Under Configurator */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
               {[
-                { icon: ShieldCheck, title: "K3s Pod Isolation", desc: "Noisy neighbor protection with Linux cgroup enforcement." },
+                { icon: ShieldCheck, title: "Kubernetes Pod Isolation", desc: "Noisy neighbor protection with Linux cgroup enforcement." },
                 { icon: Globe, title: "Web GUI Included", desc: "Zero configuration single sign-on web management." },
                 { icon: Zap, title: "Public NodePort", desc: "Direct TCP connectivity for external dev tools and CI/CD." },
                 { icon: Download, title: "Instant Export / Import", desc: "On-demand dump downloads and one-click data import." },
@@ -1358,16 +1358,16 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
         {/* ── 8. PROVISIONING SECTION (Live K3s Terminal) ───────────────── */}
         <ProvisioningSection
           subtitle="AUTOMATED CLUSTER PROVISIONING"
-          title="Instant, native Kubernetes K3s deployment."
+          title="Instant, native Kubernetes deployment."
           description="Our control panel manages Kubernetes Pod scheduling, persistent volume claim binding, secret encryption, and public TCP routing automatically. Your database is query-ready in seconds."
           buttonText="Open Database Panel"
           buttonHref="/dashboard/database"
           logs={DB_TERMINAL_LOGS}
           stats={DB_TERMINAL_STATS}
-          terminalTitle="PROVISIONING MANAGED DATABASE (K3S)"
+          terminalTitle="PROVISIONING MANAGED DATABASE (K8S)"
           iconType="k3s"
-          targetServer="Dell PowerEdge R630 • Sidoarjo DC (K3s Cluster)"
-          provisionEstimate="Backend: Native Kubernetes K3s (~15 Seconds)"
+          targetServer="Dell PowerEdge R630 • Sidoarjo DC (Kubernetes Cluster)"
+          provisionEstimate="Backend: Native Kubernetes (~15 Seconds)"
         />
 
         {/* ── 9. FINAL CTA SECTION ──────────────────────────────────────── */}
@@ -1383,7 +1383,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                 Ready for True Managed Cloud Databases?
               </h2>
               <p className="text-base sm:text-lg text-[var(--text-secondary)] mb-8 leading-relaxed">
-                Deploy production-ready databases on Masdika K3s Kubernetes infrastructure today. Enjoy isolated Pods, persistent SATA SSD storage, and 1-click web GUIs.
+                Deploy production-ready databases on Masdika Kubernetes infrastructure today. Enjoy isolated Pods, persistent SATA SSD storage, and 1-click web GUIs.
               </p>
 
               <div className="flex flex-wrap items-center justify-center gap-4">

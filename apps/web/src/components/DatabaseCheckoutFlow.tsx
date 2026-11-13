@@ -927,7 +927,7 @@ export default function DatabaseCheckoutFlow() {
                       Shared Package Details
                     </h2>
                     <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
-                      Burstable multi-tenant container specification on Kubernetes K3s
+                      Burstable multi-tenant container specification on Kubernetes
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -1361,7 +1361,7 @@ export default function DatabaseCheckoutFlow() {
                 Deploying Managed Database
               </h3>
               <p className={cn("text-xs mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
-                Please wait, allocating container and K3s configuration...
+                Please wait, allocating container and Kubernetes configuration...
               </p>
             </div>
 

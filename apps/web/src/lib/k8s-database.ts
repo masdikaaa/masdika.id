@@ -302,7 +302,7 @@ export async function execInPod(
       const timeout = setTimeout(() => {
         try {
           ws.close();
-        } catch {}
+        } catch { }
         resolve({
           stdout: Buffer.concat(stdoutChunks).toString('utf-8'),
           stderr: 'Command execution timed out after 120 seconds',
@@ -1120,9 +1120,9 @@ export async function deleteDatabase(id: number, ns = 'managed-db'): Promise<{ s
     try {
       const dbRecord = await prisma.databaseService.findUnique({ where: { id } });
       if (dbRecord && (dbRecord.type.toUpperCase().includes('POSTGRES'))) {
-        await syncPgAdminUser(dbRecord, 'delete').catch(() => {});
+        await syncPgAdminUser(dbRecord, 'delete').catch(() => { });
       }
-    } catch {}
+    } catch { }
 
     await Promise.allSettled([
       appsApi.deleteNamespacedDeployment({ name: `db-${id}`, namespace: ns }),

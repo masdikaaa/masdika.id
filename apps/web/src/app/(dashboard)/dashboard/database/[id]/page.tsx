@@ -105,48 +105,48 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
   const isMongoEngine = engineUpper.includes("MONGO");
   const transferUi = isRedisEngine
     ? {
-        importBtn: "Restore Snapshot",
-        exportBtn: "Download Snapshot",
-        importTitle: "Restore Redis Snapshot (.rdb)",
-        importSubtitle: "Replace all keys with an RDB snapshot",
-        warning:
-          "Restoring a snapshot REPLACES ALL existing keys in every logical database and restarts Redis (about 5–15 seconds of downtime). Download a fresh snapshot first if you may need to roll back.",
-        accept: ".rdb",
-        hint: "Supports .rdb snapshots from Redis 7.2 or older (Max 50MB)",
-        submit: "Restore Snapshot",
-        busy: "Restoring...",
-        exportTitle: "Download a point-in-time RDB snapshot (no downtime)",
-        importTooltip: "Restore an RDB snapshot (replaces all keys)",
-      }
+      importBtn: "Restore Snapshot",
+      exportBtn: "Download Snapshot",
+      importTitle: "Restore Redis Snapshot (.rdb)",
+      importSubtitle: "Replace all keys with an RDB snapshot",
+      warning:
+        "Restoring a snapshot REPLACES ALL existing keys in every logical database and restarts Redis (about 5–15 seconds of downtime). Download a fresh snapshot first if you may need to roll back.",
+      accept: ".rdb",
+      hint: "Supports .rdb snapshots from Redis 7.2 or older (Max 50MB)",
+      submit: "Restore Snapshot",
+      busy: "Restoring...",
+      exportTitle: "Download a point-in-time RDB snapshot (no downtime)",
+      importTooltip: "Restore an RDB snapshot (replaces all keys)",
+    }
     : isMongoEngine
       ? {
-          importBtn: "Import Data",
-          exportBtn: "Export Dump",
-          importTitle: "Import MongoDB Data",
-          importSubtitle: `Restore a mongodump archive or JSON export into ${db?.name ?? "this database"}`,
-          warning:
-            "mongodump archives replace (drop & restore) the collections they contain. JSON files are imported into a collection named after the file.",
-          accept: ".archive,.gz,.json,.dump,.bson",
-          hint: "Supports mongodump .archive / .archive.gz and .json (Max 50MB)",
-          submit: "Start Import",
-          busy: "Importing...",
-          exportTitle: "Download a mongodump archive (restore with mongorestore --archive)",
-          importTooltip: "Import a mongodump archive or JSON file",
-        }
+        importBtn: "Import Data",
+        exportBtn: "Export Dump",
+        importTitle: "Import MongoDB Data",
+        importSubtitle: `Restore a mongodump archive or JSON export into ${db?.name ?? "this database"}`,
+        warning:
+          "mongodump archives replace (drop & restore) the collections they contain. JSON files are imported into a collection named after the file.",
+        accept: ".archive,.gz,.json,.dump,.bson",
+        hint: "Supports mongodump .archive / .archive.gz and .json (Max 50MB)",
+        submit: "Start Import",
+        busy: "Importing...",
+        exportTitle: "Download a mongodump archive (restore with mongorestore --archive)",
+        importTooltip: "Import a mongodump archive or JSON file",
+      }
       : {
-          importBtn: "Import Data",
-          exportBtn: "Export Dump",
-          importTitle: "Import Database Dump",
-          importSubtitle: `Execute an SQL dump directly on ${db?.name ?? "this database"}`,
-          warning:
-            "Executing an import will run all statements against the active database. Make sure you have exported a recent backup if needed.",
-          accept: ".sql,.dump,.txt",
-          hint: "Supports .sql and .dump (Max 50MB)",
-          submit: "Start Import",
-          busy: "Importing...",
-          exportTitle: "Download SQL dump",
-          importTooltip: "Import SQL dump file",
-        };
+        importBtn: "Import Data",
+        exportBtn: "Export Dump",
+        importTitle: "Import Database Dump",
+        importSubtitle: `Execute an SQL dump directly on ${db?.name ?? "this database"}`,
+        warning:
+          "Executing an import will run all statements against the active database. Make sure you have exported a recent backup if needed.",
+        accept: ".sql,.dump,.txt",
+        hint: "Supports .sql and .dump (Max 50MB)",
+        submit: "Start Import",
+        busy: "Importing...",
+        exportTitle: "Download SQL dump",
+        importTooltip: "Import SQL dump file",
+      };
   // Dedicated Resource Monitoring States (CPU, RAM, Disk)
   const [metricsTimeframe, setMetricsTimeframe] = useState<"live" | "hour" | "day" | "week">("hour");
   const [activeMetricTab, setActiveMetricTab] = useState<"ALL" | "CPU" | "RAM" | "DISK">("ALL");
@@ -670,7 +670,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className={cn("text-base font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-                    {isProvisioning ? "Provisioning Database on K3s Cluster..." : "Initializing Database Engine & Storage..."}
+                    {isProvisioning ? "Provisioning Database on Kubernetes Cluster..." : "Initializing Database Engine & Storage..."}
                   </h3>
                   <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 animate-pulse">
                     Initializing Engine
@@ -757,10 +757,10 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
 
       {/* Main Grid: Left Column (Credentials & Snippets) + Right Column (Web GUI & Telemetry & Actions) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         {/* Left Column (2 Cols wide) */}
         <div className="lg:col-span-2 space-y-6">
-          
+
           {/* Connection Credentials Card */}
           <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-xs")}>
             <div className="flex items-center justify-between mb-4">

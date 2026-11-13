@@ -7,9 +7,9 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: {
-    absolute: "Managed Database - Kubernetes K3s High Availability Cloud DB",
+    absolute: "Managed Database - Kubernetes High Availability Cloud DB",
   },
-  description: "Deploy production-ready MySQL, PostgreSQL, MariaDB, Redis, and MongoDB clusters in seconds. Powered by Kubernetes K3s isolation, persistent SATA SSD storage, instant data export & import, browser web GUIs, and low-latency IIX routing.",
+  description: "Deploy production-ready MySQL, PostgreSQL, MariaDB, Redis, and MongoDB clusters in seconds. Powered by Kubernetes isolation, persistent SATA SSD storage, instant data export & import, browser web GUIs, and low-latency IIX routing.",
   keywords: [
     "Managed Database",
     "Kubernetes Database",
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     "MySQL Cloud Database",
     "MariaDB Hosting",
     "MongoDB Cloud",
-    "K3s Database",
+    "Kubernetes Database",
     "Database Indonesia",
     "Pay As You Go Database",
     "High Performance Database",
@@ -28,8 +28,8 @@ export const metadata: Metadata = {
     canonical: "https://www.masdika.id/managed-db",
   },
   openGraph: {
-    title: "Managed Database - Kubernetes K3s High Availability Cloud DB",
-    description: "Deploy production-ready MySQL, PostgreSQL, MariaDB, Redis, and MongoDB clusters in seconds. Powered by Kubernetes K3s isolation, persistent SATA SSD storage, instant data export & import, browser web GUIs, and low-latency IIX routing.",
+    title: "Managed Database - Kubernetes High Availability Cloud DB",
+    description: "Deploy production-ready MySQL, PostgreSQL, MariaDB, Redis, and MongoDB clusters in seconds. Powered by Kubernetes isolation, persistent SATA SSD storage, instant data export & import, browser web GUIs, and low-latency IIX routing.",
     url: "https://www.masdika.id/managed-db",
     siteName: "Masdika",
     images: [
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
         url: "/images/brand/og-image.webp",
         width: 1200,
         height: 630,
-        alt: "Masdika Managed Database - Kubernetes K3s High Availability",
+        alt: "Masdika Managed Database - Kubernetes High Availability",
       },
     ],
     locale: "en_US",
@@ -45,8 +45,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Managed Database - Kubernetes K3s High Availability Cloud DB",
-    description: "Deploy production-ready MySQL, PostgreSQL, MariaDB, Redis, and MongoDB clusters in seconds. Powered by Kubernetes K3s isolation, persistent SATA SSD storage, instant data export & import, browser web GUIs, and low-latency IIX routing.",
+    title: "Managed Database - Kubernetes High Availability Cloud DB",
+    description: "Deploy production-ready MySQL, PostgreSQL, MariaDB, Redis, and MongoDB clusters in seconds. Powered by Kubernetes isolation, persistent SATA SSD storage, instant data export & import, browser web GUIs, and low-latency IIX routing.",
     images: ["/images/brand/og-image.webp"],
   },
 };
@@ -92,10 +92,10 @@ export default async function ManagedDbLandingPage() {
       {
         "@type": "Product",
         "@id": "https://www.masdika.id/managed-db#product",
-        "name": "Managed Database - Kubernetes K3s High Availability",
+        "name": "Managed Database - Kubernetes High Availability",
         "sku": "MASDIKA-MDB-ID",
-        "mpn": "MDB-K3S-01",
-        "description": "High-Performance Managed Cloud Databases powered by Kubernetes K3s, container isolation, persistent SATA SSD storage, instant data export & import, and flexible hourly Pay-As-You-Go billing.",
+        "mpn": "MDB-K8S-01",
+        "description": "High-Performance Managed Cloud Databases powered by Kubernetes, container isolation, persistent SATA SSD storage, instant data export & import, and flexible hourly Pay-As-You-Go billing.",
         "category": "Cloud Computing > Managed Database",
         "image": "https://www.masdika.id/images/brand/og-image.webp",
         "brand": {
@@ -126,7 +126,7 @@ export default async function ManagedDbLandingPage() {
               "name": "Rian Pratama"
             },
             "datePublished": "2026-08-20",
-            "reviewBody": "Managed Database powered by K3s at Masdika is remarkably fast and resilient. Instant pgAdmin access and public NodePorts made connecting from Prisma and Laravel seamless with zero DevOps overhead.",
+            "reviewBody": "Managed Database at Masdika is remarkably fast and resilient. Instant pgAdmin access and public NodePorts made connecting from Prisma and Laravel seamless with zero DevOps overhead.",
             "reviewRating": {
               "@type": "Rating",
               "ratingValue": "5",
@@ -145,7 +145,7 @@ export default async function ManagedDbLandingPage() {
             "name": "How does Masdika Managed Database work?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Every managed database runs inside an isolated container Pod orchestrated by Kubernetes (K3s) on enterprise Dell PowerEdge nodes. Storage is bound via Persistent Volume Claims (PVC) on enterprise SSDs, ensuring zero data loss across Pod restarts or node maintenance."
+              "text": "Every managed database runs inside an isolated container Pod orchestrated by Kubernetes on enterprise Dell PowerEdge nodes. Storage is bound via Persistent Volume Claims (PVC) on enterprise SSDs, ensuring zero data loss across Pod restarts or node maintenance."
             }
           },
           {
