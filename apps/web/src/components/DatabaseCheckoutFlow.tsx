@@ -193,15 +193,19 @@ export default function DatabaseCheckoutFlow() {
     const engineParam = searchParams.get("engine");
     const tierParam = searchParams.get("tier");
     const storageParam = searchParams.get("storage");
+    const versionParam = searchParams.get("version");
+    const flavorParam = searchParams.get("flavor");
 
     if (tierParam && (tierParam.toUpperCase() === "SHARED" || tierParam.toUpperCase() === "DEDICATED")) {
       setSelectedTier(tierParam.toUpperCase() as "SHARED" | "DEDICATED");
     }
 
+    let activeEngineId = "POSTGRES";
     if (engineParam) {
       const engUpper = engineParam.toUpperCase();
       const matched = DATABASE_ENGINES.find(e => e.id === engUpper || (engUpper === "POSTGRESQL" && e.id === "POSTGRES") || (engUpper === "MONGO" && e.id === "MONGODB"));
       if (matched) {
+        activeEngineId = matched.id;
         setSelectedEngine(matched.id);
         setSelectedSharedEngine(matched.id);
         const variants = SHARED_DATABASE_VARIANTS[matched.id] || [];
@@ -209,6 +213,19 @@ export default function DatabaseCheckoutFlow() {
           const def = variants.find(v => v.default) || variants[0];
           setSelectedSharedId(def.id);
         }
+      }
+    }
+
+    if (flavorParam && DEDICATED_FLAVORS.some(f => f.id === flavorParam)) {
+      setSelectedFlavorId(flavorParam);
+    }
+
+    if (versionParam) {
+      setSelectedVersion(versionParam);
+      const variants = SHARED_DATABASE_VARIANTS[activeEngineId] || [];
+      const match = variants.find(v => v.version === versionParam);
+      if (match) {
+        setSelectedSharedId(match.id);
       }
     }
 

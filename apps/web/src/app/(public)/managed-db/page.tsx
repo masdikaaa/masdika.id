@@ -80,8 +80,8 @@ export default async function ManagedDbLandingPage() {
   const safePricing = {
     sharedMonthlyPerGb: sharedRatePerGb || 10000,
     sharedHourlyPerGb: Math.max(1, Math.ceil((sharedRatePerGb || 10000) / 720)),
-    dedicatedMonthlyBase: 45000,
-    dedicatedHourlyBase: Math.max(1, Math.ceil(45000 / 720)),
+    dedicatedMonthlyBase: 30000,
+    dedicatedHourlyBase: Math.max(1, Math.ceil(30000 / 720)),
     dedicatedStoragePerGbMonthly: 5000,
     dedicatedStoragePerGbHourly: Math.max(1, Math.ceil(5000 / 720)),
   };
@@ -126,7 +126,7 @@ export default async function ManagedDbLandingPage() {
               "name": "Rian Pratama"
             },
             "datePublished": "2026-08-20",
-            "reviewBody": "Managed Database dengan K3s di Masdika sangat cepat dan stabil. Sudah dapat akses pgAdmin dan NodePort publik, jadi koneksi dari Prisma dan Laravel lancar banget tanpa setup ribet.",
+            "reviewBody": "Managed Database powered by K3s at Masdika is remarkably fast and resilient. Instant pgAdmin access and public NodePorts made connecting from Prisma and Laravel seamless with zero DevOps overhead.",
             "reviewRating": {
               "@type": "Rating",
               "ratingValue": "5",
@@ -153,7 +153,7 @@ export default async function ManagedDbLandingPage() {
             "name": "Which database engines are supported?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "We natively support PostgreSQL 16, MySQL 8.0, MariaDB 10.11, and MongoDB 7.0. Each database instance comes with its own web-based management GUI: pgAdmin 4 for PostgreSQL, phpMyAdmin for MySQL and MariaDB, and Mongo Express for MongoDB."
+              "text": "We natively support PostgreSQL, MySQL, MariaDB, Redis, and MongoDB. Each database instance comes with its own web-based management GUI: pgAdmin 4 for PostgreSQL, phpMyAdmin for MySQL and MariaDB, Redis Commander for Redis, and Mongo Express for MongoDB."
             }
           },
           {

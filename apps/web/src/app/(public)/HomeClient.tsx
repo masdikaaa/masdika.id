@@ -898,7 +898,7 @@ export function HomeClient({
                 code: "SRV-02",
                 domain: "Data Layer",
                 title: "Database Optimization",
-                desc: "High-availability PostgreSQL/MySQL clustering, query execution plan tuning, and automated PITR backups.",
+                desc: "High-availability PostgreSQL/MySQL clustering, query execution plan tuning, and seamless data replication.",
                 stack: ["PostgreSQL", "MySQL", "Redis Cluster"],
                 outcome: "Sub-ms Query Tuning",
               },

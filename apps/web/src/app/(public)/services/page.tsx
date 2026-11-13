@@ -82,7 +82,7 @@ export default function ServicesPage() {
       icon: Database,
       title: "Database Optimization",
       percentage: 90,
-      description: "Optimizing relational and NoSQL databases for high-throughput applications, ensuring sub-millisecond query latency and automated backups.",
+      description: "Optimizing relational and NoSQL databases for high-throughput applications, ensuring sub-millisecond query latency and seamless data export & import.",
     },
     {
       icon: Network,

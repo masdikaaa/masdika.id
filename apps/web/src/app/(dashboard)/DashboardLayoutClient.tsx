@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Key, Settings, LogOut, Bell, Menu, LayoutDashboard, BarChart3, Database, Receipt, ArrowUpCircle, HardDrive, Server, Layers, MessageSquare, Wallet, Ticket, Network, Terminal, UploadCloud, MapPin, Flame, Activity, Gift, Clock, Code2, Sun, Moon, ShieldAlert, Loader2, Plus, ChevronDown, Search, Rocket } from "lucide-react";
+import { Key, Settings, LogOut, Bell, Menu, LayoutDashboard, BarChart3, Database, Receipt, ArrowUpCircle, HardDrive, Server, Layers, MessageSquare, Wallet, Ticket, Network, Terminal, UploadCloud, MapPin, Flame, Activity, Gift, Clock, Code2, Sun, Moon, ShieldAlert, Loader2, Plus, ChevronDown, Search, Rocket, Boxes } from "lucide-react";
 import { SiKubernetes, SiCloudflare } from "react-icons/si";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -77,6 +77,7 @@ const SIDEBAR_LINKS = [
   { name: "My Services", href: "/dashboard/services", icon: Layers, color: "text-cyan-400", group: "Main" },
   { name: "Cloud VPS", href: "/dashboard/vps", icon: Terminal, color: "text-cyan-400", group: "Compute & Network" },
   { name: "App Catalog", href: "/dashboard/catalog-apps", icon: Rocket, color: "text-cyan-400", group: "Compute & Network" },
+  { name: "Managed Apps", href: "/dashboard/apps", icon: Boxes, color: "text-cyan-400", group: "Compute & Network", badge: "Soon" },
   { name: "Metric & Alert", href: "/dashboard/alerts", icon: Activity, color: "text-cyan-400", group: "Compute & Network" },
   { name: "Incident Reports", href: "/dashboard/incidents", icon: ShieldAlert, color: "text-cyan-400", group: "Compute & Network" },
   { name: "Auto Scheduler", href: "/dashboard/scheduler", icon: Clock, color: "text-cyan-400", group: "Compute & Network" },
@@ -320,6 +321,18 @@ export default function DashboardLayoutClient({
                           : (isDark ? "text-cyan-400/75 group-hover:text-cyan-400" : "text-slate-400 group-hover:text-cyan-600")
                       )} />
                       <span className="relative z-10 truncate">{link.name}</span>
+                      {"badge" in link && link.badge && (
+                        <span className={cn(
+                          "ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0 transition-colors",
+                          isActive
+                            ? "bg-slate-950/20 text-slate-950 font-black"
+                            : isDark
+                              ? "bg-cyan-500/15 text-cyan-300 border border-cyan-500/30"
+                              : "bg-cyan-50 text-cyan-700 border border-cyan-200"
+                        )}>
+                          {link.badge}
+                        </span>
+                      )}
                     </Link>
                   );
                 })}

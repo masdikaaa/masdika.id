@@ -61,56 +61,91 @@ const DB_TERMINAL_STATS = [
   { value: "NVMe SSD", label: "PERSISTENT PVC" },
 ];
 
+const DEDICATED_FLAVORS = [
+  { id: "flavor-1vcpu-1gb", vcpu: "1 vCPU", ram: "1 GB", price: 30000, hourlyPrice: 42, planName: "Dedicated 1 vCPU / 1 GB" },
+  { id: "flavor-1vcpu-2gb", vcpu: "1 vCPU", ram: "2 GB", price: 45000, hourlyPrice: 62, planName: "Dedicated 1 vCPU / 2 GB" },
+  { id: "flavor-2vcpu-2gb", vcpu: "2 vCPU", ram: "2 GB", price: 55000, hourlyPrice: 76, planName: "Dedicated 2 vCPU / 2 GB" },
+  { id: "flavor-2vcpu-4gb", vcpu: "2 vCPU", ram: "4 GB", price: 150000, hourlyPrice: 208, planName: "Dedicated 2 vCPU / 4 GB" },
+  { id: "flavor-2vcpu-8gb", vcpu: "2 vCPU", ram: "8 GB", price: 250000, hourlyPrice: 347, planName: "Dedicated 2 vCPU / 8 GB" },
+  { id: "flavor-4vcpu-8gb", vcpu: "4 vCPU", ram: "8 GB", price: 400000, hourlyPrice: 555, planName: "Dedicated 4 vCPU / 8 GB" },
+];
+
 const SUPPORTED_ENGINES = [
   { 
-    name: "PostgreSQL 16", 
+    name: "PostgreSQL", 
     type: "POSTGRESQL",
     desc: "Advanced open-source relational database with native JSONB, strong indexing, and full ACID compliance.",
     webTool: "pgAdmin 4",
     icon: "/images/apps/postgresql.svg",
     color: "from-blue-600/20 to-sky-600/20",
     border: "border-sky-500/30",
-    text: "text-sky-400"
+    text: "text-sky-400",
+    defaultVersion: "16",
+    versions: [
+      { id: "16", name: "16 LTS" },
+      { id: "17", name: "17 (Latest)" },
+      { id: "15", name: "15 LTS" },
+    ],
   },
   { 
-    name: "MySQL 8.0", 
+    name: "MySQL", 
     type: "MYSQL",
     desc: "The world's most popular open-source relational database, optimized for high read throughput and web scale.",
     webTool: "phpMyAdmin",
     icon: "/images/apps/mysql.svg",
     color: "from-cyan-600/20 to-teal-600/20",
     border: "border-cyan-500/30",
-    text: "text-cyan-400"
+    text: "text-cyan-400",
+    defaultVersion: "8.0",
+    versions: [
+      { id: "8.0", name: "8.0 LTS" },
+      { id: "8.4", name: "8.4 LTS" },
+    ],
   },
   { 
-    name: "MariaDB 10.11", 
+    name: "MariaDB", 
     type: "MARIADB",
     desc: "Robust, drop-in replacement for MySQL with enhanced query optimizations, Galera replication, and LTS stability.",
     webTool: "phpMyAdmin",
     icon: "/images/apps/mariadb.svg",
     color: "from-amber-600/20 to-orange-600/20",
     border: "border-amber-500/30",
-    text: "text-amber-400"
+    text: "text-amber-400",
+    defaultVersion: "10.11",
+    versions: [
+      { id: "10.11", name: "10.11 LTS" },
+      { id: "11.4", name: "11.4 LTS" },
+    ],
   },
   { 
-    name: "MongoDB 7.0", 
+    name: "MongoDB", 
     type: "MONGODB",
     desc: "Leading document-oriented NoSQL database engineered for agile schema iterations and high-volume collections.",
     webTool: "Mongo Express",
     icon: "/images/apps/mongodb.svg",
     color: "from-emerald-600/20 to-teal-600/20",
     border: "border-emerald-500/30",
-    text: "text-emerald-400"
+    text: "text-emerald-400",
+    defaultVersion: "7.0",
+    versions: [
+      { id: "7.0", name: "7.0 (Current)" },
+      { id: "6.0", name: "6.0 LTS" },
+    ],
   },
   { 
-    name: "Redis 7.2", 
+    name: "Redis", 
     type: "REDIS",
     desc: "Ultra-fast in-memory key-value data structure store used as a database, cache, message broker, and queue.",
     webTool: "Redis Commander",
     icon: "/images/apps/redis.svg",
     color: "from-red-600/20 to-rose-600/20",
     border: "border-red-500/30",
-    text: "text-red-400"
+    text: "text-red-400",
+    defaultVersion: "7.2",
+    versions: [
+      { id: "7.2", name: "7.2 LTS" },
+      { id: "7.0", name: "7.0 LTS" },
+    ],
   },
 ];
 
@@ -173,15 +208,29 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
 
   // Interactive Configurator State
   const [selectedEngine, setSelectedEngine] = useState<string>("POSTGRESQL");
+  const [selectedVersion, setSelectedVersion] = useState<string>("16");
   const [selectedTier, setSelectedTier] = useState<"SHARED" | "DEDICATED">("SHARED");
+  const [selectedFlavorId, setSelectedFlavorId] = useState<string>("flavor-1vcpu-1gb");
   const [storageGb, setStorageGb] = useState<number>(1);
   const storageSliderId = useId();
 
-  // Price Calculation
+  const handleSelectEngine = (engineType: string) => {
+    setSelectedEngine(engineType);
+    const eng = SUPPORTED_ENGINES.find(e => e.type === engineType);
+    if (eng && eng.versions && eng.versions.length > 0) {
+      setSelectedVersion(eng.defaultVersion || eng.versions[0].id);
+    }
+  };
+
+  const selectedFlavor = DEDICATED_FLAVORS.find(f => f.id === selectedFlavorId) || DEDICATED_FLAVORS[0];
+
+  // Price Calculation exactly matching dashboard checkout:
+  // Shared: storageGb * ratePerGb (Rp 10.000/GB)
+  // Dedicated: flavor.price + (storageGb * 5.000)
   const isShared = selectedTier === "SHARED";
   const monthlyPrice = isShared 
     ? storageGb * safePricing.sharedMonthlyPerGb
-    : safePricing.dedicatedMonthlyBase + (storageGb * safePricing.dedicatedStoragePerGbMonthly);
+    : selectedFlavor.price + (storageGb * safePricing.dedicatedStoragePerGbMonthly);
   
   const hourlyRate = Math.max(1, Math.ceil(monthlyPrice / 720));
 
@@ -670,7 +719,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                     <button
                       key={eng.type}
                       type="button"
-                      onClick={() => setSelectedEngine(eng.type)}
+                      onClick={() => handleSelectEngine(eng.type)}
                       className={cn(
                         "p-4 rounded-xl border text-left transition-all relative flex flex-col justify-between group cursor-pointer",
                         isSelected
@@ -698,6 +747,35 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                   );
                 })}
               </div>
+
+              {/* Version Selector for Selected Engine */}
+              {activeEngineObj.versions && activeEngineObj.versions.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-[var(--border-primary)] flex flex-wrap items-center gap-3">
+                  <span className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider shrink-0">
+                    Engine Version:
+                  </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {activeEngineObj.versions.map((ver) => {
+                      const isVerSelected = selectedVersion === ver.id;
+                      return (
+                        <button
+                          key={ver.id}
+                          type="button"
+                          onClick={() => setSelectedVersion(ver.id)}
+                          className={cn(
+                            "px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all border cursor-pointer",
+                            isVerSelected
+                              ? "bg-cyan-400 text-slate-950 border-cyan-400 shadow-sm"
+                              : "border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-cyan-500/40"
+                          )}
+                        >
+                          {ver.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Step 2: Select Architecture Tier */}
@@ -718,7 +796,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                   type="button"
                   onClick={() => {
                     setSelectedTier("SHARED");
-                    if (storageGb > 50) setStorageGb(50);
+                    if (storageGb > 20) setStorageGb(20);
                   }}
                   className={cn(
                     "p-5 rounded-xl border text-left transition-all relative flex flex-col justify-between cursor-pointer",
@@ -750,7 +828,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                       </div>
                       <div className="flex items-center gap-2">
                         <HardDrive className="w-3.5 h-3.5 text-cyan-400" />
-                        <span>Scalable SSD Storage (1 - 50 GB)</span>
+                        <span>Scalable SSD Storage (1 - 20 GB)</span>
                       </div>
                     </div>
                   </div>
@@ -773,7 +851,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                         Dedicated Cluster
                       </span>
                       <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400">
-                        From Rp 50.000 /mo
+                        From Rp 35.000 /mo
                       </span>
                     </div>
                     <p className="text-xs text-[var(--text-secondary)] mb-4 leading-relaxed">
@@ -782,21 +860,68 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                     <div className="space-y-1.5 text-xs text-[var(--text-muted)]">
                       <div className="flex items-center gap-2">
                         <Cpu className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>1.0 Dedicated vCPU Core</span>
+                        <span>1.0 - 4.0 Dedicated vCPU</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Box className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>2 GB Dedicated RAM Buffer</span>
+                        <span>1 GB - 8 GB Dedicated RAM</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <HardDrive className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>High-IOPS NVMe SSD (1 - 100 GB)</span>
+                        <span>High-IOPS NVMe SSD (1 - 20 GB)</span>
                       </div>
                     </div>
                   </div>
                 </button>
               </div>
             </div>
+
+            {/* Step 2b: Dedicated Flavors (Only for Dedicated Tier) */}
+            {!isShared && (
+              <div className="mb-8">
+                <div className="flex items-center justify-between mb-3">
+                  <label className="text-xs font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 flex items-center gap-2">
+                    <span className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px]">2b</span>
+                    Select Dedicated Flavor
+                  </label>
+                  <span className="text-xs text-[var(--text-muted)] font-medium">
+                    Reserved CPU &amp; RAM allocation
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {DEDICATED_FLAVORS.map((flavor) => {
+                    const isFlavorSelected = selectedFlavorId === flavor.id;
+                    return (
+                      <button
+                        key={flavor.id}
+                        type="button"
+                        onClick={() => setSelectedFlavorId(flavor.id)}
+                        className={cn(
+                          "p-3.5 rounded-xl border text-left transition-all relative flex flex-col justify-between cursor-pointer",
+                          isFlavorSelected
+                            ? "border-cyan-500 bg-cyan-500/10 shadow-sm ring-1 ring-cyan-500/30"
+                            : "border-[var(--border-primary)] bg-[var(--surface-secondary)] hover:border-cyan-500/40"
+                        )}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-bold text-[var(--text-primary)]">
+                            {flavor.vcpu} / {flavor.ram}
+                          </span>
+                          <span className="text-xs font-mono font-bold text-cyan-600 dark:text-cyan-400">
+                            {formatCurrency(flavor.price)}/mo
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)]">
+                          <span>Dedicated Pod</span>
+                          <span>~{formatCurrency(flavor.hourlyPrice)}/hr</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Step 3: Storage Slider */}
             <div className="mb-8">
@@ -810,7 +935,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                     {storageGb} GB
                   </span>
                   <span className="text-xs text-[var(--text-muted)]">
-                    NVMe PVC
+                    NVMe PVC ({isShared ? "Rp 10.000/GB" : "Rp 5.000/GB"})
                   </span>
                 </div>
               </div>
@@ -819,17 +944,39 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                 id={storageSliderId}
                 type="range"
                 min={1}
-                max={isShared ? 50 : 100}
+                max={20}
                 step={1}
                 value={storageGb}
                 onChange={(e) => setStorageGb(parseInt(e.target.value, 10))}
                 className="w-full h-2.5 bg-slate-200 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-cyan-400 focus:outline-none"
               />
 
-              <div className="flex justify-between text-[11px] text-[var(--text-muted)] font-mono mt-2">
+              <div className="flex justify-between items-center text-[11px] text-[var(--text-muted)] font-mono mt-2">
                 <span>1 GB</span>
-                <span>{isShared ? "25 GB" : "50 GB"}</span>
-                <span>{isShared ? "50 GB (Max)" : "100 GB (Max)"}</span>
+                <span>10 GB</span>
+                <span>20 GB (Max)</span>
+              </div>
+
+              {/* Quick Preset Buttons */}
+              <div className="flex items-center gap-2 flex-wrap mt-3">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] mr-1">
+                  Presets:
+                </span>
+                {[1, 2, 5, 10, 15, 20].map((preset) => (
+                  <button
+                    type="button"
+                    key={preset}
+                    onClick={() => setStorageGb(preset)}
+                    className={cn(
+                      "px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer border",
+                      storageGb === preset
+                        ? "bg-cyan-400 text-slate-950 border-cyan-400 shadow-xs"
+                        : "border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-cyan-500/40"
+                    )}
+                  >
+                    {preset} GB
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -852,20 +999,31 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                     /month (~{formatCurrency(hourlyRate)}/hr)
                   </span>
                 </div>
-                <p className="text-xs text-[var(--text-secondary)] mt-1.5">
-                  Includes {activeEngineObj.name}, {isShared ? "0.5 vCPU / 1GB RAM" : "1.0 vCPU / 2GB RAM"}, {storageGb} GB SSD &amp; {activeEngineObj.webTool}.
-                </p>
+                {isShared ? (
+                  <p className="text-xs text-[var(--text-secondary)] mt-1.5">
+                    Includes {activeEngineObj.name} {activeEngineObj.versions?.find(v => v.id === selectedVersion)?.name || selectedVersion}, 0.5 vCPU / 1GB RAM, {storageGb} GB SSD &amp; {activeEngineObj.webTool}.
+                  </p>
+                ) : (
+                  <div className="text-xs text-[var(--text-secondary)] mt-1.5">
+                    <p>
+                      Includes {activeEngineObj.name} {activeEngineObj.versions?.find(v => v.id === selectedVersion)?.name || selectedVersion}, {selectedFlavor.vcpu} / {selectedFlavor.ram}, {storageGb} GB SSD &amp; {activeEngineObj.webTool}.
+                    </p>
+                    <p className="text-[11px] text-[var(--text-muted)] mt-0.5 font-medium">
+                      Flavor: {formatCurrency(selectedFlavor.price)} + Storage ({storageGb} GB × Rp 5.000): {formatCurrency(storageGb * 5000)}
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="w-full md:w-auto">
                 <Button
                   variant="primary"
                   size="lg"
-                  href={`/dashboard/database/new?engine=${selectedEngine}&tier=${selectedTier}&storage=${storageGb}`}
-                  className="w-full md:w-auto justify-center"
+                  href={`/dashboard/database/new?engine=${selectedEngine}&tier=${selectedTier}&version=${selectedVersion}&flavor=${selectedFlavorId}&storage=${storageGb}`}
+                  className="w-full md:w-auto justify-center font-bold"
                   rightIcon={<ArrowRight className="w-4 h-4" />}
                 >
-                  Deploy {activeEngineObj.name}
+                  Deploy {activeEngineObj.name} {selectedVersion}
                 </Button>
               </div>
             </div>
@@ -876,7 +1034,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                 { icon: ShieldCheck, title: "K3s Pod Isolation", desc: "Noisy neighbor protection with Linux cgroup enforcement." },
                 { icon: Globe, title: "Web GUI Included", desc: "Zero configuration single sign-on web management." },
                 { icon: Zap, title: "Public NodePort", desc: "Direct TCP connectivity for external dev tools and CI/CD." },
-                { icon: HardDrive, title: "Daily Snapshots", desc: "Point-in-time database dumps with 1-click restore." },
+                { icon: Download, title: "Instant Export / Import", desc: "On-demand dump downloads and one-click data import." },
               ].map((feat, i) => (
                 <div key={i} className="p-4 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] flex items-start gap-3">
                   <feat.icon className="w-4 h-4 text-cyan-600 dark:text-cyan-400 shrink-0 mt-0.5" />
