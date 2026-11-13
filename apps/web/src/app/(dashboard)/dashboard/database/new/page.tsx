@@ -28,11 +28,11 @@ export default function NewDatabasePage() {
             <ChevronLeft className="w-4 h-4" />
           </Link>
           <div>
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className={cn("text-lg sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                 Deploy Managed Database
               </h1>
-              <span className={cn("px-2.5 py-0.5 rounded-full text-xs font-bold border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+              <span className={cn("px-2 py-0.5 rounded-full text-[11px] sm:text-xs font-bold border shrink-0", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
                 Shared & Dedicated Tiers
               </span>
             </div>

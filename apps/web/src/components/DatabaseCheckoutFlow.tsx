@@ -468,21 +468,23 @@ export default function DatabaseCheckoutFlow() {
       )}
 
       {/* Top Architecture Mode Selector */}
-      <div className={cn("p-1.5 rounded-2xl border flex items-center justify-between gap-3 flex-wrap w-full max-w-full min-w-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
-        <div className="flex items-center gap-2">
+      <div className={cn("p-1.5 sm:p-2 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-3 w-full max-w-full min-w-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 w-full md:w-auto">
           <button
             type="button"
             onClick={() => setSelectedTier("DEDICATED")}
             className={cn(
-              "px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2",
+              "w-full px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center justify-between sm:justify-start gap-2",
               selectedTier === "DEDICATED"
                 ? "bg-cyan-400 text-slate-950 shadow-md shadow-cyan-500/20"
                 : isDark ? "text-zinc-400 hover:text-white hover:bg-white/[0.04]" : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
             )}
           >
-            <Server className="w-4 h-4" />
-            <span>Dedicated Host Resources</span>
-            <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-extrabold uppercase", selectedTier === "DEDICATED" ? "bg-slate-950/20 text-slate-950" : isDark ? "bg-white/5 text-zinc-400" : "bg-slate-200 text-slate-700")}>
+            <div className="flex items-center gap-2 min-w-0">
+              <Server className="w-4 h-4 shrink-0" />
+              <span className="truncate">Dedicated Host</span>
+            </div>
+            <span className={cn("text-[10px] px-2 py-0.5 rounded font-extrabold uppercase shrink-0 whitespace-nowrap", selectedTier === "DEDICATED" ? "bg-slate-950/20 text-slate-950" : isDark ? "bg-white/5 text-zinc-400" : "bg-slate-200 text-slate-700")}>
               6 Flavors
             </span>
           </button>
@@ -491,22 +493,24 @@ export default function DatabaseCheckoutFlow() {
             type="button"
             onClick={() => setSelectedTier("SHARED")}
             className={cn(
-              "px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2",
+              "w-full px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center justify-between sm:justify-start gap-2",
               selectedTier === "SHARED"
                 ? "bg-cyan-400 text-slate-950 shadow-md shadow-cyan-500/20"
                 : isDark ? "text-zinc-400 hover:text-white hover:bg-white/[0.04]" : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
             )}
           >
-            <Database className="w-4 h-4" />
-            <span>Shared Multi-Tenant</span>
-            <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-extrabold uppercase", selectedTier === "SHARED" ? "bg-slate-950/20 text-slate-950" : isDark ? "bg-white/5 text-zinc-400" : "bg-slate-200 text-slate-700")}>
+            <div className="flex items-center gap-2 min-w-0">
+              <Database className="w-4 h-4 shrink-0" />
+              <span className="truncate">Shared Multi-Tenant</span>
+            </div>
+            <span className={cn("text-[10px] px-2 py-0.5 rounded font-extrabold uppercase shrink-0 whitespace-nowrap", selectedTier === "SHARED" ? "bg-slate-950/20 text-slate-950" : isDark ? "bg-white/5 text-zinc-400" : "bg-slate-200 text-slate-700")}>
               Per-GB Storage
             </span>
           </button>
         </div>
 
-        <div className="flex items-center gap-2 text-xs font-medium px-3 text-zinc-400">
-          <MapPin className="w-3.5 h-3.5 text-cyan-400" />
+        <div className="flex items-center gap-2 text-xs font-medium px-2 text-zinc-400 shrink-0">
+          <MapPin className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
           <span>Region: Sidoarjo (K3s Cluster)</span>
         </div>
       </div>
@@ -520,9 +524,9 @@ export default function DatabaseCheckoutFlow() {
           {selectedTier === "DEDICATED" && (
             <>
               {/* Step 1: Engine & Version */}
-              <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all w-full max-w-full min-w-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
-                <div className="flex items-center justify-between mb-4">
-                  <div>
+              <div className={cn("rounded-2xl border p-4 sm:p-6 transition-all w-full max-w-full min-w-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
+                <div className="flex items-start sm:items-center justify-between gap-3 mb-4">
+                  <div className="min-w-0">
                     <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                       Select Database Engine
                     </h2>
@@ -530,21 +534,24 @@ export default function DatabaseCheckoutFlow() {
                       Dedicated container with isolated resources & web GUI viewer
                     </p>
                   </div>
-                  <span className={cn("text-xs font-bold px-2.5 py-1 rounded-full border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+                  <span className={cn("text-xs font-bold px-2.5 py-1 rounded-full border shrink-0 whitespace-nowrap", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
                     K8s Native
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-4">
-                  {DATABASE_ENGINES.map((engine) => {
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3 mb-4">
+                  {DATABASE_ENGINES.map((engine, idx) => {
                     const isSelected = selectedEngine === engine.id;
+                    const isLastOdd = idx === DATABASE_ENGINES.length - 1;
                     return (
                       <button
                         type="button"
                         key={engine.id}
                         onClick={() => handleEngineChange(engine.id)}
                         className={cn(
-                          "rounded-xl border p-3.5 text-left transition-all cursor-pointer flex items-center gap-3 group",
+                          "rounded-xl border transition-all cursor-pointer group relative overflow-hidden",
+                          "p-2.5 sm:p-3.5 flex flex-col sm:flex-row items-center sm:items-center text-center sm:text-left gap-2 sm:gap-3",
+                          isLastOdd ? "col-span-2 sm:col-span-1" : "col-span-1",
                           isSelected
                             ? "border-cyan-500 bg-cyan-500/10 ring-1 ring-cyan-500/40 shadow-xs text-white"
                             : isDark
@@ -553,20 +560,20 @@ export default function DatabaseCheckoutFlow() {
                         )}
                       >
                         <div className={cn(
-                          "w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 transition-transform group-hover:scale-105",
+                          "w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl border flex items-center justify-center shrink-0 transition-transform group-hover:scale-105",
                           isSelected
                             ? "border-cyan-500/30 bg-cyan-500/15"
                             : isDark
                               ? "border-white/[0.08] bg-white/[0.04]"
                               : "border-slate-200 bg-slate-50"
                         )}>
-                          <img src={engine.icon} alt={engine.name} className="w-6 h-6 object-contain pointer-events-none select-none" />
+                          <img src={engine.icon} alt={engine.name} className="w-5 h-5 sm:w-6 sm:h-6 object-contain pointer-events-none select-none" />
                         </div>
-                        <div className="min-w-0">
-                          <span className={cn("text-sm font-bold block truncate", isDark ? "text-white" : "text-slate-900")}>
+                        <div className="min-w-0 w-full sm:w-auto">
+                          <span className={cn("text-xs sm:text-sm font-bold block leading-tight", isDark ? "text-white" : "text-slate-900")}>
                             {engine.name}
                           </span>
-                          <span className="text-[11px] block truncate text-cyan-500 dark:text-cyan-400 font-semibold mt-0.5">
+                          <span className="text-[10px] sm:text-[11px] block text-cyan-500 dark:text-cyan-400 font-semibold mt-0.5 leading-tight">
                             {engine.webPanel}
                           </span>
                         </div>
@@ -774,8 +781,8 @@ export default function DatabaseCheckoutFlow() {
             <>
               {/* Step 1: Engine & Version / Edition */}
               <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all w-full max-w-full min-w-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
-                <div className="flex items-center justify-between mb-4">
-                  <div>
+                <div className="flex items-start sm:items-center justify-between gap-3 mb-4">
+                  <div className="min-w-0">
                     <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                       Select Database Engine
                     </h2>
@@ -783,21 +790,24 @@ export default function DatabaseCheckoutFlow() {
                       Shared multi-tenant containers with burstable 0.5 vCPU pool. Billed purely on storage capacity.
                     </p>
                   </div>
-                  <span className={cn("text-xs font-bold px-2.5 py-1 rounded-full border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+                  <span className={cn("text-xs font-bold px-2.5 py-1 rounded-full border shrink-0 whitespace-nowrap", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
                     Shared Multi-Tenant
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-4">
-                  {DATABASE_ENGINES.map((engine) => {
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3 mb-4">
+                  {DATABASE_ENGINES.map((engine, idx) => {
                     const isSelected = selectedSharedEngine === engine.id;
+                    const isLastOdd = idx === DATABASE_ENGINES.length - 1;
                     return (
                       <button
                         type="button"
                         key={engine.id}
                         onClick={() => handleSharedEngineChange(engine.id)}
                         className={cn(
-                          "rounded-xl border p-3.5 text-left transition-all cursor-pointer flex items-center gap-3 group",
+                          "rounded-xl border transition-all cursor-pointer group relative overflow-hidden",
+                          "p-2.5 sm:p-3.5 flex flex-col sm:flex-row items-center sm:items-center text-center sm:text-left gap-2 sm:gap-3",
+                          isLastOdd ? "col-span-2 sm:col-span-1" : "col-span-1",
                           isSelected
                             ? "border-cyan-500 bg-cyan-500/10 ring-1 ring-cyan-500/40 shadow-xs text-white"
                             : isDark
@@ -806,20 +816,20 @@ export default function DatabaseCheckoutFlow() {
                         )}
                       >
                         <div className={cn(
-                          "w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 transition-transform group-hover:scale-105",
+                          "w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl border flex items-center justify-center shrink-0 transition-transform group-hover:scale-105",
                           isSelected
                             ? "border-cyan-500/30 bg-cyan-500/15"
                             : isDark
                               ? "border-white/[0.08] bg-white/[0.04]"
                               : "border-slate-200 bg-slate-50"
                         )}>
-                          <img src={engine.icon} alt={engine.name} className="w-6 h-6 object-contain pointer-events-none select-none" />
+                          <img src={engine.icon} alt={engine.name} className="w-5 h-5 sm:w-6 sm:h-6 object-contain pointer-events-none select-none" />
                         </div>
-                        <div className="min-w-0">
-                          <span className={cn("text-sm font-bold block truncate", isDark ? "text-white" : "text-slate-900")}>
+                        <div className="min-w-0 w-full sm:w-auto">
+                          <span className={cn("text-xs sm:text-sm font-bold block leading-tight", isDark ? "text-white" : "text-slate-900")}>
                             {engine.name}
                           </span>
-                          <span className="text-[11px] block truncate text-cyan-500 dark:text-cyan-400 font-semibold mt-0.5">
+                          <span className="text-[10px] sm:text-[11px] block text-cyan-500 dark:text-cyan-400 font-semibold mt-0.5 leading-tight">
                             {engine.webPanel}
                           </span>
                         </div>
