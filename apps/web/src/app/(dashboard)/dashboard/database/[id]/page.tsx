@@ -659,12 +659,12 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
         <div className={cn(
           "rounded-2xl border p-5 sm:p-6 transition-all relative overflow-hidden",
           isDark
-            ? "bg-gradient-to-r from-amber-500/10 via-cyan-500/10 to-transparent border-amber-500/30"
-            : "bg-gradient-to-r from-amber-50 via-cyan-50 to-white border-amber-300 shadow-sm"
+            ? "bg-[#0a0a0c] border-cyan-500/20 shadow-[0_0_30px_rgba(6,182,212,0.06)]"
+            : "bg-cyan-50/60 border-cyan-200 shadow-sm"
         )}>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-start gap-3.5">
-              <div className="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center shrink-0">
+              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center shrink-0", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-100 border-cyan-200")}>
                 <Loader2 className="w-5 h-5 text-cyan-400 animate-spin" />
               </div>
               <div>
@@ -683,7 +683,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
             </div>
 
             <div className="flex items-center gap-2 self-start md:self-auto shrink-0">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/20 border border-white/10 text-xs font-mono text-zinc-300">
+              <div className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-mono", isDark ? "bg-white/[0.03] border-white/[0.08] text-zinc-400" : "bg-white border-slate-200 text-slate-500 shadow-2xs")}>
                 <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping inline-block" />
                 <span>Auto-refreshing realtime...</span>
               </div>
@@ -691,7 +691,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
           </div>
 
           {/* Provisioning Progress Steps */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4 pt-4 border-t border-white/[0.08]">
+          <div className={cn("grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4 pt-4 border-t", isDark ? "border-white/[0.06]" : "border-cyan-100")}>
             <div className="flex items-center gap-2.5 text-xs font-semibold text-emerald-400">
               <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
               <span>1. Port & Secret Allocation</span>
