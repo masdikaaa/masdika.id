@@ -44,6 +44,14 @@ export default function ServicesPage() {
       href: "/vps"
     },
     {
+      icon: Database,
+      title: "Managed Database",
+      type: "DBaaS",
+      percentage: 99,
+      description: "Production-ready PostgreSQL, MySQL, MariaDB, Redis, and MongoDB clusters with isolated K3s containers and web GUIs.",
+      href: "/managed-db"
+    },
+    {
       icon: Cloud,
       title: "File CDN",
       type: "PaaS",
@@ -176,7 +184,7 @@ export default function ServicesPage() {
           </div>
 
           {/* Products Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             {PRODUCTS.map((prod, i) => (
               <div key={i} className="h-full">
                 <Link

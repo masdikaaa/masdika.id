@@ -148,7 +148,7 @@ const DEV_MENU_ITEMS: MenuItem[] = [
   },
   {
     title: "Managed DB",
-    description: "High-performance managed MySQL, MariaDB, PostgreSQL & MongoDB.",
+    description: "High-performance managed MySQL, PostgreSQL, MariaDB, Redis & MongoDB.",
     href: "/managed-db",
     icon: Database,
     badge: "New",
