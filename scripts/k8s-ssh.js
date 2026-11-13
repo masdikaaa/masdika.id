@@ -1,6 +1,10 @@
 const { Client } = require('ssh2');
 const fs = require('fs');
 
+try {
+  require('dotenv').config();
+} catch (_) {}
+
 let cmd = process.argv[2];
 if (process.argv[2] === '-f' && process.argv[3]) {
   cmd = fs.readFileSync(process.argv[3], 'utf8');
@@ -32,9 +36,9 @@ conn.on('ready', () => {
   console.error('SSH Connection error:', err.message);
   process.exit(1);
 }).connect({
-  host: '192.168.79.16',
-  port: 22,
-  username: 'andika',
-  password: 'Andikaferdi11',
+  host: process.env.MANAGED_DB_K3S_HOST || '192.168.79.16',
+  port: parseInt(process.env.MANAGED_DB_K3S_PORT || '22', 10),
+  username: process.env.MANAGED_DB_K3S_USER || 'andika',
+  password: process.env.MANAGED_DB_K3S_PASSWORD || 'Andikaferdi11',
   readyTimeout: 10000,
 });
