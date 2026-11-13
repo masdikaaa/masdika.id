@@ -487,7 +487,19 @@ export function generateDatabaseManifest(db: DatabaseServiceRecord): string {
 `;
   } else if (typeUpper === 'POSTGRES' || typeUpper === 'POSTGRESQL') {
     const version = db.version || '16';
-    image = `postgres:${version}`;
+    const planLower = ((db.planName || '') + ' ' + (db.version || '')).toLowerCase();
+    const isPostgisTarget = planLower.includes('postgis') || planLower.includes('gis');
+    const isVectorTarget = planLower.includes('vector') || planLower.includes('pgvector');
+
+    if (isPostgisTarget && isVectorTarget) {
+      image = 'postgres:16-postgis-pgvector';
+    } else if (isPostgisTarget) {
+      image = 'postgis/postgis:16-3.4';
+    } else if (isVectorTarget) {
+      image = 'pgvector/pgvector:pg16';
+    } else {
+      image = `postgres:${version}`;
+    }
     containerPort = 5432;
     mountPath = '/var/lib/postgresql/data';
     envYaml = `
@@ -535,6 +547,11 @@ export function generateDatabaseManifest(db: DatabaseServiceRecord): string {
 
   const isMongo = typeUpper === 'MONGODB' || typeUpper === 'MONGO';
   const isRedis = typeUpper === 'REDIS';
+  const isPostgres = typeUpper === 'POSTGRES' || typeUpper === 'POSTGRESQL';
+  const planCheck = ((db.planName || '') + ' ' + (db.version || '')).toLowerCase();
+  const isPostgis = isPostgres && (planCheck.includes('postgis') || planCheck.includes('gis'));
+  const isVector = isPostgres && (planCheck.includes('vector') || planCheck.includes('pgvector'));
+  const isPgVariant = isPostgres && (isPostgis || isVector);
 
   const redisCommand = isRedis ? `
         command:
@@ -564,6 +581,22 @@ data:
       }
     };
 `
+    : '';
+
+  const pgInitConfigMap = isPgVariant
+    ? `---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cm-pg-init-${name}
+  namespace: ${ns}
+  labels:
+    app: ${name}
+    managed-by: masdika-cloud
+data:
+  01-init-extensions.sql: |
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+${isPostgis ? '    CREATE EXTENSION IF NOT EXISTS postgis;\n    CREATE EXTENSION IF NOT EXISTS postgis_topology;\n' : ''}${isVector ? '    CREATE EXTENSION IF NOT EXISTS vector;\n' : ''}`
     : '';
 
   const mongoExpressContainer = isMongo
@@ -724,7 +757,7 @@ spec:
     requests:
       storage: ${db.storageGb}Gi
   storageClassName: local-path
-${mongoConfigMap}---
+${mongoConfigMap}${pgInitConfigMap}---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -764,7 +797,10 @@ spec:
 ${envYaml}${redisCommand}
         volumeMounts:
         - name: db-storage
-          mountPath: ${mountPath}
+          mountPath: ${mountPath}${isPgVariant ? `
+        - name: pg-init-sql
+          mountPath: /docker-entrypoint-initdb.d/01-init-extensions.sql
+          subPath: 01-init-extensions.sql` : ''}
         resources:
           requests:
             cpu: ${reqCpu}m
@@ -796,7 +832,10 @@ ${envYaml}${redisCommand}
           claimName: ${pvcName}${isMongo ? `
       - name: mongo-config
         configMap:
-          name: cm-mongo-${name}` : ''}
+          name: cm-mongo-${name}` : ''}${isPgVariant ? `
+      - name: pg-init-sql
+        configMap:
+          name: cm-pg-init-${name}` : ''}
 ---
 apiVersion: v1
 kind: Service
