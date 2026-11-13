@@ -43,14 +43,14 @@ export async function POST(req: NextRequest) {
     }
 
     const MAX_TOPUP = 50000000; // Rp 50.000.000
-    const MIN_TOPUP = 50000;    // Rp 50.000
+    const MIN_TOPUP = 10000;    // Rp 10.000
 
     if (
       !Number.isSafeInteger(amount) ||
       amount < MIN_TOPUP ||
       amount > MAX_TOPUP
     ) {
-      return NextResponse.json({ error: "Invalid amount. Minimum top up is Rp 50.000 and max is Rp 50.000.000 (must be an integer)" }, { status: 400 });
+      return NextResponse.json({ error: "Invalid amount. Minimum top up is Rp 10.000 and max is Rp 50.000.000 (must be an integer)" }, { status: 400 });
     }
 
     if ((auth.user!.balance || 0) + amount > MAX_WALLET_BALANCE) {

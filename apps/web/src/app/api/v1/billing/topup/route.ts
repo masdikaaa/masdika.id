@@ -102,7 +102,7 @@ export async function GET(req: NextRequest) {
       success: true,
       data: {
         limits: {
-          minAmount: 50000,
+          minAmount: 10000,
           maxAmount: 50000000,
           currency: "IDR",
           taxRatePercent: taxRate,
@@ -131,7 +131,7 @@ export async function POST(req: NextRequest) {
     const amount = Number(rawAmount);
 
     const MAX_TOPUP = 50000000; // Rp 50.000.000
-    const MIN_TOPUP = 50000;    // Rp 50.000
+    const MIN_TOPUP = 10000;    // Rp 10.000
 
     if (body.voucherCode && String(body.voucherCode).trim().length > 0) {
       return apiError("Discount vouchers cannot be applied to wallet top-ups.", 400);

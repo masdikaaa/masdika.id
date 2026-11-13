@@ -1248,7 +1248,7 @@ export default function ResellerApiClient() {
                 endpoint="/api/v1/billing/topup"
                 description="Create a top-up request to add funds to your reseller balance. This endpoint returns a secure payment URL (Duitku) and payment identifiers (Virtual Account / QR string) for automated customer flows. Note: Both /api/v1/billing/topup and /api/v1/billing/deposit are supported."
                 parameters={[
-                  { name: "amount", type: "Integer", description: "Required. Top-up amount in IDR (Minimum: 50,000, Maximum: 50,000,000)." },
+                  { name: "amount", type: "Integer", description: "Required. Top-up amount in IDR (Minimum: 10,000, Maximum: 50,000,000)." },
                   {
                     name: "paymentMethodCode",
                     type: "String",
@@ -1301,7 +1301,7 @@ export default function ResellerApiClient() {
                   { name: "invoiceNumber", type: "String", description: "Optional. Query param to look up a specific top up invoice (e.g. ?invoiceNumber=TOPUP-1710000000000-AB12). If omitted, returns active payment channels and limits." }
                 ]}
                 payload={""}
-                response={`{\n  "success": true,\n  "data": {\n    "limits": {\n      "minAmount": 50000,\n      "maxAmount": 50000000,\n      "currency": "IDR",\n      "taxRatePercent": 11\n    },\n    "paymentMethods": [\n      {\n        "code": "SQ",\n        "name": "Nusapay QRIS",\n        "type": "QRIS",\n        "fee": 1000\n      },\n      {\n        "code": "M2",\n        "name": "Mandiri VA",\n        "type": "VA",\n        "fee": 3000\n      }\n    ],\n    "recentTopups": [\n      {\n        "invoiceNumber": "TOPUP-1710000000000-AB12",\n        "subtotal": 100000,\n        "amount": 112000,\n        "status": "PAID",\n        "paidAt": "2026-10-15T08:30:00.000Z"\n      }\n    ]\n  }\n}`}
+                response={`{\n  "success": true,\n  "data": {\n    "limits": {\n      "minAmount": 10000,\n      "maxAmount": 50000000,\n      "currency": "IDR",\n      "taxRatePercent": 11\n    },\n    "paymentMethods": [\n      {\n        "code": "SQ",\n        "name": "Nusapay QRIS",\n        "type": "QRIS",\n        "fee": 1000\n      },\n      {\n        "code": "M2",\n        "name": "Mandiri VA",\n        "type": "VA",\n        "fee": 3000\n      }\n    ],\n    "recentTopups": [\n      {\n        "invoiceNumber": "TOPUP-1710000000000-AB12",\n        "subtotal": 100000,\n        "amount": 112000,\n        "status": "PAID",\n        "paidAt": "2026-10-15T08:30:00.000Z"\n      }\n    ]\n  }\n}`}
               />
 
               {/* Integration Guide */}

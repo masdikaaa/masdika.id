@@ -14,7 +14,7 @@ import { Pagination } from "@/components/ui/Pagination";
 export default function TopUpPage() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const [topUpAmount, setTopUpAmount] = useState<number>(50000);
+  const [topUpAmount, setTopUpAmount] = useState<number>(10000);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [taxRate, setTaxRate] = useState<number>(0);
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
@@ -45,8 +45,8 @@ export default function TopUpPage() {
       toast.error("Please select a payment method");
       return;
     }
-    if (topUpAmount < 50000) {
-      toast.error("Minimum top up is Rp 50.000");
+    if (topUpAmount < 10000) {
+      toast.error("Minimum top up is Rp 10.000");
       return;
     }
 
@@ -171,7 +171,7 @@ export default function TopUpPage() {
 
             <div className="relative z-10 space-y-5">
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3.5">
-                {[50000, 100000, 250000, 500000, 1000000, 2000000].map(amt => (
+                {[10000, 25000, 50000, 100000, 250000, 500000].map(amt => (
                   <button
                     key={amt}
                     onClick={() => setTopUpAmount(amt)}
@@ -204,7 +204,7 @@ export default function TopUpPage() {
                   placeholder="Custom amount..."
                 />
               </div>
-              <p className={cn("text-xs font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>Minimum amount is Rp 50.000.</p>
+              <p className={cn("text-xs font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>Minimum amount is Rp 10.000.</p>
             </div>
           </motion.section>
 
@@ -395,10 +395,10 @@ export default function TopUpPage() {
 
             <button
               onClick={handleTopUp}
-              disabled={isProcessing || !selectedMethod || topUpAmount < 50000}
+              disabled={isProcessing || !selectedMethod || topUpAmount < 10000}
               className={cn(
                 "w-full px-3.5 py-2 rounded-xl text-xs sm:text-xs font-bold flex items-center justify-center gap-2 transition-all",
-                isProcessing || !selectedMethod || topUpAmount < 50000
+                isProcessing || !selectedMethod || topUpAmount < 10000
                   ? "bg-cyan-500/10 text-cyan-500/60 border border-cyan-500/20 cursor-not-allowed"
                   : "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-2xs"
               )}
