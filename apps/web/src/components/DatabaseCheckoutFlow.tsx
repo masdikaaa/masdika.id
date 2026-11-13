@@ -886,7 +886,7 @@ export default function DatabaseCheckoutFlow() {
                       {formatRupiah(dedicatedTotalMonthly)}/month
                     </span>
                     <span className={cn("block text-[11px] mt-0.5", isDark ? "text-zinc-500" : "text-slate-400")}>
-                      ~{formatRupiah(dedicatedHourlyRate)} / jam (PAYG)
+                      ~{formatRupiah(dedicatedHourlyRate)} / hr (PAYG)
                     </span>
                   </div>
                 </div>
@@ -943,7 +943,7 @@ export default function DatabaseCheckoutFlow() {
                     </span>
                   </div>
                   <div className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-400")}>
-                    {formatRupiah(activeSharedType.ratePerGb)} per GB/month · ~{formatRupiah(sharedHourlyRate)}/jam (PAYG)
+                    {formatRupiah(activeSharedType.ratePerGb)} per GB/month · ~{formatRupiah(sharedHourlyRate)}/hr (PAYG)
                   </div>
                 </div>
               </>
@@ -1016,7 +1016,7 @@ export default function DatabaseCheckoutFlow() {
                 Deploying Managed Database
               </h3>
               <p className={cn("text-xs mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
-                Mohon tunggu sejenak, sistem sedang mengalokasikan container dan konfigurasi K3s Anda...
+                Please wait, allocating container and K3s configuration...
               </p>
             </div>
 
@@ -1024,25 +1024,25 @@ export default function DatabaseCheckoutFlow() {
             <div className="space-y-3 text-left">
               <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span className={isDark ? "text-zinc-200" : "text-slate-700"}>Otorisasi akun & alokasi saldo PAYG</span>
+                <span className={isDark ? "text-zinc-200" : "text-slate-700"}>Account authorization & PAYG balance allocation</span>
               </div>
               <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span className={isDark ? "text-zinc-200" : "text-slate-700"}>Alokasi storage SSD {storageGb} GB (local-path)</span>
+                <span className={isDark ? "text-zinc-200" : "text-slate-700"}>SSD storage allocation {storageGb} GB (local-path)</span>
               </div>
               <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs">
                 <Loader2 className="w-4 h-4 text-cyan-400 animate-spin shrink-0" />
-                <span className="text-cyan-400 font-semibold">Membuat Secret, Deployment & NodePort</span>
+                <span className="text-cyan-400 font-semibold">Creating Secret, Deployment & NodePort</span>
               </div>
               <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.01] border border-white/[0.03] text-xs opacity-60">
                 <div className="w-4 h-4 rounded-full border border-dashed border-zinc-500 shrink-0" />
-                <span className={isDark ? "text-zinc-500" : "text-slate-400"}>Mengarahkan ke Dashboard Database...</span>
+                <span className={isDark ? "text-zinc-500" : "text-slate-400"}>Redirecting to Database Dashboard...</span>
               </div>
             </div>
 
             <div className="pt-2 text-[11px] text-zinc-500 flex items-center justify-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
-              <span>Jangan tutup atau muat ulang halaman ini</span>
+              <span>Do not close or refresh this page</span>
             </div>
           </div>
         </div>

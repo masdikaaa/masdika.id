@@ -269,7 +269,7 @@ export default function AdminDatabasePage() {
             <span className={cn("text-[11px] font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
               ALLOCATED COMPUTE
             </span>
-            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-purple-500/15 border-purple-500/25 text-purple-400" : "bg-purple-50 border-purple-200 text-purple-700")}>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
               <Cpu className="w-4 h-4" />
             </div>
           </div>
@@ -277,7 +277,7 @@ export default function AdminDatabasePage() {
             <span className={cn("text-2xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>
               {stats?.totalCpu ?? 0}
             </span>
-            <span className={cn("text-xs font-semibold", isDark ? "text-purple-400" : "text-purple-600")}>
+            <span className={cn("text-xs font-semibold", isDark ? "text-cyan-400" : "text-cyan-600")}>
               vCPU · {stats?.totalMemoryGb ?? 0} GB RAM
             </span>
           </div>
@@ -289,7 +289,7 @@ export default function AdminDatabasePage() {
             <span className={cn("text-[11px] font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
               SSD DISK QUOTA
             </span>
-            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-amber-500/15 border-amber-500/25 text-amber-400" : "bg-amber-50 border-amber-200 text-amber-700")}>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
               <HardDrive className="w-4 h-4" />
             </div>
           </div>
@@ -297,7 +297,7 @@ export default function AdminDatabasePage() {
             <span className={cn("text-2xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>
               {stats?.totalStorageGb ?? 0} GB
             </span>
-            <span className={cn("text-xs font-semibold", isDark ? "text-amber-400" : "text-amber-600")}>
+            <span className={cn("text-xs font-semibold", isDark ? "text-cyan-400" : "text-cyan-600")}>
               PV / PVC Volume
             </span>
           </div>
@@ -418,7 +418,7 @@ export default function AdminDatabasePage() {
                               <span className={cn("text-[10px] font-bold px-1.5 py-0.2 rounded border", engine.badgeBg)}>
                                 {engine.name} {db.version}
                               </span>
-                              <span className={cn("text-[10px] font-bold px-1.5 py-0.2 rounded border", db.isDedicated ? "bg-purple-500/10 text-purple-400 border-purple-500/20" : "bg-cyan-500/10 text-cyan-400 border-cyan-500/20")}>
+                              <span className={cn("text-[10px] font-bold px-1.5 py-0.2 rounded border", db.isDedicated ? "bg-cyan-500/15 text-cyan-300 border-cyan-500/30" : "bg-white/[0.04] text-zinc-300 border-white/[0.08]")}>
                                 {db.isDedicated ? "Dedicated" : "Shared"}
                               </span>
                             </div>
