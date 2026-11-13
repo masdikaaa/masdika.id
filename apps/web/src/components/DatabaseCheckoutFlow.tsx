@@ -9,7 +9,7 @@ import { formatRupiah } from "@/lib/billing";
 import { toast } from "sonner";
 import {
   Database, Check, Server, HardDrive,
-  Cpu, Layers, ShieldCheck, Zap, RefreshCw, Eye, EyeOff, MapPin, Sparkles, CheckCircle2, Loader2,
+  Cpu, Layers, ShieldCheck, Rocket, RefreshCw, Eye, EyeOff, MapPin, Sparkles, CheckCircle2, Loader2,
   AlertTriangle, AlertCircle
 } from "lucide-react";
 import { SiMysql, SiPostgresql, SiMariadb, SiMongodb } from "react-icons/si";
@@ -1153,7 +1153,7 @@ export default function DatabaseCheckoutFlow() {
                   </>
                 ) : (
                   <>
-                    <Zap className="w-4 h-4 fill-current text-slate-950" />
+                    <Rocket className="w-4 h-4 text-slate-950" />
                     <span>Create Database</span>
                   </>
                 )}

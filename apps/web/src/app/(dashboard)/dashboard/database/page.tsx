@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import {
   Database, Plus, RefreshCw, Server, ExternalLink, Power,
   Copy, Check, Activity, ShieldCheck, HardDrive, Cpu, Layers,
-  AlertTriangle, ArrowRight, Play, Square, RotateCw, Trash2, MapPin
+  AlertTriangle, ArrowRight, Play, Square, RotateCw, Trash2, MapPin, Rocket
 } from "lucide-react";
 import { SiMysql, SiPostgresql, SiMariadb, SiMongodb } from "react-icons/si";
 import { motion } from "framer-motion";
@@ -351,7 +351,7 @@ export default function DatabaseListingPage() {
             href="/dashboard/database/new"
             className="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 flex items-center justify-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:scale-95 text-slate-950 shadow-md cursor-pointer"
           >
-            <Plus className="w-4 h-4" />
+            <Rocket className="w-4 h-4" />
             <span>Deploy Database</span>
           </Link>
         </div>
@@ -460,7 +460,7 @@ export default function DatabaseListingPage() {
             href="/dashboard/database/new"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all shadow-md cursor-pointer"
           >
-            <Plus className="w-4 h-4" />
+            <Rocket className="w-4 h-4" />
             <span>Deploy Database Now</span>
           </Link>
         </div>
