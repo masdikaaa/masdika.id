@@ -116,6 +116,23 @@ describe('Managed Database K3s Engine - k8s-database.ts', () => {
       expect(details.mongoExpressUrl).toBe(`https://db-${mongoDb.id}-mongo.db.masdika.id`);
       expect(details.laravelEnv).toContain('DB_CONNECTION=mongodb');
     });
+
+    it('should build proper connection details for Redis with redisUrl and redisCommanderUrl', () => {
+      const redisDb: DatabaseServiceRecord = {
+        ...baseDb,
+        type: 'REDIS',
+        version: '7.2',
+        port: 30558,
+      };
+      const details = buildConnectionDetails(redisDb);
+      expect(details.uri.startsWith('redis://')).toBe(true);
+      expect(details.uri).toContain(`default:${encodeURIComponent(redisDb.password || '')}@db.masdika.id:30558`);
+      expect(details.redisUrl).toBe(`https://db-${redisDb.id}-redis.db.masdika.id`);
+      expect(details.redisCommanderUrl).toBe(`https://db-${redisDb.id}-redis.db.masdika.id`);
+      expect(details.laravelEnv).toContain('REDIS_CLIENT=phpredis');
+      expect(details.laravelEnv).toContain('REDIS_HOST=db.masdika.id');
+      expect(details.laravelEnv).toContain('REDIS_PORT=30558');
+    });
   });
 
   describe('parseDatabasePlanLimits', () => {

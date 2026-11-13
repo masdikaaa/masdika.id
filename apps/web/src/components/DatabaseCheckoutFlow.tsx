@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
@@ -12,7 +12,7 @@ import {
   Cpu, Layers, ShieldCheck, Rocket, RefreshCw, Eye, EyeOff, MapPin, Sparkles, CheckCircle2, Loader2,
   AlertTriangle, AlertCircle
 } from "lucide-react";
-import { SiMysql, SiPostgresql, SiMariadb, SiMongodb } from "react-icons/si";
+import { SiMysql, SiPostgresql, SiMariadb, SiMongodb, SiRedis } from "react-icons/si";
 
 // Dedicated database engines & versions
 const DATABASE_ENGINES = [
@@ -89,6 +89,24 @@ const DATABASE_ENGINES = [
     ],
     webPanel: "Mongo Express",
   },
+  {
+    id: "REDIS",
+    name: "Redis",
+    icon: SiRedis,
+    color: "text-red-400 dark:text-red-400",
+    colorDark: "text-red-400",
+    colorLight: "text-red-700",
+    boxDark: "bg-red-500/10 border-red-500/30 text-red-400 shadow-sm shadow-red-500/10",
+    boxLight: "bg-red-50 border-red-200 text-red-700 shadow-2xs",
+    badgeDark: "bg-red-500/15 border-red-500/30 text-red-300",
+    badgeLight: "bg-red-50 border-red-200 text-red-700",
+    defaultPort: 6379,
+    versions: [
+      { id: "7.2", name: "7.2 LTS", default: true },
+      { id: "7.0", name: "7.0 LTS" },
+    ],
+    webPanel: "Redis Commander",
+  },
 ];
 
 // Dedicated Flavors matching SumoPod (Gambar 1)
@@ -131,6 +149,10 @@ const SHARED_DATABASE_VARIANTS: Record<string, Array<{
     { id: "mongo-7", name: "7.0 (Current)", version: "7.0", engine: "MONGODB", ratePerGb: 10000, default: true },
     { id: "mongo-6", name: "6.0 LTS", version: "6.0", engine: "MONGODB", ratePerGb: 10000 },
   ],
+  REDIS: [
+    { id: "redis-7.2", name: "7.2 LTS", version: "7.2", engine: "REDIS", ratePerGb: 10000, default: true },
+    { id: "redis-7.0", name: "7.0 LTS", version: "7.0", engine: "REDIS", ratePerGb: 10000 },
+  ],
 };
 
 const ALL_SHARED_VARIANTS = Object.values(SHARED_DATABASE_VARIANTS).flat();
@@ -141,6 +163,7 @@ export default function DatabaseCheckoutFlow() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   // Tier switcher: DEDICATED (Gambar 1) vs SHARED (Gambar 2)
   const [selectedTier, setSelectedTier] = useState<"DEDICATED" | "SHARED">("DEDICATED");
@@ -163,6 +186,39 @@ export default function DatabaseCheckoutFlow() {
   const [customUsername, setCustomUsername] = useState("");
   const [customPassword, setCustomPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  // Parse search params on load
+  useEffect(() => {
+    if (!searchParams) return;
+    const engineParam = searchParams.get("engine");
+    const tierParam = searchParams.get("tier");
+    const storageParam = searchParams.get("storage");
+
+    if (tierParam && (tierParam.toUpperCase() === "SHARED" || tierParam.toUpperCase() === "DEDICATED")) {
+      setSelectedTier(tierParam.toUpperCase() as "SHARED" | "DEDICATED");
+    }
+
+    if (engineParam) {
+      const engUpper = engineParam.toUpperCase();
+      const matched = DATABASE_ENGINES.find(e => e.id === engUpper || (engUpper === "POSTGRESQL" && e.id === "POSTGRES") || (engUpper === "MONGO" && e.id === "MONGODB"));
+      if (matched) {
+        setSelectedEngine(matched.id);
+        setSelectedSharedEngine(matched.id);
+        const variants = SHARED_DATABASE_VARIANTS[matched.id] || [];
+        if (variants.length > 0) {
+          const def = variants.find(v => v.default) || variants[0];
+          setSelectedSharedId(def.id);
+        }
+      }
+    }
+
+    if (storageParam) {
+      const parsedStorage = parseInt(storageParam, 10);
+      if (!isNaN(parsedStorage) && parsedStorage >= 1) {
+        setStorageGb(Math.min(parsedStorage, 20));
+      }
+    }
+  }, [searchParams]);
 
   // User balance & submission state
   const [userBalance, setUserBalance] = useState<number>(0);

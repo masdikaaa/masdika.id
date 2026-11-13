@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
     }
 
     const typeUpper = (type || "").toUpperCase();
-    const allowedTypes = ["MYSQL", "MARIADB", "POSTGRES", "MONGODB"];
+    const allowedTypes = ["MYSQL", "MARIADB", "POSTGRES", "MONGODB", "REDIS"];
     if (!allowedTypes.includes(typeUpper)) {
       return NextResponse.json({ error: `Invalid database type. Allowed: ${allowedTypes.join(", ")}` }, { status: 400 });
     }
@@ -76,6 +76,7 @@ export async function POST(req: NextRequest) {
       MARIADB: ["10.11", "11.2", "11.4"],
       POSTGRES: ["15", "16", "17"],
       MONGODB: ["6.0", "7.0"],
+      REDIS: ["7.0", "7.2"],
     };
     const validVersions = allowedVersions[typeUpper] || ["latest"];
     const requestedVersion = String(version || "").trim();
@@ -295,6 +296,9 @@ export async function POST(req: NextRequest) {
           } else if (typeUpper === "MONGODB" || typeUpper === "MONGO") {
             webToolName = "Mongo Express";
             webToolUrl = connDetails.mongoUrl;
+          } else if (typeUpper === "REDIS") {
+            webToolName = "Redis Commander";
+            webToolUrl = connDetails.redisUrl;
           }
 
           await sendDatabaseProvisionedEmail({

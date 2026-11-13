@@ -401,7 +401,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                 imageWidth={1536}
                 imageHeight={1024}
                 badges={[
-                  { icon: Database, label: "Database Engines", value: "Postgres, MySQL, Mongo" },
+                  { icon: Database, label: "Database Engines", value: "Postgres, MySQL, Redis, Mongo" },
                   { icon: HardDrive, label: "Storage Engine", value: "NVMe SSD Persistent PVC" },
                   { icon: Zap, label: "NodePort Access", value: "Direct Public TCP Port" },
                   { icon: ShieldCheck, label: "Architecture", value: "Isolated K3s Pods" },
@@ -491,11 +491,9 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                     key={`engine-${idx}`}
                     className="flex items-center gap-3 shrink-0 transition-transform duration-200 select-none hover:scale-105 cursor-pointer"
                     onClick={() => {
-                      if (eng.type !== "REDIS") {
-                        setSelectedEngine(eng.type);
-                        const el = document.getElementById("pricing");
-                        if (el) el.scrollIntoView({ behavior: "smooth" });
-                      }
+                      setSelectedEngine(eng.type);
+                      const el = document.getElementById("pricing");
+                      if (el) el.scrollIntoView({ behavior: "smooth" });
                     }}
                   >
                     <img
@@ -649,23 +647,23 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
             </div>
           </div>
 
-          {/* Configurator Box */}
-          <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-10 shadow-xl overflow-hidden max-w-4xl mx-auto">
+          {/* Configurator Box - Full Space Container */}
+          <div className="relative rounded-2xl sm:rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-10 md:p-12 shadow-xl overflow-hidden w-full">
             
             {/* Step 1: Select Database Engine */}
-            <div className="mb-8">
+            <div className="mb-8 sm:mb-10">
               <div className="flex items-center justify-between mb-4">
                 <label className="text-xs font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 flex items-center gap-2">
                   <span className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px]">1</span>
                   Select Database Engine
                 </label>
                 <span className="text-xs text-[var(--text-muted)] font-medium">
-                  Web viewer included
+                  Web viewer included with automated SSL
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {SUPPORTED_ENGINES.filter(e => e.type !== "REDIS").map((eng) => {
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
+                {SUPPORTED_ENGINES.map((eng) => {
                   const isSelected = selectedEngine === eng.type;
                   return (
                     <button
@@ -673,25 +671,25 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                       type="button"
                       onClick={() => setSelectedEngine(eng.type)}
                       className={cn(
-                        "p-3.5 rounded-xl border text-left transition-all relative flex flex-col justify-between group cursor-pointer",
+                        "p-4 rounded-xl border text-left transition-all relative flex flex-col justify-between group cursor-pointer",
                         isSelected
-                          ? "border-cyan-500 bg-cyan-500/10 shadow-sm"
+                          ? "border-cyan-500 bg-cyan-500/10 shadow-sm ring-1 ring-cyan-500/30"
                           : "border-[var(--border-primary)] bg-[var(--surface-secondary)] hover:border-cyan-500/40"
                       )}
                     >
-                      <div className="flex items-center justify-between mb-2">
-                        <img src={eng.icon} alt={eng.name} className="w-7 h-7 object-contain" />
+                      <div className="flex items-center justify-between mb-3">
+                        <img src={eng.icon} alt={eng.name} className="w-8 h-8 object-contain" />
                         {isSelected && (
-                          <div className="w-4 h-4 rounded-full bg-cyan-400 text-slate-950 flex items-center justify-center">
-                            <Check className="w-2.5 h-2.5 stroke-[3]" />
+                          <div className="w-5 h-5 rounded-full bg-cyan-400 text-slate-950 flex items-center justify-center">
+                            <Check className="w-3 h-3 stroke-[3]" />
                           </div>
                         )}
                       </div>
                       <div>
-                        <div className="text-sm font-bold text-[var(--text-primary)]">
+                        <div className="text-sm sm:text-base font-bold text-[var(--text-primary)]">
                           {eng.name}
                         </div>
-                        <div className="text-[11px] text-cyan-600 dark:text-cyan-400 font-medium mt-0.5">
+                        <div className="text-xs text-cyan-600 dark:text-cyan-400 font-semibold mt-0.5">
                           {eng.webTool}
                         </div>
                       </div>
@@ -862,7 +860,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                 <Button
                   variant="primary"
                   size="lg"
-                  href={`/dashboard/database?engine=${selectedEngine}&tier=${selectedTier}&storage=${storageGb}`}
+                  href={`/dashboard/database/new?engine=${selectedEngine}&tier=${selectedTier}&storage=${storageGb}`}
                   className="w-full md:w-auto justify-center"
                   rightIcon={<ArrowRight className="w-4 h-4" />}
                 >
@@ -1087,3 +1085,4 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
     </div>
   );
 }
+

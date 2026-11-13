@@ -11,7 +11,7 @@ import {
   Copy, Check, Activity, ShieldCheck, HardDrive, Cpu, Layers,
   AlertTriangle, ArrowRight, Play, Square, RotateCw, Trash2, MapPin, Rocket
 } from "lucide-react";
-import { SiMysql, SiPostgresql, SiMariadb, SiMongodb } from "react-icons/si";
+import { SiMysql, SiPostgresql, SiMariadb, SiMongodb, SiRedis } from "react-icons/si";
 import { motion } from "framer-motion";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
@@ -254,6 +254,21 @@ export default function DatabaseListingPage() {
           badgeLight: "bg-emerald-50 border-emerald-200 text-emerald-700",
           webToolName: "Mongo Express",
           webToolUrl: details?.mongoUrl || details?.mongoExpressUrl || null,
+        };
+      case "REDIS":
+        return {
+          name: "Redis",
+          icon: SiRedis,
+          color: "text-red-400 dark:text-red-400",
+          colorDark: "text-red-400",
+          colorLight: "text-red-700",
+          boxDark: "bg-red-500/10 border-red-500/30 text-red-400 shadow-sm shadow-red-500/10",
+          boxLight: "bg-red-50 border-red-200 text-red-700 shadow-2xs",
+          badgeBg: "bg-red-500/15 border-red-500/30 text-red-300 dark:bg-red-500/15 dark:border-red-500/30 dark:text-red-300",
+          badgeDark: "bg-red-500/15 border-red-500/30 text-red-300",
+          badgeLight: "bg-red-50 border-red-200 text-red-700",
+          webToolName: "Redis Commander",
+          webToolUrl: details?.redisUrl || details?.redisCommanderUrl || null,
         };
       default:
         return {

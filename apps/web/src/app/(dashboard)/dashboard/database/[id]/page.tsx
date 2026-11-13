@@ -13,7 +13,7 @@ import {
   Cpu, Layers, HardDrive, ShieldAlert, Activity, Server, FileText, Code2, AlertTriangle, UploadCloud,
   Loader2, CheckCircle2, Zap, Info
 } from "lucide-react";
-import { SiMysql, SiPostgresql, SiMariadb, SiMongodb } from "react-icons/si";
+import { SiMysql, SiPostgresql, SiMariadb, SiMongodb, SiRedis } from "react-icons/si";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from "recharts";
@@ -315,6 +315,21 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
           badgeLight: "bg-emerald-50 border-emerald-200 text-emerald-700",
           webToolName: "Mongo Express",
           webToolUrl: db?.connectionDetails?.mongoUrl || db?.connectionDetails?.mongoExpressUrl || ""
+        };
+      case "REDIS":
+        return {
+          name: "Redis",
+          icon: SiRedis,
+          color: "text-red-400 dark:text-red-400",
+          colorDark: "text-red-400",
+          colorLight: "text-red-700",
+          boxDark: "bg-red-500/10 border-red-500/30 text-red-400 shadow-sm shadow-red-500/10",
+          boxLight: "bg-red-50 border-red-200 text-red-700 shadow-2xs",
+          badgeBg: "bg-red-500/15 border-red-500/30 text-red-300 dark:bg-red-500/15 dark:border-red-500/30 dark:text-red-300",
+          badgeDark: "bg-red-500/15 border-red-500/30 text-red-300",
+          badgeLight: "bg-red-50 border-red-200 text-red-700",
+          webToolName: "Redis Commander",
+          webToolUrl: (db?.connectionDetails as any)?.redisUrl || (db?.connectionDetails as any)?.redisCommanderUrl || ""
         };
       default:
         return {
@@ -1161,6 +1176,10 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                 ) : db.type?.toUpperCase().includes('POSTGRES') ? (
                   <span>
                     <strong>pgAdmin 4 Login:</strong> Enter the <strong>User</strong> and <strong>Pass</strong> above to log in. Your database instance is automatically registered and isolated inside the pgAdmin workspace.
+                  </span>
+                ) : db.type?.toUpperCase().includes('REDIS') ? (
+                  <span>
+                    <strong>Redis Commander Login:</strong> Enter the <strong>User</strong> and <strong>Pass</strong> above in the HTTP authentication prompt to view your Redis keys and metrics with Let&apos;s Encrypt SSL.
                   </span>
                 ) : (
                   <span>

@@ -519,9 +519,33 @@ export function generateDatabaseManifest(db: DatabaseServiceRecord): string {
         - name: MONGO_INITDB_DATABASE
           value: "${db.dbName}"
 `;
+  } else if (typeUpper === 'REDIS') {
+    const version = db.version || '7.2';
+    image = `redis:${version}-alpine`;
+    containerPort = 6379;
+    mountPath = '/data';
+    envYaml = `
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ${secretName}
+              key: password
+`;
   }
 
   const isMongo = typeUpper === 'MONGODB' || typeUpper === 'MONGO';
+  const isRedis = typeUpper === 'REDIS';
+
+  const redisCommand = isRedis ? `
+        command:
+        - redis-server
+        - --requirepass
+        - $(REDIS_PASSWORD)
+        - --appendonly
+        - "yes"
+        - --dir
+        - /data` : '';
+
   const mongoConfigMap = isMongo
     ? `---
 apiVersion: v1
@@ -594,14 +618,53 @@ data:
             memory: 256Mi`
     : '';
 
-  const mongoExpressServicePort = isMongo
+  const redisCommanderContainer = isRedis
+    ? `
+      - name: redis-commander
+        image: rediscommander/redis-commander:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8081
+          name: web-gui
+        env:
+        - name: PORT
+          value: "8081"
+        - name: REDIS_HOSTS
+          value: "local:127.0.0.1:6379:0"
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ${secretName}
+              key: password
+        - name: HTTP_USER
+          value: "${db.username}"
+        - name: HTTP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ${secretName}
+              key: password
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi`
+    : '';
+
+  const webGuiContainer = isMongo ? mongoExpressContainer : isRedis ? redisCommanderContainer : '';
+
+  const webGuiServicePort = (isMongo || isRedis)
     ? `
   - name: web-gui
     port: 8081
     targetPort: 8081`
     : '';
 
-  const mongoExpressIngress = isMongo
+  const webGuiHost = isMongo ? `${name}-mongo.db.masdika.id` : isRedis ? `${name}-redis.db.masdika.id` : '';
+  const webGuiTlsSecret = isMongo ? `tls-${name}-mongo` : isRedis ? `tls-${name}-redis` : '';
+
+  const webGuiIngress = (isMongo || isRedis) && webGuiHost
     ? `---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -617,10 +680,10 @@ spec:
   ingressClassName: traefik
   tls:
   - hosts:
-    - ${name}-mongo.db.masdika.id
-    secretName: tls-${name}-mongo
+    - ${webGuiHost}
+    secretName: ${webGuiTlsSecret}
   rules:
-  - host: ${name}-mongo.db.masdika.id
+  - host: ${webGuiHost}
     http:
       paths:
       - path: /
@@ -698,7 +761,7 @@ spec:
         - containerPort: ${containerPort}
           name: db-port
         env:
-${envYaml}
+${envYaml}${redisCommand}
         volumeMounts:
         - name: db-storage
           mountPath: ${mountPath}
@@ -726,7 +789,7 @@ ${envYaml}
             port: ${containerPort}
           initialDelaySeconds: 15
           periodSeconds: 20
-          timeoutSeconds: 5${mongoExpressContainer}
+          timeoutSeconds: 5${webGuiContainer}
       volumes:
       - name: db-storage
         persistentVolumeClaim:
@@ -751,8 +814,8 @@ spec:
   - name: db-port
     port: ${containerPort}
     targetPort: ${containerPort}
-    nodePort: ${db.port}${mongoExpressServicePort}
-${mongoExpressIngress}`;
+    nodePort: ${db.port}${webGuiServicePort}
+${webGuiIngress}`;
 }
 
 /**
@@ -1098,6 +1161,9 @@ export async function exportDatabaseDump(
         `--db=${db.dbName}`,
         '--archive',
       ];
+    } else if (typeUpper === 'REDIS') {
+      filename = `${safeDbName}-${timestamp}.rdb`;
+      command = ['sh', '-c', `redis-cli -a ${escapeShellArg(db.password)} --rdb /tmp/dump.rdb > /dev/null 2>&1 && cat /tmp/dump.rdb`];
     } else {
       return { success: false, error: `Unsupported database engine for dump: ${db.type}` };
     }
@@ -1179,6 +1245,8 @@ export async function importDatabaseDump(
       execCmd = `PGPASSWORD=${escapeShellArg(db.password)} psql -h 127.0.0.1 -U ${escapeShellArg(db.username)} -d ${escapeShellArg(db.dbName)} -f ${escapeShellArg(remoteFile)}; STATUS=$?; rm -f ${escapeShellArg(remoteFile)}; exit $STATUS`;
     } else if (typeUpper === 'MONGODB' || typeUpper === 'MONGO') {
       execCmd = `mongorestore --username=${escapeShellArg(db.username)} --password=${escapeShellArg(db.password)} --authenticationDatabase=admin --db=${escapeShellArg(db.dbName)} --archive=${escapeShellArg(remoteFile)} || mongoimport --username=${escapeShellArg(db.username)} --password=${escapeShellArg(db.password)} --authenticationDatabase=admin --db=${escapeShellArg(db.dbName)} --file=${escapeShellArg(remoteFile)}; STATUS=$?; rm -f ${escapeShellArg(remoteFile)}; exit $STATUS`;
+    } else if (typeUpper === 'REDIS') {
+      execCmd = `cat ${escapeShellArg(remoteFile)} > /data/dump.rdb; rm -f ${escapeShellArg(remoteFile)}; exit 0`;
     } else {
       return { success: false, error: `Unsupported database engine for import: ${db.type}` };
     }
@@ -1213,6 +1281,7 @@ export function buildConnectionDetails(db: DatabaseServiceRecord, clusterConfig?
   let pmaUrl: string | null = null;
   let pgAdminUrl: string | null = null;
   let mongoUrl: string | null = null;
+  let redisUrl: string | null = null;
   let connectionUri = '';
   let laravelEnv = '';
 
@@ -1228,6 +1297,10 @@ export function buildConnectionDetails(db: DatabaseServiceRecord, clusterConfig?
     mongoUrl = `https://db-${db.id}-mongo.db.masdika.id`;
     connectionUri = `mongodb://${db.username}:${db.password}@${host}:${port}/${db.dbName}?authSource=admin`;
     laravelEnv = `DB_CONNECTION=mongodb\nDB_URI=${connectionUri}`;
+  } else if (typeUpper === 'REDIS') {
+    redisUrl = `https://db-${db.id}-redis.db.masdika.id`;
+    connectionUri = `redis://default:${encodeURIComponent(db.password || '')}@${host}:${port}`;
+    laravelEnv = `REDIS_CLIENT=phpredis\nREDIS_HOST=${host}\nREDIS_PORT=${port}\nREDIS_PASSWORD=${db.password || ''}`;
   }
 
   return {
@@ -1245,6 +1318,8 @@ export function buildConnectionDetails(db: DatabaseServiceRecord, clusterConfig?
     pgadminUrl: pgAdminUrl,
     mongoUrl,
     mongoExpressUrl: mongoUrl,
+    redisUrl,
+    redisCommanderUrl: redisUrl,
   };
 }
 
