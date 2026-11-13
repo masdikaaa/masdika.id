@@ -3,7 +3,7 @@
 import { useUrlNumber } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
 import { useTheme } from "@/components/ThemeProvider";
-import { Wallet, Building2, Store, QrCode, Loader2, ArrowLeft, Check, Plus, ShieldCheck, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Wallet, Building2, Store, QrCode, Loader2, ArrowLeft, Check, Plus, ShieldCheck, ChevronLeft, ChevronRight, X, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { formatRupiah } from "@/lib/billing";
 import { toast } from "sonner";
@@ -164,9 +164,14 @@ export default function TopUpPage() {
           
           {/* Step 1: Amount */}
           <motion.section variants={itemVariants} className={cn("border rounded-2xl p-5 sm:p-6 overflow-hidden relative", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
-            <div className="flex items-center gap-3 mb-5 relative z-10">
-              <div className={cn("w-7 h-7 rounded-xl flex items-center justify-center font-black text-xs border", isDark ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/30" : "bg-cyan-500/10 text-cyan-800 border-cyan-500/20")}>1</div>
-              <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>Select Amount</h2>
+            <div className="flex items-center justify-between mb-5 relative z-10 flex-wrap gap-2">
+              <div className="flex items-center gap-3">
+                <div className={cn("w-7 h-7 rounded-xl flex items-center justify-center font-black text-xs border", isDark ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/30" : "bg-cyan-500/10 text-cyan-800 border-cyan-500/20")}>1</div>
+                <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>Select or Enter Amount</h2>
+              </div>
+              <span className={cn("text-xs font-semibold px-2.5 py-1 rounded-lg border", isDark ? "bg-white/[0.04] text-zinc-400 border-white/[0.08]" : "bg-slate-100 text-slate-600 border-slate-200")}>
+                Custom Amount Enabled
+              </span>
             </div>
 
             <div className="relative z-10 space-y-5">
@@ -191,20 +196,35 @@ export default function TopUpPage() {
                 ))}
               </div>
               
-              <div className="relative">
-                <span className={cn("absolute left-5 top-1/2 -translate-y-1/2 font-bold text-base sm:text-lg", isDark ? "text-zinc-500" : "text-slate-500")}>Rp</span>
-                <input
-                  type="text"
-                  value={topUpAmount ? topUpAmount.toLocaleString('id-ID') : ''}
-                  onChange={(e) => {
-                    const rawValue = e.target.value.replace(/[^0-9]/g, '');
-                    setTopUpAmount(Number(rawValue));
-                  }}
-                  className={cn("w-full border rounded-xl pl-14 pr-5 py-4 focus:outline-none font-black text-xl sm:text-2xl transition-all", isDark ? "bg-[#111115] border-white/[0.08] text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30" : "bg-slate-50/80 border-slate-200/90 text-slate-900 focus:border-cyan-600 focus:ring-2 focus:ring-cyan-600/20")}
-                  placeholder="Custom amount..."
-                />
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between text-xs">
+                  <label className={cn("font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-600")}>
+                    Custom Top Up Amount
+                  </label>
+                  <span className={cn("text-[11px] font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                    Min. Rp 10.000
+                  </span>
+                </div>
+                <div className="relative">
+                  <span className={cn("absolute left-5 top-1/2 -translate-y-1/2 font-bold text-base sm:text-lg", isDark ? "text-zinc-500" : "text-slate-500")}>Rp</span>
+                  <input
+                    type="text"
+                    value={topUpAmount ? topUpAmount.toLocaleString('id-ID') : ''}
+                    onChange={(e) => {
+                      const rawValue = e.target.value.replace(/[^0-9]/g, '');
+                      setTopUpAmount(Number(rawValue));
+                    }}
+                    className={cn("w-full border rounded-xl pl-14 pr-5 py-4 focus:outline-none font-black text-xl sm:text-2xl transition-all", isDark ? "bg-[#111115] border-white/[0.08] text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30" : "bg-slate-50/80 border-slate-200/90 text-slate-900 focus:border-cyan-600 focus:ring-2 focus:ring-cyan-600/20")}
+                    placeholder="Enter custom amount (e.g. 15.000)..."
+                  />
+                </div>
+                <div className={cn("p-3 rounded-xl border flex items-start gap-2.5 text-xs", isDark ? "bg-cyan-500/[0.06] border-cyan-500/20 text-zinc-300" : "bg-cyan-50/60 border-cyan-200 text-slate-700")}>
+                  <Sparkles className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                  <p className="leading-relaxed">
+                    <strong className={isDark ? "text-cyan-400" : "text-cyan-700"}>Custom Amount:</strong> You can type any custom top-up amount directly into the input field above (minimum Rp 10.000) or select one of the quick preset buttons.
+                  </p>
+                </div>
               </div>
-              <p className={cn("text-xs font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>Minimum amount is Rp 10.000.</p>
             </div>
           </motion.section>
 

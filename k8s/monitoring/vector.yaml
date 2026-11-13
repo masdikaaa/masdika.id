@@ -119,7 +119,7 @@ data:
         auth:
           strategy: "basic"
           user: "elastic"
-          password: "${ELASTIC_PASSWORD:-Andikaferdi11}"
+          password: "${ELASTIC_PASSWORD}"
         mode: "data_stream"
         data_stream:
           type: "logs"

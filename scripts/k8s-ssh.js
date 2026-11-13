@@ -1,9 +1,21 @@
 const { Client } = require('ssh2');
 const fs = require('fs');
+const path = require('path');
 
+// Load environment variables from .env
 try {
-  require('dotenv').config();
+  require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 } catch (_) {}
+
+const sshHost = process.env.MANAGED_DB_HOST || process.env.MANAGED_DB_K3S_HOST;
+const sshPort = parseInt(process.env.MANAGED_DB_SSH_PORT || process.env.MANAGED_DB_K3S_PORT || '22', 10);
+const sshUser = process.env.MANAGED_DB_SSH_USER || process.env.MANAGED_DB_K3S_USER;
+const sshPassword = process.env.MANAGED_DB_SSH_PASSWORD || process.env.MANAGED_DB_K3S_PASSWORD;
+
+if (!sshHost || !sshUser || !sshPassword) {
+  console.error('Error: Missing required SSH credentials in .env (MANAGED_DB_HOST, MANAGED_DB_SSH_USER, MANAGED_DB_SSH_PASSWORD).');
+  process.exit(1);
+}
 
 let cmd = process.argv[2];
 if (process.argv[2] === '-f' && process.argv[3]) {
@@ -36,9 +48,9 @@ conn.on('ready', () => {
   console.error('SSH Connection error:', err.message);
   process.exit(1);
 }).connect({
-  host: process.env.MANAGED_DB_K3S_HOST || '192.168.79.16',
-  port: parseInt(process.env.MANAGED_DB_K3S_PORT || '22', 10),
-  username: process.env.MANAGED_DB_K3S_USER || 'andika',
-  password: process.env.MANAGED_DB_K3S_PASSWORD || 'Andikaferdi11',
+  host: sshHost,
+  port: sshPort,
+  username: sshUser,
+  password: sshPassword,
   readyTimeout: 10000,
 });
