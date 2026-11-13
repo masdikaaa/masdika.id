@@ -698,16 +698,16 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
           </div>
 
           {/* Configurator Box - Full Space Container */}
-          <div className="relative rounded-2xl sm:rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-10 md:p-12 shadow-xl overflow-hidden w-full">
+          <div className="relative rounded-2xl sm:rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] p-4 sm:p-8 md:p-12 shadow-xl overflow-hidden w-full">
             
             {/* Step 1: Select Database Engine */}
             <div className="mb-8 sm:mb-10">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2 mb-4">
                 <label className="text-xs font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px]">1</span>
-                  Select Database Engine
+                  <span className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px] shrink-0">1</span>
+                  <span>Select Database Engine</span>
                 </label>
-                <span className="text-xs text-[var(--text-muted)] font-medium">
+                <span className="text-xs text-[var(--text-muted)] font-medium pl-7 sm:pl-0">
                   Web viewer included with automated SSL
                 </span>
               </div>
@@ -780,12 +780,12 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
 
             {/* Step 2: Select Architecture Tier */}
             <div className="mb-8">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2 mb-4">
                 <label className="text-xs font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px]">2</span>
-                  Select Architecture Tier
+                  <span className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px] shrink-0">2</span>
+                  <span>Select Architecture Tier</span>
                 </label>
-                <span className="text-xs text-[var(--text-muted)] font-medium">
+                <span className="text-xs text-[var(--text-muted)] font-medium pl-7 sm:pl-0">
                   {isShared ? "Cost-Effective Burstable" : "Guaranteed Production Compute"}
                 </span>
               </div>
@@ -799,19 +799,19 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                     if (storageGb > 20) setStorageGb(20);
                   }}
                   className={cn(
-                    "p-5 rounded-xl border text-left transition-all relative flex flex-col justify-between cursor-pointer",
+                    "p-4 sm:p-5 rounded-xl border text-left transition-all relative flex flex-col justify-between cursor-pointer",
                     isShared
                       ? "border-cyan-500 bg-cyan-500/10 shadow-sm"
                       : "border-[var(--border-primary)] bg-[var(--surface-secondary)] hover:border-cyan-500/40"
                   )}
                 >
                   <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-base font-bold text-[var(--text-primary)]">
+                    <div className="flex items-center justify-between gap-2 mb-2 flex-wrap sm:flex-nowrap">
+                      <span className="text-sm sm:text-base font-bold text-[var(--text-primary)]">
                         Shared Database
                       </span>
-                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400">
-                        From Rp 10.000 /mo
+                      <span className="text-[11px] sm:text-xs font-semibold px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 whitespace-nowrap shrink-0">
+                        From Rp 10.000/mo
                       </span>
                     </div>
                     <p className="text-xs text-[var(--text-secondary)] mb-4 leading-relaxed">
@@ -819,15 +819,15 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                     </p>
                     <div className="space-y-1.5 text-xs text-[var(--text-muted)]">
                       <div className="flex items-center gap-2">
-                        <Cpu className="w-3.5 h-3.5 text-cyan-400" />
+                        <Cpu className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
                         <span>0.5 vCPU (Burstable Compute)</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Box className="w-3.5 h-3.5 text-cyan-400" />
+                        <Box className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
                         <span>1 GB RAM Allocation</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <HardDrive className="w-3.5 h-3.5 text-cyan-400" />
+                        <HardDrive className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
                         <span>Scalable SSD Storage (1 - 20 GB)</span>
                       </div>
                     </div>
@@ -839,19 +839,19 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                   type="button"
                   onClick={() => setSelectedTier("DEDICATED")}
                   className={cn(
-                    "p-5 rounded-xl border text-left transition-all relative flex flex-col justify-between cursor-pointer",
+                    "p-4 sm:p-5 rounded-xl border text-left transition-all relative flex flex-col justify-between cursor-pointer",
                     !isShared
                       ? "border-cyan-500 bg-cyan-500/10 shadow-sm"
                       : "border-[var(--border-primary)] bg-[var(--surface-secondary)] hover:border-cyan-500/40"
                   )}
                 >
                   <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-base font-bold text-[var(--text-primary)]">
+                    <div className="flex items-center justify-between gap-2 mb-2 flex-wrap sm:flex-nowrap">
+                      <span className="text-sm sm:text-base font-bold text-[var(--text-primary)]">
                         Dedicated Cluster
                       </span>
-                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400">
-                        From Rp 35.000 /mo
+                      <span className="text-[11px] sm:text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 whitespace-nowrap shrink-0">
+                        From Rp 35.000/mo
                       </span>
                     </div>
                     <p className="text-xs text-[var(--text-secondary)] mb-4 leading-relaxed">
@@ -859,15 +859,15 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                     </p>
                     <div className="space-y-1.5 text-xs text-[var(--text-muted)]">
                       <div className="flex items-center gap-2">
-                        <Cpu className="w-3.5 h-3.5 text-emerald-400" />
+                        <Cpu className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                         <span>1.0 - 4.0 Dedicated vCPU</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Box className="w-3.5 h-3.5 text-emerald-400" />
+                        <Box className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                         <span>1 GB - 8 GB Dedicated RAM</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <HardDrive className="w-3.5 h-3.5 text-emerald-400" />
+                        <HardDrive className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                         <span>High-IOPS NVMe SSD (1 - 20 GB)</span>
                       </div>
                     </div>
@@ -879,12 +879,12 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
             {/* Step 2b: Dedicated Flavors (Only for Dedicated Tier) */}
             {!isShared && (
               <div className="mb-8">
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2 mb-3">
                   <label className="text-xs font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px]">2b</span>
-                    Select Dedicated Flavor
+                    <span className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px] shrink-0">2b</span>
+                    <span>Select Dedicated Flavor</span>
                   </label>
-                  <span className="text-xs text-[var(--text-muted)] font-medium">
+                  <span className="text-xs text-[var(--text-muted)] font-medium pl-7 sm:pl-0">
                     Reserved CPU &amp; RAM allocation
                   </span>
                 </div>
@@ -925,16 +925,16 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
 
             {/* Step 3: Storage Slider */}
             <div className="mb-8">
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-3 mb-3">
                 <label htmlFor={storageSliderId} className="text-xs font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 flex items-center gap-2 cursor-pointer">
-                  <span className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px]">3</span>
-                  Persistent SSD Storage
+                  <span className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px] shrink-0">3</span>
+                  <span>Persistent SSD Storage</span>
                 </label>
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl font-black text-cyan-600 dark:text-cyan-400">
+                <div className="flex items-baseline sm:items-center gap-2 pl-7 sm:pl-0">
+                  <span className="text-xl sm:text-2xl font-black text-cyan-600 dark:text-cyan-400">
                     {storageGb} GB
                   </span>
-                  <span className="text-xs text-[var(--text-muted)]">
+                  <span className="text-xs text-[var(--text-muted)] whitespace-nowrap">
                     NVMe PVC ({isShared ? "Rp 10.000/GB" : "Rp 5.000/GB"})
                   </span>
                 </div>
@@ -981,7 +981,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
             </div>
 
             {/* Price Calculation Card */}
-            <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="p-4 sm:p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] flex flex-col md:flex-row items-start md:items-center justify-between gap-5 sm:gap-6">
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xs uppercase tracking-wider font-bold text-[var(--text-muted)]">
@@ -991,7 +991,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                     PAYG HOURLY
                   </span>
                 </div>
-                <div className="flex items-baseline gap-2">
+                <div className="flex items-baseline gap-2 flex-wrap">
                   <span className="text-3xl sm:text-4xl font-black text-[var(--text-primary)]">
                     {formatCurrency(monthlyPrice)}
                   </span>
