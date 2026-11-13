@@ -2819,39 +2819,57 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
             </div>
 
             {isBalanceInsufficient && (
-              <div className="mb-4 p-3.5 rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 text-xs space-y-2">
+              <div className={cn(
+                "mb-4 p-3.5 rounded-xl border text-xs space-y-2 transition-colors",
+                isDark
+                  ? "border-red-500/25 bg-red-500/10 text-red-300"
+                  : "border-red-200 bg-red-50/90 text-slate-800 shadow-2xs"
+              )}>
                 <div className="flex items-start gap-2">
-                  <XCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <XCircle className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-red-400" : "text-red-600")} />
                   <div>
-                    <p className="font-bold text-red-300">Insufficient Account Balance</p>
-                    <p className="text-[11px] text-zinc-300 mt-0.5 leading-relaxed">
+                    <p className={cn("font-bold tracking-tight", isDark ? "text-red-300" : "text-red-700")}>
+                      Insufficient Account Balance
+                    </p>
+                    <p className={cn("text-[11px] mt-0.5 leading-relaxed", isDark ? "text-zinc-300" : "text-slate-600")}>
                       Deployments require sufficient balance to cover the accumulated monthly commitment of your active running services plus this new VPS.
                     </p>
                   </div>
                 </div>
-                <div className="pl-6 space-y-1 text-[11px] font-mono text-zinc-300 border-t border-red-500/20 pt-2">
+                <div className={cn(
+                  "pl-6 space-y-1 text-[11px] font-mono border-t pt-2",
+                  isDark ? "text-zinc-300 border-red-500/20" : "text-slate-700 border-red-200/80"
+                )}>
                   {activeCommitment.totalMonthly > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-zinc-400">Active Services Commitment:</span>
-                      <span>Rp {activeCommitment.totalMonthly.toLocaleString("id-ID")}/mo</span>
+                      <span className={isDark ? "text-zinc-400" : "text-slate-600"}>Active Services Commitment:</span>
+                      <span className={cn("font-medium", isDark ? "text-zinc-200" : "text-slate-900")}>Rp {activeCommitment.totalMonthly.toLocaleString("id-ID")}/mo</span>
                     </div>
                   )}
                   <div className="flex justify-between">
-                    <span className="text-zinc-400">Estimated New VPS:</span>
-                    <span>Rp {newVpsMonthly.toLocaleString("id-ID")}/mo</span>
+                    <span className={isDark ? "text-zinc-400" : "text-slate-600"}>Estimated New VPS:</span>
+                    <span className={cn("font-medium", isDark ? "text-zinc-200" : "text-slate-900")}>Rp {newVpsMonthly.toLocaleString("id-ID")}/mo</span>
                   </div>
-                  <div className="flex justify-between border-t border-red-500/20 pt-1 font-bold text-red-300">
+                  <div className={cn("flex justify-between border-t pt-1 font-bold", isDark ? "border-red-500/20 text-red-300" : "border-red-200 text-red-700")}>
                     <span>Total Required Balance:</span>
                     <span>Rp {totalRequiredBalance.toLocaleString("id-ID")}</span>
                   </div>
-                  <div className="flex justify-between text-zinc-400">
-                    <span>Your Current Balance:</span>
-                    <span className="text-red-400 font-bold">Rp {balance.toLocaleString("id-ID")}</span>
+                  <div className="flex justify-between">
+                    <span className={isDark ? "text-zinc-400" : "text-slate-600"}>Your Current Balance:</span>
+                    <span className={cn("font-bold", isDark ? "text-red-400" : "text-red-600")}>Rp {balance.toLocaleString("id-ID")}</span>
                   </div>
                 </div>
-                <div className="pl-6 pt-1 flex items-center justify-between">
-                  <span className="text-[11px] text-zinc-400">Shortfall: Rp {(totalRequiredBalance - balance).toLocaleString("id-ID")}</span>
-                  <Link href="/dashboard/billing" className="underline font-bold text-red-300 hover:text-white transition-colors">
+                <div className={cn("pl-6 pt-1.5 flex items-center justify-between border-t", isDark ? "border-red-500/20" : "border-red-200/80")}>
+                  <span className={cn("text-[11px] font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>
+                    Shortfall: <strong className={cn(isDark ? "text-red-300" : "text-red-600")}>Rp {(totalRequiredBalance - balance).toLocaleString("id-ID")}</strong>
+                  </span>
+                  <Link
+                    href="/dashboard/billing"
+                    className={cn(
+                      "font-bold underline transition-colors text-xs",
+                      isDark ? "text-red-300 hover:text-white" : "text-red-600 hover:text-red-800"
+                    )}
+                  >
                     Top Up Balance Now →
                   </Link>
                 </div>

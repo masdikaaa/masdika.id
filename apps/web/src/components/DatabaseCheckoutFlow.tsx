@@ -1240,43 +1240,58 @@ export default function DatabaseCheckoutFlow() {
             <div className={cn("pt-4 border-t space-y-3", isDark ? "border-white/[0.08]" : "border-slate-100")}>
               <div className="space-y-1.5 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-zinc-400">Account Balance:</span>
-                  <span className={cn("font-bold font-mono", !isBalanceInsufficient ? "text-emerald-400" : "text-red-400")}>
+                  <span className={isDark ? "text-zinc-400" : "text-slate-600"}>Account Balance:</span>
+                  <span className={cn("font-bold font-mono", !isBalanceInsufficient ? (isDark ? "text-emerald-400" : "text-emerald-600") : (isDark ? "text-red-400" : "text-red-600"))}>
                     {loadingBalance ? "..." : formatRupiah(userBalance)}
                   </span>
                 </div>
                 {activeCommitment.totalMonthly > 0 && (
-                  <div className="flex items-center justify-between text-[11px] text-zinc-400">
+                  <div className={cn("flex items-center justify-between text-[11px]", isDark ? "text-zinc-400" : "text-slate-600")}>
                     <span>Active Services Commitment:</span>
-                    <span className="font-mono">{formatRupiah(activeCommitment.totalMonthly)}/mo</span>
+                    <span className={cn("font-mono font-medium", isDark ? "text-zinc-300" : "text-slate-700")}>{formatRupiah(activeCommitment.totalMonthly)}/mo</span>
                   </div>
                 )}
-                <div className="flex items-center justify-between text-[11px] text-zinc-400">
+                <div className={cn("flex items-center justify-between text-[11px]", isDark ? "text-zinc-400" : "text-slate-600")}>
                   <span>New Database Estimate:</span>
-                  <span className="font-mono">{formatRupiah(currentTotalMonthly)}/mo</span>
+                  <span className={cn("font-mono font-medium", isDark ? "text-zinc-300" : "text-slate-700")}>{formatRupiah(currentTotalMonthly)}/mo</span>
                 </div>
-                <div className="flex items-center justify-between text-xs pt-1.5 border-t border-white/[0.06] font-semibold">
+                <div className={cn("flex items-center justify-between text-xs pt-1.5 border-t font-semibold", isDark ? "border-white/[0.06]" : "border-slate-200")}>
                   <span className={isDark ? "text-zinc-300" : "text-slate-700"}>Total Required Balance:</span>
-                  <span className={cn("font-mono font-bold", !isBalanceInsufficient ? "text-cyan-400" : "text-red-400")}>
+                  <span className={cn("font-mono font-bold", !isBalanceInsufficient ? (isDark ? "text-cyan-400" : "text-cyan-600") : (isDark ? "text-red-400" : "text-red-600"))}>
                     {formatRupiah(totalRequiredBalance)}
                   </span>
                 </div>
               </div>
 
               {isBalanceInsufficient && (
-                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-300 text-xs space-y-1.5">
+                <div className={cn(
+                  "p-3.5 rounded-xl border text-xs space-y-1.5 transition-colors",
+                  isDark
+                    ? "bg-red-500/10 border-red-500/25 text-red-300"
+                    : "bg-red-50/90 border-red-200 text-slate-800 shadow-2xs"
+                )}>
                   <div className="flex items-start gap-2">
-                    <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                    <AlertTriangle className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-red-400" : "text-red-600")} />
                     <div>
-                      <p className="font-bold text-red-300">Insufficient Account Balance</p>
-                      <p className="text-[11px] text-zinc-300 mt-0.5 leading-relaxed">
+                      <p className={cn("font-bold tracking-tight", isDark ? "text-red-300" : "text-red-700")}>
+                        Insufficient Account Balance
+                      </p>
+                      <p className={cn("text-[11px] mt-0.5 leading-relaxed", isDark ? "text-zinc-300" : "text-slate-600")}>
                         Orders require sufficient balance to cover the accumulated monthly commitment of your active services plus this database.
                       </p>
                     </div>
                   </div>
-                  <div className="pl-6 pt-1 flex items-center justify-between">
-                    <span className="text-[11px] text-zinc-400">Shortfall: {formatRupiah(totalRequiredBalance - userBalance)}</span>
-                    <Link href="/dashboard/topup" className="font-bold underline text-red-300 hover:text-white transition-colors">
+                  <div className={cn("pl-6 pt-1.5 flex items-center justify-between border-t", isDark ? "border-red-500/20" : "border-red-200/80")}>
+                    <span className={cn("text-[11px] font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>
+                      Shortfall: <strong className={cn(isDark ? "text-red-300" : "text-red-600")}>{formatRupiah(totalRequiredBalance - userBalance)}</strong>
+                    </span>
+                    <Link
+                      href="/dashboard/topup"
+                      className={cn(
+                        "font-bold underline transition-colors text-xs",
+                        isDark ? "text-red-300 hover:text-white" : "text-red-600 hover:text-red-800"
+                      )}
+                    >
                       Top Up Balance →
                     </Link>
                   </div>
@@ -1285,18 +1300,24 @@ export default function DatabaseCheckoutFlow() {
 
               {/* Cluster Full / Capacity Warnings */}
               {isClusterFull && (
-                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-start gap-2.5">
-                  <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                  <span className="leading-snug">
+                <div className={cn(
+                  "p-3 rounded-xl border text-xs flex items-start gap-2.5",
+                  isDark ? "bg-amber-500/10 border-amber-500/30 text-amber-300" : "bg-amber-50 border-amber-200 text-amber-900"
+                )}>
+                  <AlertTriangle className={cn("w-4 h-4 text-amber-400 shrink-0 mt-0.5", isDark ? "text-amber-400" : "text-amber-600")} />
+                  <span className={cn("leading-snug", isDark ? "text-amber-300" : "text-amber-800")}>
                     Cluster is currently at maximum capacity. New deployments are temporarily paused.
                   </span>
                 </div>
               )}
 
               {isFlavorExceedsCapacity && !isClusterFull && (
-                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-start gap-2.5">
-                  <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                  <span className="leading-snug">
+                <div className={cn(
+                  "p-3 rounded-xl border text-xs flex items-start gap-2.5",
+                  isDark ? "bg-amber-500/10 border-amber-500/30 text-amber-300" : "bg-amber-50 border-amber-200 text-amber-900"
+                )}>
+                  <AlertTriangle className={cn("w-4 h-4 text-amber-400 shrink-0 mt-0.5", isDark ? "text-amber-400" : "text-amber-600")} />
+                  <span className={cn("leading-snug", isDark ? "text-amber-300" : "text-amber-800")}>
                     Requested flavor requires {selectedMemoryMb / 1024} GB RAM, which exceeds remaining cluster memory. Please choose a smaller tier.
                   </span>
                 </div>
