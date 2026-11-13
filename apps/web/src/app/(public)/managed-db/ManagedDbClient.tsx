@@ -46,7 +46,7 @@ import { cn } from "@/lib/utils";
 
 const DB_TERMINAL_LOGS = [
   { time: "00:01", module: "CLUSTER", message: "Verifying Kubernetes K3s node capacity and cluster quotas..." },
-  { time: "00:02", module: "STORAGE", message: "Provisioning persistent volume claim (PVC) on NVMe SSD..." },
+  { time: "00:02", module: "STORAGE", message: "Provisioning persistent volume claim (PVC) on SATA SSD..." },
   { time: "00:03", module: "SECRETS", message: "Generating cryptographic passwords and isolation secrets..." },
   { time: "00:04", module: "POD", message: "Scheduling database container pod with resource limits..." },
   { time: "00:05", module: "NETWORK", message: "Binding dedicated TCP NodePort and routing ingress..." },
@@ -58,7 +58,7 @@ const DB_TERMINAL_STATS = [
   { value: "Included", label: "WEB GUI (SSL)" },
   { value: "Dedicated", label: "NODEPORT TCP" },
   { value: "1-Click", label: "EXPORT & IMPORT" },
-  { value: "NVMe SSD", label: "PERSISTENT PVC" },
+  { value: "SATA SSD", label: "PERSISTENT PVC" },
 ];
 
 const DEDICATED_FLAVORS = [
@@ -420,7 +420,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
               </h1>
 
               <p className="text-lg md:text-xl mb-10 max-w-xl leading-relaxed text-[var(--text-secondary)] font-normal">
-                Deploy production-grade PostgreSQL, MySQL, MariaDB, Redis, and MongoDB clusters in seconds. Powered by Kubernetes K3s container isolation, persistent NVMe SSD storage, instant data export &amp; import, browser web GUIs, and under 20ms local latency across Indonesia.
+                Deploy production-grade PostgreSQL, MySQL, MariaDB, Redis, and MongoDB clusters in seconds. Powered by Kubernetes K3s container isolation, persistent SATA SSD storage, instant data export &amp; import, browser web GUIs, and under 20ms local latency across Indonesia.
               </p>
 
               <div className="flex flex-wrap items-center gap-4">
@@ -452,7 +452,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                 imageHeight={1024}
                 badges={[
                   { icon: Database, label: "Database Engines", value: "Postgres, MySQL, Redis, Mongo" },
-                  { icon: HardDrive, label: "Storage Engine", value: "NVMe SSD Persistent PVC" },
+                  { icon: HardDrive, label: "Storage Engine", value: "SATA SSD Persistent PVC" },
                   { icon: Zap, label: "NodePort Access", value: "Direct Public TCP Port" },
                   { icon: ShieldCheck, label: "Architecture", value: "Isolated K3s Pods" },
                 ]}
@@ -468,7 +468,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
             {[
               { icon: Box, title: "K3s Pod Isolation", desc: "Every database runs inside dedicated container pods with strict CPU and memory resource quotas." },
               { icon: Globe, title: "Browser Web GUIs", desc: "Built-in phpMyAdmin, pgAdmin 4, and Mongo Express with automatic SSL & secure authentication." },
-              { icon: HardDrive, title: "Persistent NVMe PVC", desc: "Enterprise SSD block storage mounted via Kubernetes PVC guarantees zero data loss on restart." },
+              { icon: HardDrive, title: "Persistent SATA SSD PVC", desc: "Enterprise SSD block storage mounted via Kubernetes PVC guarantees zero data loss on restart." },
               { icon: Activity, title: "Local Sidoarjo DC", desc: "Under 20ms ultra-low ping across Indonesia with direct IIX, OpenIX, and CDIX peering." },
             ].map((pillar, i) => (
               <FadeIn key={i} delay={i * 0.1} direction="up" className="h-full">
@@ -600,7 +600,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                 <div className="space-y-3.5">
                   {[
                     "Isolated Kubernetes StatefulSet Pod with Dedicated Resource Limits",
-                    "Persistent NVMe SSD Block Storage mounted via StorageClass PVC",
+                    "Persistent SATA SSD Block Storage mounted via StorageClass PVC",
                     "Direct Public TCP NodePort (e.g. 30500 - 30600) for Remote GUI & App Access",
                     "Automated Let's Encrypt TLS/SSL Ingress for Web Management Panels",
                   ].map((item, i) => (
@@ -639,7 +639,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                     <HardDrive className="w-5 h-5" />
                   </div>
                   <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)]">
-                    NVMe SSD PVC
+                    SATA SSD PVC
                   </span>
                 </div>
 
@@ -868,7 +868,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                       </div>
                       <div className="flex items-center gap-2">
                         <HardDrive className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                        <span>High-IOPS NVMe SSD (1 - 20 GB)</span>
+                        <span>SATA SSD Storage (1 - 20 GB)</span>
                       </div>
                     </div>
                   </div>
@@ -935,7 +935,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                     {storageGb} GB
                   </span>
                   <span className="text-xs text-[var(--text-muted)] whitespace-nowrap">
-                    NVMe PVC ({isShared ? "Rp 10.000/GB" : "Rp 5.000/GB"})
+                    SATA SSD PVC ({isShared ? "Rp 10.000/GB" : "Rp 5.000/GB"})
                   </span>
                 </div>
               </div>
@@ -1113,7 +1113,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { icon: HardDrive, title: "Persistent NVMe PVC", desc: "Enterprise SSD block storage mounted via Kubernetes ensures zero loss on restart." },
+              { icon: HardDrive, title: "Persistent SATA SSD PVC", desc: "Enterprise SATA SSD block storage mounted via Kubernetes ensures zero loss on restart." },
               { icon: Globe, title: "Web Management GUIs", desc: "Instant access to pgAdmin 4, phpMyAdmin, Mongo Express, and Redis Commander with SSL." },
               { icon: Zap, title: "Public TCP NodePorts", desc: "Connect desktop IDEs like DBeaver, TablePlus, or Navicat effortlessly." },
               { icon: Download, title: "Instant Export & Import", desc: "Download full database dump files (.sql, .rdb, archive) and restore data on-demand." },
@@ -1213,7 +1213,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                 Ready for True Managed Cloud Databases?
               </h2>
               <p className="text-base sm:text-lg text-[var(--text-secondary)] mb-8 leading-relaxed">
-                Deploy production-ready databases on Masdika K3s Kubernetes infrastructure today. Enjoy isolated Pods, persistent NVMe storage, and 1-click web GUIs.
+                Deploy production-ready databases on Masdika K3s Kubernetes infrastructure today. Enjoy isolated Pods, persistent SATA SSD storage, and 1-click web GUIs.
               </p>
 
               <div className="flex flex-wrap items-center justify-center gap-4">

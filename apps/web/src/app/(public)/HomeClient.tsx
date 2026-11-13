@@ -86,11 +86,11 @@ const PRODUCTS = [
     title: "Managed Database",
     subtitle: "Kubernetes K3s High Availability",
     description:
-      "Production-ready PostgreSQL, MySQL, MariaDB, Redis, and MongoDB clusters with isolated containers, persistent NVMe SSD, and 1-click web GUIs.",
+      "Production-ready PostgreSQL, MySQL, MariaDB, Redis, and MongoDB clusters with isolated containers, persistent SATA SSD, and 1-click web GUIs.",
     href: "/managed-db",
     type: "DBaaS",
     sla: "99.9% SLA",
-    specs: ["Postgres, MySQL, Redis, Mongo", "Persistent NVMe PVC", "Instant Web GUIs"],
+    specs: ["Postgres, MySQL, Redis, Mongo", "Persistent SATA SSD PVC", "Instant Web GUIs"],
     cta: "Deploy Database",
   },
   {

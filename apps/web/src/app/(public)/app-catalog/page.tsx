@@ -11,14 +11,14 @@ export const metadata: Metadata = {
     absolute: "App Catalog - 1-Click Cloud Applications & Stacks",
   },
   description:
-    "Deploy scalable 1-Click Applications on Cloud VPS in seconds. Automated Cloud-Init deployment for aaPanel, Docker, WordPress, Nginx Proxy Manager, Ollama AI, and enterprise developer stacks.",
+    "Deploy scalable 1-Click Applications on Cloud VPS in seconds. Automated Cloud-Init deployment for aaPanel, Docker, WordPress, Coolify, Nextcloud, and enterprise developer stacks.",
   keywords: [
     "App Catalog",
     "1-Click App VPS",
     "aaPanel VPS",
     "Docker Cloud VPS",
     "WordPress VPS Indonesia",
-    "Ollama AI VPS",
+    "Coolify VPS",
     "CloudPanel VPS",
     "Automated Cloud-Init",
     "Cloud Applications",
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "App Catalog - 1-Click Cloud Applications & Stacks",
     description:
-      "Deploy scalable 1-Click Applications on Cloud VPS in seconds. Automated Cloud-Init deployment for aaPanel, Docker, WordPress, Nginx Proxy Manager, Ollama AI, and enterprise developer stacks.",
+      "Deploy scalable 1-Click Applications on Cloud VPS in seconds. Automated Cloud-Init deployment for aaPanel, Docker, WordPress, Coolify, Nextcloud, and enterprise developer stacks.",
     url: "https://www.masdika.id/app-catalog",
     siteName: "Masdika",
     images: [
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "App Catalog - 1-Click Cloud Applications & Stacks",
     description:
-      "Deploy scalable 1-Click Applications on Cloud VPS in seconds. Automated Cloud-Init deployment for aaPanel, Docker, WordPress, Nginx Proxy Manager, Ollama AI, and enterprise developer stacks.",
+      "Deploy scalable 1-Click Applications on Cloud VPS in seconds. Automated Cloud-Init deployment for aaPanel, Docker, WordPress, Coolify, Nextcloud, and enterprise developer stacks.",
     images: ["/images/brand/og-image.webp"],
   },
 };
