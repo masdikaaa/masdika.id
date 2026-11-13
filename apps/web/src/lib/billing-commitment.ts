@@ -18,7 +18,7 @@ export interface UserServicesCommitment {
  * Services include:
  * - Cloud VPS instances (hourlyRate * 730)
  * - Managed Databases (monthlyPrice or hourlyRate * 720)
- * - Subscriptions such as File CDN, S3, API Hub (hourlyPrice * 730 or monthly price)
+ * - Subscriptions such as File CDN and API Hub (hourlyPrice * 730 or monthly price)
  * - Standalone Reserved IPs (hourlyRate * 730)
  */
 export async function getUserServicesCommitment(
