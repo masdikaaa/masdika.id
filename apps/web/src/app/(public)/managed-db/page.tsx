@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   title: {
     absolute: "Managed Database - Kubernetes K3s High Availability Cloud DB",
   },
-  description: "Deploy production-ready MySQL, PostgreSQL, MariaDB, and MongoDB clusters in seconds. Powered by Kubernetes K3s isolation, persistent NVMe SSD storage, automated backups, browser web GUIs, and low-latency IIX routing.",
+  description: "Deploy production-ready MySQL, PostgreSQL, MariaDB, Redis, and MongoDB clusters in seconds. Powered by Kubernetes K3s isolation, persistent NVMe SSD storage, instant data export & import, browser web GUIs, and low-latency IIX routing.",
   keywords: [
     "Managed Database",
     "Kubernetes Database",
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Managed Database - Kubernetes K3s High Availability Cloud DB",
-    description: "Deploy production-ready MySQL, PostgreSQL, MariaDB, and MongoDB clusters in seconds. Powered by Kubernetes K3s isolation, persistent NVMe SSD storage, automated backups, browser web GUIs, and low-latency IIX routing.",
+    description: "Deploy production-ready MySQL, PostgreSQL, MariaDB, Redis, and MongoDB clusters in seconds. Powered by Kubernetes K3s isolation, persistent NVMe SSD storage, instant data export & import, browser web GUIs, and low-latency IIX routing.",
     url: "https://www.masdika.id/managed-db",
     siteName: "Masdika",
     images: [
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Managed Database - Kubernetes K3s High Availability Cloud DB",
-    description: "Deploy production-ready MySQL, PostgreSQL, MariaDB, and MongoDB clusters in seconds. Powered by Kubernetes K3s isolation, persistent NVMe SSD storage, automated backups, browser web GUIs, and low-latency IIX routing.",
+    description: "Deploy production-ready MySQL, PostgreSQL, MariaDB, Redis, and MongoDB clusters in seconds. Powered by Kubernetes K3s isolation, persistent NVMe SSD storage, instant data export & import, browser web GUIs, and low-latency IIX routing.",
     images: ["/images/brand/og-image.webp"],
   },
 };
@@ -95,7 +95,7 @@ export default async function ManagedDbLandingPage() {
         "name": "Managed Database - Kubernetes K3s High Availability",
         "sku": "MASDIKA-MDB-ID",
         "mpn": "MDB-K3S-01",
-        "description": "High-Performance Managed Cloud Databases powered by Kubernetes K3s, container isolation, persistent NVMe SSD storage, automated backups, and flexible hourly Pay-As-You-Go billing.",
+        "description": "High-Performance Managed Cloud Databases powered by Kubernetes K3s, container isolation, persistent NVMe SSD storage, instant data export & import, and flexible hourly Pay-As-You-Go billing.",
         "category": "Cloud Computing > Managed Database",
         "image": "https://www.masdika.id/images/brand/og-image.webp",
         "brand": {

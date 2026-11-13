@@ -30,7 +30,8 @@ import {
   ExternalLink,
   Sparkles,
   RefreshCw,
-  Check
+  Check,
+  Download
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -56,7 +57,7 @@ const DB_TERMINAL_LOGS = [
 const DB_TERMINAL_STATS = [
   { value: "Included", label: "WEB GUI (SSL)" },
   { value: "Dedicated", label: "NODEPORT TCP" },
-  { value: "Daily", label: "AUTO BACKUP" },
+  { value: "1-Click", label: "EXPORT & IMPORT" },
   { value: "NVMe SSD", label: "PERSISTENT PVC" },
 ];
 
@@ -144,8 +145,8 @@ const DB_FAQS = [
     a: "You top up your deposit balance and are charged strictly for each active hour your database is deployed. If you stop or terminate an instance, billing ceases immediately. There are no lock-in contracts or termination fees."
   },
   {
-    q: "Are automated backups included?",
-    a: "Yes, automated snapshots are scheduled, and you can also trigger manual full database dumps (SQL or mongodump) or import custom dump files directly from your web dashboard at any time."
+    q: "How does database export and import work?",
+    a: "You can download full database dump files (.sql for relational engines, .rdb for Redis, and dump archives for MongoDB) directly from the instance dashboard with 1-click. You can also upload and import SQL or dump scripts on-demand, or use the included web GUIs (phpMyAdmin, pgAdmin, Mongo Express, Redis Commander)."
   }
 ];
 
@@ -370,7 +371,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
               </h1>
 
               <p className="text-lg md:text-xl mb-10 max-w-xl leading-relaxed text-[var(--text-secondary)] font-normal">
-                Deploy production-grade PostgreSQL, MySQL, MariaDB, and MongoDB clusters in seconds. Powered by Kubernetes K3s container isolation, persistent NVMe SSD storage, automated backups, browser web GUIs, and under 20ms local latency across Indonesia.
+                Deploy production-grade PostgreSQL, MySQL, MariaDB, Redis, and MongoDB clusters in seconds. Powered by Kubernetes K3s container isolation, persistent NVMe SSD storage, instant data export &amp; import, browser web GUIs, and under 20ms local latency across Indonesia.
               </p>
 
               <div className="flex flex-wrap items-center gap-4">
@@ -642,7 +643,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--border-primary)] bg-[var(--surface)] text-xs text-[var(--text-secondary)] shadow-sm">
               <Info className="w-4 h-4 text-cyan-600 dark:text-cyan-400 shrink-0" />
               <span>
-                <strong>Zero Maintenance:</strong> Web GUI, SSL certificates, automated backups, and TCP NodePorts are completely included in every plan.
+                <strong>Zero Maintenance:</strong> Web GUI, SSL certificates, instant export/import tools, and TCP NodePorts are completely included in every plan.
               </span>
             </div>
           </div>
@@ -955,9 +956,9 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               { icon: HardDrive, title: "Persistent NVMe PVC", desc: "Enterprise SSD block storage mounted via Kubernetes ensures zero loss on restart." },
-              { icon: Globe, title: "Web Management GUIs", desc: "Instant access to pgAdmin 4, phpMyAdmin, and Mongo Express with SSL." },
+              { icon: Globe, title: "Web Management GUIs", desc: "Instant access to pgAdmin 4, phpMyAdmin, Mongo Express, and Redis Commander with SSL." },
               { icon: Zap, title: "Public TCP NodePorts", desc: "Connect desktop IDEs like DBeaver, TablePlus, or Navicat effortlessly." },
-              { icon: ShieldCheck, title: "Automated Daily Backups", desc: "Scheduled snapshot dumps and 1-click restore functionality." },
+              { icon: Download, title: "Instant Export & Import", desc: "Download full database dump files (.sql, .rdb, archive) and restore data on-demand." },
               { icon: TrendingUp, title: "Dynamic Scaling", desc: "Expand your persistent storage anytime without recreating your database." },
               { icon: RefreshCw, title: "Graceful Restarts", desc: "Perform rolling Pod restarts safely without dropping active transactions." },
               { icon: Lock, title: "Let's Encrypt SSL", desc: "Automated HTTPS certificates provisioned for all web viewer interfaces." },

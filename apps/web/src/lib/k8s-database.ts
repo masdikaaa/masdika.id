@@ -1299,8 +1299,8 @@ export function buildConnectionDetails(db: DatabaseServiceRecord, clusterConfig?
     laravelEnv = `DB_CONNECTION=mongodb\nDB_URI=${connectionUri}`;
   } else if (typeUpper === 'REDIS') {
     redisUrl = `https://db-${db.id}-redis.db.masdika.id`;
-    connectionUri = `redis://default:${encodeURIComponent(db.password || '')}@${host}:${port}`;
-    laravelEnv = `REDIS_CLIENT=phpredis\nREDIS_HOST=${host}\nREDIS_PORT=${port}\nREDIS_PASSWORD=${db.password || ''}`;
+    connectionUri = `redis://default:${encodeURIComponent(db.password ?? '')}@${host}:${port}`;
+    laravelEnv = `REDIS_CLIENT=phpredis\nREDIS_HOST=${host}\nREDIS_PORT=${port}\nREDIS_PASSWORD=${db.password ?? ''}`;
   }
 
   return {

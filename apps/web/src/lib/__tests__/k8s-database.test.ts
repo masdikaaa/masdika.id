@@ -126,7 +126,7 @@ describe('Managed Database K3s Engine - k8s-database.ts', () => {
       };
       const details = buildConnectionDetails(redisDb);
       expect(details.uri.startsWith('redis://')).toBe(true);
-      expect(details.uri).toContain(`default:${encodeURIComponent(redisDb.password || '')}@db.masdika.id:30558`);
+      expect(details.uri).toContain(`default:${encodeURIComponent(redisDb.password ?? '')}@db.masdika.id:30558`);
       expect(details.redisUrl).toBe(`https://db-${redisDb.id}-redis.db.masdika.id`);
       expect(details.redisCommanderUrl).toBe(`https://db-${redisDb.id}-redis.db.masdika.id`);
       expect(details.laravelEnv).toContain('REDIS_CLIENT=phpredis');
