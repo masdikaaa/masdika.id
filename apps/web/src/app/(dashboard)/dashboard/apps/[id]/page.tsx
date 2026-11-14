@@ -235,10 +235,13 @@ export default function AppDetailPage({
   if (!app) return null;
 
   const catalog = getAppDefinition(app.appType);
-  const isHermes = app.appType.toLowerCase() === "hermes";
-  const isN8n = app.appType.toLowerCase() === "n8n";
-  const hasWeb = catalog?.accessProtocol === "WEB" || catalog?.accessProtocol === "BOTH" || isHermes;
-  const hasSsh = catalog?.accessProtocol === "SSH" || catalog?.accessProtocol === "BOTH" || isHermes;
+  const appTypeLower = app.appType.toLowerCase();
+  const isHermes = appTypeLower === "hermes";
+  const isOpencode = appTypeLower === "opencode";
+  const isN8n = appTypeLower === "n8n";
+  const isDualWebSsh = catalog?.accessProtocol === "BOTH" || isHermes || isOpencode;
+  const hasWeb = catalog?.accessProtocol === "WEB" || isDualWebSsh;
+  const hasSsh = catalog?.accessProtocol === "SSH" || isDualWebSsh;
   const hostIp = app.publicIp || "";
   const sshCommand = hostIp ? `ssh ${app.username || "root"}@${hostIp} -p ${app.port}` : `ssh ${app.username || "root"}@<ip> -p ${app.port}`;
   const fullDomain = (app as any).fullDomain || `${app.subdomain}.app.masdika.id`;
@@ -463,7 +466,7 @@ export default function AppDetailPage({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                 <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
                   <Globe className="w-4 h-4 shrink-0" />
-                  <span>{isHermes ? "Hermes Web Dashboard & Ingress" : "HTTPS Web Access & Routing"}</span>
+                  <span>{isHermes ? "Hermes Web Dashboard & Ingress" : isOpencode ? "OpenCode Web Dashboard & Ingress" : "HTTPS Web Access & Routing"}</span>
                 </h3>
                 <span className={cn(
                   "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold self-start sm:self-auto shrink-0 border",
@@ -477,7 +480,7 @@ export default function AppDetailPage({
               <div className="space-y-3">
                 <div>
                   <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1", isDark ? "text-zinc-500" : "text-slate-500")}>
-                    {isHermes ? "Web Dashboard URL" : "Secure Application URL"}
+                    {isDualWebSsh ? "Web Dashboard URL" : "Secure Application URL"}
                   </label>
                   <div className="flex items-center gap-2">
                     <div className={cn(
@@ -502,11 +505,23 @@ export default function AppDetailPage({
                       rel="noopener noreferrer"
                       className="px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shrink-0 cursor-pointer active:scale-95"
                     >
-                      <span>{isHermes ? "Open Dashboard" : "Open App"}</span>
+                      <span>{isDualWebSsh ? "Open Dashboard" : "Open App"}</span>
                       <ExternalLink className="w-3.5 h-3.5" />
                     </a>
                   </div>
                 </div>
+
+                {isOpencode && (
+                  <div className={cn(
+                    "p-3 rounded-xl border flex items-start sm:items-center gap-2.5 text-xs",
+                    isDark ? "bg-cyan-500/10 border-cyan-500/20 text-zinc-300" : "bg-cyan-50/70 border-cyan-200 text-slate-700"
+                  )}>
+                    <Lock className={cn("w-4 h-4 shrink-0 mt-0.5 sm:mt-0", isDark ? "text-cyan-400" : "text-cyan-700")} />
+                    <span>
+                      Protected with HTTP Basic Auth. Sign in using username <code className={cn("font-mono font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{app.username || "root"}</code> and your instance password below.
+                    </span>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                   <div className={cn(
@@ -1107,14 +1122,15 @@ export default function AppDetailPage({
             {app.appType === "opencode" && (
               <div className="space-y-3 text-xs leading-relaxed">
                 <p className={isDark ? "text-zinc-300" : "text-slate-700"}>
-                  OpenCode is running in a dedicated developer pod with persistent workspace storage at <code className={cn("font-mono font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>/workspace</code>. Connect via SSH, configure your AI provider credentials once, and launch OpenCode directly inside your workspace:
+                  OpenCode is running in a dedicated developer pod featuring a password-protected browser Web Dashboard (sign in using username <code className={cn("font-mono font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{app.username || "root"}</code> and your SSH password) alongside direct SSH terminal access with persistent storage at <code className={cn("font-mono font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>/workspace</code>:
                 </p>
                 <div className={cn("p-3.5 rounded-xl border font-mono text-[11px] space-y-2", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-slate-50 border-slate-200/90 text-slate-800 shadow-2xs")}>
-                  <div className={isDark ? "text-zinc-500" : "text-slate-500"}># 1. Direct Terminal Login (SSH)</div>
+                  <div className={isDark ? "text-zinc-500" : "text-slate-500"}># 1. OpenCode Web Dashboard (Browser — HTTP Basic Auth User: {app.username || "root"})</div>
+                  <div className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{httpsUrl}</div>
+                  <div className={cn("pt-1", isDark ? "text-zinc-500" : "text-slate-500")}># 2. Direct Terminal Login (SSH)</div>
                   <div className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{sshCommand}</div>
-                  <div className={cn("pt-1", isDark ? "text-zinc-500" : "text-slate-500")}># 2. Configure AI Provider &amp; API Keys</div>
+                  <div className={cn("pt-1", isDark ? "text-zinc-500" : "text-slate-500")}># 3. Configure AI Provider &amp; API Keys / Launch TUI</div>
                   <div>opencode auth login</div>
-                  <div className={cn("pt-1", isDark ? "text-zinc-500" : "text-slate-500")}># 3. Launch Interactive OpenCode TUI</div>
                   <div>opencode</div>
                   <div className={cn("pt-1", isDark ? "text-zinc-500" : "text-slate-500")}># 4. Persistent Workspace &amp; Config</div>
                   <div>cd /workspace</div>

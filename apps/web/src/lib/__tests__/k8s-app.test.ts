@@ -76,8 +76,8 @@ describe('Managed Apps Catalog & Engine', () => {
       const opencode = getAppDefinition('opencode');
       expect(opencode).toBeDefined();
       expect(opencode?.icon).toBe('/images/apps/opencode.png');
-      expect(opencode?.accessProtocol).toBe('SSH');
-      expect(opencode?.appPort).toBe(22);
+      expect(opencode?.accessProtocol).toBe('BOTH');
+      expect(opencode?.appPort).toBe(4096);
       expect(opencode?.dataDir).toBe('/workspace');
 
       const openclaw = getAppDefinition('openclaw');
@@ -184,6 +184,40 @@ spec:
         const parsed = k8s.loadAllYaml(manifestYaml);
         expect(parsed.length).toBeGreaterThanOrEqual(1);
       }
+    });
+
+    it('should configure OpenCode with authenticated browser Web UI on port 4096 and SSH on port 22 without port collision', () => {
+      const legacyPortSpec = buildAppContainerSpec({
+        id: 11,
+        userId: 1,
+        name: 'opencode-dual',
+        appType: 'opencode',
+        templateName: 'Standard',
+        planName: '1C1G',
+        region: 'SDA',
+        node: 'node1',
+        subdomain: 'opencode-dual',
+        host: '103.247.10.61',
+        port: 30775,
+        appPort: 22,
+        cpuShares: 1,
+        memoryMb: 1024,
+        storageGb: 10,
+        billingMode: 'monthly',
+        monthlyPrice: 20000,
+        hourlyRate: 30,
+        accumulatedCost: 0,
+        status: 'RUNNING',
+        username: 'root',
+        password: 'MkApp_SecurePassword99',
+      } as any);
+
+      expect(legacyPortSpec.envYaml).toContain('OPENCODE_SERVER_USERNAME');
+      expect(legacyPortSpec.envYaml).toContain('value: "root"');
+      expect(legacyPortSpec.envYaml).toContain('OPENCODE_SERVER_PASSWORD');
+      expect(legacyPortSpec.envYaml).toContain('value: "MkApp_SecurePassword99"');
+      expect(legacyPortSpec.commandYaml).toContain('/usr/sbin/sshd -p 22');
+      expect(legacyPortSpec.commandYaml).toContain('opencode serve --hostname 0.0.0.0 --port 4096 --cors "https://opencode-dual.app.masdika.id"');
     });
   });
 

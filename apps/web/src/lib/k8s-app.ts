@@ -720,10 +720,13 @@ export function buildAppContainerSpec(app: AppServiceRecord, domainBase?: string
   } else if (appType === 'opencode') {
     image = 'docker.io/library/node:22-alpine';
     const sshPassword = app.password || 'OpenCode123!';
+    const authUser = app.username || 'root';
+    const webPort = app.appPort && app.appPort !== 22 ? app.appPort : 4096;
     const b64OpenCodeMotd = Buffer.from(
       '════════════════════════════════════════════════════════════\n' +
       '  Masdika Cloud - Dedicated OpenCode Instance\n' +
-      '  Application Mode: Production AI Coding Environment\n' +
+      '  Application Mode: Browser Web UI & SSH Coding Environment\n' +
+      `  Web Dashboard: https://${fullDomain} (User: ${authUser})\n` +
       '  Persistent Storage: /workspace\n' +
       '\n' +
       '  Quickstart Commands:\n' +
@@ -743,6 +746,10 @@ export function buildAppContainerSpec(app: AppServiceRecord, domainBase?: string
           value: "/root"
         - name: PATH
           value: "/root/.opencode/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin"
+        - name: OPENCODE_SERVER_USERNAME
+          value: "${authUser}"
+        - name: OPENCODE_SERVER_PASSWORD
+          value: "${sshPassword}"
 `;
 
     commandYaml = `
@@ -771,21 +778,31 @@ export function buildAppContainerSpec(app: AppServiceRecord, domainBase?: string
             grep -q '/root/.opencode/bin' /root/.bashrc 2>/dev/null || cat /etc/profile.d/opencode.sh >> /root/.bashrc
             grep -q '/root/.opencode/bin' /root/.profile 2>/dev/null || cat /etc/profile.d/opencode.sh >> /root/.profile
             grep -q '/root/.opencode/bin' /etc/profile 2>/dev/null || cat /etc/profile.d/opencode.sh >> /etc/profile
-            /usr/sbin/sshd -p ${app.appPort}
+            /usr/sbin/sshd -p 22
             if [ -x /root/.opencode/bin/opencode ]; then
               ln -sf /root/.opencode/bin/opencode /usr/local/bin/opencode
+              chmod +x /root/.opencode/bin/opencode
             fi
             export SHELL=/bin/bash HOME=/root
-            (curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path >> /workspace/.opencode/setup.log 2>&1 || npm install -g opencode-ai@latest --no-audit --no-fund >> /workspace/.opencode/setup.log 2>&1) || true
-            npm cache clean --force >/dev/null 2>&1 || true
+            if [ ! -x /root/.opencode/bin/opencode ] && ! command -v opencode >/dev/null 2>&1; then
+              (curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path >> /workspace/.opencode/setup.log 2>&1 || npm install -g opencode-ai@latest --no-audit --no-fund >> /workspace/.opencode/setup.log 2>&1) || true
+              npm cache clean --force >/dev/null 2>&1 || true
+            fi
             if [ -x /root/.opencode/bin/opencode ]; then
               ln -sf /root/.opencode/bin/opencode /usr/local/bin/opencode
               chmod +x /root/.opencode/bin/opencode
             fi
             set +e
             while true; do
-              pgrep -x sshd >/dev/null 2>&1 || /usr/sbin/sshd -p ${app.appPort}
-              sleep 5
+              pidof sshd >/dev/null 2>&1 || /usr/sbin/sshd -p 22
+              if ! command -v opencode >/dev/null 2>&1; then
+                (curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path >> /workspace/.opencode/setup.log 2>&1 || npm install -g opencode-ai@latest --no-audit --no-fund >> /workspace/.opencode/setup.log 2>&1) || true
+                [ -x /root/.opencode/bin/opencode ] && ln -sf /root/.opencode/bin/opencode /usr/local/bin/opencode && chmod +x /root/.opencode/bin/opencode
+              fi
+              if command -v opencode >/dev/null 2>&1; then
+                cd /workspace && opencode serve --hostname 0.0.0.0 --port ${webPort} --cors "https://${fullDomain}" >> /workspace/.opencode/web.log 2>&1
+              fi
+              sleep 3
             done
 `;
   } else if (appType === 'openclaw') {
@@ -886,9 +903,12 @@ export async function deployAppService(app: AppServiceRecord): Promise<{
 
   const { image, dataMount, envYaml, commandYaml } = buildAppContainerSpec(app, effectiveBase);
   const catalogItem = getAppDefinition(app.appType);
-  const isHermes = app.appType.toLowerCase() === 'hermes';
-  const hasWeb = catalogItem?.accessProtocol === 'WEB' || catalogItem?.accessProtocol === 'BOTH' || isHermes;
-  const isPureSsh = catalogItem?.accessProtocol === 'SSH' && !isHermes;
+  const appTypeLower = app.appType.toLowerCase();
+  const isHermes = appTypeLower === 'hermes';
+  const isOpencode = appTypeLower === 'opencode';
+  const isDualWebSsh = catalogItem?.accessProtocol === 'BOTH' || isHermes || isOpencode;
+  const hasWeb = catalogItem?.accessProtocol === 'WEB' || isDualWebSsh;
+  const isPureSsh = catalogItem?.accessProtocol === 'SSH' && !isDualWebSsh;
 
   const cpuReq = `${Math.max(0.1, Number((app.cpuShares * 0.4).toFixed(2)))}`;
   const cpuLim = `${app.cpuShares}`;
@@ -896,7 +916,11 @@ export async function deployAppService(app: AppServiceRecord): Promise<{
   const memLim = `${app.memoryMb}Mi`;
   const storageSize = `${Math.max(5, app.storageGb || 10)}Gi`;
 
-  const webBackendPort = isHermes ? 9119 : app.appPort;
+  const webBackendPort = isHermes
+    ? 9119
+    : isOpencode
+      ? (app.appPort && app.appPort !== 22 ? app.appPort : 4096)
+      : app.appPort;
 
   const ingressYaml = hasWeb ? `
 ---
@@ -930,21 +954,21 @@ spec:
               number: ${webBackendPort}
 ` : '';
 
-  const containerPortsYaml = isHermes
+  const containerPortsYaml = isDualWebSsh
     ? `        ports:
         - name: ssh-port
           containerPort: 22
         - name: web-port
-          containerPort: 9119`
+          containerPort: ${webBackendPort}`
     : `        ports:
         - name: app-port
           containerPort: ${app.appPort}`;
 
-  const servicePortsYaml = isHermes
+  const servicePortsYaml = isDualWebSsh
     ? `  ports:
   - name: web
-    port: 9119
-    targetPort: 9119
+    port: ${webBackendPort}
+    targetPort: ${webBackendPort}
   - name: ssh
     port: 22
     targetPort: 22
@@ -955,8 +979,8 @@ spec:
     targetPort: ${app.appPort}
     nodePort: ${app.port}`;
 
-  const readinessProbePort = isHermes ? 9119 : app.appPort;
-  const livenessProbePort = isHermes ? 22 : app.appPort;
+  const readinessProbePort = isDualWebSsh ? webBackendPort : app.appPort;
+  const livenessProbePort = isDualWebSsh ? 22 : app.appPort;
 
   const manifestYaml = `apiVersion: v1
 kind: PersistentVolumeClaim
@@ -1006,12 +1030,12 @@ ${containerPortsYaml}${commandYaml}${envYaml ? `\n        env:${envYaml}` : ''}
           tcpSocket:
             port: ${readinessProbePort}
           initialDelaySeconds: 15
-          periodSeconds: ${isHermes ? 5 : 10}
-          failureThreshold: ${isHermes ? 36 : 6}
+          periodSeconds: ${isDualWebSsh ? 5 : 10}
+          failureThreshold: ${isDualWebSsh ? 36 : 6}
         livenessProbe:
           tcpSocket:
             port: ${livenessProbePort}
-          initialDelaySeconds: ${isHermes ? 45 : 30}
+          initialDelaySeconds: ${isDualWebSsh ? 45 : 30}
           periodSeconds: 15
           failureThreshold: 6
         resources:

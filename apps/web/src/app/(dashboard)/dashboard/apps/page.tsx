@@ -379,9 +379,10 @@ export default function ManagedAppsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {apps.map((app) => {
             const catalog = getAppDefinition(app.appType);
-            const isHermes = app.appType.toLowerCase() === "hermes";
-            const hasWeb = catalog?.accessProtocol === "WEB" || catalog?.accessProtocol === "BOTH" || isHermes;
-            const hasSsh = catalog?.accessProtocol === "SSH" || catalog?.accessProtocol === "BOTH" || isHermes;
+            const appTypeLower = app.appType.toLowerCase();
+            const isDualWebSsh = catalog?.accessProtocol === "BOTH" || appTypeLower === "hermes" || appTypeLower === "opencode";
+            const hasWeb = catalog?.accessProtocol === "WEB" || isDualWebSsh;
+            const hasSsh = catalog?.accessProtocol === "SSH" || isDualWebSsh;
             const fullDomain = (app as any).fullDomain || `${app.subdomain}.app.masdika.id`;
             const httpsUrl = (app as any).httpsUrl || `https://${fullDomain}`;
             const hostIp = (app as any).publicIp || "";
