@@ -1,0 +1,52 @@
+import type { Metadata } from 'next';
+import { prisma } from '@/lib/prisma';
+import { requireAuth } from '@/lib/auth-middleware';
+
+type Props = {
+  params: Promise<{ id: string }>;
+};
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  const auth = await requireAuth();
+
+  let appName = 'Manage Application';
+
+  try {
+    const parsedId = parseInt(id, 10);
+    if (!auth.error && auth.userId && !Number.isNaN(parsedId) && parsedId > 0) {
+      const app = await prisma.appService.findFirst({
+        where: { id: parsedId, userId: auth.userId },
+        select: { name: true },
+      });
+      if (app?.name) {
+        appName = app.name;
+      }
+    }
+  } catch (error) {
+    console.error('Error generating metadata for Managed Apps:', error);
+  }
+
+  const title = `${appName} - Managed Apps`;
+  const description = `Manage your Managed App instance: ${appName}. View HTTPS access, live pod telemetry, and scale compute resources on Masdika Cloud.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [{ url: '/images/brand/og-image.webp', width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: ['/images/brand/og-image.webp'],
+    },
+  };
+}
+
+export default function AppDetailLayout({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
+}
