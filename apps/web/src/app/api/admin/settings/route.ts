@@ -57,6 +57,18 @@ export async function GET() {
     settingsObj['managed_db_pgadmin_url'] = settingsObj['managed_db_pgadmin_url'] || process.env.MANAGED_DB_PGADMIN_URL || 'https://pgadmin.db.masdika.id';
     settingsObj['managed_db_mongo_url'] = settingsObj['managed_db_mongo_url'] || process.env.MANAGED_DB_MONGO_URL || 'https://mongo.db.masdika.id';
 
+    // Managed Apps (Kubernetes API) Cluster Settings
+    const hasAppKubeconfig = Boolean(settingsObj['managed_app_kubeconfig'] || process.env.MANAGED_APP_KUBECONFIG);
+    const hasAppServiceToken = Boolean(settingsObj['managed_app_service_token'] || process.env.MANAGED_APP_SERVICE_TOKEN);
+    settingsObj['managed_app_auth_mode'] = settingsObj['managed_app_auth_mode'] || 'KUBECONFIG';
+    settingsObj['managed_app_api_server'] = settingsObj['managed_app_api_server'] || process.env.MANAGED_APP_API_SERVER || 'https://192.168.79.17:6443';
+    settingsObj['managed_app_kubeconfig'] = hasAppKubeconfig ? MASKED_SECRET : '';
+    settingsObj['managed_app_service_token'] = hasAppServiceToken ? MASKED_SECRET : '';
+    settingsObj['managed_app_skip_tls'] = settingsObj['managed_app_skip_tls'] ?? 'true';
+    settingsObj['managed_app_ca_cert'] = settingsObj['managed_app_ca_cert'] || '';
+    settingsObj['managed_app_public_domain'] = settingsObj['managed_app_public_domain'] || process.env.MANAGED_APP_PUBLIC_DOMAIN || 'app.masdika.id';
+    settingsObj['managed_app_public_ip'] = settingsObj['managed_app_public_ip'] || process.env.MANAGED_APP_PUBLIC_IP || '103.247.10.61';
+
     return NextResponse.json({
       user: {
         name: decryptDeterministic(user?.name) || '',
@@ -80,7 +92,7 @@ export async function PUT(req: Request) {
 
   try {
     const body = await req.json();
-    const { name, email, bio, twoFactorEnabled, disable2FACode, profileImage, cv_url, setup2FA, verify2FA, social_facebook, social_twitter, social_linkedin, social_instagram, social_github, contact_email, contact_location, contact_phone, hero_title, hero_description, hero_typing_text, meta_description, meta_description_blog, meta_description_portfolio, meta_description_services, meta_description_opportunities, meta_description_resume, meta_description_contact, meta_description_community, meta_description_events, meta_description_vacancies, maintenance_mode, maintenance_message, vps_enabled, k3s_enabled, cdn_enabled, promo_banner_image, promo_banner_url, promo_banner_active, tax_rate, rustfs_endpoint, rustfs_access_key, rustfs_secret_key, rustfs_bucket, rustfs_media_bucket, rustfs_ticket_bucket, rustfs_enabled, managed_db_auth_mode, managed_db_api_server, managed_db_kubeconfig, managed_db_service_token, managed_db_skip_tls, managed_db_ca_cert, managed_db_public_domain, managed_db_public_ip, managed_db_pma_url, managed_db_pgadmin_url, managed_db_mongo_url } = body;
+    const { name, email, bio, twoFactorEnabled, disable2FACode, profileImage, cv_url, setup2FA, verify2FA, social_facebook, social_twitter, social_linkedin, social_instagram, social_github, contact_email, contact_location, contact_phone, hero_title, hero_description, hero_typing_text, meta_description, meta_description_blog, meta_description_portfolio, meta_description_services, meta_description_opportunities, meta_description_resume, meta_description_contact, meta_description_community, meta_description_events, meta_description_vacancies, maintenance_mode, maintenance_message, vps_enabled, k3s_enabled, cdn_enabled, promo_banner_image, promo_banner_url, promo_banner_active, tax_rate, rustfs_endpoint, rustfs_access_key, rustfs_secret_key, rustfs_bucket, rustfs_media_bucket, rustfs_ticket_bucket, rustfs_enabled, managed_db_auth_mode, managed_db_api_server, managed_db_kubeconfig, managed_db_service_token, managed_db_skip_tls, managed_db_ca_cert, managed_db_public_domain, managed_db_public_ip, managed_db_pma_url, managed_db_pgadmin_url, managed_db_mongo_url, managed_app_auth_mode, managed_app_api_server, managed_app_kubeconfig, managed_app_service_token, managed_app_skip_tls, managed_app_ca_cert, managed_app_public_domain, managed_app_public_ip } = body;
 
     if (tax_rate !== undefined) {
       const parsedTax = Number(tax_rate);
@@ -175,6 +187,20 @@ export async function PUT(req: Request) {
     if (managed_db_pma_url !== undefined) settingsToUpdate.push({ key: 'managed_db_pma_url', value: String(managed_db_pma_url).trim() });
     if (managed_db_pgadmin_url !== undefined) settingsToUpdate.push({ key: 'managed_db_pgadmin_url', value: String(managed_db_pgadmin_url).trim() });
     if (managed_db_mongo_url !== undefined) settingsToUpdate.push({ key: 'managed_db_mongo_url', value: String(managed_db_mongo_url).trim() });
+
+    // Managed Apps (Kubernetes API) Cluster Settings
+    if (managed_app_auth_mode !== undefined) settingsToUpdate.push({ key: 'managed_app_auth_mode', value: String(managed_app_auth_mode).trim() });
+    if (managed_app_api_server !== undefined) settingsToUpdate.push({ key: 'managed_app_api_server', value: String(managed_app_api_server).trim() });
+    if (managed_app_kubeconfig !== undefined && managed_app_kubeconfig !== MASKED_SECRET && String(managed_app_kubeconfig).trim() !== '') {
+      settingsToUpdate.push({ key: 'managed_app_kubeconfig', value: encryptDeterministic(String(managed_app_kubeconfig).trim()) });
+    }
+    if (managed_app_service_token !== undefined && managed_app_service_token !== MASKED_SECRET && String(managed_app_service_token).trim() !== '') {
+      settingsToUpdate.push({ key: 'managed_app_service_token', value: encryptDeterministic(String(managed_app_service_token).trim()) });
+    }
+    if (managed_app_skip_tls !== undefined) settingsToUpdate.push({ key: 'managed_app_skip_tls', value: String(managed_app_skip_tls) });
+    if (managed_app_ca_cert !== undefined) settingsToUpdate.push({ key: 'managed_app_ca_cert', value: String(managed_app_ca_cert).trim() });
+    if (managed_app_public_domain !== undefined) settingsToUpdate.push({ key: 'managed_app_public_domain', value: String(managed_app_public_domain).trim() });
+    if (managed_app_public_ip !== undefined) settingsToUpdate.push({ key: 'managed_app_public_ip', value: String(managed_app_public_ip).trim() });
 
     for (const setting of settingsToUpdate) {
       await prisma.setting.upsert({

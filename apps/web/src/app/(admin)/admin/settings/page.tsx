@@ -3,7 +3,7 @@ import { useUrlTab } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from "react";
-import { User, Shield, Key, Save, Camera, CheckCircle2, XCircle, Trash2, X, Share2, Layout, Phone, FileText, Search, Check, CheckCircle, Settings, RefreshCw, Info, HardDrive, Eye, EyeOff, Server, AlertCircle, ArrowLeftRight, Rocket, Database } from "lucide-react";
+import { User, Shield, Key, Save, Camera, CheckCircle2, XCircle, Trash2, X, Share2, Layout, Phone, FileText, Search, Check, CheckCircle, Settings, RefreshCw, Info, HardDrive, Eye, EyeOff, Server, AlertCircle, ArrowLeftRight, Rocket, Database, Boxes } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,7 +19,7 @@ export default function SettingsPage() {
   const isDark = theme === "dark";
   const inputClass = isDark ? inputClassDark : inputClassLight;
   const labelClass = isDark ? labelClassDark : labelClassLight;
-  const [activeTab, setActiveTab] = useUrlTab<'profile' | 'contact' | 'website' | 'seo' | 'security' | 'services' | 'storage' | 'database'>('profile', { allowed: ['profile', 'contact', 'website', 'seo', 'security', 'services', 'storage', 'database'] as const });
+  const [activeTab, setActiveTab] = useUrlTab<'profile' | 'contact' | 'website' | 'seo' | 'security' | 'services' | 'storage' | 'database' | 'apps'>('profile', { allowed: ['profile', 'contact', 'website', 'seo', 'security', 'services', 'storage', 'database', 'apps'] as const });
 
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User, desc: 'Manage personal info' },
@@ -30,6 +30,7 @@ export default function SettingsPage() {
     { id: 'services', label: 'Services', icon: Settings, desc: 'Service Management' },
     { id: 'storage', label: 'RustFS Storage', icon: HardDrive, desc: 'S3-Compatible CDN Storage' },
     { id: 'database', label: 'Managed DB (K3s)', icon: Database, desc: 'K3s Cluster, PMA, pgAdmin & Mongo' },
+    { id: 'apps', label: 'Managed Apps (K8s)', icon: Boxes, desc: 'K3s Cluster & Let\'s Encrypt SSL for Apps' },
   ];
 
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
@@ -77,6 +78,10 @@ export default function SettingsPage() {
   const [testingK3s, setTestingK3s] = useState(false);
   const [k3sTestResult, setK3sTestResult] = useState<{ success: boolean; message: string; latencyMs?: number; nodes?: string[] } | null>(null);
   const [showK3sPassword, setShowK3sPassword] = useState(false);
+
+  // Managed Apps (K8s) State
+  const [testingAppK3s, setTestingAppK3s] = useState(false);
+  const [appK3sTestResult, setAppK3sTestResult] = useState<{ success: boolean; message: string; latencyMs?: number; nodes?: string[] } | null>(null);
 
 
 
@@ -136,7 +141,17 @@ export default function SettingsPage() {
     managed_db_public_ip: "",
     managed_db_pma_url: "",
     managed_db_pgadmin_url: "",
-    managed_db_mongo_url: ""
+    managed_db_mongo_url: "",
+
+    // Managed Apps (Kubernetes API) Cluster Settings
+    managed_app_auth_mode: "KUBECONFIG",
+    managed_app_api_server: "https://192.168.79.17:6443",
+    managed_app_kubeconfig: "",
+    managed_app_service_token: "",
+    managed_app_skip_tls: true,
+    managed_app_ca_cert: "",
+    managed_app_public_domain: "app.masdika.id",
+    managed_app_public_ip: "103.247.10.61"
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -205,7 +220,16 @@ export default function SettingsPage() {
             managed_db_public_ip: data.settings?.managed_db_public_ip || "",
             managed_db_pma_url: data.settings?.managed_db_pma_url || "",
             managed_db_pgadmin_url: data.settings?.managed_db_pgadmin_url || "",
-            managed_db_mongo_url: data.settings?.managed_db_mongo_url || ""
+            managed_db_mongo_url: data.settings?.managed_db_mongo_url || "",
+
+            managed_app_auth_mode: data.settings?.managed_app_auth_mode || "KUBECONFIG",
+            managed_app_api_server: data.settings?.managed_app_api_server || "https://192.168.79.17:6443",
+            managed_app_kubeconfig: data.settings?.managed_app_kubeconfig || "",
+            managed_app_service_token: data.settings?.managed_app_service_token || "",
+            managed_app_skip_tls: data.settings?.managed_app_skip_tls !== undefined ? (data.settings.managed_app_skip_tls === "true" || data.settings.managed_app_skip_tls === true) : true,
+            managed_app_ca_cert: data.settings?.managed_app_ca_cert || "",
+            managed_app_public_domain: data.settings?.managed_app_public_domain || "app.masdika.id",
+            managed_app_public_ip: data.settings?.managed_app_public_ip || "103.247.10.61"
           });
           if (data.settings?.profileImage) {
             setProfilePreview(data.settings?.profileImage);
@@ -322,6 +346,37 @@ export default function SettingsPage() {
       setK3sTestResult({ success: false, message: e?.message || "Connection failed" });
     } finally {
       setTestingK3s(false);
+    }
+  };
+
+  const handleTestAppK3s = async () => {
+    setTestingAppK3s(true);
+    setAppK3sTestResult(null);
+    const toastId = toast.loading("Connecting to Managed Apps Kubernetes API (port 6443) & verifying cluster nodes...");
+    try {
+      const res = await fetch('/api/admin/apps/test-connection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          apiServer: formData.managed_app_api_server,
+          kubeconfig: formData.managed_app_kubeconfig,
+          serviceToken: formData.managed_app_service_token,
+          skipTlsVerify: formData.managed_app_skip_tls,
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(data.message, { id: toastId });
+        setAppK3sTestResult({ success: true, message: data.message, latencyMs: data.latencyMs, nodes: data.nodes });
+      } else {
+        toast.error(data.message || "Connection failed", { id: toastId });
+        setAppK3sTestResult({ success: false, message: data.message || "Failed to connect to Managed Apps cluster", latencyMs: data.latencyMs });
+      }
+    } catch (e: any) {
+      toast.error(e?.message || "Connection failed", { id: toastId });
+      setAppK3sTestResult({ success: false, message: e?.message || "Connection failed" });
+    } finally {
+      setTestingAppK3s(false);
     }
   };
 
@@ -2100,6 +2155,181 @@ export default function SettingsPage() {
                     >
                       <Save className="w-3.5 h-3.5" />
                       <span>{saving ? "Saving Changes..." : "Save Database Settings"}</span>
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+
+            {/* Managed Apps (K8s) Tab */}
+            {activeTab === 'apps' && (
+              <motion.div
+                key="apps"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-6"
+              >
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={cn(
+                    "p-6 rounded-2xl border backdrop-blur-xl space-y-6 relative overflow-hidden",
+                    isDark ? "bg-[#101014]/60 border-white/[0.08]" : "bg-white border-slate-200 shadow-sm"
+                  )}
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-inherit">
+                    <div>
+                      <h2 className={cn("text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                        <Boxes className="w-5 h-5 text-cyan-400" /> Managed Apps Kubernetes Cluster & Auto SSL
+                      </h2>
+                      <p className={cn("text-xs mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+                        Configure the dedicated K3s cluster on 192.168.79.17 and Traefik Ingress with Let&apos;s Encrypt automated SSL for all containerized applications.
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleTestAppK3s}
+                      disabled={testingAppK3s}
+                      className="px-4 py-2 rounded-xl text-xs font-semibold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 shrink-0 self-start sm:self-auto"
+                    >
+                      <RefreshCw className={cn("w-3.5 h-3.5", testingAppK3s && "animate-spin")} />
+                      <span>{testingAppK3s ? "Testing Connection..." : "Test Cluster Connection"}</span>
+                    </button>
+                  </div>
+
+                  {appK3sTestResult && (
+                    <div className={cn(
+                      "p-4 rounded-xl border text-xs flex items-start gap-3 transition-all",
+                      appK3sTestResult.success
+                        ? isDark ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-800"
+                        : isDark ? "bg-red-500/10 border-red-500/20 text-red-400" : "bg-red-50 border-red-200 text-red-800"
+                    )}>
+                      {appK3sTestResult.success ? (
+                        <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+                      ) : (
+                        <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                      )}
+                      <div className="space-y-1 w-full">
+                        <div className="flex items-center justify-between">
+                          <p className="font-semibold">{appK3sTestResult.message}</p>
+                          {appK3sTestResult.latencyMs !== undefined && (
+                            <span className="font-mono text-[11px] opacity-80">{appK3sTestResult.latencyMs}ms</span>
+                          )}
+                        </div>
+                        {appK3sTestResult.nodes && appK3sTestResult.nodes.length > 0 && (
+                          <div className="font-mono text-[11px] opacity-90 pt-1">
+                            {appK3sTestResult.nodes.map((n, i) => (
+                              <div key={i}>• Node: {n} (Ready)</div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-6 relative z-20">
+                    <div>
+                      <h3 className={cn("text-sm font-bold uppercase tracking-wider mb-3 flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                        <Server className="w-4 h-4" /> 1. Native Kubernetes API Access (Port 6443)
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2 md:col-span-2">
+                          <label className={labelClass}>Kubernetes API Server URL *</label>
+                          <input
+                            type="text"
+                            name="managed_app_api_server"
+                            value={formData.managed_app_api_server}
+                            onChange={handleChange}
+                            placeholder="e.g. https://192.168.79.17:6443"
+                            className={inputClass}
+                          />
+                          <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>
+                            Kubernetes API server endpoint (port 6443).
+                          </p>
+                        </div>
+
+                        <div className="space-y-2 md:col-span-2">
+                          <label className={labelClass}>Kubeconfig Content (YAML) *</label>
+                          <textarea
+                            rows={6}
+                            name="managed_app_kubeconfig"
+                            value={formData.managed_app_kubeconfig}
+                            onChange={handleChange}
+                            placeholder={formData.managed_app_kubeconfig === "••••••••" ? "•••••••• (Configured and encrypted)" : "apiVersion: v1\nclusters:\n- cluster: ..."}
+                            className={cn(inputClass, "font-mono text-xs")}
+                          />
+                          <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>
+                            Kubeconfig for cluster authorization. Encrypted securely with AES-256 at rest.
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-2 pt-2 md:col-span-2">
+                          <input
+                            type="checkbox"
+                            id="managed_app_skip_tls"
+                            name="managed_app_skip_tls"
+                            checked={formData.managed_app_skip_tls}
+                            onChange={(e) => setFormData(prev => ({ ...prev, managed_app_skip_tls: e.target.checked }))}
+                            className="rounded border-zinc-700 text-cyan-500 focus:ring-cyan-500 w-4 h-4"
+                          />
+                          <label htmlFor="managed_app_skip_tls" className={cn("text-xs font-medium cursor-pointer", isDark ? "text-zinc-300" : "text-slate-700")}>
+                            Skip TLS Certificate Verification (Recommended for internal K3s self-signed CA)
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t border-inherit">
+                      <h3 className={cn("text-sm font-bold uppercase tracking-wider mb-3 flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                        <Rocket className="w-4 h-4" /> 2. Ingress & NodePort Routing
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className={labelClass}>Public Domain Base *</label>
+                          <input
+                            type="text"
+                            name="managed_app_public_domain"
+                            value={formData.managed_app_public_domain}
+                            onChange={handleChange}
+                            placeholder="e.g. app.masdika.id"
+                            className={inputClass}
+                          />
+                          <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>
+                            Apps will be accessible at <code className="font-mono text-cyan-400">*.app.masdika.id</code> with auto Let&apos;s Encrypt SSL.
+                          </p>
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className={labelClass}>Public Ingress IP *</label>
+                          <input
+                            type="text"
+                            name="managed_app_public_ip"
+                            value={formData.managed_app_public_ip}
+                            onChange={handleChange}
+                            placeholder="e.g. 103.247.10.61"
+                            className={inputClass}
+                          />
+                          <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>
+                            Public IP for direct NodePort access (range 30000 - 32767).
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Save Button */}
+                  <div className={cn("pt-6 border-t flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                    <button
+                      type="button"
+                      onClick={handleSave}
+                      disabled={saving}
+                      className="w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-xs bg-cyan-400 hover:bg-cyan-300 active:scale-95 text-slate-950 transition-all shadow-md cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      <Save className="w-3.5 h-3.5" />
+                      <span>{saving ? "Saving Changes..." : "Save Managed App Settings"}</span>
                     </button>
                   </div>
                 </motion.div>

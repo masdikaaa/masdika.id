@@ -1,0 +1,126 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import {
+  MANAGED_APPS_CATALOG,
+  MANAGED_APP_PLANS,
+  getAppDefinition,
+  getAppPlan,
+  formatRupiah,
+} from '../app-catalog';
+import {
+  deployAppService,
+  scaleAppService,
+  stopAppService,
+  startAppService,
+  deleteAppService,
+  allocateAppPort,
+} from '../k8s-app';
+
+vi.mock('../prisma', () => ({
+  prisma: {
+    setting: {
+      findMany: vi.fn().mockResolvedValue([
+        { key: 'managed_app_auth_mode', value: 'KUBECONFIG' },
+        { key: 'managed_app_api_server', value: 'https://192.168.79.17:6443' },
+        { key: 'managed_app_kubeconfig', value: 'apiVersion: v1\nclusters: []\ncontexts: []\ncurrent-context: ""' },
+        { key: 'managed_app_skip_tls', value: 'true' },
+        { key: 'managed_app_public_domain', value: 'app.masdika.id' },
+        { key: 'managed_app_public_ip', value: '103.247.10.61' },
+      ]),
+    },
+    appService: {
+      findMany: vi.fn().mockResolvedValue([
+        { port: 30001 },
+        { port: 30002 },
+      ]),
+    },
+    databaseService: {
+      findMany: vi.fn().mockResolvedValue([
+        { port: 30000 },
+        { port: 30003 },
+      ]),
+    },
+  },
+}));
+
+describe('Managed Apps Catalog & Engine', () => {
+  describe('App Catalog & Flavors', () => {
+    it('should have all 5 requested apps with official branding and ports', () => {
+      expect(MANAGED_APPS_CATALOG).toHaveLength(5);
+      const ids = MANAGED_APPS_CATALOG.map((a) => a.id);
+      expect(ids).toContain('hermes');
+      expect(ids).toContain('ninerouter');
+      expect(ids).toContain('n8n');
+      expect(ids).toContain('opencode');
+      expect(ids).toContain('openclaw');
+
+      const n8n = getAppDefinition('n8n');
+      expect(n8n).toBeDefined();
+      expect(n8n?.appPort).toBe(5678);
+      expect(n8n?.icon).toBe('/images/apps/n8n.png');
+
+      const hermes = getAppDefinition('hermes');
+      expect(hermes).toBeDefined();
+      expect(hermes?.appPort).toBe(8080);
+      expect(hermes?.icon).toBe('/images/apps/hermes-agent.png');
+
+      const router = getAppDefinition('ninerouter');
+      expect(router).toBeDefined();
+      expect(router?.appPort).toBe(20128);
+
+      const opencode = getAppDefinition('opencode');
+      expect(opencode).toBeDefined();
+      expect(opencode?.icon).toBe('/images/apps/opencode.png');
+
+      const openclaw = getAppDefinition('openclaw');
+      expect(openclaw).toBeDefined();
+      expect(openclaw?.icon).toBe('/images/apps/openclaw.png');
+    });
+
+    it('should have all 7 compute plans matching user requirements', () => {
+      expect(MANAGED_APP_PLANS).toHaveLength(7);
+
+      const plan1c1g = getAppPlan('1C1G');
+      expect(plan1c1g).toBeDefined();
+      expect(plan1c1g?.cpuShares).toBe(1.0);
+      expect(plan1c1g?.memoryMb).toBe(1024);
+      expect(plan1c1g?.monthlyPrice).toBe(20000);
+      expect(plan1c1g?.remainingStock).toBe(23);
+
+      const plan1c2g = getAppPlan('1C2G');
+      expect(plan1c2g).toBeDefined();
+      expect(plan1c2g?.cpuShares).toBe(1.0);
+      expect(plan1c2g?.memoryMb).toBe(2048);
+      expect(plan1c2g?.monthlyPrice).toBe(30000);
+      expect(plan1c2g?.remainingStock).toBe(35);
+
+      const plan2c2g = getAppPlan('2C2G');
+      expect(plan2c2g?.monthlyPrice).toBe(40000);
+
+      const plan2c4g = getAppPlan('2C4G');
+      expect(plan2c4g?.monthlyPrice).toBe(75000);
+
+      const plan4c4g = getAppPlan('4C4G');
+      expect(plan4c4g?.monthlyPrice).toBe(135000);
+
+      const plan4c8g = getAppPlan('4C8G');
+      expect(plan4c8g?.monthlyPrice).toBe(225000);
+
+      const plan4c16g = getAppPlan('4C16G');
+      expect(plan4c16g?.monthlyPrice).toBe(375000);
+      expect(plan4c16g?.memoryMb).toBe(16384);
+    });
+
+    it('should format currency correctly in Indonesian Rupiah', () => {
+      expect(formatRupiah(20000)).toBe('Rp 20.000');
+      expect(formatRupiah(375000)).toBe('Rp 375.000');
+    });
+  });
+
+  describe('NodePort Allocation', () => {
+    it('should allocate next available port taking into account both db and app ports', async () => {
+      // 30000, 30001, 30002, 30003 are taken in mock
+      const port = await allocateAppPort(30000, 30010);
+      expect(port).toBe(30004);
+    });
+  });
+});

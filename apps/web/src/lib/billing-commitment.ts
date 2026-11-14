@@ -3,11 +3,13 @@ import { prisma } from "./prisma";
 export interface UserServicesCommitment {
   vpsMonthly: number;
   dbMonthly: number;
+  appMonthly: number;
   subMonthly: number;
   reservedIpMonthly: number;
   totalMonthly: number;
   activeVpsCount: number;
   activeDbCount: number;
+  activeAppCount: number;
   activeSubCount: number;
   activeIpCount: number;
   totalActiveCount: number;
@@ -18,6 +20,7 @@ export interface UserServicesCommitment {
  * Services include:
  * - Cloud VPS instances (hourlyRate * 730)
  * - Managed Databases (monthlyPrice or hourlyRate * 720)
+ * - Managed Apps (monthlyPrice or hourlyRate * 720)
  * - Subscriptions such as File CDN and API Hub (hourlyPrice * 730 or monthly price)
  * - Standalone Reserved IPs (hourlyRate * 730)
  */
@@ -25,7 +28,7 @@ export async function getUserServicesCommitment(
   userId: number,
   tx: any = prisma
 ): Promise<UserServicesCommitment> {
-  const [activeVps, activeDb, activeSubs, activeIps] = await Promise.all([
+  const [activeVps, activeDb, activeApps, activeSubs, activeIps] = await Promise.all([
     tx.vpsService.findMany({
       where: {
         userId,
@@ -34,6 +37,13 @@ export async function getUserServicesCommitment(
       select: { hourlyRate: true },
     }),
     tx.databaseService.findMany({
+      where: {
+        userId,
+        status: { notIn: ["TERMINATED"] },
+      },
+      select: { monthlyPrice: true, hourlyRate: true, billingMode: true },
+    }),
+    tx.appService.findMany({
       where: {
         userId,
         status: { notIn: ["TERMINATED"] },
@@ -70,6 +80,11 @@ export async function getUserServicesCommitment(
     return sum + (cost || 0);
   }, 0);
 
+  const appMonthly = activeApps.reduce((sum: number, a: any) => {
+    const cost = a.monthlyPrice || Math.round((a.hourlyRate || 0) * 720);
+    return sum + (cost || 0);
+  }, 0);
+
   const subMonthly = activeSubs.reduce((sum: number, s: any) => {
     const cost = s.plan?.hourlyPrice ? Math.round(s.plan.hourlyPrice * 730) : (s.plan?.price || 0);
     return sum + (cost || 0);
@@ -80,17 +95,19 @@ export async function getUserServicesCommitment(
     0
   );
 
-  const totalMonthly = vpsMonthly + dbMonthly + subMonthly + reservedIpMonthly;
-  const totalActiveCount = activeVps.length + activeDb.length + activeSubs.length + activeIps.length;
+  const totalMonthly = vpsMonthly + dbMonthly + appMonthly + subMonthly + reservedIpMonthly;
+  const totalActiveCount = activeVps.length + activeDb.length + activeApps.length + activeSubs.length + activeIps.length;
 
   return {
     vpsMonthly,
     dbMonthly,
+    appMonthly,
     subMonthly,
     reservedIpMonthly,
     totalMonthly,
     activeVpsCount: activeVps.length,
     activeDbCount: activeDb.length,
+    activeAppCount: activeApps.length,
     activeSubCount: activeSubs.length,
     activeIpCount: activeIps.length,
     totalActiveCount,
@@ -124,6 +141,7 @@ export async function assertSufficientCommitmentBalance({
     const breakdownParts = [];
     if (commitment.activeVpsCount > 0) breakdownParts.push(`${commitment.activeVpsCount} VPS (Rp ${commitment.vpsMonthly.toLocaleString("id-ID")}/mo)`);
     if (commitment.activeDbCount > 0) breakdownParts.push(`${commitment.activeDbCount} Database (Rp ${commitment.dbMonthly.toLocaleString("id-ID")}/mo)`);
+    if (commitment.activeAppCount > 0) breakdownParts.push(`${commitment.activeAppCount} Managed App (Rp ${commitment.appMonthly.toLocaleString("id-ID")}/mo)`);
     if (commitment.activeSubCount > 0) breakdownParts.push(`${commitment.activeSubCount} Subscription/CDN (Rp ${commitment.subMonthly.toLocaleString("id-ID")}/mo)`);
     if (commitment.activeIpCount > 0) breakdownParts.push(`${commitment.activeIpCount} Reserved IP (Rp ${commitment.reservedIpMonthly.toLocaleString("id-ID")}/mo)`);
 

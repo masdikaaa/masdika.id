@@ -59,6 +59,7 @@ model User {
   activityLogs       ClientActivityLog[]
   sshKeys            UserSshKey[]
   databaseServices   DatabaseService[]
+  appServices        AppService[]
 
   @@index([createdAt])
 }
@@ -1185,6 +1186,58 @@ model DatabaseService {
   k8sDeployment   String?
   k8sService      String?
   k8sPvc          String?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([port])
+  @@index([createdAt])
+}
+
+model AppService {
+  id              Int       @id @default(autoincrement())
+  userId          Int
+  name            String
+  appType         String    // "HERMES", "NINEROUTER", "N8N", "OPENCODE", "OPENCLAW"
+  templateName    String    // e.g. "Hermes (1C2G)"
+  planName        String    // "1C1G", "1C2G", "2C2G", "2C4G", "4C4G", "4C8G", "4C16G"
+  region          String    @default("Sidoarjo")
+  node            String    @default("managed-apps")
+  subdomain       String    @unique
+  host            String    @default("app.masdika.id")
+  port            Int       // NodePort (30000..32767)
+  appPort         Int       @default(8080)
+  username        String?
+  password        String?
+  apiKey          String?
+  
+  // Resources
+  cpuShares       Float     @default(1.0)
+  memoryMb        Int       @default(2048)
+  storageGb       Int       @default(10)
+  
+  // Billing
+  billingMode     String    @default("MONTHLY") // "MONTHLY" | "PAYG"
+  monthlyPrice    Int       @default(30000)
+  hourlyRate      Int       @default(42)
+  accumulatedCost Int       @default(0)
+  
+  // Lifecycle
+  status          String    @default("PROVISIONING") // "PROVISIONING", "RUNNING", "STOPPED", "SUSPENDED", "TERMINATED"
+  suspendReason   String?
+  terminationDate DateTime?
+  lastBilledAt    DateTime?
+  
+  // Kubernetes metadata
+  k8sNamespace    String    @default("managed-apps")
+  k8sDeployment   String?
+  k8sService      String?
+  k8sPvc          String?
+  k8sIngress      String?
 
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt

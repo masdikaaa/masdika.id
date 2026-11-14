@@ -1265,31 +1265,31 @@ export default function DatabaseCheckoutFlow() {
 
               {isBalanceInsufficient && (
                 <div className={cn(
-                  "p-3.5 rounded-xl border text-xs space-y-1.5 transition-colors",
+                  "p-3.5 rounded-xl border text-xs space-y-2 transition-colors",
                   isDark
-                    ? "bg-red-500/10 border-red-500/25 text-red-300"
-                    : "bg-red-50/90 border-red-200 text-slate-800 shadow-2xs"
+                    ? "bg-red-500/15 border-red-500/35 text-red-200"
+                    : "bg-red-50 border-red-300 text-red-950 shadow-xs"
                 )}>
-                  <div className="flex items-start gap-2">
+                  <div className="flex items-start gap-2.5">
                     <AlertTriangle className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-red-400" : "text-red-600")} />
                     <div>
-                      <p className={cn("font-bold tracking-tight", isDark ? "text-red-300" : "text-red-700")}>
+                      <p className={cn("font-bold tracking-tight text-xs sm:text-sm", isDark ? "text-red-300" : "text-red-900")}>
                         Insufficient Account Balance
                       </p>
-                      <p className={cn("text-[11px] mt-0.5 leading-relaxed", isDark ? "text-zinc-300" : "text-slate-600")}>
+                      <p className={cn("text-xs mt-0.5 leading-relaxed", isDark ? "text-red-200/90" : "text-red-800")}>
                         Orders require sufficient balance to cover the accumulated monthly commitment of your active services plus this database.
                       </p>
                     </div>
                   </div>
-                  <div className={cn("pl-6 pt-1.5 flex items-center justify-between border-t", isDark ? "border-red-500/20" : "border-red-200/80")}>
-                    <span className={cn("text-[11px] font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>
-                      Shortfall: <strong className={cn(isDark ? "text-red-300" : "text-red-600")}>{formatRupiah(totalRequiredBalance - userBalance)}</strong>
+                  <div className={cn("pl-6.5 pt-2 flex items-center justify-between border-t", isDark ? "border-red-500/25" : "border-red-200")}>
+                    <span className={cn("text-xs font-semibold", isDark ? "text-red-200" : "text-red-900")}>
+                      Shortfall: <strong className={cn(isDark ? "text-red-300 font-extrabold" : "text-red-700 font-extrabold")}>{formatRupiah(totalRequiredBalance - userBalance)}</strong>
                     </span>
                     <Link
                       href="/dashboard/topup"
                       className={cn(
-                        "font-bold underline transition-colors text-xs",
-                        isDark ? "text-red-300 hover:text-white" : "text-red-600 hover:text-red-800"
+                        "font-bold underline transition-colors text-xs inline-flex items-center gap-1",
+                        isDark ? "text-red-300 hover:text-white" : "text-red-700 hover:text-red-950"
                       )}
                     >
                       Top Up Balance →

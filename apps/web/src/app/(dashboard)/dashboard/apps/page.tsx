@@ -1,68 +1,76 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
-import { 
-  Boxes, 
-  Rocket, 
-  Sparkles, 
-  Database, 
-  Terminal, 
-  Layers, 
-  Globe, 
-  ShieldCheck, 
-  Zap, 
-  GitBranch, 
-  Cpu, 
-  CheckCircle2, 
-  Bell, 
-  ArrowRight,
-  Clock,
-  ChevronRight
+import {
+  Boxes,
+  Plus,
+  ExternalLink,
+  ChevronRight,
+  TrendingUp,
+  Activity,
+  Server,
+  Globe,
+  ShieldCheck,
+  Check,
+  Copy,
+  Zap,
+  Play,
+  Square,
+  RotateCw,
+  RefreshCw,
 } from "lucide-react";
-import { 
-  SiNextdotjs, 
-  SiNodedotjs, 
-  SiPython, 
-  SiWordpress, 
-  SiDocker, 
-  SiGhost, 
-  SiStrapi, 
-  SiFastapi 
-} from "react-icons/si";
 import { toast } from "sonner";
-
-const UPCOMING_FRAMEWORKS = [
-  { name: "Next.js", icon: SiNextdotjs, color: "text-zinc-100", category: "Full-Stack React" },
-  { name: "Node.js", icon: SiNodedotjs, color: "text-emerald-400", category: "Backend Runtime" },
-  { name: "Python FastAPI", icon: SiFastapi, color: "text-teal-400", category: "High-Performance API" },
-  { name: "WordPress", icon: SiWordpress, color: "text-sky-400", category: "Headless & CMS" },
-  { name: "Docker", icon: SiDocker, color: "text-blue-400", category: "Custom Containers" },
-  { name: "Ghost", icon: SiGhost, color: "text-amber-400", category: "Modern Publishing" },
-  { name: "Strapi", icon: SiStrapi, color: "text-indigo-400", category: "Headless CMS" },
-];
+import {
+  MANAGED_APPS_CATALOG,
+  formatRupiah,
+  getAppDefinition,
+} from "@/lib/app-catalog";
+import { AppScaleModal } from "@/components/AppScaleModal";
 
 export default function ManagedAppsPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const [email, setEmail] = useState("");
-  const [isSubscribed, setIsSubscribed] = useState(false);
 
-  const handleNotifyMe = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !email.includes("@")) {
-      toast.error("Please enter a valid email address");
-      return;
+  const [apps, setApps] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [scalingApp, setScalingApp] = useState<any | null>(null);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  const fetchApps = async () => {
+    try {
+      const res = await fetch("/api/user/apps");
+      const data = await res.json();
+      if (res.ok && data.data) {
+        setApps(data.data);
+      }
+    } catch {
+      toast.error("Failed to load managed applications");
+    } finally {
+      setLoading(false);
     }
-    setIsSubscribed(true);
-    toast.success("Thank you! We will notify you when Managed Apps launches.");
   };
 
+  useEffect(() => {
+    fetchApps();
+  }, []);
+
+  const copyToClipboard = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(id);
+    toast.success("Copied to clipboard!");
+    setTimeout(() => setCopiedField(null), 2000);
+  };
+
+  const runningCount = apps.filter((a) => a.status === "RUNNING").length;
+  const totalMonthlySpend = apps.reduce((sum, a) => sum + (a.monthlyPrice || 0), 0);
+
   return (
-    <div className="space-y-6 sm:space-y-8 max-w-full">
-      {/* Breadcrumb & Navigation */}
+    <div className="space-y-6 sm:space-y-8 max-w-full pb-16">
+      {/* Breadcrumb Navigation */}
       <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] font-medium">
         <Link href="/dashboard" className="hover:text-cyan-400 transition-colors">
           Dashboard
@@ -78,233 +86,305 @@ export default function ManagedAppsPage() {
         <div>
           <div className="flex items-center gap-2.5 flex-wrap">
             <h1 className={cn("text-xl sm:text-2xl lg:text-3xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-              Managed Apps
+              Managed Applications
             </h1>
             <span className={cn(
               "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border",
               isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200"
             )}>
               <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-              Coming Soon
+              Production K8s Engine
             </span>
           </div>
           <p className={cn("text-xs sm:text-sm font-medium mt-1.5 max-w-2xl leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
-            Deploy full-stack applications, Docker containers, and modern frameworks with zero DevOps maintenance, automated Let&apos;s Encrypt SSL, and seamless database integration.
+            Deploy autonomous AI agents, multi-LLM gateways, and workflow engines with dedicated Kubernetes compute and automatic Let&apos;s Encrypt SSL.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <Link
-            href="/dashboard/database/new"
+            href="/dashboard/apps/new"
             className={cn(
-              "px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 border cursor-pointer",
-              isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-2xs"
+              "px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white transition-all shadow-md flex items-center gap-2 cursor-pointer active:scale-95",
+              isDark
+                ? "bg-blue-600 hover:bg-blue-500 shadow-blue-600/20"
+                : "bg-blue-600 hover:bg-blue-700 shadow-blue-600/10"
             )}
           >
-            <Database className="w-4 h-4 text-cyan-400" />
-            <span>Deploy Database</span>
-          </Link>
-          <Link
-            href="/dashboard/vps/create"
-            className="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 flex items-center justify-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:scale-95 text-slate-950 shadow-md cursor-pointer"
-          >
-            <Rocket className="w-4 h-4" />
-            <span>Deploy Cloud VPS</span>
+            <Plus className="w-4 h-4" />
+            <span>Deploy New App</span>
           </Link>
         </div>
       </div>
 
-      {/* Hero Announcement Card */}
-      <div className={cn(
-        "relative rounded-2xl sm:rounded-3xl border p-6 sm:p-8 lg:p-10 overflow-hidden shadow-xl",
-        isDark 
-          ? "bg-gradient-to-br from-zinc-950 via-[#0a0f1d] to-[#040814] border-white/10" 
-          : "bg-gradient-to-br from-white via-cyan-50/40 to-slate-50 border-slate-200 shadow-slate-100"
-      )}>
-        {/* Decorative background glows */}
-        <div className="absolute -top-24 -right-24 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+      {/* Metric Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className={cn(
+          "p-4 rounded-2xl border transition-all",
+          isDark ? "bg-[#101014] border-white/[0.08]" : "bg-white border-slate-200 shadow-2xs"
+        )}>
+          <div className="flex items-center justify-between text-xs font-medium text-[var(--text-muted)] mb-2">
+            <span>Total Apps</span>
+            <Boxes className="w-4 h-4 text-blue-400" />
+          </div>
+          <p className={cn("text-2xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            {apps.length}
+          </p>
+          <span className="text-[11px] text-[var(--text-muted)]">Active container instances</span>
+        </div>
 
-        <div className="relative z-10 max-w-3xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold mb-4 border bg-cyan-500/10 border-cyan-500/20 text-cyan-400">
-            <Sparkles className="w-3.5 h-3.5" />
-            Platform-as-a-Service (PaaS) in Development
+        <div className={cn(
+          "p-4 rounded-2xl border transition-all",
+          isDark ? "bg-[#101014] border-white/[0.08]" : "bg-white border-slate-200 shadow-2xs"
+        )}>
+          <div className="flex items-center justify-between text-xs font-medium text-[var(--text-muted)] mb-2">
+            <span>Running Pods</span>
+            <Activity className="w-4 h-4 text-emerald-400" />
+          </div>
+          <p className={cn("text-2xl font-black tracking-tight text-emerald-400")}>
+            {runningCount}
+          </p>
+          <span className="text-[11px] text-[var(--text-muted)]">Operational & ready</span>
+        </div>
+
+        <div className={cn(
+          "p-4 rounded-2xl border transition-all",
+          isDark ? "bg-[#101014] border-white/[0.08]" : "bg-white border-slate-200 shadow-2xs"
+        )}>
+          <div className="flex items-center justify-between text-xs font-medium text-[var(--text-muted)] mb-2">
+            <span>Monthly Commitment</span>
+            <TrendingUp className="w-4 h-4 text-cyan-400" />
+          </div>
+          <p className={cn("text-2xl font-black tracking-tight", isDark ? "text-cyan-400" : "text-cyan-700")}>
+            {formatRupiah(totalMonthlySpend)}
+          </p>
+          <span className="text-[11px] text-[var(--text-muted)]">Estimated recurring cost</span>
+        </div>
+
+        <div className={cn(
+          "p-4 rounded-2xl border transition-all",
+          isDark ? "bg-[#101014] border-white/[0.08]" : "bg-white border-slate-200 shadow-2xs"
+        )}>
+          <div className="flex items-center justify-between text-xs font-medium text-[var(--text-muted)] mb-2">
+            <span>Kubernetes Cluster</span>
+            <Server className="w-4 h-4 text-violet-400" />
+          </div>
+          <p className={cn("text-sm font-bold truncate mt-1.5", isDark ? "text-white" : "text-slate-900")}>
+            managed-apps
+          </p>
+          <span className="text-[11px] font-mono text-[var(--text-muted)]">192.168.79.17:6443</span>
+        </div>
+      </div>
+
+      {/* Main Apps List / Grid */}
+      {loading ? (
+        <div className="flex items-center justify-center min-h-[30vh]">
+          <div className="w-7 h-7 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
+        </div>
+      ) : apps.length === 0 ? (
+        /* Empty State */
+        <div className={cn(
+          "p-8 sm:p-12 rounded-3xl border text-center space-y-6 transition-all",
+          isDark ? "bg-[#101014] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm"
+        )}>
+          <div className="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center mx-auto">
+            <Boxes className="w-8 h-8" />
           </div>
 
-          <h2 className={cn("text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight mb-3", isDark ? "text-white" : "text-slate-900")}>
-            Ship Your Web Applications <br />
-            <span className="bg-gradient-to-r from-cyan-400 via-cyan-300 to-sky-300 bg-clip-text text-transparent">
-              Without Managing Servers or Kubernetes.
-            </span>
-          </h2>
+          <div className="max-w-md mx-auto space-y-2">
+            <h3 className={cn("text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+              No Applications Deployed Yet
+            </h3>
+            <p className={cn("text-xs sm:text-sm leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
+              Get started by launching Hermes Agent, 9Router, n8n, OpenCode, or OpenClaw in a single click with automated SSL.
+            </p>
+          </div>
 
-          <p className={cn("text-sm sm:text-base leading-relaxed mb-6 font-normal", isDark ? "text-zinc-300" : "text-slate-600")}>
-            Managed Apps transforms code deployment into a frictionless experience. Push code via Git or deploy a Docker image, and our orchestrator handles container builds, load balancing, SSL termination, and horizontal autoscaling automatically.
-          </p>
+          <div>
+            <Link
+              href="/dashboard/apps/new"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-blue-600/20 transition-all cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Deploy Your First App</span>
+            </Link>
+          </div>
 
-          {/* Subscription / Notification box */}
-          <div className="max-w-md">
-            {!isSubscribed ? (
-              <form onSubmit={handleNotifyMe} className="flex flex-col sm:flex-row gap-2">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email to get early access..."
-                  className={cn(
-                    "px-4 py-2.5 rounded-xl text-xs sm:text-sm border focus:outline-none focus:ring-2 focus:ring-cyan-400/40 transition-all flex-1",
-                    isDark 
-                      ? "bg-white/5 border-white/10 text-white placeholder-zinc-500" 
-                      : "bg-white border-slate-200 text-slate-900 placeholder-slate-400"
-                  )}
-                  required
-                />
-                <button
-                  type="submit"
-                  className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-cyan-400 hover:bg-cyan-300 active:scale-95 text-slate-950 shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0"
-                >
-                  <Bell className="w-4 h-4" />
-                  <span>Notify Me</span>
-                </button>
-              </form>
-            ) : (
-              <div className="flex items-center gap-2.5 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs sm:text-sm font-semibold">
-                <CheckCircle2 className="w-4 h-4 shrink-0" />
-                <span>You&apos;re on the early-access waitlist! We will notify you once open.</span>
+          {/* Quick Showcase of 5 Apps */}
+          <div className="pt-8 border-t border-inherit grid grid-cols-1 sm:grid-cols-5 gap-3 max-w-4xl mx-auto text-left">
+            {MANAGED_APPS_CATALOG.map((item) => (
+              <div
+                key={item.id}
+                className={cn(
+                  "p-3 rounded-xl border text-xs space-y-1.5",
+                  isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200"
+                )}
+              >
+                <div className="w-8 h-8 rounded-lg p-1 bg-black/40 border border-white/10 relative overflow-hidden">
+                  <Image
+                    src={item.icon}
+                    alt={item.name}
+                    width={28}
+                    height={28}
+                    className="object-contain w-full h-full"
+                    unoptimized
+                  />
+                </div>
+                <p className="font-bold tracking-tight truncate">{item.name}</p>
+                <p className="text-[10px] text-[var(--text-muted)] line-clamp-1">{item.badge}</p>
               </div>
-            )}
+            ))}
           </div>
         </div>
-      </div>
+      ) : (
+        /* Applications Cards Grid */
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {apps.map((app) => {
+            const catalog = getAppDefinition(app.appType);
+            const fullDomain = `${app.subdomain}.app.masdika.id`;
+            const httpsUrl = `https://${fullDomain}`;
+            const isRunning = app.status === "RUNNING";
 
-      {/* Feature Capabilities Grid */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-            What to Expect from Managed Apps
-          </h3>
-          <span className="text-xs text-[var(--text-muted)] font-medium">
-            Core Architecture
-          </span>
-        </div>
+            return (
+              <div
+                key={app.id}
+                className={cn(
+                  "p-5 rounded-2xl border transition-all flex flex-col justify-between gap-5 relative overflow-hidden",
+                  isDark
+                    ? "bg-[#101014] border-white/[0.08] hover:border-white/[0.16] shadow-sm"
+                    : "bg-white border-slate-200 hover:border-slate-300 shadow-2xs"
+                )}
+              >
+                <div className="space-y-4">
+                  {/* Card Header */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 p-1.5 bg-black/40 border border-white/10 shadow-sm relative overflow-hidden">
+                        <Image
+                          src={catalog?.icon || "/images/apps/docker.svg"}
+                          alt={app.name}
+                          width={40}
+                          height={40}
+                          className="object-contain w-full h-full"
+                          unoptimized
+                        />
+                      </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            {
-              icon: GitBranch,
-              title: "Git-Powered Deployments",
-              desc: "Connect your GitHub or GitLab repo. Every push to your production branch triggers an atomic zero-downtime release.",
-            },
-            {
-              icon: Globe,
-              title: "Automated SSL & Ingress",
-              desc: "Bring custom domains with instant Let's Encrypt TLS certificates, HTTP/2 routing, and built-in Cloudflare integration.",
-            },
-            {
-              icon: Database,
-              title: "1-Click DB Connection",
-              desc: "Native direct private network bridging with your Masdika Managed PostgreSQL, MySQL, Redis, or MongoDB instances.",
-            },
-            {
-              icon: Cpu,
-              title: "Resource Isolation",
-              desc: "Dedicated CPU and RAM limits per container pod with automated health checks, rolling restarts, and crash loops recovery.",
-            },
-          ].map((feature, idx) => (
-            <div
-              key={idx}
-              className={cn(
-                "p-5 rounded-2xl border transition-all flex flex-col justify-between shadow-sm",
-                isDark 
-                  ? "border-white/10 bg-zinc-950/60 hover:border-cyan-500/30" 
-                  : "border-slate-200 bg-white hover:border-cyan-400/50 shadow-2xs"
-              )}
-            >
-              <div>
-                <div className="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center mb-3.5">
-                  <feature.icon className="w-4 h-4" />
+                      <div className="min-w-0">
+                        <h3 className={cn("text-base font-bold tracking-tight truncate", isDark ? "text-white" : "text-slate-900")}>
+                          {app.name}
+                        </h3>
+                        <p className={cn("text-xs text-[var(--text-muted)] font-medium truncate")}>
+                          {app.templateName}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Status Badge */}
+                    <span className={cn(
+                      "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold border shrink-0",
+                      isRunning
+                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                        : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                    )}>
+                      <span className={cn("w-1.5 h-1.5 rounded-full", isRunning ? "bg-emerald-400 animate-pulse" : "bg-amber-400")} />
+                      {app.status}
+                    </span>
+                  </div>
+
+                  {/* Resource Badges */}
+                  <div className="flex items-center gap-2 flex-wrap text-xs text-[var(--text-muted)] font-medium">
+                    <span className={cn("px-2 py-0.5 rounded-lg border", isDark ? "bg-white/[0.03] border-white/5" : "bg-slate-100 border-slate-200")}>
+                      {app.cpuShares} vCPU
+                    </span>
+                    <span className={cn("px-2 py-0.5 rounded-lg border", isDark ? "bg-white/[0.03] border-white/5" : "bg-slate-100 border-slate-200")}>
+                      {app.memoryMb} MB RAM
+                    </span>
+                    <span className={cn("px-2 py-0.5 rounded-lg border", isDark ? "bg-white/[0.03] border-white/5" : "bg-slate-100 border-slate-200")}>
+                      {app.storageGb || 10} GB SSD
+                    </span>
+                    <span className={cn("font-bold ml-auto", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                      {formatRupiah(app.monthlyPrice)}/mo
+                    </span>
+                  </div>
+
+                  {/* HTTPS Domain Access Box */}
+                  <div className={cn(
+                    "p-3 rounded-xl border flex items-center justify-between gap-2 text-xs",
+                    isDark ? "bg-[#09090b] border-white/10" : "bg-slate-50 border-slate-200"
+                  )}>
+                    <div className="flex items-center gap-2 min-w-0 font-mono text-[11px] truncate">
+                      <Globe className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                      <span className="truncate">{fullDomain}</span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        onClick={() => copyToClipboard(httpsUrl, `url-${app.id}`)}
+                        className={cn("p-1.5 rounded-lg hover:bg-white/10 transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}
+                        title="Copy HTTPS URL"
+                      >
+                        {copiedField === `url-${app.id}` ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                      </button>
+                      <a
+                        href={httpsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1.5 rounded-lg text-cyan-400 hover:bg-cyan-500/10 transition-colors"
+                        title="Open App in Browser"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  </div>
                 </div>
-                <h4 className={cn("text-sm font-bold mb-1.5", isDark ? "text-white" : "text-slate-900")}>
-                  {feature.title}
-                </h4>
-                <p className={cn("text-xs leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
-                  {feature.desc}
-                </p>
+
+                {/* Card Actions Footer */}
+                <div className={cn("pt-4 border-t flex items-center justify-between gap-3", isDark ? "border-white/5" : "border-slate-100")}>
+                  {/* Scale Compute Button */}
+                  <button
+                    type="button"
+                    onClick={() => setScalingApp(app)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer",
+                      isDark
+                        ? "border-blue-500/30 text-blue-400 hover:bg-blue-500/10"
+                        : "border-blue-200 text-blue-700 hover:bg-blue-50"
+                    )}
+                  >
+                    <TrendingUp className="w-3.5 h-3.5" />
+                    <span>Scale</span>
+                  </button>
+
+                  <Link
+                    href={`/dashboard/apps/${app.id}`}
+                    className={cn(
+                      "px-4 py-1.5 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer",
+                      isDark
+                        ? "bg-white/[0.04] hover:bg-white/[0.08] text-white border-white/10"
+                        : "bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-300"
+                    )}
+                  >
+                    <span>Manage</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
-      </div>
+      )}
 
-      {/* Supported Frameworks Preview */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-            Supported Frameworks &amp; Stacks
-          </h3>
-          <span className="text-xs text-[var(--text-muted)] font-medium">
-            Roadmap Previews
-          </span>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
-          {UPCOMING_FRAMEWORKS.map((fw, idx) => (
-            <div
-              key={idx}
-              className={cn(
-                "p-4 rounded-xl border text-center flex flex-col items-center justify-center gap-2 transition-all",
-                isDark 
-                  ? "border-white/10 bg-zinc-950/40 hover:border-white/20" 
-                  : "border-slate-200 bg-white hover:border-slate-300 shadow-2xs"
-              )}
-            >
-              <fw.icon className={cn("w-7 h-7 object-contain", fw.color)} />
-              <div>
-                <div className={cn("text-xs font-bold", isDark ? "text-zinc-200" : "text-slate-800")}>
-                  {fw.name}
-                </div>
-                <div className="text-[10px] text-[var(--text-muted)] mt-0.5">
-                  {fw.category}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Current Alternatives Card */}
-      <div className={cn(
-        "p-6 rounded-2xl border flex flex-col md:flex-row items-center justify-between gap-6",
-        isDark ? "border-white/10 bg-zinc-950/40" : "border-slate-200 bg-slate-50"
-      )}>
-        <div>
-          <h4 className={cn("text-sm sm:text-base font-bold mb-1", isDark ? "text-white" : "text-slate-900")}>
-            Need to deploy your applications today?
-          </h4>
-          <p className={cn("text-xs sm:text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-            You can spin up an isolated Cloud VPS or deploy pre-configured 1-click applications via our App Catalog.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3 shrink-0 flex-wrap">
-          <Link
-            href="/dashboard/catalog-apps"
-            className={cn(
-              "px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all border cursor-pointer",
-              isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-white" : "border-slate-200 bg-white hover:bg-slate-100 text-slate-800"
-            )}
-          >
-            Browse App Catalog
-          </Link>
-          <Link
-            href="/dashboard/vps/create"
-            className="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
-          >
-            <span>Deploy Cloud VPS</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-      </div>
+      {/* Zero Data Loss Scaling Modal */}
+      {scalingApp && (
+        <AppScaleModal
+          isOpen={!!scalingApp}
+          onClose={() => setScalingApp(null)}
+          app={scalingApp}
+          onSuccess={fetchApps}
+          isDark={isDark}
+        />
+      )}
     </div>
   );
 }

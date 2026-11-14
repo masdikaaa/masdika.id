@@ -2,8 +2,10 @@
 // npm install --save-dev prisma dotenv
 import path from "path";
 import { config } from "dotenv";
-// Load .env from monorepo root (2 levels up from apps/web) if present
-config({ path: path.resolve(process.cwd(), "../../.env"), override: false });
+// Load .env from root or local if present
+config({ path: path.resolve(__dirname, "../../.env"), override: false });
+config({ path: path.resolve(process.cwd(), ".env"), override: false });
+config({ path: path.resolve(process.cwd(), "apps/web/.env"), override: false });
 import { defineConfig } from "prisma/config";
 
 export default defineConfig({

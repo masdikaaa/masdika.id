@@ -77,7 +77,7 @@ const SIDEBAR_LINKS = [
   { name: "My Services", href: "/dashboard/services", icon: Layers, color: "text-cyan-400", group: "Main" },
   { name: "Cloud VPS", href: "/dashboard/vps", icon: Terminal, color: "text-cyan-400", group: "Compute" },
   { name: "App Catalog", href: "/dashboard/catalog-apps", icon: Rocket, color: "text-cyan-400", group: "Applications" },
-  { name: "Managed Apps", href: "/dashboard/apps", icon: Boxes, color: "text-cyan-400", group: "Applications", badge: "Soon" },
+  { name: "Managed Apps", href: "/dashboard/apps", icon: Boxes, color: "text-cyan-400", group: "Applications", badge: "New" },
   { name: "Metric & Alert", href: "/dashboard/alerts", icon: Activity, color: "text-cyan-400", group: "Service Configuration" },
   { name: "Incident Reports", href: "/dashboard/incidents", icon: ShieldAlert, color: "text-cyan-400", group: "Service Configuration" },
   { name: "Auto Scheduler", href: "/dashboard/scheduler", icon: Clock, color: "text-cyan-400", group: "Service Configuration" },
