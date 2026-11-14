@@ -160,7 +160,7 @@ export default function AppDetailPage({
       case "update":
         return {
           title: `Update ${app?.name || "Application"} to Latest Version?`,
-          description: `Perbarui image kontainer ${app?.name} ke versi :latest terbaru dari registry resmi. Seluruh data persistent storage (/app/data), konfigurasi, dan database Anda dijamin 100% aman tanpa kehilangan data (Zero Data Loss). Pod akan menjalani rolling restart secara mulus.`,
+          description: `Update the container image of ${app?.name} to the latest release from the official registry. All persistent storage volumes (/app/data), configurations, and databases remain 100% safe with Zero Data Loss. The pod will undergo a seamless rolling update.`,
           confirmText: "Update to Latest",
           variant: "success" as const,
         };
@@ -264,12 +264,10 @@ export default function AppDetailPage({
         </Link>
       </div>
 
-      {/* Top Banner Header - Clean Card Style without Border */}
+      {/* Top Banner Header Bar - Matched with VPS Card Theme */}
       <div className={cn(
-        "flex flex-col md:flex-row md:items-center justify-between gap-5 p-5 sm:p-6 rounded-2xl transition-all shadow-lg relative overflow-hidden",
-        isDark
-          ? "bg-gradient-to-br from-[#10141f] via-[#0e111a] to-[#0a0c12] shadow-black/40"
-          : "bg-white shadow-slate-200/70"
+        "flex flex-col md:flex-row justify-between items-start md:items-center border rounded-2xl p-4 sm:p-5 shadow-2xs relative overflow-hidden gap-5",
+        isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
       )}>
         <div className="flex items-start sm:items-center gap-4 min-w-0">
           <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center shrink-0 p-2 bg-black/40 shadow-md relative overflow-hidden">
@@ -430,8 +428,8 @@ export default function AppDetailPage({
           {/* Card: Public HTTPS & Web Access (Dashboard / App UI) */}
           {hasWeb && (
             <div className={cn(
-              "p-5 sm:p-6 rounded-2xl space-y-5 transition-all shadow-lg",
-              isDark ? "bg-[#10141f] shadow-black/40" : "bg-white shadow-slate-200/70"
+              "border rounded-2xl p-5 sm:p-6 space-y-5 transition-all shadow-2xs",
+              isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
             )}>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                 <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -455,7 +453,7 @@ export default function AppDetailPage({
                   <div className="flex items-center gap-2">
                     <div className={cn(
                       "flex-1 px-3.5 py-2.5 rounded-xl border font-mono text-xs font-bold truncate",
-                      isDark ? "bg-[#09090b] border-white/10 text-cyan-400" : "bg-slate-50 border-slate-200 text-cyan-800"
+                      isDark ? "bg-[#0a0a0c] border-white/[0.08] text-cyan-400" : "bg-slate-50 border-slate-200/90 text-cyan-800 shadow-2xs"
                     )}>
                       {httpsUrl}
                     </div>
@@ -484,7 +482,7 @@ export default function AppDetailPage({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                   <div className={cn(
                     "p-3 rounded-xl border space-y-1 text-xs",
-                    isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200"
+                    isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200/90 shadow-2xs"
                   )}>
                     <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
                       Cluster Edge Gateway
@@ -496,7 +494,7 @@ export default function AppDetailPage({
 
                   <div className={cn(
                     "p-3 rounded-xl border space-y-1 text-xs",
-                    isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200"
+                    isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200/90 shadow-2xs"
                   )}>
                     <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
                       TLS Encryption
@@ -513,8 +511,8 @@ export default function AppDetailPage({
           {/* Card: Web Dashboard Authentication (for 9Router & Web Apps) */}
           {(app.appType === "ninerouter" || app.appType === "n8n") && (
             <div className={cn(
-              "p-5 sm:p-6 rounded-2xl space-y-4 transition-all shadow-lg",
-              isDark ? "bg-[#10141f] shadow-black/40" : "bg-white shadow-slate-200/70"
+              "border rounded-2xl p-5 sm:p-6 space-y-4 transition-all shadow-2xs",
+              isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
             )}>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                 <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -534,7 +532,7 @@ export default function AppDetailPage({
                 {app.appType === "n8n" && (
                   <div className={cn(
                     "p-3.5 rounded-xl border space-y-1 text-xs",
-                    isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200"
+                    isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200/90 shadow-2xs"
                   )}>
                     <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
                       Username
@@ -554,7 +552,7 @@ export default function AppDetailPage({
 
                 <div className={cn(
                   "p-3.5 rounded-xl border space-y-1 text-xs",
-                  isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200"
+                  isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200/90 shadow-2xs"
                 )}>
                   <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
                     Dashboard Password
@@ -585,12 +583,12 @@ export default function AppDetailPage({
 
                 <div className={cn(
                   "p-3 rounded-xl border space-y-1 text-xs sm:col-span-2",
-                  isDark ? "bg-cyan-500/5 border-cyan-500/20 text-zinc-300" : "bg-cyan-50/50 border-cyan-200 text-slate-700"
+                  isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-cyan-50/50 border-cyan-200 text-slate-700"
                 )}>
                   <p className="text-[11px] leading-relaxed">
                     {app.appType === "ninerouter"
-                      ? "Masuk ke Web Dashboard 9Router menggunakan password acak di atas. Anda dapat mengubah password dan mengatur AI model providers kapan saja di menu Settings 9Router."
-                      : "Gunakan kredensial di atas untuk login ke antarmuka n8n. Seluruh alur kerja dan webhook tersimpan aman di persistent storage."}
+                      ? "Sign in to 9Router Web Dashboard using the generated password above. You can update your password and configure AI model providers anytime in 9Router Settings."
+                      : "Use the credentials above to log in to the n8n interface. All workflows, nodes, and webhook configurations remain safe in persistent storage."}
                   </p>
                 </div>
               </div>
@@ -600,8 +598,8 @@ export default function AppDetailPage({
           {/* Card: Direct SSH Terminal Access */}
           {hasSsh && (
             <div className={cn(
-              "p-5 sm:p-6 rounded-2xl space-y-5 transition-all shadow-lg",
-              isDark ? "bg-[#10141f] shadow-black/40" : "bg-white shadow-slate-200/70"
+              "border rounded-2xl p-5 sm:p-6 space-y-5 transition-all shadow-2xs",
+              isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
             )}>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                 <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -625,7 +623,7 @@ export default function AppDetailPage({
                   <div className="flex items-center gap-2">
                     <div className={cn(
                       "flex-1 px-3.5 py-2.5 rounded-xl border font-mono text-xs font-bold truncate",
-                      isDark ? "bg-[#09090b] border-white/10 text-cyan-400" : "bg-slate-50 border-slate-200 text-cyan-800"
+                      isDark ? "bg-[#0a0a0c] border-white/[0.08] text-cyan-400" : "bg-slate-50 border-slate-200/90 text-cyan-800 shadow-2xs"
                     )}>
                       {sshCommand}
                     </div>
@@ -647,7 +645,7 @@ export default function AppDetailPage({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                   <div className={cn(
                     "p-3 rounded-xl border space-y-1 text-xs",
-                    isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200"
+                    isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200/90 shadow-2xs"
                   )}>
                     <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
                       Host / Server IP
@@ -665,7 +663,7 @@ export default function AppDetailPage({
 
                   <div className={cn(
                     "p-3 rounded-xl border space-y-1 text-xs",
-                    isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200"
+                    isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200/90 shadow-2xs"
                   )}>
                     <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
                       Port
@@ -683,7 +681,7 @@ export default function AppDetailPage({
 
                   <div className={cn(
                     "p-3 rounded-xl border space-y-1 text-xs",
-                    isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200"
+                    isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200/90 shadow-2xs"
                   )}>
                     <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
                       SSH User
@@ -701,7 +699,7 @@ export default function AppDetailPage({
 
                   <div className={cn(
                     "p-3 rounded-xl border space-y-1 text-xs",
-                    isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200"
+                    isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200/90 shadow-2xs"
                   )}>
                     <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
                       Password
@@ -734,8 +732,8 @@ export default function AppDetailPage({
             </div>
           )}
 
-          {/* Dedicated Resource Utilization Graphs (CPU, RAM, Disk) - Consistent with Managed DB */}
-          <div className={cn("rounded-2xl p-5 sm:p-6 transition-all shadow-lg", isDark ? "bg-[#10141f] shadow-black/40" : "bg-white shadow-slate-200/70")}>
+          {/* Dedicated Resource Utilization Graphs (CPU, RAM, Disk) - Consistent with Managed DB & VPS */}
+          <div className={cn("border rounded-2xl p-5 sm:p-6 transition-all shadow-2xs", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
@@ -955,8 +953,8 @@ export default function AppDetailPage({
 
           {/* Card 2: App Integration & API Reference */}
           <div className={cn(
-            "p-5 sm:p-6 rounded-2xl space-y-4 transition-all shadow-lg",
-            isDark ? "bg-[#10141f] shadow-black/40" : "bg-white shadow-slate-200/70"
+            "border rounded-2xl p-5 sm:p-6 space-y-4 transition-all shadow-2xs",
+            isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
           )}>
             <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
               <Terminal className="w-4 h-4 shrink-0" />
@@ -966,9 +964,9 @@ export default function AppDetailPage({
             {app.appType === "hermes" && (
               <div className="space-y-3 text-xs leading-relaxed">
                 <p className={isDark ? "text-zinc-300" : "text-slate-700"}>
-                  NousResearch Hermes Agent is running in a dual-mode sandboxed environment featuring an intuitive browser-based Web Dashboard and high-speed SSH terminal access. Your persistent memory and models are saved at <code className="font-mono text-cyan-400">/app/data</code>:
+                  NousResearch Hermes Agent is running in a dedicated high-performance production environment featuring an intuitive browser-based Web Dashboard and high-speed SSH terminal access. Your persistent memory and models are saved at <code className="font-mono text-cyan-400">/app/data</code>:
                 </p>
-                <div className={cn("p-3.5 rounded-xl border font-mono text-[11px] space-y-2", isDark ? "bg-[#09090b] border-white/10 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-800")}>
+                <div className={cn("p-3.5 rounded-xl border font-mono text-[11px] space-y-2", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-slate-50 border-slate-200/90 text-slate-800 shadow-2xs")}>
                   <div className="text-zinc-500"># 1. Hermes Web Dashboard (Browser)</div>
                   <div className="text-cyan-400 font-bold">{httpsUrl}</div>
                   <div className="text-zinc-500 pt-1"># 2. Direct Terminal Access (SSH)</div>
@@ -985,9 +983,9 @@ export default function AppDetailPage({
             {app.appType === "ninerouter" && (
               <div className="space-y-3 text-xs leading-relaxed">
                 <p className={isDark ? "text-zinc-300" : "text-slate-700"}>
-                  9Router acts as your AI gateway and router dashboard. Klik <strong>Open App</strong> di atas untuk membuka web dashboard, lalu masukkan password aplikasi Anda <code className="font-mono text-cyan-400 font-bold">{app.password || "••••••••"}</code>. Anda juga dapat menghubungkan endpoint ini ke Claude Code, Cursor, atau Cline:
+                  9Router acts as your central AI gateway and router dashboard. Click <strong>Open App</strong> above to open the web dashboard, then sign in with your application password <code className="font-mono text-cyan-400 font-bold">{app.password || "••••••••"}</code>. You can also connect this endpoint directly to Claude Code, Cursor, or Cline:
                 </p>
-                <div className={cn("p-3.5 rounded-xl border font-mono text-[11px] space-y-1", isDark ? "bg-[#09090b] border-white/10 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-800")}>
+                <div className={cn("p-3.5 rounded-xl border font-mono text-[11px] space-y-1", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-slate-50 border-slate-200/90 text-slate-800 shadow-2xs")}>
                   <div className="text-zinc-500"># OpenAI Compatible Router Base URL</div>
                   <div>OPENAI_BASE_URL={httpsUrl}/v1</div>
                 </div>
@@ -999,7 +997,7 @@ export default function AppDetailPage({
                 <p className={isDark ? "text-zinc-300" : "text-slate-700"}>
                   Your n8n workflow canvas is ready. Click <strong>Open App</strong> above to log in and begin creating automated workflows and webhook triggers.
                 </p>
-                <div className={cn("p-3.5 rounded-xl border font-mono text-[11px] space-y-1", isDark ? "bg-[#09090b] border-white/10 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-800")}>
+                <div className={cn("p-3.5 rounded-xl border font-mono text-[11px] space-y-1", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-slate-50 border-slate-200/90 text-slate-800 shadow-2xs")}>
                   <div className="text-zinc-500"># Webhook Base URL for external services</div>
                   <div>{httpsUrl}/webhook/</div>
                 </div>
@@ -1009,9 +1007,9 @@ export default function AppDetailPage({
             {app.appType === "opencode" && (
               <div className="space-y-3 text-xs leading-relaxed">
                 <p className={isDark ? "text-zinc-300" : "text-slate-700"}>
-                  OpenCode is running in a secure sandboxed developer pod. Your workspace is persisted at <code className="font-mono text-cyan-400">/workspace</code>. Package manager and port tunneling are restricted to prevent abuse:
+                  OpenCode is running in a secure production developer pod. Your workspace is persisted at <code className="font-mono text-cyan-400">/workspace</code>. Package manager and port tunneling are restricted to prevent abuse:
                 </p>
-                <div className={cn("p-3.5 rounded-xl border font-mono text-[11px] space-y-2", isDark ? "bg-[#09090b] border-white/10 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-800")}>
+                <div className={cn("p-3.5 rounded-xl border font-mono text-[11px] space-y-2", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-slate-50 border-slate-200/90 text-slate-800 shadow-2xs")}>
                   <div className="text-zinc-500"># Direct Terminal Login</div>
                   <div className="text-cyan-400 font-bold">{sshCommand}</div>
                   <div className="text-zinc-500 pt-1"># Launch OpenCode CLI</div>
@@ -1036,8 +1034,8 @@ export default function AppDetailPage({
         <div className="lg:col-span-5 space-y-6">
           {/* Card 3: Live Kubernetes Telemetry */}
           <div className={cn(
-            "p-5 sm:p-6 rounded-2xl space-y-4 transition-all shadow-lg",
-            isDark ? "bg-[#10141f] shadow-black/40" : "bg-white shadow-slate-200/70"
+            "border rounded-2xl p-5 sm:p-6 space-y-4 transition-all shadow-2xs",
+            isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
           )}>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -1085,8 +1083,8 @@ export default function AppDetailPage({
 
           {/* Card 4: Allocated Hardware Compute */}
           <div className={cn(
-            "p-5 sm:p-6 rounded-2xl space-y-4 transition-all shadow-lg",
-            isDark ? "bg-[#10141f] shadow-black/40" : "bg-white shadow-slate-200/70"
+            "border rounded-2xl p-5 sm:p-6 space-y-4 transition-all shadow-2xs",
+            isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
           )}>
             <div className="flex items-center justify-between gap-2">
               <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>

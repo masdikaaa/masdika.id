@@ -446,7 +446,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
 
   if (!db) {
     return (
-      <div className={cn("rounded-2xl border p-10 text-center", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200")}>
+      <div className={cn("rounded-2xl border p-10 text-center shadow-2xs", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
         <Database className="w-10 h-10 text-zinc-500 mx-auto mb-3" />
         <h2 className="text-lg font-bold mb-2">Database Not Found</h2>
         <p className={cn("text-xs mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>
@@ -498,8 +498,11 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
         </Link>
       </div>
 
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Top Header Bar - Matched with VPS Card Theme */}
+      <div className={cn(
+        "flex flex-col md:flex-row justify-between items-start md:items-center border rounded-2xl p-4 sm:p-5 shadow-2xs relative overflow-hidden gap-4",
+        isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
+      )}>
         <div className="flex items-center gap-3.5">
           <div>
             <div className="flex items-center gap-3 flex-wrap">
@@ -784,7 +787,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
         <div className="lg:col-span-2 space-y-6">
 
           {/* Connection Credentials Card */}
-          <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-xs")}>
+          <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#111115] border-white/[0.08] shadow-2xs" : "bg-white border-slate-200/90 shadow-2xs")}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Database className="w-4 h-4 text-cyan-400" />
@@ -939,7 +942,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
 
           {/* Dedicated Resource Utilization Graphs (CPU, RAM, Disk) - Strictly for Dedicated instances */}
           {isDedicated && (
-            <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-xs")}>
+            <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#111115] border-white/[0.08] shadow-2xs" : "bg-white border-slate-200/90 shadow-2xs")}>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
                 <div>
                   <div className="flex items-center gap-2">
@@ -1159,7 +1162,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
           )}
 
           {/* Quick Connect Code Snippets (URI, Laravel, Node.js) */}
-          <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-xs")}>
+          <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#111115] border-white/[0.08] shadow-2xs" : "bg-white border-slate-200/90 shadow-2xs")}>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
               <div className="flex items-center gap-2">
                 <Code2 className="w-4 h-4 text-purple-400" />
@@ -1229,7 +1232,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
 
           {/* Web Viewer Access Card */}
           {engine.webToolUrl && (
-            <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-xs")}>
+            <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#111115] border-white/[0.08] shadow-2xs" : "bg-white border-slate-200/90 shadow-2xs")}>
               <div className="flex items-center gap-2 mb-3">
                 <ExternalLink className="w-4 h-4 text-cyan-400" />
                 <h3 className={cn("text-base font-bold", isDark ? "text-white" : "text-slate-900")}>
@@ -1357,7 +1360,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
           )}
 
           {/* Live Telemetry Card */}
-          <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-xs")}>
+          <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#111115] border-white/[0.08] shadow-2xs" : "bg-white border-slate-200/90 shadow-2xs")}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Activity className="w-4 h-4 text-emerald-400" />
@@ -1487,7 +1490,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
       {importModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => !importing && setImportModalOpen(false)} />
-          <div className={cn("relative border rounded-2xl w-full max-w-md p-6 overflow-hidden shadow-2xl z-10", isDark ? "bg-[#0c0c0e] border-white/[0.1] text-white" : "bg-white border-slate-200 text-slate-900")}>
+          <div className={cn("relative border rounded-2xl w-full max-w-md p-6 overflow-hidden shadow-2xl z-10", isDark ? "bg-[#111115] border-white/[0.1] text-white" : "bg-white border-slate-200/90 text-slate-900")}>
             <form onSubmit={handleImport} className="space-y-4">
               <div className="flex items-center gap-3">
                 <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center border shrink-0", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>

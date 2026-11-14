@@ -373,7 +373,7 @@ export default function DatabaseListingPage() {
 
       {/* Summary Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className={cn("rounded-2xl border p-5 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-xs")}>
+        <div className={cn("rounded-2xl border p-5 transition-all shadow-2xs", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-[11px] font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
               DATABASES
@@ -392,7 +392,7 @@ export default function DatabaseListingPage() {
           </div>
         </div>
 
-        <div className={cn("rounded-2xl border p-5 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-xs")}>
+        <div className={cn("rounded-2xl border p-5 transition-all shadow-2xs", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-[11px] font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
               RUNNING STATUS
@@ -411,7 +411,7 @@ export default function DatabaseListingPage() {
           </div>
         </div>
 
-        <div className={cn("rounded-2xl border p-5 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-xs")}>
+        <div className={cn("rounded-2xl border p-5 transition-all shadow-2xs", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-[11px] font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
               REGION & CLUSTER
@@ -430,7 +430,7 @@ export default function DatabaseListingPage() {
           </div>
         </div>
 
-        <div className={cn("rounded-2xl border p-5 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-xs")}>
+        <div className={cn("rounded-2xl border p-5 transition-all shadow-2xs", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-[11px] font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
               HOURLY PAYG RATE
@@ -460,7 +460,7 @@ export default function DatabaseListingPage() {
         </div>
       ) : databases.length === 0 ? (
         /* Empty State */
-        <div className={cn("rounded-2xl border p-10 sm:p-14 text-center", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-xs")}>
+        <div className={cn("rounded-2xl border p-10 sm:p-14 text-center shadow-2xs", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
           <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
             <Database className="w-8 h-8" />
           </div>
@@ -499,18 +499,18 @@ export default function DatabaseListingPage() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 className={cn(
-                  "rounded-2xl border p-5 transition-all flex flex-col justify-between group",
+                  "rounded-2xl border p-5 transition-all flex flex-col justify-between group shadow-2xs",
                   isProvisioning
                     ? isDark
-                      ? "bg-[#0c0c0e] border-amber-500/40 ring-1 ring-amber-500/20 shadow-md"
-                      : "bg-white border-amber-300 ring-1 ring-amber-200 shadow-xs"
+                      ? "bg-[#111115] border-amber-500/40 ring-1 ring-amber-500/20"
+                      : "bg-white border-amber-300 ring-1 ring-amber-200"
                     : isSuspended
                     ? isDark
-                      ? "bg-[#0c0c0e] border-red-500/40 shadow-md"
-                      : "bg-white border-red-300 shadow-xs"
+                      ? "bg-[#111115] border-red-500/40"
+                      : "bg-white border-red-300"
                     : isDark
-                    ? "bg-[#0c0c0e] border-white/[0.08] hover:border-cyan-500/30 shadow-md"
-                    : "bg-white border-slate-200 hover:border-slate-300 shadow-xs"
+                    ? "bg-[#111115] border-white/[0.08] hover:border-cyan-500/30"
+                    : "bg-white border-slate-200/90 hover:border-slate-300"
                 )}
               >
                 <div>

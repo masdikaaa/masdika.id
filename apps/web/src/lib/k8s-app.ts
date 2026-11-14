@@ -625,7 +625,7 @@ export function buildAppContainerSpec(app: AppServiceRecord, domainBase?: string
     const b64HermesMotd = Buffer.from(
       '════════════════════════════════════════════════════════════\n' +
       '  Masdika Cloud - Dedicated Hermes Agent Instance\n' +
-      '  Application Mode: Sandboxed AI Coding Agent (Web + SSH)\n' +
+      '  Application Mode: Production AI Coding Agent (Web + SSH)\n' +
       `  Web Dashboard: https://${fullDomain}\n` +
       '  Persistent Storage: /app/data\n' +
       '\n' +
@@ -689,7 +689,7 @@ export function buildAppContainerSpec(app: AppServiceRecord, domainBase?: string
     const b64OpenCodeMotd = Buffer.from(
       '════════════════════════════════════════════════════════════\n' +
       '  Masdika Cloud - Dedicated OpenCode Instance\n' +
-      '  Application Mode: Sandboxed Developer Environment\n' +
+      '  Application Mode: Production Developer Environment\n' +
       '  Persistent Storage: /workspace\n' +
       '  Security Notice: Package installation & tunneling restricted.\n' +
       '════════════════════════════════════════════════════════════\n'
@@ -1182,7 +1182,7 @@ export async function updateAppServiceToLatest(app: AppServiceRecord): Promise<{
 
   return {
     success: true,
-    message: `Aplikasi '${app.name}' berhasil diperbarui ke rilis image terbaru (${image}). Seluruh data persistent storage Anda tetap aman (Zero Data Loss).`,
+    message: `Application '${app.name}' has been successfully updated to the latest image release (${image}) with zero data loss. Persistent storage remains intact.`,
     image,
   };
 }

@@ -54,7 +54,7 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      message: updateResult.message || `Aplikasi '${app.name}' berhasil diperbarui ke versi image terbaru. Data persistent storage Anda tetap utuh.`,
+      message: updateResult.message || `Application '${app.name}' has been successfully updated to the latest image version with zero data loss.`,
       image: updateResult.image,
       status: "RUNNING",
     });
