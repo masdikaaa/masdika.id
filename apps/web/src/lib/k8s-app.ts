@@ -345,7 +345,7 @@ export async function applyKubernetesManifests(kc: k8s.KubeConfig, manifestYaml:
 /**
  * Build App environment variables and startup command according to App Type
  */
-function buildAppContainerSpec(app: AppServiceRecord) {
+export function buildAppContainerSpec(app: AppServiceRecord) {
   const appType = app.appType.toLowerCase();
   const catalogItem = getAppDefinition(appType);
   const dataMount = catalogItem?.dataDir || '/app/data';
@@ -354,6 +354,10 @@ function buildAppContainerSpec(app: AppServiceRecord) {
   let image = catalogItem?.defaultImage || 'docker.io/library/node:22-alpine';
   let envYaml = '';
   let commandYaml = '';
+
+  const b64ApkRestrict = Buffer.from(
+    '#!/bin/sh\necho "Security Notice: Package installation (apk) is restricted on Masdika Cloud Managed Applications."\nexit 1\n'
+  ).toString('base64');
 
   if (appType === 'n8n') {
     image = 'docker.io/n8nio/n8n:latest';
@@ -382,194 +386,190 @@ function buildAppContainerSpec(app: AppServiceRecord) {
   } else if (appType === 'hermes') {
     image = 'docker.io/library/node:22-alpine';
     const sshPassword = app.password || 'Hermes123!';
+    const b64HermesBin = Buffer.from(
+      '#!/bin/sh\ncd /app/data\nexec python3 -m hermes "$@" 2>/dev/null || exec npx --yes hermes-agent "$@" 2>/dev/null || python3 -c "print(\'Hermes Agent CLI ready in /app/data\')"\n'
+    ).toString('base64');
+    const b64HermesMotd = Buffer.from(
+      '════════════════════════════════════════════════════════════\n' +
+      '  Masdika Cloud - Dedicated Hermes Agent Instance\n' +
+      '  Application Mode: Sandboxed AI Coding Agent\n' +
+      '  Persistent Storage: /app/data\n' +
+      '  Security Notice: Package installation & tunneling restricted.\n' +
+      '════════════════════════════════════════════════════════════\n'
+    ).toString('base64');
+
     commandYaml = `
         command: ["/bin/sh", "-c"]
         args:
           - |
-            apk add --no-cache openssh bash git curl nano python3 py3-pip && \
-            ssh-keygen -A && \
-            echo "root:${sshPassword}" | chpasswd && \
-            sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
-            echo "PermitRootLogin yes" >> /etc/ssh/sshd_config && \
-            echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config && \
-            echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config && \
-            echo "X11Forwarding no" >> /etc/ssh/sshd_config && \
-            echo "AllowAgentForwarding no" >> /etc/ssh/sshd_config && \
-            echo "PermitTunnel no" >> /etc/ssh/sshd_config && \
-            echo "GatewayPorts no" >> /etc/ssh/sshd_config && \
-            mkdir -p ${dataMount} /root/.hermes && \
-            cat << 'HERMESEOF' > /usr/local/bin/hermes && \
-#!/bin/sh
-cd /app/data
-exec python3 -m hermes "$@" 2>/dev/null || exec npx --yes hermes-agent "$@" 2>/dev/null || python3 -c "print('Hermes Agent CLI ready in /app/data')"
-HERMESEOF
-            chmod 755 /usr/local/bin/hermes && \
-            cat << 'MOTDEOF' > /etc/motd && \
-════════════════════════════════════════════════════════════
-  Masdika Cloud - Dedicated Hermes Agent Instance
-  Application Mode: Sandboxed AI Coding Agent
-  Persistent Storage: /app/data
-  Security Notice: Package installation & tunneling restricted.
-════════════════════════════════════════════════════════════
-MOTDEOF
-            echo "cd /app/data" >> /root/.bashrc && \
-            echo "cd /app/data" >> /etc/profile && \
-            rm -rf /etc/apk /var/cache/apk /lib/apk && \
-            cat << 'APKEOF' > /sbin/apk && \
-#!/bin/sh
-echo "Security Notice: Package installation (apk) is restricted on Masdika Cloud Managed Applications."
-exit 1
-APKEOF
-            chmod 755 /sbin/apk && \
+            apk add --no-cache openssh bash git curl nano python3 py3-pip && \\
+            ssh-keygen -A && \\
+            echo "root:${sshPassword}" | chpasswd && \\
+            sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \\
+            echo "PermitRootLogin yes" >> /etc/ssh/sshd_config && \\
+            echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config && \\
+            echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config && \\
+            echo "X11Forwarding no" >> /etc/ssh/sshd_config && \\
+            echo "AllowAgentForwarding no" >> /etc/ssh/sshd_config && \\
+            echo "PermitTunnel no" >> /etc/ssh/sshd_config && \\
+            echo "GatewayPorts no" >> /etc/ssh/sshd_config && \\
+            mkdir -p ${dataMount} /root/.hermes && \\
+            echo "${b64HermesBin}" | base64 -d > /usr/local/bin/hermes && \\
+            chmod 755 /usr/local/bin/hermes && \\
+            echo "${b64HermesMotd}" | base64 -d > /etc/motd && \\
+            echo "cd /app/data" >> /root/.bashrc && \\
+            echo "cd /app/data" >> /etc/profile && \\
+            rm -rf /etc/apk /var/cache/apk /lib/apk && \\
+            echo "${b64ApkRestrict}" | base64 -d > /sbin/apk && \\
+            chmod 755 /sbin/apk && \\
             exec /usr/sbin/sshd -D -e -p ${app.appPort}
 `;
   } else if (appType === 'ninerouter') {
     image = 'docker.io/library/node:22-alpine';
+    const serverJs = `const http = require('http');
+const server = http.createServer((req, res) => {
+  if (req.url === '/health' || req.url === '/v1/models') {
+    res.setHeader('Content-Type', 'application/json');
+    res.writeHead(200);
+    return res.end(JSON.stringify({ status: 'healthy', service: '9router', version: '1.0.0', object: 'list', data: [] }));
+  }
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.writeHead(200);
+  res.end(\`<!DOCTYPE html>
+<html>
+<head>
+  <title>9Router AI Gateway - Masdika Cloud</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #09090b; color: #f4f4f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+    .card { background: #18181b; border: 1px solid #27272a; border-radius: 16px; padding: 32px; max-width: 580px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: rgba(139, 92, 246, 0.1); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.2); border-radius: 9999px; font-size: 12px; font-weight: 600; margin-bottom: 16px; }
+    h1 { font-size: 24px; font-weight: 800; margin: 0 0 8px 0; color: #fff; }
+    p { font-size: 14px; line-height: 1.6; color: #a1a1aa; margin: 0 0 20px 0; }
+    .info-box { background: #0f0f11; border: 1px solid #27272a; border-radius: 8px; padding: 14px; font-family: monospace; font-size: 13px; color: #e4e4e7; margin-bottom: 20px; word-break: break-all; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .btn { display: inline-block; background: #8b5cf6; color: #fff; font-weight: 600; font-size: 14px; padding: 10px 20px; border-radius: 8px; text-decoration: none; transition: background 0.2s; }
+    .btn:hover { background: #7c3aed; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge"><span class="status-dot"></span> Active Router Gateway</div>
+    <h1>9Router Gateway Ready</h1>
+    <p>Smart multi-provider AI proxy with auto-fallback, RTK token optimizer, and Claude Code / Cursor integration.</p>
+    <div class="info-box">
+      <div><b>Proxy URL:</b> https://${fullDomain}</div>
+      <div><b>Port:</b> ${app.appPort}</div>
+      <div><b>Health Endpoint:</b> https://${fullDomain}/health</div>
+    </div>
+    <a href="https://github.com/decolua/9router" target="_blank" class="btn">View 9Router Docs &rarr;</a>
+  </div>
+</body>
+</html>\`);
+});
+server.listen(${app.appPort}, '0.0.0.0', () => {
+  console.log('9Router listening on port ${app.appPort}');
+});
+`;
+    const b64NineRouter = Buffer.from(serverJs).toString('base64');
     commandYaml = `
         command: ["/bin/sh", "-c"]
         args:
           - |
-            cat << 'EOF' > /server.js
-            const http = require('http');
-            const server = http.createServer((req, res) => {
-              if (req.url === '/health' || req.url === '/v1/models') {
-                res.setHeader('Content-Type', 'application/json');
-                res.writeHead(200);
-                return res.end(JSON.stringify({ status: 'healthy', service: '9router', version: '1.0.0', object: 'list', data: [] }));
-              }
-              res.setHeader('Content-Type', 'text/html; charset=utf-8');
-              res.writeHead(200);
-              res.end(\`<!DOCTYPE html>
-              <html>
-              <head>
-                <title>9Router AI Gateway - Masdika Cloud</title>
-                <meta name="viewport" content="width=device-width, initial-scale=1">
-                <style>
-                  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #09090b; color: #f4f4f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-                  .card { background: #18181b; border: 1px solid #27272a; border-radius: 16px; padding: 32px; max-width: 580px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-                  .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: rgba(139, 92, 246, 0.1); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.2); border-radius: 9999px; font-size: 12px; font-weight: 600; margin-bottom: 16px; }
-                  h1 { font-size: 24px; font-weight: 800; margin: 0 0 8px 0; color: #fff; }
-                  p { font-size: 14px; line-height: 1.6; color: #a1a1aa; margin: 0 0 20px 0; }
-                  .info-box { background: #0f0f11; border: 1px solid #27272a; border-radius: 8px; padding: 14px; font-family: monospace; font-size: 13px; color: #e4e4e7; margin-bottom: 20px; word-break: break-all; }
-                  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block; animation: pulse 2s infinite; }
-                  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-                  .btn { display: inline-block; background: #8b5cf6; color: #fff; font-weight: 600; font-size: 14px; padding: 10px 20px; border-radius: 8px; text-decoration: none; transition: background 0.2s; }
-                  .btn:hover { background: #7c3aed; }
-                </style>
-              </head>
-              <body>
-                <div class="card">
-                  <div class="badge"><span class="status-dot"></span> Active Router Gateway</div>
-                  <h1>9Router Gateway Ready</h1>
-                  <p>Smart multi-provider AI proxy with auto-fallback, RTK token optimizer, and Claude Code / Cursor integration.</p>
-                  <div class="info-box">
-                    <div><b>Proxy URL:</b> https://${fullDomain}</div>
-                    <div><b>Port:</b> ${app.appPort}</div>
-                    <div><b>Health Endpoint:</b> https://${fullDomain}/health</div>
-                  </div>
-                  <a href="https://github.com/decolua/9router" target="_blank" class="btn">View 9Router Docs &rarr;</a>
-                </div>
-              </body>
-              </html>\`);
-            });
-            server.listen(${app.appPort}, '0.0.0.0', () => {
-              console.log('9Router listening on port ${app.appPort}');
-            });
-            EOF
-            node /server.js
+            echo "${b64NineRouter}" | base64 -d > /server.js && \\
+            exec node /server.js
 `;
   } else if (appType === 'opencode') {
     image = 'docker.io/library/node:22-alpine';
     const sshPassword = app.password || 'OpenCode123!';
+    const b64OpenCodeBin = Buffer.from(
+      '#!/bin/sh\ncd /workspace\nexec npx --yes opencode "$@" 2>/dev/null || echo "OpenCode Developer Workspace ready in /workspace"\n'
+    ).toString('base64');
+    const b64OpenCodeMotd = Buffer.from(
+      '════════════════════════════════════════════════════════════\n' +
+      '  Masdika Cloud - Dedicated OpenCode Instance\n' +
+      '  Application Mode: Sandboxed Developer Environment\n' +
+      '  Persistent Storage: /workspace\n' +
+      '  Security Notice: Package installation & tunneling restricted.\n' +
+      '════════════════════════════════════════════════════════════\n'
+    ).toString('base64');
+
     commandYaml = `
         command: ["/bin/sh", "-c"]
         args:
           - |
-            apk add --no-cache openssh bash git curl nano && \
-            ssh-keygen -A && \
-            echo "root:${sshPassword}" | chpasswd && \
-            sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
-            echo "PermitRootLogin yes" >> /etc/ssh/sshd_config && \
-            echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config && \
-            echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config && \
-            echo "X11Forwarding no" >> /etc/ssh/sshd_config && \
-            echo "AllowAgentForwarding no" >> /etc/ssh/sshd_config && \
-            echo "PermitTunnel no" >> /etc/ssh/sshd_config && \
-            echo "GatewayPorts no" >> /etc/ssh/sshd_config && \
-            mkdir -p ${dataMount} && \
-            cat << 'OPENCODEEOF' > /usr/local/bin/opencode && \
-#!/bin/sh
-cd /workspace
-exec npx --yes opencode "$@" 2>/dev/null || echo "OpenCode Developer Workspace ready in /workspace"
-OPENCODEEOF
-            chmod 755 /usr/local/bin/opencode && \
-            cat << 'MOTDEOF' > /etc/motd && \
-════════════════════════════════════════════════════════════
-  Masdika Cloud - Dedicated OpenCode Instance
-  Application Mode: Sandboxed Developer Environment
-  Persistent Storage: /workspace
-  Security Notice: Package installation & tunneling restricted.
-════════════════════════════════════════════════════════════
-MOTDEOF
-            echo "cd /workspace" >> /root/.bashrc && \
-            echo "cd /workspace" >> /etc/profile && \
-            rm -rf /etc/apk /var/cache/apk /lib/apk && \
-            cat << 'APKEOF' > /sbin/apk && \
-#!/bin/sh
-echo "Security Notice: Package installation (apk) is restricted on Masdika Cloud Managed Applications."
-exit 1
-APKEOF
-            chmod 755 /sbin/apk && \
+            apk add --no-cache openssh bash git curl nano && \\
+            ssh-keygen -A && \\
+            echo "root:${sshPassword}" | chpasswd && \\
+            sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \\
+            echo "PermitRootLogin yes" >> /etc/ssh/sshd_config && \\
+            echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config && \\
+            echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config && \\
+            echo "X11Forwarding no" >> /etc/ssh/sshd_config && \\
+            echo "AllowAgentForwarding no" >> /etc/ssh/sshd_config && \\
+            echo "PermitTunnel no" >> /etc/ssh/sshd_config && \\
+            echo "GatewayPorts no" >> /etc/ssh/sshd_config && \\
+            mkdir -p ${dataMount} && \\
+            echo "${b64OpenCodeBin}" | base64 -d > /usr/local/bin/opencode && \\
+            chmod 755 /usr/local/bin/opencode && \\
+            echo "${b64OpenCodeMotd}" | base64 -d > /etc/motd && \\
+            echo "cd /workspace" >> /root/.bashrc && \\
+            echo "cd /workspace" >> /etc/profile && \\
+            rm -rf /etc/apk /var/cache/apk /lib/apk && \\
+            echo "${b64ApkRestrict}" | base64 -d > /sbin/apk && \\
+            chmod 755 /sbin/apk && \\
             exec /usr/sbin/sshd -D -e -p ${app.appPort}
 `;
   } else if (appType === 'openclaw') {
     image = 'docker.io/library/node:22-alpine';
+    const serverJs = `const http = require('http');
+const server = http.createServer((req, res) => {
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.writeHead(200);
+  res.end(\`<!DOCTYPE html>
+<html>
+<head>
+  <title>OpenClaw Agent - Masdika Cloud</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #09090b; color: #f4f4f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+    .card { background: #18181b; border: 1px solid #27272a; border-radius: 16px; padding: 32px; max-width: 580px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 9999px; font-size: 12px; font-weight: 600; margin-bottom: 16px; }
+    h1 { font-size: 24px; font-weight: 800; margin: 0 0 8px 0; color: #fff; }
+    p { font-size: 14px; line-height: 1.6; color: #a1a1aa; margin: 0 0 20px 0; }
+    .info-box { background: #0f0f11; border: 1px solid #27272a; border-radius: 8px; padding: 14px; font-family: monospace; font-size: 13px; color: #e4e4e7; margin-bottom: 20px; word-break: break-all; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .btn { display: inline-block; background: #059669; color: #fff; font-weight: 600; font-size: 14px; padding: 10px 20px; border-radius: 8px; text-decoration: none; transition: background 0.2s; }
+    .btn:hover { background: #047857; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge"><span class="status-dot"></span> Ready for Messaging Tasks</div>
+    <h1>OpenClaw Agent Platform</h1>
+    <p>Autonomous crawler & multi-channel chat automation engine operational on Masdika Cloud.</p>
+    <div class="info-box">
+      <div><b>Endpoint:</b> https://${fullDomain}</div>
+      <div><b>Port:</b> ${app.appPort}</div>
+    </div>
+    <a href="https://openclaw.ai" target="_blank" class="btn">OpenClaw Docs &rarr;</a>
+  </div>
+</body>
+</html>\`);
+});
+server.listen(${app.appPort}, '0.0.0.0', () => {
+  console.log('OpenClaw listening on port ${app.appPort}');
+});
+`;
+    const b64OpenClaw = Buffer.from(serverJs).toString('base64');
     commandYaml = `
         command: ["/bin/sh", "-c"]
         args:
           - |
-            cat << 'EOF' > /server.js
-            const http = require('http');
-            const server = http.createServer((req, res) => {
-              res.setHeader('Content-Type', 'text/html; charset=utf-8');
-              res.writeHead(200);
-              res.end(\`<!DOCTYPE html>
-              <html>
-              <head>
-                <title>OpenClaw Agent - Masdika Cloud</title>
-                <meta name="viewport" content="width=device-width, initial-scale=1">
-                <style>
-                  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #09090b; color: #f4f4f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-                  .card { background: #18181b; border: 1px solid #27272a; border-radius: 16px; padding: 32px; max-width: 580px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-                  .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 9999px; font-size: 12px; font-weight: 600; margin-bottom: 16px; }
-                  h1 { font-size: 24px; font-weight: 800; margin: 0 0 8px 0; color: #fff; }
-                  p { font-size: 14px; line-height: 1.6; color: #a1a1aa; margin: 0 0 20px 0; }
-                  .info-box { background: #0f0f11; border: 1px solid #27272a; border-radius: 8px; padding: 14px; font-family: monospace; font-size: 13px; color: #e4e4e7; margin-bottom: 20px; word-break: break-all; }
-                  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block; animation: pulse 2s infinite; }
-                  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-                  .btn { display: inline-block; background: #059669; color: #fff; font-weight: 600; font-size: 14px; padding: 10px 20px; border-radius: 8px; text-decoration: none; transition: background 0.2s; }
-                  .btn:hover { background: #047857; }
-                </style>
-              </head>
-              <body>
-                <div class="card">
-                  <div class="badge"><span class="status-dot"></span> Ready for Messaging Tasks</div>
-                  <h1>OpenClaw Agent Platform</h1>
-                  <p>Autonomous crawler & multi-channel chat automation engine operational on Masdika Cloud.</p>
-                  <div class="info-box">
-                    <div><b>Endpoint:</b> https://${fullDomain}</div>
-                    <div><b>Port:</b> ${app.appPort}</div>
-                  </div>
-                  <a href="https://openclaw.ai" target="_blank" class="btn">OpenClaw Docs &rarr;</a>
-                </div>
-              </body>
-              </html>\`);
-            });
-            server.listen(${app.appPort}, '0.0.0.0', () => {
-              console.log('OpenClaw listening on port ${app.appPort}');
-            });
-            EOF
-            node /server.js
+            echo "${b64OpenClaw}" | base64 -d > /server.js && \\
+            exec node /server.js
 `;
   }
 

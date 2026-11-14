@@ -13,7 +13,9 @@ import {
   startAppService,
   deleteAppService,
   allocateAppPort,
+  buildAppContainerSpec,
 } from '../k8s-app';
+import * as k8s from '@kubernetes/client-node';
 
 vi.mock('../prisma', () => ({
   prisma: {
@@ -120,6 +122,65 @@ describe('Managed Apps Catalog & Engine', () => {
     it('should format currency correctly in Indonesian Rupiah', () => {
       expect(formatRupiah(20000)).toBe('Rp 20.000');
       expect(formatRupiah(375000)).toBe('Rp 375.000');
+    });
+
+    it('should generate valid Kubernetes manifests for all 5 catalog apps without YAML syntax errors', () => {
+      const appTypes = ['hermes', 'n8n', 'ninerouter', 'opencode', 'openclaw'];
+      for (const appType of appTypes) {
+        const dummyApp: any = {
+          id: 42,
+          userId: 1,
+          name: `test-${appType}`,
+          appType,
+          templateName: 'Standard',
+          planName: '1C1G',
+          region: 'SDA',
+          node: 'node1',
+          subdomain: `test-${appType}`,
+          host: '103.247.10.61',
+          port: 30100,
+          appPort: 3000,
+          cpuShares: 1,
+          memoryMb: 1024,
+          storageGb: 10,
+          billingMode: 'monthly',
+          monthlyPrice: 20000,
+          hourlyRate: 30,
+          accumulatedCost: 0,
+          status: 'active',
+          password: 'TestPassword123!',
+        };
+
+        const { image, dataMount, envYaml, commandYaml } = buildAppContainerSpec(dummyApp);
+        expect(image).toBeDefined();
+
+        const manifestYaml = `apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deploy-app-${dummyApp.id}
+  namespace: managed-apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test
+  template:
+    metadata:
+      labels:
+        app: test
+    spec:
+      containers:
+      - name: test
+        image: ${image}
+        ports:
+        - name: app-port
+          containerPort: ${dummyApp.appPort}${commandYaml}${envYaml ? `\n        env:${envYaml}` : ''}
+`;
+
+        expect(() => k8s.loadAllYaml(manifestYaml)).not.toThrow();
+        const parsed = k8s.loadAllYaml(manifestYaml);
+        expect(parsed.length).toBeGreaterThanOrEqual(1);
+      }
     });
   });
 

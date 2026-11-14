@@ -108,7 +108,7 @@ export default function AppCheckoutFlow() {
           }
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   // Update instance name default when app changes
