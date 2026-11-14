@@ -124,10 +124,12 @@ describe('Managed Apps Catalog & Engine', () => {
   });
 
   describe('NodePort Allocation', () => {
-    it('should allocate next available port taking into account both db and app ports', async () => {
+    it('should allocate a collision-free random available port within agreed range', async () => {
       // 30000, 30001, 30002, 30003 are taken in mock
       const port = await allocateAppPort(30000, 30010);
-      expect(port).toBe(30004);
+      expect(port).toBeGreaterThanOrEqual(30000);
+      expect(port).toBeLessThanOrEqual(30010);
+      expect([30000, 30001, 30002, 30003]).not.toContain(port);
     });
   });
 });

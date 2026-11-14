@@ -310,7 +310,7 @@ export default function AppDetailPage({
                   "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border",
                   isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200"
                 )}>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Port {app.port} Active
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Encrypted SSH Active
                 </span>
               </div>
 
@@ -486,17 +486,11 @@ export default function AppDetailPage({
                     isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200"
                   )}>
                     <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
-                      Direct NodePort IP
+                      Cluster Edge Gateway
                     </span>
-                    <div className="flex items-center justify-between font-mono font-bold text-xs pt-0.5">
-                      <span>103.247.10.61:{app.port}</span>
-                      <button
-                        onClick={() => copyToClipboard(`http://103.247.10.61:${app.port}`, "NodePort URL")}
-                        className="text-[var(--text-muted)] hover:text-cyan-400"
-                      >
-                        <Copy className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+                    <p className="font-mono font-bold text-xs pt-0.5 text-cyan-400">
+                      HTTPS Edge Proxy (Port 443)
+                    </p>
                   </div>
 
                   <div className={cn(
@@ -504,10 +498,10 @@ export default function AppDetailPage({
                     isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200"
                   )}>
                     <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
-                      Container Internal Port
+                      TLS Encryption
                     </span>
-                    <p className="font-mono font-bold text-xs pt-0.5">
-                      {app.appPort} (HTTP)
+                    <p className="font-mono font-bold text-xs pt-0.5 text-emerald-400">
+                      Automated Let&apos;s Encrypt
                     </p>
                   </div>
                 </div>

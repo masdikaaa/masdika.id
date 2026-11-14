@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import * as k8s from '@kubernetes/client-node';
 import { prisma } from './prisma';
 import { decryptDeterministic, encryptDeterministic } from './encryption';
@@ -254,8 +255,8 @@ export async function testAppClusterConnection(customConfig?: {
 }
 
 /**
- * Allocate an available NodePort in the range 30000..32767
- * Checks BOTH DatabaseService and AppService tables to prevent collisions.
+ * Allocate a collision-free random available NodePort in the agreed range (30000..32767).
+ * Cross-checks BOTH DatabaseService, AppService, and active cluster NodePorts to prevent collisions.
  */
 export async function allocateAppPort(min = 30000, max = 32767): Promise<number> {
   const [usedApps, usedDbs] = await Promise.all([
@@ -273,13 +274,35 @@ export async function allocateAppPort(min = 30000, max = 32767): Promise<number>
   usedApps.forEach((a) => usedPorts.add(a.port));
   usedDbs.forEach((d) => usedPorts.add(d.port));
 
+  try {
+    const { coreApi } = await getAppK8sClients();
+    const svcRes = await (coreApi as any).listServiceForAllNamespaces();
+    const items = svcRes.items || svcRes.body?.items || [];
+    for (const item of items) {
+      const ports = item.spec?.ports || [];
+      for (const p of ports) {
+        if (p.nodePort) {
+          usedPorts.add(p.nodePort);
+        }
+      }
+    }
+  } catch {
+    // Cluster API might be mocked or temporarily unreachable; proceed with database records
+  }
+
+  const availablePorts: number[] = [];
   for (let port = min; port <= max; port++) {
     if (!usedPorts.has(port)) {
-      return port;
+      availablePorts.push(port);
     }
   }
 
-  throw new Error(`No available NodePort in allocated range (${min}-${max})`);
+  if (availablePorts.length === 0) {
+    throw new Error(`No available NodePort in allocated range (${min}-${max})`);
+  }
+
+  const randomIndex = crypto.randomInt(0, availablePorts.length);
+  return availablePorts[randomIndex];
 }
 
 /**

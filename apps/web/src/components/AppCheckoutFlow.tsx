@@ -64,7 +64,7 @@ export default function AppCheckoutFlow() {
           setUserProfile(data.user);
         }
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoadingUser(false));
 
     fetch("/api/user/commitment")
@@ -74,7 +74,7 @@ export default function AppCheckoutFlow() {
           setExistingCommitment(data.totalMonthly);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   // Update instance name default when app changes
@@ -203,8 +203,8 @@ export default function AppCheckoutFlow() {
                   </div>
 
                   <div className={cn("mt-3 pt-3 border-t text-[11px] flex items-center justify-between", isDark ? "border-white/5" : "border-slate-100")}>
-                    <span className={cn("font-medium", isDark ? "text-zinc-500" : "text-slate-400")}>
-                      Port: <strong className={isDark ? "text-zinc-300" : "text-slate-700"}>{app.appPort}</strong>
+                    <span className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
+                      Access: <strong className={isDark ? "text-zinc-200" : "text-slate-700"}>{app.accessProtocol === "SSH" ? "SSH Terminal" : "Web UI"}</strong>
                     </span>
                     {app.accessProtocol === "SSH" ? (
                       <span className={cn("font-semibold flex items-center gap-1", isDark ? "text-cyan-400" : "text-cyan-700")}>
@@ -374,11 +374,11 @@ export default function AppCheckoutFlow() {
                       "text-[10px] font-bold px-2 py-0.5 rounded-full border",
                       isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200"
                     )}>
-                      Port 30000–32767
+                      Dedicated Instance
                     </span>
                   </div>
                   <p className={cn("text-xs leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
-                    This application operates as a headless CLI / SSH developer container. A high-speed direct SSH port will be allocated upon deployment - no public web domain or HTTPS ingress is assigned.
+                    This application operates as a headless CLI / SSH developer container. A dedicated direct SSH connection will be dynamically assigned upon deployment - no public web domain or HTTPS ingress is assigned.
                   </p>
                   <div className={cn(
                     "p-2.5 rounded-lg border font-mono text-xs flex items-center justify-between",
@@ -567,11 +567,11 @@ export default function AppCheckoutFlow() {
             <div className="space-y-2 pt-2 text-[11px] text-[var(--text-muted)] leading-relaxed">
               <div className="flex items-center gap-2">
                 <Terminal className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                <span>Direct High-Speed SSH Access (Port 30000–32767)</span>
+                <span>Direct High-Speed SSH Access</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <span>Isolated Container & Persistent /workspace Storage</span>
+                <span>Isolated Container & Persistent {selectedApp.dataDir} Storage</span>
               </div>
             </div>
           ) : (

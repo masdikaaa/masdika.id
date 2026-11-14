@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import * as k8s from '@kubernetes/client-node';
 import { Writable, Readable } from 'stream';
 import * as fs from 'fs';
@@ -352,20 +353,37 @@ export async function execInPod(
 
 /**
  * Allocate a unique NodePort (30000 - 32767) for direct TCP database access
+ * Checks both database services and managed app services to guarantee zero port collisions.
  */
 export async function allocateAvailablePort(min = 30500, max = 32000): Promise<number> {
-  const usedDbs = await prisma.databaseService.findMany({
-    where: { status: { not: 'TERMINATED' } },
-    select: { port: true },
-  });
-  const usedPorts = new Set(usedDbs.map((d) => d.port));
+  const [usedDbs, usedApps] = await Promise.all([
+    prisma.databaseService.findMany({
+      where: { status: { not: 'TERMINATED' } },
+      select: { port: true },
+    }),
+    prisma.appService.findMany({
+      where: { status: { not: 'TERMINATED' } },
+      select: { port: true },
+    }),
+  ]);
 
+  const usedPorts = new Set<number>();
+  usedDbs.forEach((d) => usedPorts.add(d.port));
+  usedApps.forEach((a) => usedPorts.add(a.port));
+
+  const available: number[] = [];
   for (let port = min; port <= max; port++) {
     if (!usedPorts.has(port)) {
-      return port;
+      available.push(port);
     }
   }
-  throw new Error('No available NodePort in allocated database port range (30500-32000)');
+
+  if (available.length === 0) {
+    throw new Error(`No available NodePort in allocated database port range (${min}-${max})`);
+  }
+
+  const randomIndex = crypto.randomInt(0, available.length);
+  return available[randomIndex];
 }
 
 /**
