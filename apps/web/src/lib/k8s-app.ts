@@ -680,6 +680,20 @@ export function buildAppContainerSpec(app: AppServiceRecord, domainBase?: string
         - name: INITIAL_PASSWORD
           value: "${initialPassword}"
 `;
+    commandYaml = `
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            (npm install -g 9router@latest --prefer-online --no-audit --no-fund 2>/dev/null && \\
+             if [ -d /usr/local/lib/node_modules/9router/app ]; then \\
+               cp -rf /usr/local/lib/node_modules/9router/app/* /app/ 2>/dev/null || true; \\
+               if [ -d /app/.next-cli-build ]; then \\
+                 mkdir -p /app/.next; \\
+                 cp -rf /app/.next-cli-build/* /app/.next/ 2>/dev/null || true; \\
+               fi; \\
+             fi || true) && \\
+            exec /entrypoint.sh node custom-server.js
+`;
   } else if (appType === 'opencode') {
     image = 'docker.io/library/node:22-alpine';
     const sshPassword = app.password || 'OpenCode123!';
@@ -937,15 +951,15 @@ ${containerPortsYaml}${commandYaml}${envYaml ? `\n        env:${envYaml}` : ''}
         readinessProbe:
           tcpSocket:
             port: ${probePort}
-          initialDelaySeconds: 5
+          initialDelaySeconds: 15
           periodSeconds: 10
-          failureThreshold: 3
+          failureThreshold: 6
         livenessProbe:
           tcpSocket:
             port: ${probePort}
-          initialDelaySeconds: 15
+          initialDelaySeconds: 30
           periodSeconds: 15
-          failureThreshold: 5
+          failureThreshold: 6
         resources:
           requests:
             cpu: "${cpuReq}"
