@@ -591,10 +591,6 @@ export function buildAppContainerSpec(app: AppServiceRecord, domainBase?: string
   let envYaml = '';
   let commandYaml = '';
 
-  const b64ApkRestrict = Buffer.from(
-    '#!/bin/sh\necho "Security Notice: Package installation (apk) is restricted on Masdika Cloud Managed Applications."\nexit 1\n'
-  ).toString('base64');
-
   if (appType === 'n8n') {
     image = 'docker.io/n8nio/n8n:latest';
     envYaml = `
@@ -724,43 +720,73 @@ export function buildAppContainerSpec(app: AppServiceRecord, domainBase?: string
   } else if (appType === 'opencode') {
     image = 'docker.io/library/node:22-alpine';
     const sshPassword = app.password || 'OpenCode123!';
-    const b64OpenCodeBin = Buffer.from(
-      '#!/bin/sh\ncd /workspace\nexec npx --yes opencode "$@" 2>/dev/null || echo "OpenCode Developer Workspace ready in /workspace"\n'
-    ).toString('base64');
     const b64OpenCodeMotd = Buffer.from(
       '════════════════════════════════════════════════════════════\n' +
       '  Masdika Cloud - Dedicated OpenCode Instance\n' +
-      '  Application Mode: Production Developer Environment\n' +
+      '  Application Mode: Production AI Coding Environment\n' +
       '  Persistent Storage: /workspace\n' +
-      '  Security Notice: Package installation & tunneling restricted.\n' +
+      '\n' +
+      '  Quickstart Commands:\n' +
+      '    opencode auth login  -> Connect OpenAI / Anthropic / Zen / API keys\n' +
+      '    opencode             -> Launch interactive OpenCode AI workspace\n' +
+      '    opencode --help      -> View all CLI options\n' +
       '════════════════════════════════════════════════════════════\n'
     ).toString('base64');
+
+    const b64OpenCodeProfile = Buffer.from(
+      'export PATH="/root/.opencode/bin:/usr/local/bin:$PATH"\n' +
+      'cd /workspace 2>/dev/null || true\n'
+    ).toString('base64');
+
+    envYaml = `
+        - name: HOME
+          value: "/root"
+        - name: PATH
+          value: "/root/.opencode/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin"
+`;
 
     commandYaml = `
         command: ["/bin/sh", "-c"]
         args:
           - |
-            apk add --no-cache openssh bash git curl nano && \\
-            ssh-keygen -A && \\
-            echo "root:${sshPassword}" | chpasswd && \\
-            sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \\
-            echo "PermitRootLogin yes" >> /etc/ssh/sshd_config && \\
-            echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config && \\
-            echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config && \\
-            echo "X11Forwarding no" >> /etc/ssh/sshd_config && \\
-            echo "AllowAgentForwarding no" >> /etc/ssh/sshd_config && \\
-            echo "PermitTunnel no" >> /etc/ssh/sshd_config && \\
-            echo "GatewayPorts no" >> /etc/ssh/sshd_config && \\
-            mkdir -p ${dataMount} && \\
-            echo "${b64OpenCodeBin}" | base64 -d > /usr/local/bin/opencode && \\
-            chmod 755 /usr/local/bin/opencode && \\
-            echo "${b64OpenCodeMotd}" | base64 -d > /etc/motd && \\
-            echo "cd /workspace" >> /root/.bashrc && \\
-            echo "cd /workspace" >> /etc/profile && \\
-            rm -rf /etc/apk /var/cache/apk /lib/apk && \\
-            echo "${b64ApkRestrict}" | base64 -d > /sbin/apk && \\
-            chmod 755 /sbin/apk && \\
-            exec /usr/sbin/sshd -D -e -p ${app.appPort}
+            set -e
+            apk add --no-cache openssh bash git curl nano tar gzip libstdc++ libgcc ripgrep
+            mkdir -p /run/sshd /var/run/sshd /etc/profile.d ${dataMount} /workspace/.opencode/home/bin /workspace/.opencode/share /workspace/.opencode/config /root/.local/share /root/.config
+            rm -rf /root/.opencode /root/.local/share/opencode /root/.config/opencode
+            ln -sfn /workspace/.opencode/home /root/.opencode
+            ln -sfn /workspace/.opencode/share /root/.local/share/opencode
+            ln -sfn /workspace/.opencode/config /root/.config/opencode
+            ssh-keygen -A
+            echo "root:${sshPassword}" | chpasswd
+            sed -i 's/#*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+            grep -q '^PermitRootLogin yes' /etc/ssh/sshd_config || echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+            grep -q '^PasswordAuthentication yes' /etc/ssh/sshd_config || echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
+            grep -q '^AllowTcpForwarding no' /etc/ssh/sshd_config || echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config
+            grep -q '^X11Forwarding no' /etc/ssh/sshd_config || echo "X11Forwarding no" >> /etc/ssh/sshd_config
+            grep -q '^AllowAgentForwarding no' /etc/ssh/sshd_config || echo "AllowAgentForwarding no" >> /etc/ssh/sshd_config
+            grep -q '^PermitTunnel no' /etc/ssh/sshd_config || echo "PermitTunnel no" >> /etc/ssh/sshd_config
+            grep -q '^GatewayPorts no' /etc/ssh/sshd_config || echo "GatewayPorts no" >> /etc/ssh/sshd_config
+            echo "${b64OpenCodeMotd}" | base64 -d > /etc/motd
+            echo "${b64OpenCodeProfile}" | base64 -d > /etc/profile.d/opencode.sh
+            grep -q '/root/.opencode/bin' /root/.bashrc 2>/dev/null || cat /etc/profile.d/opencode.sh >> /root/.bashrc
+            grep -q '/root/.opencode/bin' /root/.profile 2>/dev/null || cat /etc/profile.d/opencode.sh >> /root/.profile
+            grep -q '/root/.opencode/bin' /etc/profile 2>/dev/null || cat /etc/profile.d/opencode.sh >> /etc/profile
+            /usr/sbin/sshd -p ${app.appPort}
+            if [ -x /root/.opencode/bin/opencode ]; then
+              ln -sf /root/.opencode/bin/opencode /usr/local/bin/opencode
+            fi
+            export SHELL=/bin/bash HOME=/root
+            (curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path >> /workspace/.opencode/setup.log 2>&1 || npm install -g opencode-ai@latest --no-audit --no-fund >> /workspace/.opencode/setup.log 2>&1) || true
+            npm cache clean --force >/dev/null 2>&1 || true
+            if [ -x /root/.opencode/bin/opencode ]; then
+              ln -sf /root/.opencode/bin/opencode /usr/local/bin/opencode
+              chmod +x /root/.opencode/bin/opencode
+            fi
+            set +e
+            while true; do
+              pgrep -x sshd >/dev/null 2>&1 || /usr/sbin/sshd -p ${app.appPort}
+              sleep 5
+            done
 `;
   } else if (appType === 'openclaw') {
     image = 'docker.io/library/node:22-alpine';

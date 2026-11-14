@@ -1107,14 +1107,16 @@ export default function AppDetailPage({
             {app.appType === "opencode" && (
               <div className="space-y-3 text-xs leading-relaxed">
                 <p className={isDark ? "text-zinc-300" : "text-slate-700"}>
-                  OpenCode is running in a secure production developer pod. Your workspace is persisted at <code className={cn("font-mono font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>/workspace</code>. Package manager and port tunneling are restricted to prevent abuse:
+                  OpenCode is running in a dedicated developer pod with persistent workspace storage at <code className={cn("font-mono font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>/workspace</code>. Connect via SSH, configure your AI provider credentials once, and launch OpenCode directly inside your workspace:
                 </p>
                 <div className={cn("p-3.5 rounded-xl border font-mono text-[11px] space-y-2", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-slate-50 border-slate-200/90 text-slate-800 shadow-2xs")}>
-                  <div className={isDark ? "text-zinc-500" : "text-slate-500"}># Direct Terminal Login</div>
+                  <div className={isDark ? "text-zinc-500" : "text-slate-500"}># 1. Direct Terminal Login (SSH)</div>
                   <div className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{sshCommand}</div>
-                  <div className={cn("pt-1", isDark ? "text-zinc-500" : "text-slate-500")}># Launch OpenCode CLI</div>
+                  <div className={cn("pt-1", isDark ? "text-zinc-500" : "text-slate-500")}># 2. Configure AI Provider &amp; API Keys</div>
+                  <div>opencode auth login</div>
+                  <div className={cn("pt-1", isDark ? "text-zinc-500" : "text-slate-500")}># 3. Launch Interactive OpenCode TUI</div>
                   <div>opencode</div>
-                  <div className={cn("pt-1", isDark ? "text-zinc-500" : "text-slate-500")}># Persistent Storage</div>
+                  <div className={cn("pt-1", isDark ? "text-zinc-500" : "text-slate-500")}># 4. Persistent Workspace &amp; Config</div>
                   <div>cd /workspace</div>
                 </div>
               </div>
