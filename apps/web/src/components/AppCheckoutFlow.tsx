@@ -27,6 +27,7 @@ import {
   CheckCircle2,
   Lock,
   Terminal,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -725,6 +726,77 @@ export default function AppCheckoutFlow() {
           )}
         </div>
       </div>
+
+      {/* Animated Deployment Modal Overlay */}
+      {deploying && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div
+            className={cn(
+              "w-full max-w-md rounded-3xl border p-6 sm:p-8 text-center space-y-6 shadow-2xl relative overflow-hidden animate-in fade-in zoom-in-95 duration-200",
+              isDark ? "bg-[#0c0c0e] border-white/10" : "bg-white border-slate-200"
+            )}
+          >
+            {/* Glowing Aura Effect */}
+            <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-48 h-48 bg-cyan-500/20 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Icon Animation */}
+            <div className="relative mx-auto w-20 h-20 flex items-center justify-center">
+              <div className="absolute inset-0 rounded-2xl bg-cyan-400/20 animate-ping opacity-30" />
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-cyan-500/20 to-cyan-400/10 border border-cyan-400/40 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+                <Image
+                  src={selectedApp.icon}
+                  alt={selectedApp.name}
+                  width={40}
+                  height={40}
+                  className="w-10 h-10 object-contain animate-pulse select-none pointer-events-none"
+                />
+              </div>
+            </div>
+
+            <div>
+              <h3 className={cn("text-lg font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+                Deploying {selectedApp.name}
+              </h3>
+              <p className={cn("text-xs mt-1 break-words [word-break:normal]", isDark ? "text-zinc-400" : "text-slate-500")}>
+                Please wait, allocating container pod and Kubernetes resources...
+              </p>
+            </div>
+
+            {/* Multi-step progress pipeline */}
+            <div className="space-y-3 text-left">
+              <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span className={cn("break-words [word-break:normal]", isDark ? "text-zinc-200" : "text-slate-700")}>
+                  Account authorization &amp; PAYG commitment allocation
+                </span>
+              </div>
+              <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span className={cn("break-words [word-break:normal]", isDark ? "text-zinc-200" : "text-slate-700")}>
+                  Cluster quota verification ({selectedPlan.cpuLabel} / {selectedPlan.ramLabel} / {selectedPlan.storageGb} GB SSD)
+                </span>
+              </div>
+              <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs">
+                <Loader2 className="w-4 h-4 text-cyan-400 animate-spin shrink-0" />
+                <span className="text-cyan-400 font-semibold break-words [word-break:normal]">
+                  Scheduling Pod, NodePort &amp; Routing
+                </span>
+              </div>
+              <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.01] border border-white/[0.03] text-xs opacity-60">
+                <div className="w-4 h-4 rounded-full border border-dashed border-zinc-500 shrink-0" />
+                <span className={cn("break-words [word-break:normal]", isDark ? "text-zinc-500" : "text-slate-400")}>
+                  Redirecting to Application Console...
+                </span>
+              </div>
+            </div>
+
+            <div className="pt-2 text-[11px] text-zinc-500 flex items-center justify-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
+              <span>Do not close or refresh this page</span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -4,8 +4,8 @@ import { prisma } from "@/lib/prisma";
 import UnifiedAlertsClient from "./UnifiedAlertsClient";
 
 export const metadata = {
-  title: "Cloud Alerts",
-  description: "Manage all your resource alerts in one place.",
+  title: "Cloud Monitoring & Alerts",
+  description: "Manage all your resource alerts and live metrics in one place.",
 };
 
 export default async function CloudAlertsPage() {
@@ -43,9 +43,32 @@ export default async function CloudAlertsPage() {
     }
   });
 
+  // Fetch Managed Databases
+  const dbList = await prisma.databaseService.findMany({
+    where: {
+      userId,
+      status: { in: ['RUNNING', 'STOPPED', 'SUSPENDED'] }
+    },
+    orderBy: { createdAt: 'desc' }
+  });
+
+  // Fetch Managed Applications
+  const appsList = await prisma.appService.findMany({
+    where: {
+      userId,
+      status: { in: ['RUNNING', 'STOPPED', 'SUSPENDED'] }
+    },
+    orderBy: { createdAt: 'desc' }
+  });
+
   return (
     <div className="space-y-6 w-full">
-      <UnifiedAlertsClient vpsList={vpsList} k3sClusters={k3sClusters} />
+      <UnifiedAlertsClient
+        vpsList={vpsList}
+        k3sClusters={k3sClusters}
+        dbList={dbList}
+        appsList={appsList}
+      />
     </div>
   );
 }

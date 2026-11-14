@@ -71,7 +71,7 @@ export function ProvisioningLiveVisualizer({
   return (
     <div
       className={cn(
-        "w-full rounded-3xl overflow-hidden relative border shadow-2xl transition-all duration-300",
+        "w-full rounded-2xl sm:rounded-3xl overflow-hidden relative border shadow-2xl transition-all duration-300",
         isDark ? "bg-[var(--surface-secondary)] border-white/10" : "bg-white border-slate-200/90 shadow-xl"
       )}
     >
@@ -85,9 +85,9 @@ export function ProvisioningLiveVisualizer({
         />
       </div>
 
-      <div className="p-5 sm:p-7 md:p-8 lg:p-9">
+      <div className="p-3.5 sm:p-6 md:p-8">
         {/* Terminal Header Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-6 mb-6 border-b border-inherit">
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 sm:pb-6 mb-4 sm:mb-6 border-b border-inherit">
           <div className="flex items-center gap-3">
             {/* macOS-style Window Dots */}
             <div className="flex items-center gap-1.5 mr-1">
@@ -137,7 +137,7 @@ export function ProvisioningLiveVisualizer({
         </div>
 
         {/* Stepper / Live Terminal Logs - Full Width */}
-        <div className="space-y-2 sm:space-y-3">
+        <div className="space-y-1.5 sm:space-y-2.5">
           {logs.map((log, idx) => {
             const isActive = idx === activeStep;
             const isPast = idx < activeStep;
@@ -146,7 +146,7 @@ export function ProvisioningLiveVisualizer({
               <div
                 key={idx}
                 className={cn(
-                  "relative flex items-start gap-3 sm:gap-4 p-2.5 sm:p-3 rounded-2xl transition-all duration-300",
+                  "relative flex items-start gap-2.5 sm:gap-4 p-2 sm:p-2.5 rounded-xl sm:rounded-2xl transition-all duration-300",
                   isActive
                     ? isDark
                       ? "bg-cyan-500/[0.07] border border-cyan-500/30 shadow-[0_0_20px_rgba(0,210,255,0.06)]"
@@ -159,7 +159,7 @@ export function ProvisioningLiveVisualizer({
                 <div className="relative flex flex-col items-center pt-0.5 shrink-0">
                   <div
                     className={cn(
-                      "w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center border-2 z-10 transition-colors duration-300",
+                      "w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center border-2 z-10 transition-colors duration-300",
                       isPast
                         ? isDark
                           ? "bg-cyan-950/60 border-cyan-400 text-cyan-400"
@@ -174,11 +174,11 @@ export function ProvisioningLiveVisualizer({
                     )}
                   >
                     {isPast ? (
-                      <CheckCircle2 className="w-4 h-4 text-cyan-400" />
+                      <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400" />
                     ) : (
                       <div
                         className={cn(
-                          "w-2 h-2 rounded-full",
+                          "w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full",
                           isActive
                             ? "bg-cyan-400 animate-pulse"
                             : isDark
@@ -192,7 +192,7 @@ export function ProvisioningLiveVisualizer({
                   {idx !== logs.length - 1 && (
                     <div
                       className={cn(
-                        "absolute top-8 bottom-[-16px] sm:bottom-[-20px] w-[2px] transition-colors duration-500",
+                        "absolute top-7 sm:top-8 bottom-[-14px] sm:bottom-[-20px] w-[2px] transition-colors duration-500",
                         isPast
                           ? "bg-cyan-500/40"
                           : isDark
@@ -208,7 +208,7 @@ export function ProvisioningLiveVisualizer({
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <span
                       className={cn(
-                        "inline-flex items-center px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-mono font-bold tracking-wider uppercase border",
+                        "inline-flex items-center px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-mono font-bold tracking-wider uppercase border shrink-0",
                         isActive
                           ? isDark
                             ? "bg-cyan-950/80 border-cyan-400/40 text-cyan-300 shadow-sm"
@@ -236,19 +236,19 @@ export function ProvisioningLiveVisualizer({
                   {log.isCommand ? (
                     <div
                       className={cn(
-                        "mt-1.5 flex items-center justify-between gap-2 p-2.5 sm:p-3 rounded-xl font-mono text-xs sm:text-[13px] border transition-colors",
+                        "mt-1.5 flex items-start sm:items-center justify-between gap-2.5 p-2 sm:p-2.5 rounded-xl font-mono text-xs sm:text-[13px] border transition-colors w-full",
                         isDark
                           ? "bg-[var(--surface-secondary)] border-cyan-500/30 text-emerald-400"
                           : "bg-slate-900 border-slate-800 text-emerald-400"
                       )}
                     >
-                      <div className="flex items-center gap-2 overflow-x-auto min-w-0">
-                        <span className="text-zinc-500 select-none">$</span>
-                        <code className="break-all">{log.message}</code>
+                      <div className="flex items-start gap-2 min-w-0 flex-1">
+                        <span className="text-zinc-500 select-none shrink-0 font-bold mt-0.5">$</span>
+                        <code className="break-words [word-break:normal] [overflow-wrap:anywhere] leading-snug">{log.message}</code>
                       </div>
                       <button
                         onClick={() => handleCopy(log.message, idx)}
-                        className="p-1 rounded hover:bg-white/10 text-zinc-400 hover:text-white transition-colors shrink-0"
+                        className="p-1.5 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white transition-colors shrink-0 mt-0.5 sm:mt-0"
                         title="Copy command"
                         aria-label="Copy command"
                       >
@@ -258,7 +258,7 @@ export function ProvisioningLiveVisualizer({
                   ) : (
                     <p
                       className={cn(
-                        "text-xs sm:text-sm font-medium leading-relaxed transition-colors",
+                        "text-xs sm:text-sm font-medium leading-relaxed transition-colors break-words [word-break:normal]",
                         isActive
                           ? isDark
                             ? "text-white"
@@ -284,16 +284,16 @@ export function ProvisioningLiveVisualizer({
         {/* Footer Status Bar */}
         <div
           className={cn(
-            "mt-6 pt-4 border-t flex flex-wrap items-center justify-between gap-2 text-[11px] sm:text-xs font-mono",
+            "mt-4 pt-3 sm:mt-6 sm:pt-4 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[10px] sm:text-xs font-mono",
             isDark ? "border-white/10 text-zinc-400" : "border-slate-200 text-slate-500"
           )}
         >
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse inline-block" />
-            <span>Target: {targetServer}</span>
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+            <span className="break-words [word-break:normal]">Target: {targetServer}</span>
           </div>
-          <div>
-            <span>{provisionEstimate}</span>
+          <div className="text-zinc-500 shrink-0">
+            <span className="break-words [word-break:normal]">{provisionEstimate}</span>
           </div>
         </div>
       </div>

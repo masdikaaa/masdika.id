@@ -1383,7 +1383,7 @@ export default function DatabaseCheckoutFlow() {
               <h3 className={cn("text-lg font-extrabold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                 Deploying Managed Database
               </h3>
-              <p className={cn("text-xs mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+              <p className={cn("text-xs mt-1 break-words [word-break:normal]", isDark ? "text-zinc-400" : "text-slate-500")}>
                 Please wait, allocating container and Kubernetes configuration...
               </p>
             </div>
@@ -1392,19 +1392,19 @@ export default function DatabaseCheckoutFlow() {
             <div className="space-y-3 text-left">
               <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span className={isDark ? "text-zinc-200" : "text-slate-700"}>Account authorization & PAYG balance allocation</span>
+                <span className={cn("break-words [word-break:normal]", isDark ? "text-zinc-200" : "text-slate-700")}>Account authorization &amp; PAYG balance allocation</span>
               </div>
               <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span className={isDark ? "text-zinc-200" : "text-slate-700"}>SSD storage allocation {storageGb} GB (local-path)</span>
+                <span className={cn("break-words [word-break:normal]", isDark ? "text-zinc-200" : "text-slate-700")}>SSD storage allocation {storageGb} GB (local-path)</span>
               </div>
               <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs">
                 <Loader2 className="w-4 h-4 text-cyan-400 animate-spin shrink-0" />
-                <span className="text-cyan-400 font-semibold">Creating Secret, Deployment & NodePort</span>
+                <span className="text-cyan-400 font-semibold break-words [word-break:normal]">Creating Secret, Deployment &amp; NodePort</span>
               </div>
               <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.01] border border-white/[0.03] text-xs opacity-60">
                 <div className="w-4 h-4 rounded-full border border-dashed border-zinc-500 shrink-0" />
-                <span className={isDark ? "text-zinc-500" : "text-slate-400"}>Redirecting to Database Dashboard...</span>
+                <span className={cn("break-words [word-break:normal]", isDark ? "text-zinc-500" : "text-slate-400")}>Redirecting to Database Dashboard...</span>
               </div>
             </div>
 

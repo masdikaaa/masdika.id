@@ -66,6 +66,16 @@ export async function GET(req: NextRequest) {
       }
     });
 
+    const activeApps = await prisma.appService.findMany({
+      where: {
+        status: { in: ['RUNNING', 'STOPPED', 'SUSPENDED'] },
+        hourlyRate: { gt: 0 }
+      },
+      include: {
+        user: { select: { id: true, name: true, email: true, image: true, balance: true } }
+      }
+    });
+
     // 3. Group by customer
     const customersMap = new Map<number, any>();
 
@@ -157,6 +167,22 @@ export async function GET(req: NextRequest) {
         accumulatedCost: db.accumulatedCost || 0,
         status: db.status,
         createdAt: db.createdAt
+      });
+    }
+
+    for (const app of activeApps) {
+      const appHost = app.subdomain ? `${app.subdomain}.${app.host}` : app.host;
+      addServiceToCustomer(app.user.id, app.user, {
+        id: `app-${app.id}`,
+        type: 'Managed App',
+        name: `${app.name} (${app.appType})`,
+        ipAddress: app.port ? `${appHost}:${app.port}` : appHost,
+        publicIp: appHost || null,
+        hourlyRate: app.status === 'SUSPENDED' ? 0 : app.hourlyRate,
+        fullHourlyRate: app.hourlyRate,
+        accumulatedCost: app.accumulatedCost || 0,
+        status: app.status,
+        createdAt: app.createdAt
       });
     }
 

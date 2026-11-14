@@ -37,12 +37,12 @@ export function ProvisioningSection({
   const isDark = theme === "dark";
 
   return (
-    <section className="py-10 sm:py-14 relative z-10 w-full">
-      <div className="relative rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-[var(--border-primary)] bg-white dark:bg-[var(--surface)] p-6 sm:p-10 lg:p-12 shadow-xl dark:shadow-2xl overflow-hidden transition-all">
+    <section className="py-8 sm:py-14 relative z-10 w-full overflow-hidden">
+      <div className="relative rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-[var(--border-primary)] bg-white dark:bg-[var(--surface)] p-4 sm:p-8 lg:p-12 shadow-xl dark:shadow-2xl overflow-hidden transition-all">
         {/* Soft Ambient Corner Accent */}
         <div className="absolute top-0 right-0 w-[450px] h-[450px] bg-gradient-to-tr from-cyan-500/10 via-cyan-400/5 to-transparent rounded-full blur-3xl pointer-events-none -z-0" />
 
-        <div className="relative z-10 grid lg:grid-cols-[1fr_1.3fr] xl:grid-cols-[1fr_1.4fr] gap-10 lg:gap-14 items-center">
+        <div className="relative z-10 grid lg:grid-cols-[1fr_1.3fr] xl:grid-cols-[1fr_1.4fr] gap-8 lg:gap-14 items-center">
           
           {/* Left Column: Content */}
           <FadeIn direction="right" delay={0.1}>
