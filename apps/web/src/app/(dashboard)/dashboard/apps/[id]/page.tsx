@@ -236,19 +236,20 @@ export default function AppDetailPage({
 
   return (
     <div className="space-y-6 max-w-full pb-16">
-      {/* Breadcrumb Navigation */}
-      <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] font-medium">
-        <Link href="/dashboard" className="hover:text-cyan-400 transition-colors">
-          Dashboard
+      {/* Back Navigation */}
+      <div>
+        <Link
+          href="/dashboard/apps"
+          className={cn(
+            "inline-flex items-center gap-2 text-xs sm:text-xs font-medium px-3.5 py-2 rounded-xl transition-all border w-fit",
+            isDark 
+              ? "text-zinc-400 hover:text-white bg-[#0a0a0c] hover:bg-white/[0.04] border-white/[0.08] hover:border-cyan-500/40" 
+              : "text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border-slate-200/90 shadow-2xs"
+          )}
+        >
+          <ChevronLeft className="w-4 h-4" />
+          Back to Managed Apps
         </Link>
-        <ChevronRight className="w-3.5 h-3.5 opacity-50" />
-        <Link href="/dashboard/apps" className="hover:text-cyan-400 transition-colors">
-          Managed Apps
-        </Link>
-        <ChevronRight className="w-3.5 h-3.5 opacity-50" />
-        <span className={cn(isDark ? "text-zinc-200" : "text-slate-700", "font-semibold")}>
-          {app.name}
-        </span>
       </div>
 
       {/* Top Banner Header - Clean Card Style without Border */}
