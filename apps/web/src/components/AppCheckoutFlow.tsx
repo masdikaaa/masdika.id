@@ -69,7 +69,7 @@ export default function AppCheckoutFlow() {
           setActiveCommitment(data.data.activeMonthlyCommitment);
         }
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoadingBalance(false));
   }, []);
 

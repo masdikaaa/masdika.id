@@ -900,27 +900,27 @@ export async function deleteAppService(app: AppServiceRecord): Promise<void> {
   // Ingress
   try {
     await netApi.deleteNamespacedIngress({ name: ingName, namespace: ns });
-  } catch {}
+  } catch { }
 
   // Service
   try {
     await coreApi.deleteNamespacedService({ name: svcName, namespace: ns });
-  } catch {}
+  } catch { }
 
   // Deployment
   try {
     await appsApi.deleteNamespacedDeployment({ name: deployName, namespace: ns });
-  } catch {}
+  } catch { }
 
   // PVC
   try {
     await coreApi.deleteNamespacedPersistentVolumeClaim({ name: pvcName, namespace: ns });
-  } catch {}
+  } catch { }
 
   // TLS Secret
   try {
     await coreApi.deleteNamespacedSecret({ name: tlsSecret, namespace: ns });
-  } catch {}
+  } catch { }
 }
 
 /**
