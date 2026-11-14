@@ -292,6 +292,15 @@ app.prepare().then(async () => {
       });
     }).catch(() => {});
 
+    // 📦 Ensure all Managed App plans are seeded & ready
+    import("./lib/app-plans-server").then(({ ensureAppPlansExist }) => {
+      ensureAppPlansExist().then(() => {
+        console.log('> [App Plans] Managed application plan catalog verified and active.');
+      }).catch((err) => {
+        console.warn('> [App Plans] Startup catalog check note:', err?.message || err);
+      });
+    }).catch(() => {});
+
     // 🛡️ Auto-recover any VPS reinstalls or background jobs interrupted by previous container restart / deployment
     import("./lib/stale-service-recovery").then(({ recoverStaleReinstalls }) => {
       recoverStaleReinstalls().then((count) => {

@@ -66,6 +66,7 @@ interface DatabaseLimitsState {
 interface AppLimitsState {
   cpu: string;
   ram: string;
+  storage: string;
   planCode: string;
   region: string;
   shared: boolean;
@@ -128,6 +129,7 @@ export default function AdminPlansPage() {
   const [appLimits, setAppLimits] = useState<AppLimitsState>({
     cpu: "1 CPU",
     ram: "1.0 GB RAM",
+    storage: "10 GB",
     planCode: "1C1G",
     region: "Sidoarjo",
     shared: true
@@ -198,6 +200,7 @@ export default function AdminPlansPage() {
     setAppLimits({
       cpu: "1 CPU",
       ram: "1.0 GB RAM",
+      storage: "10 GB",
       planCode: "1C1G",
       region: "Sidoarjo",
       shared: true
@@ -246,6 +249,7 @@ export default function AdminPlansPage() {
         setAppLimits({
           cpu: parsed.cpu || "1 CPU",
           ram: parsed.ram || "1.0 GB RAM",
+          storage: parsed.storage || (parsed.storageGb ? `${parsed.storageGb} GB` : "10 GB"),
           planCode: parsed.planCode || "1C1G",
           region: parsed.region || "Sidoarjo",
           shared: parsed.shared !== undefined ? Boolean(parsed.shared) : true
@@ -296,7 +300,17 @@ export default function AdminPlansPage() {
     } else if (formData.service === "DATABASE") {
       limitsJsonString = JSON.stringify(dbLimits);
     } else if (formData.service === "APP") {
-      limitsJsonString = JSON.stringify(appLimits);
+      const cpuVal = parseFloat(appLimits.cpu) || 1.0;
+      const ramVal = appLimits.ram.toUpperCase().includes("MB")
+        ? parseInt(appLimits.ram, 10)
+        : Math.round((parseFloat(appLimits.ram) || 1.0) * 1024);
+      const storageVal = parseInt(appLimits.storage || "10", 10) || 10;
+      limitsJsonString = JSON.stringify({
+        ...appLimits,
+        cpuShares: cpuVal,
+        memoryMb: ramVal,
+        storageGb: storageVal,
+      });
     } else if (formData.service === "CDN") {
       limitsJsonString = JSON.stringify({
         storageGB: Number(cdnLimits.storageGB) || cdnLimits.storageGB,
@@ -452,6 +466,11 @@ export default function AdminPlansPage() {
                 <MapPin className="w-3 h-3" /> {parsed.region}
               </span>
             )}
+            {(parsed.storage || parsed.storageGb) && (
+              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border flex items-center gap-1", isDark ? "bg-amber-500/10 text-amber-300 border-amber-500/20" : "bg-amber-50 text-amber-700 border-amber-200")}>
+                <HardDrive className="w-3 h-3" /> {parsed.storage || `${parsed.storageGb} GB`}
+              </span>
+            )}
             <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-medium border", isDark ? "bg-white/[0.04] text-zinc-400 border-white/[0.08]" : "bg-slate-100 text-slate-600 border-slate-200")}>
               {parsed.shared ? "Shared Pool" : "Dedicated"}
             </span>
@@ -475,6 +494,11 @@ export default function AdminPlansPage() {
             {parsed.region && (
               <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border flex items-center gap-1", isDark ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200")}>
                 <MapPin className="w-3 h-3" /> {parsed.region}
+              </span>
+            )}
+            {(parsed.storage || parsed.storageGb) && (
+              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border flex items-center gap-1", isDark ? "bg-amber-500/10 text-amber-300 border-amber-500/20" : "bg-amber-50 text-amber-700 border-amber-200")}>
+                <HardDrive className="w-3 h-3" /> {parsed.storage || `${parsed.storageGb} GB`}
               </span>
             )}
             <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-medium border", isDark ? "bg-white/[0.04] text-zinc-400 border-white/[0.08]" : "bg-slate-100 text-slate-600 border-slate-200")}>
@@ -1364,7 +1388,19 @@ export default function AdminPlansPage() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div>
+                        <label className={cn("text-[11px] font-bold block mb-1", isDark ? "text-zinc-400" : "text-slate-600")}>
+                          Storage (SSD)
+                        </label>
+                        <input
+                          type="text"
+                          value={appLimits.storage}
+                          onChange={(e) => setAppLimits({ ...appLimits, storage: e.target.value })}
+                          placeholder="e.g. 10 GB"
+                          className={cn("w-full border rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:border-cyan-500", isDark ? "bg-white/[0.03] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
+                        />
+                      </div>
                       <div>
                         <label className={cn("text-[11px] font-bold block mb-1", isDark ? "text-zinc-400" : "text-slate-600")}>
                           Region & Datacenter

@@ -45,6 +45,7 @@ export default function AppCheckoutFlow() {
   const isDark = theme === "dark";
 
   const [selectedApp, setSelectedApp] = useState<ManagedAppDefinition>(MANAGED_APPS_CATALOG[0]);
+  const [availablePlans, setAvailablePlans] = useState<ManagedAppPlanDefinition[]>(MANAGED_APP_PLANS);
   const [selectedPlan, setSelectedPlan] = useState<ManagedAppPlanDefinition>(MANAGED_APP_PLANS[1]); // Default 1C2G
   const [appName, setAppName] = useState(`${MANAGED_APPS_CATALOG[0].name} Instance`);
   const [customSubdomain, setCustomSubdomain] = useState("");
@@ -71,6 +72,43 @@ export default function AppCheckoutFlow() {
       })
       .catch(() => { })
       .finally(() => setLoadingBalance(false));
+
+    // Fetch dynamic app plans from DB (Admin editable in /admin/plans)
+    fetch("/api/public/plans")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data)) {
+          const appDbPlans = data.data.filter((p: any) => p.service === "APP" && p.isActive);
+          if (appDbPlans.length > 0) {
+            const mapped: ManagedAppPlanDefinition[] = appDbPlans.map((p: any) => {
+              let parsed: any = {};
+              try { parsed = JSON.parse(p.limits); } catch { parsed = {}; }
+              const planCode = parsed.planCode || p.name.replace(/[^0-9a-zA-Z]/g, '').slice(-4).toUpperCase() || 'CUSTOM';
+              const cpuVal = Number(parsed.cpuShares) || parseFloat(parsed.cpu || "1") || 1.0;
+              const memMb = Number(parsed.memoryMb) || (parsed.ram?.includes("GB") ? parseFloat(parsed.ram) * 1024 : 1024);
+              const storageGb = Number(parsed.storageGb) || (parsed.storage ? parseInt(parsed.storage, 10) : 10);
+              return {
+                id: planCode.toLowerCase(),
+                planCode,
+                cpuLabel: parsed.cpu || `${cpuVal} CPU`,
+                cpuShares: cpuVal,
+                ramLabel: parsed.ram || `${(memMb / 1024).toFixed(1)} GB RAM`,
+                memoryMb: memMb,
+                storageGb,
+                monthlyPrice: p.price,
+                hourlyPrice: p.hourlyPrice || Math.round(p.price / 720),
+                remainingStock: 25,
+                isPopular: Boolean(p.isPopular),
+              };
+            });
+            setAvailablePlans(mapped);
+            // Default select popular or second plan from live DB
+            const popular = mapped.find((pl) => pl.isPopular) || mapped[1] || mapped[0];
+            setSelectedPlan(popular);
+          }
+        }
+      })
+      .catch(() => {});
   }, []);
 
   // Update instance name default when app changes
@@ -231,7 +269,7 @@ export default function AppCheckoutFlow() {
           </div>
 
           <div className="space-y-2.5">
-            {MANAGED_APP_PLANS.map((plan) => {
+            {availablePlans.map((plan) => {
               const isSelected = selectedPlan.id === plan.id;
               const templateTitle = `${selectedApp.name} (${plan.planCode})`;
               const templateDesc = `${selectedApp.name} with ${plan.cpuShares} CPU and ${plan.memoryMb >= 1024 ? `${plan.memoryMb / 1024}GB` : `${plan.memoryMb}MB`} RAM`;

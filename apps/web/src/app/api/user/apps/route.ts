@@ -118,22 +118,43 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
-    const planItem = getAppPlan(planCode);
-    if (!planItem) {
+    // 4. Dynamic Server-Side Price & Commitment Calculation (Tamper-Proof from DB)
+    const dbPlan = await prisma.plan.findFirst({
+      where: {
+        service: 'APP',
+        isActive: true,
+        OR: [
+          { name: { contains: planCode, mode: 'insensitive' } },
+          { limits: { contains: `"${planCode}"` } },
+          { limits: { contains: planCode } },
+        ],
+      },
+    });
+
+    const fallbackPlan = getAppPlan(planCode);
+    if (!dbPlan && !fallbackPlan) {
       return NextResponse.json({
         error: `Invalid compute plan code. Allowed: 1C1G, 1C2G, 2C2G, 2C4G, 4C4G, 4C8G, 4C16G`,
       }, { status: 400 });
     }
 
-    // 4. Server-Side Price & Commitment Calculation (Tamper-Proof)
-    const monthlyPrice = planItem.monthlyPrice;
-    const hourlyRate = planItem.hourlyPrice;
+    let parsedLimits: any = {};
+    if (dbPlan) {
+      try { parsedLimits = JSON.parse(dbPlan.limits); } catch {}
+    }
+
+    const planCodeFinal = parsedLimits.planCode || fallbackPlan?.planCode || planCode.toUpperCase();
+    const cpuShares = Number(parsedLimits.cpuShares) || parseFloat(parsedLimits.cpu || "1") || fallbackPlan?.cpuShares || 1.0;
+    const memoryMb = Number(parsedLimits.memoryMb) || (parsedLimits.ram?.includes("GB") ? parseFloat(parsedLimits.ram) * 1024 : (fallbackPlan?.memoryMb || 1024));
+    const storageGb = Number(parsedLimits.storageGb) || fallbackPlan?.storageGb || 10;
+    const monthlyPrice = dbPlan ? dbPlan.price : fallbackPlan!.monthlyPrice;
+    const hourlyRate = dbPlan ? (dbPlan.hourlyPrice || Math.round(dbPlan.price / 720)) : fallbackPlan!.hourlyPrice;
 
     await assertSufficientCommitmentBalance({
       userId: user.id,
       userBalance: user.balance,
       newServiceMonthly: monthlyPrice,
-      serviceName: `Managed App (${catalogItem.name} - ${planItem.planCode})`,
+      serviceName: `Managed App (${catalogItem.name} - ${planCodeFinal})`,
     });
 
     // 5. Smart Collision-Proof Subdomain Generator & Conflict Resolver
@@ -186,8 +207,8 @@ export async function POST(req: NextRequest) {
         userId: user.id,
         name: cleanName,
         appType: catalogItem.id,
-        templateName: `${catalogItem.name} (${planItem.planCode})`,
-        planName: planItem.planCode,
+        templateName: `${catalogItem.name} (${planCodeFinal})`,
+        planName: planCodeFinal,
         region: "Sidoarjo",
         node: "managed-apps",
         subdomain,
@@ -197,9 +218,9 @@ export async function POST(req: NextRequest) {
         username: defaultUsername,
         password: randomPassword,
         apiKey: randomApiKey,
-        cpuShares: planItem.cpuShares,
-        memoryMb: planItem.memoryMb,
-        storageGb: planItem.storageGb,
+        cpuShares,
+        memoryMb,
+        storageGb,
         billingMode: billingMode === "PAYG" ? "PAYG" : "MONTHLY",
         monthlyPrice,
         hourlyRate,
@@ -215,7 +236,7 @@ export async function POST(req: NextRequest) {
         name: cleanName,
         appType: catalogItem.id,
         templateName: appRecord.templateName,
-        planName: planItem.planCode,
+        planName: planCodeFinal,
         region: "Sidoarjo",
         node: "managed-apps",
         subdomain,
@@ -225,9 +246,9 @@ export async function POST(req: NextRequest) {
         username: defaultUsername,
         password: randomPassword,
         apiKey: randomApiKey,
-        cpuShares: planItem.cpuShares,
-        memoryMb: planItem.memoryMb,
-        storageGb: planItem.storageGb,
+        cpuShares,
+        memoryMb,
+        storageGb,
         billingMode: appRecord.billingMode,
         monthlyPrice,
         hourlyRate,
@@ -255,7 +276,7 @@ export async function POST(req: NextRequest) {
 
       await logClientActivity({
         userId: user.id,
-        description: `Deployed Managed App '${cleanName}' (${catalogItem.name} ${planItem.planCode}) on ${connDesc}`,
+        description: `Deployed Managed App '${cleanName}' (${catalogItem.name} ${planCodeFinal}) on ${connDesc}`,
         ipAddress: clientIp,
         category: "service",
       }).catch(() => {});

@@ -48,7 +48,8 @@ export function AppScaleModal({
   onSuccess,
   isDark,
 }: AppScaleModalProps) {
-  const currentPlan = getAppPlan(app.planName) || MANAGED_APP_PLANS[1];
+  const [availablePlans, setAvailablePlans] = useState<ManagedAppPlanDefinition[]>(MANAGED_APP_PLANS);
+  const currentPlan = availablePlans.find(p => p.planCode.toUpperCase() === (app.planName || "").toUpperCase()) || getAppPlan(app.planName) || MANAGED_APP_PLANS[1];
   const [selectedPlanCode, setSelectedPlanCode] = useState(currentPlan.planCode);
   const [submitting, setSubmitting] = useState(false);
   const [userBalance, setUserBalance] = useState<number>(0);
@@ -60,7 +61,7 @@ export function AppScaleModal({
     setSelectedPlanCode(app.planName || "1C2G");
   }, [app.planName]);
 
-  // Fetch billing commitment on modal open (Identical to DatabaseScaleModal)
+  // Fetch billing commitment and dynamic plans from DB on modal open
   useEffect(() => {
     if (!isOpen) return;
     setLoadingBilling(true);
@@ -78,11 +79,45 @@ export function AppScaleModal({
       })
       .catch(() => {})
       .finally(() => setLoadingBilling(false));
+
+    // Dynamic app plans from DB
+    fetch("/api/public/plans")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data)) {
+          const appDbPlans = data.data.filter((p: any) => p.service === "APP" && p.isActive);
+          if (appDbPlans.length > 0) {
+            const mapped: ManagedAppPlanDefinition[] = appDbPlans.map((p: any) => {
+              let parsed: any = {};
+              try { parsed = JSON.parse(p.limits); } catch { parsed = {}; }
+              const planCode = parsed.planCode || p.name.replace(/[^0-9a-zA-Z]/g, '').slice(-4).toUpperCase() || 'CUSTOM';
+              const cpuVal = Number(parsed.cpuShares) || parseFloat(parsed.cpu || "1") || 1.0;
+              const memMb = Number(parsed.memoryMb) || (parsed.ram?.includes("GB") ? parseFloat(parsed.ram) * 1024 : 1024);
+              const storageGb = Number(parsed.storageGb) || (parsed.storage ? parseInt(parsed.storage, 10) : 10);
+              return {
+                id: planCode.toLowerCase(),
+                planCode,
+                cpuLabel: parsed.cpu || `${cpuVal} CPU`,
+                cpuShares: cpuVal,
+                ramLabel: parsed.ram || `${(memMb / 1024).toFixed(1)} GB RAM`,
+                memoryMb: memMb,
+                storageGb,
+                monthlyPrice: p.price,
+                hourlyPrice: p.hourlyPrice || Math.round(p.price / 720),
+                remainingStock: 25,
+                isPopular: Boolean(p.isPopular),
+              };
+            });
+            setAvailablePlans(mapped);
+          }
+        }
+      })
+      .catch(() => {});
   }, [isOpen]);
 
   if (!isOpen) return null;
 
-  const targetPlan = getAppPlan(selectedPlanCode) || currentPlan;
+  const targetPlan = availablePlans.find(p => p.planCode.toUpperCase() === selectedPlanCode.toUpperCase()) || getAppPlan(selectedPlanCode) || currentPlan;
   const catalogItem = getAppDefinition(app.appType);
 
   const currentMonthly = app.monthlyPrice || currentPlan.monthlyPrice;
@@ -206,7 +241,7 @@ export function AppScaleModal({
           </label>
 
           <div className="space-y-2">
-            {MANAGED_APP_PLANS.map((plan) => {
+            {availablePlans.map((plan) => {
               const isSelected = selectedPlanCode.toUpperCase() === plan.planCode.toUpperCase();
               const isCurrent = (app.planName || "").toUpperCase() === plan.planCode.toUpperCase();
 

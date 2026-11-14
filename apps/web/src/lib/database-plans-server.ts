@@ -29,40 +29,9 @@ export async function ensureDatabasePlansExist(): Promise<void> {
             isPopular: def.isPopular,
           },
         });
-      } else {
-        await prisma.plan.update({
-          where: { id: existing.id },
-          data: {
-            description: def.description,
-            price: def.price,
-            hourlyPrice: def.hourlyPrice,
-            limits: limitsJson,
-            isActive: true,
-          },
-        });
       }
-    }
-
-    // Clean up obsolete legacy plans outside the official flavor catalog
-    const obsoletePlans = await prisma.plan.findMany({
-      where: {
-        service: 'DATABASE',
-        name: { notIn: officialNames },
-      },
-    });
-
-    for (const obs of obsoletePlans) {
-      const subCount = await prisma.subscription.count({
-        where: { planId: obs.id },
-      });
-      if (subCount === 0) {
-        await prisma.plan.delete({ where: { id: obs.id } }).catch(() => {});
-      } else {
-        await prisma.plan.update({
-          where: { id: obs.id },
-          data: { isActive: false },
-        }).catch(() => {});
-      }
+      // When existing already exists in DB, do NOT overwrite it:
+      // This preserves any dynamic price/limit updates made by the admin in /admin/plans!
     }
   } catch (error) {
     console.error('[DatabasePlans] Failed to ensure database plans:', error);

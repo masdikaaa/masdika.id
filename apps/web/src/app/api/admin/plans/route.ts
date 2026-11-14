@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
 import { ensureDatabasePlansExist } from "@/lib/database-plans-server";
+import { ensureAppPlansExist } from "@/lib/app-plans-server";
 
 export const VALID_SERVICES = [
   'DATABASE',
+  'APP',
   'CDN',
   'TIKTOK',
   'SPOTIFY',
@@ -19,8 +21,9 @@ export async function GET(req: NextRequest) {
     const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
     if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
-    // Ensure all 6 managed database plans (Shared + 5 Dedicated tiers) exist & clean obsolete duplicates
+    // Ensure all 6 managed database plans & managed app plans exist
     await ensureDatabasePlansExist();
+    await ensureAppPlansExist();
 
     // Auto-purge any lingering obsolete plans outside the official active services
     prisma.plan.deleteMany({

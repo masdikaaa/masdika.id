@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import ManagedAppsClient from "./ManagedAppsClient";
-import { MANAGED_APPS_CATALOG, MANAGED_APP_PLANS } from "@/lib/app-catalog";
+import { MANAGED_APPS_CATALOG } from "@/lib/app-catalog";
+import { getDynamicAppPlans } from "@/lib/app-plans-server";
 
 export const dynamic = 'force-dynamic';
 
@@ -50,7 +51,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ManagedAppsLandingPage() {
+export default async function ManagedAppsLandingPage() {
   const appsJsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -136,6 +137,8 @@ export default function ManagedAppsLandingPage() {
     ]
   };
 
+  const dynamicPlans = await getDynamicAppPlans();
+
   return (
     <>
       <script
@@ -144,7 +147,7 @@ export default function ManagedAppsLandingPage() {
       />
       <ManagedAppsClient
         catalog={MANAGED_APPS_CATALOG}
-        plans={MANAGED_APP_PLANS}
+        plans={dynamicPlans}
       />
     </>
   );

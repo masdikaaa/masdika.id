@@ -91,13 +91,41 @@ export async function POST(
       return NextResponse.json({ error: "Plan code is required for scaling" }, { status: 400 });
     }
 
-    const targetPlan = getAppPlan(planCode);
-    if (!targetPlan) {
+    // Dynamic resolution from DB Plan record first
+    const dbPlan = await prisma.plan.findFirst({
+      where: {
+        service: 'APP',
+        isActive: true,
+        OR: [
+          { name: { contains: planCode, mode: 'insensitive' } },
+          { limits: { contains: `"${planCode}"` } },
+          { limits: { contains: planCode } },
+        ],
+      },
+    });
+
+    const fallbackPlan = getAppPlan(planCode);
+    if (!dbPlan && !fallbackPlan) {
       return NextResponse.json(
         { error: `Invalid compute plan code: '${planCode}'. Allowed: 1C1G, 1C2G, 2C2G, 2C4G, 4C4G, 4C8G, 4C16G` },
         { status: 400 }
       );
     }
+
+    let parsedLimits: any = {};
+    if (dbPlan) {
+      try { parsedLimits = JSON.parse(dbPlan.limits); } catch {}
+    }
+
+    const targetPlan = {
+      planCode: parsedLimits.planCode || fallbackPlan?.planCode || planCode.toUpperCase(),
+      cpuLabel: parsedLimits.cpu || fallbackPlan?.cpuLabel || `${parsedLimits.cpuShares || 1} CPU`,
+      cpuShares: Number(parsedLimits.cpuShares) || parseFloat(parsedLimits.cpu || "1") || fallbackPlan?.cpuShares || 1.0,
+      ramLabel: parsedLimits.ram || fallbackPlan?.ramLabel || `${(parsedLimits.memoryMb || 1024) / 1024} GB RAM`,
+      memoryMb: Number(parsedLimits.memoryMb) || (parsedLimits.ram?.includes("GB") ? parseFloat(parsedLimits.ram) * 1024 : (fallbackPlan?.memoryMb || 1024)),
+      monthlyPrice: dbPlan ? dbPlan.price : fallbackPlan!.monthlyPrice,
+      hourlyPrice: dbPlan ? (dbPlan.hourlyPrice || Math.round(dbPlan.price / 720)) : fallbackPlan!.hourlyPrice,
+    };
 
     // Check if new specs are identical to current specs
     if (
