@@ -208,6 +208,7 @@ function CheckoutContent() {
   const [plans, setPlans] = useState<any[]>([]);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [balance, setBalance] = useState<number>(0);
+  const [activeCommitment, setActiveCommitment] = useState<number>(0);
   const [activeSubscriptions, setActiveSubscriptions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -237,8 +238,15 @@ function CheckoutContent() {
 
       const pms = pmRes.success ? pmRes.data : [];
       if (billingRes.success) {
-        if (billingRes.data.balance > 0) {
+        if (billingRes.data.balance !== undefined) {
           setBalance(billingRes.data.balance);
+        }
+        if (billingRes.data.commitment?.totalMonthly !== undefined) {
+          setActiveCommitment(billingRes.data.commitment.totalMonthly);
+        } else if (billingRes.data.activeMonthlyCommitment !== undefined) {
+          setActiveCommitment(billingRes.data.activeMonthlyCommitment);
+        }
+        if (billingRes.data.balance > 0) {
           pms.unshift({
             code: 'BALANCE',
             name: 'Account Balance',
@@ -312,6 +320,13 @@ function CheckoutContent() {
 
     if (!isTermsAccepted) {
       toast.error("Please agree to the Terms of Service and Privacy Policy");
+      return;
+    }
+
+    const newServiceMonthly = Math.max(total, (selectedPlan?.hourlyPrice || 0) * 730, selectedPlan?.price || 0);
+    const totalRequiredBalance = activeCommitment + newServiceMonthly;
+    if (selectedPaymentMethod === "BALANCE" && balance < totalRequiredBalance) {
+      toast.error(`Insufficient account balance. This deployment requires a balance of at least ${formatRupiah(totalRequiredBalance)} to cover your active services commitment plus this service.`);
       return;
     }
 
@@ -997,6 +1012,41 @@ function CheckoutContent() {
                     {formatRupiah(total)}
                   </span>
                 </div>
+
+                {/* Balance check & Commitment Breakdown */}
+                {selectedPaymentMethod === "BALANCE" && (() => {
+                  const newServiceMonthly = Math.max(total, (selectedPlan?.hourlyPrice || 0) * 730, selectedPlan?.price || 0);
+                  const totalRequiredBalance = activeCommitment + newServiceMonthly;
+                  const isBalanceInsufficient = balance < totalRequiredBalance;
+                  return (
+                    <div className={cn("rounded-xl p-4 mb-5 border space-y-2.5 transition-all", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50 border-slate-200/80")}>
+                      <div className="space-y-1.5 text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className={isDark ? "text-zinc-400" : "text-slate-600"}>Account Balance:</span>
+                          <span className={cn("font-bold font-mono", !isBalanceInsufficient ? (isDark ? "text-emerald-400" : "text-emerald-600") : (isDark ? "text-red-400" : "text-red-600"))}>
+                            {formatRupiah(balance)}
+                          </span>
+                        </div>
+                        {activeCommitment > 0 && (
+                          <div className={cn("flex items-center justify-between text-[11px]", isDark ? "text-zinc-400" : "text-slate-600")}>
+                            <span>Active Services Commitment:</span>
+                            <span className={cn("font-mono font-medium", isDark ? "text-zinc-300" : "text-slate-700")}>{formatRupiah(activeCommitment)}/mo</span>
+                          </div>
+                        )}
+                        <div className={cn("flex items-center justify-between text-[11px]", isDark ? "text-zinc-400" : "text-slate-600")}>
+                          <span>New Service Estimate:</span>
+                          <span className={cn("font-mono font-medium", isDark ? "text-zinc-300" : "text-slate-700")}>{formatRupiah(newServiceMonthly)}/mo</span>
+                        </div>
+                        <div className={cn("flex items-center justify-between text-xs pt-1.5 border-t font-semibold", isDark ? "border-white/[0.06]" : "border-slate-200")}>
+                          <span className={isDark ? "text-zinc-300" : "text-slate-700"}>Total Required Balance:</span>
+                          <span className={cn("font-mono font-bold", !isBalanceInsufficient ? (isDark ? "text-cyan-400" : "text-cyan-600") : (isDark ? "text-red-400" : "text-red-600"))}>
+                            {formatRupiah(totalRequiredBalance)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {/* Legal Checkbox */}
                 <div className="mb-5">

@@ -2806,6 +2806,34 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
               </div>
             </div>
 
+            {/* Balance check & Commitment Breakdown (Exact match of Database & Managed App Checkout) */}
+            <div className={cn("rounded-xl p-4 mb-5 border space-y-2.5 transition-all", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50 border-slate-200/80")}>
+              <div className="space-y-1.5 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className={isDark ? "text-zinc-400" : "text-slate-600"}>Account Balance:</span>
+                  <span className={cn("font-bold font-mono", !isBalanceInsufficient ? (isDark ? "text-emerald-400" : "text-emerald-600") : (isDark ? "text-red-400" : "text-red-600"))}>
+                    {formatRupiah(balance)}
+                  </span>
+                </div>
+                {activeCommitment.totalMonthly > 0 && (
+                  <div className={cn("flex items-center justify-between text-[11px]", isDark ? "text-zinc-400" : "text-slate-600")}>
+                    <span>Active Services Commitment:</span>
+                    <span className={cn("font-mono font-medium", isDark ? "text-zinc-300" : "text-slate-700")}>{formatRupiah(activeCommitment.totalMonthly)}/mo</span>
+                  </div>
+                )}
+                <div className={cn("flex items-center justify-between text-[11px]", isDark ? "text-zinc-400" : "text-slate-600")}>
+                  <span>Estimated New VPS:</span>
+                  <span className={cn("font-mono font-medium", isDark ? "text-zinc-300" : "text-slate-700")}>{formatRupiah(newVpsMonthly)}/mo</span>
+                </div>
+                <div className={cn("flex items-center justify-between text-xs pt-1.5 border-t font-semibold", isDark ? "border-white/[0.06]" : "border-slate-200")}>
+                  <span className={isDark ? "text-zinc-300" : "text-slate-700"}>Total Required Balance:</span>
+                  <span className={cn("font-mono font-bold", !isBalanceInsufficient ? (isDark ? "text-cyan-400" : "text-cyan-600") : (isDark ? "text-red-400" : "text-red-600"))}>
+                    {formatRupiah(totalRequiredBalance)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
             <div className="mb-5">
               <label className="flex items-start gap-2.5 cursor-pointer group select-none">
                 <div className="relative flex items-center justify-center mt-0.5 shrink-0">
@@ -2836,37 +2864,14 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
                     </p>
                   </div>
                 </div>
-                <div className={cn(
-                  "pl-6 space-y-1 text-[11px] font-mono border-t pt-2",
-                  isDark ? "text-zinc-300 border-red-500/20" : "text-slate-700 border-red-200/80"
-                )}>
-                  {activeCommitment.totalMonthly > 0 && (
-                    <div className="flex justify-between">
-                      <span className={isDark ? "text-zinc-400" : "text-slate-600"}>Active Services Commitment:</span>
-                      <span className={cn("font-medium", isDark ? "text-zinc-200" : "text-slate-900")}>Rp {activeCommitment.totalMonthly.toLocaleString("id-ID")}/mo</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between">
-                    <span className={isDark ? "text-zinc-400" : "text-slate-600"}>Estimated New VPS:</span>
-                    <span className={cn("font-medium", isDark ? "text-zinc-200" : "text-slate-900")}>Rp {newVpsMonthly.toLocaleString("id-ID")}/mo</span>
-                  </div>
-                  <div className={cn("flex justify-between border-t pt-1 font-bold", isDark ? "border-red-500/20 text-red-300" : "border-red-200 text-red-700")}>
-                    <span>Total Required Balance:</span>
-                    <span>Rp {totalRequiredBalance.toLocaleString("id-ID")}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className={isDark ? "text-zinc-400" : "text-slate-600"}>Your Current Balance:</span>
-                    <span className={cn("font-bold", isDark ? "text-red-400" : "text-red-600")}>Rp {balance.toLocaleString("id-ID")}</span>
-                  </div>
-                </div>
-                <div className={cn("pl-6 pt-1.5 flex items-center justify-between border-t", isDark ? "border-red-500/20" : "border-red-200/80")}>
+                <div className={cn("pl-6 pt-2 flex items-center justify-between border-t", isDark ? "border-red-500/20" : "border-red-200/80")}>
                   <span className={cn("text-[11px] font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>
-                    Shortfall: <strong className={cn(isDark ? "text-red-300" : "text-red-600")}>Rp {(totalRequiredBalance - balance).toLocaleString("id-ID")}</strong>
+                    Shortfall: <strong className={cn(isDark ? "text-red-300" : "text-red-600")}>{formatRupiah(totalRequiredBalance - balance)}</strong>
                   </span>
                   <Link
-                    href="/dashboard/billing"
+                    href="/dashboard/topup"
                     className={cn(
-                      "font-bold underline transition-colors text-xs",
+                      "font-bold underline transition-colors text-xs inline-flex items-center gap-1",
                       isDark ? "text-red-300 hover:text-white" : "text-red-600 hover:text-red-800"
                     )}
                   >

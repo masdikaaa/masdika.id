@@ -556,16 +556,16 @@ export default function AppCheckoutFlow() {
                 </div>
                 {activeCommitment > 0 && (
                   <div className={cn("flex items-center justify-between text-[11px]", isDark ? "text-zinc-400" : "text-slate-600")}>
-                    <span>Active Commitment:</span>
+                    <span>Active Services Commitment:</span>
                     <span className={cn("font-mono font-medium", isDark ? "text-zinc-300" : "text-slate-700")}>{formatRupiah(activeCommitment)}/mo</span>
                   </div>
                 )}
                 <div className={cn("flex items-center justify-between text-[11px]", isDark ? "text-zinc-400" : "text-slate-600")}>
-                  <span>New App Cost:</span>
+                  <span>New App Estimate:</span>
                   <span className={cn("font-mono font-medium", isDark ? "text-zinc-300" : "text-slate-700")}>{formatRupiah(currentCost)}/mo</span>
                 </div>
                 <div className={cn("flex items-center justify-between text-xs pt-1.5 border-t font-semibold", isDark ? "border-white/[0.06]" : "border-slate-200")}>
-                  <span className={isDark ? "text-zinc-300" : "text-slate-700"}>Required Balance:</span>
+                  <span className={isDark ? "text-zinc-300" : "text-slate-700"}>Total Required Balance:</span>
                   <span className={cn("font-mono font-bold", !isBalanceInsufficient ? (isDark ? "text-cyan-400" : "text-cyan-600") : (isDark ? "text-red-400" : "text-red-600"))}>
                     {formatRupiah(totalRequiredBalance)}
                   </span>
