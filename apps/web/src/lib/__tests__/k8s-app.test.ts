@@ -60,7 +60,8 @@ describe('Managed Apps Catalog & Engine', () => {
 
       const hermes = getAppDefinition('hermes');
       expect(hermes).toBeDefined();
-      expect(hermes?.appPort).toBe(8080);
+      expect(hermes?.appPort).toBe(22);
+      expect(hermes?.accessProtocol).toBe('SSH');
       expect(hermes?.icon).toBe('/images/apps/hermes-agent.png');
 
       const router = getAppDefinition('ninerouter');
@@ -78,7 +79,6 @@ describe('Managed Apps Catalog & Engine', () => {
       expect(openclaw).toBeDefined();
       expect(openclaw?.icon).toBe('/images/apps/openclaw.png');
       expect(openclaw?.accessProtocol).toBe('WEB');
-      expect(hermes?.accessProtocol).toBe('WEB');
       expect(router?.accessProtocol).toBe('WEB');
       expect(n8n?.accessProtocol).toBe('WEB');
     });

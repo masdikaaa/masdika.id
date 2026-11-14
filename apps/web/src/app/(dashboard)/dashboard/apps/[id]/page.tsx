@@ -527,11 +527,13 @@ export default function AppDetailPage({
             {app.appType === "hermes" && (
               <div className="space-y-3 text-xs leading-relaxed">
                 <p className={isDark ? "text-zinc-300" : "text-slate-700"}>
-                  NousResearch Hermes Agent is running in autonomous mode with isolated storage mounted at <code className="font-mono text-cyan-400">/app/data</code>.
+                  NousResearch Hermes Agent is running as an autonomous terminal agent. You can connect via SSH, run agents, configure tools, and your workspace is persisted at <code className="font-mono text-cyan-400">/app/data</code>:
                 </p>
-                <div className={cn("p-3.5 rounded-xl border font-mono text-[11px] space-y-1", isDark ? "bg-[#09090b] border-white/10 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-800")}>
-                  <div className="text-zinc-500"># Verify Hermes Agent status via curl</div>
-                  <div>curl -k {httpsUrl}</div>
+                <div className={cn("p-3.5 rounded-xl border font-mono text-[11px] space-y-2", isDark ? "bg-[#09090b] border-white/10 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-800")}>
+                  <div className="text-zinc-500"># Direct Terminal Login</div>
+                  <div className="text-cyan-400 font-bold">{sshCommand}</div>
+                  <div className="text-zinc-500 pt-1"># Persistent Storage & Config</div>
+                  <div>cd /app/data</div>
                 </div>
               </div>
             )}

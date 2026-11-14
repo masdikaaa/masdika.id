@@ -730,6 +730,34 @@ export default function DatabaseListingPage() {
               </motion.div>
             );
           })}
+
+          {/* Deploy New Database Card - Matching Managed Apps */}
+          <Link
+            href="/dashboard/database/new"
+            className={cn(
+              "rounded-2xl border-2 border-dashed p-6 transition-all flex flex-col items-center justify-center text-center gap-3 group min-h-[200px] cursor-pointer",
+              isDark
+                ? "border-white/[0.1] bg-white/[0.01] hover:border-cyan-400/50 hover:bg-cyan-500/[0.03]"
+                : "border-slate-300 bg-slate-50/50 hover:border-cyan-500 hover:bg-cyan-50/50"
+            )}
+          >
+            <div className={cn(
+              "w-12 h-12 rounded-2xl flex items-center justify-center border transition-all group-hover:scale-110",
+              isDark
+                ? "bg-cyan-500/10 border-cyan-500/25 text-cyan-400 group-hover:bg-cyan-500/20"
+                : "bg-cyan-50 border-cyan-200 text-cyan-700 group-hover:bg-cyan-100"
+            )}>
+              <Plus className="w-6 h-6" />
+            </div>
+            <div>
+              <h4 className={cn("font-bold text-sm sm:text-base tracking-tight transition-colors group-hover:text-cyan-400", isDark ? "text-white" : "text-slate-900")}>
+                Deploy New Database
+              </h4>
+              <p className={cn("text-xs mt-1 max-w-[200px] leading-relaxed", isDark ? "text-zinc-500" : "text-slate-500")}>
+                Launch isolated MySQL, Postgres, MongoDB, MariaDB or Redis
+              </p>
+            </div>
+          </Link>
         </div>
       )}
 

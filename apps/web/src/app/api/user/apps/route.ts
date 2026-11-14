@@ -136,22 +136,40 @@ export async function POST(req: NextRequest) {
       serviceName: `Managed App (${catalogItem.name} - ${planItem.planCode})`,
     });
 
-    // 5. Generate or Validate Subdomain
+    // 5. Smart Collision-Proof Subdomain Generator & Conflict Resolver
     let subdomain = "";
-    if (customSubdomain && typeof customSubdomain === "string") {
-      const cleanSub = customSubdomain.toLowerCase().trim().replace(/[^a-z0-9-]/g, "");
-      if (cleanSub.length >= 3 && cleanSub.length <= 30) {
-        // Verify uniqueness
+    if (catalogItem.accessProtocol === "SSH") {
+      // Internal reference identifier for SSH apps (no public HTTP ingress deployed)
+      let candidate = `${catalogItem.id}-${crypto.randomBytes(3).toString("hex")}`;
+      while (await prisma.appService.findUnique({ where: { subdomain: candidate } })) {
+        candidate = `${catalogItem.id}-${crypto.randomBytes(3).toString("hex")}`;
+      }
+      subdomain = candidate;
+    } else if (customSubdomain && typeof customSubdomain === "string") {
+      const cleanSub = customSubdomain.toLowerCase().trim().replace(/[^a-z0-9-]/g, "").slice(0, 30);
+      if (cleanSub.length >= 3) {
+        // Smart Check: does this subdomain already exist in DB?
         const existing = await prisma.appService.findUnique({ where: { subdomain: cleanSub } });
         if (!existing) {
           subdomain = cleanSub;
+        } else {
+          // CERDAS: Jika nama sudah dipakai user lain, jangan bentrok atau timpa!
+          // Auto-append short unique suffix while preserving the user's custom brand name!
+          let candidate = `${cleanSub.slice(0, 24)}-${crypto.randomBytes(2).toString("hex")}`;
+          while (await prisma.appService.findUnique({ where: { subdomain: candidate } })) {
+            candidate = `${cleanSub.slice(0, 24)}-${crypto.randomBytes(2).toString("hex")}`;
+          }
+          subdomain = candidate;
         }
       }
     }
 
     if (!subdomain) {
-      const randomSuffix = crypto.randomBytes(3).toString("hex");
-      subdomain = `${catalogItem.id}-${randomSuffix}`;
+      let candidate = `${catalogItem.id}-${crypto.randomBytes(3).toString("hex")}`;
+      while (await prisma.appService.findUnique({ where: { subdomain: candidate } })) {
+        candidate = `${catalogItem.id}-${crypto.randomBytes(3).toString("hex")}`;
+      }
+      subdomain = candidate;
     }
 
     // 6. NodePort Allocation (Checking both DatabaseService and AppService used ports)

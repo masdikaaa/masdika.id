@@ -353,54 +353,19 @@ function buildAppContainerSpec(app: AppServiceRecord) {
 `;
   } else if (appType === 'hermes') {
     image = 'docker.io/library/node:22-alpine';
+    const sshPassword = app.password || 'Hermes123!';
     commandYaml = `
         command: ["/bin/sh", "-c"]
         args:
           - |
-            cat << 'EOF' > /server.js
-            const http = require('http');
-            const fs = require('fs');
-            const server = http.createServer((req, res) => {
-              res.setHeader('Content-Type', 'text/html; charset=utf-8');
-              res.writeHead(200);
-              res.end(\`<!DOCTYPE html>
-              <html>
-              <head>
-                <title>Hermes Agent - Masdika Cloud</title>
-                <meta name="viewport" content="width=device-width, initial-scale=1">
-                <style>
-                  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #09090b; color: #f4f4f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-                  .card { background: #18181b; border: 1px solid #27272a; border-radius: 16px; padding: 32px; max-width: 580px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-                  .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 9999px; font-size: 12px; font-weight: 600; margin-bottom: 16px; }
-                  h1 { font-size: 24px; font-weight: 800; margin: 0 0 8px 0; color: #fff; }
-                  p { font-size: 14px; line-height: 1.6; color: #a1a1aa; margin: 0 0 20px 0; }
-                  .info-box { background: #0f0f11; border: 1px solid #27272a; border-radius: 8px; padding: 14px; font-family: monospace; font-size: 13px; color: #e4e4e7; margin-bottom: 20px; word-break: break-all; }
-                  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block; animation: pulse 2s infinite; }
-                  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-                  .btn { display: inline-block; background: #2563eb; color: #fff; font-weight: 600; font-size: 14px; padding: 10px 20px; border-radius: 8px; text-decoration: none; transition: background 0.2s; }
-                  .btn:hover { background: #1d4ed8; }
-                </style>
-              </head>
-              <body>
-                <div class="card">
-                  <div class="badge"><span class="status-dot"></span> Ready & Operational</div>
-                  <h1>Hermes Agent Running</h1>
-                  <p>NousResearch autonomous AI agent is active and listening on Masdika Cloud Managed Apps with dedicated resources.</p>
-                  <div class="info-box">
-                    <div><b>Endpoint:</b> https://${fullDomain}</div>
-                    <div><b>Container Port:</b> ${app.appPort}</div>
-                    <div><b>Allocated Compute:</b> ${app.cpuShares} vCPU / ${app.memoryMb} MB RAM</div>
-                  </div>
-                  <a href="https://hermes-agent.org" target="_blank" class="btn">View Documentation &rarr;</a>
-                </div>
-              </body>
-              </html>\`);
-            });
-            server.listen(${app.appPort}, '0.0.0.0', () => {
-              console.log('Hermes agent listening on port ${app.appPort}');
-            });
-            EOF
-            node /server.js
+            apk add --no-cache openssh bash git curl nano python3 py3-pip && \
+            ssh-keygen -A && \
+            echo "root:${sshPassword}" | chpasswd && \
+            sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
+            echo "PermitRootLogin yes" >> /etc/ssh/sshd_config && \
+            echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config && \
+            mkdir -p ${dataMount} /root/.hermes && \
+            exec /usr/sbin/sshd -D -e -p ${app.appPort}
 `;
   } else if (appType === 'ninerouter') {
     image = 'docker.io/library/node:22-alpine';

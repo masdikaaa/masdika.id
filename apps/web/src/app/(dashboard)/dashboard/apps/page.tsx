@@ -302,22 +302,22 @@ export default function ManagedAppsPage() {
           </div>
         </div>
 
-        {/* Card 3: Edge & Ingress Network (Sanitized, NO raw IP or Kubernetes cluster) */}
+        {/* Card 3: Region & Cluster (Sanitized, exactly matching Managed DB) */}
         <div className={cn("rounded-2xl border p-5 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-xs")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-[11px] font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
-              EDGE NETWORK
+              REGION & CLUSTER
             </span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
-              <Globe className="w-4 h-4" />
+              <Server className="w-4 h-4" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
             <span className={cn("text-xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-              *.app.masdika.id
+              Sidoarjo
             </span>
             <span className={cn("text-xs font-semibold", isDark ? "text-cyan-400" : "text-cyan-600")}>
-              SSL
+              ID-SDA
             </span>
           </div>
         </div>
@@ -370,32 +370,6 @@ export default function ManagedAppsPage() {
             <Rocket className="w-4 h-4" />
             <span>Deploy Your First App</span>
           </Link>
-
-          {/* Quick Showcase of 5 Apps */}
-          <div className="pt-8 mt-8 border-t border-inherit grid grid-cols-2 sm:grid-cols-5 gap-3 max-w-4xl mx-auto text-left">
-            {MANAGED_APPS_CATALOG.map((item) => (
-              <div
-                key={item.id}
-                className={cn(
-                  "p-3 rounded-xl border text-xs space-y-1.5 transition-colors",
-                  isDark ? "bg-white/[0.02] border-white/5 hover:border-cyan-500/30" : "bg-slate-50 border-slate-200 hover:border-cyan-400"
-                )}
-              >
-                <div className="w-8 h-8 rounded-lg p-1 bg-black/40 border border-white/10 relative overflow-hidden">
-                  <Image
-                    src={item.icon}
-                    alt={item.name}
-                    width={28}
-                    height={28}
-                    className="object-contain w-full h-full"
-                    unoptimized
-                  />
-                </div>
-                <p className="font-bold tracking-tight truncate">{item.name}</p>
-                <p className="text-[10px] text-[var(--text-muted)] line-clamp-1">{item.badge}</p>
-              </div>
-            ))}
-          </div>
         </div>
       ) : (
         /* Applications Cards Grid */
@@ -594,6 +568,34 @@ export default function ManagedAppsPage() {
               </motion.div>
             );
           })}
+
+          {/* Deploy New App Card */}
+          <Link
+            href="/dashboard/apps/new"
+            className={cn(
+              "rounded-2xl border-2 border-dashed p-6 transition-all flex flex-col items-center justify-center text-center gap-3 group min-h-[200px] cursor-pointer",
+              isDark
+                ? "border-white/[0.1] bg-white/[0.01] hover:border-cyan-400/50 hover:bg-cyan-500/[0.03]"
+                : "border-slate-300 bg-slate-50/50 hover:border-cyan-500 hover:bg-cyan-50/50"
+            )}
+          >
+            <div className={cn(
+              "w-12 h-12 rounded-2xl flex items-center justify-center border transition-all group-hover:scale-110",
+              isDark
+                ? "bg-cyan-500/10 border-cyan-500/25 text-cyan-400 group-hover:bg-cyan-500/20"
+                : "bg-cyan-50 border-cyan-200 text-cyan-700 group-hover:bg-cyan-100"
+            )}>
+              <Plus className="w-6 h-6" />
+            </div>
+            <div>
+              <h4 className={cn("font-bold text-sm sm:text-base tracking-tight transition-colors group-hover:text-cyan-400", isDark ? "text-white" : "text-slate-900")}>
+                Deploy New App
+              </h4>
+              <p className={cn("text-xs mt-1 max-w-[200px] leading-relaxed", isDark ? "text-zinc-500" : "text-slate-500")}>
+                Deploy Hermes Agent, 9Router, n8n, OpenCode, or OpenClaw
+              </p>
+            </div>
+          </Link>
         </div>
       )}
 

@@ -378,7 +378,7 @@ export default function AppCheckoutFlow() {
                     </span>
                   </div>
                   <p className={cn("text-xs leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
-                    This application operates as a headless CLI / SSH developer container. A high-speed direct SSH port will be allocated upon deployment — no public web domain or HTTPS ingress is assigned.
+                    This application operates as a headless CLI / SSH developer container. A high-speed direct SSH port will be allocated upon deployment - no public web domain or HTTPS ingress is assigned.
                   </p>
                   <div className={cn(
                     "p-2.5 rounded-lg border font-mono text-xs flex items-center justify-between",
@@ -428,18 +428,21 @@ export default function AppCheckoutFlow() {
                         )}
                       />
                     </div>
+                    <p className={cn("text-[11px] leading-tight mt-1", isDark ? "text-zinc-500" : "text-slate-500")}>
+                      Smart conflict resolver: If taken, a unique suffix is automatically assigned.
+                    </p>
                   </div>
                 </div>
 
                 <div className={cn(
-                  "p-3 rounded-xl border text-xs flex items-center justify-between",
+                  "p-3 rounded-xl border text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-1.5",
                   isDark ? "bg-white/[0.02] border-white/5 text-zinc-400" : "bg-slate-50 border-slate-200 text-slate-600"
                 )}>
-                  <span className="flex items-center gap-2">
-                    <Globe className="w-3.5 h-3.5 text-cyan-400" />
-                    <span>Target HTTPS URL:</span>
+                  <span className="flex items-center gap-2 shrink-0">
+                    <Globe className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                    <span className="whitespace-nowrap font-medium">Target HTTPS URL:</span>
                   </span>
-                  <strong className={cn("font-mono font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                  <strong className={cn("font-mono font-bold break-all sm:text-right text-xs", isDark ? "text-cyan-400" : "text-cyan-700")}>
                     https://{cleanSubdomain}.app.masdika.id
                   </strong>
                 </div>
