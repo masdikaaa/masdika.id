@@ -60,20 +60,20 @@ export function AppScaleModal({
     setSelectedPlanCode(app.planName || "1C2G");
   }, [app.planName]);
 
-  // Fetch billing commitment on modal open
+  // Fetch billing commitment on modal open (Identical to DatabaseScaleModal)
   useEffect(() => {
     if (!isOpen) return;
     setLoadingBilling(true);
-    Promise.all([
-      fetch("/api/user/profile").then((r) => (r.ok ? r.json() : null)),
-      fetch("/api/user/commitment").then((r) => (r.ok ? r.json() : null)),
-    ])
-      .then(([profileData, commitmentData]) => {
-        if (profileData?.user) {
-          setUserBalance(profileData.user.balance || 0);
+    fetch("/api/user/billing")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.data?.balance !== undefined) {
+          setUserBalance(data.data.balance);
         }
-        if (commitmentData?.totalMonthly !== undefined) {
-          setActiveCommitment(commitmentData.totalMonthly);
+        if (data.data?.commitment?.totalMonthly !== undefined) {
+          setActiveCommitment(data.data.commitment.totalMonthly);
+        } else if (data.data?.activeMonthlyCommitment !== undefined) {
+          setActiveCommitment(data.data.activeMonthlyCommitment);
         }
       })
       .catch(() => {})

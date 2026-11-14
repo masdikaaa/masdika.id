@@ -50,31 +50,27 @@ export default function AppCheckoutFlow() {
   const [customSubdomain, setCustomSubdomain] = useState("");
   const [billingCycle, setBillingCycle] = useState<"MONTHLY" | "PAYG">("MONTHLY");
 
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [existingCommitment, setExistingCommitment] = useState(0);
-  const [loadingUser, setLoadingUser] = useState(true);
+  const [userBalance, setUserBalance] = useState<number>(0);
+  const [activeCommitment, setActiveCommitment] = useState<number>(0);
+  const [loadingBalance, setLoadingBalance] = useState<boolean>(true);
   const [deploying, setDeploying] = useState(false);
 
-  // Fetch user balance and existing commitments
+  // Fetch user balance and active services commitment (Identical to DatabaseCheckoutFlow)
   useEffect(() => {
-    fetch("/api/user/profile")
+    fetch("/api/user/billing")
       .then((res) => res.json())
       .then((data) => {
-        if (data.user) {
-          setUserProfile(data.user);
+        if (data.data?.balance !== undefined) {
+          setUserBalance(data.data.balance);
+        }
+        if (data.data?.commitment?.totalMonthly !== undefined) {
+          setActiveCommitment(data.data.commitment.totalMonthly);
+        } else if (data.data?.activeMonthlyCommitment !== undefined) {
+          setActiveCommitment(data.data.activeMonthlyCommitment);
         }
       })
-      .catch(() => { })
-      .finally(() => setLoadingUser(false));
-
-    fetch("/api/user/commitment")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.totalMonthly !== undefined) {
-          setExistingCommitment(data.totalMonthly);
-        }
-      })
-      .catch(() => { });
+      .catch(() => {})
+      .finally(() => setLoadingBalance(false));
   }, []);
 
   // Update instance name default when app changes
@@ -87,9 +83,8 @@ export default function AppCheckoutFlow() {
   };
 
   const currentCost = selectedPlan.monthlyPrice;
-  const userBalance = userProfile?.balance || 0;
-  const totalRequiredBalance = existingCommitment + currentCost;
-  const isBalanceInsufficient = !loadingUser && userBalance < totalRequiredBalance;
+  const totalRequiredBalance = activeCommitment + currentCost;
+  const isBalanceInsufficient = !loadingBalance && userBalance < totalRequiredBalance;
   const shortfall = Math.max(0, totalRequiredBalance - userBalance);
 
   const cleanSubdomain = customSubdomain
@@ -510,6 +505,34 @@ export default function AppCheckoutFlow() {
               <span className={cn("text-base font-black tracking-tight", isDark ? "text-cyan-400" : "text-cyan-700")}>
                 {formatRupiah(currentCost)}/month
               </span>
+            </div>
+
+            {/* Balance check & Commitment Breakdown (Exact match of DatabaseCheckoutFlow) */}
+            <div className={cn("pt-3 border-t space-y-2", isDark ? "border-white/[0.08]" : "border-slate-100")}>
+              <div className="space-y-1.5 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className={isDark ? "text-zinc-400" : "text-slate-600"}>Account Balance:</span>
+                  <span className={cn("font-bold font-mono", !isBalanceInsufficient ? (isDark ? "text-emerald-400" : "text-emerald-600") : (isDark ? "text-red-400" : "text-red-600"))}>
+                    {loadingBalance ? "..." : formatRupiah(userBalance)}
+                  </span>
+                </div>
+                {activeCommitment > 0 && (
+                  <div className={cn("flex items-center justify-between text-[11px]", isDark ? "text-zinc-400" : "text-slate-600")}>
+                    <span>Active Commitment:</span>
+                    <span className={cn("font-mono font-medium", isDark ? "text-zinc-300" : "text-slate-700")}>{formatRupiah(activeCommitment)}/mo</span>
+                  </div>
+                )}
+                <div className={cn("flex items-center justify-between text-[11px]", isDark ? "text-zinc-400" : "text-slate-600")}>
+                  <span>New App Cost:</span>
+                  <span className={cn("font-mono font-medium", isDark ? "text-zinc-300" : "text-slate-700")}>{formatRupiah(currentCost)}/mo</span>
+                </div>
+                <div className={cn("flex items-center justify-between text-xs pt-1.5 border-t font-semibold", isDark ? "border-white/[0.06]" : "border-slate-200")}>
+                  <span className={isDark ? "text-zinc-300" : "text-slate-700"}>Required Balance:</span>
+                  <span className={cn("font-mono font-bold", !isBalanceInsufficient ? (isDark ? "text-cyan-400" : "text-cyan-600") : (isDark ? "text-red-400" : "text-red-600"))}>
+                    {formatRupiah(totalRequiredBalance)}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
