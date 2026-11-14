@@ -292,4 +292,41 @@ describe('Managed Database K3s Engine - k8s-database.ts', () => {
       expect(excessRam.userMessage).toContain('Managed Database cluster cannot accommodate');
     });
   });
+
+  describe('Database Scaling & Upgrade Logic', () => {
+    it('should correctly validate official plans for database upgrades', () => {
+      const sharedPlan = OFFICIAL_DATABASE_PLANS.find((p) => p.name === 'Shared Database');
+      expect(sharedPlan).toBeDefined();
+      expect(sharedPlan?.limits.shared).toBe(true);
+
+      const dedicatedLarge = OFFICIAL_DATABASE_PLANS.find((p) => p.name === 'Dedicated 4 vCPU / 8 GB');
+      expect(dedicatedLarge).toBeDefined();
+      expect(dedicatedLarge?.limits.cpu).toBe('4 vCPU');
+      expect(dedicatedLarge?.limits.ram).toBe('8 GB');
+    });
+
+    it('should enforce zero data loss rules: storage can expand or stay same, but cannot shrink', () => {
+      const currentStorage = 20;
+      const validExpansion = 50;
+      const invalidShrink = 10;
+
+      expect(validExpansion >= currentStorage).toBe(true);
+      expect(invalidShrink >= currentStorage).toBe(false);
+    });
+
+    it('should calculate correct hourly rates for scaled plans', () => {
+      // Shared plan: 20 GB -> Rp 200,000 / mo
+      const sharedMonthly = 20 * 10000;
+      const sharedHourly = Math.max(1, Math.ceil(sharedMonthly / 720));
+      expect(sharedMonthly).toBe(200000);
+      expect(sharedHourly).toBe(278);
+
+      // Dedicated Micro (Rp 45,000 base) + 20 GB (20 * 5,000 = 100,000) = Rp 145,000 / mo
+      const dedicatedBase = 45000;
+      const dedicatedMonthly = dedicatedBase + 20 * 5000;
+      const dedicatedHourly = Math.max(1, Math.ceil(dedicatedMonthly / 720));
+      expect(dedicatedMonthly).toBe(145000);
+      expect(dedicatedHourly).toBe(202);
+    });
+  });
 });

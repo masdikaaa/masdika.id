@@ -94,18 +94,18 @@ type CidrValidationResult = {
 
 const validateCidr = (cidr: string): CidrValidationResult => {
   if (!cidr) return { error: null };
-  
+
   let suggestion = "10.10.10.0/24";
   try {
     let ipPart = cidr.split('/')[0] || "";
     let prefixPart = cidr.split('/')[1];
     let prefix = parseInt(prefixPart);
     if (isNaN(prefix) || prefix < 0 || prefix > 32) prefix = 24;
-    
+
     let parts = ipPart.split('.').map(p => p.trim() === "" ? 0 : parseInt(p));
     parts = parts.map(p => isNaN(p) ? 0 : p);
     while (parts.length < 4) parts.push(0);
-    
+
     if (parts[0] !== 10 && parts[0] !== 172 && parts[0] !== 192) {
       if (ipPart.startsWith("17")) parts = [172, 16, 0, 0];
       else if (ipPart.startsWith("19")) parts = [192, 168, 0, 0];
@@ -114,39 +114,39 @@ const validateCidr = (cidr: string): CidrValidationResult => {
       if (parts[0] === 172 && (parts[1] < 16 || parts[1] > 31)) parts[1] = 16;
       if (parts[0] === 192 && parts[1] !== 168) parts[1] = 168;
     }
-    
+
     const ipNum = ((parts[0] << 24) | (parts[1] << 16) | (parts[2] << 8) | parts[3]) >>> 0;
     const mask = prefix === 0 ? 0 : (0xffffffff << (32 - prefix)) >>> 0;
     const networkNum = (ipNum & mask) >>> 0;
     const toIp = (n: number) => [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255].join('.');
-    
+
     suggestion = `${toIp(networkNum)}/${prefix}`;
-  } catch {}
+  } catch { }
 
   if (!cidr.includes('/')) return { error: "Invalid format. Expected IP/Prefix", suggestion };
-  
+
   const [base, prefixStr] = cidr.split('/');
   const prefix = parseInt(prefixStr);
   if (isNaN(prefix) || prefix < 0 || prefix > 32) return { error: "Invalid prefix length (0-32)", suggestion };
-  
+
   const parts = base.split('.').map(Number);
   if (parts.length !== 4 || parts.some(isNaN) || parts.some(p => p < 0 || p > 255)) {
     return { error: "Invalid IP address format", suggestion };
   }
-  
-  const isPrivate = (parts[0] === 10) || 
-                    (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) || 
-                    (parts[0] === 192 && parts[1] === 168);
+
+  const isPrivate = (parts[0] === 10) ||
+    (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) ||
+    (parts[0] === 192 && parts[1] === 168);
   if (!isPrivate) return { error: "Must be a private IP range (RFC 1918)", suggestion };
 
   const ipNum = ((parts[0] << 24) | (parts[1] << 16) | (parts[2] << 8) | parts[3]) >>> 0;
   const mask = prefix === 0 ? 0 : (0xffffffff << (32 - prefix)) >>> 0;
   const networkNum = (ipNum & mask) >>> 0;
-  
+
   if (ipNum !== networkNum) {
     return { error: `Must be a network address`, suggestion };
   }
-  
+
   return { error: null };
 };
 
@@ -167,7 +167,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
   // 1-Click Apps State (initialized immediately from URL query params or APP_CATALOG service)
   const initialAppQuery = searchParams.get("app") || searchParams.get("appId");
   const isAppCatalogService = serviceType === "APP_CATALOG";
-  const initialApp = initialAppQuery 
+  const initialApp = initialAppQuery
     ? (getAppById(initialAppQuery) || getAppByName(initialAppQuery))
     : (isAppCatalogService ? VPS_APPS[0] : null);
 
@@ -432,8 +432,8 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
       const lowerName = matchedTpl.name.toLowerCase();
       const family = lowerName.includes("alma") ? "AlmaLinux" :
         lowerName.includes("ubuntu") ? "Ubuntu" :
-        lowerName.includes("debian") ? "Debian" :
-        lowerName.includes("rocky") ? "Rocky Linux" : "Linux";
+          lowerName.includes("debian") ? "Debian" :
+            lowerName.includes("rocky") ? "Rocky Linux" : "Linux";
       setSelectedOsFamily(family);
       setSelectedTemplate(matchedTpl.id);
     }
@@ -592,8 +592,8 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
           const lowerName = tpl.name.toLowerCase();
           const family = lowerName.includes("alma") ? "AlmaLinux" :
             lowerName.includes("ubuntu") ? "Ubuntu" :
-            lowerName.includes("debian") ? "Debian" :
-            lowerName.includes("rocky") ? "Rocky Linux" : "Linux";
+              lowerName.includes("debian") ? "Debian" :
+                lowerName.includes("rocky") ? "Rocky Linux" : "Linux";
           setSelectedOsFamily(family);
           setSelectedTemplate(tpl.id);
         }
@@ -692,7 +692,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
       toast.error(cidrErr);
       return;
     }
-    
+
     setIsSubmittingVpc(true);
     try {
       const res = await fetch("/api/dashboard/vpc", {
@@ -700,17 +700,17 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: newVpcName, description: newVpcDescription, cidr: newVpcCidr, isNatEnabled: newVpcNatEnabled })
       });
-      
+
       if (res.ok) {
         toast.success("VPC Created successfully");
         const fetchRes = await fetch("/api/user/vps/order-data");
         if (fetchRes.ok) {
-           const data = await fetchRes.json();
-           if (data.vpcs) {
-             setVpcs(data.vpcs);
-             const newVpc = data.vpcs.find((v: any) => v.name === newVpcName);
-             if (newVpc) setSelectedVpcId(newVpc.id);
-           }
+          const data = await fetchRes.json();
+          if (data.vpcs) {
+            setVpcs(data.vpcs);
+            const newVpc = data.vpcs.find((v: any) => v.name === newVpcName);
+            if (newVpc) setSelectedVpcId(newVpc.id);
+          }
         }
         setIsCreatingVpc(false);
         setNewVpcName("");
@@ -797,7 +797,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
         toast.error("Private IP Address is required when attaching to a VPC");
         return;
       }
-      
+
       if (!isCreatingVpc && selectedVpcId) {
         const currentVpc = vpcs.find(v => v.id === selectedVpcId);
         if (currentVpc) {
@@ -1045,14 +1045,14 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
                               setUsername("");
                             }
                           }}
-                          options={Array.from(new Set(templates.map(t => t.name.split('-')[0]))).map(fam => ({ 
-                            value: fam, 
+                          options={Array.from(new Set(templates.map(t => t.name.split('-')[0]))).map(fam => ({
+                            value: fam,
                             label: (
                               <div className="flex items-center gap-3">
                                 {getOsIcon(fam, isDark)}
                                 <span>{fam}</span>
                               </div>
-                            ) 
+                            )
                           }))}
                           placeholder="Select Image..."
                           className={cn("w-full border rounded-xl px-4 py-3 text-sm font-semibold", isDark ? "bg-[#111115] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
@@ -1069,7 +1069,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
                               const parts = tpl.name.split('-');
                               const version = parts.slice(1).join('-') || 'Default';
                               return {
-                                value: tpl.id, 
+                                value: tpl.id,
                                 label: version
                               };
                             })
@@ -1379,14 +1379,14 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
                 <Select
                   value={kubernetesVersion}
                   onChange={(val) => setKubernetesVersion(val)}
-                  options={K3S_VERSIONS.map(v => ({ 
-                    value: v.id, 
+                  options={K3S_VERSIONS.map(v => ({
+                    value: v.id,
                     label: (
                       <div className="flex items-center gap-3">
                         <SiKubernetes className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
                         <span>{v.name}</span>
                       </div>
-                    ) 
+                    )
                   }))}
                   className={cn("w-full border rounded-xl px-4 py-3 text-sm font-semibold", isDark ? "bg-[#111115] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
                 />
@@ -1406,7 +1406,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
                   onChange={(val) => setSelectedNode(val.toString())}
                   options={nodes.map((node: any) => ({
                     value: node.node,
-                    label: nodes.length > 1 
+                    label: nodes.length > 1
                       ? `${node.regionName || "Region"} - Node ${node.node} (${node.status})`
                       : `${node.regionName || node.node} (${node.status})`
                   }))}
@@ -1641,9 +1641,9 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
                         <Select
                           value={selectedReservedIpId || ""}
                           onChange={(val) => setSelectedReservedIpId(parseInt(val))}
-                          options={reservedIps.map(ip => ({ 
-                            value: ip.id, 
-                            label: ip.publicIp ? `${ip.ipAddress} (Public: ${ip.publicIp})` : ip.ipAddress 
+                          options={reservedIps.map(ip => ({
+                            value: ip.id,
+                            label: ip.publicIp ? `${ip.ipAddress} (Public: ${ip.publicIp})` : ip.ipAddress
                           }))}
                           placeholder="Select Reserved IP"
                           className={cn("w-full rounded-lg px-3 py-2 text-sm", isDark ? "bg-[#111115] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
@@ -1725,8 +1725,8 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
                     {/* Note: Public IP allocation requires opening a support ticket after VPS activation */}
                     <div className={cn(
                       "p-3 rounded-xl border flex items-start gap-2.5 text-[11px] sm:text-xs leading-relaxed transition-all",
-                      isDark 
-                        ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" 
+                      isDark
+                        ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200"
                         : "bg-cyan-50 border-cyan-200 text-cyan-900 shadow-2xs"
                     )}>
                       <Info className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} role="presentation" aria-hidden="true" />
@@ -2104,9 +2104,9 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
                     ) : vpcs.length === 0 ? (
                       <div className={cn("text-sm p-4 rounded-xl border flex flex-col items-center justify-center text-center gap-3", isDark ? "text-zinc-400 bg-[#0a0a0c] border-white/[0.08]" : "text-slate-500 bg-white border-slate-200")}>
                         <p>You don't have any Virtual Private Cloud networks.</p>
-                        <button 
+                        <button
                           type="button"
-                          onClick={() => setIsCreatingVpc(true)} 
+                          onClick={() => setIsCreatingVpc(true)}
                           className="bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 px-4 py-2 rounded-lg font-semibold transition-colors text-xs"
                         >
                           Create VPC Network
@@ -2127,9 +2127,9 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
                                   className={cn("py-2 px-3 min-h-[38px] rounded-lg w-full", isDark ? "bg-[#111115] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
                                 />
                               </div>
-                              <button 
+                              <button
                                 type="button"
-                                onClick={() => setIsCreatingVpc(true)} 
+                                onClick={() => setIsCreatingVpc(true)}
                                 className={cn("w-full sm:w-auto shrink-0 border px-3 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-1 min-h-[38px] cursor-pointer", isDark ? "bg-white/[0.04] hover:bg-white/[0.08] border-white/[0.08] text-cyan-400" : "bg-white hover:bg-slate-50 border-slate-200 text-cyan-700")}
                               >
                                 <Plus className="w-3.5 h-3.5" /> New VPC
@@ -2153,7 +2153,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
                                     onClick={async () => {
                                       const newState = !selectedVpcObj.isNatEnabled;
                                       setVpcs(vpcs.map(v => v.id === selectedVpcId ? { ...v, isNatEnabled: newState } : v));
-                                      
+
                                       try {
                                         const res = await fetch(`/api/dashboard/vpc/${selectedVpcId}/nat`, {
                                           method: "PATCH",
@@ -2619,11 +2619,11 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
                                 "group relative p-3 rounded-xl border text-left cursor-pointer transition-all duration-150 flex flex-col justify-between gap-2",
                                 isSelected
                                   ? (isDark
-                                      ? "bg-cyan-500/10 border-cyan-500/60 shadow-sm shadow-cyan-500/10 ring-1 ring-cyan-500/50"
-                                      : "bg-cyan-50/80 border-cyan-500 shadow-xs ring-1 ring-cyan-500/30")
+                                    ? "bg-cyan-500/10 border-cyan-500/60 shadow-sm shadow-cyan-500/10 ring-1 ring-cyan-500/50"
+                                    : "bg-cyan-50/80 border-cyan-500 shadow-xs ring-1 ring-cyan-500/30")
                                   : (isDark
-                                      ? "bg-[#111115] border-white/[0.08] hover:border-white/[0.18] hover:bg-white/[0.02]"
-                                      : "bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50/60")
+                                    ? "bg-[#111115] border-white/[0.08] hover:border-white/[0.18] hover:bg-white/[0.02]"
+                                    : "bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50/60")
                               )}
                             >
                               <div className="flex items-start justify-between gap-2">
@@ -2884,7 +2884,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
               if (!password) missingFields.push("Password");
               if (password !== passwordConfirm) missingFields.push("Password Confirmation");
               if (imageMode !== "apps" && selectedTemplate === null) missingFields.push("OS Template");
-              
+
               if (useVpc && (!selectedVpcId || !privateIpAddress.trim() || (() => {
                 const currentVpc = vpcs.find(v => v.id === selectedVpcId);
                 if (!currentVpc) return true;

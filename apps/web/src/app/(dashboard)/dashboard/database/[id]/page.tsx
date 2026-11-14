@@ -11,12 +11,13 @@ import {
   Database, ChevronLeft, Check, Copy, ExternalLink, RefreshCw,
   Power, Square, Play, RotateCw, Download, Upload, Trash2, Eye, EyeOff,
   Cpu, Layers, HardDrive, ShieldAlert, Activity, Server, FileText, Code2, AlertTriangle, UploadCloud,
-  Loader2, CheckCircle2, Zap, Info
+  Loader2, CheckCircle2, Zap, Info, TrendingUp
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from "recharts";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { DatabaseScaleModal } from "@/components/DatabaseScaleModal";
 
 interface DatabaseDetail {
   id: number;
@@ -96,6 +97,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
   } | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [importModalOpen, setImportModalOpen] = useState(false);
+  const [scaleModalOpen, setScaleModalOpen] = useState(false);
   const [importing, setImporting] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -624,6 +626,22 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
               <span>Start</span>
             </button>
           )}
+
+          {/* Scale / Upgrade Database Button */}
+          <button
+            onClick={() => setScaleModalOpen(true)}
+            disabled={isInitializing || isSuspended}
+            className={cn(
+              "px-3.5 py-2 rounded-xl text-xs font-bold border flex items-center gap-1.5 transition-all cursor-pointer shadow-xs disabled:opacity-40 disabled:cursor-not-allowed",
+              isDark
+                ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/30"
+                : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border-cyan-200"
+            )}
+            title={isInitializing ? "Database engine is initializing..." : "Scale compute resources and expand storage"}
+          >
+            <TrendingUp className="w-3.5 h-3.5" />
+            <span>Scale / Upgrade</span>
+          </button>
 
           {/* Import Dump Button */}
           <button
@@ -1386,6 +1404,23 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                 </span>
               </div>
             </div>
+
+            <div className="pt-3 border-t border-white/[0.06]">
+              <button
+                type="button"
+                onClick={() => setScaleModalOpen(true)}
+                disabled={isInitializing || isSuspended}
+                className={cn(
+                  "w-full py-2.5 rounded-xl font-bold text-xs border flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed",
+                  isDark
+                    ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/30"
+                    : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border-cyan-200"
+                )}
+              >
+                <TrendingUp className="w-3.5 h-3.5" />
+                <span>Scale Compute & Storage</span>
+              </button>
+            </div>
           </div>
 
           {/* Danger Zone: Terminate Instance */}
@@ -1530,6 +1565,17 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
             </form>
           </div>
         </div>
+      )}
+
+      {/* Database Scale & Upgrade Modal */}
+      {db && (
+        <DatabaseScaleModal
+          isOpen={scaleModalOpen}
+          onClose={() => setScaleModalOpen(false)}
+          database={db}
+          onSuccess={() => fetchDatabase(false)}
+          isDark={isDark}
+        />
       )}
     </div>
   );
