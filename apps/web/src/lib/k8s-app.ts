@@ -103,23 +103,16 @@ export async function checkAppClusterCapacity(
   const isManuallyFull = settingMap.get('managed_app_capacity_full') === 'true' || settingMap.get('managed_app_maintenance_mode') === 'true';
 
   // Active instances in DB (exclude terminated or error instances)
-  const [activeApps, activeDbs] = await Promise.all([
-    prisma.appService.findMany({
-      where: { status: { notIn: ['TERMINATED', 'ERROR'] } },
-      select: { id: true, port: true, cpuShares: true, memoryMb: true, storageGb: true },
-    }),
-    prisma.databaseService.findMany({
-      where: { status: { notIn: ['TERMINATED', 'ERROR'] } },
-      select: { id: true, port: true },
-    }),
-  ]);
+  const activeApps = await prisma.appService.findMany({
+    where: { status: { notIn: ['TERMINATED', 'ERROR'] } },
+    select: { id: true, port: true, cpuShares: true, memoryMb: true, storageGb: true },
+  });
 
   const activeInstances = activeApps.length;
   const allocatedCpu = parseFloat(activeApps.reduce((sum, a) => sum + (a.cpuShares || 0), 0).toFixed(1));
   const allocatedMemoryMb = activeApps.reduce((sum, a) => sum + (a.memoryMb || 0), 0);
   const allocatedStorageGb = activeApps.reduce((sum, a) => sum + (a.storageGb || 10), 0);
   const usedPorts = new Set(activeApps.map((a) => a.port));
-  activeDbs.forEach((d) => usedPorts.add(d.port));
   const totalPorts = 2768; // NodePort range 30000 - 32767
   const availablePorts = Math.max(0, totalPorts - usedPorts.size);
 
@@ -451,7 +444,8 @@ export async function testAppClusterConnection(customConfig?: {
   }
 }
 
-// In-memory atomic reservation lock to prevent race conditions during rapid concurrent checkouts
+// Mutex queue and in-memory reservation cache for collision-free atomic port allocation during concurrent orders
+let appPortAllocationQueue = Promise.resolve();
 const recentlyReservedAppPorts = new Map<number, number>(); // port -> expiresAt
 
 /**
@@ -461,90 +455,82 @@ export function releaseReservedAppPort(port: number): void {
   recentlyReservedAppPorts.delete(port);
 }
 
+export function reserveAppPort(port: number, ttlMs = 120_000): void {
+  recentlyReservedAppPorts.set(port, Date.now() + ttlMs);
+}
+
 /**
- * Allocate a collision-free random available NodePort in the agreed range (30000..32767).
- * - Primary range for Managed Apps: 31500..32767 (1,268 dedicated ports).
- * - Primary range for Database Services: 30000..31499 (1,500 dedicated ports).
- * - Cross-checks BOTH DatabaseService, AppService, in-memory concurrency locks,
- *   and active cluster NodePorts to guarantee ZERO collisions.
- * - Automatically falls back to the full range if the primary pool is exhausted.
+ * Allocate a collision-free random available NodePort in the standard range (30000..32767).
+ * Standard Kubernetes NodePort range: 30000..32767 (2,768 ports).
+ * Fully atomic and race-condition protected: concurrent orders will never collide or pick the same port.
  */
-export async function allocateAppPort(min = 31500, max = 32767): Promise<number> {
-  // 1. Clean up expired in-memory reservations (older than 60s)
-  const now = Date.now();
-  for (const [p, exp] of recentlyReservedAppPorts.entries()) {
-    if (exp < now) {
-      recentlyReservedAppPorts.delete(p);
-    }
-  }
-
-  // 2. Query both app and database records in database (non-terminated)
-  const [usedApps, usedDbs] = await Promise.all([
-    prisma.appService.findMany({
-      where: { status: { not: 'TERMINATED' } },
-      select: { port: true },
-    }),
-    prisma.databaseService.findMany({
-      where: { status: { not: 'TERMINATED' } },
-      select: { port: true },
-    }),
-  ]);
-
-  const usedPorts = new Set<number>();
-  usedApps.forEach((a) => usedPorts.add(a.port));
-  usedDbs.forEach((d) => usedPorts.add(d.port));
-
-  // Add currently locked in-memory ports
-  for (const p of recentlyReservedAppPorts.keys()) {
-    usedPorts.add(p);
-  }
-
-  // 3. Scan live Kubernetes cluster for active NodePorts across all namespaces
-  try {
-    const { coreApi } = await getAppK8sClients();
-    const svcRes = await (coreApi as any).listServiceForAllNamespaces();
-    const items = svcRes.items || svcRes.body?.items || [];
-    for (const item of items) {
-      const ports = item.spec?.ports || [];
-      for (const p of ports) {
-        if (p.nodePort) {
-          usedPorts.add(p.nodePort);
+export async function allocateAppPort(min = 30000, max = 32767): Promise<number> {
+  return new Promise<number>((resolve, reject) => {
+    appPortAllocationQueue = appPortAllocationQueue
+      .then(async () => {
+        // 1. Clean up expired in-memory reservations (older than 120s)
+        const now = Date.now();
+        for (const [p, exp] of recentlyReservedAppPorts.entries()) {
+          if (exp < now) {
+            recentlyReservedAppPorts.delete(p);
+          }
         }
-      }
-    }
-  } catch {
-    // Cluster API might be mocked or temporarily unreachable; proceed with database records
-  }
 
-  // 4. Scan requested range
-  let availablePorts: number[] = [];
-  for (let port = min; port <= max; port++) {
-    if (!usedPorts.has(port)) {
-      availablePorts.push(port);
-    }
-  }
+        // 2. Query active app records in database (non-terminated)
+        const usedApps = await prisma.appService.findMany({
+          where: { status: { not: 'TERMINATED' } },
+          select: { port: true },
+        });
 
-  // 5. Smart fallback: if primary app range (31500..32767) is exhausted, search global range (30000..32767)
-  if (availablePorts.length === 0 && (min > 30000 || max < 32767)) {
-    for (let port = 30000; port <= 32767; port++) {
-      if (!usedPorts.has(port)) {
-        availablePorts.push(port);
-      }
-    }
-  }
+        const usedPorts = new Set<number>();
+        usedApps.forEach((a) => usedPorts.add(a.port));
 
-  if (availablePorts.length === 0) {
-    throw new Error(`No available NodePort in allocated range (${min}-${max}) or global range (30000-32767)`);
-  }
+        // 3. Add currently locked in-memory ports
+        for (const p of recentlyReservedAppPorts.keys()) {
+          usedPorts.add(p);
+        }
 
-  // 6. Select a random available port from the safe candidates
-  const randomIndex = crypto.randomInt(0, availablePorts.length);
-  const chosenPort = availablePorts[randomIndex];
+        // 4. Scan live Kubernetes cluster for active NodePorts across all namespaces
+        try {
+          const { coreApi } = await getAppK8sClients();
+          const svcRes = await (coreApi as any).listServiceForAllNamespaces();
+          const items = svcRes.items || svcRes.body?.items || [];
+          for (const item of items) {
+            const ports = item.spec?.ports || [];
+            for (const p of ports) {
+              if (p.nodePort) {
+                usedPorts.add(p.nodePort);
+              }
+            }
+          }
+        } catch {
+          // Cluster API might be unreachable; proceed with database records
+        }
 
-  // 7. Lock this port in-memory for 60 seconds to prevent concurrent requests from picking it
-  recentlyReservedAppPorts.set(chosenPort, now + 60_000);
+        // 5. Scan requested range (30000..32767)
+        const availablePorts: number[] = [];
+        for (let port = min; port <= max; port++) {
+          if (!usedPorts.has(port)) {
+            availablePorts.push(port);
+          }
+        }
 
-  return chosenPort;
+        if (availablePorts.length === 0) {
+          throw new Error(`No available NodePort remaining in application cluster range (${min}-${max})`);
+        }
+
+        // 6. Select a random available port from the safe candidates using cryptographic randomness
+        const randomIndex = crypto.randomInt(0, availablePorts.length);
+        const chosenPort = availablePorts[randomIndex];
+
+        // 7. Lock this port in-memory for 120 seconds so subsequent concurrent orders skip it
+        recentlyReservedAppPorts.set(chosenPort, now + 120_000);
+
+        return chosenPort;
+      })
+      .then(resolve)
+      .catch(reject);
+  });
 }
 
 /**

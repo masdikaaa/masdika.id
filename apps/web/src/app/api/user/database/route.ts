@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
 import {
   allocateAvailablePort,
+  releaseReservedDbPort,
   deployDatabase,
   parseDatabasePlanLimits,
   getK8sClusterConfig,
@@ -233,6 +234,7 @@ export async function POST(req: NextRequest) {
     } catch (portErr: any) {
       return NextResponse.json({
         error: portErr.message || "No available network ports remaining in cluster port pool.",
+        code: "PORT_POOL_EXHAUSTED",
       }, { status: 503 });
     }
 
@@ -248,6 +250,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (balanceDeduct.count === 0) {
+      releaseReservedDbPort(port);
       return NextResponse.json({
         error: `Saldo akun tidak mencukupi untuk akumulasi komitmen layanan aktif (Dibutuhkan minimal saldo Rp ${requiredBalance.toLocaleString("id-ID")}).`,
       }, { status: 400 });

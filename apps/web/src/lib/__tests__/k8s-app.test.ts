@@ -193,6 +193,17 @@ spec:
       expect(port).toBeLessThanOrEqual(30010);
       expect([30000, 30001, 30002, 30003]).not.toContain(port);
     });
+
+    it('should allocate distinct ports under rapid concurrent requests without collisions', async () => {
+      const ports = await Promise.all([
+        allocateAppPort(30100, 30120),
+        allocateAppPort(30100, 30120),
+        allocateAppPort(30100, 30120),
+        allocateAppPort(30100, 30120),
+      ]);
+      const uniquePorts = new Set(ports);
+      expect(uniquePorts.size).toBe(4);
+    });
   });
 
   describe('Cluster Resource Capacity Check', () => {

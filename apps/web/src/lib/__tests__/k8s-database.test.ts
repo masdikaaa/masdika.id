@@ -51,6 +51,7 @@ vi.mock('../prisma', () => ({
 import {
   buildConnectionDetails,
   parseDatabasePlanLimits,
+  allocateAvailablePort,
   DatabaseServiceRecord,
 } from '../k8s-database';
 import { OFFICIAL_DATABASE_PLANS } from '../database-plans';
@@ -329,6 +330,25 @@ describe('Managed Database K3s Engine - k8s-database.ts', () => {
       const dedicatedHourly = Math.max(1, Math.ceil(dedicatedMonthly / 720));
       expect(dedicatedMonthly).toBe(145000);
       expect(dedicatedHourly).toBe(202);
+    });
+  });
+
+  describe('NodePort Allocation & Concurrency Protection', () => {
+    it('should allocate ports within standard Kubernetes range (30000-32767)', async () => {
+      const port = await allocateAvailablePort(30000, 30010);
+      expect(port).toBeGreaterThanOrEqual(30000);
+      expect(port).toBeLessThanOrEqual(30010);
+    });
+
+    it('should prevent port collisions under concurrent database orders', async () => {
+      const ports = await Promise.all([
+        allocateAvailablePort(30200, 30220),
+        allocateAvailablePort(30200, 30220),
+        allocateAvailablePort(30200, 30220),
+        allocateAvailablePort(30200, 30220),
+      ]);
+      const unique = new Set(ports);
+      expect(unique.size).toBe(4);
     });
   });
 });
