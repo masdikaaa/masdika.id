@@ -26,6 +26,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
+  Boxes,
 } from "lucide-react";
 import {
   SiKubernetes,
@@ -92,6 +93,18 @@ const PRODUCTS = [
     sla: "99.9% SLA",
     specs: ["Postgres, MySQL, Redis, Mongo", "Persistent SATA SSD PVC", "Instant Web GUIs"],
     cta: "Deploy Database",
+  },
+  {
+    icon: Boxes,
+    title: "Managed Applications",
+    subtitle: "Kubernetes Production Microservices",
+    description:
+      "Deploy autonomous AI agents, multi-LLM gateways, and workflow engines (Hermes Agent, 9Router, n8n, OpenCode, OpenClaw) with Let's Encrypt SSL and sandboxed SSH.",
+    href: "/managed-apps",
+    type: "App Hosting",
+    sla: "99.9% SLA",
+    specs: ["AI & Workflow Stacks", "Auto Let's Encrypt SSL", "Sandboxed SSH Terminal"],
+    cta: "Launch App",
   },
   {
     icon: Cloud,

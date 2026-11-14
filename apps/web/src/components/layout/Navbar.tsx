@@ -26,6 +26,7 @@ import {
   Sun,
   Moon,
   Database,
+  Boxes,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
@@ -151,6 +152,13 @@ const DEV_MENU_ITEMS: MenuItem[] = [
     description: "High-performance managed MySQL, PostgreSQL, MariaDB, Redis & MongoDB.",
     href: "/managed-db",
     icon: Database,
+    badge: "New",
+  },
+  {
+    title: "Managed Apps",
+    description: "Production Kubernetes hosting for Hermes Agent, 9Router, n8n, OpenCode & OpenClaw.",
+    href: "/managed-apps",
+    icon: Boxes,
     badge: "New",
   },
 ];

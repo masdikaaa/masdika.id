@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from "react";
 import { Reorder } from "framer-motion";
-import { GripVertical, Calendar, Briefcase, Users, FileText, BookOpen, Save, RotateCcw, UploadCloud, Code, Compass, User, Server, LayoutDashboard, Star, Database, Cloud, Box , RefreshCw , Settings, Terminal, CodeXml, Rocket } from "lucide-react";
+import { GripVertical, Calendar, Briefcase, Users, FileText, BookOpen, Save, RotateCcw, UploadCloud, Code, Compass, User, Server, LayoutDashboard, Star, Database, Cloud, Box , RefreshCw , Settings, Terminal, CodeXml, Rocket, Boxes } from "lucide-react";
 import { SiKubernetes } from "react-icons/si";
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
@@ -20,6 +20,7 @@ const MENU_META: Record<string, { label: string; description: string; icon: Reac
   vps:       { label: "Cloud VPS",           description: "High-performance virtual private servers.",                    icon: Terminal,     color: "text-cyan-400", bg: "bg-cyan-500/10" },
   "app-catalog": { label: "App Catalog",     description: "1-Click automated deployment for Docker & AI stacks.",          icon: Rocket,    color: "text-cyan-400", bg: "bg-cyan-500/10" },
   "managed-db":  { label: "Managed DB",      description: "High-performance managed MySQL, MariaDB, PostgreSQL & MongoDB.", icon: Database,  color: "text-cyan-400", bg: "bg-cyan-500/10" },
+  "managed-apps": { label: "Managed Apps",   description: "Deploy Hermes Agent, 9Router, n8n, OpenCode & OpenClaw on Kubernetes.", icon: Boxes, color: "text-cyan-400", bg: "bg-cyan-500/10" },
   about:     { label: "About",               description: "Learn more about who we are and what we do.",                  icon: User,      color: "text-cyan-400", bg: "bg-cyan-500/10" },
   services:  { label: "Services",            description: "Professional services tailored for your needs.",               icon: Server,    color: "text-cyan-400", bg: "bg-cyan-500/10" },
   portfolio: { label: "Portfolio",           description: "A showcase of our past projects and achievements.",            icon: LayoutDashboard, color: "text-cyan-400", bg: "bg-cyan-500/10" },
@@ -29,8 +30,8 @@ const MENU_META: Record<string, { label: string; description: string; icon: Reac
 const DEFAULT_ORDER  = ['events', 'vacancies', 'community', 'blog', 'series'];
 const DEFAULT_BADGES = { events: 'New', vacancies: 'New', series: 'New' } as Record<string, string | false>;
 
-const DEFAULT_DEV_ORDER  = ['api-hub', 'reseller-api', 'upload', 'vps', 'app-catalog', 'managed-db'];
-const DEFAULT_DEV_BADGES = { 'api-hub': 'New', 'reseller-api': 'New', upload: 'New', vps: 'Premium', 'app-catalog': '1-Click', 'managed-db': 'New' } as Record<string, string | false>;
+const DEFAULT_DEV_ORDER  = ['api-hub', 'reseller-api', 'upload', 'vps', 'app-catalog', 'managed-db', 'managed-apps'];
+const DEFAULT_DEV_BADGES = { 'api-hub': 'New', 'reseller-api': 'New', upload: 'New', vps: 'Premium', 'app-catalog': '1-Click', 'managed-db': 'New', 'managed-apps': 'New' } as Record<string, string | false>;
 
 const DEFAULT_COMPANY_ORDER  = ['about', 'services', 'portfolio', 'skills'];
 const DEFAULT_COMPANY_BADGES = {} as Record<string, string | false>;

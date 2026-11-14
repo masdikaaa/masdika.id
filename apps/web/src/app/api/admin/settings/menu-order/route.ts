@@ -8,7 +8,7 @@ const VALID_KEYS = ['events', 'vacancies', 'community', 'blog', 'series'];
 
 const DEV_ORDER_KEY = 'dev_menu_order';
 const DEV_BADGES_KEY = 'dev_menu_badges';
-const DEV_VALID_KEYS = ['api-hub', 'reseller-api', 'upload', 'vps', 'app-catalog', 'managed-db', 'k3s'];
+const DEV_VALID_KEYS = ['api-hub', 'reseller-api', 'upload', 'vps', 'app-catalog', 'managed-db', 'managed-apps', 'k3s'];
 
 const COMPANY_ORDER_KEY = 'company_menu_order';
 const COMPANY_BADGES_KEY = 'company_menu_badges';

@@ -116,6 +116,7 @@ export function Footer({ socialLinks }: { socialLinks?: any }) {
               {[
                 { name: 'Cloud VPS', path: '/vps' },
                 { name: 'Managed Database', path: '/managed-db', badge: 'K3s' },
+                { name: 'Managed Apps', path: '/managed-apps', badge: 'K8s' },
                 { name: 'App Catalog', path: '/app-catalog', badge: '1-Click' },
                 { name: 'Looking Glass', path: '/lg', badge: 'Live' }
               ].map((link, idx) => (
