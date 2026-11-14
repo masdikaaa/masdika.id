@@ -253,13 +253,13 @@ export function AppScaleModal({
                         )}
                       </div>
 
-                      <div className="flex items-center gap-3 mt-1 text-[11px] text-[var(--text-muted)] font-medium">
-                        <span className="flex items-center gap-1">
+                      <div className="flex items-center gap-3 mt-1 text-[11px] text-[var(--text-muted)] font-medium flex-wrap">
+                        <span className="flex items-center gap-1 whitespace-nowrap shrink-0">
                           <Cpu className="w-3 h-3 text-cyan-400" />
                           {plan.cpuLabel}
                         </span>
-                        <span>•</span>
-                        <span className="flex items-center gap-1">
+                        <span className="shrink-0">•</span>
+                        <span className="flex items-center gap-1 whitespace-nowrap shrink-0">
                           <HardDrive className="w-3 h-3 text-blue-400" />
                           {plan.ramLabel}
                         </span>

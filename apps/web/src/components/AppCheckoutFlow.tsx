@@ -34,6 +34,10 @@ interface UserProfile {
   role: string;
 }
 
+function generateRandomSuffix(): string {
+  return Math.random().toString(36).substring(2, 6);
+}
+
 export default function AppCheckoutFlow() {
   const router = useRouter();
   const { theme } = useTheme();
@@ -76,8 +80,8 @@ export default function AppCheckoutFlow() {
   const handleSelectApp = (app: ManagedAppDefinition) => {
     setSelectedApp(app);
     setAppName(`${app.name} Instance`);
-    // auto-suggest subdomain
-    const randomSuffix = Math.random().toString(36).substring(2, 6);
+    // auto-suggest subdomain using pure module-scoped generator
+    const randomSuffix = generateRandomSuffix();
     setCustomSubdomain(`${app.id}-${randomSuffix}`);
   };
 
@@ -270,18 +274,18 @@ export default function AppCheckoutFlow() {
                       <p className={cn("text-xs leading-relaxed line-clamp-1", isDark ? "text-zinc-400" : "text-slate-500")}>
                         {templateDesc}
                       </p>
-                      <div className="flex items-center gap-3 mt-1 text-[11px] text-[var(--text-muted)] font-medium">
-                        <span className="flex items-center gap-1">
+                      <div className="flex items-center gap-3 mt-1 text-[11px] text-[var(--text-muted)] font-medium flex-wrap">
+                        <span className="flex items-center gap-1 whitespace-nowrap shrink-0">
                           <Cpu className="w-3 h-3 text-cyan-400" />
                           {plan.cpuLabel}
                         </span>
-                        <span>•</span>
-                        <span className="flex items-center gap-1">
+                        <span className="shrink-0">•</span>
+                        <span className="flex items-center gap-1 whitespace-nowrap shrink-0">
                           <HardDrive className="w-3 h-3 text-blue-400" />
                           {plan.ramLabel}
                         </span>
-                        <span>•</span>
-                        <span className={cn("font-bold", isDark ? "text-zinc-200" : "text-slate-800")}>
+                        <span className="shrink-0">•</span>
+                        <span className={cn("font-bold whitespace-nowrap shrink-0", isDark ? "text-zinc-200" : "text-slate-800")}>
                           {formatRupiah(plan.monthlyPrice)}/month
                         </span>
                       </div>

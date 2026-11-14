@@ -664,15 +664,15 @@ export default function DatabaseCheckoutFlow() {
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs border-collapse">
+                  <table className="w-full min-w-[500px] text-left text-xs border-collapse">
                     <thead>
                       <tr className={cn("border-b text-[11px] font-bold uppercase tracking-wider", isDark ? "border-white/[0.08] text-zinc-500" : "border-slate-200 text-slate-500")}>
-                        <th className="py-2.5 px-3 w-8"></th>
-                        <th className="py-2.5 px-3">ENGINE</th>
-                        <th className="py-2.5 px-3">VERSION</th>
-                        <th className="py-2.5 px-3">VCPU</th>
-                        <th className="py-2.5 px-3">RAM</th>
-                        <th className="py-2.5 px-3 text-right">PRICE</th>
+                        <th className="py-2.5 px-3 w-8 whitespace-nowrap"></th>
+                        <th className="py-2.5 px-3 whitespace-nowrap">ENGINE</th>
+                        <th className="py-2.5 px-3 whitespace-nowrap">VERSION</th>
+                        <th className="py-2.5 px-3 whitespace-nowrap">VCPU</th>
+                        <th className="py-2.5 px-3 whitespace-nowrap">RAM</th>
+                        <th className="py-2.5 px-3 text-right whitespace-nowrap">PRICE</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/[0.04]">
@@ -702,7 +702,7 @@ export default function DatabaseCheckoutFlow() {
                                   : "border-l-transparent hover:bg-slate-50 text-slate-700"
                             )}
                           >
-                            <td className="py-3 px-3">
+                            <td className="py-3 px-3 whitespace-nowrap">
                               <div className={cn(
                                 "w-4 h-4 rounded-full border flex items-center justify-center transition-all shrink-0",
                                 isSelected && !isUnavailable
@@ -712,33 +712,33 @@ export default function DatabaseCheckoutFlow() {
                                 {isSelected && !isUnavailable && <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-xs shadow-cyan-400/60" />}
                               </div>
                             </td>
-                            <td className="py-3 px-3">
+                            <td className="py-3 px-3 whitespace-nowrap">
                               <div className="flex items-center gap-2">
-                                <img src={activeEngineMeta.icon} alt={activeEngineMeta.name} className="w-4 h-4 object-contain" />
-                                <span className="font-bold">{activeEngineMeta.name}</span>
+                                <img src={activeEngineMeta.icon} alt={activeEngineMeta.name} className="w-4 h-4 object-contain shrink-0" />
+                                <span className="font-bold whitespace-nowrap">{activeEngineMeta.name}</span>
                               </div>
                             </td>
-                            <td className="py-3 px-3 text-zinc-400">{selectedVersion}</td>
-                            <td className="py-3 px-3">
-                              <span className={cn("px-2 py-0.5 rounded font-mono text-[11px]", isDark ? "bg-white/5 text-zinc-200" : "bg-slate-100 text-slate-800")}>
+                            <td className="py-3 px-3 text-zinc-400 whitespace-nowrap">{selectedVersion}</td>
+                            <td className="py-3 px-3 whitespace-nowrap">
+                              <span className={cn("inline-flex items-center whitespace-nowrap px-2.5 py-1 rounded font-mono text-[11px] font-semibold leading-none", isDark ? "bg-white/5 text-zinc-200" : "bg-slate-100 text-slate-800")}>
                                 {flavor.vcpu}
                               </span>
                             </td>
-                            <td className="py-3 px-3">
-                              <span className={cn("px-2 py-0.5 rounded font-mono text-[11px]", isDark ? "bg-white/5 text-zinc-200" : "bg-slate-100 text-slate-800")}>
+                            <td className="py-3 px-3 whitespace-nowrap">
+                              <span className={cn("inline-flex items-center whitespace-nowrap px-2.5 py-1 rounded font-mono text-[11px] font-semibold leading-none", isDark ? "bg-white/5 text-zinc-200" : "bg-slate-100 text-slate-800")}>
                                 {flavor.ram}
                               </span>
                             </td>
-                            <td className="py-3 px-3 text-right">
+                            <td className="py-3 px-3 text-right whitespace-nowrap">
                               {isUnavailable ? (
-                                <div className="text-right">
-                                  <span className="text-zinc-500 line-through">{formatRupiah(flavor.price)}/mo</span>
-                                  <span className="block text-[10px] text-amber-500 font-bold">
+                                <div className="text-right whitespace-nowrap">
+                                  <span className="text-zinc-500 line-through whitespace-nowrap">{formatRupiah(flavor.price)}/mo</span>
+                                  <span className="block text-[10px] text-amber-500 font-bold whitespace-nowrap">
                                     {flavor.isOutOfStock ? "(Out of Stock)" : "(Full Capacity)"}
                                   </span>
                                 </div>
                               ) : (
-                                <span className={cn("font-bold text-sm font-mono", isSelected ? "text-cyan-400" : isDark ? "text-zinc-300" : "text-slate-800")}>
+                                <span className={cn("font-bold text-sm font-mono whitespace-nowrap", isSelected ? "text-cyan-400" : isDark ? "text-zinc-300" : "text-slate-800")}>
                                   {formatRupiah(flavor.price)}/mo
                                 </span>
                               )}
