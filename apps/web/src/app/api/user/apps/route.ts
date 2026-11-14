@@ -292,15 +292,16 @@ export async function POST(req: NextRequest) {
         message: `Successfully provisioned ${catalogItem.name}.`,
       });
     } catch (k8sErr: any) {
-      console.error("Kubernetes deployment error:", k8sErr);
-      // Mark as ERROR in DB
-      await prisma.appService.update({
+      console.error("Kubernetes deployment error, rolling back record:", k8sErr);
+      // Clean rollback: delete failed application record so it does not clutter the user's dashboard with broken instances
+      await prisma.appService.delete({
         where: { id: appRecord.id },
-        data: { status: "ERROR", suspendReason: k8sErr.message || "Failed to initialize Kubernetes pod" },
+      }).catch((delErr) => {
+        console.error("Failed to delete orphaned app record on rollback:", delErr);
       });
+
       return NextResponse.json({
         error: `Failed to deploy application on Kubernetes cluster: ${k8sErr.message || "Cluster error"}`,
-        appId: appRecord.id,
       }, { status: 500 });
     }
   } catch (error: any) {

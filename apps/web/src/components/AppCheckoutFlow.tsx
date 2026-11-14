@@ -14,6 +14,7 @@ import {
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
 import {
+  Rocket,
   Zap,
   Check,
   AlertTriangle,
@@ -620,7 +621,7 @@ export default function AppCheckoutFlow() {
               "bg-cyan-400 hover:bg-cyan-300 shadow-cyan-400/25"
             )}
           >
-            <Zap className={cn("w-4 h-4", deploying && "animate-spin")} />
+            <Rocket className={cn("w-4 h-4", deploying && "animate-spin")} />
             <span>{deploying ? "Deploying App..." : "Deploy App"}</span>
           </button>
 
