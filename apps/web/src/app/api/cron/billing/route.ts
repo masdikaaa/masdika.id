@@ -740,6 +740,74 @@ export async function GET(req: Request) {
     }
 
     // ============================================
+    // 2.5 MANAGED APPS & DATABASES (3-DAY GRACE PERIOD TERMINATIONS)
+    // ============================================
+    const defaultThreeDaysService = new Date(now);
+    defaultThreeDaysService.setDate(defaultThreeDaysService.getDate() + 3);
+
+    // Self-heal any suspended AppService with missing terminationDate so it gets 3 days grace
+    await prisma.appService.updateMany({
+      where: {
+        status: 'SUSPENDED',
+        terminationDate: null
+      },
+      data: {
+        terminationDate: defaultThreeDaysService
+      }
+    });
+
+    const terminatedAppsList = await prisma.appService.findMany({
+      where: {
+        status: 'SUSPENDED',
+        terminationDate: { not: null, lte: now }
+      }
+    });
+
+    for (const app of terminatedAppsList) {
+      try {
+        const { deleteAppService } = await import('@/lib/k8s-app');
+        await deleteAppService(app as any);
+        await prisma.appService.update({
+          where: { id: app.id },
+          data: { status: 'TERMINATED' }
+        });
+      } catch (e) {
+        console.error(`Failed to terminate expired app ${app.id}:`, e);
+      }
+    }
+
+    // Self-heal any suspended DatabaseService with missing terminationDate so it gets 3 days grace
+    await prisma.databaseService.updateMany({
+      where: {
+        status: 'SUSPENDED',
+        terminationDate: null
+      },
+      data: {
+        terminationDate: defaultThreeDaysService
+      }
+    });
+
+    const terminatedDbsList = await prisma.databaseService.findMany({
+      where: {
+        status: 'SUSPENDED',
+        terminationDate: { not: null, lte: now }
+      }
+    });
+
+    for (const db of terminatedDbsList) {
+      try {
+        const { deleteDatabase } = await import('@/lib/k8s-database');
+        await deleteDatabase(db.id, db.k8sNamespace || 'managed-db');
+        await prisma.databaseService.update({
+          where: { id: db.id },
+          data: { status: 'TERMINATED' }
+        });
+      } catch (e) {
+        console.error(`Failed to terminate expired database ${db.id}:`, e);
+      }
+    }
+
+    // ============================================
     // RESERVED IPS BILLING
     // ============================================
     const expiredReservedIps = await prisma.reservedIp.findMany({

@@ -5,6 +5,7 @@ import {
   allocateAppPort,
   deployAppService,
   getAppClusterConfig,
+  checkAppClusterCapacity,
 } from "@/lib/k8s-app";
 import {
   getAppDefinition,
@@ -156,6 +157,14 @@ export async function POST(req: NextRequest) {
       newServiceMonthly: monthlyPrice,
       serviceName: `Managed App (${catalogItem.name} - ${planCodeFinal})`,
     });
+
+    // 4.5 Cluster Hardware Capacity Check (8 Core CPU / 16 GB RAM / 60 GB Disk)
+    const clusterCapacity = await checkAppClusterCapacity(cpuShares, memoryMb, storageGb);
+    if (!clusterCapacity.available) {
+      return NextResponse.json({
+        error: clusterCapacity.userMessage || "The Managed Applications cluster is currently at full capacity. Deployments are paused.",
+      }, { status: 400 });
+    }
 
     // 5. Smart Collision-Proof Subdomain Generator & Conflict Resolver
     let subdomain = "";

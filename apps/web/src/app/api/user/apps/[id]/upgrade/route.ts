@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
-import { scaleAppService } from "@/lib/k8s-app";
+import { scaleAppService, checkAppClusterCapacity } from "@/lib/k8s-app";
 import { getAppPlan, getAppDefinition } from "@/lib/app-catalog";
 import { getUserServicesCommitment } from "@/lib/billing-commitment";
 import { getClientIp } from "@/lib/get-ip";
@@ -157,6 +157,19 @@ export async function POST(
             currentBalance: user.balance,
             shortfall: requiredBalance - user.balance,
           },
+          { status: 400 }
+        );
+      }
+    }
+
+    // 5.5 Check Cluster Capacity for Delta Resources
+    const diffCpu = Math.max(0, targetPlan.cpuShares - app.cpuShares);
+    const diffRam = Math.max(0, targetPlan.memoryMb - app.memoryMb);
+    if (diffCpu > 0 || diffRam > 0) {
+      const clusterCapacity = await checkAppClusterCapacity(diffCpu, diffRam, 0);
+      if (!clusterCapacity.available) {
+        return NextResponse.json(
+          { error: clusterCapacity.userMessage || "Cluster compute limits reached. Unable to upgrade app to larger compute flavor." },
           { status: 400 }
         );
       }

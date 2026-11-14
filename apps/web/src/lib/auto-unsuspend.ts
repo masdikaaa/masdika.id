@@ -478,10 +478,67 @@ export async function attemptAutoUnsuspendDatabase(dbId: number) {
   }
 }
 
+/**
+ * Attempts to unsuspend a Managed Application service if user has sufficient balance.
+ */
+export async function attemptAutoUnsuspendApp(appId: number) {
+  try {
+    const app = await prisma.appService.findUnique({
+      where: { id: appId },
+      include: { user: true }
+    });
+
+    if (!app) return { success: false, message: 'App not found' };
+    if (app.status !== 'SUSPENDED') return { success: false, message: 'App is not suspended' };
+
+    // Check if suspension was due to billing
+    if (!isBillingSuspension(app.suspendReason)) {
+      return { success: false, unsuspended: false, reason: 'NON_BILLING_SUSPENSION' };
+    }
+
+    const hourlyRate = app.hourlyRate || 30;
+    if (app.user.balance < hourlyRate) {
+      return { success: false, unsuspended: false, reason: 'INSUFFICIENT_BALANCE' };
+    }
+
+    await prisma.$transaction(async (tx) => {
+      const updateResult = await tx.user.updateMany({
+        where: { id: app.userId, balance: { gte: hourlyRate } },
+        data: { balance: { decrement: hourlyRate } }
+      });
+      if (updateResult.count === 0) throw new Error("INSUFFICIENT_BALANCE");
+
+      await tx.appService.update({
+        where: { id: app.id },
+        data: {
+          status: 'RUNNING',
+          suspendReason: null,
+          terminationDate: null,
+          accumulatedCost: { increment: hourlyRate },
+          lastBilledAt: new Date()
+        }
+      });
+    });
+
+    // Scale up K8s pod to 1 replica
+    try {
+      const { startAppService } = await import('@/lib/k8s-app');
+      await startAppService(app as any);
+    } catch (startErr) {
+      console.error(`[Auto-Unsuspend] Failed to start K8s pod for App ${app.id}:`, startErr);
+    }
+
+    return { success: true, unsuspended: true };
+  } catch (err: any) {
+    return { success: false, message: err.message };
+  }
+}
+
 export async function attemptAutoUnsuspendAllForUser(userId: number) {
   let vpsCount = 0;
   let subCount = 0;
   let dbCount = 0;
+  let appCount = 0;
   const errors: any[] = [];
 
   try {
@@ -531,12 +588,25 @@ export async function attemptAutoUnsuspendAllForUser(userId: number) {
       const res = await attemptAutoUnsuspendDatabase(db.id);
       if (res.unsuspended) dbCount++;
     }
+
+    const suspendedApps = await prisma.appService.findMany({
+      where: {
+        userId,
+        status: 'SUSPENDED'
+      },
+      select: { id: true }
+    });
+
+    for (const app of suspendedApps) {
+      const res = await attemptAutoUnsuspendApp(app.id);
+      if (res.unsuspended) appCount++;
+    }
   } catch (err) {
     console.error(`[Auto-Unsuspend] Failed to auto-unsuspend all for user ${userId}:`, err);
     errors.push(err);
   }
 
-  return { vpsCount, subCount, dbCount, errors };
+  return { vpsCount, subCount, dbCount, appCount, errors };
 }
 
 /**
@@ -547,6 +617,7 @@ export async function attemptAutoUnsuspendAll() {
   let vpsCount = 0;
   let subCount = 0;
   let dbCount = 0;
+  let appCount = 0;
   const errors: any[] = [];
 
   try {
@@ -585,10 +656,22 @@ export async function attemptAutoUnsuspendAll() {
       const res = await attemptAutoUnsuspendDatabase(db.id);
       if (res.unsuspended) dbCount++;
     }
+
+    const suspendedApps = await prisma.appService.findMany({
+      where: {
+        status: 'SUSPENDED'
+      },
+      select: { id: true }
+    });
+
+    for (const app of suspendedApps) {
+      const res = await attemptAutoUnsuspendApp(app.id);
+      if (res.unsuspended) appCount++;
+    }
   } catch (err) {
     console.error('[Auto-Unsuspend] Global auto-unsuspend batch failed:', err);
     errors.push(err);
   }
 
-  return { vpsCount, subCount, dbCount, errors };
+  return { vpsCount, subCount, dbCount, appCount, errors };
 }

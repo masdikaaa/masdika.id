@@ -672,6 +672,90 @@ export async function GET(req: Request) {
     }
 
     // ----------------------------------------------------
+    // PROCESS MANAGED APPLICATIONS (HOURLY BILLING)
+    // ----------------------------------------------------
+    let appProcessed = 0;
+    let appSuspended = 0;
+    let appTerminated = 0;
+
+    // 1. Process active apps for hourly burn
+    const activeApps = await prisma.appService.findMany({
+      where: {
+        status: { in: ['RUNNING', 'STOPPED'] },
+        hourlyRate: { gt: 0 }
+      },
+      include: { user: true }
+    });
+
+    for (const app of activeApps) {
+      const costThisHour = app.hourlyRate;
+
+      try {
+        await prisma.$transaction(async (tx) => {
+          const updateResult = await tx.user.updateMany({
+            where: { id: app.userId, balance: { gte: costThisHour } },
+            data: { balance: { decrement: costThisHour } }
+          });
+          if (updateResult.count === 0) throw new Error("INSUFFICIENT_BALANCE");
+
+          await tx.appService.update({
+            where: { id: app.id },
+            data: {
+              accumulatedCost: { increment: costThisHour },
+              lastBilledAt: now
+            }
+          });
+        });
+        appProcessed++;
+      } catch (e: any) {
+        if (e.message === "INSUFFICIENT_BALANCE") {
+          appSuspended++;
+          const defaultTermination = new Date(now);
+          defaultTermination.setDate(defaultTermination.getDate() + 3);
+
+          await prisma.appService.update({
+            where: { id: app.id },
+            data: {
+              status: 'SUSPENDED',
+              suspendReason: 'Insufficient balance for Pay as You Go hourly application billing.',
+              terminationDate: defaultTermination
+            }
+          });
+
+          // Stop application pod on K8s (scale to 0)
+          try {
+            const { stopAppService } = await import('@/lib/k8s-app');
+            await stopAppService(app as any);
+          } catch (stopErr) {
+            console.error(`Failed to stop app pod for App ${app.id}:`, stopErr);
+          }
+        }
+      }
+    }
+
+    // 2. Terminate suspended apps that reached 3-day grace period
+    const expiredApps = await prisma.appService.findMany({
+      where: {
+        status: 'SUSPENDED',
+        terminationDate: { lte: now }
+      }
+    });
+
+    for (const expApp of expiredApps) {
+      try {
+        const { deleteAppService } = await import('@/lib/k8s-app');
+        await deleteAppService(expApp as any);
+        await prisma.appService.update({
+          where: { id: expApp.id },
+          data: { status: 'TERMINATED' }
+        });
+        appTerminated++;
+      } catch (termErr) {
+        console.error(`Failed to terminate expired app ${expApp.id}:`, termErr);
+      }
+    }
+
+    // ----------------------------------------------------
     // LOW BALANCE NOTIFICATIONS (ALL PAYG SERVICES)
     // Checks all active services (VPS, IPs, Subscriptions)
     // and sends warning email to customers with remaining runtime <= 24 hours.
@@ -695,6 +779,8 @@ export async function GET(req: Request) {
         ghostErrors: typeof ghostErrors !== 'undefined' ? ghostErrors : []
       },
       reservedIps: { processed: ipProcessed, insufficientBalance: ipReleased },
+      databases: { processed: dbProcessed, suspended: dbSuspended, terminated: dbTerminated },
+      apps: { processed: appProcessed, suspended: appSuspended, terminated: appTerminated },
       lowBalanceAlerts: lowBalanceSummary
     };
 

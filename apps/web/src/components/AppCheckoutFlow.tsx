@@ -55,6 +55,18 @@ export default function AppCheckoutFlow() {
   const [userBalance, setUserBalance] = useState<number>(0);
   const [activeCommitment, setActiveCommitment] = useState<number>(0);
   const [loadingBalance, setLoadingBalance] = useState<boolean>(true);
+  const [clusterCapacity, setClusterCapacity] = useState<{
+    available: boolean;
+    status: string;
+    capacityPercent: number;
+    allocatedCpu: number;
+    totalCpu: number;
+    cpuPercent: number;
+    allocatedMemoryMb: number;
+    totalMemoryMb: number;
+    memoryPercent: number;
+    userMessage?: string;
+  } | null>(null);
   const [deploying, setDeploying] = useState(false);
 
   // Fetch user balance and active services commitment (Identical to DatabaseCheckoutFlow)
@@ -73,6 +85,16 @@ export default function AppCheckoutFlow() {
       })
       .catch(() => { })
       .finally(() => setLoadingBalance(false));
+
+    // Fetch cluster resource capacity (Dedicated specs: 8 Core CPU / 16 GB RAM / 60 GB Disk)
+    fetch("/api/user/apps/capacity")
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && json.data) {
+          setClusterCapacity(json.data);
+        }
+      })
+      .catch(() => { });
 
     // Fetch dynamic app plans from DB (Admin editable in /admin/plans)
     fetch("/api/public/plans")
@@ -126,6 +148,15 @@ export default function AppCheckoutFlow() {
   const isBalanceInsufficient = !loadingBalance && userBalance < totalRequiredBalance;
   const shortfall = Math.max(0, totalRequiredBalance - userBalance);
 
+  const isClusterFull = Boolean(
+    clusterCapacity && (!clusterCapacity.available || clusterCapacity.status === "FULL" || clusterCapacity.status === "OFFLINE")
+  );
+  const isPlanExceedsCapacity = Boolean(
+    clusterCapacity &&
+    clusterCapacity.totalMemoryMb > 0 &&
+    (clusterCapacity.totalMemoryMb - clusterCapacity.allocatedMemoryMb < selectedPlan.memoryMb)
+  );
+
   const cleanSubdomain = customSubdomain
     ? customSubdomain.toLowerCase().trim().replace(/[^a-z0-9-]/g, "")
     : `${selectedApp.id}-abc`;
@@ -133,6 +164,13 @@ export default function AppCheckoutFlow() {
   const handleDeploy = async () => {
     if (!appName.trim()) {
       toast.error("Please enter a name for your application.");
+      return;
+    }
+
+    if (isClusterFull || isPlanExceedsCapacity) {
+      toast.error(
+        clusterCapacity?.userMessage || "The Managed Applications cluster is currently at full capacity. Deployments are temporarily paused."
+      );
       return;
     }
 
@@ -274,14 +312,23 @@ export default function AppCheckoutFlow() {
               const isSelected = selectedPlan.id === plan.id;
               const templateTitle = `${selectedApp.name} (${plan.planCode})`;
               const templateDesc = `${selectedApp.name} with ${plan.cpuShares} CPU and ${plan.memoryMb >= 1024 ? `${plan.memoryMb / 1024}GB` : `${plan.memoryMb}MB`} RAM`;
+              const isPlanExceeds = Boolean(
+                clusterCapacity &&
+                clusterCapacity.totalMemoryMb > 0 &&
+                (clusterCapacity.totalMemoryMb - clusterCapacity.allocatedMemoryMb < plan.memoryMb)
+              );
+              const isPlanDisabled = isClusterFull || isPlanExceeds;
 
               return (
                 <div
                   key={plan.id}
-                  onClick={() => setSelectedPlan(plan)}
+                  onClick={() => {
+                    if (!isPlanDisabled) setSelectedPlan(plan);
+                  }}
                   className={cn(
-                    "relative p-4 rounded-xl border transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4",
-                    isSelected
+                    "relative p-4 rounded-xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4",
+                    isPlanDisabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer",
+                    isSelected && !isPlanDisabled
                       ? isDark
                         ? "bg-cyan-500/10 border-cyan-400 ring-1 ring-cyan-400/40 shadow-md"
                         : "bg-cyan-50/90 border-cyan-500 ring-1 ring-cyan-500/30 shadow-xs"
@@ -294,7 +341,7 @@ export default function AppCheckoutFlow() {
                     {/* Cloud Icon container matching Gambar 1 */}
                     <div className={cn(
                       "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-colors",
-                      isSelected
+                      isSelected && !isPlanDisabled
                         ? isDark ? "bg-cyan-500/15 border-cyan-500/30 text-cyan-400" : "bg-cyan-100 border-cyan-300 text-cyan-700"
                         : isDark ? "bg-white/[0.03] border-white/[0.08] text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-500"
                     )}>
@@ -336,25 +383,29 @@ export default function AppCheckoutFlow() {
                   </div>
 
                   <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 self-stretch sm:self-auto pt-2 sm:pt-0 border-t sm:border-0 border-inherit">
-                    {/* Stock Status Badge */}
+                    {/* Stock / Capacity Status Badge */}
                     <span className={cn(
                       "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border",
-                      isDark
-                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                        : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                      isPlanDisabled
+                        ? isDark
+                          ? "bg-red-500/10 text-red-400 border-red-500/20"
+                          : "bg-red-50 text-red-700 border-red-200"
+                        : isDark
+                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                          : "bg-emerald-50 text-emerald-700 border-emerald-200"
                     )}>
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      Available
+                      <span className={cn("w-1.5 h-1.5 rounded-full", isPlanDisabled ? "bg-red-400" : "bg-emerald-400 animate-pulse")} />
+                      {isPlanDisabled ? "Full Capacity" : "Available"}
                     </span>
 
                     {/* Radio circle indicator */}
                     <div className={cn(
                       "w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all",
-                      isSelected
+                      isSelected && !isPlanDisabled
                         ? "border-cyan-400 bg-cyan-400/20 shadow-xs"
                         : isDark ? "border-zinc-600" : "border-slate-300"
                     )}>
-                      {isSelected && (
+                      {isSelected && !isPlanDisabled && (
                         <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-xs shadow-cyan-400/60" />
                       )}
                     </div>
@@ -611,18 +662,42 @@ export default function AppCheckoutFlow() {
             </div>
           )}
 
+          {/* Cluster Full / Capacity Alert */}
+          {(isClusterFull || isPlanExceedsCapacity) && (
+            <div className={cn(
+              "rounded-xl p-3.5 mb-5 border text-xs space-y-1.5",
+              isDark ? "bg-amber-500/10 border-amber-500/20 text-amber-300" : "bg-amber-50 border-amber-200 text-amber-800"
+            )}>
+              <div className="flex items-center gap-2 font-bold">
+                <AlertTriangle className="w-4 h-4 shrink-0 text-amber-400" />
+                <span>{isClusterFull ? "Cluster at Full Capacity" : "Plan Exceeds Server Capacity"}</span>
+              </div>
+              <p className="text-[11px] leading-relaxed opacity-90">
+                {clusterCapacity?.userMessage || "Server resources (8 Core CPU / 16 GB RAM / 60 GB Disk) are fully allocated. Please choose a smaller flavor or wait until resources are freed."}
+              </p>
+            </div>
+          )}
+
           {/* Deploy Button (Matching Masdika Cyan Brand Theme & VPS Standard) */}
           <button
             type="button"
             onClick={handleDeploy}
-            disabled={deploying || isBalanceInsufficient}
+            disabled={deploying || isBalanceInsufficient || isClusterFull || isPlanExceedsCapacity}
             className={cn(
               "w-full py-3.5 px-5 rounded-xl font-bold text-sm text-slate-950 transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]",
               "bg-cyan-400 hover:bg-cyan-300 shadow-cyan-400/25"
             )}
           >
             <Rocket className={cn("w-4 h-4", deploying && "animate-spin")} />
-            <span>{deploying ? "Deploying App..." : "Deploy App"}</span>
+            <span>
+              {deploying
+                ? "Deploying App..."
+                : isClusterFull
+                  ? "Cluster at Full Capacity"
+                  : isPlanExceedsCapacity
+                    ? "Selected Plan Exceeds Capacity"
+                    : "Deploy App"}
+            </span>
           </button>
 
           {selectedApp.accessProtocol === "SSH" ? (

@@ -14,6 +14,7 @@ import {
   deleteAppService,
   allocateAppPort,
   buildAppContainerSpec,
+  checkAppClusterCapacity,
 } from '../k8s-app';
 import * as k8s from '@kubernetes/client-node';
 
@@ -191,6 +192,30 @@ spec:
       expect(port).toBeGreaterThanOrEqual(30000);
       expect(port).toBeLessThanOrEqual(30010);
       expect([30000, 30001, 30002, 30003]).not.toContain(port);
+    });
+  });
+
+  describe('Cluster Resource Capacity Check', () => {
+    it('should permit ordering when requested within 8 CPU, 16 GB RAM, 60 GB Disk', async () => {
+      const cap = await checkAppClusterCapacity(1.0, 2048, 10);
+      expect(cap.available).toBe(true);
+      expect(cap.totalCpu).toBe(8.0);
+      expect(cap.totalMemoryMb).toBe(16384);
+      expect(cap.totalStorageGb).toBe(60);
+    });
+
+    it('should reject ordering when requested exceeds hardware capacity limits', async () => {
+      const capCpu = await checkAppClusterCapacity(16.0, 1024, 10);
+      expect(capCpu.available).toBe(false);
+      expect(capCpu.status).toBe('FULL');
+
+      const capRam = await checkAppClusterCapacity(1.0, 32768, 10);
+      expect(capRam.available).toBe(false);
+      expect(capRam.status).toBe('FULL');
+
+      const capStorage = await checkAppClusterCapacity(1.0, 1024, 100);
+      expect(capStorage.available).toBe(false);
+      expect(capStorage.status).toBe('FULL');
     });
   });
 });

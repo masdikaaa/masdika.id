@@ -48,6 +48,180 @@ export interface AppClusterConfig {
   publicIp: string;
 }
 
+export interface AppClusterCapacity {
+  available: boolean;
+  status: 'OPTIMAL' | 'WARNING' | 'FULL' | 'OFFLINE';
+  capacityPercent: number;
+  activeInstances: number;
+  maxInstances: number;
+  allocatedCpu: number;
+  totalCpu: number;
+  cpuPercent: number;
+  allocatedMemoryMb: number;
+  totalMemoryMb: number;
+  memoryPercent: number;
+  allocatedStorageGb: number;
+  totalStorageGb: number;
+  storagePercent: number;
+  availablePorts: number;
+  totalPorts: number;
+  reason?: string;
+  userMessage?: string;
+}
+
+/**
+ * Check cluster resource capacity for Managed Applications (8 Core CPU, 16 GB RAM, 60 GB Disk).
+ * Prevents oversubscription and prevents order placement when cluster resources are full.
+ */
+export async function checkAppClusterCapacity(
+  requestedCpu = 0,
+  requestedRamMb = 0,
+  requestedDiskGb = 0
+): Promise<AppClusterCapacity> {
+  const settings = await prisma.setting.findMany({
+    where: {
+      key: {
+        in: [
+          'managed_app_capacity_full',
+          'managed_app_maintenance_mode',
+          'managed_app_max_instances',
+          'managed_app_max_cpu',
+          'managed_app_max_ram_gb',
+          'managed_app_max_disk_gb',
+        ],
+      },
+    },
+  });
+
+  const settingMap = new Map<string, string>();
+  for (const s of settings) {
+    settingMap.set(s.key, s.value);
+  }
+
+  const isManuallyFull = settingMap.get('managed_app_capacity_full') === 'true' || settingMap.get('managed_app_maintenance_mode') === 'true';
+
+  // Active instances in DB (exclude terminated or error instances)
+  const activeApps = await prisma.appService.findMany({
+    where: { status: { notIn: ['TERMINATED', 'ERROR'] } },
+    select: { id: true, port: true, cpuShares: true, memoryMb: true, storageGb: true },
+  });
+
+  const activeInstances = activeApps.length;
+  const allocatedCpu = parseFloat(activeApps.reduce((sum, a) => sum + (a.cpuShares || 0), 0).toFixed(1));
+  const allocatedMemoryMb = activeApps.reduce((sum, a) => sum + (a.memoryMb || 0), 0);
+  const allocatedStorageGb = activeApps.reduce((sum, a) => sum + (a.storageGb || 10), 0);
+  const usedPorts = new Set(activeApps.map((a) => a.port));
+  const totalPorts = 2768; // NodePort range 30000 - 32767
+  const availablePorts = Math.max(0, totalPorts - usedPorts.size);
+
+  // Dedicated Hardware Server Specs: 8 Cores CPU, 16 GB RAM (16384 MB), 60 GB Disk
+  const customMaxInstances = parseInt(settingMap.get('managed_app_max_instances') || '', 10);
+  const customMaxCpu = parseFloat(settingMap.get('managed_app_max_cpu') || '');
+  const customMaxRamGb = parseFloat(settingMap.get('managed_app_max_ram_gb') || '');
+  const customMaxDiskGb = parseFloat(settingMap.get('managed_app_max_disk_gb') || '');
+
+  const totalCpu = !isNaN(customMaxCpu) && customMaxCpu > 0 ? customMaxCpu : 8.0;
+  const totalMemoryMb = !isNaN(customMaxRamGb) && customMaxRamGb > 0 ? customMaxRamGb * 1024 : 16384;
+  const totalStorageGb = !isNaN(customMaxDiskGb) && customMaxDiskGb > 0 ? customMaxDiskGb : 60;
+  const maxInstances = !isNaN(customMaxInstances) && customMaxInstances > 0 ? customMaxInstances : 20;
+
+  const cpuPercent = totalCpu > 0 ? Math.min(100, Math.round((allocatedCpu / totalCpu) * 100)) : 100;
+  const memoryPercent = totalMemoryMb > 0 ? Math.min(100, Math.round((allocatedMemoryMb / totalMemoryMb) * 100)) : 100;
+  const storagePercent = totalStorageGb > 0 ? Math.min(100, Math.round((allocatedStorageGb / totalStorageGb) * 100)) : 100;
+  const instancePercent = maxInstances > 0 ? Math.min(100, Math.round((activeInstances / maxInstances) * 100)) : 100;
+
+  const capacityPercent = Math.max(cpuPercent, memoryPercent, storagePercent, instancePercent);
+
+  if (isManuallyFull) {
+    return {
+      available: false,
+      status: 'FULL',
+      capacityPercent: 100,
+      activeInstances,
+      maxInstances,
+      allocatedCpu,
+      totalCpu,
+      cpuPercent: 100,
+      allocatedMemoryMb,
+      totalMemoryMb,
+      memoryPercent: 100,
+      allocatedStorageGb,
+      totalStorageGb,
+      storagePercent: 100,
+      availablePorts,
+      totalPorts,
+      reason: 'Application provisioning paused by administrator',
+      userMessage: 'The Managed Applications cluster is temporarily undergoing maintenance or capacity expansion. New application deployments are temporarily paused.',
+    };
+  }
+
+  // Check if requested resources exceed capacity
+  const wouldExceedCpu = (allocatedCpu + requestedCpu) > totalCpu;
+  const wouldExceedRam = (allocatedMemoryMb + requestedRamMb) > totalMemoryMb;
+  const wouldExceedStorage = (allocatedStorageGb + requestedDiskGb) > totalStorageGb;
+  const wouldExceedInstances = (activeInstances + 1) > maxInstances;
+  const noPortsAvailable = availablePorts <= 0;
+
+  if (wouldExceedCpu || wouldExceedRam || wouldExceedStorage || wouldExceedInstances || noPortsAvailable) {
+    let reason = 'Cluster resources are full';
+    let userMessage = 'The Managed Applications cluster has reached full compute/storage capacity. Deployment is paused until existing resources are scaled down or terminated.';
+    if (wouldExceedCpu) {
+      reason = `vCPU limit reached (${allocatedCpu}/${totalCpu} cores allocated)`;
+      userMessage = `Server vCPU capacity reached (${totalCpu} cores max). Please choose a smaller compute plan or try again later.`;
+    } else if (wouldExceedRam) {
+      reason = `RAM limit reached (${(allocatedMemoryMb / 1024).toFixed(1)}/${(totalMemoryMb / 1024).toFixed(1)} GB allocated)`;
+      userMessage = `Server RAM capacity reached (${(totalMemoryMb / 1024).toFixed(0)} GB max). Please choose a smaller compute plan or try again later.`;
+    } else if (wouldExceedStorage) {
+      reason = `Storage limit reached (${allocatedStorageGb}/${totalStorageGb} GB allocated)`;
+      userMessage = `Server storage capacity reached (${totalStorageGb} GB max). Deployment is paused until storage is freed.`;
+    } else if (noPortsAvailable) {
+      reason = 'No NodePorts available in 30000-32767 range';
+      userMessage = 'All service ports in the cluster are currently assigned.';
+    }
+
+    return {
+      available: false,
+      status: 'FULL',
+      capacityPercent: 100,
+      activeInstances,
+      maxInstances,
+      allocatedCpu,
+      totalCpu,
+      cpuPercent,
+      allocatedMemoryMb,
+      totalMemoryMb,
+      memoryPercent,
+      allocatedStorageGb,
+      totalStorageGb,
+      storagePercent,
+      availablePorts,
+      totalPorts,
+      reason,
+      userMessage,
+    };
+  }
+
+  const status: 'OPTIMAL' | 'WARNING' = capacityPercent >= 80 ? 'WARNING' : 'OPTIMAL';
+  return {
+    available: true,
+    status,
+    capacityPercent,
+    activeInstances,
+    maxInstances,
+    allocatedCpu,
+    totalCpu,
+    cpuPercent,
+    allocatedMemoryMb,
+    totalMemoryMb,
+    memoryPercent,
+    allocatedStorageGb,
+    totalStorageGb,
+    storagePercent,
+    availablePorts,
+    totalPorts,
+  };
+}
+
 // In-memory cache for cluster configuration (60 seconds TTL)
 let cachedAppClusterConfig: AppClusterConfig | null = null;
 let appClusterConfigExpiry = 0;
