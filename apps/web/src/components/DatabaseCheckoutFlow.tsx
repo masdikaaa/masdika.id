@@ -582,7 +582,7 @@ export default function DatabaseCheckoutFlow() {
                     </p>
                   </div>
                   <span className={cn("text-xs font-bold px-2.5 py-1 rounded-full border shrink-0 whitespace-nowrap", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
-                    K8s Native
+                    K3s Native
                   </span>
                 </div>
 

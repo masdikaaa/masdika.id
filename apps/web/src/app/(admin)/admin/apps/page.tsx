@@ -170,19 +170,19 @@ export default function AdminManagedAppsPage() {
 
   return (
     <div className="space-y-6 max-w-full pb-16">
-      {/* Top Banner Header */}
+      {/* Top Banner Header (Consistent with Gambar 3 Managed Database) */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 flex-wrap">
             <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-              Managed Applications Administration
+              Managed Applications Clusters
             </h1>
             <span className={cn("px-2.5 py-0.5 rounded-full text-xs font-bold border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
-              Cluster Engine
+              K3s Native
             </span>
           </div>
           <p className={cn("text-xs sm:text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
-            Manage, supervise, power cycle, and monitor all customer AI agents, gateways, and workflow instances across the cluster.
+            Manage all customer AI agents, gateways &amp; workflow pods deployed on Kubernetes.
           </p>
         </div>
 
@@ -199,11 +199,8 @@ export default function AdminManagedAppsPage() {
             <span>Refresh</span>
           </button>
           <Link
-            href="/admin/settings"
-            className={cn(
-              "px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 border cursor-pointer",
-              isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-2xs"
-            )}
+            href="/admin/settings?tab=apps"
+            className="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
           >
             <Settings className="w-3.5 h-3.5" />
             <span>Cluster Settings</span>
@@ -227,7 +224,7 @@ export default function AdminManagedAppsPage() {
               {stats?.totalInstances ?? apps.length}
             </span>
             <span className={cn("text-xs font-semibold", isDark ? "text-cyan-400" : "text-cyan-600")}>
-              Instances
+              Active Instances
             </span>
           </div>
         </div>
@@ -265,7 +262,7 @@ export default function AdminManagedAppsPage() {
               {stats?.totalCpu ?? 0} vCPU
             </span>
             <span className={cn("text-xs font-semibold", isDark ? "text-cyan-400" : "text-cyan-600")}>
-              {stats?.totalMemoryGb ?? 0} GB
+              • {stats?.totalMemoryGb ?? 0} GB RAM
             </span>
           </div>
         </div>
@@ -273,24 +270,24 @@ export default function AdminManagedAppsPage() {
         <div className={cn("rounded-2xl border p-5 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-xs")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-[11px] font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
-              MONTHLY RUN RATE
+              K3S HOST CAPACITY
             </span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
-              <ShieldCheck className="w-4 h-4" />
+              <Server className="w-4 h-4" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={cn("text-xl sm:text-2xl font-black tracking-tight", isDark ? "text-cyan-400" : "text-cyan-700")}>
-              {formatRupiah(stats?.totalMonthlyRunRate ?? 0)}
+            <span className={cn("text-xl sm:text-2xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+              16 GB • 8 Core
             </span>
             <span className={cn("text-xs font-semibold", isDark ? "text-cyan-400" : "text-cyan-600")}>
-              /mo
+              Shared
             </span>
           </div>
         </div>
       </div>
 
-      {/* Filters and Search Bar */}
+      {/* Filters and Search Bar (Pill buttons matching Gambar 3) */}
       <div className={cn("rounded-2xl border p-4 transition-all flex flex-col md:flex-row items-center justify-between gap-3", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200 shadow-xs")}>
         <div className="relative w-full md:w-80">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
@@ -298,7 +295,7 @@ export default function AdminManagedAppsPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by app, customer, or domain..."
+            placeholder="Search by instance, customer name, email, or port..."
             className={cn(
               "w-full pl-9 pr-3 py-1.5 rounded-xl border text-xs transition-all focus:outline-none focus:ring-2 focus:ring-cyan-400/20 focus:border-cyan-400",
               isDark ? "bg-white/[0.03] border-white/10 text-white placeholder-zinc-500" : "bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400"
@@ -307,38 +304,55 @@ export default function AdminManagedAppsPage() {
         </div>
 
         <div className="flex items-center gap-2 flex-wrap w-full md:w-auto justify-end">
-          {/* App Type Filter */}
-          <select
-            value={selectedType}
-            onChange={(e) => setSelectedType(e.target.value)}
-            className={cn(
-              "px-3 py-1.5 rounded-xl border text-xs font-medium cursor-pointer transition-all",
-              isDark ? "bg-[#111115] border-white/10 text-white" : "bg-white border-slate-200 text-slate-800"
-            )}
-          >
-            <option value="ALL">All App Types</option>
+          {/* App Stack Pill Filters */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
+            <button
+              type="button"
+              onClick={() => setSelectedType("ALL")}
+              className={cn(
+                "px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer",
+                selectedType === "ALL"
+                  ? "bg-cyan-500 text-slate-950 font-bold"
+                  : isDark ? "bg-white/5 text-zinc-400 hover:text-white" : "bg-slate-100 text-slate-600 hover:text-slate-900"
+              )}
+            >
+              All Apps
+            </button>
             {MANAGED_APPS_CATALOG.map((cat) => (
-              <option key={cat.id} value={cat.id}>
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => setSelectedType(cat.id)}
+                className={cn(
+                  "px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap",
+                  selectedType === cat.id
+                    ? "bg-cyan-500 text-slate-950 font-bold"
+                    : isDark ? "bg-white/5 text-zinc-400 hover:text-white" : "bg-slate-100 text-slate-600 hover:text-slate-900"
+                )}
+              >
                 {cat.name}
-              </option>
+              </button>
             ))}
-          </select>
+          </div>
 
-          {/* Status Filter */}
-          <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className={cn(
-              "px-3 py-1.5 rounded-xl border text-xs font-medium cursor-pointer transition-all",
-              isDark ? "bg-[#111115] border-white/10 text-white" : "bg-white border-slate-200 text-slate-800"
-            )}
-          >
-            <option value="ALL">All Status</option>
-            <option value="RUNNING">Running</option>
-            <option value="STOPPED">Stopped</option>
-            <option value="PROVISIONING">Starting</option>
-            <option value="SUSPENDED">Suspended</option>
-          </select>
+          {/* Status Pill Filters */}
+          <div className="flex items-center gap-1.5 pl-2 border-l border-white/10">
+            {["ALL", "RUNNING", "STOPPED"].map((st) => (
+              <button
+                key={st}
+                type="button"
+                onClick={() => setSelectedStatus(st)}
+                className={cn(
+                  "px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer uppercase",
+                  selectedStatus === st
+                    ? "bg-cyan-500 text-slate-950 font-bold"
+                    : isDark ? "bg-white/5 text-zinc-400 hover:text-white" : "bg-slate-100 text-slate-600 hover:text-slate-900"
+                )}
+              >
+                {st === "ALL" ? "All Status" : st}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -417,33 +431,54 @@ export default function AdminManagedAppsPage() {
                       </span>
                     </td>
 
-                    {/* Ingress HTTPS */}
+                    {/* Ingress / Terminal Endpoint */}
                     <td className="py-3 px-4">
-                      <button
-                        type="button"
-                        onClick={() => copyToClipboard(app.httpsUrl, `url-${app.id}`)}
-                        className={cn("font-mono font-bold text-xs flex items-center gap-1 hover:underline cursor-pointer", isDark ? "text-cyan-400" : "text-cyan-700")}
-                      >
-                        <Globe className="w-3 h-3 shrink-0" />
-                        <span className="truncate max-w-[180px]">{app.fullDomain}</span>
-                        {copiedId === `url-${app.id}` ? <Check className="w-3 h-3 text-emerald-400 shrink-0" /> : <Copy className="w-3 h-3 opacity-60 shrink-0" />}
-                      </button>
-                      <span className={cn("text-[10px] font-mono block mt-0.5", isDark ? "text-zinc-500" : "text-slate-400")}>
-                        Port: {app.appPort} (HTTP)
-                      </span>
+                      {app.catalog?.accessProtocol === 'SSH' ? (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => copyToClipboard(`ssh -p ${app.port} hermes@apps.masdika.id`, `ssh-${app.id}`)}
+                            className={cn("font-mono font-bold text-xs flex items-center gap-1 hover:underline cursor-pointer", isDark ? "text-amber-400" : "text-amber-700")}
+                            title="Click to copy SSH command"
+                          >
+                            <Server className="w-3 h-3 shrink-0" />
+                            <span className="truncate max-w-[180px]">apps.masdika.id:{app.port}</span>
+                            {copiedId === `ssh-${app.id}` ? <Check className="w-3 h-3 text-emerald-400 shrink-0" /> : <Copy className="w-3 h-3 opacity-60 shrink-0" />}
+                          </button>
+                          <span className={cn("text-[10px] font-mono block mt-0.5", isDark ? "text-zinc-500" : "text-slate-400")}>
+                            Port: {app.port} (SSH Terminal)
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => copyToClipboard(app.httpsUrl, `url-${app.id}`)}
+                            className={cn("font-mono font-bold text-xs flex items-center gap-1 hover:underline cursor-pointer", isDark ? "text-cyan-400" : "text-cyan-700")}
+                            title="Click to copy Web URL"
+                          >
+                            <Globe className="w-3 h-3 shrink-0" />
+                            <span className="truncate max-w-[180px]">{app.fullDomain}</span>
+                            {copiedId === `url-${app.id}` ? <Check className="w-3 h-3 text-emerald-400 shrink-0" /> : <Copy className="w-3 h-3 opacity-60 shrink-0" />}
+                          </button>
+                          <span className={cn("text-[10px] font-mono block mt-0.5", isDark ? "text-zinc-500" : "text-slate-400")}>
+                            HTTPS Wildcard SSL
+                          </span>
+                        </>
+                      )}
                     </td>
 
                     {/* Specifications */}
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className={cn("px-2 py-0.5 rounded font-mono text-[11px]", isDark ? "bg-white/5 text-zinc-300" : "bg-slate-100 text-slate-700")}>
+                        <span className={cn("px-2 py-0.5 rounded font-mono text-[11px] font-semibold border", isDark ? "bg-cyan-500/10 text-cyan-300 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
                           {app.cpuShares} vCPU
                         </span>
-                        <span className={cn("px-2 py-0.5 rounded font-mono text-[11px]", isDark ? "bg-white/5 text-zinc-300" : "bg-slate-100 text-slate-700")}>
+                        <span className={cn("px-2 py-0.5 rounded font-mono text-[11px] font-semibold border", isDark ? "bg-purple-500/10 text-purple-300 border-purple-500/20" : "bg-purple-50 text-purple-700 border-purple-200")}>
                           {app.memoryMb >= 1024 ? `${app.memoryMb / 1024} GB` : `${app.memoryMb} MB`}
                         </span>
-                        <span className={cn("px-2 py-0.5 rounded font-mono text-[11px]", isDark ? "bg-white/5 text-zinc-300" : "bg-slate-100 text-slate-700")}>
-                          {app.storageGb || 10} GB
+                        <span className={cn("px-2 py-0.5 rounded font-mono text-[10px] font-medium border", isDark ? "bg-white/[0.04] text-zinc-400 border-white/[0.08]" : "bg-slate-100 text-slate-600 border-slate-200")}>
+                          Shared Pool
                         </span>
                       </div>
                     </td>
@@ -514,13 +549,13 @@ export default function AdminManagedAppsPage() {
                           </button>
                         )}
 
-                        {/* Open in Browser */}
+                        {/* Open in Browser / Instance Dashboard */}
                         <a
-                          href={app.httpsUrl}
+                          href={app.catalog?.accessProtocol === 'SSH' ? `/dashboard/apps/${app.id}` : app.httpsUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           className={cn("p-1.5 rounded-lg border transition-all cursor-pointer", isDark ? "bg-white/5 border-white/10 hover:bg-white/10 text-cyan-300" : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-cyan-700")}
-                          title="Open Application Web URL"
+                          title={app.catalog?.accessProtocol === 'SSH' ? "Open Instance Dashboard (Terminal)" : "Open Application Web URL"}
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
                         </a>

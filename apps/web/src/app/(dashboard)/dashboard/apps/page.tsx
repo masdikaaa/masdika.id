@@ -230,6 +230,9 @@ export default function ManagedAppsPage() {
               Managed Applications
             </h1>
             <span className={cn("px-2.5 py-0.5 rounded-full text-xs font-bold border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+              K3s Native
+            </span>
+            <span className={cn("px-2.5 py-0.5 rounded-full text-xs font-bold border", isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200")}>
               Auto SSL
             </span>
           </div>

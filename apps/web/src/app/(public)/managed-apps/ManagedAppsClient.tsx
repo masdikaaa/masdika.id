@@ -89,7 +89,7 @@ const APP_FAQS = [
   },
   {
     q: "Can I connect via SSH to Hermes Agent and OpenCode?",
-    a: "Yes! Every SSH-enabled instance is assigned a dedicated NodePort within the range 30000–32767. You can connect securely from your terminal using ssh hermes@apps.masdika.id -p <PORT> or via our integrated web terminal."
+    a: "Yes! Every SSH-enabled instance is assigned a dedicated, secure SSH port. You can connect securely from your terminal using your allocated connection command (e.g. ssh hermes@apps.masdika.id -p <PORT>) or via our integrated web terminal."
   },
   {
     q: "Is there protection against resource abuse on SSH containers?",
@@ -495,7 +495,7 @@ export default function ManagedAppsClient({
                   {[
                     "Isolated Kubernetes StatefulSet Pod with Dedicated Resource Limits",
                     "Automated Self-Healing Pods with Zero-Downtime Rolling Restarts",
-                    "Sandboxed SSH & Direct NodePort Access (30000–32767) for CLI Tools",
+                    "Sandboxed SSH & Dedicated Secure Port for CLI Tools",
                     "Automated Let's Encrypt TLS/SSL Ingress for Web Interfaces",
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
@@ -712,8 +712,9 @@ export default function ManagedAppsClient({
                       )}
                     >
                       {p.isPopular && (
-                        <span className="absolute -top-2.5 right-3 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950">
-                          Popular
+                        <span className="absolute -top-2.5 right-3 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 text-slate-950 shadow-md flex items-center gap-1 border border-amber-300/40">
+                          <Sparkles className="w-2.5 h-2.5 fill-slate-950" />
+                          <span>Popular</span>
                         </span>
                       )}
 
@@ -951,7 +952,7 @@ export default function ManagedAppsClient({
           buttonHref="/dashboard/apps"
           logs={APP_TERMINAL_LOGS}
           stats={APP_TERMINAL_STATS}
-          terminalTitle="PROVISIONING MANAGED APPLICATION (K8S)"
+          terminalTitle="PROVISIONING MANAGED APPLICATION (K3S)"
           iconType="k3s"
           targetServer="Dell PowerEdge R630 • Sidoarjo DC (Kubernetes Cluster)"
           provisionEstimate="Backend: Native Kubernetes (~15 Seconds)"

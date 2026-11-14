@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import {
-  Plus, Edit2, Trash2, Server, Zap, Database, Check, X, ShieldAlert,
+  Plus, Edit2, Trash2, Server, Zap, Database, Boxes, Check, X, ShieldAlert,
   CheckCircle, FileText, FileVideo, Music, PlaySquare, Cloud, Activity,
   UploadCloud, RefreshCw, LayoutDashboard, Search, LayoutGrid, Table as TableIcon,
   HardDrive, Cpu, Layers, Sparkles, SlidersHorizontal, ArrowUpDown, MapPin
@@ -31,6 +31,7 @@ interface Plan {
 const VALID_SERVICES = [
   "ALL",
   "DATABASE",
+  "APP",
   "CDN",
   "TIKTOK",
   "SPOTIFY",
@@ -43,6 +44,7 @@ const VALID_SERVICES = [
 const SERVICE_LABELS: Record<string, string> = {
   ALL: "All Services",
   DATABASE: "Managed Database",
+  APP: "Managed Apps",
   CDN: "File CDN",
   TIKTOK: "TikTok API",
   SPOTIFY: "Spotify API",
@@ -59,6 +61,14 @@ interface DatabaseLimitsState {
   region: string;
   shared: boolean;
   engines: string[];
+}
+
+interface AppLimitsState {
+  cpu: string;
+  ram: string;
+  planCode: string;
+  region: string;
+  shared: boolean;
 }
 
 interface CdnLimitsState {
@@ -113,6 +123,14 @@ export default function AdminPlansPage() {
     region: "Sidoarjo",
     shared: true,
     engines: ["MySQL", "MariaDB", "PostgreSQL", "MongoDB"]
+  });
+
+  const [appLimits, setAppLimits] = useState<AppLimitsState>({
+    cpu: "1 CPU",
+    ram: "1.0 GB RAM",
+    planCode: "1C1G",
+    region: "Sidoarjo",
+    shared: true
   });
 
   const [cdnLimits, setCdnLimits] = useState<CdnLimitsState>({
@@ -177,6 +195,14 @@ export default function AdminPlansPage() {
       engines: ["MySQL", "MariaDB", "PostgreSQL", "MongoDB"]
     });
 
+    setAppLimits({
+      cpu: "1 CPU",
+      ram: "1.0 GB RAM",
+      planCode: "1C1G",
+      region: "Sidoarjo",
+      shared: true
+    });
+
     setCdnLimits({
       storageGB: "10",
       transferGB: "50",
@@ -215,6 +241,14 @@ export default function AdminPlansPage() {
           region: parsed.region || "Sidoarjo",
           shared: parsed.shared !== undefined ? Boolean(parsed.shared) : true,
           engines: Array.isArray(parsed.engines) ? parsed.engines : ["MySQL", "MariaDB", "PostgreSQL", "MongoDB"]
+        });
+      } else if (plan.service === "APP") {
+        setAppLimits({
+          cpu: parsed.cpu || "1 CPU",
+          ram: parsed.ram || "1.0 GB RAM",
+          planCode: parsed.planCode || "1C1G",
+          region: parsed.region || "Sidoarjo",
+          shared: parsed.shared !== undefined ? Boolean(parsed.shared) : true
         });
       } else if (plan.service === "CDN") {
         setCdnLimits({
@@ -261,6 +295,8 @@ export default function AdminPlansPage() {
       limitsJsonString = JSON.stringify(customObj);
     } else if (formData.service === "DATABASE") {
       limitsJsonString = JSON.stringify(dbLimits);
+    } else if (formData.service === "APP") {
+      limitsJsonString = JSON.stringify(appLimits);
     } else if (formData.service === "CDN") {
       limitsJsonString = JSON.stringify({
         storageGB: Number(cdnLimits.storageGB) || cdnLimits.storageGB,
@@ -378,6 +414,7 @@ export default function AdminPlansPage() {
   const getServiceIcon = (service: string) => {
     switch (service) {
       case "DATABASE": return <Database className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />;
+      case "APP": return <Boxes className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />;
       case "CDN": return <UploadCloud className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />;
       case "TIKTOK": return <FileVideo className={cn("w-4 h-4", isDark ? "text-purple-400" : "text-purple-600")} />;
       case "SPOTIFY": return <Music className={cn("w-4 h-4", isDark ? "text-emerald-400" : "text-emerald-600")} />;
@@ -418,6 +455,36 @@ export default function AdminPlansPage() {
             <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-medium border", isDark ? "bg-white/[0.04] text-zinc-400 border-white/[0.08]" : "bg-slate-100 text-slate-600 border-slate-200")}>
               {parsed.shared ? "Shared Pool" : "Dedicated"}
             </span>
+          </div>
+        );
+      }
+
+      if (plan.service === "APP") {
+        return (
+          <div className="flex flex-wrap items-center gap-1.5 max-w-[340px]">
+            {parsed.cpu && (
+              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border flex items-center gap-1", isDark ? "bg-cyan-500/10 text-cyan-300 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+                <Cpu className="w-3 h-3" /> {parsed.cpu}
+              </span>
+            )}
+            {parsed.ram && (
+              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border flex items-center gap-1", isDark ? "bg-purple-500/10 text-purple-300 border-purple-500/20" : "bg-purple-50 text-purple-700 border-purple-200")}>
+                <Layers className="w-3 h-3" /> {parsed.ram}
+              </span>
+            )}
+            {parsed.region && (
+              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border flex items-center gap-1", isDark ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200")}>
+                <MapPin className="w-3 h-3" /> {parsed.region}
+              </span>
+            )}
+            <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-medium border", isDark ? "bg-white/[0.04] text-zinc-400 border-white/[0.08]" : "bg-slate-100 text-slate-600 border-slate-200")}>
+              Shared Pool
+            </span>
+            {parsed.planCode && (
+              <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-mono font-bold border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/30" : "bg-cyan-50 text-cyan-800 border-cyan-200")}>
+                {parsed.planCode}
+              </span>
+            )}
           </div>
         );
       }
@@ -1012,6 +1079,7 @@ export default function AdminPlansPage() {
                     }}
                     options={[
                       { value: "DATABASE", label: "Managed Database (K3s)" },
+                      { value: "APP", label: "Managed Apps (K3s)" },
                       { value: "CDN", label: "File CDN" },
                       { value: "TIKTOK", label: "TikTok API" },
                       { value: "SPOTIFY", label: "Spotify API" },
@@ -1251,6 +1319,71 @@ export default function AdminPlansPage() {
                             </button>
                           );
                         })}
+                      </div>
+                    </div>
+                  </div>
+                ) : formData.service === "APP" ? (
+                  /* Form for Managed Apps */
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div>
+                        <label className={cn("text-[11px] font-bold block mb-1", isDark ? "text-zinc-400" : "text-slate-600")}>
+                          CPU Allocation
+                        </label>
+                        <input
+                          type="text"
+                          value={appLimits.cpu}
+                          onChange={(e) => setAppLimits({ ...appLimits, cpu: e.target.value })}
+                          placeholder="e.g. 1 CPU or 2 vCPU"
+                          className={cn("w-full border rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:border-cyan-500", isDark ? "bg-white/[0.03] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
+                        />
+                      </div>
+                      <div>
+                        <label className={cn("text-[11px] font-bold block mb-1", isDark ? "text-zinc-400" : "text-slate-600")}>
+                          RAM Allocation
+                        </label>
+                        <input
+                          type="text"
+                          value={appLimits.ram}
+                          onChange={(e) => setAppLimits({ ...appLimits, ram: e.target.value })}
+                          placeholder="e.g. 1.0 GB RAM"
+                          className={cn("w-full border rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:border-cyan-500", isDark ? "bg-white/[0.03] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
+                        />
+                      </div>
+                      <div>
+                        <label className={cn("text-[11px] font-bold block mb-1", isDark ? "text-zinc-400" : "text-slate-600")}>
+                          Plan Code
+                        </label>
+                        <input
+                          type="text"
+                          value={appLimits.planCode}
+                          onChange={(e) => setAppLimits({ ...appLimits, planCode: e.target.value })}
+                          placeholder="e.g. 1C1G or 2C4G"
+                          className={cn("w-full border rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:border-cyan-500", isDark ? "bg-white/[0.03] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className={cn("text-[11px] font-bold block mb-1", isDark ? "text-zinc-400" : "text-slate-600")}>
+                          Region & Datacenter
+                        </label>
+                        <input
+                          type="text"
+                          value={appLimits.region}
+                          onChange={(e) => setAppLimits({ ...appLimits, region: e.target.value })}
+                          placeholder="e.g. Sidoarjo"
+                          className={cn("w-full border rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:border-cyan-500", isDark ? "bg-white/[0.03] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
+                        />
+                      </div>
+                      <div>
+                        <label className={cn("text-[11px] font-bold block mb-1", isDark ? "text-zinc-400" : "text-slate-600")}>
+                          Resource Pool Mode
+                        </label>
+                        <div className={cn("w-full border rounded-lg px-3 py-2 text-xs font-semibold flex items-center", isDark ? "bg-white/[0.02] border-white/[0.08] text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-700")}>
+                          Shared Multi-Tenant (K3s Pods)
+                        </div>
                       </div>
                     </div>
                   </div>

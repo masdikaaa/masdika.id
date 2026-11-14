@@ -30,7 +30,7 @@ export default function SettingsPage() {
     { id: 'services', label: 'Services', icon: Settings, desc: 'Service Management' },
     { id: 'storage', label: 'RustFS Storage', icon: HardDrive, desc: 'S3-Compatible CDN Storage' },
     { id: 'database', label: 'Managed DB (K3s)', icon: Database, desc: 'K3s Cluster, PMA, pgAdmin & Mongo' },
-    { id: 'apps', label: 'Managed Apps (K8s)', icon: Boxes, desc: 'K3s Cluster & Let\'s Encrypt SSL for Apps' },
+    { id: 'apps', label: 'Managed Apps (K3s)', icon: Boxes, desc: 'K3s Cluster & Let\'s Encrypt SSL for Apps' },
   ];
 
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
@@ -2161,7 +2161,7 @@ export default function SettingsPage() {
               </motion.div>
             )}
 
-            {/* Managed Apps (K8s) Tab */}
+            {/* Managed Apps (K3s) Tab */}
             {activeTab === 'apps' && (
               <motion.div
                 key="apps"
@@ -2182,7 +2182,7 @@ export default function SettingsPage() {
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-inherit">
                     <div>
                       <h2 className={cn("text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                        <Boxes className="w-5 h-5 text-cyan-400" /> Managed Apps Kubernetes Cluster & Auto SSL
+                        <Boxes className="w-5 h-5 text-cyan-400" /> Managed Apps K3s Cluster & Auto SSL
                       </h2>
                       <p className={cn("text-xs mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
                         Configure the dedicated K3s cluster on 192.168.79.17 and Traefik Ingress with Let&apos;s Encrypt automated SSL for all containerized applications.

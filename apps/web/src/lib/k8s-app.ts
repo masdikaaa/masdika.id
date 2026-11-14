@@ -199,11 +199,12 @@ export async function testAppClusterConnection(customConfig?: {
     let serviceToken = customConfig?.serviceToken;
     let skipTls = customConfig?.skipTlsVerify ?? true;
 
-    if (!kubeconfig && !serviceToken && !apiServer) {
+    // Fallback to active saved DB configuration if not provided or masked
+    if (!kubeconfig || kubeconfig === '••••••••' || kubeconfig.trim().length === 0) {
       const activeConfig = await getAppClusterConfig();
       kubeconfig = activeConfig.kubeconfig;
-      apiServer = activeConfig.apiServer;
-      serviceToken = activeConfig.serviceToken;
+      if (!apiServer) apiServer = activeConfig.apiServer;
+      if (!serviceToken) serviceToken = activeConfig.serviceToken;
       skipTls = activeConfig.skipTlsVerify;
     }
 
@@ -229,7 +230,11 @@ export async function testAppClusterConnection(customConfig?: {
         }
       );
     } else {
-      kc.loadFromCluster();
+      return {
+        success: false,
+        message: 'No Kubeconfig YAML or API Server configuration provided for Managed Apps.',
+        latencyMs: Date.now() - startTime,
+      };
     }
 
     const coreApi = kc.makeApiClient(k8s.CoreV1Api);
