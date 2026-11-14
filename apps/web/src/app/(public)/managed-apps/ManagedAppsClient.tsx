@@ -54,7 +54,7 @@ import {
 
 const APP_TERMINAL_LOGS = [
   { time: "00:01", module: "CLUSTER", message: "Verifying Kubernetes node capacity and cluster quotas..." },
-  { time: "00:02", module: "STORAGE", message: "Provisioning persistent volume claim (PVC) on SATA SSD..." },
+  { time: "00:02", module: "WORKSPACE", message: "Mounting isolated application workspace and runtime state..." },
   { time: "00:03", module: "SECRETS", message: "Generating cryptographic passwords and isolation secrets..." },
   { time: "00:04", module: "POD", message: "Scheduling application container pod with resource limits..." },
   { time: "00:05", module: "NETWORK", message: "Binding dedicated NodePort and routing ingress..." },
@@ -66,7 +66,7 @@ const APP_TERMINAL_STATS = [
   { value: "Included", label: "AUTO SSL INGRESS" },
   { value: "Dedicated", label: "NODEPORT ACCESS" },
   { value: "1-Click", label: "INSTANT DEPLOY" },
-  { value: "SATA SSD", label: "PERSISTENT PVC" },
+  { value: "Isolated", label: "CONTAINER CGROUP" },
 ];
 
 const REPEATED_APPS = [
@@ -81,7 +81,7 @@ const REPEATED_APPS = [
 const APP_FAQS = [
   {
     q: "How does Masdika Managed Applications work?",
-    a: "Every managed application runs inside a dedicated Kubernetes container Pod on enterprise Dell PowerEdge nodes. Storage is persistently bound via Persistent Volume Claims (PVC) on SATA SSDs, ensuring zero data loss across Pod restarts or node maintenance."
+    a: "Every managed application runs inside a dedicated Kubernetes container Pod on enterprise Dell PowerEdge nodes. Applications benefit from guaranteed CPU and RAM isolation, automated SSL ingress, and self-healing container lifecycles across Pod restarts or node maintenance."
   },
   {
     q: "How is access handled for web applications vs. CLI/SSH applications?",
@@ -93,7 +93,7 @@ const APP_FAQS = [
   },
   {
     q: "Is there protection against resource abuse on SSH containers?",
-    a: "Absolutely. Terminal-accessible applications operate in locked-down, restricted user environments with Linux cgroups and seccomp profiles enforced. Package installation, unauthorized background daemons, and storage abuse are blocked to guarantee cluster stability."
+    a: "Absolutely. Terminal-accessible applications operate in locked-down, restricted user environments with Linux cgroups and seccomp profiles enforced. Package installation, unauthorized background daemons, and resource abuse are blocked to guarantee cluster stability."
   },
   {
     q: "How does billing work?",
@@ -101,7 +101,7 @@ const APP_FAQS = [
   },
   {
     q: "Can I upgrade or scale my application resources later?",
-    a: "Yes. You can scale your vCPU and RAM allocations at any time directly from the dashboard. Because application data is stored on an independent Persistent Volume Claim (PVC), your workspaces, workflows, and database records remain 100% intact."
+    a: "Yes. You can scale your vCPU and RAM allocations at any time directly from the dashboard. Your application workspace, workflows, and configurations remain 100% intact across upgrades."
   }
 ];
 
@@ -314,7 +314,7 @@ export default function ManagedAppsClient({
               </h1>
 
               <p className="text-lg md:text-xl mb-10 max-w-xl leading-relaxed text-[var(--text-secondary)] font-normal">
-                Deploy production-grade Hermes Agent, 9Router, n8n, OpenCode, and OpenClaw in seconds. Powered by Kubernetes container isolation, persistent SATA SSD storage, automated SSL ingress, sandboxed SSH terminals, and under 20ms local latency across Indonesia.
+                Deploy production-grade Hermes Agent, 9Router, n8n, OpenCode, and OpenClaw in seconds. Powered by Kubernetes container isolation, automated SSL ingress, sandboxed SSH terminals, and under 20ms local latency across Indonesia.
               </p>
 
               <div className="flex flex-wrap items-center gap-4">
@@ -346,7 +346,7 @@ export default function ManagedAppsClient({
                 imageHeight={1024}
                 badges={[
                   { icon: Boxes, label: "Application Stacks", value: "Hermes, 9Router, n8n, OpenCode" },
-                  { icon: HardDrive, label: "Storage Engine", value: "SATA SSD Persistent PVC" },
+                  { icon: Cpu, label: "Compute Engine", value: "Guaranteed vCPU & RAM" },
                   { icon: Zap, label: "NodePort Access", value: "Direct High-Speed Port" },
                   { icon: ShieldCheck, label: "Architecture", value: "Dedicated Kubernetes Pods" },
                 ]}
@@ -362,7 +362,7 @@ export default function ManagedAppsClient({
             {[
               { icon: Box, title: "Kubernetes Pod Isolation", desc: "Every application runs inside dedicated container pods with strict CPU and memory resource quotas." },
               { icon: Globe, title: "Automated Let's Encrypt SSL", desc: "Zero-configuration Ingress routing on *.app.masdika.id with automated SSL certificate provisioning." },
-              { icon: HardDrive, title: "Persistent SATA SSD PVC", desc: "Enterprise SSD block storage mounted via Kubernetes PVC guarantees zero data loss on restart." },
+              { icon: RefreshCw, title: "Self-Healing Orchestration", desc: "Automated container restarts and node failover reconciliation guarantee 99.9% uptime." },
               { icon: Activity, title: "Local Sidoarjo DC", desc: "Under 20ms ultra-low ping across Indonesia with direct IIX, OpenIX, and CDIX peering." },
             ].map((pillar, i) => (
               <FadeIn key={i} delay={i * 0.1} direction="up" className="h-full">
@@ -394,7 +394,7 @@ export default function ManagedAppsClient({
               One-Click Production Application Stacks
             </h2>
             <p className="text-sm sm:text-base text-[var(--text-secondary)]">
-              Select your favorite AI agent, API router, or workflow engine, pre-configured with persistent storage and secure ingress.
+              Select your favorite AI agent, API router, or workflow engine, pre-configured with secure ingress and automated orchestration.
             </p>
           </div>
 
@@ -488,13 +488,13 @@ export default function ManagedAppsClient({
                   Built on Cloud-Native Kubernetes
                 </h2>
                 <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed mb-8 max-w-xl">
-                  Unlike conventional shared hosting, each Masdika Managed Application runs in an isolated StatefulSet Pod with dedicated memory buffers, persistent SATA SSD volumes, and automated self-healing.
+                  Unlike conventional shared hosting, each Masdika Managed Application runs in an isolated StatefulSet Pod with dedicated memory buffers, guaranteed CPU limits, and automated self-healing.
                 </p>
 
                 <div className="space-y-3.5">
                   {[
                     "Isolated Kubernetes StatefulSet Pod with Dedicated Resource Limits",
-                    "Persistent SATA SSD Block Storage mounted via StorageClass PVC",
+                    "Automated Self-Healing Pods with Zero-Downtime Rolling Restarts",
                     "Sandboxed SSH & Direct NodePort Access (30000–32767) for CLI Tools",
                     "Automated Let's Encrypt TLS/SSL Ingress for Web Interfaces",
                   ].map((item, i) => (
@@ -524,16 +524,16 @@ export default function ManagedAppsClient({
                     100%
                   </span>
                   <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-                    Data Persistence
+                    Uptime SLA
                   </span>
                 </div>
 
                 <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-center flex flex-col items-center justify-center">
                   <div className="w-10 h-10 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-2">
-                    <HardDrive className="w-5 h-5" />
+                    <Cpu className="w-5 h-5" />
                   </div>
                   <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)]">
-                    SATA SSD PVC
+                    Guaranteed vCPU
                   </span>
                 </div>
 
@@ -586,7 +586,7 @@ export default function ManagedAppsClient({
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--border-primary)] bg-[var(--surface)] text-xs text-[var(--text-secondary)] shadow-sm">
               <Info className="w-4 h-4 text-cyan-600 dark:text-cyan-400 shrink-0" />
               <span>
-                <strong>Zero Maintenance:</strong> Automated Let&apos;s Encrypt SSL, persistent SSD storage, isolated container environments, and dedicated ports are completely included.
+                <strong>Zero Maintenance:</strong> Automated Let&apos;s Encrypt SSL, isolated container environments, and dedicated ports are completely included.
               </span>
             </div>
           </div>
@@ -723,8 +723,8 @@ export default function ManagedAppsClient({
                             {p.cpuLabel} • {p.ramLabel}
                           </div>
                           <div className="text-xs text-[var(--text-muted)] mt-0.5 flex items-center gap-1.5 font-medium">
-                            <HardDrive className="w-3.5 h-3.5 text-cyan-400" />
-                            <span>{p.storageGb} GB SATA SSD</span>
+                            <Cpu className="w-3.5 h-3.5 text-cyan-400" />
+                            <span>{p.cpuShares >= 1 ? `${p.cpuShares} Dedicated Core` : 'Guaranteed Core'}</span>
                           </div>
                         </div>
                         {isSelected && (
@@ -768,7 +768,7 @@ export default function ManagedAppsClient({
                   </span>
                 </div>
                 <p className="text-xs text-[var(--text-secondary)] mt-1.5">
-                  Includes {activeApp.name}, {activePlan.cpuLabel} / {activePlan.ramLabel}, {activePlan.storageGb} GB SATA SSD &amp; {activeApp.accessProtocol === 'SSH' ? 'Direct SSH Terminal Access' : 'Automated Let\'s Encrypt SSL Ingress'}.
+                  Includes {activeApp.name}, {activePlan.cpuLabel} / {activePlan.ramLabel} &amp; {activeApp.accessProtocol === 'SSH' ? 'Direct SSH Terminal Access' : 'Automated Let\'s Encrypt SSL Ingress'}.
                 </p>
               </div>
 
@@ -791,7 +791,7 @@ export default function ManagedAppsClient({
                 { icon: ShieldCheck, title: "Kubernetes Pod Isolation", desc: "Guaranteed CPU & RAM allocation with strict cgroup limits." },
                 { icon: Globe, title: "Automated Let's Encrypt SSL", desc: "Instant HTTPS certificates with zero DNS setup required." },
                 { icon: Terminal, title: "Sandboxed Direct SSH", desc: "Secure command-line access via dedicated high-speed NodePorts." },
-                { icon: HardDrive, title: "Persistent SATA SSD PVC", desc: "Data and workspace files persist across all container restarts." },
+                { icon: RefreshCw, title: "Self-Healing Container", desc: "Automatic container restarts with zero-downtime health reconciliation." },
               ].map((feat, i) => (
                 <div key={i} className="p-4 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] flex items-start gap-3">
                   <feat.icon className="w-4 h-4 text-cyan-600 dark:text-cyan-400 shrink-0 mt-0.5" />
@@ -870,14 +870,14 @@ export default function ManagedAppsClient({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { icon: HardDrive, title: "Persistent SATA SSD PVC", desc: "Enterprise SATA SSD block storage mounted via Kubernetes ensures zero loss on restart." },
+              { icon: Cpu, title: "Guaranteed vCPU & RAM", desc: "Dedicated resource allocations ensure consistent, unthrottled application performance." },
               { icon: Globe, title: "Automated Let's Encrypt SSL", desc: "Zero-configuration wildcard TLS certificates provisioned automatically for web apps." },
               { icon: Terminal, title: "Sandboxed Direct SSH", desc: "High-speed CLI access over dedicated NodePorts protected by hardened user permissions." },
-              { icon: Zap, title: "Dynamic Scaling", desc: "Expand your vCPU and memory specifications seamlessly without rebuilding storage." },
-              { icon: RefreshCw, title: "Graceful Restarts", desc: "Perform rolling Pod restarts safely without dropping stateful persistent volume files." },
+              { icon: Zap, title: "Dynamic Scaling", desc: "Expand your vCPU and memory specifications seamlessly as your compute requirements grow." },
+              { icon: RefreshCw, title: "Graceful Restarts", desc: "Perform rolling Pod restarts safely without dropping active application connections." },
               { icon: ShieldCheck, title: "Cgroup Memory Isolation", desc: "Strict Linux container limits guarantee noisy neighbors never impact your containers." },
               { icon: KeyRound, title: "Isolated Cluster Secrets", desc: "API keys and sensitive tokens are encrypted using Kubernetes Secret objects." },
-              { icon: Activity, title: "Real-Time Telemetry", desc: "Monitor live CPU usage, memory consumption, and disk capacity in dashboard." }
+              { icon: Activity, title: "Real-Time Telemetry", desc: "Monitor live CPU usage, memory consumption, and runtime metrics in dashboard." }
             ].map((feat, i) => (
               <FadeIn key={i} delay={i * 0.05} direction="up" className="h-full">
                 <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-colors flex flex-col justify-between h-full shadow-sm">
@@ -970,7 +970,7 @@ export default function ManagedAppsClient({
                 Ready for True Managed Cloud Applications?
               </h2>
               <p className="text-base sm:text-lg text-[var(--text-secondary)] mb-8 leading-relaxed">
-                Deploy production-ready AI agents and workflows on Masdika Kubernetes infrastructure today. Enjoy isolated Pods, persistent SATA SSD storage, and automated SSL.
+                Deploy production-ready AI agents and workflows on Masdika Kubernetes infrastructure today. Enjoy isolated Pods, automated SSL, and guaranteed compute.
               </p>
 
               <div className="flex flex-wrap items-center justify-center gap-4">

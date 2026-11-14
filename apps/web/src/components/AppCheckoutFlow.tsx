@@ -288,7 +288,7 @@ export default function AppCheckoutFlow() {
                         </span>
                         <span className="shrink-0">•</span>
                         <span className="flex items-center gap-1 whitespace-nowrap shrink-0">
-                          <HardDrive className="w-3 h-3 text-cyan-400" />
+                          <Zap className="w-3 h-3 text-cyan-400" />
                           {plan.ramLabel}
                         </span>
                         <span className="shrink-0">•</span>
@@ -571,7 +571,7 @@ export default function AppCheckoutFlow() {
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <span>Isolated Container & Persistent {selectedApp.dataDir} Storage</span>
+                <span>Isolated Container Pod &amp; Persistent Runtime</span>
               </div>
             </div>
           ) : (
@@ -582,7 +582,7 @@ export default function AppCheckoutFlow() {
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                <span>Dedicated Isolated Container & SSD storage</span>
+                <span>Dedicated Isolated Container Pod</span>
               </div>
             </div>
           )}

@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: {
     absolute: "Managed Applications - Kubernetes Production AI & Microservice Hosting",
   },
-  description: "Deploy autonomous AI agents, multi-LLM gateways, and workflow engines (Hermes Agent, 9Router, n8n, OpenCode, OpenClaw) in seconds. Powered by Kubernetes isolation, persistent SSD storage, automated Let's Encrypt SSL, and sandboxed SSH terminal access.",
+  description: "Deploy autonomous AI agents, multi-LLM gateways, and workflow engines (Hermes Agent, 9Router, n8n, OpenCode, OpenClaw) in seconds. Powered by Kubernetes isolation, automated Let's Encrypt SSL, and sandboxed SSH terminal access.",
   keywords: [
     "Managed Applications",
     "Kubernetes App Hosting",
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Managed Applications - Kubernetes Production AI & Microservice Hosting",
-    description: "Deploy autonomous AI agents, multi-LLM gateways, and workflow engines (Hermes Agent, 9Router, n8n, OpenCode, OpenClaw) in seconds. Powered by Kubernetes isolation, persistent SSD storage, automated Let's Encrypt SSL, and sandboxed SSH terminal access.",
+    description: "Deploy autonomous AI agents, multi-LLM gateways, and workflow engines (Hermes Agent, 9Router, n8n, OpenCode, OpenClaw) in seconds. Powered by Kubernetes isolation, automated Let's Encrypt SSL, and sandboxed SSH terminal access.",
     url: "https://www.masdika.id/managed-apps",
     siteName: "Masdika",
     images: [
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Managed Applications - Kubernetes Production AI & Microservice Hosting",
-    description: "Deploy autonomous AI agents, multi-LLM gateways, and workflow engines (Hermes Agent, 9Router, n8n, OpenCode, OpenClaw) in seconds. Powered by Kubernetes isolation, persistent SSD storage, automated Let's Encrypt SSL, and sandboxed SSH terminal access.",
+    description: "Deploy autonomous AI agents, multi-LLM gateways, and workflow engines (Hermes Agent, 9Router, n8n, OpenCode, OpenClaw) in seconds. Powered by Kubernetes isolation, automated Let's Encrypt SSL, and sandboxed SSH terminal access.",
     images: ["/images/mascots/managed-apps.webp"],
   },
 };
@@ -60,7 +60,7 @@ export default function ManagedAppsLandingPage() {
         "name": "Managed Applications - Kubernetes Production AI & Microservice Hosting",
         "sku": "MASDIKA-MAPP-ID",
         "mpn": "MAPP-K8S-01",
-        "description": "High-Performance Managed Cloud Applications powered by Kubernetes, container isolation, persistent SSD storage, automated Let's Encrypt SSL, and flexible monthly pricing starting from Rp 20.000 / month.",
+        "description": "High-Performance Managed Cloud Applications powered by Kubernetes, container isolation, automated Let's Encrypt SSL, and flexible monthly pricing starting from Rp 20.000 / month.",
         "category": "Cloud Computing > Managed Applications",
         "image": "https://www.masdika.id/images/mascots/managed-apps.webp",
         "brand": {
