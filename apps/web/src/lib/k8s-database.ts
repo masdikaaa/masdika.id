@@ -517,6 +517,8 @@ export function generateDatabaseManifest(db: DatabaseServiceRecord): string {
       image = 'postgis/postgis:16-3.4';
     } else if (isVectorTarget) {
       image = 'pgvector/pgvector:pg16';
+    } else if (version === '18' || version.startsWith('18.')) {
+      image = 'postgres:18';
     } else if (version === '17' || version.startsWith('17.')) {
       image = 'postgres:17.12';
     } else if (version === '16' || version.startsWith('16.')) {

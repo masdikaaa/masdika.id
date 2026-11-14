@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
     const allowedVersions: Record<string, string[]> = {
       MYSQL: ["8.0", "8.4"],
       MARIADB: ["10.11", "11.2", "11.4"],
-      POSTGRES: ["15", "16", "17"],
+      POSTGRES: ["15", "16", "17", "18"],
       MONGODB: ["6.0", "7.0"],
       REDIS: ["7.0", "7.2"],
     };

@@ -20,8 +20,9 @@ const DATABASE_ENGINES = [
     icon: "/images/apps/postgresql.svg",
     defaultPort: 5432,
     versions: [
+      { id: "18", name: "18 (Latest)" },
+      { id: "17", name: "17 LTS" },
       { id: "16", name: "16 LTS", default: true },
-      { id: "17", name: "17 (Latest)" },
       { id: "15", name: "15 LTS" },
     ],
     webPanel: "pgAdmin 4",
@@ -93,8 +94,9 @@ const SHARED_DATABASE_VARIANTS: Record<string, Array<{
   default?: boolean;
 }>> = {
   POSTGRES: [
+    { id: "postgres-18", name: "18 (Latest)", version: "18", engine: "POSTGRES", ratePerGb: 10000 },
+    { id: "postgres-17", name: "17 LTS", version: "17", engine: "POSTGRES", ratePerGb: 10000 },
     { id: "postgres-16", name: "16 LTS", version: "16", engine: "POSTGRES", ratePerGb: 10000, default: true },
-    { id: "postgres-17", name: "17 (Latest)", version: "17", engine: "POSTGRES", ratePerGb: 10000 },
     { id: "postgres-15", name: "15 LTS", version: "15", engine: "POSTGRES", ratePerGb: 10000 },
     { id: "postgres-postgis", name: "16 + PostGIS", version: "16", engine: "POSTGRES", ratePerGb: 12500, badge: "GIS" },
     { id: "postgres-vector", name: "16 + pgvector", version: "16", engine: "POSTGRES", ratePerGb: 12500, badge: "AI" },

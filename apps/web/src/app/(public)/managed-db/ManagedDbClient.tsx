@@ -72,8 +72,9 @@ const DEDICATED_FLAVORS = [
 
 const SHARED_ENGINE_VERSIONS: Record<string, Array<{ id: string; name: string; ratePerGb: number; badge?: string }>> = {
   POSTGRESQL: [
+    { id: "18", name: "18 (Latest)", ratePerGb: 10000 },
+    { id: "17", name: "17 LTS", ratePerGb: 10000 },
     { id: "16", name: "16 LTS", ratePerGb: 10000 },
-    { id: "17", name: "17 (Latest)", ratePerGb: 10000 },
     { id: "15", name: "15 LTS", ratePerGb: 10000 },
     { id: "postgres-postgis", name: "16 + PostGIS", ratePerGb: 12500, badge: "GIS" },
     { id: "postgres-vector", name: "16 + pgvector", ratePerGb: 12500, badge: "AI" },
@@ -109,8 +110,9 @@ const SUPPORTED_ENGINES = [
     text: "text-sky-400",
     defaultVersion: "16",
     versions: [
+      { id: "18", name: "18 (Latest)" },
+      { id: "17", name: "17 LTS" },
       { id: "16", name: "16 LTS" },
-      { id: "17", name: "17 (Latest)" },
       { id: "15", name: "15 LTS" },
     ],
   },
