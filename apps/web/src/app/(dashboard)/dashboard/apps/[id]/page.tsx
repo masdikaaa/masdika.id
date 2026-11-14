@@ -214,16 +214,15 @@ export default function AppDetailPage({
         </span>
       </div>
 
-      {/* Top Banner Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-2xl border backdrop-blur-xl transition-all shadow-sm relative overflow-hidden"
-        style={{
-          background: isDark
-            ? "linear-gradient(135deg, rgba(16, 20, 31, 0.9) 0%, rgba(16, 16, 20, 0.9) 100%)"
-            : "linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.9) 100%)",
-        }}
-      >
+      {/* Top Banner Header - Clean Card Style without Border */}
+      <div className={cn(
+        "flex flex-col md:flex-row md:items-center justify-between gap-5 p-5 sm:p-6 rounded-2xl transition-all shadow-lg relative overflow-hidden",
+        isDark
+          ? "bg-gradient-to-br from-[#10141f] via-[#0e111a] to-[#0a0c12] shadow-black/40"
+          : "bg-white shadow-slate-200/70"
+      )}>
         <div className="flex items-start sm:items-center gap-4 min-w-0">
-          <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 p-2 bg-black/40 border border-white/10 shadow-lg relative overflow-hidden">
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center shrink-0 p-2 bg-black/40 shadow-md relative overflow-hidden">
             <Image
               src={catalog?.icon || "/images/apps/docker.svg"}
               alt={app.name}
@@ -235,19 +234,19 @@ export default function AppDetailPage({
           </div>
 
           <div className="min-w-0">
-            <div className="flex items-center gap-3 flex-wrap">
-              <h1 className={cn("text-xl sm:text-2xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h1 className={cn("text-lg sm:text-2xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                 {app.name}
               </h1>
 
               {/* Status Badge */}
               <span className={cn(
-                "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border",
+                "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-bold",
                 isRunning
-                  ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                  ? "bg-emerald-500/15 text-emerald-400"
                   : isStopped
-                  ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                  : "bg-blue-500/10 text-blue-400 border-blue-500/20"
+                  ? "bg-amber-500/15 text-amber-400"
+                  : "bg-blue-500/15 text-blue-400"
               )}>
                 <span className={cn(
                   "w-2 h-2 rounded-full",
@@ -257,85 +256,92 @@ export default function AppDetailPage({
               </span>
             </div>
 
-            <p className={cn("text-xs sm:text-sm font-medium mt-1 text-[var(--text-muted)] flex items-center gap-2 flex-wrap")}>
+            <div className="flex items-center gap-2 flex-wrap text-xs font-medium mt-1.5 text-[var(--text-muted)]">
               <span>{app.templateName}</span>
-              <span>•</span>
+              <span className="opacity-30">•</span>
               <span>Region: Sidoarjo</span>
-              <span>•</span>
+              <span className="opacity-30">•</span>
               {isSshApp ? (
-                <span className="font-mono text-cyan-400">{sshCommand}</span>
+                <span className="font-mono text-cyan-400 bg-cyan-950/40 px-2 py-0.5 rounded-md text-[11px] font-semibold break-all">
+                  SSH Port: {app.port}
+                </span>
               ) : (
-                <span className="font-mono text-cyan-400">{fullDomain}</span>
+                <span className="font-mono text-cyan-400 bg-cyan-950/40 px-2 py-0.5 rounded-md text-[11px] font-semibold break-all truncate max-w-[200px] sm:max-w-none">
+                  {fullDomain}
+                </span>
               )}
-            </p>
+            </div>
           </div>
         </div>
 
-        {/* Action Controls */}
-        <div className="flex items-center gap-2 flex-wrap shrink-0">
+        {/* Action Controls - Responsive Grid on Mobile, Flex on Desktop */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto pt-3 md:pt-0 shrink-0">
           {/* Scale Compute Button (Triggers AppScaleModal) */}
           <button
             type="button"
             onClick={() => setIsScaleModalOpen(true)}
-            className="px-4 py-2.5 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all shadow-md shadow-cyan-400/20 flex items-center gap-2 cursor-pointer active:scale-95"
+            className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all shadow-md shadow-cyan-400/20 flex items-center justify-center gap-2 cursor-pointer active:scale-95"
           >
             <TrendingUp className="w-3.5 h-3.5" />
             <span>Scale Compute</span>
           </button>
 
-          {/* Power Controls */}
-          {isRunning ? (
-            <button
-              type="button"
-              onClick={() => handlePowerAction("stop")}
-              disabled={powering !== null}
-              className={cn(
-                "px-3.5 py-2.5 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50",
-                isDark ? "border-amber-500/30 text-amber-400 hover:bg-amber-500/10" : "border-amber-300 text-amber-700 hover:bg-amber-50"
-              )}
-              title="Stop Application"
-            >
-              <Square className="w-3.5 h-3.5" />
-              <span>Stop</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => handlePowerAction("start")}
-              disabled={powering !== null}
-              className={cn(
-                "px-3.5 py-2.5 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50",
-                isDark ? "border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10" : "border-emerald-300 text-emerald-700 hover:bg-emerald-50"
-              )}
-              title="Start Application"
-            >
-              <Play className="w-3.5 h-3.5" />
-              <span>Start</span>
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={() => handlePowerAction("restart")}
-            disabled={powering !== null || !isRunning}
-            className={cn(
-              "px-3.5 py-2.5 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50",
-              isDark ? "border-white/10 text-zinc-300 hover:bg-white/5" : "border-slate-300 text-slate-700 hover:bg-slate-100"
+          {/* Secondary Action Buttons Grid on Mobile, Flex on Desktop */}
+          <div className="grid grid-cols-3 sm:flex items-center gap-2 w-full sm:w-auto">
+            {isRunning ? (
+              <button
+                type="button"
+                onClick={() => handlePowerAction("stop")}
+                disabled={powering !== null}
+                className={cn(
+                  "col-span-1 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
+                  isDark ? "bg-amber-500/10 text-amber-400 hover:bg-amber-500/20" : "bg-amber-50 text-amber-700 hover:bg-amber-100"
+                )}
+                title="Stop Application"
+              >
+                <Square className="w-3.5 h-3.5" />
+                <span>Stop</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => handlePowerAction("start")}
+                disabled={powering !== null}
+                className={cn(
+                  "col-span-1 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
+                  isDark ? "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20" : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                )}
+                title="Start Application"
+              >
+                <Play className="w-3.5 h-3.5" />
+                <span>Start</span>
+              </button>
             )}
-            title="Restart Application Pod"
-          >
-            <RotateCw className={cn("w-3.5 h-3.5", powering === "restart" && "animate-spin")} />
-            <span>Restart</span>
-          </button>
 
-          <button
-            type="button"
-            onClick={() => setIsDeleteModalOpen(true)}
-            className="p-2.5 rounded-xl text-xs font-bold border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-all cursor-pointer"
-            title="Terminate Application"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
+            <button
+              type="button"
+              onClick={() => handlePowerAction("restart")}
+              disabled={powering !== null || !isRunning}
+              className={cn(
+                "col-span-1 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
+                isDark ? "bg-white/[0.05] text-zinc-300 hover:bg-white/10" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+              )}
+              title="Restart Application Pod"
+            >
+              <RotateCw className={cn("w-3.5 h-3.5", powering === "restart" && "animate-spin")} />
+              <span>Restart</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsDeleteModalOpen(true)}
+              className="col-span-1 py-2.5 px-3 rounded-xl text-xs font-bold bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              title="Terminate Application"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span className="sm:hidden">Delete</span>
+            </button>
+          </div>
         </div>
       </div>
 

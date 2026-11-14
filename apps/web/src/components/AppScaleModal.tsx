@@ -12,6 +12,7 @@ import {
   X,
   ShieldCheck,
   Zap,
+  Rocket,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -413,7 +414,7 @@ export function AppScaleModal({
               </>
             ) : (
               <>
-                <Zap className="w-3.5 h-3.5" />
+                <Rocket className="w-3.5 h-3.5" />
                 <span>Confirm & Scale App</span>
               </>
             )}
