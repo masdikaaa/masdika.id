@@ -686,11 +686,7 @@ export function buildAppContainerSpec(app: AppServiceRecord, domainBase?: string
           - |
             (npm install -g 9router@latest --prefer-online --no-audit --no-fund 2>/dev/null && \\
              if [ -d /usr/local/lib/node_modules/9router/app ]; then \\
-               cp -rf /usr/local/lib/node_modules/9router/app/* /app/ 2>/dev/null || true; \\
-               if [ -d /app/.next-cli-build ]; then \\
-                 mkdir -p /app/.next; \\
-                 cp -rf /app/.next-cli-build/* /app/.next/ 2>/dev/null || true; \\
-               fi; \\
+               cp -a /usr/local/lib/node_modules/9router/app/. /app/ 2>/dev/null || true; \\
              fi || true) && \\
             exec /entrypoint.sh node custom-server.js
 `;
