@@ -67,7 +67,7 @@ export function ProvisioningSection({
                         {text}
                       </span>
                     ) : (
-                      text + (title.includes(',') && i === 0 ? ',' : '')
+                      text + (title.includes(',') && i === 0 ? ', ' : '')
                     )}
                     {i === 0 && <br className="hidden md:block" />}
                   </span>
@@ -83,6 +83,7 @@ export function ProvisioningSection({
                 size="lg"
                 href={buttonHref}
                 rightIcon={<ArrowRight className="w-5 h-5" />}
+                className="w-full sm:w-auto justify-center font-bold shadow-lg shadow-cyan-400/10 hover:shadow-cyan-400/25 active:scale-[0.98] transition-all"
               >
                 {buttonText}
               </Button>

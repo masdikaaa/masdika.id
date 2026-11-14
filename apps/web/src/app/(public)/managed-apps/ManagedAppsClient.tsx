@@ -606,9 +606,10 @@ export default function ManagedAppsClient({
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
-                {catalog.map((app) => {
+              <div className="grid grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4">
+                {catalog.map((app, idx) => {
                   const isSelected = selectedAppId === app.id;
+                  const isLastOdd = idx === catalog.length - 1;
                   return (
                     <button
                       key={app.id}
@@ -616,6 +617,7 @@ export default function ManagedAppsClient({
                       onClick={() => setSelectedAppId(app.id)}
                       className={cn(
                         "rounded-xl border text-left transition-all relative group cursor-pointer p-3.5 sm:p-4 flex flex-col justify-between min-h-[110px] sm:min-h-[130px]",
+                        isLastOdd && "col-span-2 lg:col-span-1",
                         isSelected
                           ? "border-cyan-500 bg-cyan-500/10 shadow-sm ring-1 ring-cyan-500/30"
                           : "border-[var(--border-primary)] bg-[var(--surface-secondary)] hover:border-cyan-500/40"
@@ -692,7 +694,7 @@ export default function ManagedAppsClient({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 {plans.map((p) => {
                   const isSelected = selectedPlanId === p.id;
                   const priceDisplay = billingCycle === "MONTHLY" 
@@ -712,19 +714,18 @@ export default function ManagedAppsClient({
                       )}
                     >
                       {p.isPopular && (
-                        <span className="absolute -top-2.5 right-3 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 text-slate-950 shadow-md flex items-center gap-1 border border-amber-300/40">
-                          <Sparkles className="w-2.5 h-2.5 fill-slate-950" />
-                          <span>Popular</span>
+                        <span className="absolute -top-2.5 right-3 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-cyan-400 text-slate-950 shadow-md flex items-center gap-1 border border-cyan-300/50">
+                          <span>POPULAR</span>
                         </span>
                       )}
 
                       <div className="flex items-start justify-between w-full">
                         <div>
-                          <div className="text-sm font-bold text-[var(--text-primary)]">
+                          <div className="text-sm sm:text-base font-bold text-[var(--text-primary)]">
                             {p.cpuLabel} • {p.ramLabel}
                           </div>
                           <div className="text-xs text-[var(--text-muted)] mt-0.5 flex items-center gap-1.5 font-medium">
-                            <Cpu className="w-3.5 h-3.5 text-cyan-400" />
+                            <Cpu className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
                             <span>{p.cpuShares >= 1 ? `${p.cpuShares} Dedicated Core` : 'Guaranteed Core'}</span>
                           </div>
                         </div>
@@ -735,11 +736,11 @@ export default function ManagedAppsClient({
                         )}
                       </div>
 
-                      <div className="mt-4 pt-2 border-t border-[var(--border-primary)] flex items-baseline justify-between w-full">
-                        <span className="text-base sm:text-lg font-black text-cyan-600 dark:text-cyan-400">
+                      <div className="mt-4 pt-2 border-t border-[var(--border-primary)] flex items-baseline justify-between w-full gap-2">
+                        <span className="text-base sm:text-lg font-black text-cyan-600 dark:text-cyan-400 shrink-0">
                           {priceDisplay}
                         </span>
-                        <span className="text-[10px] text-[var(--text-muted)] font-mono">
+                        <span className="text-[10px] text-[var(--text-muted)] font-mono shrink-0 px-1.5 py-0.5 rounded bg-white/[0.04] border border-white/[0.06]">
                           {p.planCode}
                         </span>
                       </div>
@@ -778,7 +779,7 @@ export default function ManagedAppsClient({
                   variant="primary"
                   size="lg"
                   href={`/dashboard/apps/new?app=${selectedAppId}&plan=${selectedPlanId}`}
-                  className="w-full md:w-auto justify-center font-bold"
+                  className="w-full md:w-auto justify-center font-bold px-7 sm:px-8 py-3.5 sm:py-4 text-sm sm:text-base rounded-xl shadow-lg shadow-cyan-400/10 hover:shadow-cyan-400/25 active:scale-[0.98] transition-all"
                   rightIcon={<ArrowRight className="w-4 h-4" />}
                 >
                   Deploy {activeApp.name} ({activePlan.planCode})

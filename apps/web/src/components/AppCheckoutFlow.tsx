@@ -154,8 +154,9 @@ export default function AppCheckoutFlow() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
-            {MANAGED_APPS_CATALOG.map((app) => {
+            {MANAGED_APPS_CATALOG.map((app, idx) => {
               const isSelected = selectedApp.id === app.id;
+              const isLast = idx === MANAGED_APPS_CATALOG.length - 1;
               return (
                 <button
                   key={app.id}
@@ -163,6 +164,7 @@ export default function AppCheckoutFlow() {
                   onClick={() => handleSelectApp(app)}
                   className={cn(
                     "relative p-4 rounded-2xl border text-left transition-all flex flex-col justify-between cursor-pointer group text-left",
+                    isLast && "sm:col-span-2 md:col-span-1",
                     isSelected
                       ? isDark
                         ? "bg-cyan-500/10 border-cyan-400 ring-2 ring-cyan-400/20 shadow-lg shadow-cyan-500/10"
@@ -547,16 +549,14 @@ export default function AppCheckoutFlow() {
             </div>
           )}
 
-          {/* Deploy Button (Matching Masdika Cyan Brand Theme) */}
+          {/* Deploy Button (Matching Masdika Cyan Brand Theme & VPS Standard) */}
           <button
             type="button"
             onClick={handleDeploy}
             disabled={deploying || isBalanceInsufficient}
             className={cn(
-              "w-full py-3 px-4 rounded-xl font-bold text-sm text-slate-950 transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed active:scale-95",
-              isDark
-                ? "bg-cyan-400 hover:bg-cyan-300 shadow-cyan-400/20"
-                : "bg-cyan-400 hover:bg-cyan-300 shadow-cyan-400/20"
+              "w-full py-3.5 px-5 rounded-xl font-bold text-sm text-slate-950 transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]",
+              "bg-cyan-400 hover:bg-cyan-300 shadow-cyan-400/25"
             )}
           >
             <Zap className={cn("w-4 h-4", deploying && "animate-spin")} />

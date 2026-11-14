@@ -1192,7 +1192,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                   variant="primary"
                   size="lg"
                   href={`/dashboard/database/new?engine=${selectedEngine}&tier=${selectedTier}&version=${selectedVersion}&flavor=${selectedFlavorId}&storage=${storageGb}`}
-                  className="w-full md:w-auto justify-center font-bold"
+                  className="w-full md:w-auto justify-center font-bold px-7 sm:px-8 py-3.5 sm:py-4 text-sm sm:text-base rounded-xl shadow-lg shadow-cyan-400/10 hover:shadow-cyan-400/25 active:scale-[0.98] transition-all cursor-pointer"
                   rightIcon={<ArrowRight className="w-4 h-4" />}
                 >
                   Deploy {activeEngineObj.name} {selectedVersion}
