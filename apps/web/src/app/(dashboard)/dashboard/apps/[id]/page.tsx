@@ -480,6 +480,93 @@ export default function AppDetailPage({
             </div>
           )}
 
+          {/* Card: Web Dashboard Authentication (for 9Router & Web Apps) */}
+          {(app.appType === "ninerouter" || app.appType === "n8n") && (
+            <div className={cn(
+              "p-5 sm:p-6 rounded-2xl space-y-4 transition-all shadow-lg",
+              isDark ? "bg-[#10141f] shadow-black/40" : "bg-white shadow-slate-200/70"
+            )}>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                  <Lock className="w-4 h-4 shrink-0" />
+                  <span>{app.appType === "ninerouter" ? "9Router Dashboard Authentication" : "n8n Web Credentials"}</span>
+                </h3>
+                <span className={cn(
+                  "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold self-start sm:self-auto shrink-0",
+                  isDark ? "bg-emerald-500/15 text-emerald-400" : "bg-emerald-50 text-emerald-700"
+                )}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>Dashboard Access Ready</span>
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {app.appType === "n8n" && (
+                  <div className={cn(
+                    "p-3.5 rounded-xl border space-y-1 text-xs",
+                    isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200"
+                  )}>
+                    <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
+                      Username
+                    </span>
+                    <div className="flex items-center justify-between font-mono font-bold text-xs pt-0.5">
+                      <span>{app.username || "admin"}</span>
+                      <button
+                        onClick={() => copyToClipboard(app.username || "admin", "Username")}
+                        className="text-[var(--text-muted)] hover:text-cyan-400 cursor-pointer"
+                        title="Copy Username"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <div className={cn(
+                  "p-3.5 rounded-xl border space-y-1 text-xs",
+                  isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200"
+                )}>
+                  <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
+                    Dashboard Password
+                  </span>
+                  <div className="flex items-center justify-between font-mono font-bold text-xs pt-0.5">
+                    <span className="truncate mr-2 text-cyan-400">
+                      {showPassword ? (app.password || "123456") : "••••••••••••"}
+                    </span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="text-[var(--text-muted)] hover:text-cyan-400 cursor-pointer"
+                        title={showPassword ? "Hide Password" : "Show Password"}
+                      >
+                        {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </button>
+                      <button
+                        onClick={() => copyToClipboard(app.password || "123456", "Password")}
+                        className="text-[var(--text-muted)] hover:text-cyan-400 cursor-pointer"
+                        title="Copy Password"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={cn(
+                  "p-3 rounded-xl border space-y-1 text-xs sm:col-span-2",
+                  isDark ? "bg-cyan-500/5 border-cyan-500/20 text-zinc-300" : "bg-cyan-50/50 border-cyan-200 text-slate-700"
+                )}>
+                  <p className="text-[11px] leading-relaxed">
+                    {app.appType === "ninerouter"
+                      ? "Masuk ke Web Dashboard 9Router menggunakan password di atas (default: 123456). Anda dapat mengubah password dan mengatur AI model providers kapan saja di menu Settings 9Router."
+                      : "Gunakan kredensial di atas untuk login ke antarmuka n8n. Seluruh alur kerja dan webhook tersimpan aman di persistent storage."}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Card: Direct SSH Terminal Access */}
           {hasSsh && (
             <div className={cn(
@@ -868,7 +955,7 @@ export default function AppDetailPage({
             {app.appType === "ninerouter" && (
               <div className="space-y-3 text-xs leading-relaxed">
                 <p className={isDark ? "text-zinc-300" : "text-slate-700"}>
-                  9Router acts as your local AI gateway with multi-tier fallback and RTK token optimization. You can plug this endpoint into Claude Code, Cursor, or Cline:
+                  9Router acts as your AI gateway and router dashboard. Klik <strong>Open App</strong> di atas untuk membuka web dashboard, lalu masukkan password awal <code className="font-mono text-cyan-400 font-bold">{app.password || "123456"}</code>. Anda juga dapat menghubungkan endpoint ini ke Claude Code, Cursor, atau Cline:
                 </p>
                 <div className={cn("p-3.5 rounded-xl border font-mono text-[11px] space-y-1", isDark ? "bg-[#09090b] border-white/10 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-800")}>
                   <div className="text-zinc-500"># OpenAI Compatible Router Base URL</div>

@@ -62,7 +62,7 @@ export const MANAGED_APPS_CATALOG: ManagedAppDefinition[] = [
     icon: '/images/apps/9router.png',
     appPort: 20128,
     dataDir: '/app/data',
-    defaultImage: 'docker.io/library/node:22-alpine',
+    defaultImage: 'docker.io/decolua/9router:latest',
     color: 'from-violet-500 to-purple-600',
     badge: 'API Gateway',
     accessProtocol: 'WEB',

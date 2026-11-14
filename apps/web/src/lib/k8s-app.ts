@@ -666,60 +666,19 @@ export function buildAppContainerSpec(app: AppServiceRecord, domainBase?: string
             exec /usr/sbin/sshd -D -e -p 22
 `;
   } else if (appType === 'ninerouter') {
-    image = 'docker.io/library/node:22-alpine';
-    const serverJs = `const http = require('http');
-const server = http.createServer((req, res) => {
-  if (req.url === '/health' || req.url === '/v1/models') {
-    res.setHeader('Content-Type', 'application/json');
-    res.writeHead(200);
-    return res.end(JSON.stringify({ status: 'healthy', service: '9router', version: '1.0.0', object: 'list', data: [] }));
-  }
-  res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  res.writeHead(200);
-  res.end(\`<!DOCTYPE html>
-<html>
-<head>
-  <title>9Router AI Gateway - Masdika Cloud</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #09090b; color: #f4f4f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-    .card { background: #18181b; border: 1px solid #27272a; border-radius: 16px; padding: 32px; max-width: 580px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: rgba(139, 92, 246, 0.1); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.2); border-radius: 9999px; font-size: 12px; font-weight: 600; margin-bottom: 16px; }
-    h1 { font-size: 24px; font-weight: 800; margin: 0 0 8px 0; color: #fff; }
-    p { font-size: 14px; line-height: 1.6; color: #a1a1aa; margin: 0 0 20px 0; }
-    .info-box { background: #0f0f11; border: 1px solid #27272a; border-radius: 8px; padding: 14px; font-family: monospace; font-size: 13px; color: #e4e4e7; margin-bottom: 20px; word-break: break-all; }
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block; animation: pulse 2s infinite; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-    .btn { display: inline-block; background: #8b5cf6; color: #fff; font-weight: 600; font-size: 14px; padding: 10px 20px; border-radius: 8px; text-decoration: none; transition: background 0.2s; }
-    .btn:hover { background: #7c3aed; }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <div class="badge"><span class="status-dot"></span> Active Router Gateway</div>
-    <h1>9Router Gateway Ready</h1>
-    <p>Smart multi-provider AI proxy with auto-fallback, RTK token optimizer, and Claude Code / Cursor integration.</p>
-    <div class="info-box">
-      <div><b>Proxy URL:</b> https://${fullDomain}</div>
-      <div><b>Port:</b> ${app.appPort}</div>
-      <div><b>Health Endpoint:</b> https://${fullDomain}/health</div>
-    </div>
-    <a href="https://github.com/decolua/9router" target="_blank" class="btn">View 9Router Docs &rarr;</a>
-  </div>
-</body>
-</html>\`);
-});
-server.listen(${app.appPort}, '0.0.0.0', () => {
-  console.log('9Router listening on port ${app.appPort}');
-});
-`;
-    const b64NineRouter = Buffer.from(serverJs).toString('base64');
-    commandYaml = `
-        command: ["/bin/sh", "-c"]
-        args:
-          - |
-            echo "${b64NineRouter}" | base64 -d > /server.js && \\
-            exec node /server.js
+    image = 'docker.io/decolua/9router:latest';
+    const initialPassword = app.password || '123456';
+    envYaml = `
+        - name: PORT
+          value: "${app.appPort}"
+        - name: HOSTNAME
+          value: "0.0.0.0"
+        - name: DATA_DIR
+          value: "${dataMount}"
+        - name: NODE_ENV
+          value: "production"
+        - name: INITIAL_PASSWORD
+          value: "${initialPassword}"
 `;
   } else if (appType === 'opencode') {
     image = 'docker.io/library/node:22-alpine';
@@ -1123,7 +1082,7 @@ export async function stopAppService(app: AppServiceRecord): Promise<void> {
 }
 
 /**
- * Start App Service: Scale replicas to 1
+ * Start App Service: Scale replicas to 1 and ensure latest container manifests are applied
  */
 export async function startAppService(app: AppServiceRecord): Promise<void> {
   const kc = await getAppKubeConfig();
@@ -1131,21 +1090,25 @@ export async function startAppService(app: AppServiceRecord): Promise<void> {
   const ns = app.k8sNamespace || 'managed-apps';
   const deployName = app.k8sDeployment || `deploy-app-${app.id}-${app.subdomain}`.toLowerCase();
 
-  await objApi.patch({
-    apiVersion: 'apps/v1',
-    kind: 'Deployment',
-    metadata: {
-      name: deployName,
-      namespace: ns,
-    },
-    spec: {
-      replicas: 1,
-    },
-  });
+  try {
+    await deployAppService(app);
+  } catch {
+    await objApi.patch({
+      apiVersion: 'apps/v1',
+      kind: 'Deployment',
+      metadata: {
+        name: deployName,
+        namespace: ns,
+      },
+      spec: {
+        replicas: 1,
+      },
+    });
+  }
 }
 
 /**
- * Restart App Service: Roll deployment pods
+ * Restart App Service: Roll deployment pods and synchronize container manifests
  */
 export async function restartAppService(app: AppServiceRecord): Promise<void> {
   const kc = await getAppKubeConfig();
@@ -1153,23 +1116,27 @@ export async function restartAppService(app: AppServiceRecord): Promise<void> {
   const ns = app.k8sNamespace || 'managed-apps';
   const deployName = app.k8sDeployment || `deploy-app-${app.id}-${app.subdomain}`.toLowerCase();
 
-  await objApi.patch({
-    apiVersion: 'apps/v1',
-    kind: 'Deployment',
-    metadata: {
-      name: deployName,
-      namespace: ns,
-    },
-    spec: {
-      template: {
-        metadata: {
-          annotations: {
-            'kubectl.kubernetes.io/restartedAt': new Date().toISOString(),
+  try {
+    await deployAppService(app);
+  } catch {
+    await objApi.patch({
+      apiVersion: 'apps/v1',
+      kind: 'Deployment',
+      metadata: {
+        name: deployName,
+        namespace: ns,
+      },
+      spec: {
+        template: {
+          metadata: {
+            annotations: {
+              'kubectl.kubernetes.io/restartedAt': new Date().toISOString(),
+            },
           },
         },
       },
-    },
-  });
+    });
+  }
 }
 
 /**
