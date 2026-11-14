@@ -32,15 +32,17 @@ export async function GET(req: NextRequest) {
     });
 
     const clusterConfig = await getAppClusterConfig().catch(() => null);
+    const baseDomain = clusterConfig?.publicDomain || "app.masdika.id";
+    const clusterIp = clusterConfig?.publicIp || "";
     const enriched = apps.map((app) => {
-      const fullDomain = `${app.subdomain}.app.masdika.id`;
+      const fullDomain = `${app.subdomain}.${baseDomain}`;
       const catalog = getAppDefinition(app.appType);
       return {
         ...app,
         fullDomain,
-        publicIp: clusterConfig?.publicIp || "103.247.10.61",
+        publicIp: clusterIp,
         httpsUrl: `https://${fullDomain}`,
-        nodePortUrl: `http://${clusterConfig?.publicIp || "103.247.10.61"}:${app.port}`,
+        nodePortUrl: clusterIp ? `http://${clusterIp}:${app.port}` : null,
         catalog,
       };
     });
@@ -276,11 +278,16 @@ export async function POST(req: NextRequest) {
       const hasWeb = catalogItem.accessProtocol === "WEB" || catalogItem.accessProtocol === "BOTH";
       const hasSsh = catalogItem.accessProtocol === "SSH" || catalogItem.accessProtocol === "BOTH";
 
+      const clusterConfig = await getAppClusterConfig().catch(() => null);
+      const baseDomain = clusterConfig?.publicDomain || "app.masdika.id";
+      const clusterIp = clusterConfig?.publicIp || "";
+      const fullDomain = `${subdomain}.${baseDomain}`;
+
       const connDesc = (hasWeb && hasSsh)
-        ? `Web Dashboard (https://${subdomain}.app.masdika.id) and SSH port ${port}`
+        ? `Web Dashboard (https://${fullDomain}) and SSH port ${port}`
         : hasSsh
-        ? `SSH port ${port}`
-        : `https://${subdomain}.app.masdika.id (port ${port})`;
+        ? (clusterIp ? `SSH port ${port} (${clusterIp})` : `SSH port ${port}`)
+        : `https://${fullDomain} (port ${port})`;
 
       await logClientActivity({
         userId: user.id,
@@ -293,9 +300,11 @@ export async function POST(req: NextRequest) {
         success: true,
         data: {
           ...updatedApp,
-          httpsUrl: hasWeb ? `https://${subdomain}.app.masdika.id` : null,
-          sshCommand: hasSsh ? `ssh root@103.247.10.61 -p ${port}` : null,
-          nodePortUrl: `http://103.247.10.61:${port}`,
+          fullDomain,
+          publicIp: clusterIp,
+          httpsUrl: hasWeb ? `https://${fullDomain}` : null,
+          sshCommand: hasSsh ? (clusterIp ? `ssh root@${clusterIp} -p ${port}` : null) : null,
+          nodePortUrl: clusterIp ? `http://${clusterIp}:${port}` : null,
         },
         message: `Successfully provisioned ${catalogItem.name}.`,
       });

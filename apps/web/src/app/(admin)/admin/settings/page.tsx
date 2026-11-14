@@ -145,13 +145,13 @@ export default function SettingsPage() {
 
     // Managed Apps (Kubernetes API) Cluster Settings
     managed_app_auth_mode: "KUBECONFIG",
-    managed_app_api_server: "https://192.168.79.17:6443",
+    managed_app_api_server: "",
     managed_app_kubeconfig: "",
     managed_app_service_token: "",
     managed_app_skip_tls: true,
     managed_app_ca_cert: "",
-    managed_app_public_domain: "app.masdika.id",
-    managed_app_public_ip: "103.247.10.61"
+    managed_app_public_domain: "",
+    managed_app_public_ip: ""
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -223,13 +223,13 @@ export default function SettingsPage() {
             managed_db_mongo_url: data.settings?.managed_db_mongo_url || "",
 
             managed_app_auth_mode: data.settings?.managed_app_auth_mode || "KUBECONFIG",
-            managed_app_api_server: data.settings?.managed_app_api_server || "https://192.168.79.17:6443",
+            managed_app_api_server: data.settings?.managed_app_api_server || "",
             managed_app_kubeconfig: data.settings?.managed_app_kubeconfig || "",
             managed_app_service_token: data.settings?.managed_app_service_token || "",
             managed_app_skip_tls: data.settings?.managed_app_skip_tls !== undefined ? (data.settings.managed_app_skip_tls === "true" || data.settings.managed_app_skip_tls === true) : true,
             managed_app_ca_cert: data.settings?.managed_app_ca_cert || "",
-            managed_app_public_domain: data.settings?.managed_app_public_domain || "app.masdika.id",
-            managed_app_public_ip: data.settings?.managed_app_public_ip || "103.247.10.61"
+            managed_app_public_domain: data.settings?.managed_app_public_domain || "",
+            managed_app_public_ip: data.settings?.managed_app_public_ip || ""
           });
           if (data.settings?.profileImage) {
             setProfilePreview(data.settings?.profileImage);
@@ -2014,7 +2014,7 @@ export default function SettingsPage() {
                         </div>
 
                         <div className="space-y-2 md:col-span-2">
-                          <label className={labelClass}>Kubeconfig Content (YAML / /etc/rancher/k3s/k3s.yaml) *</label>
+                          <label className={labelClass}>Kubeconfig Content (YAML / kubeconfig.yaml) *</label>
                           <textarea
                             name="managed_db_kubeconfig"
                             value={formData.managed_db_kubeconfig}
@@ -2024,7 +2024,7 @@ export default function SettingsPage() {
                             className={cn(inputClass, "font-mono text-xs leading-relaxed resize-y")}
                           />
                           <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>
-                            Paste full content of /etc/rancher/k3s/k3s.yaml from your cluster. Stored securely with AES-256 encryption. Leave as •••••••• to keep current.
+                            Paste full content of kubeconfig.yaml from your cluster. Stored securely with AES-256 encryption. Leave as •••••••• to keep current.
                           </p>
                         </div>
 
@@ -2053,11 +2053,11 @@ export default function SettingsPage() {
                               className="w-4 h-4 rounded text-cyan-500 focus:ring-cyan-400 bg-black/20 border-white/10"
                             />
                             <span className={cn("text-xs font-semibold", isDark ? "text-zinc-300" : "text-slate-700")}>
-                              Skip TLS Verification (Recommended for K3s self-signed certs)
+                              Skip TLS Verification (Recommended for Kubernetes self-signed certs)
                             </span>
                           </label>
                           <p className={cn("text-[11px] pl-6", isDark ? "text-zinc-500" : "text-slate-500")}>
-                            Bypasses x509 self-signed certificate warnings when connecting to K3s port 6443.
+                            Bypasses x509 self-signed certificate warnings when connecting to Kubernetes port 6443.
                           </p>
                         </div>
                       </div>
@@ -2092,7 +2092,7 @@ export default function SettingsPage() {
                             placeholder="e.g. 203.0.113.1"
                             className={inputClass}
                           />
-                          <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Public IP address mapped to K3s cluster for direct TCP NodePort access</p>
+                          <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Public IP address mapped to Kubernetes cluster for direct TCP NodePort access</p>
                         </div>
                       </div>
                     </div>
@@ -2182,10 +2182,10 @@ export default function SettingsPage() {
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-inherit">
                     <div>
                       <h2 className={cn("text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                        <Boxes className="w-5 h-5 text-cyan-400" /> Managed Apps K3s Cluster & Auto SSL
+                        <Boxes className="w-5 h-5 text-cyan-400" /> Managed Apps Kubernetes Cluster & Auto SSL
                       </h2>
                       <p className={cn("text-xs mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
-                        Configure the dedicated K3s cluster on 192.168.79.17 and Traefik Ingress with Let&apos;s Encrypt automated SSL for all containerized applications.
+                        Configure the dedicated Kubernetes cluster and Traefik Ingress with Let&apos;s Encrypt automated SSL for all containerized applications.
                       </p>
                     </div>
 
@@ -2243,7 +2243,7 @@ export default function SettingsPage() {
                             name="managed_app_api_server"
                             value={formData.managed_app_api_server}
                             onChange={handleChange}
-                            placeholder="e.g. https://192.168.79.17:6443"
+                            placeholder="e.g. https://k8s-apps.example.com:6443"
                             className={inputClass}
                           />
                           <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>
@@ -2276,7 +2276,7 @@ export default function SettingsPage() {
                             className="rounded border-zinc-700 text-cyan-500 focus:ring-cyan-500 w-4 h-4"
                           />
                           <label htmlFor="managed_app_skip_tls" className={cn("text-xs font-medium cursor-pointer", isDark ? "text-zinc-300" : "text-slate-700")}>
-                            Skip TLS Certificate Verification (Recommended for internal K3s self-signed CA)
+                            Skip TLS Certificate Verification (Recommended for internal Kubernetes self-signed CA)
                           </label>
                         </div>
                       </div>
@@ -2309,7 +2309,7 @@ export default function SettingsPage() {
                             name="managed_app_public_ip"
                             value={formData.managed_app_public_ip}
                             onChange={handleChange}
-                            placeholder="e.g. 103.247.10.61"
+                            placeholder="e.g. 203.0.113.1"
                             className={inputClass}
                           />
                           <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>

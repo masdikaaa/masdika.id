@@ -65,6 +65,8 @@ export interface AppClusterCapacity {
   storagePercent: number;
   availablePorts: number;
   totalPorts: number;
+  publicDomain?: string;
+  publicIp?: string;
   reason?: string;
   userMessage?: string;
 }
@@ -138,6 +140,9 @@ export async function checkAppClusterCapacity(
   const instancePercent = maxInstances > 0 ? Math.min(100, Math.round((activeInstances / maxInstances) * 100)) : 100;
 
   const capacityPercent = Math.max(cpuPercent, memoryPercent, storagePercent, instancePercent);
+  const clusterConfig = await getAppClusterConfig().catch(() => null);
+  const publicDomain = clusterConfig?.publicDomain || '';
+  const publicIp = clusterConfig?.publicIp || '';
 
   if (isManuallyFull) {
     return {
@@ -157,6 +162,8 @@ export async function checkAppClusterCapacity(
       storagePercent: 100,
       availablePorts,
       totalPorts,
+      publicDomain,
+      publicIp,
       reason: 'Application provisioning paused by administrator',
       userMessage: 'The Managed Applications cluster is temporarily undergoing maintenance or capacity expansion. New application deployments are temporarily paused.',
     };
@@ -203,6 +210,8 @@ export async function checkAppClusterCapacity(
       storagePercent,
       availablePorts,
       totalPorts,
+      publicDomain,
+      publicIp,
       reason,
       userMessage,
     };
@@ -226,6 +235,8 @@ export async function checkAppClusterCapacity(
     storagePercent,
     availablePorts,
     totalPorts,
+    publicDomain,
+    publicIp,
   };
 }
 
@@ -273,7 +284,7 @@ export async function getAppClusterConfig(forceRefresh = false): Promise<AppClus
   }
 
   const authMode = (settingMap.get('managed_app_auth_mode') || 'KUBECONFIG') as 'KUBECONFIG' | 'TOKEN';
-  const apiServer = settingMap.get('managed_app_api_server') || process.env.MANAGED_APP_API_SERVER || 'https://192.168.79.17:6443';
+  const apiServer = settingMap.get('managed_app_api_server') || process.env.MANAGED_APP_API_SERVER || '';
 
   const rawKubeconfig = settingMap.get('managed_app_kubeconfig') || process.env.MANAGED_APP_KUBECONFIG || '';
   const kubeconfig = rawKubeconfig.startsWith('enc:') ? (decryptDeterministic(rawKubeconfig) || rawKubeconfig) : rawKubeconfig;
@@ -286,7 +297,7 @@ export async function getAppClusterConfig(forceRefresh = false): Promise<AppClus
   const caCert = settingMap.get('managed_app_ca_cert') || process.env.MANAGED_APP_CA_CERT || '';
 
   const publicDomain = settingMap.get('managed_app_public_domain') || process.env.MANAGED_APP_PUBLIC_DOMAIN || 'app.masdika.id';
-  const publicIp = settingMap.get('managed_app_public_ip') || process.env.MANAGED_APP_PUBLIC_IP || '103.247.10.61';
+  const publicIp = settingMap.get('managed_app_public_ip') || process.env.MANAGED_APP_PUBLIC_IP || '';
 
   cachedAppClusterConfig = {
     authMode,
@@ -571,11 +582,12 @@ export async function applyKubernetesManifests(kc: k8s.KubeConfig, manifestYaml:
 /**
  * Build App environment variables and startup command according to App Type
  */
-export function buildAppContainerSpec(app: AppServiceRecord) {
+export function buildAppContainerSpec(app: AppServiceRecord, domainBase?: string) {
   const appType = app.appType.toLowerCase();
   const catalogItem = getAppDefinition(appType);
   const dataMount = catalogItem?.dataDir || '/app/data';
-  const fullDomain = `${app.subdomain}.app.masdika.id`;
+  const effectiveBase = domainBase || 'app.masdika.id';
+  const fullDomain = `${app.subdomain}.${effectiveBase}`;
 
   let image = catalogItem?.defaultImage || 'docker.io/library/node:22-alpine';
   let envYaml = '';
@@ -823,9 +835,11 @@ export async function deployAppService(app: AppServiceRecord): Promise<{
   fullDomain: string;
 }> {
   const kc = await getAppKubeConfig();
+  const clusterConfig = await getAppClusterConfig().catch(() => null);
+  const effectiveBase = clusterConfig?.publicDomain || 'app.masdika.id';
   const ns = 'managed-apps';
   const name = `app-${app.id}-${app.subdomain}`.toLowerCase().replace(/[^a-z0-9-]/g, '-').slice(0, 50);
-  const fullDomain = `${app.subdomain}.app.masdika.id`;
+  const fullDomain = `${app.subdomain}.${effectiveBase}`;
 
   // 1. Ensure Namespace exists
   const coreApi = kc.makeApiClient(k8s.CoreV1Api);
@@ -846,7 +860,7 @@ export async function deployAppService(app: AppServiceRecord): Promise<{
     }
   }
 
-  const { image, dataMount, envYaml, commandYaml } = buildAppContainerSpec(app);
+  const { image, dataMount, envYaml, commandYaml } = buildAppContainerSpec(app, effectiveBase);
   const catalogItem = getAppDefinition(app.appType);
   const isHermes = app.appType.toLowerCase() === 'hermes';
   const hasWeb = catalogItem?.accessProtocol === 'WEB' || catalogItem?.accessProtocol === 'BOTH' || isHermes;

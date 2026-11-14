@@ -51,23 +51,23 @@ export async function GET() {
     settingsObj['managed_db_service_token'] = hasServiceToken ? MASKED_SECRET : '';
     settingsObj['managed_db_skip_tls'] = settingsObj['managed_db_skip_tls'] ?? 'true';
     settingsObj['managed_db_ca_cert'] = settingsObj['managed_db_ca_cert'] || '';
-    settingsObj['managed_db_public_domain'] = settingsObj['managed_db_public_domain'] || process.env.MANAGED_DB_PUBLIC_DOMAIN || 'db.masdika.id';
-    settingsObj['managed_db_public_ip'] = settingsObj['managed_db_public_ip'] || process.env.MANAGED_DB_PUBLIC_IP || '103.247.10.61';
-    settingsObj['managed_db_pma_url'] = settingsObj['managed_db_pma_url'] || process.env.MANAGED_DB_PMA_URL || 'https://pma.db.masdika.id';
-    settingsObj['managed_db_pgadmin_url'] = settingsObj['managed_db_pgadmin_url'] || process.env.MANAGED_DB_PGADMIN_URL || 'https://pgadmin.db.masdika.id';
-    settingsObj['managed_db_mongo_url'] = settingsObj['managed_db_mongo_url'] || process.env.MANAGED_DB_MONGO_URL || 'https://mongo.db.masdika.id';
+    settingsObj['managed_db_public_domain'] = settingsObj['managed_db_public_domain'] || process.env.MANAGED_DB_PUBLIC_DOMAIN || '';
+    settingsObj['managed_db_public_ip'] = settingsObj['managed_db_public_ip'] || process.env.MANAGED_DB_PUBLIC_IP || '';
+    settingsObj['managed_db_pma_url'] = settingsObj['managed_db_pma_url'] || process.env.MANAGED_DB_PMA_URL || '';
+    settingsObj['managed_db_pgadmin_url'] = settingsObj['managed_db_pgadmin_url'] || process.env.MANAGED_DB_PGADMIN_URL || '';
+    settingsObj['managed_db_mongo_url'] = settingsObj['managed_db_mongo_url'] || process.env.MANAGED_DB_MONGO_URL || '';
 
     // Managed Apps (Kubernetes API) Cluster Settings
     const hasAppKubeconfig = Boolean(settingsObj['managed_app_kubeconfig'] || process.env.MANAGED_APP_KUBECONFIG);
     const hasAppServiceToken = Boolean(settingsObj['managed_app_service_token'] || process.env.MANAGED_APP_SERVICE_TOKEN);
     settingsObj['managed_app_auth_mode'] = settingsObj['managed_app_auth_mode'] || 'KUBECONFIG';
-    settingsObj['managed_app_api_server'] = settingsObj['managed_app_api_server'] || process.env.MANAGED_APP_API_SERVER || 'https://192.168.79.17:6443';
+    settingsObj['managed_app_api_server'] = settingsObj['managed_app_api_server'] || process.env.MANAGED_APP_API_SERVER || '';
     settingsObj['managed_app_kubeconfig'] = hasAppKubeconfig ? MASKED_SECRET : '';
     settingsObj['managed_app_service_token'] = hasAppServiceToken ? MASKED_SECRET : '';
     settingsObj['managed_app_skip_tls'] = settingsObj['managed_app_skip_tls'] ?? 'true';
     settingsObj['managed_app_ca_cert'] = settingsObj['managed_app_ca_cert'] || '';
-    settingsObj['managed_app_public_domain'] = settingsObj['managed_app_public_domain'] || process.env.MANAGED_APP_PUBLIC_DOMAIN || 'app.masdika.id';
-    settingsObj['managed_app_public_ip'] = settingsObj['managed_app_public_ip'] || process.env.MANAGED_APP_PUBLIC_IP || '103.247.10.61';
+    settingsObj['managed_app_public_domain'] = settingsObj['managed_app_public_domain'] || process.env.MANAGED_APP_PUBLIC_DOMAIN || '';
+    settingsObj['managed_app_public_ip'] = settingsObj['managed_app_public_ip'] || process.env.MANAGED_APP_PUBLIC_IP || '';
 
     return NextResponse.json({
       user: {

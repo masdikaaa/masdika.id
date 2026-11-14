@@ -382,10 +382,10 @@ export default function ManagedAppsPage() {
             const isHermes = app.appType.toLowerCase() === "hermes";
             const hasWeb = catalog?.accessProtocol === "WEB" || catalog?.accessProtocol === "BOTH" || isHermes;
             const hasSsh = catalog?.accessProtocol === "SSH" || catalog?.accessProtocol === "BOTH" || isHermes;
-            const fullDomain = `${app.subdomain}.app.masdika.id`;
-            const httpsUrl = `https://${fullDomain}`;
-            const hostIp = app.publicIp || "103.247.10.61";
-            const sshCommand = `ssh root@${hostIp} -p ${app.port}`;
+            const fullDomain = (app as any).fullDomain || `${app.subdomain}.app.masdika.id`;
+            const httpsUrl = (app as any).httpsUrl || `https://${fullDomain}`;
+            const hostIp = (app as any).publicIp || "";
+            const sshCommand = hostIp ? `ssh root@${hostIp} -p ${app.port}` : `ssh root@<ip> -p ${app.port}`;
             const isRunning = app.status === "RUNNING";
             const isActing = actionLoadingId === app.id;
 

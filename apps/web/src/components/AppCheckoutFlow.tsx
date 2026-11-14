@@ -66,6 +66,8 @@ export default function AppCheckoutFlow() {
     allocatedMemoryMb: number;
     totalMemoryMb: number;
     memoryPercent: number;
+    publicDomain?: string;
+    publicIp?: string;
     userMessage?: string;
   } | null>(null);
   const [deploying, setDeploying] = useState(false);
@@ -535,7 +537,7 @@ export default function AppCheckoutFlow() {
                     <span className="whitespace-nowrap font-medium">Target HTTPS URL:</span>
                   </span>
                   <strong className={cn("font-mono font-bold break-all sm:text-right text-xs", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                    https://{cleanSubdomain}.app.masdika.id
+                    https://{cleanSubdomain}.{clusterCapacity?.publicDomain || 'app.masdika.id'}
                   </strong>
                 </div>
               </>

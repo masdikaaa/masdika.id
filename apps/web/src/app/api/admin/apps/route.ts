@@ -57,7 +57,9 @@ export async function GET(req: NextRequest) {
         }
       }
 
-      const fullDomain = `${app.subdomain}.app.masdika.id`;
+      const baseDomain = clusterConfig?.publicDomain || "app.masdika.id";
+      const clusterIp = clusterConfig?.publicIp || "";
+      const fullDomain = `${app.subdomain}.${baseDomain}`;
       const catalog = getAppDefinition(app.appType);
 
       return {
@@ -65,8 +67,9 @@ export async function GET(req: NextRequest) {
         customerName: resolvedCustomerName,
         customerEmail: resolvedCustomerEmail,
         fullDomain,
+        publicIp: clusterIp,
         httpsUrl: `https://${fullDomain}`,
-        nodePortUrl: `http://${clusterConfig?.publicIp || "103.247.10.61"}:${app.port}`,
+        nodePortUrl: clusterIp ? `http://${clusterIp}:${app.port}` : null,
         catalog,
       };
     });
@@ -90,8 +93,8 @@ export async function GET(req: NextRequest) {
         totalMemoryGb: parseFloat((totalMemoryMb / 1024).toFixed(1)),
         totalStorageGb,
         totalMonthlyRunRate,
-        publicIp: clusterConfig?.publicIp || "103.247.10.61",
-        publicDomain: clusterConfig?.publicDomain || "app.masdika.id",
+        publicIp: clusterConfig?.publicIp || "",
+        publicDomain: clusterConfig?.publicDomain || "",
       },
     });
   } catch (error: any) {

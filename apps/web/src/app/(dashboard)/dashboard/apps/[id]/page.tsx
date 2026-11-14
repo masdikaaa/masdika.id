@@ -226,10 +226,10 @@ export default function AppDetailPage({
   const isHermes = app.appType.toLowerCase() === "hermes";
   const hasWeb = catalog?.accessProtocol === "WEB" || catalog?.accessProtocol === "BOTH" || isHermes;
   const hasSsh = catalog?.accessProtocol === "SSH" || catalog?.accessProtocol === "BOTH" || isHermes;
-  const hostIp = app.publicIp || "103.247.10.61";
-  const sshCommand = `ssh ${app.username || "root"}@${hostIp} -p ${app.port}`;
-  const fullDomain = `${app.subdomain}.app.masdika.id`;
-  const httpsUrl = `https://${fullDomain}`;
+  const hostIp = app.publicIp || "";
+  const sshCommand = hostIp ? `ssh ${app.username || "root"}@${hostIp} -p ${app.port}` : `ssh ${app.username || "root"}@<ip> -p ${app.port}`;
+  const fullDomain = (app as any).fullDomain || `${app.subdomain}.app.masdika.id`;
+  const httpsUrl = (app as any).httpsUrl || `https://${fullDomain}`;
   const isRunning = app.status === "RUNNING";
   const isStopped = app.status === "STOPPED";
   const isReady = isRunning && Boolean(app.telemetry?.ready);

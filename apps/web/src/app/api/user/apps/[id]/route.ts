@@ -44,7 +44,9 @@ export async function GET(
       })),
     ]);
 
-    const fullDomain = `${app.subdomain}.app.masdika.id`;
+    const baseDomain = clusterConfig?.publicDomain || "app.masdika.id";
+    const clusterIp = clusterConfig?.publicIp || "";
+    const fullDomain = `${app.subdomain}.${baseDomain}`;
     const catalog = getAppDefinition(app.appType);
 
     return NextResponse.json({
@@ -52,9 +54,9 @@ export async function GET(
       data: {
         ...app,
         fullDomain,
-        publicIp: clusterConfig?.publicIp || "103.247.10.61",
+        publicIp: clusterIp,
         httpsUrl: `https://${fullDomain}`,
-        nodePortUrl: `http://${clusterConfig?.publicIp || "103.247.10.61"}:${app.port}`,
+        nodePortUrl: clusterIp ? `http://${clusterIp}:${app.port}` : null,
         catalog,
         telemetry,
       },

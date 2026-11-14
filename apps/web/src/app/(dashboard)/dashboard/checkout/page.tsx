@@ -6,7 +6,7 @@ import {
   Check, ChevronRight, ChevronLeft, ShieldCheck,
   Wallet, Code2, Cloud, Database,
   UploadCloud, Server, FileVideo, Music, PlaySquare,
-  FileText, Activity, X, ArrowUpCircle, ShoppingCart, Loader2, BadgeCheck, RefreshCw, Terminal, Plus, Rocket
+  FileText, Activity, X, ArrowUpCircle, ShoppingCart, Loader2, BadgeCheck, RefreshCw, Terminal, Plus, Rocket, Boxes
 } from "lucide-react";
 import { SiKubernetes } from "react-icons/si";
 import Link from "next/link";
@@ -17,6 +17,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import VpsCheckoutFlow from "@/components/VpsCheckoutFlow";
 import DatabaseCheckoutFlow from "@/components/DatabaseCheckoutFlow";
+import AppCheckoutFlow from "@/components/AppCheckoutFlow";
 import { EnterpriseInfraBanner, EnterpriseInfraSidebarCard } from "@/components/EnterpriseInfraBadges";
 
 function Pager({
@@ -98,6 +99,7 @@ interface ServiceDef {
 const CATEGORIES = [
   { id: "COMPUTE", name: "Cloud Compute", icon: Server },
   { id: "DATABASE", name: "Managed Database", icon: Database },
+  { id: "MANAGED_APP", name: "Managed Apps", icon: Boxes },
   { id: "STORAGE_CDN", name: "File CDN", icon: UploadCloud },
   { id: "DEVELOPER_API", name: "API Hub", icon: Code2 }
 ];
@@ -129,6 +131,15 @@ const SERVICES: ServiceDef[] = [
     desc: "Production-ready MySQL, MariaDB, PostgreSQL & MongoDB with SSD storage & web GUI in Sidoarjo.",
     badge: "Cloud DB",
     tags: ["MySQL/PG/Mongo", "phpMyAdmin/pgAdmin", "Pay As You Go", "Sidoarjo Region"]
+  },
+  {
+    id: "MANAGED_APP",
+    name: "Managed Applications",
+    category: "MANAGED_APP",
+    icon: Boxes,
+    desc: "Dedicated containerized AI coding agents, workflow engines & API routers on Kubernetes with auto SSL.",
+    badge: "Kubernetes Native",
+    tags: ["Hermes Agent", "9Router", "n8n", "OpenCode", "OpenClaw", "Auto SSL"]
   },
   {
     id: "CDN",
@@ -212,10 +223,17 @@ function CheckoutContent() {
   const [activeSubscriptions, setActiveSubscriptions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const defaultService = appParam
+  const isManagedAppUrl = urlService === "APP" || urlService === "APPS" || urlService === "MANAGED_APP" || urlService === "MANAGED_APPS";
+  const defaultService = isManagedAppUrl
+    ? "MANAGED_APP"
+    : appParam
     ? "APP_CATALOG"
-    : (urlService === "APP_CATALOG" || urlService === "CATALOG_APPS" || urlService === "APPS" ? "APP_CATALOG" : (urlService || "VPS"));
-  const defaultCategory = appParam ? "COMPUTE" : (SERVICES.find(s => s.id === defaultService)?.category || "COMPUTE");
+    : (urlService === "APP_CATALOG" || urlService === "CATALOG_APPS" ? "APP_CATALOG" : (urlService || "VPS"));
+  const defaultCategory = isManagedAppUrl
+    ? "MANAGED_APP"
+    : appParam
+    ? "COMPUTE"
+    : (SERVICES.find(s => s.id === defaultService)?.category || "COMPUTE");
 
   const [selectedCategory, setSelectedCategory] = useState<string>(defaultCategory);
   const [servicePage, setServicePage] = useState<number>(1);
@@ -609,6 +627,10 @@ function CheckoutContent() {
                                   el.scrollIntoView({ behavior: "smooth", block: "start" });
                                 }
                               }, 100);
+                            } else if (srv.id === "DATABASE") {
+                              router.replace("/dashboard/checkout?service=DATABASE", { scroll: false });
+                            } else if (srv.id === "MANAGED_APP") {
+                              router.replace("/dashboard/checkout?service=MANAGED_APP", { scroll: false });
                             }
                           }}
                           className={cn(
@@ -729,6 +751,10 @@ function CheckoutContent() {
         {selectedService === "DATABASE" ? (
           <div key="database-flow" className="w-full max-w-full min-w-0 transition-all duration-200">
             <DatabaseCheckoutFlow />
+          </div>
+        ) : selectedService === "MANAGED_APP" || selectedService === "APP" || selectedService === "APPS" ? (
+          <div key="managed-app-flow" className="w-full max-w-full min-w-0 transition-all duration-200">
+            <AppCheckoutFlow />
           </div>
         ) : selectedService === "VPS" || selectedService === "KUBERNETES" || selectedService === "APP_CATALOG" ? (
           <div key={`vps-flow-${selectedService}`} className="w-full max-w-full min-w-0 transition-all duration-200">

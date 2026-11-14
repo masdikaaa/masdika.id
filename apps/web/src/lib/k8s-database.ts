@@ -112,7 +112,7 @@ export async function getK8sClusterConfig(forceRefresh = false): Promise<K8sClus
   const caCert = settingMap.get('managed_db_ca_cert') || process.env.MANAGED_DB_CA_CERT || '';
 
   const publicDomain = settingMap.get('managed_db_public_domain') || process.env.MANAGED_DB_PUBLIC_DOMAIN || 'db.masdika.id';
-  const publicIp = settingMap.get('managed_db_public_ip') || process.env.MANAGED_DB_PUBLIC_IP || '103.247.10.61';
+  const publicIp = settingMap.get('managed_db_public_ip') || process.env.MANAGED_DB_PUBLIC_IP || '';
   const pmaUrl = settingMap.get('managed_db_pma_url') || process.env.MANAGED_DB_PMA_URL || 'https://pma.db.masdika.id';
   const pgadminUrl = settingMap.get('managed_db_pgadmin_url') || process.env.MANAGED_DB_PGADMIN_URL || 'https://pgadmin.db.masdika.id';
   const mongoUrl = settingMap.get('managed_db_mongo_url') || process.env.MANAGED_DB_MONGO_URL || 'https://mongo.db.masdika.id';
@@ -136,7 +136,7 @@ export async function getK8sClusterConfig(forceRefresh = false): Promise<K8sClus
 }
 
 export const MANAGED_DB_PUBLIC_DOMAIN = process.env.MANAGED_DB_PUBLIC_DOMAIN || 'db.masdika.id';
-export const MANAGED_DB_PUBLIC_IP = process.env.MANAGED_DB_PUBLIC_IP || '103.247.10.61';
+export const MANAGED_DB_PUBLIC_IP = process.env.MANAGED_DB_PUBLIC_IP || '';
 export const MANAGED_DB_PMA_URL = process.env.MANAGED_DB_PMA_URL || 'https://pma.db.masdika.id';
 export const MANAGED_DB_PGADMIN_URL = process.env.MANAGED_DB_PGADMIN_URL || 'https://pgadmin.db.masdika.id';
 export const MANAGED_DB_MONGO_URL = process.env.MANAGED_DB_MONGO_URL || 'https://mongo.db.masdika.id';
