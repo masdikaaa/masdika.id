@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { ensureDatabasePlansExist } from "@/lib/database-plans";
+import { ensureDatabasePlansExist } from "@/lib/database-plans-server";
 
 export async function GET() {
   try {

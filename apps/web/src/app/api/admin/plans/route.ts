@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
-import { ensureDatabasePlansExist } from "@/lib/database-plans";
+import { ensureDatabasePlansExist } from "@/lib/database-plans-server";
 
 export const VALID_SERVICES = [
   'DATABASE',

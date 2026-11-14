@@ -284,7 +284,7 @@ app.prepare().then(async () => {
     });
 
     // 🗄️ Ensure all 6 Managed Database plans (1 Shared + 5 Dedicated tiers) are seeded & ready
-    import("./lib/database-plans").then(({ ensureDatabasePlansExist }) => {
+    import("./lib/database-plans-server").then(({ ensureDatabasePlansExist }) => {
       ensureDatabasePlansExist().then(() => {
         console.log('> [Database Plans] Managed database plan catalog verified and active.');
       }).catch((err) => {
