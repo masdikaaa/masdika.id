@@ -46,22 +46,42 @@ export async function PUT(req: Request, props: { params: Promise<{ type: string;
         });
 
         if (sub.user) {
-          const serviceName = sub.plan ? `${sub.plan.name} (${sub.plan.service})` : 'Subscription';
+          const isCdn = sub.plan?.service === 'CDN';
+          const serviceType = isCdn ? 'File CDN' : `API Hub (${sub.plan?.service || 'API'})`;
+          const serviceName = sub.plan ? `${sub.plan.name} (${sub.plan.service})` : serviceType;
           if (suspend) {
-            sendAdminServiceSuspendedEmail(sub.user.name || 'Customer', sub.user.email, serviceName, 'Subscription').catch(console.error);
+            const { sendPaygSuspendedEmail } = await import('@/lib/email');
+            sendPaygSuspendedEmail(sub.user.email, sub.user.name || 'Customer', sub.plan?.name || 'Subscription', sub.plan?.service || 'Subscription').catch(console.error);
+            sendAdminServiceSuspendedEmail(sub.user.name || 'Customer', sub.user.email, serviceName, serviceType).catch(console.error);
           } else {
             sendReactivatedEmail(sub.user.email, sub.user.name || 'Customer', sub.plan?.name || 'Subscription', serviceName).catch(console.error);
-            sendAdminServiceReactivatedEmail(sub.user.name || 'Customer', sub.user.email, serviceName, 'Subscription').catch(console.error);
+            sendAdminServiceReactivatedEmail(sub.user.name || 'Customer', sub.user.email, serviceName, serviceType).catch(console.error);
           }
         }
         break;
       }
 
       case 'apikeys': {
+        const key = await prisma.apiKey.findUnique({
+          where: { id },
+          include: { user: true }
+        });
+        if (!key) return NextResponse.json({ error: 'API Key not found' }, { status: 404 });
+
         result = await prisma.apiKey.update({
           where: { id },
           data: { status: statusValue }
         });
+
+        if (key.user) {
+          const keyLabel = `API Key (${key.service || key.name || 'Global'})`;
+          if (suspend) {
+            sendAdminServiceSuspendedEmail(key.user.name || 'Customer', key.user.email, keyLabel, 'API Hub Key').catch(console.error);
+          } else {
+            sendReactivatedEmail(key.user.email, key.user.name || 'Customer', 'API Key', keyLabel).catch(console.error);
+            sendAdminServiceReactivatedEmail(key.user.name || 'Customer', key.user.email, keyLabel, 'API Hub Key').catch(console.error);
+          }
+        }
         break;
       }
 

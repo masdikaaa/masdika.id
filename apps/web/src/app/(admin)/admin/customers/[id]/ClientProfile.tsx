@@ -370,26 +370,49 @@ export default function ClientProfile({ userId }: { userId: string }) {
   const allServices = user ? [
     ...(user.subscriptions?.map((s: any) => {
       let serviceName = s.plan?.service || 'UNKNOWN';
+      let category = 'Subscription';
       let icon = <Activity className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} />;
 
       if (serviceName === 'CDN') {
         serviceName = 'File CDN';
+        category = 'File CDN';
         icon = <UploadCloud className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} />;
       } else if (serviceName === 'SPOTIFY') {
+        category = 'API Hub';
         icon = <Music className="w-4 h-4 text-green-400" />;
-      } else if (serviceName === 'BMKG_EARTHQUAKE') {
+      } else if (serviceName === 'BMKG_EARTHQUAKE' || serviceName === 'BMKG_WEATHER') {
+        category = 'API Hub';
         icon = <Activity className="w-4 h-4 text-orange-400" />;
+      } else if (serviceName === 'TIKTOK' || serviceName === 'YOUTUBE' || serviceName === 'BLOG') {
+        category = 'API Hub';
+        icon = <Globe className="w-4 h-4 text-purple-400" />;
+      } else {
+        category = 'API Hub';
       }
       
+      let limitsStr = '';
+      try {
+        if (s.plan?.limits) {
+          const lim = JSON.parse(s.plan.limits);
+          if (lim.storage || lim.storageGB) limitsStr = `Quota: ${lim.storageGB ? `${lim.storageGB} GB` : lim.storage}`;
+          if (lim.requests) limitsStr = `Limit: ${lim.requests === 'unlimited' ? 'Unlimited' : `${Number(lim.requests).toLocaleString()} reqs`}`;
+        }
+      } catch {}
+
       return {
         id: s.id,
-        category: 'Subscription',
+        category,
         type: 'subscriptions',
         name: s.plan ? `${s.plan.name} (${serviceName})` : 'Unknown Plan',
         detail: (
           <div className="flex flex-col gap-0.5">
             <span className={cn("text-sm font-medium", isDark ? "text-zinc-300" : "text-slate-600")}>Expires: {s.expiresAt ? new Date(s.expiresAt).toLocaleDateString() : 'N/A'}</span>
             <span className={cn("text-[11px] font-mono", isDark ? "text-zinc-400" : "text-slate-500")}>Registration Date: {s.createdAt ? new Date(s.createdAt).toLocaleDateString() : 'N/A'}</span>
+            {limitsStr && (
+              <span className={cn("text-[11px] font-mono font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                {limitsStr}
+              </span>
+            )}
             {s.billingType === 'PAYG' && (
               <span className={cn("text-xs font-semibold mt-1 px-2 py-0.5 rounded w-fit border", isDark ? "bg-white/5 border-white/10 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-700")}>
                 PAYG Meter: {s.usageCount ? s.usageCount.toLocaleString() : 0} reqs
@@ -404,6 +427,40 @@ export default function ClientProfile({ userId }: { userId: string }) {
         rawData: s
       };
     }) || []),
+    ...(user.apiKeys?.map((k: any) => ({
+      id: k.id,
+      category: 'API Key',
+      type: 'apikeys',
+      name: k.name || `API Key (${k.service || 'Global'})`,
+      detail: (
+        <div className="flex flex-col gap-0.5 mt-0.5">
+          <div className="text-sm font-medium truncate">
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-2">
+                <span className={cn("font-semibold", isDark ? "text-zinc-300" : "text-slate-800")}>Developer Key</span>
+                <span className={cn("text-xs font-mono px-1.5 py-0.5 rounded border", isDark ? "bg-white/5 border-white/10 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-700")}>
+                  {k.service ? k.service.toUpperCase() : 'ALL SERVICES'}
+                </span>
+              </div>
+              <span className={cn("text-[11px] font-mono", isDark ? "text-zinc-400" : "text-slate-500")}>
+                Usage: {(k.usageCount || 0).toLocaleString()} requests
+              </span>
+              <span className={cn("text-[11px] font-normal font-mono", isDark ? "text-zinc-400" : "text-slate-500")}>
+                Registration Date: {k.createdAt ? new Date(k.createdAt).toLocaleDateString() : 'N/A'}
+              </span>
+            </div>
+          </div>
+          <div className={cn("text-[11px] font-mono truncate", isDark ? "text-zinc-500" : "text-slate-500")}>
+            Last Used: {k.lastUsed ? new Date(k.lastUsed).toLocaleString() : 'Never'}
+          </div>
+        </div>
+      ),
+      status: k.status || 'ACTIVE',
+      suspendReason: k.status === 'SUSPENDED' ? 'Suspended by admin' : null,
+      icon: <Key className={cn("w-4 h-4", isDark ? "text-amber-400" : "text-amber-700")} />,
+      createdAt: k.createdAt,
+      rawData: k
+    })) || []),
     ...(user.vpsServices?.map((vps: any) => ({
       id: vps.id,
       category: 'Cloud VPS',
