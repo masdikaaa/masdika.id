@@ -534,9 +534,6 @@ export default function CommunityClient({ initialGroups }: { initialGroups: Comm
         {/* ── 3. SUBMIT GROUP SECTION (Design-system Compliant Card) ────── */}
         <section id="submit-group" className="scroll-mt-24 py-10 sm:py-14 relative z-10">
           <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-8 sm:p-12 overflow-hidden shadow-xl">
-            {/* Soft Ambient Accent */}
-            <div className="absolute top-0 right-0 w-[450px] h-[450px] bg-gradient-to-bl from-cyan-500/10 via-sky-500/5 to-transparent rounded-full blur-3xl pointer-events-none -z-0" />
-
             <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
               
               {/* Left Column: Information */}

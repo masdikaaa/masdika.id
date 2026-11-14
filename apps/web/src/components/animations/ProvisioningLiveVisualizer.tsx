@@ -31,7 +31,7 @@ export function ProvisioningLiveVisualizer({
   logs,
   title = "PROVISIONING",
   targetServer = "Dell PowerEdge R630 • Sidoarjo DC",
-  provisionEstimate = "Backend: KVM Hypervisor (Estimasi ~5 Menit)",
+  provisionEstimate = "Backend: KVM Hypervisor (Est. ~5 Mins)",
 }: ProvisioningVisualizerProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -78,7 +78,7 @@ export function ProvisioningLiveVisualizer({
       {/* Top Gradient Progress Bar */}
       <div className={cn("absolute top-0 left-0 right-0 h-1", isDark ? "bg-white/5" : "bg-slate-100")}>
         <motion.div
-          className="h-full bg-gradient-to-r from-cyan-600 via-cyan-400 to-emerald-400 shadow-[0_0_15px_rgba(34,211,238,0.5)] transform-gpu will-change-transform"
+          className="h-full bg-cyan-400 transform-gpu will-change-transform"
           initial={{ width: "0%" }}
           animate={{ width: `${progress}%` }}
           transition={{ duration: 0.5 }}
@@ -149,7 +149,7 @@ export function ProvisioningLiveVisualizer({
                   "relative flex items-start gap-2.5 sm:gap-4 p-2 sm:p-2.5 rounded-xl sm:rounded-2xl transition-all duration-300",
                   isActive
                     ? isDark
-                      ? "bg-cyan-500/[0.07] border border-cyan-500/30 shadow-[0_0_20px_rgba(0,210,255,0.06)]"
+                      ? "bg-cyan-500/[0.07] border border-cyan-500/30"
                       : "bg-cyan-50/90 border border-cyan-200 shadow-sm"
                     : "border border-transparent",
                   isPast || isActive ? "opacity-100" : "opacity-35"
@@ -166,8 +166,8 @@ export function ProvisioningLiveVisualizer({
                           : "bg-cyan-50 border-cyan-500 text-cyan-600"
                         : isActive
                           ? isDark
-                            ? "bg-[var(--surface)] border-cyan-400 text-cyan-400 shadow-[0_0_12px_rgba(34,211,238,0.5)]"
-                            : "bg-white border-cyan-500 text-cyan-600 shadow-[0_0_12px_rgba(6,182,212,0.3)]"
+                            ? "bg-[var(--surface)] border-cyan-400 text-cyan-400"
+                            : "bg-white border-cyan-500 text-cyan-600"
                           : isDark
                             ? "bg-[var(--surface)] border-[var(--border-primary)] text-zinc-600"
                             : "bg-white border-slate-200 text-slate-300"

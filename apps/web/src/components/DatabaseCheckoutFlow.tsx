@@ -503,7 +503,7 @@ export default function DatabaseCheckoutFlow() {
       {/* Top Architecture Mode Selector */}
       <div className={cn(
         "p-1.5 rounded-2xl border grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 w-full max-w-full min-w-0",
-        isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200/80"
+        isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-100 border-slate-200/80"
       )}>
         <button
           type="button"
@@ -571,7 +571,7 @@ export default function DatabaseCheckoutFlow() {
           {selectedTier === "DEDICATED" && (
             <>
               {/* Step 1: Engine & Version */}
-              <div className={cn("rounded-2xl border p-4 sm:p-6 transition-all w-full max-w-full min-w-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
+              <div className={cn("rounded-2xl border p-4 sm:p-6 transition-all w-full max-w-full min-w-0", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
                 <div className="flex items-start sm:items-center justify-between gap-3 mb-4">
                   <div className="min-w-0">
                     <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
@@ -655,7 +655,7 @@ export default function DatabaseCheckoutFlow() {
               </div>
 
               {/* Step 2: Select Flavor (SumoPod Style Table Gambar 1) */}
-              <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all w-full max-w-full min-w-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
+              <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all w-full max-w-full min-w-0", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
                 <div className="mb-4">
                   <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                     Select Flavor
@@ -754,7 +754,7 @@ export default function DatabaseCheckoutFlow() {
               </div>
 
               {/* Step 3: Storage Size Scale Bar (Gambar 1) */}
-              <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all w-full max-w-full min-w-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
+              <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all w-full max-w-full min-w-0", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
                 <div className="mb-4">
                   <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                     Storage Size
@@ -827,7 +827,7 @@ export default function DatabaseCheckoutFlow() {
           {selectedTier === "SHARED" && (
             <>
               {/* Step 1: Engine & Version / Edition */}
-              <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all w-full max-w-full min-w-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
+              <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all w-full max-w-full min-w-0", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
                 <div className="flex items-start sm:items-center justify-between gap-3 mb-4">
                   <div className="min-w-0">
                     <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
@@ -922,7 +922,7 @@ export default function DatabaseCheckoutFlow() {
               </div>
 
               {/* Step 2: Shared Package Details (Spec Overview) */}
-              <div className={cn("rounded-2xl border p-4 sm:p-6 transition-all w-full max-w-full min-w-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
+              <div className={cn("rounded-2xl border p-4 sm:p-6 transition-all w-full max-w-full min-w-0", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                   <div>
                     <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
@@ -968,7 +968,7 @@ export default function DatabaseCheckoutFlow() {
               </div>
 
               {/* Step 3: Storage Size Scale Bar */}
-              <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all w-full max-w-full min-w-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
+              <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all w-full max-w-full min-w-0", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
                 <div className="mb-4">
                   <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                     Storage Size
@@ -1038,7 +1038,7 @@ export default function DatabaseCheckoutFlow() {
           )}
 
           {/* Instance Configuration & Credentials */}
-          <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all w-full max-w-full min-w-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
+          <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all w-full max-w-full min-w-0", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
             <h2 className={cn("text-base sm:text-lg font-bold tracking-tight mb-4", isDark ? "text-white" : "text-slate-900")}>
               Instance Configuration & Credentials
             </h2>
@@ -1056,7 +1056,7 @@ export default function DatabaseCheckoutFlow() {
                   placeholder="e.g. production-database"
                   className={cn("w-full border rounded-xl px-3.5 py-2.5 text-sm font-medium focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
-                <p className="text-[11px] text-zinc-500">Alphanumeric, spasi, titik, strip & underscore (2-50 chars)</p>
+                <p className="text-[11px] text-zinc-500">Alphanumeric, spaces, dots, hyphens &amp; underscores (2-50 chars)</p>
               </div>
 
               <div className="space-y-1.5">
@@ -1070,7 +1070,7 @@ export default function DatabaseCheckoutFlow() {
                   placeholder="Leave blank to auto-generate"
                   className={cn("w-full border rounded-xl px-3.5 py-2.5 text-sm font-mono focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
-                <p className="text-[11px] text-zinc-500">Awali huruf, alphanumeric & underscore (2-32 chars)</p>
+                <p className="text-[11px] text-zinc-500">Must start with a letter, alphanumeric &amp; underscores (2-32 chars)</p>
               </div>
 
               <div className="space-y-1.5">
@@ -1084,7 +1084,7 @@ export default function DatabaseCheckoutFlow() {
                   placeholder="Leave blank to auto-generate"
                   className={cn("w-full border rounded-xl px-3.5 py-2.5 text-sm font-mono focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white placeholder:text-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
-                <p className="text-[11px] text-zinc-500">Awali huruf, alphanumeric & underscore (non-root)</p>
+                <p className="text-[11px] text-zinc-500">Must start with a letter, alphanumeric &amp; underscores (non-root)</p>
               </div>
 
               <div className="space-y-1.5">
@@ -1107,7 +1107,7 @@ export default function DatabaseCheckoutFlow() {
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
-                <p className="text-[11px] text-zinc-500">Min 8 karakter (@#%^+=_-. aman), tanpa kutip atau shell</p>
+                <p className="text-[11px] text-zinc-500">Min 8 characters (@#%^+=_-. allowed), no quotes or shell characters</p>
               </div>
             </div>
           </div>
@@ -1115,7 +1115,7 @@ export default function DatabaseCheckoutFlow() {
 
         {/* Right Column (1 col): Sticky Summary Box (Gambar 1 & Gambar 2) */}
         <div className="xl:col-span-1 sticky top-6 space-y-6 w-full">
-          <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all space-y-5", isDark ? "bg-[#0a0a0c] border-white/[0.08] shadow-xl" : "bg-white border-slate-200/90 shadow-md")}>
+          <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all space-y-5", isDark ? "bg-[#111115] border-white/[0.08] shadow-xl" : "bg-white border-slate-200/90 shadow-md")}>
 
             {/* DEDICATED SUMMARY (Gambar 1) */}
             {selectedTier === "DEDICATED" ? (
@@ -1362,19 +1362,21 @@ export default function DatabaseCheckoutFlow() {
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
           <div className={cn(
             "w-full max-w-md rounded-3xl border p-6 sm:p-8 text-center space-y-6 shadow-2xl relative overflow-hidden animate-in fade-in zoom-in-95 duration-200",
-            isDark ? "bg-[#0c0c0e] border-white/10" : "bg-white border-slate-200"
+            isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90"
           )}>
-            {/* Glowing Aura Effect */}
-            <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-48 h-48 bg-cyan-500/20 rounded-full blur-3xl pointer-events-none" />
-
             {/* Icon Animation */}
             <div className="relative mx-auto w-20 h-20 flex items-center justify-center">
-              <div className="absolute inset-0 rounded-2xl bg-cyan-400/20 animate-ping opacity-30" />
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-cyan-500/20 to-cyan-400/10 border border-cyan-400/40 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-                <img 
-                  src={selectedTier === "DEDICATED" ? activeEngineMeta.icon : activeSharedEngineMeta.icon} 
-                  alt="Engine" 
-                  className="w-10 h-10 object-contain animate-pulse select-none pointer-events-none" 
+              <div
+                className={cn(
+                  "w-20 h-20 rounded-2xl border flex items-center justify-center relative",
+                  isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200"
+                )}
+              >
+                <div className="absolute inset-1.5 rounded-full border-2 border-cyan-400/15 border-t-cyan-400 animate-spin" />
+                <img
+                  src={selectedTier === "DEDICATED" ? activeEngineMeta.icon : activeSharedEngineMeta.icon}
+                  alt="Engine"
+                  className="w-9 h-9 object-contain select-none pointer-events-none relative z-10"
                 />
               </div>
             </div>
@@ -1390,26 +1392,26 @@ export default function DatabaseCheckoutFlow() {
 
             {/* Multi-step progress pipeline */}
             <div className="space-y-3 text-left">
-              <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs">
+              <div className={cn("flex items-center gap-3 p-2.5 rounded-xl border text-xs", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200/80")}>
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                 <span className={cn("break-words [word-break:normal]", isDark ? "text-zinc-200" : "text-slate-700")}>Account authorization &amp; PAYG balance allocation</span>
               </div>
-              <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs">
+              <div className={cn("flex items-center gap-3 p-2.5 rounded-xl border text-xs", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200/80")}>
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                 <span className={cn("break-words [word-break:normal]", isDark ? "text-zinc-200" : "text-slate-700")}>SSD storage allocation {storageGb} GB (local-path)</span>
               </div>
-              <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs">
+              <div className={cn("flex items-center gap-3 p-2.5 rounded-xl border text-xs", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200/80")}>
                 <Loader2 className="w-4 h-4 text-cyan-400 animate-spin shrink-0" />
                 <span className="text-cyan-400 font-semibold break-words [word-break:normal]">Creating Secret, Deployment &amp; NodePort</span>
               </div>
-              <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.01] border border-white/[0.03] text-xs opacity-60">
+              <div className={cn("flex items-center gap-3 p-2.5 rounded-xl border text-xs opacity-60", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200/80")}>
                 <div className="w-4 h-4 rounded-full border border-dashed border-zinc-500 shrink-0" />
                 <span className={cn("break-words [word-break:normal]", isDark ? "text-zinc-500" : "text-slate-400")}>Redirecting to Database Dashboard...</span>
               </div>
             </div>
 
             <div className="pt-2 text-[11px] text-zinc-500 flex items-center justify-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
               <span>Do not close or refresh this page</span>
             </div>
           </div>

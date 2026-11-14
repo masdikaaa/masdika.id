@@ -630,8 +630,6 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
         {/* ── 3. HARDWARE & K8S ARCHITECTURE SHOWCASE ───────────────────── */}
         <section id="features" className="scroll-mt-24 py-10 sm:py-14 relative z-10">
           <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-8 sm:p-12 shadow-xl overflow-hidden">
-            <div className="absolute top-0 right-0 w-[450px] h-[450px] bg-gradient-to-tr from-cyan-500/15 via-cyan-400/10 to-transparent dark:from-cyan-500/20 dark:via-cyan-400/10 dark:to-transparent rounded-full blur-3xl pointer-events-none -z-0" />
-
             <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
               <div className="lg:col-span-7">
                 <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
@@ -1375,8 +1373,6 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
         {/* ── 9. FINAL CTA SECTION ──────────────────────────────────────── */}
         <section className="py-10 sm:py-14 relative z-10 w-full">
           <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-10 md:p-16 text-center shadow-xl overflow-hidden w-full">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-gradient-to-tr from-cyan-500/15 via-cyan-400/10 to-transparent dark:from-cyan-500/20 dark:via-cyan-400/10 dark:to-transparent rounded-full blur-3xl pointer-events-none -z-0" />
-
             <div className="relative z-10 max-w-2xl mx-auto">
               <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
                 START STORING DATA TODAY

@@ -31,7 +31,7 @@ export function ProvisioningSection({
   terminalTitle = "DEPLOYMENT",
   iconType = "vps",
   targetServer = "Dell PowerEdge R630 • Sidoarjo DC",
-  provisionEstimate = "Backend: KVM Hypervisor (Estimasi ~5 Menit)",
+  provisionEstimate = "Backend: KVM Hypervisor (Est. ~5 Mins)",
 }: ProvisioningSectionProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -39,9 +39,6 @@ export function ProvisioningSection({
   return (
     <section className="py-8 sm:py-14 relative z-10 w-full overflow-hidden">
       <div className="relative rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-[var(--border-primary)] bg-white dark:bg-[var(--surface)] p-4 sm:p-8 lg:p-12 shadow-xl dark:shadow-2xl overflow-hidden transition-all">
-        {/* Soft Ambient Corner Accent */}
-        <div className="absolute top-0 right-0 w-[450px] h-[450px] bg-gradient-to-tr from-cyan-500/10 via-cyan-400/5 to-transparent rounded-full blur-3xl pointer-events-none -z-0" />
-
         <div className="relative z-10 grid lg:grid-cols-[1fr_1.3fr] xl:grid-cols-[1fr_1.4fr] gap-8 lg:gap-14 items-center">
           
           {/* Left Column: Content */}
@@ -92,14 +89,6 @@ export function ProvisioningSection({
 
           {/* Right Column: Visualizer */}
           <FadeIn direction="left" delay={0.2} className="relative w-full">
-            {/* Ambient Background Glow — radial gradient instead of expensive blur filter */}
-            <div
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] rounded-full pointer-events-none"
-              style={{
-                background: "radial-gradient(circle at 50% 50%, rgba(6,182,212,0.12) 0%, rgba(6,182,212,0.04) 45%, transparent 70%)"
-              }}
-            />
-            
             <ProvisioningLiveVisualizer
               logs={logs}
               stats={stats}

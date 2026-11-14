@@ -580,8 +580,6 @@ export default function AppCatalogClient({ baseHourlyRate = 100 }: { baseHourlyR
         {/* ── 6. FINAL CTA SECTION ──────────────────────────────────────── */}
         <section className="py-10 sm:py-14 relative z-10 w-full">
           <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-10 md:p-16 text-center shadow-xl overflow-hidden w-full">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-gradient-to-tr from-cyan-500/15 via-cyan-400/10 to-transparent dark:from-cyan-500/20 dark:via-cyan-400/10 dark:to-transparent rounded-full blur-3xl pointer-events-none -z-0" />
-
             <div className="relative z-10 max-w-2xl mx-auto">
               <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
                 START COMPUTING TODAY

@@ -684,7 +684,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
         <div className={cn(
           "rounded-2xl border p-5 sm:p-6 transition-all relative overflow-hidden",
           isDark
-            ? "bg-[#0a0a0c] border-cyan-500/20 shadow-[0_0_30px_rgba(6,182,212,0.06)]"
+            ? "bg-[#111115] border-cyan-500/25 shadow-2xs"
             : "bg-cyan-50/60 border-cyan-200 shadow-sm"
         )}>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
