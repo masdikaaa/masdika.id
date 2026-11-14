@@ -560,15 +560,16 @@ export function buildAppContainerSpec(app: AppServiceRecord) {
   } else if (appType === 'hermes') {
     image = 'docker.io/library/node:22-alpine';
     const sshPassword = app.password || 'Hermes123!';
-    const b64HermesBin = Buffer.from(
-      '#!/bin/sh\ncd /app/data\nexec python3 -m hermes "$@" 2>/dev/null || exec npx --yes hermes-agent "$@" 2>/dev/null || python3 -c "print(\'Hermes Agent CLI ready in /app/data\')"\n'
-    ).toString('base64');
     const b64HermesMotd = Buffer.from(
       '════════════════════════════════════════════════════════════\n' +
       '  Masdika Cloud - Dedicated Hermes Agent Instance\n' +
       '  Application Mode: Sandboxed AI Coding Agent\n' +
       '  Persistent Storage: /app/data\n' +
-      '  Security Notice: Package installation & tunneling restricted.\n' +
+      '\n' +
+      '  Quickstart Commands:\n' +
+      '    hermes model    -> Set up LLM provider & API keys\n' +
+      '    hermes --tui    -> Launch interactive Terminal UI\n' +
+      '    hermes          -> Start autonomous agent loop\n' +
       '════════════════════════════════════════════════════════════\n'
     ).toString('base64');
 
@@ -577,6 +578,9 @@ export function buildAppContainerSpec(app: AppServiceRecord) {
         args:
           - |
             apk add --no-cache openssh bash git curl nano python3 py3-pip && \\
+            pip install --no-cache-dir --break-system-packages hermes-agent && \\
+            ln -sf /usr/bin/hermes /usr/local/bin/hermes && \\
+            ln -sf /usr/bin/hermes-agent /usr/local/bin/hermes-agent && \\
             ssh-keygen -A && \\
             echo "root:${sshPassword}" | chpasswd && \\
             sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \\
@@ -588,8 +592,6 @@ export function buildAppContainerSpec(app: AppServiceRecord) {
             echo "PermitTunnel no" >> /etc/ssh/sshd_config && \\
             echo "GatewayPorts no" >> /etc/ssh/sshd_config && \\
             mkdir -p ${dataMount} /root/.hermes && \\
-            echo "${b64HermesBin}" | base64 -d > /usr/local/bin/hermes && \\
-            chmod 755 /usr/local/bin/hermes && \\
             echo "${b64HermesMotd}" | base64 -d > /etc/motd && \\
             echo "cd /app/data" >> /root/.bashrc && \\
             echo "cd /app/data" >> /etc/profile && \\

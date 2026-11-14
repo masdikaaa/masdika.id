@@ -189,7 +189,8 @@ export default function AppDetailPage({
 
   const catalog = getAppDefinition(app.appType);
   const isSshApp = catalog?.accessProtocol === "SSH";
-  const sshCommand = `ssh ${app.username || "root"}@103.247.10.61 -p ${app.port}`;
+  const hostIp = app.publicIp || "103.247.10.61";
+  const sshCommand = `ssh ${app.username || "root"}@${hostIp} -p ${app.port}`;
   const fullDomain = `${app.subdomain}.app.masdika.id`;
   const httpsUrl = `https://${fullDomain}`;
   const isRunning = app.status === "RUNNING";
@@ -396,9 +397,9 @@ export default function AppDetailPage({
                       Host / Server IP
                     </span>
                     <div className="flex items-center justify-between font-mono font-bold text-xs pt-0.5">
-                      <span>103.247.10.61</span>
+                      <span>{hostIp}</span>
                       <button
-                        onClick={() => copyToClipboard("103.247.10.61", "Host IP")}
+                        onClick={() => copyToClipboard(hostIp, "Host IP")}
                         className="text-[var(--text-muted)] hover:text-cyan-400"
                       >
                         <Copy className="w-3.5 h-3.5" />

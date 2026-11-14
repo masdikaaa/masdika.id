@@ -382,7 +382,8 @@ export default function ManagedAppsPage() {
             const isSshApp = catalog?.accessProtocol === "SSH";
             const fullDomain = `${app.subdomain}.app.masdika.id`;
             const httpsUrl = `https://${fullDomain}`;
-            const sshCommand = `ssh root@103.247.10.61 -p ${app.port}`;
+            const hostIp = app.publicIp || "103.247.10.61";
+            const sshCommand = `ssh root@${hostIp} -p ${app.port}`;
             const isRunning = app.status === "RUNNING";
             const isActing = actionLoadingId === app.id;
 
