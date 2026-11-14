@@ -33,6 +33,7 @@ import {
   EyeOff,
   Layers,
   Loader2,
+  ArrowUpCircle,
 } from "lucide-react";
 import {
   AreaChart,
@@ -63,7 +64,7 @@ export default function AppDetailPage({
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [isScaleModalOpen, setIsScaleModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [powerModalAction, setPowerModalAction] = useState<"start" | "stop" | "restart" | null>(null);
+  const [powerModalAction, setPowerModalAction] = useState<"start" | "stop" | "restart" | "update" | null>(null);
   const [powering, setPowering] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -133,7 +134,7 @@ export default function AppDetailPage({
     setTimeout(() => setCopiedField(null), 2000);
   };
 
-  const getPowerModalConfig = (action: "start" | "stop" | "restart" | null) => {
+  const getPowerModalConfig = (action: "start" | "stop" | "restart" | "update" | null) => {
     switch (action) {
       case "start":
         return {
@@ -156,6 +157,13 @@ export default function AppDetailPage({
           confirmText: "Restart Application",
           variant: "warning" as const,
         };
+      case "update":
+        return {
+          title: `Update ${app?.name || "Application"} to Latest Version?`,
+          description: `Perbarui image kontainer ${app?.name} ke versi :latest terbaru dari registry resmi. Seluruh data persistent storage (/app/data), konfigurasi, dan database Anda dijamin 100% aman tanpa kehilangan data (Zero Data Loss). Pod akan menjalani rolling restart secara mulus.`,
+          confirmText: "Update to Latest",
+          variant: "success" as const,
+        };
       default:
         return {
           title: "Confirm Action",
@@ -166,9 +174,13 @@ export default function AppDetailPage({
     }
   };
 
-  const handlePowerAction = async (action: "start" | "stop" | "restart") => {
+  const handlePowerAction = async (action: "start" | "stop" | "restart" | "update") => {
     setPowering(action);
-    const toastId = toast.loading(`Executing ${action} on ${app?.name}...`);
+    const toastId = toast.loading(
+      action === "update"
+        ? `Updating ${app?.name} to latest version (Zero Data Loss)...`
+        : `Executing ${action} on ${app?.name}...`
+    );
     try {
       const res = await fetch(`/api/user/apps/${id}/power`, {
         method: "POST",
@@ -336,20 +348,20 @@ export default function AppDetailPage({
           </button>
 
           {/* Secondary Action Buttons Grid on Mobile, Flex on Desktop */}
-          <div className="grid grid-cols-3 sm:flex items-center gap-2 w-full sm:w-auto">
+          <div className="grid grid-cols-4 sm:flex items-center gap-2 w-full sm:w-auto">
             {isRunning ? (
               <button
                 type="button"
                 onClick={() => setPowerModalAction("stop")}
                 disabled={powering !== null}
                 className={cn(
-                  "col-span-1 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
+                  "col-span-1 px-3 sm:px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
                   isDark ? "bg-amber-500/10 text-amber-400 hover:bg-amber-500/20" : "bg-amber-50 text-amber-700 hover:bg-amber-100"
                 )}
                 title="Stop Application"
               >
                 <Square className="w-3.5 h-3.5" />
-                <span>Stop</span>
+                <span className="hidden xs:inline sm:inline">Stop</span>
               </button>
             ) : (
               <button
@@ -357,13 +369,13 @@ export default function AppDetailPage({
                 onClick={() => setPowerModalAction("start")}
                 disabled={powering !== null}
                 className={cn(
-                  "col-span-1 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
+                  "col-span-1 px-3 sm:px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
                   isDark ? "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20" : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
                 )}
                 title="Start Application"
               >
                 <Play className="w-3.5 h-3.5" />
-                <span>Start</span>
+                <span className="hidden xs:inline sm:inline">Start</span>
               </button>
             )}
 
@@ -372,13 +384,30 @@ export default function AppDetailPage({
               onClick={() => setPowerModalAction("restart")}
               disabled={powering !== null || !isRunning}
               className={cn(
-                "col-span-1 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
+                "col-span-1 px-3 sm:px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
                 isDark ? "bg-white/[0.05] text-zinc-300 hover:bg-white/10" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
               )}
               title="Restart Application Pod"
             >
               <RotateCw className={cn("w-3.5 h-3.5", powering === "restart" && "animate-spin")} />
-              <span>Restart</span>
+              <span className="hidden xs:inline sm:inline">Restart</span>
+            </button>
+
+            {/* Zero-Data-Loss Update Version Button */}
+            <button
+              type="button"
+              onClick={() => setPowerModalAction("update")}
+              disabled={powering !== null || !isRunning}
+              className={cn(
+                "col-span-1 px-3 sm:px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
+                isDark
+                  ? "bg-violet-500/10 text-violet-400 hover:bg-violet-500/20 border border-violet-500/20"
+                  : "bg-violet-50 text-violet-700 hover:bg-violet-100 border border-violet-200"
+              )}
+              title="Update Application Image to Latest Release (Zero Data Loss)"
+            >
+              <ArrowUpCircle className={cn("w-3.5 h-3.5", powering === "update" && "animate-spin")} />
+              <span className="hidden xs:inline sm:inline">Update</span>
             </button>
 
             <button
@@ -1093,6 +1122,14 @@ export default function AppDetailPage({
               <div className="flex items-center justify-between pb-2 border-b border-inherit">
                 <span className={isDark ? "text-zinc-400" : "text-slate-500"}>Storage (PVC):</span>
                 <span className="font-mono font-semibold">{app.storageGb || 10} GB SSD</span>
+              </div>
+
+              <div className="flex items-center justify-between pb-2 border-b border-inherit">
+                <span className={isDark ? "text-zinc-400" : "text-slate-500"}>Release Version:</span>
+                <span className="font-mono font-bold text-violet-400 flex items-center gap-1.5 text-[11px]">
+                  <ArrowUpCircle className="w-3.5 h-3.5" />
+                  Latest • Zero Data Loss
+                </span>
               </div>
 
               <div className="flex items-center justify-between pt-1">

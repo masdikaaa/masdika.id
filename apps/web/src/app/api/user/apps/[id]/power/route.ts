@@ -5,6 +5,7 @@ import {
   startAppService,
   stopAppService,
   restartAppService,
+  updateAppServiceToLatest,
 } from "@/lib/k8s-app";
 import { logClientActivity } from "@/lib/activity-log";
 import { getClientIp } from "@/lib/get-ip";
@@ -37,10 +38,11 @@ export async function POST(
     const body = await req.json().catch(() => ({}));
     const action = (body.action || "").toLowerCase().trim();
 
-    if (!["start", "stop", "restart"].includes(action)) {
-      return NextResponse.json({ error: "Invalid action. Allowed: start, stop, restart" }, { status: 400 });
+    if (!["start", "stop", "restart", "update"].includes(action)) {
+      return NextResponse.json({ error: "Invalid action. Allowed: start, stop, restart, update" }, { status: 400 });
     }
 
+    let updateMessage = "";
     if (action === "stop") {
       await stopAppService(app as any);
       await prisma.appService.update({
@@ -59,6 +61,13 @@ export async function POST(
         where: { id: app.id },
         data: { status: "RUNNING" },
       });
+    } else if (action === "update") {
+      const updateResult = await updateAppServiceToLatest(app as any);
+      updateMessage = updateResult.message;
+      await prisma.appService.update({
+        where: { id: app.id },
+        data: { status: "RUNNING", updatedAt: new Date() },
+      });
     }
 
     const clientIp = getClientIp(req);
@@ -71,7 +80,7 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      message: `Application '${app.name}' has been ${action === "stop" ? "stopped" : action === "start" ? "started" : "restarted"} successfully.`,
+      message: updateMessage || `Application '${app.name}' has been ${action === "stop" ? "stopped" : action === "start" ? "started" : "restarted"} successfully.`,
       status: action === "stop" ? "STOPPED" : "RUNNING",
     });
   } catch (error: any) {

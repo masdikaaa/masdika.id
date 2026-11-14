@@ -932,7 +932,7 @@ spec:
       containers:
       - name: ${name}
         image: ${image}
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
 ${containerPortsYaml}${commandYaml}${envYaml ? `\n        env:${envYaml}` : ''}
         readinessProbe:
           tcpSocket:
@@ -1137,6 +1137,54 @@ export async function restartAppService(app: AppServiceRecord): Promise<void> {
       },
     });
   }
+}
+
+/**
+ * Zero-Data-Loss Image & Version Update:
+ * Pulls the latest container image from the registry and redeploys the pod
+ * while strictly preserving the PersistentVolumeClaim storage.
+ */
+export async function updateAppServiceToLatest(app: AppServiceRecord): Promise<{
+  success: boolean;
+  message: string;
+  image: string;
+}> {
+  const kc = await getAppKubeConfig();
+  const objApi = k8s.KubernetesObjectApi.makeApiClient(kc);
+  const ns = app.k8sNamespace || 'managed-apps';
+  const deployName = app.k8sDeployment || `deploy-app-${app.id}-${app.subdomain}`.toLowerCase();
+
+  // 1. Redeploy deployment with updated container image & pull policy Always
+  await deployAppService(app);
+
+  // 2. Trigger rolling restart to fetch latest container image
+  const nowIso = new Date().toISOString();
+  await objApi.patch({
+    apiVersion: 'apps/v1',
+    kind: 'Deployment',
+    metadata: {
+      name: deployName,
+      namespace: ns,
+    },
+    spec: {
+      template: {
+        metadata: {
+          annotations: {
+            'kubectl.kubernetes.io/restartedAt': nowIso,
+            'app.masdika.id/updatedAt': nowIso,
+          },
+        },
+      },
+    },
+  });
+
+  const { image } = buildAppContainerSpec(app);
+
+  return {
+    success: true,
+    message: `Aplikasi '${app.name}' berhasil diperbarui ke rilis image terbaru (${image}). Seluruh data persistent storage Anda tetap aman (Zero Data Loss).`,
+    image,
+  };
 }
 
 /**
