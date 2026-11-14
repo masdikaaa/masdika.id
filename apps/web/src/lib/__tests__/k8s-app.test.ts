@@ -63,8 +63,8 @@ describe('Managed Apps Catalog & Engine', () => {
 
       const hermes = getAppDefinition('hermes');
       expect(hermes).toBeDefined();
-      expect(hermes?.appPort).toBe(22);
-      expect(hermes?.accessProtocol).toBe('SSH');
+      expect(hermes?.appPort).toBe(9119);
+      expect(hermes?.accessProtocol).toBe('BOTH');
       expect(hermes?.icon).toBe('/images/apps/hermes-agent.png');
 
       const router = getAppDefinition('ninerouter');

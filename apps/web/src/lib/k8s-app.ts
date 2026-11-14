@@ -101,16 +101,23 @@ export async function checkAppClusterCapacity(
   const isManuallyFull = settingMap.get('managed_app_capacity_full') === 'true' || settingMap.get('managed_app_maintenance_mode') === 'true';
 
   // Active instances in DB (exclude terminated or error instances)
-  const activeApps = await prisma.appService.findMany({
-    where: { status: { notIn: ['TERMINATED', 'ERROR'] } },
-    select: { id: true, port: true, cpuShares: true, memoryMb: true, storageGb: true },
-  });
+  const [activeApps, activeDbs] = await Promise.all([
+    prisma.appService.findMany({
+      where: { status: { notIn: ['TERMINATED', 'ERROR'] } },
+      select: { id: true, port: true, cpuShares: true, memoryMb: true, storageGb: true },
+    }),
+    prisma.databaseService.findMany({
+      where: { status: { notIn: ['TERMINATED', 'ERROR'] } },
+      select: { id: true, port: true },
+    }),
+  ]);
 
   const activeInstances = activeApps.length;
   const allocatedCpu = parseFloat(activeApps.reduce((sum, a) => sum + (a.cpuShares || 0), 0).toFixed(1));
   const allocatedMemoryMb = activeApps.reduce((sum, a) => sum + (a.memoryMb || 0), 0);
   const allocatedStorageGb = activeApps.reduce((sum, a) => sum + (a.storageGb || 10), 0);
   const usedPorts = new Set(activeApps.map((a) => a.port));
+  activeDbs.forEach((d) => usedPorts.add(d.port));
   const totalPorts = 2768; // NodePort range 30000 - 32767
   const availablePorts = Math.max(0, totalPorts - usedPorts.size);
 
@@ -433,11 +440,34 @@ export async function testAppClusterConnection(customConfig?: {
   }
 }
 
+// In-memory atomic reservation lock to prevent race conditions during rapid concurrent checkouts
+const recentlyReservedAppPorts = new Map<number, number>(); // port -> expiresAt
+
+/**
+ * Release an in-memory reserved port (e.g. if order transaction fails before saving)
+ */
+export function releaseReservedAppPort(port: number): void {
+  recentlyReservedAppPorts.delete(port);
+}
+
 /**
  * Allocate a collision-free random available NodePort in the agreed range (30000..32767).
- * Cross-checks BOTH DatabaseService, AppService, and active cluster NodePorts to prevent collisions.
+ * - Primary range for Managed Apps: 31500..32767 (1,268 dedicated ports).
+ * - Primary range for Database Services: 30000..31499 (1,500 dedicated ports).
+ * - Cross-checks BOTH DatabaseService, AppService, in-memory concurrency locks,
+ *   and active cluster NodePorts to guarantee ZERO collisions.
+ * - Automatically falls back to the full range if the primary pool is exhausted.
  */
-export async function allocateAppPort(min = 30000, max = 32767): Promise<number> {
+export async function allocateAppPort(min = 31500, max = 32767): Promise<number> {
+  // 1. Clean up expired in-memory reservations (older than 60s)
+  const now = Date.now();
+  for (const [p, exp] of recentlyReservedAppPorts.entries()) {
+    if (exp < now) {
+      recentlyReservedAppPorts.delete(p);
+    }
+  }
+
+  // 2. Query both app and database records in database (non-terminated)
   const [usedApps, usedDbs] = await Promise.all([
     prisma.appService.findMany({
       where: { status: { not: 'TERMINATED' } },
@@ -453,6 +483,12 @@ export async function allocateAppPort(min = 30000, max = 32767): Promise<number>
   usedApps.forEach((a) => usedPorts.add(a.port));
   usedDbs.forEach((d) => usedPorts.add(d.port));
 
+  // Add currently locked in-memory ports
+  for (const p of recentlyReservedAppPorts.keys()) {
+    usedPorts.add(p);
+  }
+
+  // 3. Scan live Kubernetes cluster for active NodePorts across all namespaces
   try {
     const { coreApi } = await getAppK8sClients();
     const svcRes = await (coreApi as any).listServiceForAllNamespaces();
@@ -469,19 +505,35 @@ export async function allocateAppPort(min = 30000, max = 32767): Promise<number>
     // Cluster API might be mocked or temporarily unreachable; proceed with database records
   }
 
-  const availablePorts: number[] = [];
+  // 4. Scan requested range
+  let availablePorts: number[] = [];
   for (let port = min; port <= max; port++) {
     if (!usedPorts.has(port)) {
       availablePorts.push(port);
     }
   }
 
-  if (availablePorts.length === 0) {
-    throw new Error(`No available NodePort in allocated range (${min}-${max})`);
+  // 5. Smart fallback: if primary app range (31500..32767) is exhausted, search global range (30000..32767)
+  if (availablePorts.length === 0 && (min > 30000 || max < 32767)) {
+    for (let port = 30000; port <= 32767; port++) {
+      if (!usedPorts.has(port)) {
+        availablePorts.push(port);
+      }
+    }
   }
 
+  if (availablePorts.length === 0) {
+    throw new Error(`No available NodePort in allocated range (${min}-${max}) or global range (30000-32767)`);
+  }
+
+  // 6. Select a random available port from the safe candidates
   const randomIndex = crypto.randomInt(0, availablePorts.length);
-  return availablePorts[randomIndex];
+  const chosenPort = availablePorts[randomIndex];
+
+  // 7. Lock this port in-memory for 60 seconds to prevent concurrent requests from picking it
+  recentlyReservedAppPorts.set(chosenPort, now + 60_000);
+
+  return chosenPort;
 }
 
 /**
@@ -563,13 +615,15 @@ export function buildAppContainerSpec(app: AppServiceRecord) {
     const b64HermesMotd = Buffer.from(
       '════════════════════════════════════════════════════════════\n' +
       '  Masdika Cloud - Dedicated Hermes Agent Instance\n' +
-      '  Application Mode: Sandboxed AI Coding Agent\n' +
+      '  Application Mode: Sandboxed AI Coding Agent (Web + SSH)\n' +
+      `  Web Dashboard: https://${fullDomain}\n` +
       '  Persistent Storage: /app/data\n' +
       '\n' +
       '  Quickstart Commands:\n' +
-      '    hermes model    -> Set up LLM provider & API keys\n' +
-      '    hermes --tui    -> Launch interactive Terminal UI\n' +
-      '    hermes          -> Start autonomous agent loop\n' +
+      '    hermes model      -> Set up LLM provider & API keys\n' +
+      '    hermes setup      -> Run interactive configuration wizard\n' +
+      `    hermes dashboard  -> Web dashboard running at https://${fullDomain}\n` +
+      '    hermes            -> Start autonomous agent loop\n' +
       '════════════════════════════════════════════════════════════\n'
     ).toString('base64');
 
@@ -578,7 +632,7 @@ export function buildAppContainerSpec(app: AppServiceRecord) {
         args:
           - |
             apk add --no-cache openssh bash git curl nano python3 py3-pip && \\
-            pip install --no-cache-dir --break-system-packages hermes-agent && \\
+            pip install --no-cache-dir --break-system-packages "hermes-agent[web]" uvicorn fastapi || pip install --no-cache-dir --break-system-packages hermes-agent uvicorn fastapi && \\
             ln -sf /usr/bin/hermes /usr/local/bin/hermes && \\
             ln -sf /usr/bin/hermes-agent /usr/local/bin/hermes-agent && \\
             ssh-keygen -A && \\
@@ -598,7 +652,8 @@ export function buildAppContainerSpec(app: AppServiceRecord) {
             rm -rf /etc/apk /var/cache/apk /lib/apk && \\
             echo "${b64ApkRestrict}" | base64 -d > /sbin/apk && \\
             chmod 755 /sbin/apk && \\
-            exec /usr/sbin/sshd -D -e -p ${app.appPort}
+            (while true; do hermes dashboard --host 0.0.0.0 --port 9119 --no-open; sleep 5; done >> /app/data/hermes-dashboard.log 2>&1) & \\
+            exec /usr/sbin/sshd -D -e -p 22
 `;
   } else if (appType === 'ninerouter') {
     image = 'docker.io/library/node:22-alpine';
@@ -793,7 +848,9 @@ export async function deployAppService(app: AppServiceRecord): Promise<{
 
   const { image, dataMount, envYaml, commandYaml } = buildAppContainerSpec(app);
   const catalogItem = getAppDefinition(app.appType);
-  const isSshApp = catalogItem?.accessProtocol === 'SSH';
+  const isHermes = app.appType.toLowerCase() === 'hermes';
+  const hasWeb = catalogItem?.accessProtocol === 'WEB' || catalogItem?.accessProtocol === 'BOTH' || isHermes;
+  const isPureSsh = catalogItem?.accessProtocol === 'SSH' && !isHermes;
 
   const cpuReq = `${Math.max(0.1, Number((app.cpuShares * 0.4).toFixed(2)))}`;
   const cpuLim = `${app.cpuShares}`;
@@ -801,7 +858,9 @@ export async function deployAppService(app: AppServiceRecord): Promise<{
   const memLim = `${app.memoryMb}Mi`;
   const storageSize = `${Math.max(5, app.storageGb || 10)}Gi`;
 
-  const ingressYaml = !isSshApp ? `
+  const webBackendPort = isHermes ? 9119 : app.appPort;
+
+  const ingressYaml = hasWeb ? `
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -830,8 +889,35 @@ spec:
           service:
             name: svc-${name}
             port:
-              number: ${app.appPort}
+              number: ${webBackendPort}
 ` : '';
+
+  const containerPortsYaml = isHermes
+    ? `        ports:
+        - name: ssh-port
+          containerPort: 22
+        - name: web-port
+          containerPort: 9119`
+    : `        ports:
+        - name: app-port
+          containerPort: ${app.appPort}`;
+
+  const servicePortsYaml = isHermes
+    ? `  ports:
+  - name: web
+    port: 9119
+    targetPort: 9119
+  - name: ssh
+    port: 22
+    targetPort: 22
+    nodePort: ${app.port}`
+    : `  ports:
+  - name: app-port
+    port: ${app.appPort}
+    targetPort: ${app.appPort}
+    nodePort: ${app.port}`;
+
+  const probePort = isHermes ? 22 : app.appPort;
 
   const manifestYaml = `apiVersion: v1
 kind: PersistentVolumeClaim
@@ -876,18 +962,16 @@ spec:
       - name: ${name}
         image: ${image}
         imagePullPolicy: IfNotPresent
-        ports:
-        - name: app-port
-          containerPort: ${app.appPort}${commandYaml}${envYaml ? `\n        env:${envYaml}` : ''}
+${containerPortsYaml}${commandYaml}${envYaml ? `\n        env:${envYaml}` : ''}
         readinessProbe:
           tcpSocket:
-            port: ${app.appPort}
+            port: ${probePort}
           initialDelaySeconds: 5
           periodSeconds: 10
           failureThreshold: 3
         livenessProbe:
           tcpSocket:
-            port: ${app.appPort}
+            port: ${probePort}
           initialDelaySeconds: 15
           periodSeconds: 15
           failureThreshold: 5
@@ -920,20 +1004,35 @@ spec:
   type: NodePort
   selector:
     app: ${name}
-  ports:
-  - name: app-port
-    port: ${app.appPort}
-    targetPort: ${app.appPort}
-    nodePort: ${app.port}${ingressYaml}
+${servicePortsYaml}${ingressYaml}
 `;
 
-  await applyKubernetesManifests(kc, manifestYaml);
+  let manifestToApply = manifestYaml;
+  try {
+    await applyKubernetesManifests(kc, manifestToApply);
+  } catch (applyErr: any) {
+    const errText = String(applyErr?.message || applyErr?.body?.message || '');
+    if (errText.includes('provided port is already allocated') || errText.includes('nodePort')) {
+      console.warn(`[deployAppService] Detected NodePort collision on ${app.port}. Re-allocating fresh port...`);
+      const newPort = await allocateAppPort();
+      const oldPort = app.port;
+      app.port = newPort;
+      await prisma.appService.update({
+        where: { id: app.id },
+        data: { port: newPort },
+      }).catch(() => {});
+      manifestToApply = manifestToApply.replaceAll(`nodePort: ${oldPort}`, `nodePort: ${newPort}`);
+      await applyKubernetesManifests(kc, manifestToApply);
+    } else {
+      throw applyErr;
+    }
+  }
 
   return {
     deploymentName: `deploy-${name}`,
     serviceName: `svc-${name}`,
     pvcName: `pvc-${name}`,
-    ingressName: !isSshApp ? `ing-${name}` : '',
+    ingressName: hasWeb ? `ing-${name}` : '',
     fullDomain,
   };
 }

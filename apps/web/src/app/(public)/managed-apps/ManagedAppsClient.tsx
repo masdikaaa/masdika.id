@@ -85,7 +85,7 @@ const APP_FAQS = [
   },
   {
     q: "How is access handled for web applications vs. CLI/SSH applications?",
-    a: "Web-based applications (like n8n, 9Router, and OpenClaw) are automatically assigned a Let's Encrypt SSL-secured subdomain on *.app.masdika.id. CLI and agentic applications (like Hermes Agent and OpenCode) are assigned a secure, direct NodePort for SSH terminal access, isolated from web ingress."
+    a: "Web-based applications (like n8n, 9Router, and OpenClaw) are automatically assigned a Let's Encrypt SSL-secured subdomain on *.app.masdika.id. Dual-access applications like Hermes Agent include both a browser-based Web Dashboard and a secure direct SSH terminal, while pure developer pods (like OpenCode) use dedicated NodePorts for SSH terminal access."
   },
   {
     q: "Can I connect via SSH to Hermes Agent and OpenCode?",
@@ -636,11 +636,13 @@ export default function ManagedAppsClient({
                         ) : (
                           <span className={cn(
                             "text-[10px] font-mono px-1.5 py-0.5 rounded uppercase font-bold border",
-                            app.accessProtocol === 'SSH'
+                            app.accessProtocol === 'BOTH'
+                              ? "bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border-emerald-500/30"
+                              : app.accessProtocol === 'SSH'
                               ? "bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/30"
                               : "bg-cyan-500/15 text-cyan-800 dark:text-cyan-300 border-cyan-500/30"
                           )}>
-                            {app.accessProtocol}
+                            {app.accessProtocol === 'BOTH' ? 'WEB + SSH' : app.accessProtocol}
                           </span>
                         )}
                       </div>
@@ -772,7 +774,7 @@ export default function ManagedAppsClient({
                   </span>
                 </div>
                 <p className="text-xs text-[var(--text-secondary)] mt-1.5">
-                  Includes {activeApp.name}, {activePlan.cpuLabel} / {activePlan.ramLabel} &amp; {activeApp.accessProtocol === 'SSH' ? 'Direct SSH Terminal Access' : 'Automated Let\'s Encrypt SSL Ingress'}.
+                  Includes {activeApp.name}, {activePlan.cpuLabel} / {activePlan.ramLabel} &amp; {activeApp.accessProtocol === 'BOTH' ? 'Web Dashboard & Direct SSH Terminal Access' : activeApp.accessProtocol === 'SSH' ? 'Direct SSH Terminal Access' : 'Automated Let\'s Encrypt SSL Ingress'}.
                 </p>
               </div>
 

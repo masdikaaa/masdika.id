@@ -43,6 +43,7 @@ interface AdminAppItem {
   fullDomain: string;
   httpsUrl: string;
   nodePortUrl: string;
+  publicIp?: string;
   port: number;
   appPort: number;
   cpuShares: number;
@@ -433,16 +434,32 @@ export default function AdminManagedAppsPage() {
 
                     {/* Ingress / Terminal Endpoint */}
                     <td className="py-3 px-4">
-                      {app.catalog?.accessProtocol === 'SSH' ? (
+                      {app.catalog?.accessProtocol === 'BOTH' ? (
                         <>
                           <button
                             type="button"
-                            onClick={() => copyToClipboard(`ssh -p ${app.port} hermes@apps.masdika.id`, `ssh-${app.id}`)}
+                            onClick={() => copyToClipboard(app.httpsUrl, `url-${app.id}`)}
+                            className={cn("font-mono font-bold text-xs flex items-center gap-1 hover:underline cursor-pointer", isDark ? "text-cyan-400" : "text-cyan-700")}
+                            title="Click to copy Web URL"
+                          >
+                            <Globe className="w-3 h-3 shrink-0" />
+                            <span className="truncate max-w-[180px]">{app.fullDomain}</span>
+                            {copiedId === `url-${app.id}` ? <Check className="w-3 h-3 text-emerald-400 shrink-0" /> : <Copy className="w-3 h-3 opacity-60 shrink-0" />}
+                          </button>
+                          <span className={cn("text-[10px] font-mono block mt-0.5", isDark ? "text-zinc-500" : "text-slate-400")}>
+                            SSH: {app.publicIp || "103.247.10.61"}:{app.port}
+                          </span>
+                        </>
+                      ) : app.catalog?.accessProtocol === 'SSH' ? (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => copyToClipboard(`ssh root@${app.publicIp || "103.247.10.61"} -p ${app.port}`, `ssh-${app.id}`)}
                             className={cn("font-mono font-bold text-xs flex items-center gap-1 hover:underline cursor-pointer", isDark ? "text-amber-400" : "text-amber-700")}
                             title="Click to copy SSH command"
                           >
                             <Server className="w-3 h-3 shrink-0" />
-                            <span className="truncate max-w-[180px]">apps.masdika.id:{app.port}</span>
+                            <span className="truncate max-w-[180px]">{app.publicIp || "103.247.10.61"}:{app.port}</span>
                             {copiedId === `ssh-${app.id}` ? <Check className="w-3 h-3 text-emerald-400 shrink-0" /> : <Copy className="w-3 h-3 opacity-60 shrink-0" />}
                           </button>
                           <span className={cn("text-[10px] font-mono block mt-0.5", isDark ? "text-zinc-500" : "text-slate-400")}>

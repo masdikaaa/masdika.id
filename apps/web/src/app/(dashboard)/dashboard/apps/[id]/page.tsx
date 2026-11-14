@@ -223,7 +223,9 @@ export default function AppDetailPage({
   if (!app) return null;
 
   const catalog = getAppDefinition(app.appType);
-  const isSshApp = catalog?.accessProtocol === "SSH";
+  const isHermes = app.appType.toLowerCase() === "hermes";
+  const hasWeb = catalog?.accessProtocol === "WEB" || catalog?.accessProtocol === "BOTH" || isHermes;
+  const hasSsh = catalog?.accessProtocol === "SSH" || catalog?.accessProtocol === "BOTH" || isHermes;
   const hostIp = app.publicIp || "103.247.10.61";
   const sshCommand = `ssh ${app.username || "root"}@${hostIp} -p ${app.port}`;
   const fullDomain = `${app.subdomain}.app.masdika.id`;
@@ -295,15 +297,26 @@ export default function AppDetailPage({
               <span>{app.templateName}</span>
               <span className="opacity-30">•</span>
               <span>Region: Sidoarjo</span>
-              <span className="opacity-30">•</span>
-              {isSshApp ? (
-                <span className="font-mono text-cyan-400 bg-cyan-950/40 px-2 py-0.5 rounded-md text-[11px] font-semibold break-all">
-                  SSH Port: {app.port}
-                </span>
-              ) : (
-                <span className="font-mono text-cyan-400 bg-cyan-950/40 px-2 py-0.5 rounded-md text-[11px] font-semibold break-all truncate max-w-[200px] sm:max-w-none">
-                  {fullDomain}
-                </span>
+              {hasWeb && (
+                <>
+                  <span className="opacity-30">•</span>
+                  <a
+                    href={httpsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-mono text-cyan-400 bg-cyan-950/40 hover:bg-cyan-900/40 px-2 py-0.5 rounded-md text-[11px] font-semibold break-all truncate max-w-[200px] sm:max-w-none transition-colors"
+                  >
+                    {fullDomain}
+                  </a>
+                </>
+              )}
+              {hasSsh && (
+                <>
+                  <span className="opacity-30">•</span>
+                  <span className="font-mono text-cyan-400 bg-cyan-950/40 px-2 py-0.5 rounded-md text-[11px] font-semibold break-all">
+                    SSH Port: {app.port}
+                  </span>
+                </>
               )}
             </div>
           </div>
@@ -384,8 +397,91 @@ export default function AppDetailPage({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Connectivity & Access (7 Cols) */}
         <div className="lg:col-span-7 space-y-6">
-          {/* Card 1: Public HTTPS & Domain Access OR Direct SSH Access */}
-          {isSshApp ? (
+          {/* Card: Public HTTPS & Web Access (Dashboard / App UI) */}
+          {hasWeb && (
+            <div className={cn(
+              "p-5 sm:p-6 rounded-2xl space-y-5 transition-all shadow-lg",
+              isDark ? "bg-[#10141f] shadow-black/40" : "bg-white shadow-slate-200/70"
+            )}>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                  <Globe className="w-4 h-4 shrink-0" />
+                  <span>{isHermes ? "Hermes Web Dashboard & Ingress" : "HTTPS Web Access & Routing"}</span>
+                </h3>
+                <span className={cn(
+                  "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold self-start sm:self-auto shrink-0",
+                  isDark ? "bg-emerald-500/15 text-emerald-400" : "bg-emerald-50 text-emerald-700"
+                )}>
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Let&apos;s Encrypt SSL Active</span>
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1", isDark ? "text-zinc-500" : "text-slate-400")}>
+                    {isHermes ? "Web Dashboard URL" : "Secure Application URL"}
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <div className={cn(
+                      "flex-1 px-3.5 py-2.5 rounded-xl border font-mono text-xs font-bold truncate",
+                      isDark ? "bg-[#09090b] border-white/10 text-cyan-400" : "bg-slate-50 border-slate-200 text-cyan-800"
+                    )}>
+                      {httpsUrl}
+                    </div>
+                    <button
+                      onClick={() => copyToClipboard(httpsUrl, "HTTPS URL")}
+                      className={cn(
+                        "p-2.5 rounded-xl border transition-colors cursor-pointer shrink-0",
+                        isDark ? "border-white/10 hover:bg-white/5 text-zinc-300" : "border-slate-300 hover:bg-slate-100 text-slate-700"
+                      )}
+                      title="Copy URL"
+                    >
+                      {copiedField === "HTTPS URL" ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                    </button>
+                    <a
+                      href={httpsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shrink-0 cursor-pointer active:scale-95"
+                    >
+                      <span>{isHermes ? "Open Dashboard" : "Open App"}</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                  <div className={cn(
+                    "p-3 rounded-xl border space-y-1 text-xs",
+                    isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200"
+                  )}>
+                    <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
+                      Cluster Edge Gateway
+                    </span>
+                    <p className="font-mono font-bold text-xs pt-0.5 text-cyan-400">
+                      HTTPS Edge Proxy (Port 443)
+                    </p>
+                  </div>
+
+                  <div className={cn(
+                    "p-3 rounded-xl border space-y-1 text-xs",
+                    isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200"
+                  )}>
+                    <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
+                      TLS Encryption
+                    </span>
+                    <p className="font-mono font-bold text-xs pt-0.5 text-emerald-400">
+                      Automated Let&apos;s Encrypt
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Card: Direct SSH Terminal Access */}
+          {hasSsh && (
             <div className={cn(
               "p-5 sm:p-6 rounded-2xl space-y-5 transition-all shadow-lg",
               isDark ? "bg-[#10141f] shadow-black/40" : "bg-white shadow-slate-200/70"
@@ -515,86 +611,6 @@ export default function AppDetailPage({
                         </button>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className={cn(
-              "p-5 sm:p-6 rounded-2xl space-y-5 transition-all shadow-lg",
-              isDark ? "bg-[#10141f] shadow-black/40" : "bg-white shadow-slate-200/70"
-            )}>
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                  <Globe className="w-4 h-4 shrink-0" />
-                  <span>HTTPS Web Access &amp; Routing</span>
-                </h3>
-                <span className={cn(
-                  "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold self-start sm:self-auto shrink-0",
-                  isDark ? "bg-emerald-500/15 text-emerald-400" : "bg-emerald-50 text-emerald-700"
-                )}>
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Let&apos;s Encrypt SSL Active</span>
-                </span>
-              </div>
-
-              <div className="space-y-3">
-                <div>
-                  <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1", isDark ? "text-zinc-500" : "text-slate-400")}>
-                    Secure Application URL
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <div className={cn(
-                      "flex-1 px-3.5 py-2.5 rounded-xl border font-mono text-xs font-bold truncate",
-                      isDark ? "bg-[#09090b] border-white/10 text-cyan-400" : "bg-slate-50 border-slate-200 text-cyan-800"
-                    )}>
-                      {httpsUrl}
-                    </div>
-                    <button
-                      onClick={() => copyToClipboard(httpsUrl, "HTTPS URL")}
-                      className={cn(
-                        "p-2.5 rounded-xl border transition-colors cursor-pointer shrink-0",
-                        isDark ? "border-white/10 hover:bg-white/5 text-zinc-300" : "border-slate-300 hover:bg-slate-100 text-slate-700"
-                      )}
-                      title="Copy URL"
-                    >
-                      {copiedField === "HTTPS URL" ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                    </button>
-                    <a
-                      href={httpsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shrink-0 cursor-pointer active:scale-95"
-                    >
-                      <span>Open App</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                  <div className={cn(
-                    "p-3 rounded-xl border space-y-1 text-xs",
-                    isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200"
-                  )}>
-                    <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
-                      Cluster Edge Gateway
-                    </span>
-                    <p className="font-mono font-bold text-xs pt-0.5 text-cyan-400">
-                      HTTPS Edge Proxy (Port 443)
-                    </p>
-                  </div>
-
-                  <div className={cn(
-                    "p-3 rounded-xl border space-y-1 text-xs",
-                    isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200"
-                  )}>
-                    <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
-                      TLS Encryption
-                    </span>
-                    <p className="font-mono font-bold text-xs pt-0.5 text-emerald-400">
-                      Automated Let&apos;s Encrypt
-                    </p>
                   </div>
                 </div>
               </div>
@@ -833,14 +849,17 @@ export default function AppDetailPage({
             {app.appType === "hermes" && (
               <div className="space-y-3 text-xs leading-relaxed">
                 <p className={isDark ? "text-zinc-300" : "text-slate-700"}>
-                  NousResearch Hermes Agent is running in a secure sandboxed environment. Your workspace is persisted at <code className="font-mono text-cyan-400">/app/data</code>. Package manager and port tunneling are restricted to prevent abuse:
+                  NousResearch Hermes Agent is running in a dual-mode sandboxed environment featuring an intuitive browser-based Web Dashboard and high-speed SSH terminal access. Your persistent memory and models are saved at <code className="font-mono text-cyan-400">/app/data</code>:
                 </p>
                 <div className={cn("p-3.5 rounded-xl border font-mono text-[11px] space-y-2", isDark ? "bg-[#09090b] border-white/10 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-800")}>
-                  <div className="text-zinc-500"># Direct Terminal Login</div>
+                  <div className="text-zinc-500"># 1. Hermes Web Dashboard (Browser)</div>
+                  <div className="text-cyan-400 font-bold">{httpsUrl}</div>
+                  <div className="text-zinc-500 pt-1"># 2. Direct Terminal Access (SSH)</div>
                   <div className="text-cyan-400 font-bold">{sshCommand}</div>
-                  <div className="text-zinc-500 pt-1"># Launch Hermes Agent CLI</div>
+                  <div className="text-zinc-500 pt-1"># 3. Interactive Provider Setup &amp; CLI Chat</div>
+                  <div>hermes setup</div>
                   <div>hermes</div>
-                  <div className="text-zinc-500 pt-1"># Persistent Storage</div>
+                  <div className="text-zinc-500 pt-1"># 4. Persistent Storage Directory</div>
                   <div>cd /app/data</div>
                 </div>
               </div>

@@ -352,10 +352,11 @@ export async function execInPod(
 }
 
 /**
- * Allocate a unique NodePort (30000 - 32767) for direct TCP database access
- * Checks both database services and managed app services to guarantee zero port collisions.
+ * Allocate a unique NodePort (30000 - 32767) for direct TCP database access.
+ * Primary database pool: 30000..31499 (1,500 ports, distinct from Managed Apps pool 31500..32767).
+ * Checks both database services, managed app services, and live cluster NodePorts to guarantee zero port collisions.
  */
-export async function allocateAvailablePort(min = 30500, max = 32000): Promise<number> {
+export async function allocateAvailablePort(min = 30000, max = 31499): Promise<number> {
   const [usedDbs, usedApps] = await Promise.all([
     prisma.databaseService.findMany({
       where: { status: { not: 'TERMINATED' } },
@@ -371,10 +372,36 @@ export async function allocateAvailablePort(min = 30500, max = 32000): Promise<n
   usedDbs.forEach((d) => usedPorts.add(d.port));
   usedApps.forEach((a) => usedPorts.add(a.port));
 
-  const available: number[] = [];
+  try {
+    const kc = await getK8sKubeConfig();
+    const coreApi = kc.makeApiClient(k8s.CoreV1Api);
+    const svcRes = await (coreApi as any).listServiceForAllNamespaces();
+    const items = svcRes.items || svcRes.body?.items || [];
+    for (const item of items) {
+      const ports = item.spec?.ports || [];
+      for (const p of ports) {
+        if (p.nodePort) {
+          usedPorts.add(p.nodePort);
+        }
+      }
+    }
+  } catch {
+    // Cluster API might be mocked or temporarily unreachable; proceed with database records
+  }
+
+  let available: number[] = [];
   for (let port = min; port <= max; port++) {
     if (!usedPorts.has(port)) {
       available.push(port);
+    }
+  }
+
+  // Smart fallback: if primary database pool is full, search global pool
+  if (available.length === 0 && (min > 30000 || max < 32767)) {
+    for (let port = 30000; port <= 32767; port++) {
+      if (!usedPorts.has(port)) {
+        available.push(port);
+      }
     }
   }
 

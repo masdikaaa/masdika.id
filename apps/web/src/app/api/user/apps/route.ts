@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
 import {
   allocateAppPort,
+  releaseReservedAppPort,
   deployAppService,
   getAppClusterConfig,
   checkAppClusterCapacity,
@@ -168,14 +169,7 @@ export async function POST(req: NextRequest) {
 
     // 5. Smart Collision-Proof Subdomain Generator & Conflict Resolver
     let subdomain = "";
-    if (catalogItem.accessProtocol === "SSH") {
-      // Internal reference identifier for SSH apps (no public HTTP ingress deployed)
-      let candidate = `${catalogItem.id}-${crypto.randomBytes(3).toString("hex")}`;
-      while (await prisma.appService.findUnique({ where: { subdomain: candidate } })) {
-        candidate = `${catalogItem.id}-${crypto.randomBytes(3).toString("hex")}`;
-      }
-      subdomain = candidate;
-    } else if (customSubdomain && typeof customSubdomain === "string") {
+    if (customSubdomain && typeof customSubdomain === "string" && catalogItem.accessProtocol !== "SSH") {
       const cleanSub = customSubdomain.toLowerCase().trim().replace(/[^a-z0-9-]/g, "").slice(0, 30);
       if (cleanSub.length >= 3) {
         // Smart Check: does this subdomain already exist in DB?
@@ -202,13 +196,13 @@ export async function POST(req: NextRequest) {
       subdomain = candidate;
     }
 
-    // 6. NodePort Allocation (Checking both DatabaseService and AppService used ports)
-    const port = await allocateAppPort(30000, 32767);
+    // 6. Smart NodePort Allocation (Dedicated Range 31500..32767 with in-memory lock & cross-checks)
+    const port = await allocateAppPort();
 
     // 7. Generate Initial Credentials
     const randomPassword = `MkApp_${crypto.randomBytes(6).toString("base64url")}`;
     const randomApiKey = `mk_${crypto.randomBytes(16).toString("hex")}`;
-    const defaultUsername = catalogItem.accessProtocol === "SSH" ? "root" : "admin";
+    const defaultUsername = (catalogItem.accessProtocol === "SSH" || catalogItem.accessProtocol === "BOTH") ? "root" : "admin";
 
     // 8. Create Record in Database
     const appRecord = await prisma.appService.create({
@@ -279,9 +273,14 @@ export async function POST(req: NextRequest) {
       });
 
       // Audit Log
-      const connDesc = catalogItem.accessProtocol === "SSH"
+      const hasWeb = catalogItem.accessProtocol === "WEB" || catalogItem.accessProtocol === "BOTH";
+      const hasSsh = catalogItem.accessProtocol === "SSH" || catalogItem.accessProtocol === "BOTH";
+
+      const connDesc = (hasWeb && hasSsh)
+        ? `Web Dashboard (https://${subdomain}.app.masdika.id) and SSH port ${port}`
+        : hasSsh
         ? `SSH port ${port}`
-        : `port ${port} and https://${subdomain}.app.masdika.id`;
+        : `https://${subdomain}.app.masdika.id (port ${port})`;
 
       await logClientActivity({
         userId: user.id,
@@ -294,15 +293,16 @@ export async function POST(req: NextRequest) {
         success: true,
         data: {
           ...updatedApp,
-          httpsUrl: catalogItem.accessProtocol === "SSH" ? null : `https://${subdomain}.app.masdika.id`,
-          sshCommand: catalogItem.accessProtocol === "SSH" ? `ssh root@103.247.10.61 -p ${port}` : null,
+          httpsUrl: hasWeb ? `https://${subdomain}.app.masdika.id` : null,
+          sshCommand: hasSsh ? `ssh root@103.247.10.61 -p ${port}` : null,
           nodePortUrl: `http://103.247.10.61:${port}`,
         },
         message: `Successfully provisioned ${catalogItem.name}.`,
       });
     } catch (k8sErr: any) {
       console.error("Kubernetes deployment error, rolling back record:", k8sErr);
-      // Clean rollback: delete failed application record so it does not clutter the user's dashboard with broken instances
+      // Clean rollback: release in-memory reserved port and delete failed app record
+      releaseReservedAppPort(port);
       await prisma.appService.delete({
         where: { id: appRecord.id },
       }).catch((delErr) => {

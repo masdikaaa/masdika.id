@@ -279,9 +279,13 @@ export default function AppCheckoutFlow() {
 
                   <div className={cn("mt-3 pt-3 border-t text-[11px] flex items-center justify-between", isDark ? "border-white/5" : "border-slate-100")}>
                     <span className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
-                      Access: <strong className={isDark ? "text-zinc-200" : "text-slate-700"}>{app.accessProtocol === "SSH" ? "SSH Terminal" : "Web UI"}</strong>
+                      Access: <strong className={isDark ? "text-zinc-200" : "text-slate-700"}>{app.accessProtocol === "BOTH" ? "Web + SSH" : app.accessProtocol === "SSH" ? "SSH Terminal" : "Web UI"}</strong>
                     </span>
-                    {app.accessProtocol === "SSH" ? (
+                    {app.accessProtocol === "BOTH" ? (
+                      <span className={cn("font-semibold flex items-center gap-1", isDark ? "text-emerald-400" : "text-emerald-700")}>
+                        Web + SSH <Check className="w-3 h-3" />
+                      </span>
+                    ) : app.accessProtocol === "SSH" ? (
                       <span className={cn("font-semibold flex items-center gap-1", isDark ? "text-cyan-400" : "text-cyan-700")}>
                         <Terminal className="w-3 h-3" /> Direct SSH
                       </span>
@@ -576,7 +580,7 @@ export default function AppCheckoutFlow() {
                 Connection Mode
               </p>
               <p className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>
-                {selectedApp.accessProtocol === "SSH" ? "Direct SSH (CLI)" : "HTTPS Web (Auto SSL)"}
+                {selectedApp.accessProtocol === "BOTH" ? "Web Dashboard + SSH (Dual)" : selectedApp.accessProtocol === "SSH" ? "Direct SSH (CLI)" : "HTTPS Web (Auto SSL)"}
               </p>
             </div>
 
@@ -701,7 +705,18 @@ export default function AppCheckoutFlow() {
             </span>
           </button>
 
-          {selectedApp.accessProtocol === "SSH" ? (
+          {selectedApp.accessProtocol === "BOTH" ? (
+            <div className="space-y-2 pt-2 text-[11px] text-[var(--text-muted)] leading-relaxed">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span>Web Dashboard with Automated Let&apos;s Encrypt SSL</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Terminal className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                <span>Direct High-Speed SSH Terminal Access</span>
+              </div>
+            </div>
+          ) : selectedApp.accessProtocol === "SSH" ? (
             <div className="space-y-2 pt-2 text-[11px] text-[var(--text-muted)] leading-relaxed">
               <div className="flex items-center gap-2">
                 <Terminal className="w-3.5 h-3.5 text-cyan-400 shrink-0" />

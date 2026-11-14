@@ -13,7 +13,7 @@ export interface ManagedAppDefinition {
   website: string;
   github?: string;
   features: string[];
-  accessProtocol: 'WEB' | 'SSH';
+  accessProtocol: 'WEB' | 'SSH' | 'BOTH';
 }
 
 export interface ManagedAppPlanDefinition {
@@ -34,23 +34,23 @@ export const MANAGED_APPS_CATALOG: ManagedAppDefinition[] = [
   {
     id: 'hermes',
     name: 'Hermes Agent',
-    tagline: 'NousResearch Autonomous AI Coding & Learning Agent',
+    tagline: 'NousResearch Autonomous AI Coding Agent with Web Dashboard & SSH',
     category: 'AI Agent',
-    description: 'Autonomous AI agent built by NousResearch featuring persistent memory, recursive tool generation, and self-improving coding workflows accessed via direct SSH terminal.',
+    description: 'Autonomous AI agent built by NousResearch featuring browser-based Web Dashboard (FastAPI/Uvicorn), persistent memory, and sandboxed SSH terminal access.',
     icon: '/images/apps/hermes-agent.png',
-    appPort: 22,
+    appPort: 9119,
     dataDir: '/app/data',
     defaultImage: 'docker.io/library/node:22-alpine',
     color: 'from-amber-500 to-orange-600',
-    badge: 'SSH / CLI Agent',
-    accessProtocol: 'SSH',
-    website: 'https://hermes-agent.org',
+    badge: 'WEB + SSH',
+    accessProtocol: 'BOTH',
+    website: 'https://hermes-agent.nousresearch.com/docs/user-guide/features/web-dashboard',
     github: 'https://github.com/NousResearch/hermes-agent',
     features: [
-      'Direct High-Speed SSH Terminal Access',
-      'Persistent Memory & Learning Loop across Restarts',
-      'Autonomous Code Generation & Tool Creation',
-      'Seamless Multi-Model LLM Orchestration',
+      'Browser Web Dashboard with Let\'s Encrypt SSL',
+      'Direct High-Speed Sandboxed SSH Terminal Access',
+      'Persistent Memory & Learning Loop across Restarts (/app/data)',
+      'Multi-Model LLM Orchestration & Web UI Configuration',
     ],
   },
   {

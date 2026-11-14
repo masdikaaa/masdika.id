@@ -379,7 +379,9 @@ export default function ManagedAppsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {apps.map((app) => {
             const catalog = getAppDefinition(app.appType);
-            const isSshApp = catalog?.accessProtocol === "SSH";
+            const isHermes = app.appType.toLowerCase() === "hermes";
+            const hasWeb = catalog?.accessProtocol === "WEB" || catalog?.accessProtocol === "BOTH" || isHermes;
+            const hasSsh = catalog?.accessProtocol === "SSH" || catalog?.accessProtocol === "BOTH" || isHermes;
             const fullDomain = `${app.subdomain}.app.masdika.id`;
             const httpsUrl = `https://${fullDomain}`;
             const hostIp = app.publicIp || "103.247.10.61";
@@ -436,30 +438,10 @@ export default function ManagedAppsPage() {
                     </div>
                   </div>
 
-                  {/* Access Endpoint Box (SSH vs HTTPS) */}
-                  {isSshApp ? (
+                  {/* Access Endpoint Box (Web Dashboard and/or SSH) */}
+                  {hasWeb && (
                     <div className={cn(
-                      "p-3 rounded-xl border flex items-center justify-between gap-2 mb-3",
-                      isDark ? "bg-[#111115] border-white/[0.06]" : "bg-slate-50 border-slate-200"
-                    )}>
-                      <div className="flex items-center gap-2 min-w-0 font-mono text-[11px] truncate">
-                        <Terminal className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                        <span className="truncate font-medium">{sshCommand}</span>
-                      </div>
-
-                      <div className="flex items-center gap-1 shrink-0">
-                        <button
-                          onClick={() => copyToClipboard(sshCommand, `ssh-${app.id}`)}
-                          className={cn("p-1.5 rounded-lg transition-colors cursor-pointer", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-500 hover:text-slate-900 hover:bg-slate-200")}
-                          title="Copy SSH Command"
-                        >
-                          {copiedField === `ssh-${app.id}` ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className={cn(
-                      "p-3 rounded-xl border flex items-center justify-between gap-2 mb-3",
+                      "p-2.5 rounded-xl border flex items-center justify-between gap-2 mb-2",
                       isDark ? "bg-[#111115] border-white/[0.06]" : "bg-slate-50 border-slate-200"
                     )}>
                       <div className="flex items-center gap-2 min-w-0 font-mono text-[11px] truncate">
@@ -480,10 +462,32 @@ export default function ManagedAppsPage() {
                           target="_blank"
                           rel="noopener noreferrer"
                           className="p-1.5 rounded-lg text-cyan-400 hover:bg-cyan-500/10 transition-colors"
-                          title="Open App in Browser"
+                          title="Open Web Dashboard in Browser"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
                         </a>
+                      </div>
+                    </div>
+                  )}
+
+                  {hasSsh && (
+                    <div className={cn(
+                      "p-2.5 rounded-xl border flex items-center justify-between gap-2 mb-3",
+                      isDark ? "bg-[#111115] border-white/[0.06]" : "bg-slate-50 border-slate-200"
+                    )}>
+                      <div className="flex items-center gap-2 min-w-0 font-mono text-[11px] truncate">
+                        <Terminal className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                        <span className="truncate font-medium">{sshCommand}</span>
+                      </div>
+
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          onClick={() => copyToClipboard(sshCommand, `ssh-${app.id}`)}
+                          className={cn("p-1.5 rounded-lg transition-colors cursor-pointer", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-500 hover:text-slate-900 hover:bg-slate-200")}
+                          title="Copy SSH Command"
+                        >
+                          {copiedField === `ssh-${app.id}` ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                        </button>
                       </div>
                     </div>
                   )}
