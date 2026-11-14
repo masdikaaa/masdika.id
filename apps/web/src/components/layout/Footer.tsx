@@ -110,35 +110,45 @@ export function Footer({ socialLinks }: { socialLinks?: any }) {
           </div>
 
           {/* Column 3: Cloud & Network */}
-          <div className="lg:col-span-2">
-            <h3 className="text-sm font-semibold mb-5 text-[var(--text-primary)]">Cloud & Network</h3>
-            <ul className="space-y-3">
-              {[
-                { name: 'Cloud VPS', path: '/vps' },
-                { name: 'Managed Database', path: '/managed-db', badge: 'K3s' },
-                { name: 'Managed Apps', path: '/managed-apps', badge: 'K8s' },
-                { name: 'App Catalog', path: '/app-catalog', badge: '1-Click' },
-                { name: 'Looking Glass', path: '/lg', badge: 'Live' }
-              ].map((link, idx) => (
-                <li key={idx} className="flex items-center gap-2">
-                  <Link
-                    href={link.path}
-                    className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-500 rounded"
-                  >
-                    {link.name}
-                  </Link>
-                  {link.badge && (
-                    <span className="px-1.5 py-0.5 rounded-[3px] text-[9px] font-mono font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 select-none pointer-events-none cursor-default">
-                      <span className="relative flex h-1.5 w-1.5">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
-                      </span>
-                      <span>{link.badge}</span>
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
+          <div className="lg:col-span-2 space-y-6">
+            <div>
+              <h3 className="text-sm font-semibold mb-4 text-[var(--text-primary)]">Cloud</h3>
+              <ul className="space-y-2.5">
+                {[
+                  { name: 'Cloud VPS', path: '/vps' },
+                  { name: 'Managed Database', path: '/managed-db' },
+                  { name: 'Managed Apps', path: '/managed-apps' },
+                  { name: 'App Catalog', path: '/app-catalog' },
+                ].map((link, idx) => (
+                  <li key={idx}>
+                    <Link
+                      href={link.path}
+                      className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-500 rounded"
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-semibold mb-3 text-[var(--text-primary)]">Network</h3>
+              <ul className="space-y-2.5">
+                {[
+                  { name: 'Looking Glass', path: '/lg' },
+                ].map((link, idx) => (
+                  <li key={idx}>
+                    <Link
+                      href={link.path}
+                      className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-500 rounded"
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
 
           {/* Column 4: Legal & Contact */}
