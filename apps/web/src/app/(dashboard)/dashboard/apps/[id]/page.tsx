@@ -531,7 +531,7 @@ export default function AppDetailPage({
                   </span>
                   <div className="flex items-center justify-between font-mono font-bold text-xs pt-0.5">
                     <span className="truncate mr-2 text-cyan-400">
-                      {showPassword ? (app.password || "123456") : "••••••••••••"}
+                      {showPassword ? (app.password || "••••••••") : "••••••••••••"}
                     </span>
                     <div className="flex items-center gap-1.5 shrink-0">
                       <button
@@ -543,7 +543,7 @@ export default function AppDetailPage({
                         {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                       </button>
                       <button
-                        onClick={() => copyToClipboard(app.password || "123456", "Password")}
+                        onClick={() => copyToClipboard(app.password || "", "Password")}
                         className="text-[var(--text-muted)] hover:text-cyan-400 cursor-pointer"
                         title="Copy Password"
                       >
@@ -559,7 +559,7 @@ export default function AppDetailPage({
                 )}>
                   <p className="text-[11px] leading-relaxed">
                     {app.appType === "ninerouter"
-                      ? "Masuk ke Web Dashboard 9Router menggunakan password di atas (default: 123456). Anda dapat mengubah password dan mengatur AI model providers kapan saja di menu Settings 9Router."
+                      ? "Masuk ke Web Dashboard 9Router menggunakan password acak di atas. Anda dapat mengubah password dan mengatur AI model providers kapan saja di menu Settings 9Router."
                       : "Gunakan kredensial di atas untuk login ke antarmuka n8n. Seluruh alur kerja dan webhook tersimpan aman di persistent storage."}
                   </p>
                 </div>
@@ -955,7 +955,7 @@ export default function AppDetailPage({
             {app.appType === "ninerouter" && (
               <div className="space-y-3 text-xs leading-relaxed">
                 <p className={isDark ? "text-zinc-300" : "text-slate-700"}>
-                  9Router acts as your AI gateway and router dashboard. Klik <strong>Open App</strong> di atas untuk membuka web dashboard, lalu masukkan password awal <code className="font-mono text-cyan-400 font-bold">{app.password || "123456"}</code>. Anda juga dapat menghubungkan endpoint ini ke Claude Code, Cursor, atau Cline:
+                  9Router acts as your AI gateway and router dashboard. Klik <strong>Open App</strong> di atas untuk membuka web dashboard, lalu masukkan password aplikasi Anda <code className="font-mono text-cyan-400 font-bold">{app.password || "••••••••"}</code>. Anda juga dapat menghubungkan endpoint ini ke Claude Code, Cursor, atau Cline:
                 </p>
                 <div className={cn("p-3.5 rounded-xl border font-mono text-[11px] space-y-1", isDark ? "bg-[#09090b] border-white/10 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-800")}>
                   <div className="text-zinc-500"># OpenAI Compatible Router Base URL</div>

@@ -201,8 +201,8 @@ export async function POST(req: NextRequest) {
     // 6. Smart NodePort Allocation (Dedicated Range 31500..32767 with in-memory lock & cross-checks)
     const port = await allocateAppPort();
 
-    // 7. Generate Initial Credentials (9Router uses standard default 123456 as shown in setup prompt)
-    const randomPassword = catalogItem.id === "ninerouter" ? "123456" : `MkApp_${crypto.randomBytes(6).toString("base64url")}`;
+    // 7. Generate Initial Credentials
+    const randomPassword = `MkApp_${crypto.randomBytes(6).toString("base64url")}`;
     const randomApiKey = `mk_${crypto.randomBytes(16).toString("hex")}`;
     const defaultUsername = (catalogItem.accessProtocol === "SSH" || catalogItem.accessProtocol === "BOTH") ? "root" : "admin";
 
