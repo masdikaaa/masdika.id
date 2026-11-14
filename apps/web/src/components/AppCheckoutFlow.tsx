@@ -25,6 +25,7 @@ import {
   ShieldCheck,
   CheckCircle2,
   Lock,
+  Terminal,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -205,9 +206,15 @@ export default function AppCheckoutFlow() {
                     <span className={cn("font-medium", isDark ? "text-zinc-500" : "text-slate-400")}>
                       Port: <strong className={isDark ? "text-zinc-300" : "text-slate-700"}>{app.appPort}</strong>
                     </span>
-                    <span className={cn("font-semibold flex items-center gap-1", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                      Auto SSL <Check className="w-3 h-3" />
-                    </span>
+                    {app.accessProtocol === "SSH" ? (
+                      <span className={cn("font-semibold flex items-center gap-1", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                        <Terminal className="w-3 h-3" /> Direct SSH
+                      </span>
+                    ) : (
+                      <span className={cn("font-semibold flex items-center gap-1", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                        Auto SSL <Check className="w-3 h-3" />
+                      </span>
+                    )}
                   </div>
                 </button>
               );
@@ -293,14 +300,15 @@ export default function AppCheckoutFlow() {
                   </div>
 
                   <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 self-stretch sm:self-auto pt-2 sm:pt-0 border-t sm:border-0 border-inherit">
-                    {/* Remaining Stock Badge matching Gambar 1 & 2 */}
+                    {/* Stock Status Badge */}
                     <span className={cn(
-                      "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border",
+                      "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border",
                       isDark
                         ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                         : "bg-emerald-50 text-emerald-700 border-emerald-200"
                     )}>
-                      {plan.remainingStock} remaining
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      Available
                     </span>
 
                     {/* Radio circle indicator */}
@@ -333,58 +341,110 @@ export default function AppCheckoutFlow() {
             "p-5 rounded-2xl border space-y-4",
             isDark ? "bg-[#101014] border-white/[0.08]" : "bg-white border-slate-200 shadow-2xs"
           )}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className={cn("text-xs font-bold uppercase tracking-wider block", isDark ? "text-zinc-400" : "text-slate-600")}>
-                  App Instance Name *
-                </label>
-                <input
-                  type="text"
-                  value={appName}
-                  onChange={(e) => setAppName(e.target.value)}
-                  placeholder="e.g. My Hermes Agent"
-                  className={cn(
-                    "w-full px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-cyan-400/20 focus:border-cyan-400",
-                    isDark
-                      ? "bg-[#09090b] border-white/10 text-white placeholder-zinc-500"
-                      : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400"
-                  )}
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className={cn("text-xs font-bold uppercase tracking-wider block", isDark ? "text-zinc-400" : "text-slate-600")}>
-                  Custom Subdomain (Optional)
-                </label>
-                <div className="relative">
+            {selectedApp.accessProtocol === "SSH" ? (
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className={cn("text-xs font-bold uppercase tracking-wider block", isDark ? "text-zinc-400" : "text-slate-600")}>
+                    App Instance Name *
+                  </label>
                   <input
                     type="text"
-                    value={customSubdomain}
-                    onChange={(e) => setCustomSubdomain(e.target.value)}
-                    placeholder={`${selectedApp.id}-production`}
+                    value={appName}
+                    onChange={(e) => setAppName(e.target.value)}
+                    placeholder="e.g. My OpenCode Environment"
                     className={cn(
-                      "w-full px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-cyan-400/20 focus:border-cyan-400 font-mono",
+                      "w-full px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-cyan-400/20 focus:border-cyan-400",
                       isDark
                         ? "bg-[#09090b] border-white/10 text-white placeholder-zinc-500"
                         : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400"
                     )}
                   />
                 </div>
-              </div>
-            </div>
 
-            <div className={cn(
-              "p-3 rounded-xl border text-xs flex items-center justify-between",
-              isDark ? "bg-white/[0.02] border-white/5 text-zinc-400" : "bg-slate-50 border-slate-200 text-slate-600"
-            )}>
-              <span className="flex items-center gap-2">
-                <Globe className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Target HTTPS URL:</span>
-              </span>
-              <strong className={cn("font-mono font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                https://{cleanSubdomain}.app.masdika.id
-              </strong>
-            </div>
+                <div className={cn(
+                  "p-4 rounded-xl border space-y-3",
+                  isDark ? "bg-[#09090b] border-white/10" : "bg-slate-50 border-slate-200"
+                )}>
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-cyan-400">
+                      <Terminal className="w-4 h-4 text-cyan-400" />
+                      <span>Direct SSH Terminal Access</span>
+                    </span>
+                    <span className={cn(
+                      "text-[10px] font-bold px-2 py-0.5 rounded-full border",
+                      isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200"
+                    )}>
+                      Port 30000–32767
+                    </span>
+                  </div>
+                  <p className={cn("text-xs leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
+                    This application operates as a headless CLI / SSH developer container. A high-speed direct SSH port will be allocated upon deployment — no public web domain or HTTPS ingress is assigned.
+                  </p>
+                  <div className={cn(
+                    "p-2.5 rounded-lg border font-mono text-xs flex items-center justify-between",
+                    isDark ? "bg-black/60 border-white/5 text-zinc-300" : "bg-white border-slate-200 text-slate-800"
+                  )}>
+                    <span className="text-zinc-500">Access Mode:</span>
+                    <span className="font-semibold text-cyan-400">Direct High-Speed SSH (CLI)</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className={cn("text-xs font-bold uppercase tracking-wider block", isDark ? "text-zinc-400" : "text-slate-600")}>
+                      App Instance Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={appName}
+                      onChange={(e) => setAppName(e.target.value)}
+                      placeholder="e.g. My Hermes Agent"
+                      className={cn(
+                        "w-full px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-cyan-400/20 focus:border-cyan-400",
+                        isDark
+                          ? "bg-[#09090b] border-white/10 text-white placeholder-zinc-500"
+                          : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400"
+                      )}
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className={cn("text-xs font-bold uppercase tracking-wider block", isDark ? "text-zinc-400" : "text-slate-600")}>
+                      Custom Subdomain (Optional)
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={customSubdomain}
+                        onChange={(e) => setCustomSubdomain(e.target.value)}
+                        placeholder={`${selectedApp.id}-production`}
+                        className={cn(
+                          "w-full px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-cyan-400/20 focus:border-cyan-400 font-mono",
+                          isDark
+                            ? "bg-[#09090b] border-white/10 text-white placeholder-zinc-500"
+                            : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400"
+                        )}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className={cn(
+                  "p-3 rounded-xl border text-xs flex items-center justify-between",
+                  isDark ? "bg-white/[0.02] border-white/5 text-zinc-400" : "bg-slate-50 border-slate-200 text-slate-600"
+                )}>
+                  <span className="flex items-center gap-2">
+                    <Globe className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>Target HTTPS URL:</span>
+                  </span>
+                  <strong className={cn("font-mono font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                    https://{cleanSubdomain}.app.masdika.id
+                  </strong>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -417,6 +477,15 @@ export default function AppCheckoutFlow() {
               </p>
               <p className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>
                 {selectedApp.name} ({selectedPlan.planCode})
+              </p>
+            </div>
+
+            <div>
+              <p className={cn("text-[11px] font-semibold uppercase tracking-wider mb-1", isDark ? "text-zinc-500" : "text-slate-400")}>
+                Connection Mode
+              </p>
+              <p className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>
+                {selectedApp.accessProtocol === "SSH" ? "Direct SSH (CLI)" : "HTTPS Web (Auto SSL)"}
               </p>
             </div>
 
@@ -491,16 +560,29 @@ export default function AppCheckoutFlow() {
             <span>{deploying ? "Deploying App..." : "Deploy App"}</span>
           </button>
 
-          <div className="space-y-2 pt-2 text-[11px] text-[var(--text-muted)] leading-relaxed">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-              <span>Automated Let&apos;s Encrypt SSL on Ingress</span>
+          {selectedApp.accessProtocol === "SSH" ? (
+            <div className="space-y-2 pt-2 text-[11px] text-[var(--text-muted)] leading-relaxed">
+              <div className="flex items-center gap-2">
+                <Terminal className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                <span>Direct High-Speed SSH Access (Port 30000–32767)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span>Isolated Container & Persistent /workspace Storage</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-              <span>Dedicated Isolated Container & SSD storage</span>
+          ) : (
+            <div className="space-y-2 pt-2 text-[11px] text-[var(--text-muted)] leading-relaxed">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span>Automated Let&apos;s Encrypt SSL on Ingress</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                <span>Dedicated Isolated Container & SSD storage</span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

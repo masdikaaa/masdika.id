@@ -271,8 +271,9 @@ export function AppScaleModal({
                     <p className="font-bold text-sm">
                       {formatRupiah(plan.monthlyPrice)}<span className="text-[11px] font-normal text-[var(--text-muted)]">/mo</span>
                     </p>
-                    <p className={cn("text-[10px] font-semibold", isDark ? "text-emerald-400" : "text-emerald-700")}>
-                      {plan.remainingStock} remaining
+                    <p className={cn("text-[10px] font-semibold flex items-center justify-end gap-1", isDark ? "text-emerald-400" : "text-emerald-700")}>
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      Available
                     </p>
                   </div>
                 </div>

@@ -160,6 +160,7 @@ export async function POST(req: NextRequest) {
     // 7. Generate Initial Credentials
     const randomPassword = `MkApp_${crypto.randomBytes(6).toString("base64url")}`;
     const randomApiKey = `mk_${crypto.randomBytes(16).toString("hex")}`;
+    const defaultUsername = catalogItem.accessProtocol === "SSH" ? "root" : "admin";
 
     // 8. Create Record in Database
     const appRecord = await prisma.appService.create({
@@ -175,7 +176,7 @@ export async function POST(req: NextRequest) {
         host: "app.masdika.id",
         port,
         appPort: catalogItem.appPort,
-        username: "admin",
+        username: defaultUsername,
         password: randomPassword,
         apiKey: randomApiKey,
         cpuShares: planItem.cpuShares,
@@ -203,7 +204,7 @@ export async function POST(req: NextRequest) {
         host: "app.masdika.id",
         port,
         appPort: catalogItem.appPort,
-        username: "admin",
+        username: defaultUsername,
         password: randomPassword,
         apiKey: randomApiKey,
         cpuShares: planItem.cpuShares,
@@ -225,14 +226,18 @@ export async function POST(req: NextRequest) {
           k8sDeployment: k8sResult.deploymentName,
           k8sService: k8sResult.serviceName,
           k8sPvc: k8sResult.pvcName,
-          k8sIngress: k8sResult.ingressName,
+          k8sIngress: k8sResult.ingressName || null,
         },
       });
 
       // Audit Log
+      const connDesc = catalogItem.accessProtocol === "SSH"
+        ? `SSH port ${port}`
+        : `port ${port} and https://${subdomain}.app.masdika.id`;
+
       await logClientActivity({
         userId: user.id,
-        description: `Deployed Managed App '${cleanName}' (${catalogItem.name} ${planItem.planCode}) on port ${port} and https://${subdomain}.app.masdika.id`,
+        description: `Deployed Managed App '${cleanName}' (${catalogItem.name} ${planItem.planCode}) on ${connDesc}`,
         ipAddress: clientIp,
         category: "service",
       }).catch(() => {});
@@ -241,7 +246,8 @@ export async function POST(req: NextRequest) {
         success: true,
         data: {
           ...updatedApp,
-          httpsUrl: `https://${subdomain}.app.masdika.id`,
+          httpsUrl: catalogItem.accessProtocol === "SSH" ? null : `https://${subdomain}.app.masdika.id`,
+          sshCommand: catalogItem.accessProtocol === "SSH" ? `ssh root@103.247.10.61 -p ${port}` : null,
           nodePortUrl: `http://103.247.10.61:${port}`,
         },
         message: `Successfully provisioned ${catalogItem.name}.`,

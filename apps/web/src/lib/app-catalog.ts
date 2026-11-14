@@ -13,6 +13,7 @@ export interface ManagedAppDefinition {
   website: string;
   github?: string;
   features: string[];
+  accessProtocol: 'WEB' | 'SSH';
 }
 
 export interface ManagedAppPlanDefinition {
@@ -42,6 +43,7 @@ export const MANAGED_APPS_CATALOG: ManagedAppDefinition[] = [
     defaultImage: 'docker.io/library/node:22-alpine',
     color: 'from-amber-500 to-orange-600',
     badge: 'Autonomous AI',
+    accessProtocol: 'WEB',
     website: 'https://hermes-agent.org',
     github: 'https://github.com/NousResearch/hermes-agent',
     features: [
@@ -63,6 +65,7 @@ export const MANAGED_APPS_CATALOG: ManagedAppDefinition[] = [
     defaultImage: 'docker.io/library/node:22-alpine',
     color: 'from-violet-500 to-purple-600',
     badge: 'API Gateway',
+    accessProtocol: 'WEB',
     website: 'https://github.com/decolua/9router',
     github: 'https://github.com/decolua/9router',
     features: [
@@ -84,6 +87,7 @@ export const MANAGED_APPS_CATALOG: ManagedAppDefinition[] = [
     defaultImage: 'docker.io/n8nio/n8n:latest',
     color: 'from-orange-500 to-amber-600',
     badge: 'Workflow Engine',
+    accessProtocol: 'WEB',
     website: 'https://n8n.io',
     github: 'https://github.com/n8n-io/n8n',
     features: [
@@ -98,18 +102,19 @@ export const MANAGED_APPS_CATALOG: ManagedAppDefinition[] = [
     name: 'OpenCode',
     tagline: 'Terminal AI Coding Assistant & Developer Environment',
     category: 'Developer Tools',
-    description: 'Fast, native AI developer assistant and web terminal environment that indexes codebases, automates git workflows, and pairs with multiple LLMs.',
+    description: 'Fast, native AI developer assistant and terminal environment accessed via direct SSH that indexes codebases, automates git workflows, and pairs with multiple LLMs.',
     icon: '/images/apps/opencode.png',
-    appPort: 8080,
+    appPort: 22,
     dataDir: '/workspace',
     defaultImage: 'docker.io/library/node:22-alpine',
     color: 'from-blue-500 to-cyan-600',
-    badge: 'CLI Companion',
+    badge: 'SSH / CLI Access',
+    accessProtocol: 'SSH',
     website: 'https://opencode.ai',
     github: 'https://github.com/anomalyco/opencode',
     features: [
-      'Web-Based Interactive Terminal & Workspace',
-      'Deep AST Codebase Indexing & Semantic Search',
+      'Direct High-Speed SSH Terminal Access',
+      'Persistent Workspace Storage at /workspace',
       'Git Commit, Diff & Automated PR Generation',
       'Seamless OpenAI / Anthropic / Local Model Pairing',
     ],
@@ -126,6 +131,7 @@ export const MANAGED_APPS_CATALOG: ManagedAppDefinition[] = [
     defaultImage: 'docker.io/library/node:22-alpine',
     color: 'from-emerald-500 to-teal-600',
     badge: 'Multi-Channel AI',
+    accessProtocol: 'WEB',
     website: 'https://openclaw.ai',
     github: 'https://github.com/openclaw/openclaw',
     features: [

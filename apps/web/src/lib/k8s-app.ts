@@ -459,53 +459,19 @@ function buildAppContainerSpec(app: AppServiceRecord) {
 `;
   } else if (appType === 'opencode') {
     image = 'docker.io/library/node:22-alpine';
+    const sshPassword = app.password || 'OpenCode123!';
     commandYaml = `
         command: ["/bin/sh", "-c"]
         args:
           - |
-            cat << 'EOF' > /server.js
-            const http = require('http');
-            const server = http.createServer((req, res) => {
-              res.setHeader('Content-Type', 'text/html; charset=utf-8');
-              res.writeHead(200);
-              res.end(\`<!DOCTYPE html>
-              <html>
-              <head>
-                <title>OpenCode Terminal - Masdika Cloud</title>
-                <meta name="viewport" content="width=device-width, initial-scale=1">
-                <style>
-                  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #09090b; color: #f4f4f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-                  .card { background: #18181b; border: 1px solid #27272a; border-radius: 16px; padding: 32px; max-width: 580px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-                  .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: rgba(6, 182, 212, 0.1); color: #06b6d4; border: 1px solid rgba(6, 182, 212, 0.2); border-radius: 9999px; font-size: 12px; font-weight: 600; margin-bottom: 16px; }
-                  h1 { font-size: 24px; font-weight: 800; margin: 0 0 8px 0; color: #fff; }
-                  p { font-size: 14px; line-height: 1.6; color: #a1a1aa; margin: 0 0 20px 0; }
-                  .info-box { background: #0f0f11; border: 1px solid #27272a; border-radius: 8px; padding: 14px; font-family: monospace; font-size: 13px; color: #e4e4e7; margin-bottom: 20px; word-break: break-all; }
-                  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block; animation: pulse 2s infinite; }
-                  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-                  .btn { display: inline-block; background: #0891b2; color: #fff; font-weight: 600; font-size: 14px; padding: 10px 20px; border-radius: 8px; text-decoration: none; transition: background 0.2s; }
-                  .btn:hover { background: #0e7490; }
-                </style>
-              </head>
-              <body>
-                <div class="card">
-                  <div class="badge"><span class="status-dot"></span> Online & Listening</div>
-                  <h1>OpenCode Environment</h1>
-                  <p>AI coding companion and developer environment active on Masdika Cloud.</p>
-                  <div class="info-box">
-                    <div><b>Endpoint:</b> https://${fullDomain}</div>
-                    <div><b>Port:</b> ${app.appPort}</div>
-                    <div><b>Workspace:</b> ${dataMount}</div>
-                  </div>
-                  <a href="https://opencode.ai" target="_blank" class="btn">OpenCode Guide &rarr;</a>
-                </div>
-              </body>
-              </html>\`);
-            });
-            server.listen(${app.appPort}, '0.0.0.0', () => {
-              console.log('OpenCode listening on port ${app.appPort}');
-            });
-            EOF
-            node /server.js
+            apk add --no-cache openssh bash git curl nano && \
+            ssh-keygen -A && \
+            echo "root:${sshPassword}" | chpasswd && \
+            sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
+            echo "PermitRootLogin yes" >> /etc/ssh/sshd_config && \
+            echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config && \
+            mkdir -p ${dataMount} && \
+            exec /usr/sbin/sshd -D -e -p ${app.appPort}
 `;
   } else if (appType === 'openclaw') {
     image = 'docker.io/library/node:22-alpine';
@@ -601,12 +567,46 @@ export async function deployAppService(app: AppServiceRecord): Promise<{
   }
 
   const { image, dataMount, envYaml, commandYaml } = buildAppContainerSpec(app);
+  const catalogItem = getAppDefinition(app.appType);
+  const isSshApp = catalogItem?.accessProtocol === 'SSH';
 
   const cpuReq = `${Math.max(0.1, Number((app.cpuShares * 0.4).toFixed(2)))}`;
   const cpuLim = `${app.cpuShares}`;
   const memReq = `${Math.max(128, Math.round(app.memoryMb * 0.5))}Mi`;
   const memLim = `${app.memoryMb}Mi`;
   const storageSize = `${Math.max(5, app.storageGb || 10)}Gi`;
+
+  const ingressYaml = !isSshApp ? `
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ing-${name}
+  namespace: ${ns}
+  labels:
+    app: ${name}
+    managed-by: masdika-cloud
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure,web
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - ${fullDomain}
+    secretName: tls-${app.subdomain}
+  rules:
+  - host: ${fullDomain}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: svc-${name}
+            port:
+              number: ${app.appPort}
+` : '';
 
   const manifestYaml = `apiVersion: v1
 kind: PersistentVolumeClaim
@@ -652,7 +652,7 @@ spec:
         image: ${image}
         imagePullPolicy: IfNotPresent
         ports:
-        - name: http
+        - name: app-port
           containerPort: ${app.appPort}${commandYaml}${envYaml ? `\n        env:${envYaml}` : ''}
         readinessProbe:
           tcpSocket:
@@ -694,39 +694,10 @@ spec:
   selector:
     app: ${name}
   ports:
-  - name: http
+  - name: app-port
     port: ${app.appPort}
     targetPort: ${app.appPort}
-    nodePort: ${app.port}
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: ing-${name}
-  namespace: ${ns}
-  labels:
-    app: ${name}
-    managed-by: masdika-cloud
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure,web
-spec:
-  ingressClassName: traefik
-  tls:
-  - hosts:
-    - ${fullDomain}
-    secretName: tls-${app.subdomain}
-  rules:
-  - host: ${fullDomain}
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: svc-${name}
-            port:
-              number: ${app.appPort}
+    nodePort: ${app.port}${ingressYaml}
 `;
 
   await applyKubernetesManifests(kc, manifestYaml);
@@ -735,7 +706,7 @@ spec:
     deploymentName: `deploy-${name}`,
     serviceName: `svc-${name}`,
     pvcName: `pvc-${name}`,
-    ingressName: `ing-${name}`,
+    ingressName: !isSshApp ? `ing-${name}` : '',
     fullDomain,
   };
 }

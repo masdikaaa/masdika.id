@@ -70,10 +70,17 @@ describe('Managed Apps Catalog & Engine', () => {
       const opencode = getAppDefinition('opencode');
       expect(opencode).toBeDefined();
       expect(opencode?.icon).toBe('/images/apps/opencode.png');
+      expect(opencode?.accessProtocol).toBe('SSH');
+      expect(opencode?.appPort).toBe(22);
+      expect(opencode?.dataDir).toBe('/workspace');
 
       const openclaw = getAppDefinition('openclaw');
       expect(openclaw).toBeDefined();
       expect(openclaw?.icon).toBe('/images/apps/openclaw.png');
+      expect(openclaw?.accessProtocol).toBe('WEB');
+      expect(hermes?.accessProtocol).toBe('WEB');
+      expect(router?.accessProtocol).toBe('WEB');
+      expect(n8n?.accessProtocol).toBe('WEB');
     });
 
     it('should have all 7 compute plans matching user requirements', () => {

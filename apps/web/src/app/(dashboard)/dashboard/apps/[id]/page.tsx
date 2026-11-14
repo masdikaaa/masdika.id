@@ -28,6 +28,8 @@ import {
   Terminal,
   AlertTriangle,
   Lock,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatRupiah, getAppDefinition } from "@/lib/app-catalog";
@@ -51,6 +53,7 @@ export default function AppDetailPage({
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [powering, setPowering] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const fetchAppDetail = async () => {
     try {
@@ -140,6 +143,8 @@ export default function AppDetailPage({
   if (!app) return null;
 
   const catalog = getAppDefinition(app.appType);
+  const isSshApp = catalog?.accessProtocol === "SSH";
+  const sshCommand = `ssh ${app.username || "root"}@103.247.10.61 -p ${app.port}`;
   const fullDomain = `${app.subdomain}.app.masdika.id`;
   const httpsUrl = `https://${fullDomain}`;
   const isRunning = app.status === "RUNNING";
@@ -210,7 +215,11 @@ export default function AppDetailPage({
               <span>•</span>
               <span>Region: Sidoarjo</span>
               <span>•</span>
-              <span className="font-mono text-cyan-400">{fullDomain}</span>
+              {isSshApp ? (
+                <span className="font-mono text-cyan-400">{sshCommand}</span>
+              ) : (
+                <span className="font-mono text-cyan-400">{fullDomain}</span>
+              )}
             </p>
           </div>
         </div>
@@ -287,90 +296,224 @@ export default function AppDetailPage({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Connectivity & Access (7 Cols) */}
         <div className="lg:col-span-7 space-y-6">
-          {/* Card 1: Public HTTPS & Domain Access */}
-          <div className={cn(
-            "p-6 rounded-2xl border space-y-5 transition-all",
-            isDark ? "bg-[#101014] border-white/[0.08]" : "bg-white border-slate-200 shadow-2xs"
-          )}>
-            <div className="flex items-center justify-between">
-              <h3 className={cn("text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                <Globe className="w-4 h-4" /> HTTPS Web Access & Routing
-              </h3>
-              <span className={cn(
-                "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border",
-                isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200"
-              )}>
-                <ShieldCheck className="w-3.5 h-3.5" /> Let&apos;s Encrypt SSL Active
-              </span>
-            </div>
-
-            <div className="space-y-3">
-              <div>
-                <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1", isDark ? "text-zinc-500" : "text-slate-400")}>
-                  Secure Application URL
-                </label>
-                <div className="flex items-center gap-2">
-                  <div className={cn(
-                    "flex-1 px-3.5 py-2.5 rounded-xl border font-mono text-xs font-bold truncate",
-                    isDark ? "bg-[#09090b] border-white/10 text-cyan-400" : "bg-slate-50 border-slate-200 text-cyan-800"
-                  )}>
-                    {httpsUrl}
-                  </div>
-                  <button
-                    onClick={() => copyToClipboard(httpsUrl, "HTTPS URL")}
-                    className={cn(
-                      "p-2.5 rounded-xl border transition-colors cursor-pointer shrink-0",
-                      isDark ? "border-white/10 hover:bg-white/5 text-zinc-300" : "border-slate-300 hover:bg-slate-100 text-slate-700"
-                    )}
-                    title="Copy URL"
-                  >
-                    {copiedField === "HTTPS URL" ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                  </button>
-                  <a
-                    href={httpsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shrink-0 cursor-pointer active:scale-95"
-                  >
-                    <span>Open App</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                </div>
+          {/* Card 1: Public HTTPS & Domain Access OR Direct SSH Access */}
+          {isSshApp ? (
+            <div className={cn(
+              "p-6 rounded-2xl border space-y-5 transition-all",
+              isDark ? "bg-[#101014] border-white/[0.08]" : "bg-white border-slate-200 shadow-2xs"
+            )}>
+              <div className="flex items-center justify-between">
+                <h3 className={cn("text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                  <Terminal className="w-4 h-4" /> Direct SSH Terminal Access
+                </h3>
+                <span className={cn(
+                  "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border",
+                  isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                )}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Port {app.port} Active
+                </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                <div className={cn(
-                  "p-3 rounded-xl border space-y-1 text-xs",
-                  isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200"
-                )}>
-                  <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
-                    Direct NodePort IP
-                  </span>
-                  <div className="flex items-center justify-between font-mono font-bold text-xs pt-0.5">
-                    <span>103.247.10.61:{app.port}</span>
+              <div className="space-y-4">
+                <div>
+                  <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1.5", isDark ? "text-zinc-500" : "text-slate-400")}>
+                    SSH Connection Command
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <div className={cn(
+                      "flex-1 px-3.5 py-2.5 rounded-xl border font-mono text-xs font-bold truncate",
+                      isDark ? "bg-[#09090b] border-white/10 text-cyan-400" : "bg-slate-50 border-slate-200 text-cyan-800"
+                    )}>
+                      {sshCommand}
+                    </div>
                     <button
-                      onClick={() => copyToClipboard(`http://103.247.10.61:${app.port}`, "NodePort URL")}
-                      className="text-[var(--text-muted)] hover:text-cyan-400"
+                      onClick={() => copyToClipboard(sshCommand, "SSH Command")}
+                      className={cn(
+                        "px-3.5 py-2.5 rounded-xl border font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shrink-0",
+                        isDark ? "border-cyan-500/30 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20" : "border-cyan-300 bg-cyan-50 text-cyan-700 hover:bg-cyan-100"
+                      )}
+                      title="Copy SSH Command"
                     >
-                      <Copy className="w-3.5 h-3.5" />
+                      {copiedField === "SSH Command" ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span>Copy</span>
                     </button>
                   </div>
                 </div>
 
-                <div className={cn(
-                  "p-3 rounded-xl border space-y-1 text-xs",
-                  isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200"
-                )}>
-                  <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
-                    Container Internal Port
-                  </span>
-                  <p className="font-mono font-bold text-xs pt-0.5">
-                    {app.appPort} (HTTP)
-                  </p>
+                {/* SSH Credentials & Host Details Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  <div className={cn(
+                    "p-3 rounded-xl border space-y-1 text-xs",
+                    isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200"
+                  )}>
+                    <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
+                      Host / Server IP
+                    </span>
+                    <div className="flex items-center justify-between font-mono font-bold text-xs pt-0.5">
+                      <span>103.247.10.61</span>
+                      <button
+                        onClick={() => copyToClipboard("103.247.10.61", "Host IP")}
+                        className="text-[var(--text-muted)] hover:text-cyan-400"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className={cn(
+                    "p-3 rounded-xl border space-y-1 text-xs",
+                    isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200"
+                  )}>
+                    <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
+                      Port
+                    </span>
+                    <div className="flex items-center justify-between font-mono font-bold text-xs pt-0.5">
+                      <span>{app.port}</span>
+                      <button
+                        onClick={() => copyToClipboard(String(app.port), "Port")}
+                        className="text-[var(--text-muted)] hover:text-cyan-400"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className={cn(
+                    "p-3 rounded-xl border space-y-1 text-xs",
+                    isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200"
+                  )}>
+                    <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
+                      SSH User
+                    </span>
+                    <div className="flex items-center justify-between font-mono font-bold text-xs pt-0.5">
+                      <span>{app.username || "root"}</span>
+                      <button
+                        onClick={() => copyToClipboard(app.username || "root", "SSH User")}
+                        className="text-[var(--text-muted)] hover:text-cyan-400"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className={cn(
+                    "p-3 rounded-xl border space-y-1 text-xs",
+                    isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200"
+                  )}>
+                    <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
+                      Password
+                    </span>
+                    <div className="flex items-center justify-between font-mono font-bold text-xs pt-0.5">
+                      <span className="truncate mr-2">
+                        {showPassword ? (app.password || "••••••••") : "••••••••••••"}
+                      </span>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="text-[var(--text-muted)] hover:text-cyan-400 cursor-pointer"
+                          title={showPassword ? "Hide Password" : "Show Password"}
+                        >
+                          {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                        </button>
+                        <button
+                          onClick={() => copyToClipboard(app.password || "", "Password")}
+                          className="text-[var(--text-muted)] hover:text-cyan-400 cursor-pointer"
+                          title="Copy Password"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className={cn(
+              "p-6 rounded-2xl border space-y-5 transition-all",
+              isDark ? "bg-[#101014] border-white/[0.08]" : "bg-white border-slate-200 shadow-2xs"
+            )}>
+              <div className="flex items-center justify-between">
+                <h3 className={cn("text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                  <Globe className="w-4 h-4" /> HTTPS Web Access & Routing
+                </h3>
+                <span className={cn(
+                  "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border",
+                  isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                )}>
+                  <ShieldCheck className="w-3.5 h-3.5" /> Let&apos;s Encrypt SSL Active
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1", isDark ? "text-zinc-500" : "text-slate-400")}>
+                    Secure Application URL
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <div className={cn(
+                      "flex-1 px-3.5 py-2.5 rounded-xl border font-mono text-xs font-bold truncate",
+                      isDark ? "bg-[#09090b] border-white/10 text-cyan-400" : "bg-slate-50 border-slate-200 text-cyan-800"
+                    )}>
+                      {httpsUrl}
+                    </div>
+                    <button
+                      onClick={() => copyToClipboard(httpsUrl, "HTTPS URL")}
+                      className={cn(
+                        "p-2.5 rounded-xl border transition-colors cursor-pointer shrink-0",
+                        isDark ? "border-white/10 hover:bg-white/5 text-zinc-300" : "border-slate-300 hover:bg-slate-100 text-slate-700"
+                      )}
+                      title="Copy URL"
+                    >
+                      {copiedField === "HTTPS URL" ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                    </button>
+                    <a
+                      href={httpsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shrink-0 cursor-pointer active:scale-95"
+                    >
+                      <span>Open App</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                  <div className={cn(
+                    "p-3 rounded-xl border space-y-1 text-xs",
+                    isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200"
+                  )}>
+                    <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
+                      Direct NodePort IP
+                    </span>
+                    <div className="flex items-center justify-between font-mono font-bold text-xs pt-0.5">
+                      <span>103.247.10.61:{app.port}</span>
+                      <button
+                        onClick={() => copyToClipboard(`http://103.247.10.61:${app.port}`, "NodePort URL")}
+                        className="text-[var(--text-muted)] hover:text-cyan-400"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className={cn(
+                    "p-3 rounded-xl border space-y-1 text-xs",
+                    isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200"
+                  )}>
+                    <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
+                      Container Internal Port
+                    </span>
+                    <p className="font-mono font-bold text-xs pt-0.5">
+                      {app.appPort} (HTTP)
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Card 2: App Integration & API Reference */}
           <div className={cn(
@@ -420,8 +563,14 @@ export default function AppDetailPage({
             {app.appType === "opencode" && (
               <div className="space-y-3 text-xs leading-relaxed">
                 <p className={isDark ? "text-zinc-300" : "text-slate-700"}>
-                  OpenCode terminal and AI assistant companion is operational. Use the interactive web terminal to pair on code, manage repositories, and run commands.
+                  OpenCode is running as a dedicated SSH coding container. You can connect from your local terminal, VS Code Remote SSH, or Cursor:
                 </p>
+                <div className={cn("p-3.5 rounded-xl border font-mono text-[11px] space-y-2", isDark ? "bg-[#09090b] border-white/10 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-800")}>
+                  <div className="text-zinc-500"># Direct Terminal Login</div>
+                  <div className="text-cyan-400 font-bold">{sshCommand}</div>
+                  <div className="text-zinc-500 pt-1"># Persistent Storage Mount</div>
+                  <div>cd /workspace</div>
+                </div>
               </div>
             )}
 
