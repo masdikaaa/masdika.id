@@ -5,6 +5,9 @@ import { decryptDeterministic } from "@/lib/encryption";
 import {
   getDatabaseStatus,
   deleteDatabase,
+  startDatabase,
+  stopDatabase,
+  restartDatabase,
   buildConnectionDetails,
   getK8sClusterConfig,
   MANAGED_DB_PMA_URL,
@@ -125,6 +128,38 @@ export async function POST(req: NextRequest) {
 
     if (!db) {
       return NextResponse.json({ error: "Database instance not found" }, { status: 404 });
+    }
+
+    if (action === "start") {
+      const res = await startDatabase(db.id, db.k8sNamespace || "managed-db");
+      if (!res.success) {
+        return NextResponse.json({ error: res.error || "Failed to start database" }, { status: 500 });
+      }
+      await prisma.databaseService.update({
+        where: { id: db.id },
+        data: { status: "RUNNING" },
+      });
+      return NextResponse.json({ success: true, message: `Database ${db.name} started successfully` });
+    }
+
+    if (action === "stop") {
+      const res = await stopDatabase(db.id, db.k8sNamespace || "managed-db");
+      if (!res.success) {
+        return NextResponse.json({ error: res.error || "Failed to stop database" }, { status: 500 });
+      }
+      await prisma.databaseService.update({
+        where: { id: db.id },
+        data: { status: "STOPPED" },
+      });
+      return NextResponse.json({ success: true, message: `Database ${db.name} stopped successfully` });
+    }
+
+    if (action === "restart") {
+      const res = await restartDatabase(db.id, db.k8sNamespace || "managed-db");
+      if (!res.success) {
+        return NextResponse.json({ error: res.error || "Failed to restart database" }, { status: 500 });
+      }
+      return NextResponse.json({ success: true, message: `Database ${db.name} restarted successfully` });
     }
 
     if (action === "delete") {

@@ -37,7 +37,7 @@ export default function NewManagedAppPage() {
               </span>
             </div>
             <p className={cn("text-xs sm:text-sm font-medium mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
-              Deploy AI agents, routing gateways, and workflow engines on Masdika Cloud Kubernetes cluster.
+              Deploy AI agents, routing gateways, and workflow engines on Masdika Cloud high-performance isolated infrastructure.
             </p>
           </div>
         </div>

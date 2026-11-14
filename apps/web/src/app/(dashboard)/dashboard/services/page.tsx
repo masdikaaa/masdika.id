@@ -532,7 +532,7 @@ export default function MyServicesPage() {
                 );
               } else if ('appType' in item) {
                 const app = item;
-                const colorClass = "from-blue-500/20 text-blue-400 border-blue-500/30";
+                const colorClass = "from-cyan-500/20 text-cyan-400 border-cyan-500/30";
                 return (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -541,17 +541,17 @@ export default function MyServicesPage() {
                     key={`app-${app.id}`}
                     className={cn(
                       "group border rounded-2xl p-5 sm:p-6 transition-all flex flex-col h-full relative overflow-hidden",
-                      isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/[0.16]" : "bg-white border-slate-200/90 shadow-2xs hover:border-slate-300",
+                      isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-cyan-500/30" : "bg-white border-slate-200/90 shadow-2xs hover:border-slate-300",
                       app.status === 'TERMINATED' && "opacity-75 grayscale-[30%]"
                     )}
                   >
                     <div className="flex justify-between items-start mb-6 relative z-10">
                       <div className="flex gap-3.5 items-center min-w-0">
                         <div className={cn("w-12 h-12 rounded-xl bg-gradient-to-br border flex items-center justify-center shrink-0", colorClass)}>
-                          <Boxes className="w-6 h-6 text-blue-400 group-hover:scale-110 transition-transform duration-300" strokeWidth={1.5} />
+                          <Boxes className="w-6 h-6 text-cyan-400 group-hover:scale-110 transition-transform duration-300" strokeWidth={1.5} />
                         </div>
                         <div className="min-w-0">
-                          <h3 className={cn("text-base sm:text-lg font-bold group-hover:text-blue-400 transition-colors leading-tight mb-1 truncate", isDark ? "text-white" : "text-slate-900")}>{app.name}</h3>
+                          <h3 className={cn("text-base sm:text-lg font-bold group-hover:text-cyan-400 transition-colors leading-tight mb-1 truncate", isDark ? "text-white" : "text-slate-900")}>{app.name}</h3>
                           <p className={cn("text-[10px] font-black uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-400")}>
                             MANAGED APP • {app.appType.toUpperCase()}
                           </p>
@@ -567,7 +567,7 @@ export default function MyServicesPage() {
 
                       <div className={cn("border p-3.5 rounded-xl flex flex-col justify-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                         <span className={cn("text-[10px] font-black uppercase tracking-widest mb-1", isDark ? "text-zinc-500" : "text-slate-400")}>HTTPS URL</span>
-                        <span className={cn("text-xs font-mono font-bold tracking-wide truncate", isDark ? "text-white" : "text-slate-900")}>{app.subdomain}.app.masdika.id</span>
+                        <span className={cn("text-xs font-mono font-bold tracking-wide truncate", isDark ? "text-cyan-400" : "text-cyan-700")}>{app.subdomain}.app.masdika.id</span>
                       </div>
 
                       <div className={cn("border p-3.5 rounded-xl flex flex-col justify-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
@@ -578,7 +578,7 @@ export default function MyServicesPage() {
                       <div className={cn("col-span-2 border p-3.5 rounded-xl flex justify-between items-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                         <div className="flex flex-col">
                           <span className={cn("text-[10px] font-black uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-400")}>Hourly Rate</span>
-                          <span className="text-xs text-blue-400 font-bold mt-1">{formatRupiah(app.hourlyRate || 42)}/hr</span>
+                          <span className="text-xs text-cyan-400 font-bold mt-1">{formatRupiah(app.hourlyRate || 42)}/hr</span>
                         </div>
                         <span className={cn("text-lg font-black tracking-tight text-right", isDark ? "text-white" : "text-slate-900")}>
                           {formatRupiah(app.monthlyPrice || 30000)}
@@ -591,7 +591,7 @@ export default function MyServicesPage() {
                       {app.status !== 'TERMINATED' ? (
                         <Link
                           href={`/dashboard/apps/${app.id}`}
-                          className="flex-1 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 px-3.5 py-2 rounded-xl text-xs sm:text-xs font-bold flex items-center justify-center transition-all text-white"
+                          className="flex-1 bg-cyan-400 hover:bg-cyan-300 active:scale-95 px-3.5 py-2.5 rounded-xl text-xs sm:text-xs font-bold flex items-center justify-center transition-all text-slate-950 shadow-md shadow-cyan-400/20"
                         >
                           Manage App
                         </Link>

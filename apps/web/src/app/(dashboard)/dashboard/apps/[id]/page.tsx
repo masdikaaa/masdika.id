@@ -128,7 +128,7 @@ export default function AppDetailPage({
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
+          <div className="w-8 h-8 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin" />
           <p className={cn("text-xs font-semibold", isDark ? "text-zinc-400" : "text-slate-500")}>
             Loading application telemetry...
           </p>
@@ -221,7 +221,7 @@ export default function AppDetailPage({
           <button
             type="button"
             onClick={() => setIsScaleModalOpen(true)}
-            className="px-4 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer active:scale-95"
+            className="px-4 py-2.5 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all shadow-md shadow-cyan-400/20 flex items-center gap-2 cursor-pointer active:scale-95"
           >
             <TrendingUp className="w-3.5 h-3.5" />
             <span>Scale Compute</span>
@@ -330,7 +330,7 @@ export default function AppDetailPage({
                     href={httpsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shrink-0 cursor-pointer"
+                    className="px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shrink-0 cursor-pointer active:scale-95"
                   >
                     <span>Open App</span>
                     <ExternalLink className="w-3.5 h-3.5" />
@@ -477,9 +477,9 @@ export default function AppDetailPage({
               </div>
 
               <div className="flex items-center justify-between">
-                <span className={isDark ? "text-zinc-400" : "text-slate-500"}>Cluster Host:</span>
-                <span className="font-mono font-semibold text-[11px]">
-                  managed-apps (192.168.79.17)
+                <span className={isDark ? "text-zinc-400" : "text-slate-500"}>Edge Network:</span>
+                <span className="font-semibold text-xs text-cyan-400">
+                  Sidoarjo (ID-SDA) • Auto SSL
                 </span>
               </div>
             </div>

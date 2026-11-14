@@ -58,6 +58,30 @@ export default function AdminDatabasePage() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [deleteModalItem, setDeleteModalItem] = useState<AdminDatabaseItem | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [poweringId, setPoweringId] = useState<number | null>(null);
+
+  const handlePowerAction = async (id: number, action: "start" | "stop" | "restart") => {
+    setPoweringId(id);
+    const toastId = toast.loading(`Performing ${action} on database...`);
+    try {
+      const res = await fetch("/api/admin/database", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, id }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success(data.message || `Database ${action}ed successfully`, { id: toastId });
+        fetchDatabases();
+      } else {
+        toast.error(data.error || `Failed to ${action} database`, { id: toastId });
+      }
+    } catch {
+      toast.error("An error occurred during power action", { id: toastId });
+    } finally {
+      setPoweringId(null);
+    }
+  };
 
   const fetchDatabases = async () => {
     setRefreshing(true);
@@ -549,6 +573,49 @@ export default function AdminDatabasePage() {
                       {/* Actions */}
                       <td className="py-3 px-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
+                          {/* Power Controls */}
+                          {db.status === "RUNNING" ? (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => handlePowerAction(db.id, "stop")}
+                                disabled={poweringId === db.id}
+                                className={cn(
+                                  "p-1.5 rounded-lg border transition-all cursor-pointer disabled:opacity-50",
+                                  isDark ? "bg-amber-500/10 border-amber-500/20 text-amber-400 hover:bg-amber-500/20" : "bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100"
+                                )}
+                                title="Stop Database"
+                              >
+                                <Square className="w-3.5 h-3.5 fill-current" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handlePowerAction(db.id, "restart")}
+                                disabled={poweringId === db.id}
+                                className={cn(
+                                  "p-1.5 rounded-lg border transition-all cursor-pointer disabled:opacity-50",
+                                  isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400 hover:bg-cyan-500/20" : "bg-cyan-50 border-cyan-200 text-cyan-700 hover:bg-cyan-100"
+                                )}
+                                title="Restart Database"
+                              >
+                                <RotateCw className={cn("w-3.5 h-3.5", poweringId === db.id && "animate-spin")} />
+                              </button>
+                            </>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handlePowerAction(db.id, "start")}
+                              disabled={poweringId === db.id}
+                              className={cn(
+                                "p-1.5 rounded-lg border transition-all cursor-pointer disabled:opacity-50",
+                                isDark ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20" : "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
+                              )}
+                              title="Start Database"
+                            >
+                              <Play className="w-3.5 h-3.5 fill-current" />
+                            </button>
+                          )}
+
                           {db.connectionDetails?.pmaUrl && (
                             <a
                               href={db.connectionDetails.pmaUrl}

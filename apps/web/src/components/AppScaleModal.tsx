@@ -170,7 +170,7 @@ export function AppScaleModal({
 
         {/* Header */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 shrink-0">
             <TrendingUp className="w-5 h-5" />
           </div>
           <div>
@@ -194,7 +194,7 @@ export function AppScaleModal({
           <div className="space-y-0.5">
             <p className="font-bold">Zero-Data-Loss Rolling Upgrade</p>
             <p className="text-[11px] opacity-90 leading-relaxed">
-              Your application pod compute limits are updated dynamically in Kubernetes. Storage volumes remain safely attached and untouched.
+              Your application container compute limits are updated dynamically on the cluster. Storage volumes remain safely attached and untouched.
             </p>
           </div>
         </div>
@@ -218,8 +218,8 @@ export function AppScaleModal({
                     "p-3.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-4",
                     isSelected
                       ? isDark
-                        ? "bg-blue-600/15 border-blue-500 ring-1 ring-blue-500"
-                        : "bg-blue-50/90 border-blue-500 ring-1 ring-blue-500"
+                        ? "bg-cyan-500/10 border-cyan-400 ring-1 ring-cyan-400/30"
+                        : "bg-cyan-50/90 border-cyan-500 ring-1 ring-cyan-500/30"
                       : isDark
                         ? "bg-[#141419] border-white/5 hover:border-white/10 hover:bg-white/[0.02]"
                         : "bg-slate-50 border-slate-200 hover:border-slate-300 hover:bg-white"
@@ -228,9 +228,9 @@ export function AppScaleModal({
                   <div className="flex items-center gap-3 min-w-0">
                     <div className={cn(
                       "w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0",
-                      isSelected ? "border-blue-500" : isDark ? "border-zinc-600" : "border-slate-300"
+                      isSelected ? "border-cyan-400 bg-cyan-400/20" : isDark ? "border-zinc-600" : "border-slate-300"
                     )}>
-                      {isSelected && <div className="w-2 h-2 rounded-full bg-blue-500" />}
+                      {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-cyan-400" />}
                     </div>
 
                     <div>
@@ -247,7 +247,7 @@ export function AppScaleModal({
                           </span>
                         )}
                         {plan.isPopular && !isCurrent && (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
                             Recommended
                           </span>
                         )}
@@ -260,7 +260,7 @@ export function AppScaleModal({
                         </span>
                         <span className="shrink-0">•</span>
                         <span className="flex items-center gap-1 whitespace-nowrap shrink-0">
-                          <HardDrive className="w-3 h-3 text-blue-400" />
+                          <HardDrive className="w-3 h-3 text-cyan-400" />
                           {plan.ramLabel}
                         </span>
                       </div>
@@ -364,10 +364,10 @@ export function AppScaleModal({
             onClick={handleScaleSubmit}
             disabled={submitting || isIdentical || isBalanceInsufficient}
             className={cn(
-              "px-6 py-2.5 rounded-xl text-xs font-bold text-white transition-all shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed",
+              "px-6 py-2.5 rounded-xl text-xs font-bold text-slate-950 transition-all shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed active:scale-95",
               isDark
-                ? "bg-blue-600 hover:bg-blue-500 active:scale-95 shadow-blue-600/20"
-                : "bg-blue-600 hover:bg-blue-700 active:scale-95 shadow-blue-600/10"
+                ? "bg-cyan-400 hover:bg-cyan-300 shadow-cyan-400/20"
+                : "bg-cyan-400 hover:bg-cyan-300 shadow-cyan-400/20"
             )}
           >
             {submitting ? (

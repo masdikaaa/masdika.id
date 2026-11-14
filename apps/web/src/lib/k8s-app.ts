@@ -644,6 +644,9 @@ spec:
         app: ${name}
         managed-by: masdika-cloud
     spec:
+      restartPolicy: Always
+      securityContext:
+        fsGroup: 1000
       containers:
       - name: ${name}
         image: ${image}
@@ -651,6 +654,18 @@ spec:
         ports:
         - name: http
           containerPort: ${app.appPort}${commandYaml}${envYaml ? `\n        env:${envYaml}` : ''}
+        readinessProbe:
+          tcpSocket:
+            port: ${app.appPort}
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3
+        livenessProbe:
+          tcpSocket:
+            port: ${app.appPort}
+          initialDelaySeconds: 15
+          periodSeconds: 15
+          failureThreshold: 5
         resources:
           requests:
             cpu: "${cpuReq}"
@@ -887,7 +902,7 @@ export async function deleteAppService(app: AppServiceRecord): Promise<void> {
 }
 
 /**
- * Get App Pod status & telemetry
+ * Get App Pod status & telemetry with reboot and node-recovery resilience
  */
 export async function getAppPodStatus(app: AppServiceRecord): Promise<{
   phase: string;
@@ -895,6 +910,7 @@ export async function getAppPodStatus(app: AppServiceRecord): Promise<{
   restartCount: number;
   podName?: string;
   uptimeSeconds?: number;
+  statusLabel?: string;
 }> {
   try {
     const { coreApi } = await getAppK8sClients();
@@ -908,32 +924,64 @@ export async function getAppPodStatus(app: AppServiceRecord): Promise<{
 
     const items = (res as any).items || (res as any).body?.items || [];
     if (!items || items.length === 0) {
-      return { phase: 'Pending', ready: false, restartCount: 0 };
+      const isStopped = app.status === 'STOPPED';
+      return {
+        phase: isStopped ? 'Stopped' : 'Pending',
+        ready: false,
+        restartCount: 0,
+        statusLabel: isStopped ? 'Stopped' : 'Starting',
+      };
     }
 
-    const pod = items[0];
-    const phase = pod.status?.phase || 'Unknown';
-    const containerStatus = pod.status?.containerStatuses?.[0];
+    // Pick active pod: filter out pods being deleted, prioritize Running, then Pending
+    const activePod =
+      items.find((p: any) => p.status?.phase === 'Running' && !p.metadata?.deletionTimestamp) ||
+      items.find((p: any) => p.status?.phase === 'Pending' && !p.metadata?.deletionTimestamp) ||
+      items.find((p: any) => !p.metadata?.deletionTimestamp) ||
+      items[0];
+
+    const rawPhase = activePod.status?.phase || 'Pending';
+    const containerStatus = activePod.status?.containerStatuses?.[0];
     const ready = Boolean(containerStatus?.ready);
     const restartCount = containerStatus?.restartCount || 0;
 
+    let phase = rawPhase;
+    let statusLabel = 'Starting';
+    if (rawPhase === 'Running' && ready) {
+      phase = 'Running';
+      statusLabel = 'Running';
+    } else if (rawPhase === 'Running' && !ready) {
+      phase = 'Starting';
+      statusLabel = 'Starting';
+    } else if (rawPhase === 'Pending') {
+      phase = 'Starting';
+      statusLabel = 'Starting';
+    } else if (rawPhase === 'Failed') {
+      phase = 'Error';
+      statusLabel = 'Error';
+    }
+
     let uptimeSeconds: number | undefined;
-    if (pod.status?.startTime) {
-      uptimeSeconds = Math.max(0, Math.floor((Date.now() - new Date(pod.status.startTime).getTime()) / 1000));
+    if (activePod.status?.startTime) {
+      uptimeSeconds = Math.max(0, Math.floor((Date.now() - new Date(activePod.status.startTime).getTime()) / 1000));
     }
 
     return {
       phase,
       ready,
       restartCount,
-      podName: pod.metadata?.name,
+      podName: activePod.metadata?.name,
       uptimeSeconds,
+      statusLabel,
     };
-  } catch (err: any) {
+  } catch {
+    // When cluster is rebooting or kubelet is temporarily reconnecting:
+    const isAppRunning = app.status === 'RUNNING';
     return {
-      phase: 'Unknown',
-      ready: false,
+      phase: isAppRunning ? 'Running' : 'Stopped',
+      ready: isAppRunning,
       restartCount: 0,
+      statusLabel: isAppRunning ? 'Running' : 'Stopped',
     };
   }
 }
