@@ -521,12 +521,14 @@ export default function AppDetailPage({
             {app.appType === "hermes" && (
               <div className="space-y-3 text-xs leading-relaxed">
                 <p className={isDark ? "text-zinc-300" : "text-slate-700"}>
-                  NousResearch Hermes Agent is running as an autonomous terminal agent. You can connect via SSH, run agents, configure tools, and your workspace is persisted at <code className="font-mono text-cyan-400">/app/data</code>:
+                  NousResearch Hermes Agent is running in a secure sandboxed environment. Your workspace is persisted at <code className="font-mono text-cyan-400">/app/data</code>. Package manager and port tunneling are restricted to prevent abuse:
                 </p>
                 <div className={cn("p-3.5 rounded-xl border font-mono text-[11px] space-y-2", isDark ? "bg-[#09090b] border-white/10 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-800")}>
                   <div className="text-zinc-500"># Direct Terminal Login</div>
                   <div className="text-cyan-400 font-bold">{sshCommand}</div>
-                  <div className="text-zinc-500 pt-1"># Persistent Storage & Config</div>
+                  <div className="text-zinc-500 pt-1"># Launch Hermes Agent CLI</div>
+                  <div>hermes</div>
+                  <div className="text-zinc-500 pt-1"># Persistent Storage</div>
                   <div>cd /app/data</div>
                 </div>
               </div>
@@ -559,12 +561,14 @@ export default function AppDetailPage({
             {app.appType === "opencode" && (
               <div className="space-y-3 text-xs leading-relaxed">
                 <p className={isDark ? "text-zinc-300" : "text-slate-700"}>
-                  OpenCode is running as a dedicated SSH coding container. You can connect from your local terminal, VS Code Remote SSH, or Cursor:
+                  OpenCode is running in a secure sandboxed developer pod. Your workspace is persisted at <code className="font-mono text-cyan-400">/workspace</code>. Package manager and port tunneling are restricted to prevent abuse:
                 </p>
                 <div className={cn("p-3.5 rounded-xl border font-mono text-[11px] space-y-2", isDark ? "bg-[#09090b] border-white/10 text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-800")}>
                   <div className="text-zinc-500"># Direct Terminal Login</div>
                   <div className="text-cyan-400 font-bold">{sshCommand}</div>
-                  <div className="text-zinc-500 pt-1"># Persistent Storage Mount</div>
+                  <div className="text-zinc-500 pt-1"># Launch OpenCode CLI</div>
+                  <div>opencode</div>
+                  <div className="text-zinc-500 pt-1"># Persistent Storage</div>
                   <div>cd /workspace</div>
                 </div>
               </div>

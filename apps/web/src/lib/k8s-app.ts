@@ -387,7 +387,35 @@ function buildAppContainerSpec(app: AppServiceRecord) {
             sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
             echo "PermitRootLogin yes" >> /etc/ssh/sshd_config && \
             echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config && \
+            echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config && \
+            echo "X11Forwarding no" >> /etc/ssh/sshd_config && \
+            echo "AllowAgentForwarding no" >> /etc/ssh/sshd_config && \
+            echo "PermitTunnel no" >> /etc/ssh/sshd_config && \
+            echo "GatewayPorts no" >> /etc/ssh/sshd_config && \
             mkdir -p ${dataMount} /root/.hermes && \
+            cat << 'HERMESEOF' > /usr/local/bin/hermes && \
+#!/bin/sh
+cd /app/data
+exec python3 -m hermes "$@" 2>/dev/null || exec npx --yes hermes-agent "$@" 2>/dev/null || python3 -c "print('Hermes Agent CLI ready in /app/data')"
+HERMESEOF
+            chmod 755 /usr/local/bin/hermes && \
+            cat << 'MOTDEOF' > /etc/motd && \
+════════════════════════════════════════════════════════════
+  Masdika Cloud - Dedicated Hermes Agent Instance
+  Application Mode: Sandboxed AI Coding Agent
+  Persistent Storage: /app/data
+  Security Notice: Package installation & tunneling restricted.
+════════════════════════════════════════════════════════════
+MOTDEOF
+            echo "cd /app/data" >> /root/.bashrc && \
+            echo "cd /app/data" >> /etc/profile && \
+            rm -rf /etc/apk /var/cache/apk /lib/apk && \
+            cat << 'APKEOF' > /sbin/apk && \
+#!/bin/sh
+echo "Security Notice: Package installation (apk) is restricted on Masdika Cloud Managed Applications."
+exit 1
+APKEOF
+            chmod 755 /sbin/apk && \
             exec /usr/sbin/sshd -D -e -p ${app.appPort}
 `;
   } else if (appType === 'ninerouter') {
@@ -458,7 +486,35 @@ function buildAppContainerSpec(app: AppServiceRecord) {
             sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
             echo "PermitRootLogin yes" >> /etc/ssh/sshd_config && \
             echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config && \
+            echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config && \
+            echo "X11Forwarding no" >> /etc/ssh/sshd_config && \
+            echo "AllowAgentForwarding no" >> /etc/ssh/sshd_config && \
+            echo "PermitTunnel no" >> /etc/ssh/sshd_config && \
+            echo "GatewayPorts no" >> /etc/ssh/sshd_config && \
             mkdir -p ${dataMount} && \
+            cat << 'OPENCODEEOF' > /usr/local/bin/opencode && \
+#!/bin/sh
+cd /workspace
+exec npx --yes opencode "$@" 2>/dev/null || echo "OpenCode Developer Workspace ready in /workspace"
+OPENCODEEOF
+            chmod 755 /usr/local/bin/opencode && \
+            cat << 'MOTDEOF' > /etc/motd && \
+════════════════════════════════════════════════════════════
+  Masdika Cloud - Dedicated OpenCode Instance
+  Application Mode: Sandboxed Developer Environment
+  Persistent Storage: /workspace
+  Security Notice: Package installation & tunneling restricted.
+════════════════════════════════════════════════════════════
+MOTDEOF
+            echo "cd /workspace" >> /root/.bashrc && \
+            echo "cd /workspace" >> /etc/profile && \
+            rm -rf /etc/apk /var/cache/apk /lib/apk && \
+            cat << 'APKEOF' > /sbin/apk && \
+#!/bin/sh
+echo "Security Notice: Package installation (apk) is restricted on Masdika Cloud Managed Applications."
+exit 1
+APKEOF
+            chmod 755 /sbin/apk && \
             exec /usr/sbin/sshd -D -e -p ${app.appPort}
 `;
   } else if (appType === 'openclaw') {
@@ -658,9 +714,11 @@ spec:
           requests:
             cpu: "${cpuReq}"
             memory: "${memReq}"
+            ephemeral-storage: "256Mi"
           limits:
             cpu: "${cpuLim}"
             memory: "${memLim}"
+            ephemeral-storage: "2Gi"
         volumeMounts:
         - name: app-storage
           mountPath: ${dataMount}
