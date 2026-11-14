@@ -396,8 +396,8 @@ export default function AdminDatabasePage() {
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="relative flex-1 max-w-md">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
+        <div className="relative flex-1 max-w-md w-full">
           <Search className={cn("w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none", isDark ? "text-zinc-500" : "text-slate-400")} />
           <input
             type="text"
@@ -414,16 +414,16 @@ export default function AdminDatabasePage() {
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center gap-2 flex-wrap max-w-full overflow-x-auto pb-1">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 max-w-full overflow-hidden">
           {/* Engine Selector */}
-          <div className={cn("p-1 rounded-xl border flex items-center gap-1 shrink-0 overflow-x-auto", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
+          <div className={cn("p-1 rounded-xl border flex items-center gap-1 overflow-x-auto scrollbar-none no-scrollbar max-w-full", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
             {["ALL", "MYSQL", "POSTGRES", "MONGODB", "MARIADB", "REDIS"].map((eng) => (
               <button
                 key={eng}
                 type="button"
                 onClick={() => setSelectedEngine(eng)}
                 className={cn(
-                  "px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap",
+                  "px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0",
                   selectedEngine === eng
                     ? "bg-cyan-500 text-slate-950 shadow-xs"
                     : isDark ? "text-zinc-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
@@ -435,14 +435,14 @@ export default function AdminDatabasePage() {
           </div>
 
           {/* Tier Selector */}
-          <div className={cn("p-1 rounded-xl border flex items-center gap-1 shrink-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
+          <div className={cn("p-1 rounded-xl border flex items-center gap-1 overflow-x-auto scrollbar-none no-scrollbar shrink-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-100 border-slate-200")}>
             {["ALL", "DEDICATED", "SHARED"].map((tier) => (
               <button
                 key={tier}
                 type="button"
                 onClick={() => setSelectedTier(tier)}
                 className={cn(
-                  "px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap",
+                  "px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0",
                   selectedTier === tier
                     ? "bg-cyan-500 text-slate-950 shadow-xs"
                     : isDark ? "text-zinc-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
@@ -457,7 +457,8 @@ export default function AdminDatabasePage() {
 
       {/* Instances Table / Card List */}
       <div className={cn("rounded-2xl border overflow-hidden transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-xs")}>
-        <div className="overflow-x-auto">
+        {/* Desktop / Tablet Table View */}
+        <div className="hidden md:block overflow-x-auto scrollbar-none no-scrollbar">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className={cn("border-b text-[11px] font-bold uppercase tracking-wider", isDark ? "border-white/[0.08] bg-[#0a0a0c] text-zinc-400" : "border-slate-200 bg-slate-50 text-slate-500")}>
@@ -668,6 +669,203 @@ export default function AdminDatabasePage() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Responsive Cards (block md:hidden) */}
+        <div className={cn("block md:hidden divide-y", isDark ? "divide-white/[0.06]" : "divide-slate-100")}>
+          {loading ? (
+            <div className="py-12 text-center text-zinc-400">
+              <RefreshCw className="w-6 h-6 text-cyan-400 animate-spin mx-auto mb-2" />
+              <span className="text-xs">Loading cluster databases...</span>
+            </div>
+          ) : filteredDatabases.length === 0 ? (
+            <div className="py-12 text-center text-zinc-400">
+              <Database className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
+              <p className="text-xs font-semibold">No database instances match your filter</p>
+            </div>
+          ) : (
+            filteredDatabases.map((db) => {
+              const engine = getEngineMeta(db.type);
+              const endpoint = `${db.host}:${db.port}`;
+
+              return (
+                <div key={db.id} className="p-4 space-y-3">
+                  {/* Card Top: Engine Icon + Instance Name + Status */}
+                  <div className="flex items-start justify-between gap-2.5">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={cn(
+                        "w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 p-1.5 shadow-2xs",
+                        isDark ? engine.boxDark : engine.boxLight
+                      )}>
+                        <img src={engine.icon} alt={engine.name} className="w-5 h-5 object-contain pointer-events-none select-none" />
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className={cn("font-bold text-sm truncate", isDark ? "text-white" : "text-slate-900")}>
+                          {db.name}
+                        </h4>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <span className={cn(
+                            "text-[10px] font-bold px-1.5 py-0.5 rounded border",
+                            isDark ? engine.badgeDark : engine.badgeLight
+                          )}>
+                            {engine.name} {db.version}
+                          </span>
+                          <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded border", db.isDedicated ? "bg-cyan-500/15 text-cyan-300 border-cyan-500/30" : "bg-white/[0.04] text-zinc-300 border-white/[0.08]")}>
+                            {db.isDedicated ? "Dedicated" : "Shared"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Status Badge */}
+                    <span className={cn(
+                      "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border shrink-0",
+                      db.status === "RUNNING"
+                        ? (isDark ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200")
+                        : (isDark ? "bg-zinc-500/15 text-zinc-400 border-zinc-500/30" : "bg-slate-100 text-slate-600 border-slate-200")
+                    )}>
+                      {db.status === "RUNNING" && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />}
+                      {db.status}
+                    </span>
+                  </div>
+
+                  {/* Details Box */}
+                  <div className={cn("p-2.5 rounded-xl border text-xs space-y-1.5", isDark ? "bg-white/[0.02] border-white/[0.06]" : "bg-slate-50 border-slate-200/80")}>
+                    <div className="flex items-center justify-between gap-2 text-[11px]">
+                      <span className={cn("font-medium shrink-0", isDark ? "text-zinc-400" : "text-slate-500")}>Customer</span>
+                      <span className={cn("font-semibold truncate text-right", isDark ? "text-zinc-200" : "text-slate-800")}>
+                        {db.customerName} <span className="text-zinc-500 font-mono">({db.customerEmail})</span>
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-2 text-[11px]">
+                      <span className={cn("font-medium shrink-0", isDark ? "text-zinc-400" : "text-slate-500")}>Endpoint</span>
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(endpoint, `ep-m-${db.id}`)}
+                        className={cn("font-mono font-bold flex items-center gap-1 hover:underline cursor-pointer truncate max-w-[200px]", isDark ? "text-cyan-400" : "text-cyan-700")}
+                      >
+                        <span className="truncate">{endpoint}</span>
+                        {copiedId === `ep-m-${db.id}` ? <Check className="w-3 h-3 text-emerald-400 shrink-0" /> : <Copy className="w-3 h-3 opacity-60 shrink-0" />}
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-2 text-[11px]">
+                      <span className={cn("font-medium shrink-0", isDark ? "text-zinc-400" : "text-slate-500")}>Auth</span>
+                      <span className={cn("font-mono text-[10px] truncate", isDark ? "text-zinc-300" : "text-slate-700")}>
+                        DB: {db.dbName} • User: {db.username}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-2 text-[11px]">
+                      <span className={cn("font-medium shrink-0", isDark ? "text-zinc-400" : "text-slate-500")}>Spec</span>
+                      <div className="flex items-center gap-1.5 font-mono text-[10px]">
+                        <span className={cn("px-1.5 py-0.5 rounded border font-semibold", isDark ? "bg-white/5 text-zinc-300 border-white/10" : "bg-slate-100 text-slate-700 border-slate-200")}>
+                          {db.cpuShares} vCPU
+                        </span>
+                        <span className={cn("px-1.5 py-0.5 rounded border font-semibold", isDark ? "bg-white/5 text-zinc-300 border-white/10" : "bg-slate-100 text-slate-700 border-slate-200")}>
+                          {db.memoryMb >= 1024 ? `${db.memoryMb / 1024} GB` : `${db.memoryMb} MB`}
+                        </span>
+                        <span className={cn("px-1.5 py-0.5 rounded border font-semibold", isDark ? "bg-white/5 text-zinc-300 border-white/10" : "bg-slate-100 text-slate-700 border-slate-200")}>
+                          {db.storageGb} GB
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions Buttons on Mobile */}
+                  <div className="flex items-center gap-2 pt-1">
+                    {db.status === "RUNNING" ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => handlePowerAction(db.id, "restart")}
+                          disabled={poweringId === db.id}
+                          className={cn(
+                            "flex-1 py-1.5 px-3 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-50",
+                            isDark ? "bg-cyan-500/10 border-cyan-500/25 text-cyan-400 hover:bg-cyan-500/20" : "bg-cyan-50 border-cyan-200 text-cyan-700 hover:bg-cyan-100"
+                          )}
+                        >
+                          <RotateCw className={cn("w-3.5 h-3.5", poweringId === db.id && "animate-spin")} />
+                          <span>Restart</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handlePowerAction(db.id, "stop")}
+                          disabled={poweringId === db.id}
+                          className={cn(
+                            "py-1.5 px-3 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-50",
+                            isDark ? "bg-amber-500/10 border-amber-500/25 text-amber-400 hover:bg-amber-500/20" : "bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100"
+                          )}
+                        >
+                          <Square className="w-3.5 h-3.5 fill-current" />
+                          <span>Stop</span>
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handlePowerAction(db.id, "start")}
+                        disabled={poweringId === db.id}
+                        className={cn(
+                          "flex-1 py-1.5 px-3 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-50",
+                          isDark ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-400 hover:bg-emerald-500/20" : "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
+                        )}
+                      >
+                        <Play className="w-3.5 h-3.5 fill-current" />
+                        <span>Start</span>
+                      </button>
+                    )}
+
+                    {db.connectionDetails?.pmaUrl && (
+                      <a
+                        href={db.connectionDetails.pmaUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={cn("p-2 rounded-lg border transition-all cursor-pointer flex items-center justify-center", isDark ? "bg-white/5 border-white/10 hover:bg-white/10 text-cyan-300" : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-cyan-700")}
+                        title="Open phpMyAdmin"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    )}
+
+                    {db.connectionDetails?.pgadminUrl && (
+                      <a
+                        href={db.connectionDetails.pgadminUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={cn("p-2 rounded-lg border transition-all cursor-pointer flex items-center justify-center", isDark ? "bg-white/5 border-white/10 hover:bg-white/10 text-[#336791]" : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-[#336791]")}
+                        title="Open pgAdmin 4"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    )}
+
+                    {db.connectionDetails?.mongoUrl && (
+                      <a
+                        href={db.connectionDetails.mongoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={cn("p-2 rounded-lg border transition-all cursor-pointer flex items-center justify-center", isDark ? "bg-white/5 border-white/10 hover:bg-white/10 text-[#47A248]" : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-[#47A248]")}
+                        title="Open Mongo Express"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => setDeleteModalItem(db)}
+                      className={cn("p-2 rounded-lg border transition-all cursor-pointer flex items-center justify-center", isDark ? "bg-red-500/10 border-red-500/25 text-red-400 hover:bg-red-500/20" : "bg-red-50 border-red-200 text-red-600 hover:bg-red-100")}
+                      title="Terminate Database Instance"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
 
