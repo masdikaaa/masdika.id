@@ -1125,29 +1125,32 @@ export async function scaleDatabase(
     const kc = await getK8sKubeConfig();
     const objApi = k8s.KubernetesObjectApi.makeApiClient(kc);
 
-    const name = `db-${db.id}`;
+    const safeNs = String(ns || 'managed-db').replace(/[^a-zA-Z0-9-]/g, '') || 'managed-db';
+    const safeId = Math.floor(Math.abs(Number(db.id)));
+    const name = `db-${safeId}`;
     const pvcName = `data-${name}`;
 
-    const cpuMillicores = Math.max(250, Math.round(newCpuShares * 1000));
+    const safeStorageGb = Math.max(1, Math.min(20, Math.round(newStorageGb)));
+    const cpuMillicores = Math.max(250, Math.min(16000, Math.round(newCpuShares * 1000)));
     const reqCpu = Math.max(100, Math.round(cpuMillicores * 0.4));
-    const memMb = newMemoryMb;
+    const memMb = Math.max(512, Math.min(65536, Math.round(newMemoryMb)));
     const reqMem = Math.max(256, Math.round(memMb * 0.5));
 
     // 1. Expand PVC storage if new storage is larger than current
-    const currentStorage = db.storageGb || 1;
-    if (newStorageGb > currentStorage) {
+    const currentStorage = Math.max(1, Math.min(20, Math.round(db.storageGb || 1)));
+    if (safeStorageGb > currentStorage) {
       try {
         await objApi.patch({
           apiVersion: 'v1',
           kind: 'PersistentVolumeClaim',
           metadata: {
             name: pvcName,
-            namespace: ns,
+            namespace: safeNs,
           },
           spec: {
             resources: {
               requests: {
-                storage: `${newStorageGb}Gi`,
+                storage: `${safeStorageGb}Gi`,
               },
             },
           },
@@ -1165,7 +1168,7 @@ export async function scaleDatabase(
       kind: 'Deployment',
       metadata: {
         name,
-        namespace: ns,
+        namespace: safeNs,
       },
       spec: {
         template: {
