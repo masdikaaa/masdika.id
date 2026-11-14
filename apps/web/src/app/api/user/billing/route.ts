@@ -46,6 +46,11 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: "desc" },
     });
 
+    const appServices = await prisma.appService.findMany({
+      where: { userId, status: { not: "TERMINATED" } },
+      orderBy: { createdAt: "desc" },
+    });
+
     const commitment = await getUserServicesCommitment(userId);
 
     const user = await prisma.user.findUnique({
@@ -60,6 +65,7 @@ export async function GET(req: NextRequest) {
         invoices,
         vpsServices,
         databases,
+        appServices,
         commitment,
         activeMonthlyCommitment: commitment.totalMonthly,
         reservedIps,

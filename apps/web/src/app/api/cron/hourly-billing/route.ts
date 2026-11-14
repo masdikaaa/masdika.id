@@ -630,7 +630,7 @@ export async function GET(req: Request) {
 
           // Send 3-day grace period suspension email
           try {
-            const { sendDatabaseSuspendedGracePeriodEmail } = await import('@/lib/email');
+            const { sendDatabaseSuspendedGracePeriodEmail, sendAdminServiceSuspendedEmail } = await import('@/lib/email');
             const email = decryptDeterministic(db.user.email) || db.user.email;
             const name = decryptDeterministic(db.user.name) || db.user.name;
             await sendDatabaseSuspendedGracePeriodEmail({
@@ -642,6 +642,7 @@ export async function GET(req: Request) {
               hourlyRate: db.hourlyRate,
               reason: 'Insufficient balance for Pay as You Go hourly database billing'
             });
+            await sendAdminServiceSuspendedEmail(name, email, db.name, "Managed Database").catch(e => console.error(e));
           } catch (emailErr) {
             console.error(`Failed to send database suspension email for DB ${db.id}:`, emailErr);
           }
@@ -654,7 +655,8 @@ export async function GET(req: Request) {
       where: {
         status: 'SUSPENDED',
         terminationDate: { lte: now }
-      }
+      },
+      include: { user: true }
     });
 
     for (const expDb of expiredDatabases) {
@@ -666,6 +668,16 @@ export async function GET(req: Request) {
           data: { status: 'TERMINATED' }
         });
         dbTerminated++;
+
+        // Send termination notification email
+        try {
+          const { sendTerminationEmail } = await import('@/lib/email');
+          const email = decryptDeterministic(expDb.user.email) || expDb.user.email;
+          const name = decryptDeterministic(expDb.user.name) || expDb.user.name;
+          await sendTerminationEmail(email, name, expDb.name, "Managed Database");
+        } catch (emailErr) {
+          console.error(`Failed to send database termination email:`, emailErr);
+        }
       } catch (termErr) {
         console.error(`Failed to terminate expired database ${expDb.id}:`, termErr);
       }
@@ -729,6 +741,25 @@ export async function GET(req: Request) {
           } catch (stopErr) {
             console.error(`Failed to stop app pod for App ${app.id}:`, stopErr);
           }
+
+          // Send 3-day grace period suspension email to user and admin
+          try {
+            const { sendAppSuspendedGracePeriodEmail, sendAdminServiceSuspendedEmail } = await import('@/lib/email');
+            const email = decryptDeterministic(app.user.email) || app.user.email;
+            const name = decryptDeterministic(app.user.name) || app.user.name;
+            await sendAppSuspendedGracePeriodEmail({
+              email,
+              userName: name,
+              appName: app.name,
+              appType: app.appType,
+              terminationDate: defaultTermination,
+              hourlyRate: app.hourlyRate,
+              reason: 'Insufficient balance for Pay as You Go hourly application billing'
+            });
+            await sendAdminServiceSuspendedEmail(name, email, app.name, "Managed Application").catch(e => console.error(e));
+          } catch (emailErr) {
+            console.error(`Failed to send app suspension email for App ${app.id}:`, emailErr);
+          }
         }
       }
     }
@@ -738,7 +769,8 @@ export async function GET(req: Request) {
       where: {
         status: 'SUSPENDED',
         terminationDate: { lte: now }
-      }
+      },
+      include: { user: true }
     });
 
     for (const expApp of expiredApps) {
@@ -750,6 +782,16 @@ export async function GET(req: Request) {
           data: { status: 'TERMINATED' }
         });
         appTerminated++;
+
+        // Send termination notification email
+        try {
+          const { sendTerminationEmail } = await import('@/lib/email');
+          const email = decryptDeterministic(expApp.user.email) || expApp.user.email;
+          const name = decryptDeterministic(expApp.user.name) || expApp.user.name;
+          await sendTerminationEmail(email, name, expApp.name, "Managed Application");
+        } catch (emailErr) {
+          console.error(`Failed to send app termination email:`, emailErr);
+        }
       } catch (termErr) {
         console.error(`Failed to terminate expired app ${expApp.id}:`, termErr);
       }

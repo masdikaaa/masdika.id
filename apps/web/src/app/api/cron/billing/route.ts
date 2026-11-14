@@ -760,7 +760,8 @@ export async function GET(req: Request) {
       where: {
         status: 'SUSPENDED',
         terminationDate: { not: null, lte: now }
-      }
+      },
+      include: { user: true }
     });
 
     for (const app of terminatedAppsList) {
@@ -771,6 +772,16 @@ export async function GET(req: Request) {
           where: { id: app.id },
           data: { status: 'TERMINATED' }
         });
+
+        // Send termination email notification
+        try {
+          const { sendTerminationEmail } = await import('@/lib/email');
+          const email = decryptDeterministic(app.user.email) || app.user.email;
+          const name = decryptDeterministic(app.user.name) || app.user.name;
+          await sendTerminationEmail(email, name, app.name, "Managed Application");
+        } catch (emailErr) {
+          console.error(`Failed to send app termination email:`, emailErr);
+        }
       } catch (e) {
         console.error(`Failed to terminate expired app ${app.id}:`, e);
       }
@@ -791,7 +802,8 @@ export async function GET(req: Request) {
       where: {
         status: 'SUSPENDED',
         terminationDate: { not: null, lte: now }
-      }
+      },
+      include: { user: true }
     });
 
     for (const db of terminatedDbsList) {
@@ -802,6 +814,16 @@ export async function GET(req: Request) {
           where: { id: db.id },
           data: { status: 'TERMINATED' }
         });
+
+        // Send termination email notification
+        try {
+          const { sendTerminationEmail } = await import('@/lib/email');
+          const email = decryptDeterministic(db.user.email) || db.user.email;
+          const name = decryptDeterministic(db.user.name) || db.user.name;
+          await sendTerminationEmail(email, name, db.name, "Managed Database");
+        } catch (emailErr) {
+          console.error(`Failed to send database termination email:`, emailErr);
+        }
       } catch (e) {
         console.error(`Failed to terminate expired database ${db.id}:`, e);
       }

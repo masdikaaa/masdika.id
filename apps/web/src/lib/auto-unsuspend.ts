@@ -472,6 +472,14 @@ export async function attemptAutoUnsuspendDatabase(dbId: number) {
       console.error(`[Auto-Unsuspend] Failed to start K8s pod for DB ${db.id}:`, startErr);
     }
 
+    // Send notifications
+    const email = decryptDeterministic(db.user.email) || db.user.email;
+    const name = decryptDeterministic(db.user.name) || db.user.name;
+    if (email) {
+      sendReactivatedEmail(email, name, db.name, 'Managed Database').catch(console.error);
+      sendAdminServiceReactivatedEmail(name, email, db.name, 'Managed Database').catch(console.error);
+    }
+
     return { success: true, unsuspended: true };
   } catch (err: any) {
     return { success: false, message: err.message };
@@ -526,6 +534,14 @@ export async function attemptAutoUnsuspendApp(appId: number) {
       await startAppService(app as any);
     } catch (startErr) {
       console.error(`[Auto-Unsuspend] Failed to start K8s pod for App ${app.id}:`, startErr);
+    }
+
+    // Send notifications
+    const email = decryptDeterministic(app.user.email) || app.user.email;
+    const name = decryptDeterministic(app.user.name) || app.user.name;
+    if (email) {
+      sendReactivatedEmail(email, name, app.name, 'Managed Application').catch(console.error);
+      sendAdminServiceReactivatedEmail(name, email, app.name, 'Managed Application').catch(console.error);
     }
 
     return { success: true, unsuspended: true };

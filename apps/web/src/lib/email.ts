@@ -455,6 +455,116 @@ export const sendDatabaseSuspendedGracePeriodEmail = async ({
   });
 };
 
+export interface AppSuspendedGracePeriodEmailParams {
+  email: string;
+  userName: string;
+  appName: string;
+  appType: string;
+  terminationDate: Date;
+  hourlyRate: number;
+  reason?: string;
+}
+
+export const sendAppSuspendedGracePeriodEmail = async ({
+  email,
+  userName,
+  appName,
+  appType,
+  terminationDate,
+  hourlyRate,
+  reason,
+}: AppSuspendedGracePeriodEmailParams) => {
+  const decEmail = decryptDeterministic(email) || email;
+  const decName = decryptDeterministic(userName) || userName;
+
+  const deadlineStr = terminationDate.toLocaleString('en-US', {
+    timeZone: 'Asia/Jakarta',
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }) + ' WIB';
+
+  const formattedRate = hourlyRate && hourlyRate > 0
+    ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(hourlyRate) + '/hr'
+    : null;
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://masdika.id';
+
+  const content = `
+    <div style="margin-bottom: 20px;">
+      <span style="display: inline-block; background-color: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 700; text-transform: uppercase;">
+        Suspension Notice (Suspended)
+      </span>
+    </div>
+
+    <h2 style="color: #ef4444; margin-top: 0; margin-bottom: 16px; font-size: 22px;">Managed Application Suspended: Insufficient Balance</h2>
+    
+    <p style="color: #e2e8f0; font-size: 15px; line-height: 1.6;">
+      Hello <strong>${decName}</strong>,
+    </p>
+
+    <p style="color: #cbd5e1; font-size: 14px; line-height: 1.6;">
+      Your Managed Application service (<strong style="color: #38bdf8; font-family: monospace;">${appName}</strong> - ${appType}) has been suspended (<strong>SUSPENDED</strong>) because your Masdika account balance is insufficient for hourly Pay-As-You-Go deductions (${reason || 'Billing failed due to insufficient balance'}).
+    </p>
+
+    <div style="background-color: #030712; padding: 20px 24px; border-radius: 12px; margin: 25px 0; border: 1px solid #1e293b; border-left: 4px solid #f59e0b;">
+      <h3 style="color: #f59e0b; margin-top: 0; margin-bottom: 14px; font-size: 15px; font-weight: 700; text-transform: uppercase;">3-Day Grace Period</h3>
+      <table width="100%" cellpadding="0" cellspacing="0" style="color: #e2e8f0; font-size: 14px;">
+        <tr>
+          <td style="padding: 6px 0; color: #94a3b8;" width="160">Application Name:</td>
+          <td style="padding: 6px 0; color: #38bdf8; font-weight: 700; font-family: monospace;">${appName} (${appType})</td>
+        </tr>
+        ${formattedRate ? `
+        <tr>
+          <td style="padding: 6px 0; color: #94a3b8;">Hourly Rate (PAYG):</td>
+          <td style="padding: 6px 0; color: #e2e8f0; font-weight: 600;">${formattedRate}</td>
+        </tr>
+        ` : ''}
+        <tr>
+          <td style="padding: 6px 0; color: #94a3b8;">Service Status:</td>
+          <td style="padding: 6px 0; color: #ef4444; font-weight: 700;">SUSPENDED (Pod Paused)</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #f59e0b; font-weight: 700;">Top Up Deadline:</td>
+          <td style="padding: 8px 0; color: #f59e0b; font-weight: 800; font-size: 15px;">${deadlineStr}</td>
+        </tr>
+      </table>
+    </div>
+
+    <div style="background-color: #0c1a2e; border: 1px solid #1e3a8a; border-radius: 10px; padding: 18px 20px; margin: 25px 0;">
+      <h3 style="color: #38bdf8; margin-top: 0; margin-bottom: 10px; font-size: 15px;">Auto-Unsuspend (Automatic Reactivation)</h3>
+      <ul style="color: #cbd5e1; font-size: 13.5px; line-height: 1.6; margin: 0; padding-left: 20px;">
+        <li style="margin-bottom: 8px;"><strong>Application State is Safe:</strong> Your application runtime workspace, configuration, and persistent storage remain intact during this 3-day grace period. The pod is only temporarily paused to stop ongoing compute charges.</li>
+        <li style="margin-bottom: 8px;"><strong>Simply Top Up:</strong> As soon as you top up your account balance with sufficient funds, our system will <strong>automatically unsuspend and resume your application pod</strong> with no manual intervention required.</li>
+      </ul>
+    </div>
+
+    <div style="background-color: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 10px; padding: 16px 20px; margin: 25px 0;">
+      <p style="color: #f87171; margin: 0; font-size: 13px; line-height: 1.5;">
+        <strong>IMPORTANT:</strong> If your account is not topped up before <strong>${deadlineStr}</strong> (3 days), the Application service along with all persistent storage volumes and configuration will be <strong>permanently terminated</strong>. Terminated data cannot be recovered.
+      </p>
+    </div>
+
+    <div style="text-align: center; margin: 35px 0;">
+      <a href="${appUrl}/dashboard/topup" style="background-color: #06b6d4; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 15px; display: inline-block;">Top Up Balance Now</a>
+    </div>
+
+    <p style="color: #94a3b8; font-size: 13px; line-height: 1.5;">
+      If you need assistance or have questions regarding your service, please contact our support team via Support Tickets in your dashboard.
+    </p>
+  `;
+
+  await getTransporter().sendMail({
+    from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
+    to: decEmail,
+    subject: `[IMPORTANT] Application Service ${appName} Suspended (3-Day Grace Period) - Masdika Cloud`,
+    html: getBaseHtml(content),
+  });
+};
+
 export interface DatabaseProvisionedEmailParams {
   email: string;
   userName: string;
@@ -682,7 +792,12 @@ export const sendLowBalanceAlertEmail = async ({
     const rate = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(s.hourlyRate);
 
     let ipBadgesHtml = '';
+    let badgeBg = '#0e3b52';
+    let badgeColor = '#38bdf8';
+
     if (s.type === 'VPS') {
+      badgeBg = '#1e3a8a';
+      badgeColor = '#60a5fa';
       if (s.ipAddress) {
         ipBadgesHtml += `<span style="display: inline-block; font-family: monospace; font-size: 11px; padding: 1px 6px; border-radius: 4px; background: #1e293b; color: #94a3b8; border: 1px solid #334155; margin-left: 6px;">${s.ipAddress}</span>`;
       }
@@ -690,17 +805,31 @@ export const sendLowBalanceAlertEmail = async ({
         ipBadgesHtml += `<span style="display: inline-block; font-family: monospace; font-size: 11px; padding: 1px 6px; border-radius: 4px; background: rgba(6, 182, 212, 0.15); color: #22d3ee; border: 1px solid rgba(6, 182, 212, 0.3); font-weight: 600; margin-left: 6px;">🌐 ${s.publicIp}</span>`;
       }
     } else if (s.type === 'Reserved IP') {
+      badgeBg = '#0e3b52';
+      badgeColor = '#38bdf8';
       if (s.publicIp) {
         ipBadgesHtml += `<span style="display: inline-block; font-family: monospace; font-size: 11px; padding: 1px 6px; border-radius: 4px; background: rgba(6, 182, 212, 0.15); color: #22d3ee; border: 1px solid rgba(6, 182, 212, 0.3); font-weight: 600; margin-left: 6px;">🌐 ${s.publicIp}</span>`;
       }
       if (s.vpsHostname) {
         ipBadgesHtml += `<span style="display: inline-block; font-size: 11px; padding: 1px 6px; border-radius: 4px; background: #1e293b; color: #94a3b8; margin-left: 6px;">→ ${s.vpsHostname}</span>`;
       }
+    } else if (s.type === 'Database') {
+      badgeBg = '#064e3b';
+      badgeColor = '#34d399';
+      if (s.ipAddress) {
+        ipBadgesHtml += `<span style="display: inline-block; font-family: monospace; font-size: 11px; padding: 1px 6px; border-radius: 4px; background: #1e293b; color: #94a3b8; border: 1px solid #334155; margin-left: 6px;">${s.ipAddress}</span>`;
+      }
+    } else if (s.type === 'Managed App') {
+      badgeBg = '#3b0764';
+      badgeColor = '#c084fc';
+      if (s.publicIp) {
+        ipBadgesHtml += `<span style="display: inline-block; font-family: monospace; font-size: 11px; padding: 1px 6px; border-radius: 4px; background: rgba(6, 182, 212, 0.15); color: #22d3ee; border: 1px solid rgba(6, 182, 212, 0.3); font-weight: 600; margin-left: 6px;">🌐 ${s.publicIp}</span>`;
+      }
     }
 
     return `<tr>
       <td style="padding: 8px 0; border-bottom: 1px solid #1e293b; color: #e2e8f0;">
-        <span style="display: inline-block; font-size: 11px; padding: 2px 6px; border-radius: 4px; background: #0e3b52; color: #38bdf8; font-weight: 600; margin-right: 6px;">${s.type}</span>
+        <span style="display: inline-block; font-size: 11px; padding: 2px 6px; border-radius: 4px; background: ${badgeBg}; color: ${badgeColor}; font-weight: 600; margin-right: 6px;">${s.type}</span>
         <strong>${s.name}</strong>
         ${ipBadgesHtml}
       </td>

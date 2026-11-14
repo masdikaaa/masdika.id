@@ -2,7 +2,7 @@
 
 import { useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
-import { Receipt, Globe, Clock, CheckCircle, XCircle, CreditCard, ExternalLink, ArrowUpCircle, Printer, Plus, X, Wallet, Building2, Store, QrCode, Database, Layers, ArrowRight, RefreshCw, HardDrive, Cloud, Activity, Music, PlaySquare, FileText, Code2, Server, Terminal, Network, Box, Loader2, Search, Calendar, Filter, ChevronLeft, ChevronRight } from "lucide-react";
+import { Receipt, Globe, Clock, CheckCircle, XCircle, CreditCard, ExternalLink, ArrowUpCircle, Printer, Plus, X, Wallet, Building2, Store, QrCode, Database, Layers, ArrowRight, RefreshCw, HardDrive, Cloud, Activity, Music, PlaySquare, FileText, Code2, Server, Terminal, Network, Box, Boxes, Loader2, Search, Calendar, Filter, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { formatRupiah, getCycleText } from "@/lib/billing";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -24,6 +24,8 @@ export default function CustomerBillingPage() {
           invoices: json.data.invoices || [],
           vpsServices: json.data.vpsServices || [],
           reservedIps: json.data.reservedIps || [],
+          databases: json.data.databases || [],
+          appServices: json.data.appServices || [],
           balance: json.data.balance || 0
         });
       }
@@ -34,7 +36,23 @@ export default function CustomerBillingPage() {
     }
   };
 
-  const [data, setData] = useState<{subscriptions: any[], invoices: any[], vpsServices: any[], reservedIps: any[], balance: number}>({ subscriptions: [], invoices: [], vpsServices: [], reservedIps: [], balance: 0 });
+  const [data, setData] = useState<{
+    subscriptions: any[];
+    invoices: any[];
+    vpsServices: any[];
+    reservedIps: any[];
+    databases: any[];
+    appServices: any[];
+    balance: number;
+  }>({
+    subscriptions: [],
+    invoices: [],
+    vpsServices: [],
+    reservedIps: [],
+    databases: [],
+    appServices: [],
+    balance: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState<string | null>(null);
   const { theme } = useTheme();
@@ -116,12 +134,16 @@ export default function CustomerBillingPage() {
 
   const activeSubscriptions = data.subscriptions.filter(s => s.status === 'ACTIVE' || s.status === 'SUSPENDED');
   const activeVps = data.vpsServices.filter(s => s.status === 'RUNNING' || s.status === 'STOPPED' || s.status === 'SUSPENDED');
+  const activeDbs = (data.databases || []).filter(d => d.status === 'RUNNING' || d.status === 'STOPPED' || d.status === 'SUSPENDED');
+  const activeApps = (data.appServices || []).filter(a => a.status === 'RUNNING' || a.status === 'STOPPED' || a.status === 'SUSPENDED');
   const activeIps = data.reservedIps;
-  const totalActive = activeSubscriptions.length + activeVps.length + activeIps.length;
+  const totalActive = activeSubscriptions.length + activeVps.length + activeDbs.length + activeApps.length + activeIps.length;
 
   const unifiedServices = [
     ...activeSubscriptions.map(s => ({ type: 'SUBSCRIPTION', data: s, key: `sub-${s.id}` })),
     ...activeVps.map(v => ({ type: 'VPS', data: v, key: `vps-${v.id}` })),
+    ...activeDbs.map(db => ({ type: 'DATABASE', data: db, key: `db-${db.id}` })),
+    ...activeApps.map(app => ({ type: 'APP', data: app, key: `app-${app.id}` })),
     ...activeIps.map(ip => ({ type: 'RESERVED_IP', data: ip, key: `ip-${ip.id}` }))
   ];
   
@@ -277,6 +299,70 @@ export default function CustomerBillingPage() {
                             <span className={cn("text-[9px] mt-1.5 font-bold uppercase tracking-widest transition-colors duration-300", v.autoRenew ? "text-cyan-400" : "text-zinc-500")}>
                               {v.autoRenew ? 'Auto' : 'Manual'}
                             </span>
+                          </div>
+                        </div>
+                      );
+
+                    } else if (type === 'DATABASE') {
+                      const db = item.data;
+                      const isSuspended = db.status === 'SUSPENDED';
+                      return (
+                        <div key={key} className={cn("flex items-center justify-between p-3 rounded-xl transition-colors border mb-1", isDark ? "hover:bg-white/[0.04] border-transparent hover:border-white/[0.08]" : "hover:bg-white border-transparent hover:border-slate-200/90")}>
+                          <div className="flex items-center gap-3 overflow-hidden">
+                            <Database className="w-4 h-4 text-emerald-400 shrink-0" />
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className={cn("text-sm font-bold truncate", isDark ? "text-white" : "text-slate-900")}>{db.name}</span>
+                                {isSuspended && (
+                                  <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-rose-500/15 text-rose-400 border border-rose-500/30">
+                                    Suspended (Grace Period 3 Hari)
+                                  </span>
+                                )}
+                              </div>
+                              <div className={cn("text-xs truncate", isDark ? "text-zinc-500" : "text-slate-500")}>
+                                {db.type?.toUpperCase()} • {db.monthlyPrice ? `${formatRupiah(db.monthlyPrice)}/bln` : `${formatRupiah(db.hourlyRate)}/jam (PAYG)`}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0 pl-2">
+                            <Link
+                              href={`/dashboard/database/${db.id}`}
+                              className="px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-colors bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/20"
+                            >
+                              Manage
+                            </Link>
+                          </div>
+                        </div>
+                      );
+
+                    } else if (type === 'APP') {
+                      const app = item.data;
+                      const isSuspended = app.status === 'SUSPENDED';
+                      return (
+                        <div key={key} className={cn("flex items-center justify-between p-3 rounded-xl transition-colors border mb-1", isDark ? "hover:bg-white/[0.04] border-transparent hover:border-white/[0.08]" : "hover:bg-white border-transparent hover:border-slate-200/90")}>
+                          <div className="flex items-center gap-3 overflow-hidden">
+                            <Boxes className="w-4 h-4 text-cyan-400 shrink-0" />
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className={cn("text-sm font-bold truncate", isDark ? "text-white" : "text-slate-900")}>{app.name}</span>
+                                {isSuspended && (
+                                  <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-rose-500/15 text-rose-400 border border-rose-500/30">
+                                    Suspended (Grace Period 3 Hari)
+                                  </span>
+                                )}
+                              </div>
+                              <div className={cn("text-xs truncate", isDark ? "text-zinc-500" : "text-slate-500")}>
+                                {app.appType?.toUpperCase()} • {app.monthlyPrice ? `${formatRupiah(app.monthlyPrice)}/bln` : `${formatRupiah(app.hourlyRate)}/jam (PAYG)`}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0 pl-2">
+                            <Link
+                              href={`/dashboard/apps/${app.id}`}
+                              className="px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-colors bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20"
+                            >
+                              Manage
+                            </Link>
                           </div>
                         </div>
                       );
