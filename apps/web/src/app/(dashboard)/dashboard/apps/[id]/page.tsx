@@ -236,14 +236,17 @@ export default function AppDetailPage({
 
   const catalog = getAppDefinition(app.appType);
   const isHermes = app.appType.toLowerCase() === "hermes";
+  const isN8n = app.appType.toLowerCase() === "n8n";
   const hasWeb = catalog?.accessProtocol === "WEB" || catalog?.accessProtocol === "BOTH" || isHermes;
   const hasSsh = catalog?.accessProtocol === "SSH" || catalog?.accessProtocol === "BOTH" || isHermes;
   const hostIp = app.publicIp || "";
   const sshCommand = hostIp ? `ssh ${app.username || "root"}@${hostIp} -p ${app.port}` : `ssh ${app.username || "root"}@<ip> -p ${app.port}`;
   const fullDomain = (app as any).fullDomain || `${app.subdomain}.app.masdika.id`;
   const httpsUrl = (app as any).httpsUrl || `https://${fullDomain}`;
+  const n8nSetupUrl = `${httpsUrl}/setup`;
   const isRunning = app.status === "RUNNING";
   const isStopped = app.status === "STOPPED";
+  const isSuspended = app.status === "SUSPENDED";
   const isReady = isRunning && Boolean(app.telemetry?.ready);
 
   return (
@@ -270,7 +273,10 @@ export default function AppDetailPage({
         isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
       )}>
         <div className="flex items-start sm:items-center gap-4 min-w-0">
-          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center shrink-0 p-2 bg-black/40 shadow-md relative overflow-hidden">
+          <div className={cn(
+            "w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center shrink-0 p-2 shadow-sm relative overflow-hidden border",
+            isDark ? "bg-black/40 border-white/[0.08]" : "bg-slate-50 border-slate-200/90"
+          )}>
             <Image
               src={catalog?.icon || "/images/apps/docker.svg"}
               alt={app.name}
@@ -289,22 +295,30 @@ export default function AppDetailPage({
 
               {/* Status Badge */}
               <span className={cn(
-                "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-bold",
+                "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-bold border",
                 isRunning
-                  ? "bg-emerald-500/15 text-emerald-400"
+                  ? isDark ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200"
                   : isStopped
-                  ? "bg-amber-500/15 text-amber-400"
-                  : "bg-blue-500/15 text-blue-400"
+                  ? isDark ? "bg-amber-500/15 text-amber-400 border-amber-500/30" : "bg-amber-50 text-amber-700 border-amber-200"
+                  : isSuspended
+                  ? isDark ? "bg-red-500/15 text-red-400 border-red-500/30" : "bg-red-50 text-red-700 border-red-200"
+                  : isDark ? "bg-blue-500/15 text-blue-400 border-blue-500/30" : "bg-blue-50 text-blue-700 border-blue-200"
               )}>
                 <span className={cn(
                   "w-2 h-2 rounded-full",
-                  isRunning ? "bg-emerald-400 animate-pulse" : isStopped ? "bg-amber-400" : "bg-blue-400 animate-spin"
+                  isRunning
+                    ? isDark ? "bg-emerald-400 animate-pulse" : "bg-emerald-500 animate-pulse"
+                    : isStopped
+                    ? isDark ? "bg-amber-400" : "bg-amber-500"
+                    : isSuspended
+                    ? isDark ? "bg-red-400" : "bg-red-500"
+                    : isDark ? "bg-blue-400 animate-spin" : "bg-blue-600 animate-spin"
                 )} />
                 {app.status}
               </span>
             </div>
 
-            <div className="flex items-center gap-2 flex-wrap text-xs font-medium mt-1.5 text-[var(--text-muted)]">
+            <div className={cn("flex items-center gap-2 flex-wrap text-xs font-medium mt-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
               <span>{app.templateName}</span>
               <span className="opacity-30">•</span>
               <span>Region: Sidoarjo</span>
@@ -315,7 +329,12 @@ export default function AppDetailPage({
                     href={httpsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-mono text-cyan-400 bg-cyan-950/40 hover:bg-cyan-900/40 px-2 py-0.5 rounded-md text-[11px] font-semibold break-all truncate max-w-[200px] sm:max-w-none transition-colors"
+                    className={cn(
+                      "font-mono px-2 py-0.5 rounded-md text-[11px] font-semibold break-all truncate max-w-[200px] sm:max-w-none transition-colors border",
+                      isDark
+                        ? "text-cyan-400 bg-cyan-950/40 hover:bg-cyan-900/40 border-cyan-500/20"
+                        : "text-cyan-700 bg-cyan-50 hover:bg-cyan-100 border-cyan-200"
+                    )}
                   >
                     {fullDomain}
                   </a>
@@ -324,7 +343,12 @@ export default function AppDetailPage({
               {hasSsh && (
                 <>
                   <span className="opacity-30">•</span>
-                  <span className="font-mono text-cyan-400 bg-cyan-950/40 px-2 py-0.5 rounded-md text-[11px] font-semibold break-all">
+                  <span className={cn(
+                    "font-mono px-2 py-0.5 rounded-md text-[11px] font-semibold break-all border",
+                    isDark
+                      ? "text-cyan-400 bg-cyan-950/40 border-cyan-500/20"
+                      : "text-cyan-700 bg-cyan-50 border-cyan-200"
+                  )}>
                     SSH Port: {app.port}
                   </span>
                 </>
@@ -353,8 +377,8 @@ export default function AppDetailPage({
                 onClick={() => setPowerModalAction("stop")}
                 disabled={powering !== null}
                 className={cn(
-                  "col-span-1 px-3 sm:px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
-                  isDark ? "bg-amber-500/10 text-amber-400 hover:bg-amber-500/20" : "bg-amber-50 text-amber-700 hover:bg-amber-100"
+                  "col-span-1 px-3 sm:px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 border",
+                  isDark ? "bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border-amber-500/25" : "bg-amber-50 text-amber-700 hover:bg-amber-100 border-amber-200"
                 )}
                 title="Stop Application"
               >
@@ -367,8 +391,8 @@ export default function AppDetailPage({
                 onClick={() => setPowerModalAction("start")}
                 disabled={powering !== null}
                 className={cn(
-                  "col-span-1 px-3 sm:px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
-                  isDark ? "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20" : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                  "col-span-1 px-3 sm:px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 border",
+                  isDark ? "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border-emerald-500/25" : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-200"
                 )}
                 title="Start Application"
               >
@@ -382,8 +406,8 @@ export default function AppDetailPage({
               onClick={() => setPowerModalAction("restart")}
               disabled={powering !== null || !isRunning}
               className={cn(
-                "col-span-1 px-3 sm:px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
-                isDark ? "bg-white/[0.05] text-zinc-300 hover:bg-white/10" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                "col-span-1 px-3 sm:px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 border",
+                isDark ? "bg-white/[0.05] text-zinc-300 hover:bg-white/10 border-white/10" : "bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-200"
               )}
               title="Restart Application Pod"
             >
@@ -397,10 +421,10 @@ export default function AppDetailPage({
               onClick={() => setPowerModalAction("update")}
               disabled={powering !== null || !isRunning}
               className={cn(
-                "col-span-1 px-3 sm:px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
+                "col-span-1 px-3 sm:px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 border",
                 isDark
-                  ? "bg-violet-500/10 text-violet-400 hover:bg-violet-500/20 border border-violet-500/20"
-                  : "bg-violet-50 text-violet-700 hover:bg-violet-100 border border-violet-200"
+                  ? "bg-violet-500/10 text-violet-400 hover:bg-violet-500/20 border-violet-500/20"
+                  : "bg-violet-50 text-violet-700 hover:bg-violet-100 border-violet-200"
               )}
               title="Update Application Image to Latest Release (Zero Data Loss)"
             >
@@ -411,7 +435,12 @@ export default function AppDetailPage({
             <button
               type="button"
               onClick={() => setIsDeleteModalOpen(true)}
-              className="col-span-1 py-2.5 px-3 rounded-xl text-xs font-bold bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              className={cn(
+                "col-span-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer border",
+                isDark
+                  ? "bg-red-500/10 text-red-400 hover:bg-red-500/20 border-red-500/20"
+                  : "bg-red-50 text-red-600 hover:bg-red-100 border-red-200"
+              )}
               title="Terminate Application"
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -437,8 +466,8 @@ export default function AppDetailPage({
                   <span>{isHermes ? "Hermes Web Dashboard & Ingress" : "HTTPS Web Access & Routing"}</span>
                 </h3>
                 <span className={cn(
-                  "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold self-start sm:self-auto shrink-0",
-                  isDark ? "bg-emerald-500/15 text-emerald-400" : "bg-emerald-50 text-emerald-700"
+                  "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold self-start sm:self-auto shrink-0 border",
+                  isDark ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/25" : "bg-emerald-50 text-emerald-700 border-emerald-200"
                 )}>
                   <ShieldCheck className="w-3.5 h-3.5" />
                   <span>Let&apos;s Encrypt SSL Active</span>
@@ -447,7 +476,7 @@ export default function AppDetailPage({
 
               <div className="space-y-3">
                 <div>
-                  <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1", isDark ? "text-zinc-500" : "text-slate-400")}>
+                  <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1", isDark ? "text-zinc-500" : "text-slate-500")}>
                     {isHermes ? "Web Dashboard URL" : "Secure Application URL"}
                   </label>
                   <div className="flex items-center gap-2">
@@ -465,7 +494,7 @@ export default function AppDetailPage({
                       )}
                       title="Copy URL"
                     >
-                      {copiedField === "HTTPS URL" ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                      {copiedField === "HTTPS URL" ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
                     </button>
                     <a
                       href={httpsUrl}
@@ -484,10 +513,10 @@ export default function AppDetailPage({
                     "p-3 rounded-xl border space-y-1 text-xs",
                     isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200/90 shadow-2xs"
                   )}>
-                    <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
+                    <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-500")}>
                       Cluster Edge Gateway
                     </span>
-                    <p className="font-mono font-bold text-xs pt-0.5 text-cyan-400">
+                    <p className={cn("font-mono font-bold text-xs pt-0.5", isDark ? "text-cyan-400" : "text-cyan-700")}>
                       HTTPS Edge Proxy (Port 443)
                     </p>
                   </div>
@@ -496,10 +525,10 @@ export default function AppDetailPage({
                     "p-3 rounded-xl border space-y-1 text-xs",
                     isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200/90 shadow-2xs"
                   )}>
-                    <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
+                    <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-500")}>
                       TLS Encryption
                     </span>
-                    <p className="font-mono font-bold text-xs pt-0.5 text-emerald-400">
+                    <p className={cn("font-mono font-bold text-xs pt-0.5", isDark ? "text-emerald-400" : "text-emerald-700")}>
                       Automated Let&apos;s Encrypt
                     </p>
                   </div>
@@ -508,8 +537,8 @@ export default function AppDetailPage({
             </div>
           )}
 
-          {/* Card: Web Dashboard Authentication (for 9Router & Web Apps) */}
-          {(app.appType === "ninerouter" || app.appType === "n8n") && (
+          {/* Card: Web Dashboard Authentication (9Router Password vs n8n Owner Setup) */}
+          {app.appType === "ninerouter" && (
             <div className={cn(
               "border rounded-2xl p-5 sm:p-6 space-y-4 transition-all shadow-2xs",
               isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
@@ -517,62 +546,41 @@ export default function AppDetailPage({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                 <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
                   <Lock className="w-4 h-4 shrink-0" />
-                  <span>{app.appType === "ninerouter" ? "9Router Dashboard Authentication" : "n8n Web Credentials"}</span>
+                  <span>9Router Dashboard Authentication</span>
                 </h3>
                 <span className={cn(
-                  "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold self-start sm:self-auto shrink-0",
-                  isDark ? "bg-emerald-500/15 text-emerald-400" : "bg-emerald-50 text-emerald-700"
+                  "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold self-start sm:self-auto shrink-0 border",
+                  isDark ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/25" : "bg-emerald-50 text-emerald-700 border-emerald-200"
                 )}>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className={cn("w-1.5 h-1.5 rounded-full animate-pulse", isDark ? "bg-emerald-400" : "bg-emerald-500")} />
                   <span>Dashboard Access Ready</span>
                 </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {app.appType === "n8n" && (
-                  <div className={cn(
-                    "p-3.5 rounded-xl border space-y-1 text-xs",
-                    isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200/90 shadow-2xs"
-                  )}>
-                    <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
-                      Username
-                    </span>
-                    <div className="flex items-center justify-between font-mono font-bold text-xs pt-0.5">
-                      <span>{app.username || "admin"}</span>
-                      <button
-                        onClick={() => copyToClipboard(app.username || "admin", "Username")}
-                        className="text-[var(--text-muted)] hover:text-cyan-400 cursor-pointer"
-                        title="Copy Username"
-                      >
-                        <Copy className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                )}
-
                 <div className={cn(
-                  "p-3.5 rounded-xl border space-y-1 text-xs",
+                  "p-3.5 rounded-xl border space-y-1 text-xs sm:col-span-2",
                   isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200/90 shadow-2xs"
                 )}>
-                  <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
+                  <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-500")}>
                     Dashboard Password
                   </span>
                   <div className="flex items-center justify-between font-mono font-bold text-xs pt-0.5">
-                    <span className="truncate mr-2 text-cyan-400">
+                    <span className={cn("truncate mr-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
                       {showPassword ? (app.password || "••••••••") : "••••••••••••"}
                     </span>
                     <div className="flex items-center gap-1.5 shrink-0">
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="text-[var(--text-muted)] hover:text-cyan-400 cursor-pointer"
+                        className={cn("cursor-pointer transition-colors", isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-500 hover:text-cyan-700")}
                         title={showPassword ? "Hide Password" : "Show Password"}
                       >
                         {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                       </button>
                       <button
                         onClick={() => copyToClipboard(app.password || "", "Password")}
-                        className="text-[var(--text-muted)] hover:text-cyan-400 cursor-pointer"
+                        className={cn("cursor-pointer transition-colors", isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-500 hover:text-cyan-700")}
                         title="Copy Password"
                       >
                         <Copy className="w-3.5 h-3.5" />
@@ -583,14 +591,102 @@ export default function AppDetailPage({
 
                 <div className={cn(
                   "p-3 rounded-xl border space-y-1 text-xs sm:col-span-2",
-                  isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-cyan-50/50 border-cyan-200 text-slate-700"
+                  isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-cyan-50/60 border-cyan-200 text-slate-700"
                 )}>
                   <p className="text-[11px] leading-relaxed">
-                    {app.appType === "ninerouter"
-                      ? "Sign in to 9Router Web Dashboard using the generated password above. You can update your password and configure AI model providers anytime in 9Router Settings."
-                      : "Use the credentials above to log in to the n8n interface. All workflows, nodes, and webhook configurations remain safe in persistent storage."}
+                    Sign in to 9Router Web Dashboard using the generated password above. You can update your password and configure AI model providers anytime in 9Router Settings.
                   </p>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {isN8n && (
+            <div className={cn(
+              "border rounded-2xl p-5 sm:p-6 space-y-4 transition-all shadow-2xs",
+              isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
+            )}>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                  <Lock className="w-4 h-4 shrink-0" />
+                  <span>n8n Owner Account &amp; Authentication</span>
+                </h3>
+                <span className={cn(
+                  "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold self-start sm:self-auto shrink-0 border",
+                  isDark ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/25" : "bg-cyan-50 text-cyan-700 border-cyan-200"
+                )}>
+                  <span className={cn("w-1.5 h-1.5 rounded-full animate-pulse", isDark ? "bg-cyan-400" : "bg-cyan-600")} />
+                  <span>Self-Setup on First Launch</span>
+                </span>
+              </div>
+
+              <div>
+                <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1.5", isDark ? "text-zinc-500" : "text-slate-500")}>
+                  Owner Account Setup URL
+                </label>
+                <div className="flex items-center gap-2">
+                  <div className={cn(
+                    "flex-1 px-3.5 py-2.5 rounded-xl border font-mono text-xs font-bold truncate",
+                    isDark ? "bg-[#0a0a0c] border-white/[0.08] text-cyan-400" : "bg-slate-50 border-slate-200/90 text-cyan-800 shadow-2xs"
+                  )}>
+                    {n8nSetupUrl}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(n8nSetupUrl, "n8n Setup URL")}
+                    className={cn(
+                      "p-2.5 rounded-xl border transition-colors cursor-pointer shrink-0",
+                      isDark ? "border-white/10 hover:bg-white/5 text-zinc-300" : "border-slate-300 hover:bg-slate-100 text-slate-700"
+                    )}
+                    title="Copy Setup URL"
+                  >
+                    {copiedField === "n8n Setup URL" ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                  </button>
+                  <a
+                    href={n8nSetupUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shrink-0 cursor-pointer active:scale-95"
+                  >
+                    <span>Open n8n Setup</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className={cn(
+                  "p-3 rounded-xl border space-y-1 text-xs",
+                  isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200/90 shadow-2xs"
+                )}>
+                  <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-500")}>
+                    Owner Registration Fields
+                  </span>
+                  <p className={cn("font-semibold text-xs pt-0.5", isDark ? "text-white" : "text-slate-900")}>
+                    Email, First Name, Last Name &amp; Password
+                  </p>
+                </div>
+
+                <div className={cn(
+                  "p-3 rounded-xl border space-y-1 text-xs",
+                  isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200/90 shadow-2xs"
+                )}>
+                  <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-500")}>
+                    Persistent Credential Storage
+                  </span>
+                  <p className={cn("font-mono font-bold text-xs pt-0.5", isDark ? "text-emerald-400" : "text-emerald-700")}>
+                    /home/node/.n8n (Dedicated SSD PVC)
+                  </p>
+                </div>
+              </div>
+
+              <div className={cn(
+                "p-3 rounded-xl border text-xs",
+                isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-cyan-50/60 border-cyan-200 text-slate-700"
+              )}>
+                <p className="text-[11px] leading-relaxed">
+                  n8n uses its native Owner Account setup flow instead of pre-shared credentials. On your first visit to <strong>{fullDomain}/setup</strong>, set up your own Email, First Name, Last Name, and Password directly in n8n. Your owner account and workflows remain preserved in persistent SSD storage across restarts and updates.
+                </p>
               </div>
             </div>
           )}
@@ -607,17 +703,17 @@ export default function AppDetailPage({
                   <span>Direct SSH Terminal Access</span>
                 </h3>
                 <span className={cn(
-                  "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold self-start sm:self-auto shrink-0",
-                  isDark ? "bg-emerald-500/15 text-emerald-400" : "bg-emerald-50 text-emerald-700"
+                  "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold self-start sm:self-auto shrink-0 border",
+                  isDark ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/25" : "bg-emerald-50 text-emerald-700 border-emerald-200"
                 )}>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className={cn("w-1.5 h-1.5 rounded-full animate-pulse", isDark ? "bg-emerald-400" : "bg-emerald-500")} />
                   <span>Encrypted SSH Active</span>
                 </span>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1.5", isDark ? "text-zinc-500" : "text-slate-400")}>
+                  <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1.5", isDark ? "text-zinc-500" : "text-slate-500")}>
                     SSH Connection Command
                   </label>
                   <div className="flex items-center gap-2">
@@ -635,7 +731,7 @@ export default function AppDetailPage({
                       )}
                       title="Copy SSH Command"
                     >
-                      {copiedField === "SSH Command" ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                      {copiedField === "SSH Command" ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
                       <span>Copy</span>
                     </button>
                   </div>
@@ -647,14 +743,14 @@ export default function AppDetailPage({
                     "p-3 rounded-xl border space-y-1 text-xs",
                     isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200/90 shadow-2xs"
                   )}>
-                    <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
+                    <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-500")}>
                       Host / Server IP
                     </span>
-                    <div className="flex items-center justify-between font-mono font-bold text-xs pt-0.5">
+                    <div className={cn("flex items-center justify-between font-mono font-bold text-xs pt-0.5", isDark ? "text-white" : "text-slate-900")}>
                       <span>{hostIp}</span>
                       <button
                         onClick={() => copyToClipboard(hostIp, "Host IP")}
-                        className="text-[var(--text-muted)] hover:text-cyan-400"
+                        className={cn("cursor-pointer transition-colors", isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-500 hover:text-cyan-700")}
                       >
                         <Copy className="w-3.5 h-3.5" />
                       </button>
@@ -665,14 +761,14 @@ export default function AppDetailPage({
                     "p-3 rounded-xl border space-y-1 text-xs",
                     isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200/90 shadow-2xs"
                   )}>
-                    <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
+                    <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-500")}>
                       Port
                     </span>
-                    <div className="flex items-center justify-between font-mono font-bold text-xs pt-0.5">
+                    <div className={cn("flex items-center justify-between font-mono font-bold text-xs pt-0.5", isDark ? "text-white" : "text-slate-900")}>
                       <span>{app.port}</span>
                       <button
                         onClick={() => copyToClipboard(String(app.port), "Port")}
-                        className="text-[var(--text-muted)] hover:text-cyan-400"
+                        className={cn("cursor-pointer transition-colors", isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-500 hover:text-cyan-700")}
                       >
                         <Copy className="w-3.5 h-3.5" />
                       </button>
@@ -683,14 +779,14 @@ export default function AppDetailPage({
                     "p-3 rounded-xl border space-y-1 text-xs",
                     isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200/90 shadow-2xs"
                   )}>
-                    <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
+                    <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-500")}>
                       SSH User
                     </span>
-                    <div className="flex items-center justify-between font-mono font-bold text-xs pt-0.5">
+                    <div className={cn("flex items-center justify-between font-mono font-bold text-xs pt-0.5", isDark ? "text-white" : "text-slate-900")}>
                       <span>{app.username || "root"}</span>
                       <button
                         onClick={() => copyToClipboard(app.username || "root", "SSH User")}
-                        className="text-[var(--text-muted)] hover:text-cyan-400"
+                        className={cn("cursor-pointer transition-colors", isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-500 hover:text-cyan-700")}
                       >
                         <Copy className="w-3.5 h-3.5" />
                       </button>
@@ -701,10 +797,10 @@ export default function AppDetailPage({
                     "p-3 rounded-xl border space-y-1 text-xs",
                     isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200/90 shadow-2xs"
                   )}>
-                    <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-400")}>
+                    <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-500")}>
                       Password
                     </span>
-                    <div className="flex items-center justify-between font-mono font-bold text-xs pt-0.5">
+                    <div className={cn("flex items-center justify-between font-mono font-bold text-xs pt-0.5", isDark ? "text-white" : "text-slate-900")}>
                       <span className="truncate mr-2">
                         {showPassword ? (app.password || "••••••••") : "••••••••••••"}
                       </span>
@@ -712,14 +808,14 @@ export default function AppDetailPage({
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="text-[var(--text-muted)] hover:text-cyan-400 cursor-pointer"
+                          className={cn("cursor-pointer transition-colors", isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-500 hover:text-cyan-700")}
                           title={showPassword ? "Hide Password" : "Show Password"}
                         >
                           {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                         </button>
                         <button
                           onClick={() => copyToClipboard(app.password || "", "Password")}
-                          className="text-[var(--text-muted)] hover:text-cyan-400 cursor-pointer"
+                          className={cn("cursor-pointer transition-colors", isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-500 hover:text-cyan-700")}
                           title="Copy Password"
                         >
                           <Copy className="w-3.5 h-3.5" />
@@ -737,24 +833,28 @@ export default function AppDetailPage({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Activity className="w-4 h-4 text-cyan-400 shrink-0" />
+                  <Activity className={cn("w-4 h-4 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
                   <h2 className={cn("text-sm sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                     Dedicated Resource Monitoring
                   </h2>
                   <span className={cn(
-                    "px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1",
+                    "px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 border",
                     isReady
-                      ? "bg-emerald-500/15 text-emerald-400"
-                      : "bg-amber-500/15 text-amber-400"
+                      ? isDark
+                        ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/25"
+                        : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                      : isDark
+                        ? "bg-amber-500/15 text-amber-400 border-amber-500/25"
+                        : "bg-amber-50 text-amber-800 border-amber-200"
                   )}>
                     {isReady ? (
                       <>
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        <span className={cn("w-1.5 h-1.5 rounded-full animate-pulse", isDark ? "bg-emerald-400" : "bg-emerald-500")} />
                         <span>Live Telemetry</span>
                       </>
                     ) : (
                       <>
-                        <Loader2 className="w-3 h-3 animate-spin text-amber-400" />
+                        <Loader2 className={cn("w-3 h-3 animate-spin", isDark ? "text-amber-400" : "text-amber-600")} />
                         <span>Initializing Telemetry</span>
                       </>
                     )}
@@ -799,17 +899,17 @@ export default function AppDetailPage({
                 )}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className={cn("text-[10px] font-bold uppercase tracking-wider flex items-center gap-1", isDark ? "text-zinc-400" : "text-slate-500")}>
-                    <Cpu className="w-3.5 h-3.5 text-cyan-400" />
+                  <span className={cn("text-[10px] font-bold uppercase tracking-wider flex items-center gap-1", isDark ? "text-zinc-400" : "text-slate-600")}>
+                    <Cpu className={cn("w-3.5 h-3.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
                     CPU Utilization
                   </span>
-                  <span className="text-[10px] font-mono text-cyan-400 font-bold">{app.cpuShares} vCPU</span>
+                  <span className={cn("text-[10px] font-mono font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{app.cpuShares} vCPU</span>
                 </div>
                 <div className="flex items-baseline gap-2">
                   <span className={cn("text-xl font-black font-mono tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                     {metricsData?.summary?.cpu?.current ?? (isRunning ? 14.2 : 0)}%
                   </span>
-                  <span className={cn("text-xs font-medium", isDark ? "text-zinc-500" : "text-slate-400")}>
+                  <span className={cn("text-xs font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>
                     of 100% capacity
                   </span>
                 </div>
@@ -827,17 +927,17 @@ export default function AppDetailPage({
                 )}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className={cn("text-[10px] font-bold uppercase tracking-wider flex items-center gap-1", isDark ? "text-zinc-400" : "text-slate-500")}>
-                    <Layers className="w-3.5 h-3.5 text-cyan-400" />
+                  <span className={cn("text-[10px] font-bold uppercase tracking-wider flex items-center gap-1", isDark ? "text-zinc-400" : "text-slate-600")}>
+                    <Layers className={cn("w-3.5 h-3.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
                     Memory (RAM)
                   </span>
-                  <span className="text-[10px] font-mono text-cyan-400 font-bold">{app.memoryMb} MB Max</span>
+                  <span className={cn("text-[10px] font-mono font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{app.memoryMb} MB Max</span>
                 </div>
                 <div className="flex items-baseline gap-2">
                   <span className={cn("text-xl font-black font-mono tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                     {metricsData?.summary?.memory?.currentMb ?? (isRunning ? Math.min(app.memoryMb, 220) : 0)} MB
                   </span>
-                  <span className={cn("text-xs font-medium", isDark ? "text-zinc-500" : "text-slate-400")}>
+                  <span className={cn("text-xs font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>
                     ({metricsData?.summary?.memory?.percentage ?? (isRunning ? Math.round((220 / app.memoryMb) * 100) : 0)}%)
                   </span>
                 </div>
@@ -855,17 +955,17 @@ export default function AppDetailPage({
                 )}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className={cn("text-[10px] font-bold uppercase tracking-wider flex items-center gap-1", isDark ? "text-zinc-400" : "text-slate-500")}>
-                    <HardDrive className="w-3.5 h-3.5 text-cyan-400" />
+                  <span className={cn("text-[10px] font-bold uppercase tracking-wider flex items-center gap-1", isDark ? "text-zinc-400" : "text-slate-600")}>
+                    <HardDrive className={cn("w-3.5 h-3.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
                     SSD Storage
                   </span>
-                  <span className="text-[10px] font-mono text-cyan-400 font-bold">{app.storageGb || 10} GB Quota</span>
+                  <span className={cn("text-[10px] font-mono font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{app.storageGb || 10} GB Quota</span>
                 </div>
                 <div className="flex items-baseline gap-2">
                   <span className={cn("text-xl font-black font-mono tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                     {metricsData?.summary?.disk?.usedGb ?? 1.2} GB
                   </span>
-                  <span className={cn("text-xs font-medium", isDark ? "text-zinc-500" : "text-slate-400")}>
+                  <span className={cn("text-xs font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>
                     ({metricsData?.summary?.disk?.percentage ?? Math.round((1.2 / (app.storageGb || 10)) * 100)}%)
                   </span>
                 </div>
@@ -964,17 +1064,17 @@ export default function AppDetailPage({
             {app.appType === "hermes" && (
               <div className="space-y-3 text-xs leading-relaxed">
                 <p className={isDark ? "text-zinc-300" : "text-slate-700"}>
-                  NousResearch Hermes Agent is running in a dedicated high-performance production environment featuring an intuitive browser-based Web Dashboard and high-speed SSH terminal access. Your persistent memory and models are saved at <code className="font-mono text-cyan-400">/app/data</code>:
+                  NousResearch Hermes Agent is running in a dedicated high-performance production environment featuring an intuitive browser-based Web Dashboard (sign in using username <code className={cn("font-mono font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{app.username || "root"}</code> and your SSH password) and direct SSH terminal access. Your persistent memory and models are saved at <code className={cn("font-mono font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>/app/data</code>:
                 </p>
                 <div className={cn("p-3.5 rounded-xl border font-mono text-[11px] space-y-2", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-slate-50 border-slate-200/90 text-slate-800 shadow-2xs")}>
-                  <div className="text-zinc-500"># 1. Hermes Web Dashboard (Browser)</div>
-                  <div className="text-cyan-400 font-bold">{httpsUrl}</div>
-                  <div className="text-zinc-500 pt-1"># 2. Direct Terminal Access (SSH)</div>
-                  <div className="text-cyan-400 font-bold">{sshCommand}</div>
-                  <div className="text-zinc-500 pt-1"># 3. Interactive Provider Setup &amp; CLI Chat</div>
+                  <div className={isDark ? "text-zinc-500" : "text-slate-500"}># 1. Hermes Web Dashboard (Browser — Login with User: {app.username || "root"})</div>
+                  <div className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{httpsUrl}</div>
+                  <div className={cn("pt-1", isDark ? "text-zinc-500" : "text-slate-500")}># 2. Direct Terminal Access (SSH)</div>
+                  <div className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{sshCommand}</div>
+                  <div className={cn("pt-1", isDark ? "text-zinc-500" : "text-slate-500")}># 3. Interactive Provider Setup &amp; CLI Chat</div>
                   <div>hermes setup</div>
                   <div>hermes</div>
-                  <div className="text-zinc-500 pt-1"># 4. Persistent Storage Directory</div>
+                  <div className={cn("pt-1", isDark ? "text-zinc-500" : "text-slate-500")}># 4. Persistent Storage Directory</div>
                   <div>cd /app/data</div>
                 </div>
               </div>
@@ -983,10 +1083,10 @@ export default function AppDetailPage({
             {app.appType === "ninerouter" && (
               <div className="space-y-3 text-xs leading-relaxed">
                 <p className={isDark ? "text-zinc-300" : "text-slate-700"}>
-                  9Router acts as your central AI gateway and router dashboard. Click <strong>Open App</strong> above to open the web dashboard, then sign in with your application password <code className="font-mono text-cyan-400 font-bold">{app.password || "••••••••"}</code>. You can also connect this endpoint directly to Claude Code, Cursor, or Cline:
+                  9Router acts as your central AI gateway and router dashboard. Click <strong>Open App</strong> above to open the web dashboard, then sign in with your application password <code className={cn("font-mono font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{app.password || "••••••••"}</code>. You can also connect this endpoint directly to Claude Code, Cursor, or Cline:
                 </p>
                 <div className={cn("p-3.5 rounded-xl border font-mono text-[11px] space-y-1", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-slate-50 border-slate-200/90 text-slate-800 shadow-2xs")}>
-                  <div className="text-zinc-500"># OpenAI Compatible Router Base URL</div>
+                  <div className={isDark ? "text-zinc-500" : "text-slate-500"}># OpenAI Compatible Router Base URL</div>
                   <div>OPENAI_BASE_URL={httpsUrl}/v1</div>
                 </div>
               </div>
@@ -995,10 +1095,10 @@ export default function AppDetailPage({
             {app.appType === "n8n" && (
               <div className="space-y-3 text-xs leading-relaxed">
                 <p className={isDark ? "text-zinc-300" : "text-slate-700"}>
-                  Your n8n workflow canvas is ready. Click <strong>Open App</strong> above to log in and begin creating automated workflows and webhook triggers.
+                  Your n8n automation workspace is live. Click <strong>Open App</strong> above (or open <code className={cn("font-mono font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>{httpsUrl}/setup</code>) to create your own Owner Account (email, name, and password) and start building workflows and webhooks.
                 </p>
                 <div className={cn("p-3.5 rounded-xl border font-mono text-[11px] space-y-1", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-slate-50 border-slate-200/90 text-slate-800 shadow-2xs")}>
-                  <div className="text-zinc-500"># Webhook Base URL for external services</div>
+                  <div className={isDark ? "text-zinc-500" : "text-slate-500"}># Webhook Base URL for external services</div>
                   <div>{httpsUrl}/webhook/</div>
                 </div>
               </div>
@@ -1007,14 +1107,14 @@ export default function AppDetailPage({
             {app.appType === "opencode" && (
               <div className="space-y-3 text-xs leading-relaxed">
                 <p className={isDark ? "text-zinc-300" : "text-slate-700"}>
-                  OpenCode is running in a secure production developer pod. Your workspace is persisted at <code className="font-mono text-cyan-400">/workspace</code>. Package manager and port tunneling are restricted to prevent abuse:
+                  OpenCode is running in a secure production developer pod. Your workspace is persisted at <code className={cn("font-mono font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>/workspace</code>. Package manager and port tunneling are restricted to prevent abuse:
                 </p>
                 <div className={cn("p-3.5 rounded-xl border font-mono text-[11px] space-y-2", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-slate-50 border-slate-200/90 text-slate-800 shadow-2xs")}>
-                  <div className="text-zinc-500"># Direct Terminal Login</div>
-                  <div className="text-cyan-400 font-bold">{sshCommand}</div>
-                  <div className="text-zinc-500 pt-1"># Launch OpenCode CLI</div>
+                  <div className={isDark ? "text-zinc-500" : "text-slate-500"}># Direct Terminal Login</div>
+                  <div className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{sshCommand}</div>
+                  <div className={cn("pt-1", isDark ? "text-zinc-500" : "text-slate-500")}># Launch OpenCode CLI</div>
                   <div>opencode</div>
-                  <div className="text-zinc-500 pt-1"># Persistent Storage</div>
+                  <div className={cn("pt-1", isDark ? "text-zinc-500" : "text-slate-500")}># Persistent Storage</div>
                   <div>cd /workspace</div>
                 </div>
               </div>
@@ -1048,33 +1148,43 @@ export default function AppDetailPage({
             </div>
 
             <div className="space-y-3 text-xs">
-              <div className="flex items-center justify-between pb-2 border-b border-inherit">
+              <div className={cn("flex items-center justify-between pb-2 border-b", isDark ? "border-white/[0.06]" : "border-slate-200")}>
                 <span className={isDark ? "text-zinc-400" : "text-slate-500"}>Pod Phase:</span>
-                <span className={cn("font-bold flex items-center gap-1.5", app.telemetry?.ready ? "text-emerald-400" : "text-amber-400")}>
-                  <span className={cn("w-2 h-2 rounded-full", app.telemetry?.ready ? "bg-emerald-400 animate-pulse" : "bg-amber-400")} />
+                <span className={cn(
+                  "font-bold flex items-center gap-1.5",
+                  app.telemetry?.ready
+                    ? (isDark ? "text-emerald-400" : "text-emerald-700")
+                    : (isDark ? "text-amber-400" : "text-amber-700")
+                )}>
+                  <span className={cn(
+                    "w-2 h-2 rounded-full",
+                    app.telemetry?.ready
+                      ? (isDark ? "bg-emerald-400 animate-pulse" : "bg-emerald-500 animate-pulse")
+                      : (isDark ? "bg-amber-400" : "bg-amber-500")
+                  )} />
                   {app.telemetry?.phase || "Running"} ({app.telemetry?.ready ? "Ready" : "Initializing"})
                 </span>
               </div>
 
-              <div className="flex items-center justify-between pb-2 border-b border-inherit">
+              <div className={cn("flex items-center justify-between pb-2 border-b", isDark ? "border-white/[0.06]" : "border-slate-200")}>
                 <span className={isDark ? "text-zinc-400" : "text-slate-500"}>Uptime:</span>
-                <span className="font-mono font-semibold">
+                <span className={cn("font-mono font-semibold", isDark ? "text-white" : "text-slate-900")}>
                   {app.telemetry?.uptimeSeconds
                     ? `${Math.floor(app.telemetry.uptimeSeconds / 60)} min`
                     : "Active"}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between pb-2 border-b border-inherit">
+              <div className={cn("flex items-center justify-between pb-2 border-b", isDark ? "border-white/[0.06]" : "border-slate-200")}>
                 <span className={isDark ? "text-zinc-400" : "text-slate-500"}>Restart Count:</span>
-                <span className="font-mono font-semibold">
+                <span className={cn("font-mono font-semibold", isDark ? "text-white" : "text-slate-900")}>
                   {app.telemetry?.restartCount ?? 0}
                 </span>
               </div>
 
               <div className="flex items-center justify-between">
                 <span className={isDark ? "text-zinc-400" : "text-slate-500"}>Edge Network:</span>
-                <span className="font-semibold text-xs text-cyan-400">
+                <span className={cn("font-semibold text-xs", isDark ? "text-cyan-400" : "text-cyan-700")}>
                   Sidoarjo (ID-SDA) • Auto SSL
                 </span>
               </div>
@@ -1094,7 +1204,7 @@ export default function AppDetailPage({
               <button
                 type="button"
                 onClick={() => setIsScaleModalOpen(true)}
-                className="text-xs font-bold text-cyan-400 hover:underline cursor-pointer flex items-center gap-1"
+                className={cn("text-xs font-bold hover:underline cursor-pointer flex items-center gap-1", isDark ? "text-cyan-400" : "text-cyan-700")}
               >
                 <span>Scale</span>
                 <Rocket className="w-3 h-3" />
@@ -1102,29 +1212,29 @@ export default function AppDetailPage({
             </div>
 
             <div className="space-y-3 text-xs">
-              <div className="flex items-center justify-between pb-2 border-b border-inherit">
+              <div className={cn("flex items-center justify-between pb-2 border-b", isDark ? "border-white/[0.06]" : "border-slate-200")}>
                 <span className={isDark ? "text-zinc-400" : "text-slate-500"}>Compute Tier:</span>
-                <span className="font-bold">{app.planName}</span>
+                <span className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>{app.planName}</span>
               </div>
 
-              <div className="flex items-center justify-between pb-2 border-b border-inherit">
+              <div className={cn("flex items-center justify-between pb-2 border-b", isDark ? "border-white/[0.06]" : "border-slate-200")}>
                 <span className={isDark ? "text-zinc-400" : "text-slate-500"}>CPU Cores:</span>
-                <span className="font-mono font-semibold">{app.cpuShares} vCPU</span>
+                <span className={cn("font-mono font-semibold", isDark ? "text-white" : "text-slate-900")}>{app.cpuShares} vCPU</span>
               </div>
 
-              <div className="flex items-center justify-between pb-2 border-b border-inherit">
+              <div className={cn("flex items-center justify-between pb-2 border-b", isDark ? "border-white/[0.06]" : "border-slate-200")}>
                 <span className={isDark ? "text-zinc-400" : "text-slate-500"}>Memory (RAM):</span>
-                <span className="font-mono font-semibold">{app.memoryMb} MB</span>
+                <span className={cn("font-mono font-semibold", isDark ? "text-white" : "text-slate-900")}>{app.memoryMb} MB</span>
               </div>
 
-              <div className="flex items-center justify-between pb-2 border-b border-inherit">
+              <div className={cn("flex items-center justify-between pb-2 border-b", isDark ? "border-white/[0.06]" : "border-slate-200")}>
                 <span className={isDark ? "text-zinc-400" : "text-slate-500"}>Storage (PVC):</span>
-                <span className="font-mono font-semibold">{app.storageGb || 10} GB SSD</span>
+                <span className={cn("font-mono font-semibold", isDark ? "text-white" : "text-slate-900")}>{app.storageGb || 10} GB SSD</span>
               </div>
 
-              <div className="flex items-center justify-between pb-2 border-b border-inherit">
+              <div className={cn("flex items-center justify-between pb-2 border-b", isDark ? "border-white/[0.06]" : "border-slate-200")}>
                 <span className={isDark ? "text-zinc-400" : "text-slate-500"}>Release Version:</span>
-                <span className="font-mono font-bold text-violet-400 flex items-center gap-1.5 text-[11px]">
+                <span className={cn("font-mono font-bold flex items-center gap-1.5 text-[11px]", isDark ? "text-violet-400" : "text-violet-700")}>
                   <ArrowUpCircle className="w-3.5 h-3.5" />
                   Latest • Zero Data Loss
                 </span>

@@ -9,10 +9,12 @@ import { toast } from "sonner";
 import {
   Database, Plus, RefreshCw, Server, ExternalLink, Power,
   Copy, Check, Activity, ShieldCheck, HardDrive, Cpu, Layers,
-  AlertTriangle, ArrowRight, Play, Square, RotateCw, Trash2, MapPin, Rocket
+  AlertTriangle, ArrowRight, Play, Square, RotateCw, Trash2, MapPin, Rocket,
+  ChevronRight, TrendingUp
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { DatabaseScaleModal } from "@/components/DatabaseScaleModal";
 
 interface DatabaseServiceItem {
   id: number;
@@ -58,6 +60,7 @@ export default function DatabaseListingPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [actionLoadingId, setActionLoadingId] = useState<number | null>(null);
+  const [scalingDb, setScalingDb] = useState<DatabaseServiceItem | null>(null);
   const [confirmModal, setConfirmModal] = useState<{
     dbId: number;
     action: "start" | "stop" | "restart" | "delete";
@@ -292,7 +295,7 @@ export default function DatabaseListingPage() {
       case "RUNNING":
         return (
           <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border", isDark ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200")}>
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className={cn("w-1.5 h-1.5 rounded-full animate-pulse", isDark ? "bg-emerald-400" : "bg-emerald-500")} />
             RUNNING
           </span>
         );
@@ -305,7 +308,7 @@ export default function DatabaseListingPage() {
         );
       case "PROVISIONING":
         return (
-          <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border", isDark ? "bg-amber-500/15 text-amber-400 border-amber-500/30" : "bg-amber-50 text-amber-700 border-amber-200")}>
+          <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border", isDark ? "bg-amber-500/15 text-amber-400 border-amber-500/30" : "bg-amber-50 text-amber-800 border-amber-200")}>
             <RefreshCw className="w-2.5 h-2.5 animate-spin" />
             PROVISIONING
           </span>
@@ -332,20 +335,23 @@ export default function DatabaseListingPage() {
     .reduce((acc, curr) => acc + (curr.hourlyRate || 28), 0);
 
   return (
-    <div className="space-y-6 max-w-full">
+    <div className="space-y-6 max-w-full pb-16">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 flex-wrap">
             <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
               Managed Database
             </h1>
             <span className={cn("px-2.5 py-0.5 rounded-full text-xs font-bold border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
               Kubernetes Native
             </span>
+            <span className={cn("px-2.5 py-0.5 rounded-full text-xs font-bold border", isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200")}>
+              Web GUI Ready
+            </span>
           </div>
           <p className={cn("text-xs sm:text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
-            High-performance managed MySQL, MariaDB, PostgreSQL, MongoDB & Redis with isolated containers, SSD storage & web GUI.
+            High-performance managed MySQL, MariaDB, PostgreSQL, MongoDB &amp; Redis with isolated containers, SSD storage &amp; web GUI.
           </p>
         </div>
 
@@ -358,15 +364,15 @@ export default function DatabaseListingPage() {
               isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-2xs"
             )}
           >
-            <RefreshCw className={cn("w-3.5 h-3.5", (refreshing || loading) && "animate-spin text-cyan-400")} />
+            <RefreshCw className={cn("w-3.5 h-3.5", (refreshing || loading) && (isDark ? "animate-spin text-cyan-400" : "animate-spin text-cyan-600"))} />
             <span>Refresh</span>
           </button>
           <Link
             href="/dashboard/database/new"
             className="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 flex items-center justify-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:scale-95 text-slate-950 shadow-md cursor-pointer"
           >
-            <Rocket className="w-4 h-4" />
-            <span>Deploy Database</span>
+            <Plus className="w-4 h-4" />
+            <span>Deploy New Database</span>
           </Link>
         </div>
       </div>
@@ -514,7 +520,7 @@ export default function DatabaseListingPage() {
                 )}
               >
                 <div>
-                  {/* Card Header: Engine Icon, Name, Status */}
+                  {/* Card Header: Engine Icon, Badges, Name, Status */}
                   <div className="flex items-start justify-between gap-3 mb-4">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className={cn(
@@ -545,7 +551,7 @@ export default function DatabaseListingPage() {
                           </span>
                         </div>
                         <h3 className={cn(
-                          "text-base sm:text-lg font-extrabold tracking-tight mt-1 truncate max-w-[190px] transition-colors",
+                          "font-bold text-sm sm:text-base tracking-tight truncate mt-1 transition-colors",
                           isDark ? "text-white group-hover:text-cyan-300" : "text-slate-900 group-hover:text-cyan-700"
                         )}>
                           {db.name}
@@ -553,179 +559,190 @@ export default function DatabaseListingPage() {
                       </div>
                     </div>
 
-                    <div>
+                    <div className="shrink-0">
                       {getStatusBadge(db.status)}
                     </div>
                   </div>
 
                   {/* Provisioning / Suspended Alerts */}
                   {isProvisioning && (
-                    <div className="mb-4 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-between text-xs text-amber-400">
-                      <span className="flex items-center gap-2 font-semibold">
+                    <div className={cn(
+                      "mb-3 px-3 py-2 rounded-xl border flex items-center justify-between text-xs font-semibold",
+                      isDark ? "bg-amber-500/10 border-amber-500/25 text-amber-400" : "bg-amber-50 border-amber-200 text-amber-800"
+                    )}>
+                      <span className="flex items-center gap-2">
                         <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                        Deploying container & volume...
+                        Deploying engine &amp; volume...
                       </span>
-                      <span className="text-[10px] opacity-75 font-mono">Please wait</span>
+                      <span className="text-[10px] opacity-80 font-mono">Please wait</span>
                     </div>
                   )}
 
                   {isSuspended && (
-                    <div className="mb-4 px-3 py-2 rounded-xl bg-red-500/10 border border-red-500/25 flex items-center justify-between text-xs text-red-400">
-                      <span className="flex items-center gap-1.5 font-semibold">
+                    <div className={cn(
+                      "mb-3 px-3 py-2 rounded-xl border flex items-center justify-between text-xs font-semibold",
+                      isDark ? "bg-red-500/10 border-red-500/25 text-red-400" : "bg-red-50 border-red-200 text-red-700"
+                    )}>
+                      <span className="flex items-center gap-1.5">
                         <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                        Suspended (3-Day Grace Period)
+                        Suspended (3-Day Grace)
                       </span>
-                      <Link href="/dashboard/billing" className="font-bold underline text-red-300 hover:text-white text-[11px]">
+                      <Link href="/dashboard/billing" className={cn("font-bold underline text-[11px]", isDark ? "text-red-300 hover:text-white" : "text-red-700 hover:text-red-900")}>
                         Top Up
                       </Link>
                     </div>
                   )}
 
-                  {/* Connection Details Box */}
-                  <div className={cn("p-3.5 rounded-xl border space-y-2 mb-4", isDark ? "bg-[#0a0a0c] border-white/[0.06]" : "bg-slate-50 border-slate-200")}>
-                    <div className="flex items-center justify-between text-xs">
-                      <span className={cn("font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>
-                        Direct Host & Port
+                  {/* Endpoint Row 1: Host:Port & Web GUI */}
+                  <div className={cn("rounded-xl px-3 py-2 border flex items-center justify-between gap-2 mb-2", isDark ? "bg-[#0a0a0c] border-white/[0.06]" : "bg-slate-50 border-slate-200")}>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Server className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                      <span className={cn("font-mono text-xs truncate font-semibold", isDark ? "text-zinc-200" : "text-slate-800")}>
+                        {fullEndpoint}
                       </span>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
                       <button
+                        type="button"
                         onClick={() => copyToClipboard(fullEndpoint, `endpoint-${db.id}`)}
-                        className={cn("flex items-center gap-1 font-mono font-bold hover:underline cursor-pointer", isDark ? "text-cyan-400" : "text-cyan-700")}
-                        title="Copy endpoint"
+                        className={cn("p-1 rounded-md transition-colors cursor-pointer", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-500 hover:text-slate-900 hover:bg-slate-200")}
+                        title="Copy Host & Port"
                       >
-                        <span>{fullEndpoint}</span>
-                        {copiedId === `endpoint-${db.id}` ? (
-                          <Check className="w-3.5 h-3.5 text-emerald-400 stroke-[3]" />
-                        ) : (
-                          <Copy className="w-3.5 h-3.5 opacity-70" />
-                        )}
+                        {copiedId === `endpoint-${db.id}` ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
                       </button>
-                    </div>
-
-                    <div className="flex items-center justify-between text-xs">
-                      <span className={cn("font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>
-                        Database Name
-                      </span>
-                      <span className={cn("font-mono font-semibold", isDark ? "text-zinc-300" : "text-slate-700")}>
-                        {db.dbName}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between text-xs">
-                      <span className={cn("font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>
-                        Username
-                      </span>
-                      <span className={cn("font-mono font-semibold", isDark ? "text-zinc-300" : "text-slate-700")}>
-                        {db.username}
-                      </span>
+                      {engine.webToolUrl && (
+                        <a
+                          href={isProvisioning || isSuspended || db.status === "STOPPED" ? undefined : engine.webToolUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={cn(
+                            "p-1 rounded-md transition-colors",
+                            isProvisioning || isSuspended || db.status === "STOPPED"
+                              ? "opacity-40 cursor-not-allowed pointer-events-none text-zinc-500"
+                              : isDark
+                                ? "text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 cursor-pointer"
+                                : "text-cyan-700 hover:text-cyan-900 hover:bg-cyan-100 cursor-pointer"
+                          )}
+                          title={isProvisioning ? "Preparing Web GUI..." : isSuspended ? "Database Suspended" : `Open ${engine.webToolName}`}
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      )}
                     </div>
                   </div>
 
-                  {/* Resource Badges */}
-                  <div className="flex flex-wrap items-center gap-1.5 mb-4">
-                    <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-semibold border flex items-center gap-1", isDark ? "bg-white/[0.04] text-zinc-300 border-white/[0.08]" : "bg-slate-100 text-slate-700 border-slate-200")}>
-                      <Cpu className="w-3 h-3 text-cyan-400" /> {db.cpuShares} vCPU
-                    </span>
-                    <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-semibold border flex items-center gap-1", isDark ? "bg-white/[0.04] text-zinc-300 border-white/[0.08]" : "bg-slate-100 text-slate-700 border-slate-200")}>
-                      <Layers className="w-3 h-3 text-cyan-400" /> {db.memoryMb >= 1024 ? `${db.memoryMb / 1024} GB` : `${db.memoryMb} MB`} RAM
-                    </span>
-                    <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-semibold border flex items-center gap-1", isDark ? "bg-white/[0.04] text-zinc-300 border-white/[0.08]" : "bg-slate-100 text-slate-700 border-slate-200")}>
-                      <HardDrive className="w-3 h-3 text-cyan-400" /> {db.storageGb} GB SSD
-                    </span>
-                    <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-semibold border flex items-center gap-1", isDark ? "bg-white/[0.04] text-zinc-300 border-white/[0.08]" : "bg-slate-100 text-slate-700 border-slate-200")}>
-                      <MapPin className="w-3 h-3 text-cyan-400" /> {db.region}
-                    </span>
+                  {/* Endpoint Row 2: Username • Database Name */}
+                  <div className={cn("rounded-xl px-3 py-2 border flex items-center justify-between gap-2 mb-3", isDark ? "bg-[#0a0a0c] border-white/[0.06]" : "bg-slate-50 border-slate-200")}>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Database className={cn("w-3.5 h-3.5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")} />
+                      <span className={cn("font-mono text-xs truncate", isDark ? "text-zinc-300" : "text-slate-700")}>
+                        {db.username} • {db.dbName}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => copyToClipboard(db.connectionDetails?.uri || db.dbName, `uri-${db.id}`)}
+                      className={cn("p-1 rounded-md transition-colors cursor-pointer shrink-0", isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-500 hover:text-slate-900 hover:bg-slate-200")}
+                      title="Copy Connection URI"
+                    >
+                      {copiedId === `uri-${db.id}` ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                    </button>
                   </div>
 
-                  {/* Price info */}
-                  <div className="flex items-center justify-between text-xs mb-4">
-                    <span className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
-                      PAYG Accumulation:
-                    </span>
-                    <div className="text-right">
-                      <span className={cn("font-black", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                        {formatRupiah(db.monthlyPrice || 10000)}
-                      </span>
-                      <span className={cn("text-[10px] ml-1", isDark ? "text-zinc-500" : "text-slate-500")}>
-                        /mo (~Rp {db.hourlyRate || 14}/hr)
-                      </span>
+                  {/* Specs Summary Grid */}
+                  <div className="grid grid-cols-2 gap-2.5 mb-4">
+                    <div className={cn("p-2.5 rounded-xl border", isDark ? "bg-white/[0.02] border-white/[0.05]" : "bg-slate-50/70 border-slate-200/80")}>
+                      <div className={cn("text-[10px] font-bold uppercase tracking-wider mb-0.5", isDark ? "text-zinc-500" : "text-slate-500")}>
+                        Compute
+                      </div>
+                      <div className={cn("text-xs font-bold font-mono", isDark ? "text-white" : "text-slate-900")}>
+                        {db.cpuShares} vCPU • {db.memoryMb >= 1024 ? `${db.memoryMb / 1024} GB` : `${db.memoryMb} MB`}
+                      </div>
+                    </div>
+                    <div className={cn("p-2.5 rounded-xl border", isDark ? "bg-white/[0.02] border-white/[0.05]" : "bg-slate-50/70 border-slate-200/80")}>
+                      <div className={cn("text-[10px] font-bold uppercase tracking-wider mb-0.5", isDark ? "text-zinc-500" : "text-slate-500")}>
+                        Storage
+                      </div>
+                      <div className={cn("text-xs font-bold font-mono", isDark ? "text-white" : "text-slate-900")}>
+                        {db.storageGb} GB SSD
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Card Actions */}
-                <div className={cn("pt-4 border-t flex items-center justify-between gap-2", isDark ? "border-white/[0.06]" : "border-slate-100")}>
+                {/* Card Footer */}
+                <div className={cn("pt-3.5 border-t flex items-center justify-between gap-2 flex-wrap", isDark ? "border-white/[0.06]" : "border-slate-200")}>
+                  <div>
+                    <div className={cn("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-500")}>
+                      Commitment
+                    </div>
+                    <div className={cn("text-xs font-bold font-mono", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                      {formatRupiah(db.monthlyPrice || 10000)}/mo
+                    </div>
+                  </div>
+
                   <div className="flex items-center gap-1.5">
-                    {engine.webToolUrl && (
-                      <a
-                        href={isProvisioning || isSuspended ? undefined : engine.webToolUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    {!isProvisioning && !isSuspended && (
+                      <button
+                        type="button"
+                        onClick={() => setScalingDb(db)}
                         className={cn(
-                          "px-2.5 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1.5 transition-all",
-                          isProvisioning || isSuspended
-                            ? "opacity-40 cursor-not-allowed pointer-events-none border-white/5 bg-white/5 text-zinc-500"
-                            : isDark
-                            ? "bg-white/5 border-white/10 text-cyan-300 hover:text-cyan-200 hover:bg-white/10 cursor-pointer"
-                            : "bg-slate-50 border-slate-200 text-cyan-700 hover:bg-slate-100 cursor-pointer"
+                          "px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer flex items-center gap-1",
+                          isDark
+                            ? "border-cyan-500/30 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20"
+                            : "border-cyan-200 bg-cyan-50 text-cyan-700 hover:bg-cyan-100"
                         )}
-                        title={isProvisioning ? "Preparing Web GUI..." : isSuspended ? "Database Suspended" : `Open in ${engine.webToolName}`}
+                        title="Scale Compute & Storage"
                       >
-                        <ExternalLink className="w-3 h-3" />
-                        <span>{engine.webToolName}</span>
-                      </a>
+                        <TrendingUp className="w-3 h-3" />
+                        <span>Scale</span>
+                      </button>
                     )}
 
-                    {/* Power Action Buttons */}
                     {isProvisioning ? (
-                      <span className="px-2 py-1 text-[11px] font-semibold text-amber-400 flex items-center gap-1.5">
+                      <span className={cn("px-2 py-1 text-[11px] font-semibold flex items-center gap-1.5", isDark ? "text-amber-400" : "text-amber-700")}>
                         <RefreshCw className="w-3 h-3 animate-spin" /> Provisioning...
                       </span>
                     ) : isSuspended ? (
                       <Link
                         href="/dashboard/billing"
-                        className="px-2.5 py-1 rounded-xl text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/25 hover:bg-red-500/20 transition-all flex items-center gap-1"
+                        className={cn(
+                          "px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-all flex items-center gap-1",
+                          isDark ? "bg-red-500/10 text-red-400 border-red-500/25 hover:bg-red-500/20" : "bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
+                        )}
                         title="Reactivate Database by Adding Balance"
                       >
                         Reactivate
                       </Link>
-                    ) : db.status === "RUNNING" ? (
-                      <>
-                        <button
-                          onClick={() => setConfirmModal({ dbId: db.id, action: "restart", name: db.name })}
-                          disabled={isActing}
-                          className={cn("p-1.5 rounded-xl border transition-all cursor-pointer", isDark ? "bg-white/5 border-white/10 text-zinc-400 hover:text-white" : "bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-900")}
-                          title="Restart Database"
-                        >
-                          <RotateCw className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => setConfirmModal({ dbId: db.id, action: "stop", name: db.name })}
-                          disabled={isActing}
-                          className={cn("p-1.5 rounded-xl border transition-all cursor-pointer", isDark ? "bg-white/5 border-white/10 text-zinc-400 hover:text-amber-400" : "bg-slate-50 border-slate-200 text-slate-500 hover:text-amber-600")}
-                          title="Stop Database"
-                        >
-                          <Square className="w-3.5 h-3.5" />
-                        </button>
-                      </>
                     ) : (
                       <button
-                        onClick={() => setConfirmModal({ dbId: db.id, action: "start", name: db.name })}
+                        type="button"
+                        onClick={() => setConfirmModal({ dbId: db.id, action: db.status === "RUNNING" ? "stop" : "start", name: db.name })}
                         disabled={isActing}
-                        className={cn("p-1.5 rounded-xl border transition-all cursor-pointer", isDark ? "bg-white/5 border-white/10 text-zinc-400 hover:text-emerald-400" : "bg-slate-50 border-slate-200 text-slate-500 hover:text-emerald-600")}
-                        title="Start Database"
+                        className={cn(
+                          "px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer flex items-center gap-1 disabled:opacity-50",
+                          db.status === "RUNNING"
+                            ? (isDark ? "border-amber-500/30 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20" : "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100")
+                            : (isDark ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20" : "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100")
+                        )}
+                        title={db.status === "RUNNING" ? "Stop Database" : "Start Database"}
                       >
-                        <Play className="w-3.5 h-3.5" />
+                        {db.status === "RUNNING" ? <Square className="w-3 h-3 fill-current" /> : <Play className="w-3 h-3 fill-current" />}
+                        <span>{db.status === "RUNNING" ? "Stop" : "Start"}</span>
                       </button>
                     )}
-                  </div>
 
-                  <Link
-                    href={`/dashboard/database/${db.id}`}
-                    className="px-3 py-1.5 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 active:scale-95 text-slate-950 flex items-center gap-1 transition-all cursor-pointer"
-                  >
-                    <span>Manage</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
+                    <Link
+                      href={`/dashboard/database/${db.id}`}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer",
+                        isDark ? "bg-white/10 hover:bg-white/15 text-white" : "bg-slate-900 hover:bg-slate-800 text-white"
+                      )}
+                    >
+                      <span>Manage</span>
+                      <ChevronRight className="w-3 h-3" />
+                    </Link>
+                  </div>
                 </div>
               </motion.div>
             );
@@ -750,7 +767,10 @@ export default function DatabaseListingPage() {
               <Plus className="w-6 h-6" />
             </div>
             <div>
-              <h4 className={cn("font-bold text-sm sm:text-base tracking-tight transition-colors group-hover:text-cyan-400", isDark ? "text-white" : "text-slate-900")}>
+              <h4 className={cn(
+                "font-bold text-sm sm:text-base tracking-tight transition-colors",
+                isDark ? "text-white group-hover:text-cyan-400" : "text-slate-900 group-hover:text-cyan-700"
+              )}>
                 Deploy New Database
               </h4>
               <p className={cn("text-xs mt-1 max-w-[200px] leading-relaxed", isDark ? "text-zinc-500" : "text-slate-500")}>
@@ -759,6 +779,17 @@ export default function DatabaseListingPage() {
             </div>
           </Link>
         </div>
+      )}
+
+      {/* Scale Compute & Storage Modal */}
+      {scalingDb && (
+        <DatabaseScaleModal
+          isOpen={!!scalingDb}
+          onClose={() => setScalingDb(null)}
+          database={scalingDb}
+          onSuccess={() => fetchDatabases()}
+          isDark={isDark}
+        />
       )}
 
       {/* Action Confirmation Modal (Consistent with VPS) */}

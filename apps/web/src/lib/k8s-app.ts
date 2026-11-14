@@ -612,21 +612,34 @@ export function buildAppContainerSpec(app: AppServiceRecord, domainBase?: string
           value: "Asia/Jakarta"
         - name: N8N_PAYLOAD_SIZE_MAX
           value: "64"
-        - name: N8N_BASIC_AUTH_ACTIVE
-          value: "true"
-        - name: N8N_BASIC_AUTH_USER
-          value: "${app.username || 'admin'}"
-        - name: N8N_BASIC_AUTH_PASSWORD
-          value: "${app.password || 'MasdikaCloud123!'}"
 `;
   } else if (appType === 'hermes') {
-    image = 'docker.io/library/node:22-alpine';
+    image = 'docker.io/library/python:3.12-slim';
     const sshPassword = app.password || 'Hermes123!';
+    const authUser = app.username || 'root';
+    const authSecret = crypto
+      .createHash('sha256')
+      .update(`${app.id}-${app.subdomain}-${sshPassword}`)
+      .digest('hex');
+
+    envYaml = `
+        - name: HERMES_HOME
+          value: "/app/data/.hermes"
+        - name: PATH
+          value: "/app/data/venv/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin"
+        - name: HERMES_DASHBOARD_BASIC_AUTH_USERNAME
+          value: "${authUser}"
+        - name: HERMES_DASHBOARD_BASIC_AUTH_PASSWORD
+          value: "${sshPassword}"
+        - name: HERMES_DASHBOARD_BASIC_AUTH_SECRET
+          value: "${authSecret}"
+`;
+
     const b64HermesMotd = Buffer.from(
       '════════════════════════════════════════════════════════════\n' +
       '  Masdika Cloud - Dedicated Hermes Agent Instance\n' +
       '  Application Mode: Production AI Coding Agent (Web + SSH)\n' +
-      `  Web Dashboard: https://${fullDomain}\n` +
+      `  Web Dashboard: https://${fullDomain} (User: ${authUser})\n` +
       '  Persistent Storage: /app/data\n' +
       '\n' +
       '  Quickstart Commands:\n' +
@@ -637,33 +650,51 @@ export function buildAppContainerSpec(app: AppServiceRecord, domainBase?: string
       '════════════════════════════════════════════════════════════\n'
     ).toString('base64');
 
+    const b64HermesProfile = Buffer.from(
+      'export PATH="/app/data/venv/bin:$PATH"\n' +
+      'export HERMES_HOME="/app/data/.hermes"\n' +
+      'cd /app/data 2>/dev/null || true\n'
+    ).toString('base64');
+
     commandYaml = `
         command: ["/bin/sh", "-c"]
         args:
           - |
-            apk add --no-cache openssh bash git curl nano python3 py3-pip && \\
-            pip install --no-cache-dir --break-system-packages "hermes-agent[web]" uvicorn fastapi || pip install --no-cache-dir --break-system-packages hermes-agent uvicorn fastapi && \\
-            ln -sf /usr/bin/hermes /usr/local/bin/hermes && \\
-            ln -sf /usr/bin/hermes-agent /usr/local/bin/hermes-agent && \\
-            ssh-keygen -A && \\
-            echo "root:${sshPassword}" | chpasswd && \\
-            sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \\
-            echo "PermitRootLogin yes" >> /etc/ssh/sshd_config && \\
-            echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config && \\
-            echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config && \\
-            echo "X11Forwarding no" >> /etc/ssh/sshd_config && \\
-            echo "AllowAgentForwarding no" >> /etc/ssh/sshd_config && \\
-            echo "PermitTunnel no" >> /etc/ssh/sshd_config && \\
-            echo "GatewayPorts no" >> /etc/ssh/sshd_config && \\
-            mkdir -p ${dataMount} /root/.hermes && \\
-            echo "${b64HermesMotd}" | base64 -d > /etc/motd && \\
-            echo "cd /app/data" >> /root/.bashrc && \\
-            echo "cd /app/data" >> /etc/profile && \\
-            rm -rf /etc/apk /var/cache/apk /lib/apk && \\
-            echo "${b64ApkRestrict}" | base64 -d > /sbin/apk && \\
-            chmod 755 /sbin/apk && \\
-            (while true; do hermes dashboard --host 0.0.0.0 --port 9119 --no-open; sleep 5; done >> /app/data/hermes-dashboard.log 2>&1) & \\
-            exec /usr/sbin/sshd -D -e -p 22
+            set -e
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get update
+            apt-get install -y --no-install-recommends openssh-server ca-certificates procps
+            mkdir -p /run/sshd /var/run/sshd ${dataMount} /app/data/.hermes
+            rm -rf /root/.hermes && ln -sfn /app/data/.hermes /root/.hermes
+            ssh-keygen -A
+            echo "root:${sshPassword}" | chpasswd
+            sed -i 's/#*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+            grep -q '^PermitRootLogin yes' /etc/ssh/sshd_config || echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+            grep -q '^PasswordAuthentication yes' /etc/ssh/sshd_config || echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
+            grep -q '^AllowTcpForwarding no' /etc/ssh/sshd_config || echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config
+            grep -q '^X11Forwarding no' /etc/ssh/sshd_config || echo "X11Forwarding no" >> /etc/ssh/sshd_config
+            grep -q '^AllowAgentForwarding no' /etc/ssh/sshd_config || echo "AllowAgentForwarding no" >> /etc/ssh/sshd_config
+            grep -q '^PermitTunnel no' /etc/ssh/sshd_config || echo "PermitTunnel no" >> /etc/ssh/sshd_config
+            grep -q '^GatewayPorts no' /etc/ssh/sshd_config || echo "GatewayPorts no" >> /etc/ssh/sshd_config
+            echo "${b64HermesMotd}" | base64 -d > /etc/motd
+            echo "${b64HermesProfile}" | base64 -d > /etc/profile.d/hermes.sh
+            grep -q 'HERMES_HOME' /root/.bashrc 2>/dev/null || cat /etc/profile.d/hermes.sh >> /root/.bashrc
+            grep -q 'HERMES_HOME' /root/.profile 2>/dev/null || cat /etc/profile.d/hermes.sh >> /root/.profile
+            grep -q 'HERMES_HOME' /etc/profile 2>/dev/null || cat /etc/profile.d/hermes.sh >> /etc/profile
+            /usr/sbin/sshd -p 22
+            apt-get install -y --no-install-recommends bash git curl nano nodejs && rm -rf /var/lib/apt/lists/*
+            if [ ! -x /app/data/venv/bin/pip ]; then
+              python3 -m venv /app/data/venv
+            fi
+            /app/data/venv/bin/pip install --no-cache-dir --upgrade pip "hermes-agent[web]" >> /app/data/hermes-setup.log 2>&1 || /app/data/venv/bin/pip install --no-cache-dir --upgrade "hermes-agent" uvicorn fastapi >> /app/data/hermes-setup.log 2>&1
+            ln -sf /app/data/venv/bin/hermes /usr/local/bin/hermes
+            ln -sf /app/data/venv/bin/hermes-agent /usr/local/bin/hermes-agent
+            set +e
+            while true; do
+              pgrep -x sshd >/dev/null 2>&1 || /usr/sbin/sshd -p 22
+              /app/data/venv/bin/hermes dashboard --host 0.0.0.0 --port 9119 --no-open --skip-build >> /app/data/hermes-dashboard.log 2>&1 || /app/data/venv/bin/hermes dashboard --host 0.0.0.0 --port 9119 --no-open >> /app/data/hermes-dashboard.log 2>&1
+              sleep 3
+            done
 `;
   } else if (appType === 'ninerouter') {
     image = 'docker.io/decolua/9router:latest';
@@ -898,7 +929,8 @@ spec:
     targetPort: ${app.appPort}
     nodePort: ${app.port}`;
 
-  const probePort = isHermes ? 22 : app.appPort;
+  const readinessProbePort = isHermes ? 9119 : app.appPort;
+  const livenessProbePort = isHermes ? 22 : app.appPort;
 
   const manifestYaml = `apiVersion: v1
 kind: PersistentVolumeClaim
@@ -946,14 +978,14 @@ spec:
 ${containerPortsYaml}${commandYaml}${envYaml ? `\n        env:${envYaml}` : ''}
         readinessProbe:
           tcpSocket:
-            port: ${probePort}
+            port: ${readinessProbePort}
           initialDelaySeconds: 15
-          periodSeconds: 10
-          failureThreshold: 6
+          periodSeconds: ${isHermes ? 5 : 10}
+          failureThreshold: ${isHermes ? 36 : 6}
         livenessProbe:
           tcpSocket:
-            port: ${probePort}
-          initialDelaySeconds: 30
+            port: ${livenessProbePort}
+          initialDelaySeconds: ${isHermes ? 45 : 30}
           periodSeconds: 15
           failureThreshold: 6
         resources:

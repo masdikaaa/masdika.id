@@ -543,14 +543,14 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                       ? (isDark ? "bg-red-500/15 text-red-400 border-red-500/30" : "bg-red-50 text-red-700 border-red-200")
                       : (isDark ? "bg-zinc-500/15 text-zinc-400 border-zinc-500/30" : "bg-slate-100 text-slate-600 border-slate-200")
               )}>
-                {isReady && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />}
-                {isInitializing && <Loader2 className="w-3 h-3 animate-spin text-amber-400" />}
-                {isSuspended && <AlertTriangle className="w-3 h-3 text-red-400" />}
+                {isReady && <span className={cn("w-1.5 h-1.5 rounded-full animate-pulse", isDark ? "bg-emerald-400" : "bg-emerald-500")} />}
+                {isInitializing && <Loader2 className={cn("w-3 h-3 animate-spin", isDark ? "text-amber-400" : "text-amber-600")} />}
+                {isSuspended && <AlertTriangle className={cn("w-3 h-3", isDark ? "text-red-400" : "text-red-600")} />}
                 {isReady ? "ONLINE & READY" : isInitializing ? "INITIALIZING ENGINE..." : db.status}
               </span>
             </div>
             <p className={cn("text-xs sm:text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
-              Endpoint: <span className="font-mono text-cyan-400 font-bold">{db.host}:{db.port}</span> • Region: {db.region} • PAYG: {formatRupiah(db.hourlyRate || 14)}/hr
+              Endpoint: <span className={cn("font-mono font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{db.host}:{db.port}</span> • Region: {db.region} • PAYG: {formatRupiah(db.hourlyRate || 14)}/hr
             </p>
           </div>
         </div>
@@ -690,14 +690,14 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-start gap-3.5">
               <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center shrink-0", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-100 border-cyan-200")}>
-                <Loader2 className="w-5 h-5 text-cyan-400 animate-spin" />
+                <Loader2 className={cn("w-5 h-5 animate-spin", isDark ? "text-cyan-400" : "text-cyan-600")} />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className={cn("text-base font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                     {isProvisioning ? "Provisioning Database on Kubernetes Cluster..." : "Initializing Database Engine & Storage..."}
                   </h3>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 animate-pulse">
+                  <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border animate-pulse", isDark ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/30" : "bg-cyan-100 text-cyan-800 border-cyan-300")}>
                     Initializing Engine
                   </span>
                 </div>
@@ -708,25 +708,25 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
             </div>
 
             <div className="flex items-center gap-2 self-start md:self-auto shrink-0">
-              <div className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-mono", isDark ? "bg-white/[0.03] border-white/[0.08] text-zinc-400" : "bg-white border-slate-200 text-slate-500 shadow-2xs")}>
-                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping inline-block" />
+              <div className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-mono", isDark ? "bg-white/[0.03] border-white/[0.08] text-zinc-400" : "bg-white border-slate-200 text-slate-600 shadow-2xs")}>
+                <span className={cn("w-2 h-2 rounded-full animate-ping inline-block", isDark ? "bg-cyan-400" : "bg-cyan-600")} />
                 <span>Auto-refreshing realtime...</span>
               </div>
             </div>
           </div>
 
           {/* Provisioning Progress Steps */}
-          <div className={cn("grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4 pt-4 border-t", isDark ? "border-white/[0.06]" : "border-cyan-100")}>
-            <div className="flex items-center gap-2.5 text-xs font-semibold text-emerald-400">
-              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+          <div className={cn("grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4 pt-4 border-t", isDark ? "border-white/[0.06]" : "border-cyan-200")}>
+            <div className={cn("flex items-center gap-2.5 text-xs font-semibold", isDark ? "text-emerald-400" : "text-emerald-700")}>
+              <CheckCircle2 className={cn("w-4 h-4 shrink-0", isDark ? "text-emerald-400" : "text-emerald-600")} />
               <span>1. Port & Secret Allocation</span>
             </div>
-            <div className="flex items-center gap-2.5 text-xs font-semibold text-emerald-400">
-              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+            <div className={cn("flex items-center gap-2.5 text-xs font-semibold", isDark ? "text-emerald-400" : "text-emerald-700")}>
+              <CheckCircle2 className={cn("w-4 h-4 shrink-0", isDark ? "text-emerald-400" : "text-emerald-600")} />
               <span>2. Mount Persistent SSD Volume</span>
             </div>
-            <div className="flex items-center gap-2.5 text-xs font-semibold text-cyan-400">
-              <Loader2 className="w-4 h-4 shrink-0 animate-spin text-cyan-400" />
+            <div className={cn("flex items-center gap-2.5 text-xs font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>
+              <Loader2 className={cn("w-4 h-4 shrink-0 animate-spin", isDark ? "text-cyan-400" : "text-cyan-600")} />
               <span>3. Start Pod & Readiness Check</span>
             </div>
           </div>
@@ -743,22 +743,22 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
         )}>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-start gap-3.5">
-              <div className="w-10 h-10 rounded-xl bg-red-500/20 border border-red-500/30 flex items-center justify-center shrink-0">
-                <AlertTriangle className="w-5 h-5 text-red-400" />
+              <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center shrink-0", isDark ? "bg-red-500/20 border-red-500/30" : "bg-red-100 border-red-200")}>
+                <AlertTriangle className={cn("w-5 h-5", isDark ? "text-red-400" : "text-red-600")} />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className={cn("text-base font-bold tracking-tight text-red-400")}>
+                  <h3 className={cn("text-base font-bold tracking-tight", isDark ? "text-red-400" : "text-red-700")}>
                     Database Service Suspended
                   </h3>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-red-500/20 text-red-400 border border-red-500/30">
+                  <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border", isDark ? "bg-red-500/20 text-red-400 border-red-500/30" : "bg-red-100 text-red-700 border-red-200")}>
                     Low Balance
                   </span>
                 </div>
                 <p className={cn("text-xs mt-1 leading-relaxed", isDark ? "text-zinc-300" : "text-slate-700")}>
                   {db.suspendReason || "Account balance is insufficient for hourly Pay-As-You-Go deductions."}{" "}
                   {db.terminationDate && (
-                    <strong className="text-amber-400">
+                    <strong className={isDark ? "text-amber-400" : "text-amber-700"}>
                       3-day grace period until {new Date(db.terminationDate).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}.
                     </strong>
                   )}{" "}
@@ -823,10 +823,10 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
               {/* Port */}
               <div className={cn("p-3.5 rounded-xl border flex items-center justify-between", isDark ? "bg-[#0a0a0c] border-white/[0.06]" : "bg-slate-50 border-slate-200")}>
                 <div>
-                  <span className={cn("text-[10px] uppercase font-bold tracking-wider block", isDark ? "text-zinc-500" : "text-slate-400")}>
+                  <span className={cn("text-[10px] uppercase font-bold tracking-wider block", isDark ? "text-zinc-500" : "text-slate-500")}>
                     NodePort
                   </span>
-                  <span className={cn("font-mono font-bold text-sm text-cyan-400")}>
+                  <span className={cn("font-mono font-bold text-sm", isDark ? "text-cyan-400" : "text-cyan-700")}>
                     {db.port}
                   </span>
                 </div>
@@ -842,7 +842,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
               {/* Database Name */}
               <div className={cn("p-3.5 rounded-xl border flex items-center justify-between", isDark ? "bg-[#0a0a0c] border-white/[0.06]" : "bg-slate-50 border-slate-200")}>
                 <div>
-                  <span className={cn("text-[10px] uppercase font-bold tracking-wider block", isDark ? "text-zinc-500" : "text-slate-400")}>
+                  <span className={cn("text-[10px] uppercase font-bold tracking-wider block", isDark ? "text-zinc-500" : "text-slate-500")}>
                     Database Name
                   </span>
                   <span className={cn("font-mono font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>
@@ -861,7 +861,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
               {/* Username */}
               <div className={cn("p-3.5 rounded-xl border flex items-center justify-between", isDark ? "bg-[#0a0a0c] border-white/[0.06]" : "bg-slate-50 border-slate-200")}>
                 <div>
-                  <span className={cn("text-[10px] uppercase font-bold tracking-wider block", isDark ? "text-zinc-500" : "text-slate-400")}>
+                  <span className={cn("text-[10px] uppercase font-bold tracking-wider block", isDark ? "text-zinc-500" : "text-slate-500")}>
                     Username
                   </span>
                   <span className={cn("font-mono font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>
@@ -880,7 +880,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
               {/* Password */}
               <div className={cn("p-3.5 rounded-xl border flex items-center justify-between", isDark ? "bg-[#0a0a0c] border-white/[0.06]" : "bg-slate-50 border-slate-200")}>
                 <div>
-                  <span className={cn("text-[10px] uppercase font-bold tracking-wider block", isDark ? "text-zinc-500" : "text-slate-400")}>
+                  <span className={cn("text-[10px] uppercase font-bold tracking-wider block", isDark ? "text-zinc-500" : "text-slate-500")}>
                     Password
                   </span>
                   <span className={cn("font-mono font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>
@@ -911,10 +911,10 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
               {db.rootPassword && (
                 <div className={cn("p-3.5 rounded-xl border flex items-center justify-between", isDark ? "bg-[#0a0a0c] border-white/[0.06]" : "bg-slate-50 border-slate-200")}>
                   <div>
-                    <span className={cn("text-[10px] uppercase font-bold tracking-wider block", isDark ? "text-zinc-500" : "text-slate-400")}>
+                    <span className={cn("text-[10px] uppercase font-bold tracking-wider block", isDark ? "text-zinc-500" : "text-slate-500")}>
                       Root / Superuser Password
                     </span>
-                    <span className={cn("font-mono font-bold text-sm text-amber-400")}>
+                    <span className={cn("font-mono font-bold text-sm", isDark ? "text-amber-400" : "text-amber-700")}>
                       {showRootPassword ? db.rootPassword : "••••••••••••"}
                     </span>
                   </div>
@@ -946,24 +946,24 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
                 <div>
                   <div className="flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-cyan-400" />
+                    <Activity className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />
                     <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                       Dedicated Resource Monitoring
                     </h2>
                     <span className={cn(
                       "px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border flex items-center gap-1",
                       isReady
-                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                        : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                        ? (isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200")
+                        : (isDark ? "bg-amber-500/10 text-amber-400 border-amber-500/20" : "bg-amber-50 text-amber-800 border-amber-200")
                     )}>
                       {isReady ? (
                         <>
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                          <span className={cn("w-1.5 h-1.5 rounded-full animate-pulse", isDark ? "bg-emerald-400" : "bg-emerald-500")} />
                           <span>Live Telemetry</span>
                         </>
                       ) : (
                         <>
-                          <Loader2 className="w-3 h-3 animate-spin text-amber-400" />
+                          <Loader2 className={cn("w-3 h-3 animate-spin", isDark ? "text-amber-400" : "text-amber-600")} />
                           <span>Initializing Telemetry</span>
                         </>
                       )}
@@ -1008,17 +1008,17 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                   )}
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <span className={cn("text-[10px] font-bold uppercase tracking-wider flex items-center gap-1", isDark ? "text-zinc-400" : "text-slate-500")}>
-                      <Cpu className="w-3.5 h-3.5 text-cyan-400" />
+                    <span className={cn("text-[10px] font-bold uppercase tracking-wider flex items-center gap-1", isDark ? "text-zinc-400" : "text-slate-600")}>
+                      <Cpu className={cn("w-3.5 h-3.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
                       CPU Utilization
                     </span>
-                    <span className="text-[10px] font-mono text-cyan-400 font-bold">{db.cpuShares} vCPU</span>
+                    <span className={cn("text-[10px] font-mono font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{db.cpuShares} vCPU</span>
                   </div>
                   <div className="flex items-baseline gap-2">
                     <span className={cn("text-xl font-black font-mono tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                       {metricsData?.summary?.cpu?.current ?? (db.status === "RUNNING" ? 12.5 : 0)}%
                     </span>
-                    <span className={cn("text-xs font-medium", isDark ? "text-zinc-500" : "text-slate-400")}>
+                    <span className={cn("text-xs font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>
                       of 100% capacity
                     </span>
                   </div>
@@ -1036,17 +1036,17 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                   )}
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <span className={cn("text-[10px] font-bold uppercase tracking-wider flex items-center gap-1", isDark ? "text-zinc-400" : "text-slate-500")}>
-                      <Layers className="w-3.5 h-3.5 text-cyan-400" />
+                    <span className={cn("text-[10px] font-bold uppercase tracking-wider flex items-center gap-1", isDark ? "text-zinc-400" : "text-slate-600")}>
+                      <Layers className={cn("w-3.5 h-3.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
                       Memory (RAM)
                     </span>
-                    <span className="text-[10px] font-mono text-cyan-400 font-bold">{db.memoryMb} MB Max</span>
+                    <span className={cn("text-[10px] font-mono font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{db.memoryMb} MB Max</span>
                   </div>
                   <div className="flex items-baseline gap-2">
                     <span className={cn("text-xl font-black font-mono tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                       {metricsData?.summary?.memory?.currentMb ?? (db.status === "RUNNING" ? Math.min(db.memoryMb, 240) : 0)} MB
                     </span>
-                    <span className={cn("text-xs font-medium", isDark ? "text-zinc-500" : "text-slate-400")}>
+                    <span className={cn("text-xs font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>
                       ({metricsData?.summary?.memory?.percentage ?? (db.status === "RUNNING" ? Math.round((240 / db.memoryMb) * 100) : 0)}%)
                     </span>
                   </div>
@@ -1064,17 +1064,17 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                   )}
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <span className={cn("text-[10px] font-bold uppercase tracking-wider flex items-center gap-1", isDark ? "text-zinc-400" : "text-slate-500")}>
-                      <HardDrive className="w-3.5 h-3.5 text-cyan-400" />
+                    <span className={cn("text-[10px] font-bold uppercase tracking-wider flex items-center gap-1", isDark ? "text-zinc-400" : "text-slate-600")}>
+                      <HardDrive className={cn("w-3.5 h-3.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
                       SSD Storage
                     </span>
-                    <span className="text-[10px] font-mono text-cyan-400 font-bold">{db.storageGb} GB Quota</span>
+                    <span className={cn("text-[10px] font-mono font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{db.storageGb} GB Quota</span>
                   </div>
                   <div className="flex items-baseline gap-2">
                     <span className={cn("text-xl font-black font-mono tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                       {metricsData?.summary?.disk?.usedGb ?? 1.2} GB
                     </span>
-                    <span className={cn("text-xs font-medium", isDark ? "text-zinc-500" : "text-slate-400")}>
+                    <span className={cn("text-xs font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>
                       ({metricsData?.summary?.disk?.percentage ?? Math.round((1.2 / db.storageGb) * 100)}%)
                     </span>
                   </div>
@@ -1209,11 +1209,16 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                       : nodejsSnippet;
                   copyToClipboard(content, `snippet-${activeSnippetTab}`);
                 }}
-                className="absolute top-3 right-3 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white/10 hover:bg-white/20 text-white flex items-center gap-1 border border-white/10 transition-all cursor-pointer"
+                className={cn(
+                  "absolute top-3 right-3 px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 border transition-all cursor-pointer",
+                  isDark
+                    ? "bg-white/10 hover:bg-white/20 text-white border-white/10"
+                    : "bg-slate-200/80 hover:bg-slate-300 text-slate-800 border-slate-300"
+                )}
               >
                 {copiedKey === `snippet-${activeSnippetTab}` ? (
                   <>
-                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    <Check className={cn("w-3.5 h-3.5", isDark ? "text-emerald-400" : "text-emerald-600")} />
                     <span>Copied</span>
                   </>
                 ) : (
@@ -1312,13 +1317,13 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                     </div>
                   )}
                   {isInitializing ? (
-                    <p className="text-amber-400 font-semibold flex items-center gap-1.5 pt-0.5">
-                      <Loader2 className="w-3 h-3 animate-spin text-amber-400 shrink-0" />
+                    <p className={cn("font-semibold flex items-center gap-1.5 pt-0.5", isDark ? "text-amber-400" : "text-amber-700")}>
+                      <Loader2 className={cn("w-3 h-3 animate-spin shrink-0", isDark ? "text-amber-400" : "text-amber-600")} />
                       <span>Waiting for database engine to accept connections before Web GUI is enabled...</span>
                     </p>
                   ) : isReady ? (
-                    <p className="text-emerald-400 font-semibold flex items-center gap-1 pt-0.5">
-                      <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
+                    <p className={cn("font-semibold flex items-center gap-1 pt-0.5", isDark ? "text-emerald-400" : "text-emerald-700")}>
+                      <CheckCircle2 className={cn("w-3 h-3 shrink-0", isDark ? "text-emerald-400" : "text-emerald-600")} />
                       <span>Database engine is online and accepting connections!</span>
                     </p>
                   ) : null}
@@ -1329,17 +1334,23 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
                 <button
                   type="button"
                   disabled
-                  className="w-full py-2.5 rounded-xl font-bold text-xs bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 flex items-center justify-center gap-2 cursor-not-allowed opacity-80"
+                  className={cn(
+                    "w-full py-2.5 rounded-xl font-bold text-xs border flex items-center justify-center gap-2 cursor-not-allowed opacity-85",
+                    isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-300" : "bg-cyan-50 border-cyan-200 text-cyan-800"
+                  )}
                   title="Web GUI will activate automatically once the database engine is ready"
                 >
-                  <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-400" />
+                  <Loader2 className={cn("w-3.5 h-3.5 animate-spin", isDark ? "text-cyan-400" : "text-cyan-600")} />
                   <span>Starting {engine.webToolName} (Waiting for Engine)...</span>
                 </button>
               ) : isSuspended ? (
                 <button
                   type="button"
                   disabled
-                  className="w-full py-2.5 rounded-xl font-bold text-xs bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center gap-2 cursor-not-allowed"
+                  className={cn(
+                    "w-full py-2.5 rounded-xl font-bold text-xs border flex items-center justify-center gap-2 cursor-not-allowed",
+                    isDark ? "bg-red-500/10 border-red-500/20 text-red-400" : "bg-red-50 border-red-200 text-red-700"
+                  )}
                   title="Database suspended due to insufficient balance"
                 >
                   <AlertTriangle className="w-3.5 h-3.5" />
@@ -1363,45 +1374,47 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
           <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#111115] border-white/[0.08] shadow-2xs" : "bg-white border-slate-200/90 shadow-2xs")}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Activity className="w-4 h-4 text-emerald-400" />
+                <Activity className={cn("w-4 h-4", isDark ? "text-emerald-400" : "text-emerald-600")} />
                 <h3 className={cn("text-base font-bold", isDark ? "text-white" : "text-slate-900")}>
                   Cluster Telemetry
                 </h3>
               </div>
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className={cn("w-2 h-2 rounded-full animate-pulse", isReady ? (isDark ? "bg-emerald-400" : "bg-emerald-500") : (isDark ? "bg-amber-400" : "bg-amber-500"))} />
             </div>
 
             <div className="space-y-3">
               <div className="flex items-center justify-between text-xs">
                 <span className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Pod Status</span>
-                <span className="font-bold text-emerald-400">{db.k8sStatus?.phase || (db.status === "RUNNING" ? "Running" : "Stopped")}</span>
+                <span className={cn("font-bold", isReady ? (isDark ? "text-emerald-400" : "text-emerald-700") : (isDark ? "text-amber-400" : "text-amber-700"))}>
+                  {db.k8sStatus?.phase || (db.status === "RUNNING" ? "Running" : db.status)} ({isReady ? "Ready" : isInitializing ? "Initializing" : db.status})
+                </span>
               </div>
 
               <div className="flex items-center justify-between text-xs">
                 <span className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>CPU Usage</span>
-                <span className="font-mono font-bold">{db.k8sStatus?.cpuUsage || "Active (~25m)"}</span>
+                <span className={cn("font-mono font-bold", isDark ? "text-white" : "text-slate-900")}>{db.k8sStatus?.cpuUsage || "Active (~25m)"}</span>
               </div>
 
               <div className="flex items-center justify-between text-xs">
                 <span className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Memory Usage</span>
-                <span className="font-mono font-bold">{db.k8sStatus?.memoryUsage || "Active (~180Mi)"}</span>
+                <span className={cn("font-mono font-bold", isDark ? "text-white" : "text-slate-900")}>{db.k8sStatus?.memoryUsage || "Active (~180Mi)"}</span>
               </div>
 
               <div className="flex items-center justify-between text-xs">
                 <span className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Tier Architecture</span>
-                <span className="font-bold text-cyan-400">
+                <span className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>
                   {db.planName || (isDedicated ? "Dedicated Database" : "Shared Database")}
                 </span>
               </div>
 
               <div className="flex items-center justify-between text-xs">
                 <span className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Allocated Quota</span>
-                <span className="font-semibold">{db.cpuShares} vCPU / {db.memoryMb >= 1024 ? `${db.memoryMb / 1024} GB` : `${db.memoryMb} MB`} RAM</span>
+                <span className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>{db.cpuShares} vCPU / {db.memoryMb >= 1024 ? `${db.memoryMb / 1024} GB` : `${db.memoryMb} MB`} RAM</span>
               </div>
 
               <div className="flex items-center justify-between text-xs">
                 <span className={cn("font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Storage Volume</span>
-                <span className="font-semibold">{db.storageGb} GB SSD</span>
+                <span className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>{db.storageGb} GB SSD</span>
               </div>
 
               <div className="flex items-center justify-between text-xs">
@@ -1412,7 +1425,7 @@ export default function DatabaseDetailPage({ params }: { params: Promise<{ id: s
               </div>
             </div>
 
-            <div className="pt-3 border-t border-white/[0.06]">
+            <div className={cn("pt-3 border-t", isDark ? "border-white/[0.06]" : "border-slate-200")}>
               <button
                 type="button"
                 onClick={() => setScaleModalOpen(true)}
