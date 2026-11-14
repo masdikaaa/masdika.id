@@ -14,6 +14,7 @@ import {
   Copy,
   Check,
   TrendingUp,
+  Rocket,
   Play,
   Square,
   RotateCw,
@@ -62,6 +63,7 @@ export default function AppDetailPage({
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [isScaleModalOpen, setIsScaleModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [powerModalAction, setPowerModalAction] = useState<"start" | "stop" | "restart" | null>(null);
   const [powering, setPowering] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -129,6 +131,39 @@ export default function AppDetailPage({
     setCopiedField(field);
     toast.success(`Copied ${field} to clipboard!`);
     setTimeout(() => setCopiedField(null), 2000);
+  };
+
+  const getPowerModalConfig = (action: "start" | "stop" | "restart" | null) => {
+    switch (action) {
+      case "start":
+        return {
+          title: `Start ${app?.name || "Application"}?`,
+          description: `Are you sure you want to boot up ${app?.name}? The container pod will start up and traffic routing will resume immediately.`,
+          confirmText: "Start Application",
+          variant: "success" as const,
+        };
+      case "stop":
+        return {
+          title: `Stop ${app?.name || "Application"}?`,
+          description: `Are you sure you want to stop ${app?.name}? The container pod will be paused with 0 replicas. All persistent volume data on disk will remain completely safe.`,
+          confirmText: "Stop Application",
+          variant: "warning" as const,
+        };
+      case "restart":
+        return {
+          title: `Restart ${app?.name || "Application"}?`,
+          description: `Are you sure you want to restart ${app?.name}? Active connections will drop momentarily while the container pod undergoes a rolling restart.`,
+          confirmText: "Restart Application",
+          variant: "warning" as const,
+        };
+      default:
+        return {
+          title: "Confirm Action",
+          description: "Are you sure you want to proceed?",
+          confirmText: "Confirm",
+          variant: "warning" as const,
+        };
+    }
   };
 
   const handlePowerAction = async (action: "start" | "stop" | "restart") => {
@@ -282,7 +317,7 @@ export default function AppDetailPage({
             onClick={() => setIsScaleModalOpen(true)}
             className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all shadow-md shadow-cyan-400/20 flex items-center justify-center gap-2 cursor-pointer active:scale-95"
           >
-            <TrendingUp className="w-3.5 h-3.5" />
+            <Rocket className="w-3.5 h-3.5" />
             <span>Scale Compute</span>
           </button>
 
@@ -291,7 +326,7 @@ export default function AppDetailPage({
             {isRunning ? (
               <button
                 type="button"
-                onClick={() => handlePowerAction("stop")}
+                onClick={() => setPowerModalAction("stop")}
                 disabled={powering !== null}
                 className={cn(
                   "col-span-1 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
@@ -305,7 +340,7 @@ export default function AppDetailPage({
             ) : (
               <button
                 type="button"
-                onClick={() => handlePowerAction("start")}
+                onClick={() => setPowerModalAction("start")}
                 disabled={powering !== null}
                 className={cn(
                   "col-span-1 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
@@ -320,7 +355,7 @@ export default function AppDetailPage({
 
             <button
               type="button"
-              onClick={() => handlePowerAction("restart")}
+              onClick={() => setPowerModalAction("restart")}
               disabled={powering !== null || !isRunning}
               className={cn(
                 "col-span-1 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50",
@@ -352,18 +387,20 @@ export default function AppDetailPage({
           {/* Card 1: Public HTTPS & Domain Access OR Direct SSH Access */}
           {isSshApp ? (
             <div className={cn(
-              "p-6 rounded-2xl border space-y-5 transition-all",
-              isDark ? "bg-[#101014] border-white/[0.08]" : "bg-white border-slate-200 shadow-2xs"
+              "p-5 sm:p-6 rounded-2xl space-y-5 transition-all shadow-lg",
+              isDark ? "bg-[#10141f] shadow-black/40" : "bg-white shadow-slate-200/70"
             )}>
-              <div className="flex items-center justify-between">
-                <h3 className={cn("text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                  <Terminal className="w-4 h-4" /> Direct SSH Terminal Access
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                  <Terminal className="w-4 h-4 shrink-0" />
+                  <span>Direct SSH Terminal Access</span>
                 </h3>
                 <span className={cn(
-                  "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border",
-                  isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                  "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold self-start sm:self-auto shrink-0",
+                  isDark ? "bg-emerald-500/15 text-emerald-400" : "bg-emerald-50 text-emerald-700"
                 )}>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Encrypted SSH Active
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>Encrypted SSH Active</span>
                 </span>
               </div>
 
@@ -484,18 +521,20 @@ export default function AppDetailPage({
             </div>
           ) : (
             <div className={cn(
-              "p-6 rounded-2xl border space-y-5 transition-all",
-              isDark ? "bg-[#101014] border-white/[0.08]" : "bg-white border-slate-200 shadow-2xs"
+              "p-5 sm:p-6 rounded-2xl space-y-5 transition-all shadow-lg",
+              isDark ? "bg-[#10141f] shadow-black/40" : "bg-white shadow-slate-200/70"
             )}>
-              <div className="flex items-center justify-between">
-                <h3 className={cn("text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                  <Globe className="w-4 h-4" /> HTTPS Web Access & Routing
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                  <Globe className="w-4 h-4 shrink-0" />
+                  <span>HTTPS Web Access &amp; Routing</span>
                 </h3>
                 <span className={cn(
-                  "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border",
-                  isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                  "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold self-start sm:self-auto shrink-0",
+                  isDark ? "bg-emerald-500/15 text-emerald-400" : "bg-emerald-50 text-emerald-700"
                 )}>
-                  <ShieldCheck className="w-3.5 h-3.5" /> Let&apos;s Encrypt SSL Active
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Let&apos;s Encrypt SSL Active</span>
                 </span>
               </div>
 
@@ -563,19 +602,19 @@ export default function AppDetailPage({
           )}
 
           {/* Dedicated Resource Utilization Graphs (CPU, RAM, Disk) - Consistent with Managed DB */}
-          <div className={cn("rounded-2xl border p-5 sm:p-6 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-xs")}>
+          <div className={cn("rounded-2xl p-5 sm:p-6 transition-all shadow-lg", isDark ? "bg-[#10141f] shadow-black/40" : "bg-white shadow-slate-200/70")}>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
               <div>
-                <div className="flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-cyan-400" />
-                  <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Activity className="w-4 h-4 text-cyan-400 shrink-0" />
+                  <h2 className={cn("text-sm sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                     Dedicated Resource Monitoring
                   </h2>
                   <span className={cn(
-                    "px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border flex items-center gap-1",
+                    "px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1",
                     isReady
-                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                      : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                      ? "bg-emerald-500/15 text-emerald-400"
+                      : "bg-amber-500/15 text-amber-400"
                   )}>
                     {isReady ? (
                       <>
@@ -783,11 +822,12 @@ export default function AppDetailPage({
 
           {/* Card 2: App Integration & API Reference */}
           <div className={cn(
-            "p-6 rounded-2xl border space-y-4 transition-all",
-            isDark ? "bg-[#101014] border-white/[0.08]" : "bg-white border-slate-200 shadow-2xs"
+            "p-5 sm:p-6 rounded-2xl space-y-4 transition-all shadow-lg",
+            isDark ? "bg-[#10141f] shadow-black/40" : "bg-white shadow-slate-200/70"
           )}>
-            <h3 className={cn("text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
-              <Terminal className="w-4 h-4" /> Quick Usage & Integration Guide
+            <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
+              <Terminal className="w-4 h-4 shrink-0" />
+              <span>Quick Usage &amp; Integration Guide</span>
             </h3>
 
             {app.appType === "hermes" && (
@@ -860,14 +900,15 @@ export default function AppDetailPage({
         <div className="lg:col-span-5 space-y-6">
           {/* Card 3: Live Kubernetes Telemetry */}
           <div className={cn(
-            "p-6 rounded-2xl border space-y-4 transition-all",
-            isDark ? "bg-[#101014] border-white/[0.08]" : "bg-white border-slate-200 shadow-2xs"
+            "p-5 sm:p-6 rounded-2xl space-y-4 transition-all shadow-lg",
+            isDark ? "bg-[#10141f] shadow-black/40" : "bg-white shadow-slate-200/70"
           )}>
-            <div className="flex items-center justify-between">
-              <h3 className={cn("text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                <Activity className="w-4 h-4" /> Live Pod Telemetry
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                <Activity className="w-4 h-4 shrink-0" />
+                <span>Live Pod Telemetry</span>
               </h3>
-              <span className={cn("text-[11px] font-mono", isDark ? "text-zinc-400" : "text-slate-500")}>
+              <span className={cn("text-[11px] font-mono self-start sm:self-auto", isDark ? "text-zinc-400" : "text-slate-500")}>
                 Auto-refreshing (10s)
               </span>
             </div>
@@ -908,19 +949,21 @@ export default function AppDetailPage({
 
           {/* Card 4: Allocated Hardware Compute */}
           <div className={cn(
-            "p-6 rounded-2xl border space-y-4 transition-all",
-            isDark ? "bg-[#101014] border-white/[0.08]" : "bg-white border-slate-200 shadow-2xs"
+            "p-5 sm:p-6 rounded-2xl space-y-4 transition-all shadow-lg",
+            isDark ? "bg-[#10141f] shadow-black/40" : "bg-white shadow-slate-200/70"
           )}>
-            <div className="flex items-center justify-between">
-              <h3 className={cn("text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                <Server className="w-4 h-4" /> Allocated Hardware
+            <div className="flex items-center justify-between gap-2">
+              <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                <Server className="w-4 h-4 shrink-0" />
+                <span>Allocated Hardware</span>
               </h3>
               <button
                 type="button"
                 onClick={() => setIsScaleModalOpen(true)}
-                className="text-xs font-bold text-cyan-400 hover:underline cursor-pointer"
+                className="text-xs font-bold text-cyan-400 hover:underline cursor-pointer flex items-center gap-1"
               >
-                Scale &rarr;
+                <span>Scale</span>
+                <Rocket className="w-3 h-3" />
               </button>
             </div>
 
@@ -963,6 +1006,23 @@ export default function AppDetailPage({
         app={app}
         onSuccess={fetchAppDetail}
         isDark={isDark}
+      />
+
+      {/* Power Action Confirmation Modal (Start / Stop / Restart) */}
+      <ConfirmModal
+        isOpen={powerModalAction !== null}
+        onClose={() => setPowerModalAction(null)}
+        onConfirm={async () => {
+          if (!powerModalAction) return;
+          const action = powerModalAction;
+          setPowerModalAction(null);
+          await handlePowerAction(action);
+        }}
+        title={getPowerModalConfig(powerModalAction).title}
+        description={getPowerModalConfig(powerModalAction).description}
+        confirmText={getPowerModalConfig(powerModalAction).confirmText}
+        isLoading={powering !== null}
+        variant={getPowerModalConfig(powerModalAction).variant}
       />
 
       {/* Delete / Terminate Confirmation Modal */}

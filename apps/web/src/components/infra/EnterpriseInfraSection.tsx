@@ -32,7 +32,7 @@ export function EnterpriseInfraSection({ mode = "vps" }: EnterpriseInfraSectionP
               </h2>
               <p className="text-xs sm:text-sm md:text-base text-[var(--text-secondary)] mt-2 leading-relaxed">
                 {mode === "k3s"
-                  ? "Every Masdika K3s Kubernetes cluster is deployed on genuine Dell PowerEdge servers with high-frequency Intel® Xeon® processors, carrier-grade Juniper Networks® core fabric, and MikroTik® edge routing at Sidoarjo DC."
+                  ? "Every Masdika Kubernetes cluster is deployed on genuine Dell PowerEdge servers with high-frequency Intel® Xeon® processors, carrier-grade Juniper Networks® core fabric, and MikroTik® edge routing at Sidoarjo DC."
                   : "Masdika Cloud VPS instances are backed by dedicated Intel® Xeon® processor nodes, enterprise Juniper Networks® switching fabric, and hardware-accelerated MikroTik® edge BGP routing hosted on-premise at Sidoarjo DC."}
               </p>
             </div>

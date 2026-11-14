@@ -34,10 +34,10 @@ export const metadata: Metadata = {
     siteName: "Masdika",
     images: [
       {
-        url: "/images/brand/og-image.webp",
-        width: 1200,
-        height: 630,
-        alt: "Masdika Managed Database - Kubernetes High Availability",
+        url: "/images/mascots/managed-db.webp",
+        width: 1536,
+        height: 1024,
+        alt: "Masdika Managed Database - Kubernetes High Availability Cloud DB",
       },
     ],
     locale: "en_US",
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Managed Database - Kubernetes High Availability Cloud DB",
     description: "Deploy production-ready MySQL, PostgreSQL, MariaDB, Redis, and MongoDB clusters in seconds. Powered by Kubernetes isolation, persistent SATA SSD storage, instant data export & import, browser web GUIs, and low-latency IIX routing.",
-    images: ["/images/brand/og-image.webp"],
+    images: ["/images/mascots/managed-db.webp"],
   },
 };
 
@@ -97,7 +97,7 @@ export default async function ManagedDbLandingPage() {
         "mpn": "MDB-K8S-01",
         "description": "High-Performance Managed Cloud Databases powered by Kubernetes, container isolation, persistent SATA SSD storage, instant data export & import, and flexible hourly Pay-As-You-Go billing.",
         "category": "Cloud Computing > Managed Database",
-        "image": "https://www.masdika.id/images/brand/og-image.webp",
+        "image": "https://www.masdika.id/images/mascots/managed-db.webp",
         "brand": {
           "@type": "Brand",
           "name": "Masdika"

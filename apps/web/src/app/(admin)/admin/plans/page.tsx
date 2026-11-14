@@ -1102,8 +1102,8 @@ export default function AdminPlansPage() {
                       setFormData({ ...formData, service: newService });
                     }}
                     options={[
-                      { value: "DATABASE", label: "Managed Database (K3s)" },
-                      { value: "APP", label: "Managed Apps (K3s)" },
+                      { value: "DATABASE", label: "Managed Database (Kubernetes)" },
+                      { value: "APP", label: "Managed Apps (Kubernetes)" },
                       { value: "CDN", label: "File CDN" },
                       { value: "TIKTOK", label: "TikTok API" },
                       { value: "SPOTIFY", label: "Spotify API" },
@@ -1308,8 +1308,8 @@ export default function AdminPlansPage() {
                           onChange={(e) => setDbLimits({ ...dbLimits, shared: e.target.value === "shared" })}
                           className={cn("w-full border rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:border-cyan-500", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
                         >
-                          <option value="shared">Shared Multi-Tenant (K3s)</option>
-                          <option value="dedicated">Dedicated K3s Worker Node</option>
+                          <option value="shared">Shared Multi-Tenant (Kubernetes)</option>
+                          <option value="dedicated">Dedicated Kubernetes Worker Node</option>
                         </select>
                       </div>
                     </div>
@@ -1418,7 +1418,7 @@ export default function AdminPlansPage() {
                           Resource Pool Mode
                         </label>
                         <div className={cn("w-full border rounded-lg px-3 py-2 text-xs font-semibold flex items-center", isDark ? "bg-white/[0.02] border-white/[0.08] text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-700")}>
-                          Shared Multi-Tenant (K3s Pods)
+                          Shared Multi-Tenant (Kubernetes Pods)
                         </div>
                       </div>
                     </div>

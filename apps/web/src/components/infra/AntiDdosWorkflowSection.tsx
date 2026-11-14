@@ -60,7 +60,7 @@ export function AntiDdosWorkflowSection({ mode = "vps" }: AntiDdosWorkflowSectio
     },
     {
       id: 4,
-      title: mode === "k3s" ? "4. K3s Ingress & Pod Routing" : "4. VPS Hardware Delivery",
+      title: mode === "k3s" ? "4. Kubernetes Ingress & Pod Routing" : "4. VPS Hardware Delivery",
       vendor: mode === "k3s" ? "Traefik Ingress + Pod Network" : "KVM Hypervisor + Intel Xeon",
       badge: mode === "k3s" ? "0% Pod Disruption" : "100% VM Responsive",
       desc: mode === "k3s"
@@ -88,7 +88,7 @@ export function AntiDdosWorkflowSection({ mode = "vps" }: AntiDdosWorkflowSectio
               </h2>
               <p className="text-xs sm:text-sm md:text-base text-[var(--text-secondary)] mt-2 leading-relaxed">
                 {mode === "k3s"
-                  ? "Interactive simulation demonstrating how automated multi-tier mitigation at our MikroTik edge and Juniper core fabric scrubs millions of malicious packets before they ever reach your K3s cluster at Sidoarjo DC."
+                  ? "Interactive simulation demonstrating how automated multi-tier mitigation at our MikroTik edge and Juniper core fabric scrubs millions of malicious packets before they ever reach your Kubernetes cluster at Sidoarjo DC."
                   : "Interactive simulation demonstrating how automated multi-tier security filters out cyber attacks and ensures your Cloud VPS instance remains 100% responsive with zero CPU spikes."}
               </p>
             </div>
@@ -282,7 +282,7 @@ export function AntiDdosWorkflowSection({ mode = "vps" }: AntiDdosWorkflowSectio
                   </div>
                 </div>
                 <div className="font-bold text-sm text-[var(--text-primary)] mb-0.5">
-                  {mode === "k3s" ? "K3s Pods / Ingress" : "VPS Server Instance"}
+                  {mode === "k3s" ? "Kubernetes Pods / Ingress" : "VPS Server Instance"}
                 </div>
                 <div className="text-[11px] text-[var(--text-secondary)] mb-3">
                   Sidoarjo DC • 1 Gbps

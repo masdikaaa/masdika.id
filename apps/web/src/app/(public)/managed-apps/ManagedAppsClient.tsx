@@ -635,8 +635,10 @@ export default function ManagedAppsClient({
                           </div>
                         ) : (
                           <span className={cn(
-                            "text-[10px] font-mono px-1.5 py-0.5 rounded uppercase font-bold",
-                            app.accessProtocol === 'SSH' ? "bg-amber-500/20 text-amber-400" : "bg-cyan-500/20 text-cyan-400"
+                            "text-[10px] font-mono px-1.5 py-0.5 rounded uppercase font-bold border",
+                            app.accessProtocol === 'SSH'
+                              ? "bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/30"
+                              : "bg-cyan-500/15 text-cyan-800 dark:text-cyan-300 border-cyan-500/30"
                           )}>
                             {app.accessProtocol}
                           </span>
@@ -953,7 +955,7 @@ export default function ManagedAppsClient({
           buttonHref="/dashboard/apps"
           logs={APP_TERMINAL_LOGS}
           stats={APP_TERMINAL_STATS}
-          terminalTitle="PROVISIONING MANAGED APPLICATION (K3S)"
+          terminalTitle="PROVISIONING MANAGED APPLICATION (KUBERNETES)"
           iconType="k3s"
           targetServer="Dell PowerEdge R630 • Sidoarjo DC (Kubernetes Cluster)"
           provisionEstimate="Backend: Native Kubernetes (~15 Seconds)"

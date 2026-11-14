@@ -1366,7 +1366,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
           buttonHref="/dashboard/database"
           logs={DB_TERMINAL_LOGS}
           stats={DB_TERMINAL_STATS}
-          terminalTitle="PROVISIONING MANAGED DATABASE (K3S)"
+          terminalTitle="PROVISIONING MANAGED DATABASE (KUBERNETES)"
           iconType="k3s"
           targetServer="Dell PowerEdge R630 • Sidoarjo DC (Kubernetes Cluster)"
           provisionEstimate="Backend: Native Kubernetes (~15 Seconds)"

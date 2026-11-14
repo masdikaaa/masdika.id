@@ -317,7 +317,7 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
                   Unlimited Traffic Quota Included
                 </h4>
                 <p className="text-xs md:text-sm leading-relaxed text-[var(--text-secondary)]">
-                  All port speeds include unmetered traffic data transfer for your {serviceType === "K3S" ? "K3s" : "VPS"} workloads with zero bandwidth overage charges.
+                  All port speeds include unmetered traffic data transfer for your {serviceType === "K3S" ? "Kubernetes" : "VPS"} workloads with zero bandwidth overage charges.
                 </p>
               </div>
             </div>

@@ -29,8 +29,8 @@ export default function SettingsPage() {
     { id: 'security', label: 'Security', icon: Shield, desc: 'Passwords & 2FA' },
     { id: 'services', label: 'Services', icon: Settings, desc: 'Service Management' },
     { id: 'storage', label: 'RustFS Storage', icon: HardDrive, desc: 'S3-Compatible CDN Storage' },
-    { id: 'database', label: 'Managed DB (K3s)', icon: Database, desc: 'K3s Cluster, PMA, pgAdmin & Mongo' },
-    { id: 'apps', label: 'Managed Apps (K3s)', icon: Boxes, desc: 'K3s Cluster & Let\'s Encrypt SSL for Apps' },
+    { id: 'database', label: 'Managed DB (Kubernetes)', icon: Database, desc: 'Kubernetes Cluster, PMA, pgAdmin & Mongo' },
+    { id: 'apps', label: 'Managed Apps (Kubernetes)', icon: Boxes, desc: 'Kubernetes Cluster & Let\'s Encrypt SSL for Apps' },
   ];
 
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
