@@ -41,6 +41,8 @@ export async function GET(req: Request, props: { params: Promise<{ id: string }>
         apiKeys: true,
         vpsServices: { where: { kubernetesClusterId: null }, include: { assignedIps: true } },
         kubernetesClusters: true,
+        databaseServices: true,
+        appServices: true,
       }
     });
 
@@ -131,6 +133,32 @@ export async function DELETE(req: Request, props: { params: Promise<{ id: string
               console.warn(`Admin User Deletion: Failed to delete VMID ${vps.vmid}:`, err.message);
             }
           }
+        }
+      }
+    }
+
+    // 4.7. Find and physically delete all Managed Databases on K8s
+    const userDatabases = await prisma.databaseService.findMany({ where: { userId: user.id } });
+    if (userDatabases.length > 0) {
+      const { deleteDatabase } = await import('@/lib/k8s-database');
+      for (const db of userDatabases) {
+        try {
+          await deleteDatabase(db.id, db.k8sNamespace || 'managed-db');
+        } catch (e: any) {
+          console.warn(`Admin User Deletion: Failed to delete DB ${db.id}:`, e.message);
+        }
+      }
+    }
+
+    // 4.8. Find and physically delete all Managed Apps on K8s
+    const userApps = await prisma.appService.findMany({ where: { userId: user.id } });
+    if (userApps.length > 0) {
+      const { deleteAppService } = await import('@/lib/k8s-app');
+      for (const app of userApps) {
+        try {
+          await deleteAppService(app as any);
+        } catch (e: any) {
+          console.warn(`Admin User Deletion: Failed to delete App ${app.id}:`, e.message);
         }
       }
     }

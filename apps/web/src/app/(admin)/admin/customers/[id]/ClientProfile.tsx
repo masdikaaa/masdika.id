@@ -32,7 +32,7 @@ const StatusBadge = ({ status }: { status: string }) => {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const upperStatus = status?.toUpperCase() || 'UNKNOWN';
-  if (upperStatus === 'ACTIVE' || upperStatus === 'PAID') {
+  if (upperStatus === 'ACTIVE' || upperStatus === 'PAID' || upperStatus === 'RUNNING') {
     return (
       <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold border", isDark ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700")}>
         <CheckCircle className="w-3.5 h-3.5" /> {upperStatus}
@@ -53,7 +53,7 @@ const StatusBadge = ({ status }: { status: string }) => {
       </span>
     );
   }
-  if (upperStatus === 'EXPIRED' || upperStatus === 'FAILED' || upperStatus === 'CANCELED') {
+  if (upperStatus === 'EXPIRED' || upperStatus === 'FAILED' || upperStatus === 'CANCELED' || upperStatus === 'TERMINATED') {
     return (
       <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold border", isDark ? "bg-red-500/10 border-red-500/20 text-red-400" : "bg-red-50 border-red-200 text-red-700")}>
         <AlertTriangle className="w-3.5 h-3.5" /> {upperStatus}
@@ -451,6 +451,72 @@ export default function ClientProfile({ userId }: { userId: string }) {
       icon: <SiKubernetes className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} />,
       createdAt: k8s.createdAt,
       rawData: k8s
+    })) || []),
+    ...(user.databaseServices?.map((db: any) => ({
+      id: db.id,
+      category: 'Managed Database',
+      type: 'database',
+      name: db.name || `Database #${db.id}`,
+      detail: (
+        <div className="flex flex-col gap-0.5 mt-0.5">
+          <div className="text-sm font-medium truncate">
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-2">
+                <span className={cn("font-semibold", isDark ? "text-zinc-300" : "text-slate-800")}>
+                  {db.billingMode === 'MONTHLY' ? 'Monthly' : 'Pay As You Go'}
+                </span>
+              </div>
+              <span className={cn(isDark ? "text-zinc-300" : "text-slate-600")}>
+                Expires: {db.terminationDate ? new Date(db.terminationDate).toLocaleDateString() : 'N/A'}
+              </span>
+              <span className={cn("text-[11px] font-normal font-mono", isDark ? "text-zinc-400" : "text-slate-500")}>
+                Registration Date: {db.createdAt ? new Date(db.createdAt).toLocaleDateString() : 'N/A'}
+              </span>
+            </div>
+          </div>
+          <div className={cn("text-[11px] font-mono truncate", isDark ? "text-zinc-500" : "text-slate-500")}>
+            {db.type} {db.version} • {db.cpuShares} vCPU • {db.memoryMb} MB RAM • {db.storageGb} GB SSD • Host: {db.host}:{db.port}
+          </div>
+        </div>
+      ),
+      status: db.status,
+      suspendReason: db.suspendReason,
+      icon: <Database className={cn("w-4 h-4", isDark ? "text-emerald-400" : "text-emerald-700")} />,
+      createdAt: db.createdAt,
+      rawData: db
+    })) || []),
+    ...(user.appServices?.map((app: any) => ({
+      id: app.id,
+      category: 'Managed App',
+      type: 'apps',
+      name: app.name || `${app.appType} #${app.id}`,
+      detail: (
+        <div className="flex flex-col gap-0.5 mt-0.5">
+          <div className="text-sm font-medium truncate">
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-2">
+                <span className={cn("font-semibold", isDark ? "text-zinc-300" : "text-slate-800")}>
+                  {app.billingMode === 'PAYG' ? 'Pay As You Go' : 'Monthly'}
+                </span>
+              </div>
+              <span className={cn(isDark ? "text-zinc-300" : "text-slate-600")}>
+                Expires: {app.terminationDate ? new Date(app.terminationDate).toLocaleDateString() : 'N/A'}
+              </span>
+              <span className={cn("text-[11px] font-normal font-mono", isDark ? "text-zinc-400" : "text-slate-500")}>
+                Registration Date: {app.createdAt ? new Date(app.createdAt).toLocaleDateString() : 'N/A'}
+              </span>
+            </div>
+          </div>
+          <div className={cn("text-[11px] font-mono truncate", isDark ? "text-zinc-500" : "text-slate-500")}>
+            {app.appType} ({app.planName}) • {app.cpuShares} vCPU • {app.memoryMb} MB RAM • {app.storageGb} GB SSD • {app.subdomain}.{app.host}
+          </div>
+        </div>
+      ),
+      status: app.status,
+      suspendReason: app.suspendReason,
+      icon: <Box className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} />,
+      createdAt: app.createdAt,
+      rawData: app
     })) || []),
 
   ] : [];

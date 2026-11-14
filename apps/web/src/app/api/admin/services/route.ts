@@ -26,7 +26,19 @@ export async function POST(req: NextRequest) {
         data: updateData
       });
     } else if (type === 'kubernetes') {
+      const k8sData: any = {};
+      if (status !== undefined) k8sData.status = status;
       await prisma.kubernetesCluster.update({
+        where: { id: Number(id) },
+        data: k8sData
+      });
+    } else if (type === 'database') {
+      await prisma.databaseService.update({
+        where: { id: Number(id) },
+        data: updateData
+      });
+    } else if (type === 'apps' || type === 'app') {
+      await prisma.appService.update({
         where: { id: Number(id) },
         data: updateData
       });

@@ -21,7 +21,11 @@ export async function GET(req: Request, props: { params: Promise<{ id: string }>
         },
 
         secureFiles: true,
-        apiKeys: true
+        apiKeys: true,
+        vpsServices: { where: { kubernetesClusterId: null }, include: { assignedIps: true } },
+        kubernetesClusters: true,
+        databaseServices: true,
+        appServices: true,
       }
     });
 
@@ -31,9 +35,12 @@ export async function GET(req: Request, props: { params: Promise<{ id: string }>
 
     const services = {
       subscriptions: user.subscriptions,
-
       secureFiles: user.secureFiles,
-      apiKeys: user.apiKeys
+      apiKeys: user.apiKeys,
+      vpsServices: user.vpsServices,
+      kubernetesClusters: user.kubernetesClusters,
+      databaseServices: user.databaseServices,
+      appServices: user.appServices,
     };
 
     return NextResponse.json({ success: true, data: services });
