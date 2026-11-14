@@ -337,9 +337,13 @@ export async function getAppKubeConfig(): Promise<k8s.KubeConfig> {
       }
     );
   } else {
-    try {
-      kc.loadFromCluster();
-    } catch {
+    if (process.env.KUBERNETES_SERVICE_HOST && process.env.KUBERNETES_SERVICE_PORT) {
+      try {
+        kc.loadFromCluster();
+      } catch {
+        throw new Error('Kubernetes API configuration is missing for Managed Apps. Please configure Kubeconfig or API Server in Admin Settings.');
+      }
+    } else {
       throw new Error('Kubernetes API configuration is missing for Managed Apps. Please configure Kubeconfig or API Server in Admin Settings.');
     }
   }
@@ -492,14 +496,22 @@ export async function allocateAppPort(min = 30000, max = 32767): Promise<number>
 
         // 4. Scan live Kubernetes cluster for active NodePorts across all namespaces
         try {
-          const { coreApi } = await getAppK8sClients();
-          const svcRes = await (coreApi as any).listServiceForAllNamespaces();
-          const items = svcRes.items || svcRes.body?.items || [];
-          for (const item of items) {
-            const ports = item.spec?.ports || [];
-            for (const p of ports) {
-              if (p.nodePort) {
-                usedPorts.add(p.nodePort);
+          const config = await getAppClusterConfig();
+          const hasClusterConfig =
+            (config.kubeconfig && config.kubeconfig.trim().length > 0) ||
+            (config.serviceToken && config.apiServer) ||
+            Boolean(process.env.KUBERNETES_SERVICE_HOST && process.env.KUBERNETES_SERVICE_PORT);
+
+          if (hasClusterConfig) {
+            const { coreApi } = await getAppK8sClients();
+            const svcRes = await (coreApi as any).listServiceForAllNamespaces();
+            const items = svcRes.items || svcRes.body?.items || [];
+            for (const item of items) {
+              const ports = item.spec?.ports || [];
+              for (const p of ports) {
+                if (p.nodePort) {
+                  usedPorts.add(p.nodePort);
+                }
               }
             }
           }

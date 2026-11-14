@@ -171,10 +171,14 @@ export async function getK8sKubeConfig(): Promise<k8s.KubeConfig> {
       }
     );
   } else {
-    // In-cluster fallback
-    try {
-      kc.loadFromCluster();
-    } catch {
+    // In-cluster fallback only if running in a Kubernetes pod
+    if (process.env.KUBERNETES_SERVICE_HOST && process.env.KUBERNETES_SERVICE_PORT) {
+      try {
+        kc.loadFromCluster();
+      } catch {
+        throw new Error('Kubernetes API configuration is missing. Please configure Kubeconfig or API Server in Admin Settings.');
+      }
+    } else {
       throw new Error('Kubernetes API configuration is missing. Please configure Kubeconfig or API Server in Admin Settings.');
     }
   }
@@ -396,15 +400,23 @@ export async function allocateAvailablePort(min = 30000, max = 32767): Promise<n
 
         // 4. Scan live Kubernetes cluster for active NodePorts across all namespaces
         try {
-          const kc = await getK8sKubeConfig();
-          const coreApi = kc.makeApiClient(k8s.CoreV1Api);
-          const svcRes = await (coreApi as any).listServiceForAllNamespaces();
-          const items = svcRes.items || svcRes.body?.items || [];
-          for (const item of items) {
-            const ports = item.spec?.ports || [];
-            for (const p of ports) {
-              if (p.nodePort) {
-                usedPorts.add(p.nodePort);
+          const config = await getK8sClusterConfig();
+          const hasClusterConfig =
+            (config.kubeconfig && config.kubeconfig.trim().length > 0) ||
+            (config.serviceToken && config.apiServer) ||
+            Boolean(process.env.KUBERNETES_SERVICE_HOST && process.env.KUBERNETES_SERVICE_PORT);
+
+          if (hasClusterConfig) {
+            const kc = await getK8sKubeConfig();
+            const coreApi = kc.makeApiClient(k8s.CoreV1Api);
+            const svcRes = await (coreApi as any).listServiceForAllNamespaces();
+            const items = svcRes.items || svcRes.body?.items || [];
+            for (const item of items) {
+              const ports = item.spec?.ports || [];
+              for (const p of ports) {
+                if (p.nodePort) {
+                  usedPorts.add(p.nodePort);
+                }
               }
             }
           }
@@ -1916,6 +1928,17 @@ async function getNodeClusterCapacity(): Promise<{
   }
 
   try {
+    const config = await getK8sClusterConfig();
+    const hasClusterConfig =
+      (config.kubeconfig && config.kubeconfig.trim().length > 0) ||
+      (config.serviceToken && config.apiServer) ||
+      Boolean(process.env.KUBERNETES_SERVICE_HOST && process.env.KUBERNETES_SERVICE_PORT);
+
+    if (!hasClusterConfig) {
+      if (cachedNodeCapacity) return cachedNodeCapacity;
+      return { totalCpu: 4, totalMemoryMb: 8192, maxPods: 100, nodeCount: 1, allNodesReady: true };
+    }
+
     const kc = await getK8sKubeConfig();
     const coreApi = kc.makeApiClient(k8s.CoreV1Api);
     const nodesRes = await coreApi.listNode();

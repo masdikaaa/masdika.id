@@ -32,8 +32,10 @@ vi.mock('../prisma', () => ({
     },
     appService: {
       findMany: vi.fn().mockResolvedValue([
+        { port: 30000 },
         { port: 30001 },
         { port: 30002 },
+        { port: 30003 },
       ]),
     },
     databaseService: {
