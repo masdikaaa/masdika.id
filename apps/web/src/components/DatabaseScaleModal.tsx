@@ -17,6 +17,8 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { OFFICIAL_DATABASE_PLANS } from "@/lib/database-plans";
 
+const STORAGE_PRESETS = [1, 2, 5, 10, 15, 20];
+
 interface DatabaseScaleModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -273,81 +275,93 @@ export function DatabaseScaleModal({
             </div>
           </div>
 
-          {/* Step 2: Storage Volume Slider (Cannot Decrease) */}
+          {/* Step 2: Storage Size (Max 20 GB matching initial checkout) */}
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className={cn("text-xs font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-600")}>
-                2. Storage Capacity (SATA SSD)
+            <div className="mb-2">
+              <label className={cn("text-xs font-bold uppercase tracking-wider block", isDark ? "text-zinc-400" : "text-slate-600")}>
+                2. Storage Size (SATA SSD)
               </label>
-              <div className="flex items-center gap-1.5 text-xs">
-                <span className={isDark ? "text-zinc-400" : "text-slate-500"}>Selected:</span>
-                <span className="font-mono font-bold text-cyan-400">{selectedStorageGb} GB SSD</span>
-              </div>
+              <p className={cn("text-[11px] mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                Freely adjustable, billed per GB on top of the flavor price above.
+              </p>
             </div>
 
-            <div className={cn("p-4 rounded-xl border space-y-3", isDark ? "bg-[#111115] border-white/[0.06]" : "bg-slate-50 border-slate-200")}>
-              <div className="flex items-center gap-3">
-                <HardDrive className="w-5 h-5 text-cyan-400 shrink-0" />
+            <div className={cn("p-4 rounded-xl border space-y-3.5", isDark ? "bg-[#111115] border-white/[0.06]" : "bg-slate-50 border-slate-200")}>
+              <div className="flex items-center justify-between">
+                <span className={cn("text-sm font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                  <span>Storage:</span>
+                  <span className="text-cyan-400 font-mono text-base">{selectedStorageGb} GB</span>
+                </span>
+                <span className={cn("text-xs font-semibold", isDark ? "text-zinc-500" : "text-slate-500")}>
+                  Max: 20 GB
+                </span>
+              </div>
+
+              {/* Range Slider */}
+              <div className="relative py-1">
                 <input
                   type="range"
                   min={currentStorage}
-                  max={200}
+                  max={20}
                   step={1}
                   value={selectedStorageGb}
-                  onChange={(e) => setSelectedStorageGb(Math.max(currentStorage, parseInt(e.target.value, 10)))}
-                  className="w-full accent-cyan-400 cursor-pointer h-2 bg-zinc-700 rounded-lg appearance-none"
+                  onChange={(e) => setSelectedStorageGb(Math.max(currentStorage, Math.min(20, parseInt(e.target.value, 10) || currentStorage)))}
+                  className="w-full h-2.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-cyan-400 transition-all"
                 />
-                <div className="flex items-center gap-1 shrink-0">
-                  <input
-                    type="number"
-                    min={currentStorage}
-                    max={500}
-                    value={selectedStorageGb}
-                    onChange={(e) => {
-                      const val = parseInt(e.target.value, 10);
-                      if (!isNaN(val)) setSelectedStorageGb(Math.max(currentStorage, Math.min(500, val)));
-                    }}
-                    className={cn(
-                      "w-16 px-2 py-1 text-xs font-mono font-bold rounded-lg border text-center focus:outline-none focus:border-cyan-400",
-                      isDark ? "bg-[#0a0a0c] border-white/10 text-white" : "bg-white border-slate-300 text-slate-900"
-                    )}
-                  />
-                  <span className="text-xs font-bold text-zinc-400">GB</span>
-                </div>
               </div>
 
-              {/* Quick Increment Buttons */}
-              <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
-                <span className={cn("text-[11px] font-medium mr-1", isDark ? "text-zinc-500" : "text-slate-400")}>Quick Add:</span>
-                {[5, 10, 20, 50].map((add) => (
-                  <button
-                    key={add}
-                    type="button"
-                    onClick={() => setSelectedStorageGb((prev) => Math.min(500, prev + add))}
-                    className={cn(
-                      "px-2.5 py-1 rounded-lg border text-[11px] font-bold transition-all cursor-pointer",
-                      isDark
-                        ? "bg-white/[0.03] border-white/10 hover:border-cyan-400/50 text-zinc-300 hover:text-white"
-                        : "bg-white border-slate-200 hover:border-cyan-500 text-slate-700 shadow-2xs"
-                    )}
-                  >
-                    +{add} GB
-                  </button>
-                ))}
-                {selectedStorageGb > currentStorage && (
-                  <button
-                    type="button"
-                    onClick={() => setSelectedStorageGb(currentStorage)}
-                    className="text-[11px] text-zinc-400 hover:text-zinc-200 underline ml-auto cursor-pointer"
-                  >
-                    Reset to current ({currentStorage} GB)
-                  </button>
+              {/* Quick Preset Buttons */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className={cn("text-[11px] font-bold uppercase tracking-wider mr-1", isDark ? "text-zinc-500" : "text-slate-400")}>
+                  Presets:
+                </span>
+                {STORAGE_PRESETS.map((preset) => {
+                  const isDisabled = preset < currentStorage;
+                  const isSelected = selectedStorageGb === preset;
+                  return (
+                    <button
+                      type="button"
+                      key={preset}
+                      disabled={isDisabled}
+                      onClick={() => setSelectedStorageGb(preset)}
+                      className={cn(
+                        "px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all border",
+                        isSelected
+                          ? "bg-cyan-400 text-slate-950 border-cyan-400 shadow-xs cursor-pointer"
+                          : isDisabled
+                          ? (isDark
+                              ? "bg-white/[0.02] text-zinc-600 border-white/[0.04] cursor-not-allowed opacity-35"
+                              : "bg-slate-100/60 text-slate-400 border-slate-200/60 cursor-not-allowed opacity-45")
+                          : isDark
+                          ? "bg-white/[0.03] text-zinc-400 border-white/[0.08] hover:text-white hover:bg-white/[0.06] cursor-pointer"
+                          : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100 cursor-pointer"
+                      )}
+                      title={isDisabled ? `Cannot downgrade below current storage (${currentStorage} GB)` : undefined}
+                    >
+                      {preset} GB
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="flex items-center justify-between text-xs text-zinc-500 font-mono pt-0.5">
+                <span>{currentStorage} GB</span>
+                <span>20 GB</span>
+              </div>
+
+              <div className={cn("pt-2 text-xs border-t border-white/[0.06] flex items-center justify-between", isDark ? "text-zinc-400" : "text-slate-600")}>
+                <span>
+                  {isShared ? "Rp 10.000/GB/month" : "Rp 5.000/GB/month"} · Storage cost:{" "}
+                  <strong className="text-cyan-400 font-mono">
+                    Rp {(selectedStorageGb * (isShared ? 10000 : 5000)).toLocaleString("id-ID")}/month
+                  </strong>
+                </span>
+                {currentStorage > 1 && (
+                  <span className={cn("text-[10px] italic", isDark ? "text-zinc-500" : "text-slate-400")}>
+                    (Min: {currentStorage} GB)
+                  </span>
                 )}
               </div>
-
-              <p className={cn("text-[11px] leading-relaxed", isDark ? "text-zinc-500" : "text-slate-500")}>
-                ℹ️ Storage capacity can only be expanded (minimum {currentStorage} GB). Disks cannot be shrunk to protect database integrity.
-              </p>
             </div>
           </div>
 

@@ -88,9 +88,9 @@ export async function POST(
       );
     }
 
-    if (requestedStorage > 500) {
+    if (requestedStorage > 20) {
       return NextResponse.json(
-        { error: "Maximum storage capacity is 500 GB." },
+        { error: "Maximum storage capacity is 20 GB." },
         { status: 400 }
       );
     }

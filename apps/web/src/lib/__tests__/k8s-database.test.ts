@@ -305,13 +305,15 @@ describe('Managed Database K3s Engine - k8s-database.ts', () => {
       expect(dedicatedLarge?.limits.ram).toBe('8 GB');
     });
 
-    it('should enforce zero data loss rules: storage can expand or stay same, but cannot shrink', () => {
-      const currentStorage = 20;
-      const validExpansion = 50;
-      const invalidShrink = 10;
+    it('should enforce zero data loss rules: storage can expand or stay same up to 20 GB, but cannot shrink', () => {
+      const currentStorage = 5;
+      const validExpansion = 20;
+      const invalidShrink = 2;
+      const exceedsMax = 25;
 
-      expect(validExpansion >= currentStorage).toBe(true);
+      expect(validExpansion >= currentStorage && validExpansion <= 20).toBe(true);
       expect(invalidShrink >= currentStorage).toBe(false);
+      expect(exceedsMax <= 20).toBe(false);
     });
 
     it('should calculate correct hourly rates for scaled plans', () => {
