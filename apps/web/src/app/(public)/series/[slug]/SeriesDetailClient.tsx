@@ -179,7 +179,7 @@ export function SeriesDetailClient({ initialSeries, slug }: { initialSeries: any
     "@type": "Course",
     "name": series.title,
     "description": series.description,
-    "image": series.image || `${process.env.NEXT_PUBLIC_APP_URL}/images/brand/og-image.webp`,
+    "image": series.image || `${process.env.NEXT_PUBLIC_APP_URL}${OG_IMAGE_PATH}`,
     "provider": {
       "@type": "Person",
       "name": "Masdika",

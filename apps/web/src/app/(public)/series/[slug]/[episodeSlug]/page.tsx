@@ -208,7 +208,7 @@ export default async function EpisodePage({
       "name": episode.title,
       "description": episode.excerpt || episode.title,
       "embedUrl": `https://www.youtube.com/embed/${ytId}`,
-      "thumbnailUrl": episode.image || `${appUrl}/images/brand/og-image.webp`,
+      "thumbnailUrl": episode.image || `${appUrl}${OG_IMAGE_PATH}`,
       "uploadDate": episode.createdAt,
     });
   }

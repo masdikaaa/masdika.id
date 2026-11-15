@@ -24,7 +24,7 @@ const geistMono = Geist_Mono({
 });
 
 import { getCachedData } from '@/lib/cache';
-import { getFreshOgImagePath } from '@/lib/og-image';
+import { getFreshOgImagePath, OG_IMAGE_PATH } from '@/lib/og-image';
 
 const getCachedMetaDescription = () =>
   getCachedData('setting:meta_description', 3600, () =>
@@ -194,7 +194,7 @@ export default async function RootLayout({
                   ],
                   "sku": "MASDIKA-VPS-ID",
                   "mpn": "VPS-ID-01",
-                  "image": "https://www.masdika.id/images/brand/og-image.webp",
+                  "image": `https://www.masdika.id${OG_IMAGE_PATH}`,
                   "description": "Layanan Cloud VPS murah Indonesia berkinerja tinggi didukung prosesor enterprise Intel Xeon, enterprise SSD & HDD storage, KVM virtualization, dan sistem hemat Pay-As-You-Go per jam.",
                   "brand": {
                     "@type": "Brand",
