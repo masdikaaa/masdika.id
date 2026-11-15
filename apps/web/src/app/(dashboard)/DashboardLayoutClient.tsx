@@ -81,7 +81,7 @@ const SIDEBAR_LINKS = [
   { name: "Metric & Alert", href: "/dashboard/alerts", icon: Activity, color: "text-cyan-400", group: "Service Configuration" },
   { name: "Incident Reports", href: "/dashboard/incidents", icon: ShieldAlert, color: "text-cyan-400", group: "Service Configuration" },
   { name: "Auto Scheduler", href: "/dashboard/scheduler", icon: Clock, color: "text-cyan-400", group: "Service Configuration" },
-  { name: "Reserved IPs", href: "/dashboard/reserved-ips", icon: Network, color: "text-cyan-400", group: "Service Configuration" },
+  { name: "Elastic Static IPs", href: "/dashboard/reserved-ips", icon: Network, color: "text-cyan-400", group: "Service Configuration" },
   { name: "Virtual Private Cloud", href: "/dashboard/vpc", icon: VpcIcon, color: "text-cyan-400", group: "Service Configuration" },
   { name: "Cloudflared", href: "/dashboard/cloudflared", icon: SiCloudflare, color: "text-[#F38020]", group: "Service Configuration" },
   { name: "Firewalls", href: "/dashboard/firewalls", icon: FirewallIcon, color: "text-orange-500", group: "Service Configuration" },

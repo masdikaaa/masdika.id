@@ -605,7 +605,7 @@ export default function SettingsPage() {
       <motion.div variants={itemVariants} className="flex flex-col md:flex-row gap-5 md:gap-6 items-stretch md:items-start w-full max-w-full min-w-0">
         {/* Navigation Sidebar (Sticky on mobile & desktop) */}
         <div className="w-full max-w-full md:w-60 shrink-0 sticky top-0 md:top-6 md:self-start lg:sticky lg:top-6 lg:self-start z-20 min-w-0 py-2 -my-2 md:py-0 md:my-0 bg-[#f8fafb]/90 dark:bg-[#000000]/90 md:bg-transparent md:dark:bg-transparent backdrop-blur-md md:backdrop-blur-none transition-all">
-          <div className={cn("w-full max-w-full rounded-2xl p-1.5 sm:p-2 grid grid-cols-3 md:flex md:flex-col gap-1.5 border min-w-0 box-border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+          <div className={cn("w-full max-w-full rounded-2xl p-1.5 sm:p-2 grid grid-cols-3 md:flex md:flex-col gap-1.5 border min-w-0 box-border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
@@ -644,7 +644,7 @@ export default function SettingsPage() {
                 className="space-y-6 w-full max-w-full min-w-0"
               >
                 {/* Profile Picture Card */}
-                <div className={cn("rounded-2xl p-4 sm:p-6 relative overflow-hidden border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                <div className={cn("rounded-2xl p-4 sm:p-6 relative overflow-hidden border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
                   <div className="flex items-center gap-3.5 mb-6 relative z-10">
                     <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center border shrink-0", isDark ? "bg-[#111115] border-white/[0.08] text-cyan-400" : "bg-slate-50/80 border-slate-200/90 text-cyan-600")}>
                       <Camera className="w-5 h-5" />
@@ -707,7 +707,7 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Personal Info Card */}
-                <div className={cn("rounded-2xl p-4 sm:p-6 relative overflow-hidden border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                <div className={cn("rounded-2xl p-4 sm:p-6 relative overflow-hidden border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
                   <div className="flex items-center gap-3.5 mb-6 relative z-10">
                     <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center border shrink-0", isDark ? "bg-[#111115] border-white/[0.08] text-cyan-400" : "bg-slate-50/80 border-slate-200/90 text-cyan-600")}>
                       <User className="w-5 h-5" />
@@ -753,7 +753,7 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Billing Info Card */}
-                <div className={cn("rounded-2xl p-4 sm:p-6 relative border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                <div className={cn("rounded-2xl p-4 sm:p-6 relative border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
                   <div className="flex items-center gap-3.5 mb-6 relative z-10">
                     <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center border shrink-0", isDark ? "bg-[#111115] border-white/[0.08] text-cyan-400" : "bg-slate-50/80 border-slate-200/90 text-cyan-600")}>
                       <Building2 className="w-5 h-5" />
@@ -855,7 +855,7 @@ export default function SettingsPage() {
                 className="space-y-6 w-full max-w-full min-w-0"
               >
                 {/* Change Password Card */}
-                <div className={cn("rounded-2xl p-4 sm:p-6 relative border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                <div className={cn("rounded-2xl p-4 sm:p-6 relative border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
                   
                   <div className="flex items-center gap-3.5 mb-6 relative z-10">
                     <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center border shrink-0", isDark ? "bg-[#111115] border-white/[0.08] text-cyan-400" : "bg-slate-50/80 border-slate-200/90 text-cyan-600")}>
@@ -939,7 +939,7 @@ export default function SettingsPage() {
                 </div>
 
                 {/* 2FA Card */}
-                <div className={cn("rounded-2xl p-4 sm:p-6 relative border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                <div className={cn("rounded-2xl p-4 sm:p-6 relative border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
                   {/* Header */}
                   <div className={cn("flex flex-col sm:flex-row sm:items-start sm:items-center justify-between gap-3 sm:gap-4 mb-5 relative z-10 pb-4 border-b transition-colors w-full min-w-0", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>
                     <div className="flex items-center gap-3.5 min-w-0 flex-1 w-full">
@@ -1099,7 +1099,7 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Security & Login History Card */}
-                <div className={cn("rounded-2xl p-4 sm:p-6 relative overflow-hidden border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                <div className={cn("rounded-2xl p-4 sm:p-6 relative overflow-hidden border w-full max-w-full min-w-0 box-border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 relative z-10 w-full min-w-0">
                     <div className="flex items-center gap-3.5 min-w-0 flex-1 w-full">
                       <div className={cn("w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center border shrink-0", isDark ? "bg-[#111115] border-white/[0.08] text-cyan-400" : "bg-slate-50/80 border-slate-200/90 text-cyan-600")}>
@@ -1468,7 +1468,7 @@ export default function SettingsPage() {
       <AnimatePresence>
         {showOtpModal && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("rounded-2xl border p-5 sm:p-6 w-full max-w-md shadow-2xl relative overflow-hidden", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90")}>
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("rounded-2xl border p-5 sm:p-6 w-full max-w-md shadow-2xl relative overflow-hidden", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90")}>
               <button onClick={() => setShowOtpModal(false)} className={cn("absolute top-4 right-4 sm:top-5 sm:right-5 transition-colors p-2 rounded-xl cursor-pointer", isDark ? "text-zinc-400 hover:text-white bg-[#111115] hover:bg-white/[0.08]" : "text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200")}><X className="w-4 h-4" /></button>
               <div className="text-center mb-6 relative z-10">
                 <div className={cn("w-14 h-14 sm:w-16 sm:h-16 border rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4", isDark ? "bg-[#111115] border-white/[0.08] text-cyan-400" : "bg-slate-50/80 border-slate-200/90 text-cyan-600")}>
@@ -1495,7 +1495,7 @@ export default function SettingsPage() {
       <AnimatePresence>
         {showEmailModal && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("rounded-2xl border p-5 sm:p-6 w-full max-w-md shadow-2xl relative overflow-hidden", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90")}>
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("rounded-2xl border p-5 sm:p-6 w-full max-w-md shadow-2xl relative overflow-hidden", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90")}>
               <button onClick={() => { setShowEmailModal(false); setEmailOtpStep(false); }} className={cn("absolute top-4 right-4 sm:top-5 sm:right-5 transition-colors p-2 rounded-xl cursor-pointer", isDark ? "text-zinc-400 hover:text-white bg-[#111115] hover:bg-white/[0.08]" : "text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200")}><X className="w-4 h-4" /></button>
 
               <div className="text-center mb-6 relative z-10">
@@ -1540,7 +1540,7 @@ export default function SettingsPage() {
       <AnimatePresence>
         {showTwoFactorModal && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("rounded-2xl border p-5 sm:p-6 w-full max-w-md shadow-2xl relative overflow-hidden", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90")}>
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("rounded-2xl border p-5 sm:p-6 w-full max-w-md shadow-2xl relative overflow-hidden", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90")}>
               <button onClick={() => setShowTwoFactorModal(false)} className={cn("absolute top-4 right-4 sm:top-5 sm:right-5 transition-colors p-2 rounded-xl cursor-pointer", isDark ? "text-zinc-400 hover:text-white bg-[#111115] hover:bg-white/[0.08]" : "text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200")}><X className="w-4 h-4" /></button>
 
               <div className="text-center mb-6 relative z-10">

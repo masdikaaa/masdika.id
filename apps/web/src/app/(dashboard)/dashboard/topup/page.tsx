@@ -150,7 +150,7 @@ export default function TopUpPage() {
             className={cn(
               "w-full sm:w-auto inline-flex items-center justify-center gap-2 text-xs sm:text-xs font-bold px-3.5 py-2 rounded-xl transition-all border",
               isDark 
-                ? "text-zinc-300 hover:text-white bg-[#0a0a0c] hover:bg-white/[0.04] border-white/[0.08]" 
+                ? "text-zinc-300 hover:text-white bg-[#111115] hover:bg-white/[0.04] border-white/[0.08]" 
                 : "text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border-slate-200/90 shadow-2xs"
             )}
           >
@@ -166,7 +166,7 @@ export default function TopUpPage() {
         <div className="lg:col-span-2 space-y-6">
           
           {/* Step 1: Amount */}
-          <motion.section variants={itemVariants} className={cn("border rounded-2xl p-5 sm:p-6 overflow-hidden relative", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+          <motion.section variants={itemVariants} className={cn("border rounded-2xl p-5 sm:p-6 overflow-hidden relative", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
             <div className="flex items-center justify-between mb-5 relative z-10 flex-wrap gap-2">
               <div className="flex items-center gap-3">
                 <div className={cn("w-7 h-7 rounded-xl flex items-center justify-center font-black text-xs border", isDark ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/30" : "bg-cyan-500/10 text-cyan-800 border-cyan-500/20")}>1</div>
@@ -232,7 +232,7 @@ export default function TopUpPage() {
           </motion.section>
 
           {/* Step 2: Payment Method */}
-          <motion.section variants={itemVariants} className={cn("border rounded-2xl p-5 sm:p-6 overflow-hidden relative", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+          <motion.section variants={itemVariants} className={cn("border rounded-2xl p-5 sm:p-6 overflow-hidden relative", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
             <div className="flex items-center gap-3 mb-5 relative z-10">
               <div className={cn("w-7 h-7 rounded-xl flex items-center justify-center font-black text-xs border", isDark ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/30" : "bg-cyan-500/10 text-cyan-800 border-cyan-500/20")}>2</div>
               <h2 className={cn("text-base sm:text-lg font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>Payment Method</h2>
@@ -331,7 +331,7 @@ export default function TopUpPage() {
 
         {/* Right Column: Order Summary */}
         <motion.div variants={itemVariants} className="lg:col-span-1">
-          <div className={cn("sticky top-6 border rounded-2xl p-5 sm:p-6 overflow-hidden", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+          <div className={cn("sticky top-6 border rounded-2xl p-5 sm:p-6 overflow-hidden", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
             <h2 className={cn("text-base sm:text-lg font-bold mb-5 border-b pb-4 flex items-center gap-2 relative z-10", isDark ? "text-white border-white/[0.08]" : "text-slate-900 border-slate-200/90")}>
               <ShieldCheck className="w-5 h-5 text-cyan-400" /> Payment Details
             </h2>

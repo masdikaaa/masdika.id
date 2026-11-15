@@ -104,7 +104,7 @@ export default function LookingGlassPage() {
     { title: "Object Storage", desc: "S3-compatible buckets with IAM keys and presigned URLs.", path: "/object-storage", icon: HardDrive },
     { title: "File CDN", desc: "Securely upload temporary files up to 100MB.", path: "/file-cdn", icon: UploadCloud },
     { title: "Cloud VPS", desc: "High-performance virtual private servers with SSD.", path: "/vps", icon: Terminal },
-    { title: "Reseller API", desc: "Integrate our cloud provisioning programmatically.", path: "/reseller-api", icon: Code2 },
+    { title: "API VPS", desc: "Free REST API to start, stop, and reboot your Cloud VPS.", path: "/dashboard/api-vps", icon: Code2 },
   ];
 
   const testFiles = [

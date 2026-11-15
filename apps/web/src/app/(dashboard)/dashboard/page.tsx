@@ -24,8 +24,8 @@ import {
   Sparkles,
   Megaphone,
   Calendar,
+  Boxes,
 } from "lucide-react";
-import { SiKubernetes } from "react-icons/si";
 import Link from "next/link";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -61,7 +61,7 @@ export default function DashboardOverview() {
   const isDark = theme === "dark";
   const [cdnUsage, setCdnUsage] = useState<any>(null);
   const [vpsList, setVpsList] = useState<any[]>([]);
-  const [k3sList, setK3sList] = useState<any[]>([]);
+  const [appsList, setAppsList] = useState<any[]>([]);
   const [reservedIpsList, setReservedIpsList] = useState<any[]>([]);
   const [vpcList, setVpcList] = useState<any[]>([]);
   const [billingData, setBillingData] = useState<any>({ balance: 0, invoices: [] });
@@ -70,7 +70,7 @@ export default function DashboardOverview() {
   const [bannersList, setBannersList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [vpsPage, setVpsPage] = useUrlNumber("vpsPage", 1);
-  const [k3sPage, setK3sPage] = useUrlNumber("k3sPage", 1);
+  const [appsPage, setAppsPage] = useUrlNumber("appsPage", 1);
   const [beritaPage, setBeritaPage] = useUrlNumber("beritaPage", 1);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
 
@@ -81,18 +81,19 @@ export default function DashboardOverview() {
       fetch("/api/user/billing").then(safeJson),
       fetch("/api/user/cdn/quota").then(safeJson),
       fetch("/api/user/vps").then(safeJson),
-      fetch("/api/user/k3s").then(safeJson),
+      fetch("/api/user/apps").then(safeJson),
       fetch("/api/user/reserved-ips").then(safeJson),
       fetch("/api/dashboard/vpc").then(safeJson),
       fetch("/api/announcements").then(safeJson),
       fetch("/api/banners").then(safeJson),
       fetch("/api/tickets").then(safeJson),
     ])
-      .then(([billingRes, cdnData, vpsData, k3sData, ipsData, vpcData, beritaData, bannersData, ticketsData]) => {
+      .then(([billingRes, cdnData, vpsData, appsData, ipsData, vpcData, beritaData, bannersData, ticketsData]) => {
         if (billingRes?.success) setBillingData(billingRes.data);
         if (cdnData && !cdnData.error) setCdnUsage(cdnData);
         if (Array.isArray(vpsData)) setVpsList(vpsData);
-        if (Array.isArray(k3sData)) setK3sList(k3sData);
+        if (appsData?.success && Array.isArray(appsData.data)) setAppsList(appsData.data);
+        else if (Array.isArray(appsData)) setAppsList(appsData);
         if (Array.isArray(ipsData)) setReservedIpsList(ipsData);
         if (Array.isArray(vpcData)) setVpcList(vpcData);
         if (Array.isArray(beritaData)) setBeritaList(beritaData);
@@ -105,7 +106,7 @@ export default function DashboardOverview() {
 
   const totalVps = vpsList.length;
   const runningVps = vpsList.filter((v) => v.liveStatus?.status === "running").length;
-  const totalK3s = k3sList.length;
+  const totalApps = appsList.length;
   const totalIps = reservedIpsList.length;
   const totalVpc = vpcList.length;
   const unpaidInvoices = billingData.invoices?.filter((i: any) => i.status === "PENDING").length || 0;
@@ -201,7 +202,7 @@ export default function DashboardOverview() {
             className={cn(
               "inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 sm:py-2 rounded-xl text-xs font-semibold border transition-all",
               isDark
-                ? "bg-[#0a0a0c] hover:bg-white/[0.04] border-white/[0.08] text-zinc-200"
+                ? "bg-[#111115] hover:bg-white/[0.04] border-white/[0.08] text-zinc-200"
                 : "bg-white hover:bg-slate-50 border-slate-200/90 text-slate-700 shadow-2xs"
             )}
           >
@@ -227,7 +228,7 @@ export default function DashboardOverview() {
             className={cn(
               "lg:col-span-6 relative overflow-hidden rounded-2xl group aspect-[2/1] w-full border",
               isDark
-                ? "bg-[#0a0a0c] border-white/[0.08] shadow-lg shadow-black/20"
+                ? "bg-[#111115] border-white/[0.08] shadow-lg shadow-black/20"
                 : "bg-slate-100 border-slate-200/90 shadow-2xs"
             )}
           >
@@ -303,7 +304,7 @@ export default function DashboardOverview() {
           className={cn(
             "rounded-2xl flex flex-col w-full border overflow-hidden",
             activeBanners.length > 0 ? "lg:col-span-6 lg:aspect-[2/1] min-h-[320px] lg:min-h-0" : "min-h-[240px]",
-            isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
+            isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
           )}
         >
           <div
@@ -467,7 +468,7 @@ export default function DashboardOverview() {
             className={cn(
               "group flex flex-col justify-between p-4 sm:p-5 rounded-2xl border transition-all h-full",
               isDark
-                ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/[0.16] hover:bg-white/[0.015]"
+                ? "bg-[#111115] border-white/[0.08] hover:border-white/[0.16] hover:bg-white/[0.015]"
                 : "bg-white border-slate-200/90 hover:border-slate-300 shadow-2xs"
             )}
           >
@@ -535,14 +536,14 @@ export default function DashboardOverview() {
           </Link>
         </motion.div>
 
-        {/* 2. Managed K3s */}
+        {/* 2. Managed Apps */}
         <motion.div variants={itemVariants}>
           <Link
-            href="/dashboard/k3s"
+            href="/dashboard/apps"
             className={cn(
               "group flex flex-col justify-between p-4 sm:p-5 rounded-2xl border transition-all h-full",
               isDark
-                ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/[0.16] hover:bg-white/[0.015]"
+                ? "bg-[#111115] border-white/[0.08] hover:border-cyan-500/30 hover:bg-white/[0.015]"
                 : "bg-white border-slate-200/90 hover:border-slate-300 shadow-2xs"
             )}
           >
@@ -556,7 +557,7 @@ export default function DashboardOverview() {
                       : "bg-slate-50 border-slate-200/80 text-cyan-700 group-hover:bg-cyan-50 group-hover:border-cyan-200"
                   )}
                 >
-                  <SiKubernetes className="w-4 h-4" />
+                  <Boxes className="w-4 h-4" />
                 </div>
                 <span
                   className={cn(
@@ -564,7 +565,7 @@ export default function DashboardOverview() {
                     isDark ? "text-zinc-400 group-hover:text-zinc-200" : "text-slate-600 group-hover:text-slate-900"
                   )}
                 >
-                  Managed Kubernetes
+                  Managed Apps
                 </span>
               </div>
               <ArrowUpRight
@@ -583,7 +584,7 @@ export default function DashboardOverview() {
                     isDark ? "text-white" : "text-slate-900"
                   )}
                 >
-                  {totalK3s}
+                  {totalApps}
                 </span>
                 <span
                   className={cn(
@@ -593,24 +594,24 @@ export default function DashboardOverview() {
                       : "bg-slate-50 border-slate-200 text-slate-600"
                   )}
                 >
-                  Clusters
+                  Apps
                 </span>
               </div>
               <p className={cn("text-[11px] mt-1.5", isDark ? "text-zinc-500" : "text-slate-500")}>
-                Active Kubernetes control planes
+                Deployed managed applications
               </p>
             </div>
           </Link>
         </motion.div>
 
-        {/* 3. Reserved IPs */}
+        {/* 3. Elastic Static IPs */}
         <motion.div variants={itemVariants}>
           <Link
             href="/dashboard/reserved-ips"
             className={cn(
               "group flex flex-col justify-between p-4 sm:p-5 rounded-2xl border transition-all h-full",
               isDark
-                ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/[0.16] hover:bg-white/[0.015]"
+                ? "bg-[#111115] border-white/[0.08] hover:border-cyan-500/30 hover:bg-white/[0.015]"
                 : "bg-white border-slate-200/90 hover:border-slate-300 shadow-2xs"
             )}
           >
@@ -632,7 +633,7 @@ export default function DashboardOverview() {
                     isDark ? "text-zinc-400 group-hover:text-zinc-200" : "text-slate-600 group-hover:text-slate-900"
                   )}
                 >
-                  Reserved IPs
+                  Elastic Static IPs
                 </span>
               </div>
               <ArrowUpRight
@@ -678,7 +679,7 @@ export default function DashboardOverview() {
             className={cn(
               "group flex flex-col justify-between p-4 sm:p-5 rounded-2xl border transition-all h-full",
               isDark
-                ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/[0.16] hover:bg-white/[0.015]"
+                ? "bg-[#111115] border-white/[0.08] hover:border-white/[0.16] hover:bg-white/[0.015]"
                 : "bg-white border-slate-200/90 hover:border-slate-300 shadow-2xs"
             )}
           >
@@ -747,7 +748,7 @@ export default function DashboardOverview() {
             className={cn(
               "group flex flex-col justify-between p-4 sm:p-5 rounded-2xl border transition-all h-full",
               isDark
-                ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/[0.16] hover:bg-white/[0.015]"
+                ? "bg-[#111115] border-white/[0.08] hover:border-white/[0.16] hover:bg-white/[0.015]"
                 : "bg-white border-slate-200/90 hover:border-slate-300 shadow-2xs"
             )}
           >
@@ -815,7 +816,7 @@ export default function DashboardOverview() {
             className={cn(
               "group flex flex-col justify-between p-4 sm:p-5 rounded-2xl border transition-all h-full",
               isDark
-                ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/[0.16] hover:bg-white/[0.015]"
+                ? "bg-[#111115] border-white/[0.08] hover:border-white/[0.16] hover:bg-white/[0.015]"
                 : "bg-white border-slate-200/90 hover:border-slate-300 shadow-2xs"
             )}
           >
@@ -873,7 +874,7 @@ export default function DashboardOverview() {
             className={cn(
               "group flex flex-col justify-between p-4 sm:p-5 rounded-2xl border transition-all h-full",
               isDark
-                ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/[0.16] hover:bg-white/[0.015]"
+                ? "bg-[#111115] border-white/[0.08] hover:border-white/[0.16] hover:bg-white/[0.015]"
                 : "bg-white border-slate-200/90 hover:border-slate-300 shadow-2xs"
             )}
           >
@@ -949,7 +950,7 @@ export default function DashboardOverview() {
             className={cn(
               "group flex flex-col justify-between p-4 sm:p-5 rounded-2xl border transition-all h-full",
               isDark
-                ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/[0.16] hover:bg-white/[0.015]"
+                ? "bg-[#111115] border-white/[0.08] hover:border-white/[0.16] hover:bg-white/[0.015]"
                 : "bg-white border-slate-200/90 hover:border-slate-300 shadow-2xs"
             )}
           >
@@ -1017,7 +1018,7 @@ export default function DashboardOverview() {
           variants={itemVariants}
           className={cn(
             "border rounded-2xl overflow-hidden",
-            isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
+            isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
           )}
         >
           <div
@@ -1278,13 +1279,13 @@ export default function DashboardOverview() {
         </motion.div>
       )}
 
-      {/* Managed Kubernetes Section */}
-      {k3sList.length > 0 && (
+      {/* Managed Applications Section */}
+      {appsList.length > 0 && (
         <motion.div
           variants={itemVariants}
           className={cn(
             "border rounded-2xl overflow-hidden",
-            isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
+            isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
           )}
         >
           <div
@@ -1302,25 +1303,25 @@ export default function DashboardOverview() {
                     : "bg-cyan-50 border-cyan-200 text-cyan-700"
                 )}
               >
-                <SiKubernetes className="w-4 h-4" />
+                <Boxes className="w-4 h-4" />
               </div>
               <div>
                 <h2 className={cn("text-sm sm:text-base font-bold", isDark ? "text-white" : "text-slate-900")}>
-                  Managed Kubernetes Clusters
+                  Managed Applications
                 </h2>
                 <p className={cn("text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>
-                  Your Kubernetes control planes and worker node pools.
+                  Your deployed one-click managed applications.
                 </p>
               </div>
             </div>
           </div>
 
           <div className={cn("divide-y", isDark ? "divide-white/[0.06]" : "divide-slate-100")}>
-            {k3sList.slice((k3sPage - 1) * 3, k3sPage * 3).map((cluster) => {
-              const isClusterActive = cluster.status === "ACTIVE" || cluster.status === "RUNNING";
+            {appsList.slice((appsPage - 1) * 3, appsPage * 3).map((app) => {
+              const isAppActive = app.status === "ACTIVE" || app.status === "RUNNING";
               return (
                 <div
-                  key={cluster.id}
+                  key={app.id}
                   className={cn(
                     "p-4 sm:px-5 sm:py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4 transition-colors",
                     isDark ? "hover:bg-white/[0.015]" : "hover:bg-slate-50/70"
@@ -1336,14 +1337,14 @@ export default function DashboardOverview() {
                             : "bg-slate-50 border-slate-200 text-cyan-700"
                         )}
                       >
-                        <SiKubernetes className="w-5 h-5" />
+                        <Boxes className="w-5 h-5" />
                       </div>
                       <div className="min-w-0">
                         <h3 className={cn("text-sm font-bold truncate", isDark ? "text-white" : "text-slate-900")}>
-                          {cluster.name}
+                          {app.name}
                         </h3>
                         <p className={cn("text-xs font-mono mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
-                          {cluster.version} • {cluster.nodeCount} nodes
+                          {app.appType} • {app.planName}
                         </p>
                       </div>
                     </div>
@@ -1351,7 +1352,7 @@ export default function DashboardOverview() {
                     <span
                       className={cn(
                         "sm:hidden inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider border shrink-0",
-                        isClusterActive
+                        isAppActive
                           ? isDark
                             ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                             : "bg-emerald-50 text-emerald-700 border-emerald-200"
@@ -1363,10 +1364,10 @@ export default function DashboardOverview() {
                       <span
                         className={cn(
                           "w-1.5 h-1.5 rounded-full",
-                          isClusterActive ? "bg-emerald-400 animate-pulse" : "bg-amber-400"
+                          isAppActive ? "bg-emerald-400 animate-pulse" : "bg-amber-400"
                         )}
                       />
-                      {cluster.status}
+                      {app.status}
                     </span>
                   </div>
 
@@ -1374,7 +1375,7 @@ export default function DashboardOverview() {
                     <span
                       className={cn(
                         "hidden sm:inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider border shrink-0",
-                        isClusterActive
+                        isAppActive
                           ? isDark
                             ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                             : "bg-emerald-50 text-emerald-700 border-emerald-200"
@@ -1386,14 +1387,14 @@ export default function DashboardOverview() {
                       <span
                         className={cn(
                           "w-1.5 h-1.5 rounded-full",
-                          isClusterActive ? "bg-emerald-400 animate-pulse" : "bg-amber-400"
+                          isAppActive ? "bg-emerald-400 animate-pulse" : "bg-amber-400"
                         )}
                       />
-                      {cluster.status}
+                      {app.status}
                     </span>
 
                     <Link
-                      href={`/dashboard/k3s/${cluster.id}`}
+                      href={`/dashboard/apps/${app.id}`}
                       className={cn(
                         "w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2 sm:py-1.5 rounded-xl sm:rounded-lg border text-xs font-semibold transition-all shrink-0",
                         isDark
@@ -1410,7 +1411,7 @@ export default function DashboardOverview() {
             })}
           </div>
 
-          {k3sList.length > 3 && (
+          {appsList.length > 3 && (
             <div
               className={cn(
                 "px-3.5 py-2 border-t",
@@ -1418,9 +1419,9 @@ export default function DashboardOverview() {
               )}
             >
               <Pagination
-                currentPage={k3sPage}
-                totalPages={Math.ceil(k3sList.length / 3)}
-                onPageChange={setK3sPage}
+                currentPage={appsPage}
+                totalPages={Math.ceil(appsList.length / 3)}
+                onPageChange={setAppsPage}
               />
             </div>
           )}

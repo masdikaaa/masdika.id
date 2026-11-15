@@ -122,7 +122,7 @@ export default function NotificationsPage() {
         <div className="flex flex-col sm:flex-row gap-2.5 w-full sm:w-auto shrink-0">
           <Link 
             href="/dashboard"
-            className={cn("w-full sm:w-auto px-3.5 py-2 rounded-xl font-bold text-xs sm:text-xs flex items-center justify-center gap-2 border transition-all", isDark ? "bg-[#0a0a0c] hover:bg-white/[0.04] text-zinc-300 hover:text-white border-white/[0.08]" : "bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border-slate-200/90 shadow-2xs")}
+            className={cn("w-full sm:w-auto px-3.5 py-2 rounded-xl font-bold text-xs sm:text-xs flex items-center justify-center gap-2 border transition-all", isDark ? "bg-[#111115] hover:bg-white/[0.04] text-zinc-300 hover:text-white border-white/[0.08]" : "bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border-slate-200/90 shadow-2xs")}
           >
             <ChevronLeft className="w-4 h-4" />
             Back to Dashboard
@@ -140,7 +140,7 @@ export default function NotificationsPage() {
       </motion.div>
 
       {notifications.length === 0 ? (
-        <motion.div variants={itemVariants} className={cn("border rounded-2xl p-8 sm:p-12 text-center relative overflow-hidden", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+        <motion.div variants={itemVariants} className={cn("border rounded-2xl p-8 sm:p-12 text-center relative overflow-hidden", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
           <div className="relative z-10">
             <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 border", isDark ? "bg-white/[0.03] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
               <BellRing className={cn("w-8 h-8", isDark ? "text-zinc-500" : "text-slate-400")} />
@@ -150,7 +150,7 @@ export default function NotificationsPage() {
           </div>
         </motion.div>
       ) : (
-        <motion.div variants={itemVariants} className={cn("border rounded-2xl overflow-hidden relative", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+        <motion.div variants={itemVariants} className={cn("border rounded-2xl overflow-hidden relative", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
           
           <div className={cn("divide-y relative z-10", isDark ? "divide-white/[0.06]" : "divide-slate-200/90")}>
             {paginatedNotifications.map((notif) => (

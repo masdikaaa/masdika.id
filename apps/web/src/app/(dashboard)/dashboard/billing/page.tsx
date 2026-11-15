@@ -194,7 +194,7 @@ export default function CustomerBillingPage() {
       </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <motion.div variants={itemVariants} className={cn("rounded-2xl overflow-hidden p-5 sm:p-6 flex flex-col relative group border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+        <motion.div variants={itemVariants} className={cn("rounded-2xl overflow-hidden p-5 sm:p-6 flex flex-col relative group border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
           <h2 className={cn("text-base sm:text-lg font-bold mb-1.5 relative z-10 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
             <Layers className="w-5 h-5 text-cyan-400" /> Services Summary
           </h2>
@@ -375,18 +375,18 @@ export default function CustomerBillingPage() {
                       return (
                         <div key={key} className={cn("flex items-center justify-between p-3 rounded-xl transition-colors border mb-1", isDark ? "hover:bg-white/[0.04] border-transparent hover:border-white/[0.08]" : "hover:bg-white border-transparent hover:border-slate-200/90")}>
                           <div className="flex items-center gap-3 overflow-hidden">
-                            <HardDrive className="w-4 h-4 text-indigo-400 shrink-0" />
+                            <HardDrive className="w-4 h-4 text-cyan-400 shrink-0" />
                             <div className="min-w-0">
                               <div className="flex items-center gap-1.5 flex-wrap">
                                 <span className={cn("text-sm font-bold truncate", isDark ? "text-white" : "text-slate-900")}>{obj.name}</span>
                                 {isSuspended && (
                                   <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-rose-500/15 text-rose-400 border border-rose-500/30">
-                                    Suspended (Grace Period 3 Hari)
+                                    Suspended (3-Day Grace Period)
                                   </span>
                                 )}
                               </div>
                               <div className={cn("text-xs truncate", isDark ? "text-zinc-500" : "text-slate-500")}>
-                                OBJECT STORAGE ({obj.storageGb} GB) • {obj.billingMode === 'MONTHLY' ? `${formatRupiah(obj.monthlyPrice)}/bln` : `${formatRupiah(obj.hourlyRate)}/jam (PAYG)`}
+                                OBJECT STORAGE ({obj.storageGb} GB) • {obj.billingMode === 'MONTHLY' ? `${formatRupiah(obj.monthlyPrice)}/mo` : `${formatRupiah(obj.hourlyRate)}/hr (PAYG)`}
                               </div>
                             </div>
                           </div>
@@ -401,7 +401,7 @@ export default function CustomerBillingPage() {
                             )}
                             <Link
                               href={`/dashboard/object-storage/${obj.id}`}
-                              className="px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-colors bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border-indigo-500/20"
+                              className="px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-colors bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20"
                             >
                               Manage
                             </Link>
@@ -475,7 +475,7 @@ export default function CustomerBillingPage() {
           </div>
         </motion.div>
         
-        <motion.div variants={itemVariants} className={cn("rounded-2xl overflow-hidden p-5 sm:p-6 flex flex-col justify-between relative group border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+        <motion.div variants={itemVariants} className={cn("rounded-2xl overflow-hidden p-5 sm:p-6 flex flex-col justify-between relative group border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
            <div className="relative z-10">
              <h2 className={cn("text-base sm:text-lg font-bold mb-5 flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
                <Wallet className="w-5 h-5 text-cyan-400" /> Account Balance
@@ -504,7 +504,7 @@ export default function CustomerBillingPage() {
         </motion.div>
       </div>
 
-      <motion.div variants={itemVariants} className={cn("rounded-2xl overflow-hidden relative border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+      <motion.div variants={itemVariants} className={cn("rounded-2xl overflow-hidden relative border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
         <div className={cn("p-5 sm:p-6 border-b relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>
           <h2 className={cn("text-base sm:text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
             <Receipt className="w-5 h-5 text-cyan-400" /> Billing History

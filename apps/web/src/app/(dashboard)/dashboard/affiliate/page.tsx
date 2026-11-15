@@ -141,7 +141,7 @@ export default function AffiliatePage() {
       {/* Referral Link Box */}
       <motion.div 
         variants={itemVariants}
-        className={cn("p-5 sm:p-6 rounded-2xl flex flex-col md:flex-row items-center gap-4 relative overflow-hidden border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}
+        className={cn("p-5 sm:p-6 rounded-2xl flex flex-col md:flex-row items-center gap-4 relative overflow-hidden border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}
       >
         <div className="flex-1 w-full relative z-10">
           <label className={cn("text-xs font-bold uppercase tracking-widest mb-2 block", isDark ? "text-zinc-400" : "text-slate-500")}>Your Referral Link</label>
@@ -171,7 +171,7 @@ export default function AffiliatePage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <motion.div 
           variants={itemVariants}
-          className={cn("p-5 sm:p-6 rounded-2xl relative overflow-hidden group border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}
+          className={cn("p-5 sm:p-6 rounded-2xl relative overflow-hidden group border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}
         >
           <div className="relative z-10">
             <div className="flex items-center gap-3.5 mb-4">
@@ -198,7 +198,7 @@ export default function AffiliatePage() {
 
         <motion.div 
           variants={itemVariants}
-          className={cn("p-5 sm:p-6 rounded-2xl relative overflow-hidden group border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}
+          className={cn("p-5 sm:p-6 rounded-2xl relative overflow-hidden group border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}
         >
           <div className="relative z-10">
             <div className="flex items-center gap-3.5 mb-4">
@@ -216,7 +216,7 @@ export default function AffiliatePage() {
 
         <motion.div 
           variants={itemVariants}
-          className={cn("p-5 sm:p-6 rounded-2xl relative overflow-hidden group border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}
+          className={cn("p-5 sm:p-6 rounded-2xl relative overflow-hidden group border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}
         >
           <div className="relative z-10">
             <div className="flex items-center gap-3.5 mb-4">
@@ -239,7 +239,7 @@ export default function AffiliatePage() {
           <h2 className={cn("text-base sm:text-lg font-bold flex items-center gap-2 mb-3.5", isDark ? "text-white" : "text-slate-900")}>
             <Activity className="w-5 h-5 text-cyan-600 dark:text-cyan-400" /> Commission History
           </h2>
-          <div className={cn("flex-1 border rounded-2xl overflow-hidden flex flex-col relative min-h-[280px]", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+          <div className={cn("flex-1 border rounded-2xl overflow-hidden flex flex-col relative min-h-[280px]", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
             <div className="relative z-10 flex-1 flex flex-col">
               {data?.recentEarnings?.length > 0 ? (
                 <div className={cn("divide-y", isDark ? "divide-white/[0.06]" : "divide-slate-200/90")}>
@@ -293,9 +293,9 @@ export default function AffiliatePage() {
         {/* Recent Withdrawals */}
         <motion.div variants={itemVariants} className="flex flex-col h-full">
           <h2 className={cn("text-base sm:text-lg font-bold flex items-center gap-2 mb-3.5", isDark ? "text-white" : "text-slate-900")}>
-            <Landmark className="w-5 h-5 text-purple-600 dark:text-purple-400" /> Withdrawal History
+            <Landmark className="w-5 h-5 text-cyan-600 dark:text-cyan-400" /> Withdrawal History
           </h2>
-          <div className={cn("flex-1 border rounded-2xl overflow-hidden flex flex-col relative min-h-[280px]", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+          <div className={cn("flex-1 border rounded-2xl overflow-hidden flex flex-col relative min-h-[280px]", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
             <div className="relative z-10 flex-1 flex flex-col">
               {data?.recentWithdrawals?.length > 0 ? (
                 <div className={cn("divide-y", isDark ? "divide-white/[0.06]" : "divide-slate-200/90")}>
@@ -356,7 +356,7 @@ export default function AffiliatePage() {
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className={cn("border p-5 sm:p-6 rounded-2xl max-w-md w-full shadow-2xl relative overflow-hidden", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90")}
+            className={cn("border p-5 sm:p-6 rounded-2xl max-w-md w-full shadow-2xl relative overflow-hidden", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90")}
           >
             <div className="relative z-10">
               <h2 className={cn("text-xl sm:text-2xl font-bold mb-1.5 tracking-tight", isDark ? "text-white" : "text-slate-900")}>Withdraw Affiliate Funds</h2>

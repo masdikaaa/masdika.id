@@ -86,15 +86,15 @@ export default function BeritaListPage() {
         <div className="w-full sm:w-auto shrink-0">
           <Link 
             href="/dashboard" 
-            className={cn("w-full sm:w-auto inline-flex items-center justify-center gap-2 text-xs sm:text-xs font-bold px-3.5 py-2 rounded-xl transition-all border", isDark ? "text-zinc-300 hover:text-white bg-[#0a0a0c] hover:bg-white/[0.04] border-white/[0.08]" : "text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border-slate-200/90 shadow-2xs")}
+            className={cn("w-full sm:w-auto inline-flex items-center justify-center gap-2 text-xs sm:text-xs font-bold px-3.5 py-2 rounded-xl transition-all border", isDark ? "text-zinc-300 hover:text-white bg-[#111115] hover:bg-white/[0.04] border-white/[0.08]" : "text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border-slate-200/90 shadow-2xs")}
           >
             <ChevronLeft className="w-4 h-4" />
-            Kembali ke Dashboard
+            Back to Dashboard
           </Link>
         </div>
       </motion.div>
 
-      <motion.div variants={itemVariants} className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+      <motion.div variants={itemVariants} className={cn("border rounded-2xl overflow-hidden", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
         <div className={cn("p-4 sm:p-5 border-b", isDark ? "border-white/[0.08] bg-[#111115]" : "border-slate-200/90 bg-slate-50/80")}>
           <h2 className={cn("text-sm sm:text-base font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
             <Newspaper className={cn("w-4 h-4 sm:w-5 sm:h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
@@ -123,7 +123,7 @@ export default function BeritaListPage() {
                 </p>
                 <div className={cn("flex items-center text-[11px] font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>
                   <Calendar className="w-3.5 h-3.5 mr-1.5" />
-                  {new Date(berita.createdAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}
+                  {new Date(berita.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                 </div>
               </Link>
             ))

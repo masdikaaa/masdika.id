@@ -2097,10 +2097,6 @@ export default function VpsManagementPage() {
                     <input type="checkbox" checked={newPlan.isActive} onChange={e => setNewPlan({ ...newPlan, isActive: e.target.checked })} className={cn("rounded", isDark ? "text-cyan-500" : "text-cyan-700")} />
                     <span className={cn("text-sm font-medium", isDark ? "text-white" : "text-slate-900")}>Active (Visible)</span>
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" checked={newPlan.isReseller} onChange={e => setNewPlan({ ...newPlan, isReseller: e.target.checked })} className={cn("rounded", isDark ? "text-purple-500" : "text-purple-700")} />
-                    <span className={cn("text-sm font-medium", isDark ? "text-purple-400" : "text-purple-700")}>Reseller VPS Plan</span>
-                  </label>
                 </div>
                 <div className="md:col-span-2 flex justify-end gap-3 mt-4">
                   <button type="button" onClick={() => setShowAddPlan(false)} className={cn("px-4 py-2 hover:text-white transition-colors", isDark ? "text-zinc-400" : "text-slate-500")}>Cancel</button>

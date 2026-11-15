@@ -164,8 +164,8 @@ export default function MyServicesPage() {
   const getServiceIcon = (service: string) => {
     switch (service) {
       case 'CDN': return <UploadCloud className="w-6 h-6 text-cyan-400 group-hover:scale-110 transition-transform duration-300" strokeWidth={1.5} />;
-      case 'API_HUB': return <Code className="w-6 h-6 text-fuchsia-400 group-hover:scale-110 transition-transform duration-300" strokeWidth={1.5} />;
-      case 'VPS': return <Terminal className="w-6 h-6 text-blue-400 group-hover:scale-110 transition-transform duration-300" strokeWidth={1.5} />;
+      case 'API_HUB': return <Code className="w-6 h-6 text-cyan-400 group-hover:scale-110 transition-transform duration-300" strokeWidth={1.5} />;
+      case 'VPS': return <Terminal className="w-6 h-6 text-cyan-400 group-hover:scale-110 transition-transform duration-300" strokeWidth={1.5} />;
       case 'K3S': return <SiKubernetes className="w-6 h-6 text-cyan-400 group-hover:scale-110 transition-transform duration-300" />;
       default: return <Box className="w-6 h-6 text-cyan-400 group-hover:scale-110 transition-transform duration-300" strokeWidth={1.5} />;
     }
@@ -173,7 +173,7 @@ export default function MyServicesPage() {
 
   const getServiceColor = (service: string) => {
     switch (service) {
-      case 'API_HUB': return "from-fuchsia-500/20 text-fuchsia-400 border-fuchsia-500/30";
+      case 'API_HUB': return "from-cyan-500/20 text-cyan-400 border-cyan-500/30";
       case 'VPS': return "from-cyan-500/20 text-cyan-400 border-cyan-500/30";
       default: return "from-cyan-500/20 text-cyan-400 border-cyan-500/30";
     }
@@ -243,7 +243,7 @@ export default function MyServicesPage() {
       </motion.div>
 
       {subscriptions.length === 0 && vpsServices.length === 0 && k3sServices.length === 0 ? (
-        <motion.div variants={itemVariants} className={cn("border rounded-2xl p-8 sm:p-12 text-center", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+        <motion.div variants={itemVariants} className={cn("border rounded-2xl p-8 sm:p-12 text-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
           <div className="relative z-10">
             <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 border", isDark ? "bg-white/[0.03] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
               <Layers className={cn("w-8 h-8", isDark ? "text-zinc-500" : "text-slate-400")} />
@@ -273,7 +273,7 @@ export default function MyServicesPage() {
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     transition={{ delay: idx * 0.05 }}
                     key={`vps-${vps.id}`}
-                    className={cn("group border rounded-2xl p-5 sm:p-6 transition-all flex flex-col h-full relative overflow-hidden", isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/[0.16]" : "bg-white border-slate-200/90 shadow-2xs hover:border-slate-300", vps.status === 'TERMINATED' && "opacity-75 grayscale-[30%]")}
+                    className={cn("group border rounded-2xl p-5 sm:p-6 transition-all flex flex-col h-full relative overflow-hidden", isDark ? "bg-[#111115] border-white/[0.08] hover:border-white/[0.16]" : "bg-white border-slate-200/90 shadow-2xs hover:border-slate-300", vps.status === 'TERMINATED' && "opacity-75 grayscale-[30%]")}
                   >
                     <div className="flex justify-between items-start mb-6 relative z-10">
                       <div className="flex gap-3.5 items-center min-w-0">
@@ -330,11 +330,11 @@ export default function MyServicesPage() {
                               <p className="text-xs font-semibold text-red-300">{vps.suspendReason || "Service suspended by system/administrator."}</p>
                               {!vps.autoRenew ? (
                                 <p className="text-[11px] text-cyan-300 mt-2 font-medium">
-                                  💡 Tip: Aktifkan <strong>Auto-Renew</strong> agar VPS ini otomatis aktif kembali jika saldo mencukupi.
+                                  💡 Tip: Enable <strong>Auto-Renew</strong> so this VPS automatically reactivates when your balance is sufficient.
                                 </p>
                               ) : (
                                 <p className="text-[11px] text-amber-300 mt-2 font-medium">
-                                  💡 Tip: Auto-Renew telah aktif. Silakan Top Up saldo Anda agar VPS langsung otomatis aktif kembali.
+                                  💡 Tip: Auto-Renew is enabled. Top up your balance to reactivate this VPS automatically.
                                 </p>
                               )}
                             </div>
@@ -361,7 +361,7 @@ export default function MyServicesPage() {
                             className="bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all"
                           >
                             <CreditCard className="w-3.5 h-3.5" />
-                            Top Up Saldo
+                            Top Up Balance
                           </Link>
                         )
                       )}
@@ -391,7 +391,7 @@ export default function MyServicesPage() {
                     key={`k3s-${k3s.id}`}
                     className={cn(
                       "group border rounded-2xl p-5 sm:p-6 transition-all flex flex-col h-full relative overflow-hidden",
-                      isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/[0.16]" : "bg-white border-slate-200/90 shadow-2xs hover:border-slate-300",
+                      isDark ? "bg-[#111115] border-white/[0.08] hover:border-white/[0.16]" : "bg-white border-slate-200/90 shadow-2xs hover:border-slate-300",
                       k3s.status === 'TERMINATED' && "opacity-75 grayscale-[30%]"
                     )}
                   >
@@ -468,7 +468,7 @@ export default function MyServicesPage() {
                     key={`db-${db.id}`}
                     className={cn(
                       "group border rounded-2xl p-5 sm:p-6 transition-all flex flex-col h-full relative overflow-hidden",
-                      isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/[0.16]" : "bg-white border-slate-200/90 shadow-2xs hover:border-slate-300",
+                      isDark ? "bg-[#111115] border-white/[0.08] hover:border-white/[0.16]" : "bg-white border-slate-200/90 shadow-2xs hover:border-slate-300",
                       db.status === 'TERMINATED' && "opacity-75 grayscale-[30%]"
                     )}
                   >
@@ -541,7 +541,7 @@ export default function MyServicesPage() {
                     key={`app-${app.id}`}
                     className={cn(
                       "group border rounded-2xl p-5 sm:p-6 transition-all flex flex-col h-full relative overflow-hidden",
-                      isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-cyan-500/30" : "bg-white border-slate-200/90 shadow-2xs hover:border-slate-300",
+                      isDark ? "bg-[#111115] border-white/[0.08] hover:border-cyan-500/30" : "bg-white border-slate-200/90 shadow-2xs hover:border-slate-300",
                       app.status === 'TERMINATED' && "opacity-75 grayscale-[30%]"
                     )}
                   >
@@ -614,7 +614,7 @@ export default function MyServicesPage() {
                     key={sub.id}
                     className={cn(
                       "group border rounded-2xl p-5 sm:p-6 transition-all flex flex-col h-full relative overflow-hidden",
-                      isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/[0.16]" : "bg-white border-slate-200/90 shadow-2xs hover:border-slate-300",
+                      isDark ? "bg-[#111115] border-white/[0.08] hover:border-white/[0.16]" : "bg-white border-slate-200/90 shadow-2xs hover:border-slate-300",
                       sub.status === 'CANCELLED' && "opacity-75 grayscale-[30%]"
                     )}
                   >
@@ -669,11 +669,11 @@ export default function MyServicesPage() {
                               <p className="text-xs font-semibold text-red-300">{sub.suspendReason || "Service suspended by system/administrator."}</p>
                               {!sub.autoRenew ? (
                                 <p className="text-[11px] text-cyan-300 mt-2 font-medium">
-                                  💡 Tip: Aktifkan <strong>Auto-Renew</strong> agar layanan ini otomatis aktif kembali jika saldo mencukupi.
+                                  💡 Tip: Enable <strong>Auto-Renew</strong> so this service automatically reactivates when your balance is sufficient.
                                 </p>
                               ) : (
                                 <p className="text-[11px] text-amber-300 mt-2 font-medium">
-                                  💡 Tip: Auto-Renew telah aktif. Silakan Top Up saldo Anda agar layanan langsung otomatis aktif kembali.
+                                  💡 Tip: Auto-Renew is enabled. Top up your balance to reactivate this service automatically.
                                 </p>
                               )}
                             </div>
@@ -702,7 +702,7 @@ export default function MyServicesPage() {
                                 className="bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all"
                               >
                                 <CreditCard className="w-3.5 h-3.5" />
-                                Top Up Saldo
+                                Top Up Balance
                               </Link>
                             )
                           )}
@@ -757,7 +757,7 @@ export default function MyServicesPage() {
       {/* Terminate Confirmation Modal */}
       {terminateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className={cn("border w-full max-w-sm rounded-2xl p-6 shadow-xl relative", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90")}>
+          <div className={cn("border w-full max-w-sm rounded-2xl p-6 shadow-xl relative", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90")}>
             <button onClick={() => setTerminateModal(null)} className={cn("absolute top-4 right-4 transition-colors", isDark ? "text-zinc-500 hover:text-white" : "text-slate-400 hover:text-slate-900")}>
               <XCircle className="w-6 h-6" />
             </button>
