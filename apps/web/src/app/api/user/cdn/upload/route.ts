@@ -85,7 +85,10 @@ export async function POST(req: NextRequest) {
     const isPublic = isPublicHeader === null ? true : isPublicHeader === "true";
 
     const requestedBucket = req.headers.get("x-upload-bucket");
-    const targetBucket = await resolveCustomerCdnBucket(userId, requestedBucket);
+    const rawSubId = req.headers.get("x-upload-subscription-id");
+    const parsedSubId = rawSubId ? parseInt(rawSubId, 10) : undefined;
+    const validSubId = parsedSubId && !isNaN(parsedSubId) ? parsedSubId : undefined;
+    const targetBucket = await resolveCustomerCdnBucket(userId, requestedBucket, validSubId);
     if (!targetBucket) {
       return NextResponse.json({ error: "Target CDN bucket not found or access denied" }, { status: 404 });
     }
@@ -221,6 +224,7 @@ export async function POST(req: NextRequest) {
         mimeType: resolvedMime,
         size: fileSize,
         bucket: targetBucket.name,
+        subscriptionId: validSubId ?? targetBucket.subscriptionId ?? null,
         folderPath,
         isFolder: false,
         isPublic,

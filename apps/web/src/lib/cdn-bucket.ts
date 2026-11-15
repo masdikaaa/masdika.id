@@ -7,9 +7,10 @@ import {
   deleteCustomerBucketCompletely,
 } from './customer-rustfs';
 
-export async function ensureDefaultCdnBucket(userId: number) {
+export async function ensureDefaultCdnBucket(userId: number, subscriptionId?: number) {
+  const subWhere = subscriptionId ? { subscriptionId } : {};
   const existingDefault = await prisma.cdnBucket.findFirst({
-    where: { userId, isDefault: true },
+    where: { userId, ...subWhere, isDefault: true },
   });
   if (existingDefault) {
     // Ensure bucket exists physically on Customer RustFS (best effort)
@@ -18,7 +19,7 @@ export async function ensureDefaultCdnBucket(userId: number) {
   }
 
   const anyExisting = await prisma.cdnBucket.findFirst({
-    where: { userId },
+    where: { userId, ...subWhere },
     orderBy: { createdAt: 'asc' },
   });
   if (anyExisting) {
@@ -31,7 +32,7 @@ export async function ensureDefaultCdnBucket(userId: number) {
   }
 
   const cfg = await getCustomerRustFSConfig();
-  const bucketName = getDefaultCdnBucketName(userId, cfg.cdnBucketPrefix);
+  const bucketName = getDefaultCdnBucketName(userId, cfg.cdnBucketPrefix, subscriptionId);
 
   if (cfg.enabled && cfg.endpoint && cfg.accessKey && cfg.secretKey) {
     await ensureCustomerBucketExists(bucketName, 'PRIVATE');
@@ -40,21 +41,30 @@ export async function ensureDefaultCdnBucket(userId: number) {
   return prisma.cdnBucket.create({
     data: {
       userId,
+      subscriptionId: subscriptionId ?? null,
       name: bucketName,
       isDefault: true,
     },
   });
 }
 
-export async function resolveCustomerCdnBucket(userId: number, requestedBucket?: string | null) {
-  const defaultBucket = await ensureDefaultCdnBucket(userId);
+export async function resolveCustomerCdnBucket(
+  userId: number,
+  requestedBucket?: string | null,
+  subscriptionId?: number
+) {
+  const defaultBucket = await ensureDefaultCdnBucket(userId, subscriptionId);
   if (!requestedBucket || requestedBucket.trim() === '') {
     return defaultBucket;
   }
 
   const normalized = requestedBucket.trim().toLowerCase();
   const owned = await prisma.cdnBucket.findFirst({
-    where: { userId, name: normalized },
+    where: {
+      userId,
+      name: normalized,
+      ...(subscriptionId ? { OR: [{ subscriptionId }, { subscriptionId: null }] } : {}),
+    },
   });
 
   if (!owned) {
@@ -69,7 +79,11 @@ export async function resolveCustomerCdnBucket(userId: number, requestedBucket?:
   return owned;
 }
 
-export async function createCustomerCdnBucket(userId: number, rawName: string) {
+export async function createCustomerCdnBucket(
+  userId: number,
+  rawName: string,
+  subscriptionId?: number
+) {
   const name = rawName.trim().toLowerCase();
   const check = validateS3BucketName(name);
   if (!check.valid) {
@@ -95,6 +109,7 @@ export async function createCustomerCdnBucket(userId: number, rawName: string) {
   return prisma.cdnBucket.create({
     data: {
       userId,
+      subscriptionId: subscriptionId ?? null,
       name,
       isDefault: false,
     },

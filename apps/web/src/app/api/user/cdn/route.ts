@@ -36,19 +36,25 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const requestedBucket = searchParams.get('bucket');
+    const rawSubId = searchParams.get('subscriptionId');
+    const subscriptionId = rawSubId ? parseInt(rawSubId, 10) : undefined;
+    const validSubId = subscriptionId && !isNaN(subscriptionId) ? subscriptionId : undefined;
     const folderPath = sanitizeCdnFolderPath(searchParams.get('folder') || '/');
     if (!folderPath) {
       return NextResponse.json({ error: "Invalid folder path" }, { status: 400 });
     }
 
-    const activeBucket = await resolveCustomerCdnBucket(userId, requestedBucket);
+    const activeBucket = await resolveCustomerCdnBucket(userId, requestedBucket, validSubId);
     if (!activeBucket) {
       return NextResponse.json({ error: "Bucket not found or access denied" }, { status: 404 });
     }
 
     const [buckets, rustfsCfg] = await Promise.all([
       prisma.cdnBucket.findMany({
-        where: { userId },
+        where: {
+          userId,
+          ...(validSubId ? { subscriptionId: validSubId } : {}),
+        },
         orderBy: [{ isDefault: 'desc' }, { createdAt: 'asc' }],
       }),
       getCustomerRustFSConfig(),
@@ -150,6 +156,9 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     const { action } = body;
+    const rawSubId = body.subscriptionId;
+    const subscriptionId = rawSubId ? parseInt(String(rawSubId), 10) : undefined;
+    const validSubId = subscriptionId && !isNaN(subscriptionId) ? subscriptionId : undefined;
 
     if (action === 'createBucket') {
       const { bucketName } = body;
@@ -157,8 +166,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Bucket name is required" }, { status: 400 });
       }
       try {
-        await ensureDefaultCdnBucket(userId);
-        const created = await createCustomerCdnBucket(userId, bucketName);
+        await ensureDefaultCdnBucket(userId, validSubId);
+        const created = await createCustomerCdnBucket(userId, bucketName, validSubId);
         return NextResponse.json({ success: true, bucket: created });
       } catch (err: any) {
         return NextResponse.json({ error: err?.message || "Failed to create bucket" }, { status: 400 });
@@ -180,7 +189,7 @@ export async function POST(req: NextRequest) {
 
     if (action === 'mkdir') {
       const { currentFolder, folderName, bucket } = body;
-      const activeBucket = await resolveCustomerCdnBucket(userId, bucket);
+      const activeBucket = await resolveCustomerCdnBucket(userId, bucket, validSubId);
       if (!activeBucket) {
         return NextResponse.json({ error: "Bucket not found or access denied" }, { status: 404 });
       }
@@ -208,6 +217,7 @@ export async function POST(req: NextRequest) {
           mimeType: "inode/directory",
           size: 0,
           bucket: activeBucket.name,
+          subscriptionId: validSubId ?? activeBucket.subscriptionId ?? null,
           folderPath: safeFolder,
           isFolder: true,
           token: uuidv4(),

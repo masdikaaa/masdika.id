@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     const rawName = auth.user!.name || '';
     const decryptedName = decryptDeterministic(rawName);
     const userName = decryptedName || rawName || 'Customer';
-    const { planId, paymentMethodCode, upgradeSubscriptionId } = await req.json();
+    const { planId, paymentMethodCode, upgradeSubscriptionId, serviceName } = await req.json();
 
     if (!planId || !paymentMethodCode) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -119,6 +119,7 @@ export async function POST(req: NextRequest) {
     const initialStatus = (totalAmount <= 0 || isBalancePayment) ? 'ACTIVE' : 'PENDING';
 
     const merchantOrderId = generateOrderId();
+    let createdSubscriptionId: number | null = null;
 
     try {
       await prisma.$transaction(async (tx) => {
@@ -178,6 +179,7 @@ export async function POST(req: NextRequest) {
           data: {
             userId,
             planId,
+            name: typeof serviceName === 'string' && serviceName.trim() ? serviceName.trim().slice(0, 80) : plan.name,
             cycle: 'HOURLY',
             status: initialStatus,
             expiresAt,
@@ -185,12 +187,29 @@ export async function POST(req: NextRequest) {
             lockedHourlyPrice: plan.hourlyPrice
           }
         });
+        createdSubscriptionId = subscription.id;
 
         if (initialStatus === 'ACTIVE' && upgradeSubscriptionId) {
           await tx.vpsService.updateMany({
             where: { subscriptionId: upgradeSubscriptionId, userId },
             data: { subscriptionId: subscription.id }
           });
+          if (plan.service === 'CDN') {
+            await Promise.all([
+              tx.cdnBucket.updateMany({
+                where: { subscriptionId: upgradeSubscriptionId, userId },
+                data: { subscriptionId: subscription.id },
+              }),
+              tx.cdnApiKey.updateMany({
+                where: { subscriptionId: upgradeSubscriptionId, userId },
+                data: { subscriptionId: subscription.id },
+              }),
+              tx.secureMedia.updateMany({
+                where: { subscriptionId: upgradeSubscriptionId, userId },
+                data: { subscriptionId: subscription.id },
+              }),
+            ]);
+          }
         }
 
         await tx.invoice.create({
@@ -240,6 +259,13 @@ export async function POST(req: NextRequest) {
       throw txError;
     }
 
+    if (plan.service === 'CDN' && !upgradeSubscriptionId && initialStatus === 'ACTIVE' && createdSubscriptionId) {
+      const { ensureDefaultCdnBucket } = await import('@/lib/cdn-bucket');
+      await ensureDefaultCdnBucket(userId, createdSubscriptionId).catch((err) =>
+        console.error('Failed to provision default CDN bucket:', err)
+      );
+    }
+
     if (isBalancePayment && totalAmount > 0) {
       // Balance payment = immediate activation, send success emails
       sendCustomerPaymentSuccessEmail({
@@ -264,11 +290,11 @@ export async function POST(req: NextRequest) {
         invoiceNumber: merchantOrderId,
       }).catch(e => console.error('Email error:', e));
 
-      return NextResponse.json({ success: true, paymentUrl: null });
+      return NextResponse.json({ success: true, paymentUrl: null, subscriptionId: createdSubscriptionId });
     }
 
     if (totalAmount <= 0) {
-      return NextResponse.json({ success: true, paymentUrl: null });
+      return NextResponse.json({ success: true, paymentUrl: null, subscriptionId: createdSubscriptionId });
     }
 
     // If not balance payment, we throw error (which should never happen now)

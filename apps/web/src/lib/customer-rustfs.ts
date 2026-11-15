@@ -231,9 +231,14 @@ export function validateS3BucketName(name: string): { valid: boolean; normalized
   return { valid: true, normalized };
 }
 
-export function getDefaultCdnBucketName(userId: number, prefix = 'masdika-cdn-u'): string {
+export function getDefaultCdnBucketName(
+  userId: number,
+  prefix = 'masdika-cdn-u',
+  subscriptionId?: number
+): string {
   const cleanPrefix = prefix.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/^-+|-+$/g, '') || 'masdika-cdn-u';
-  return `${cleanPrefix}${userId}`.slice(0, 63);
+  const suffix = subscriptionId ? `${userId}-s${subscriptionId}` : `${userId}`;
+  return `${cleanPrefix}${suffix}`.slice(0, 63);
 }
 
 /**

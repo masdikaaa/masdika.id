@@ -4,13 +4,20 @@ import { requireAuth } from '@/lib/auth-middleware';
 import { hasActiveSubscription } from '@/lib/subscription';
 import { generateCdnApiKey } from '@/lib/cdn-api-auth';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const auth = await requireAuth({ allowedRoles: ['ADMIN', 'USER'] });
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
   try {
+    const { searchParams } = new URL(req.url);
+    const rawSubId = searchParams.get('subscriptionId');
+    const subscriptionId = rawSubId ? parseInt(rawSubId, 10) : undefined;
+
     const keys = await prisma.cdnApiKey.findMany({
-      where: { userId: auth.userId! },
+      where: {
+        userId: auth.userId!,
+        ...(subscriptionId && !isNaN(subscriptionId) ? { subscriptionId } : {}),
+      },
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
@@ -50,11 +57,14 @@ export async function POST(req: NextRequest) {
     }
 
     const permission = body?.scope === 'READ_ONLY' || body?.permission === 'READ_ONLY' ? 'READ_ONLY' : 'READ_WRITE';
+    const rawSubId = body?.subscriptionId;
+    const subscriptionId = rawSubId ? parseInt(String(rawSubId), 10) : undefined;
     const { rawKey, keyHash, keyPrefix } = generateCdnApiKey();
 
     const created = await prisma.cdnApiKey.create({
       data: {
         userId,
+        subscriptionId: subscriptionId && !isNaN(subscriptionId) ? subscriptionId : null,
         name,
         keyPrefix,
         keyHash,

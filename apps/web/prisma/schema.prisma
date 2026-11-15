@@ -325,6 +325,7 @@ model SecureMedia {
   token        String    @unique
   expiresAt    DateTime?
   userId       Int?
+  subscriptionId Int?
   createdAt    DateTime  @default(now())
   user         User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -333,6 +334,7 @@ model SecureMedia {
 
   @@index([userId])
   @@index([userId, bucket])
+  @@index([subscriptionId])
 }
 
 model MediaRating {
@@ -569,6 +571,7 @@ model Subscription {
   id                Int         @id @default(autoincrement())
   userId            Int
   planId            Int
+  name              String?
   status            String      @default("ACTIVE")
   suspendReason     String?
   cycle             String
@@ -584,6 +587,8 @@ model Subscription {
   plan              Plan        @relation(fields: [planId], references: [id])
   user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   vpsService        VpsService?
+  cdnBuckets        CdnBucket[]
+  cdnApiKeys        CdnApiKey[]
 
   @@index([userId])
   @@index([planId])
@@ -1258,31 +1263,37 @@ model AppService {
 }
 
 model CdnBucket {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  name      String   @unique
-  isDefault Boolean  @default(false)
-  isPublic  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id             Int           @id @default(autoincrement())
+  userId         Int
+  subscriptionId Int?
+  name           String        @unique
+  isDefault      Boolean       @default(false)
+  isPublic       Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([subscriptionId])
 }
 
 model CdnApiKey {
-  id         Int       @id @default(autoincrement())
-  userId     Int
-  name       String
-  keyPrefix  String
-  keyHash    String    @unique
-  permission String    @default("READ_WRITE") // "READ_WRITE" | "READ_ONLY"
-  isActive   Boolean   @default(true)
-  lastUsedAt DateTime?
-  createdAt  DateTime  @default(now())
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id             Int           @id @default(autoincrement())
+  userId         Int
+  subscriptionId Int?
+  name           String
+  keyPrefix      String
+  keyHash        String        @unique
+  permission     String        @default("READ_WRITE") // "READ_WRITE" | "READ_ONLY"
+  isActive       Boolean       @default(true)
+  lastUsedAt     DateTime?
+  createdAt      DateTime      @default(now())
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([subscriptionId])
 }
 
 model ObjectStorageService {
