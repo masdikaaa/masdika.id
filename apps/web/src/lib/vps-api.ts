@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { ProxmoxClient } from "@/lib/proxmox";
+import { decryptDeterministic } from "@/lib/encryption";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 export const LIVE_VPS_STATUSES = ["PROVISIONING", "RUNNING", "STOPPED", "SUSPENDED"];
@@ -191,4 +192,47 @@ export async function executeVpsPowerAction(
     console.error(`[VPS_API_${action.toUpperCase()}]`, error);
     return vpsApiError("Internal server error", 500);
   }
+}
+
+/**
+ * Loads a provisioned, non-terminated VPS owned by `userId`.
+ */
+export async function getOwnedProvisionedVps(
+  userId: number,
+  rawId: string,
+  options: { blockSuspended?: boolean } = { blockSuspended: true }
+) {
+  const vpsId = parseVpsId(rawId);
+  if (!vpsId) return { error: vpsApiError("Invalid VPS ID", 400) };
+
+  const vps = await prisma.vpsService.findFirst({
+    where: { id: vpsId, userId },
+  });
+
+  if (!vps || !vps.vmid || vps.status === "TERMINATED") {
+    return { error: vpsApiError("VPS instance not found", 404) };
+  }
+
+  if (options.blockSuspended !== false && vps.status === "SUSPENDED") {
+    return {
+      error: vpsApiError(
+        "VPS instance is suspended. Please top up your balance or contact support first.",
+        403
+      ),
+    };
+  }
+
+  return { vps };
+}
+
+/**
+ * Instantiates a ProxmoxClient for the currently active hypervisor.
+ */
+export async function getActiveProxmoxClient() {
+  const server = await prisma.proxmoxServer.findFirst({ where: { isActive: true } });
+  if (!server) {
+    return { error: vpsApiError("Hypervisor is currently unavailable", 503) };
+  }
+  const secret = decryptDeterministic(server.tokenSecret) || server.tokenSecret;
+  return { proxmox: new ProxmoxClient(server.host, server.tokenId, secret) };
 }
