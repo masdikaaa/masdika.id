@@ -349,7 +349,7 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
       setNewBucketName('');
       setSelectedBucket(data.bucket.name);
       setPrefix('');
-      fetchService();
+      fetchService(true);
     } catch (err: any) {
       toast.error(err?.message || 'Failed to create bucket');
     } finally {
@@ -368,7 +368,7 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       toast.success(`Bucket "${bucketName}" is now ${nextVis}`);
-      fetchService();
+      fetchService(true);
     } catch (err: any) {
       toast.error(err?.message || 'Failed to update bucket ACL');
     }
@@ -388,7 +388,7 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
           if (!res.ok) throw new Error(data.error);
           toast.success(`Bucket "${bucketName}" deleted`);
           if (selectedBucket === bucketName) setSelectedBucket(null);
-          fetchService();
+          fetchService(true);
         } catch (err: any) {
           toast.error(err?.message || 'Failed to delete bucket');
         }
@@ -526,7 +526,7 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
       setRevealedCred({ accessKey: data.key.accessKey, secretKey: data.secretKey });
       setNewKeyName('');
       toast.success('S3 Access Key provisioned!');
-      fetchService();
+      fetchService(true);
     } catch (err: any) {
       toast.error(err?.message || 'Failed to create S3 key');
     } finally {
@@ -544,7 +544,7 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
           const res = await fetch(`/api/user/object-storage/${id}/keys?keyId=${keyId}`, { method: 'DELETE' });
           if (!res.ok) throw new Error('Failed');
           toast.success('S3 key revoked');
-          fetchService();
+          fetchService(true);
         } catch {
           toast.error('Failed to revoke key');
         }
@@ -1217,7 +1217,7 @@ s3 = boto3.client(
           </span>
           <button
             type="button"
-            onClick={() => fetchService()}
+            onClick={() => fetchService(true)}
             className={cn(
               'px-3 py-1.5 rounded-xl border text-[11px] font-semibold flex items-center gap-1.5 transition-colors cursor-pointer',
               isDark ? 'bg-[#111115] border-white/[0.08] text-zinc-300 hover:bg-white/[0.05]' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 shadow-2xs'
