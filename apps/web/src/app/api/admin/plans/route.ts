@@ -3,10 +3,12 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
 import { ensureDatabasePlansExist } from "@/lib/database-plans-server";
 import { ensureAppPlansExist } from "@/lib/app-plans-server";
+import { ensureObjectStoragePlansExist } from "@/lib/object-storage-plans-server";
 
 export const VALID_SERVICES = [
   'DATABASE',
   'APP',
+  'OBJECT_STORAGE',
   'CDN',
   'TIKTOK',
   'SPOTIFY',
@@ -21,9 +23,12 @@ export async function GET(req: NextRequest) {
     const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
     if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
-    // Ensure all 6 managed database plans & managed app plans exist
-    await ensureDatabasePlansExist();
-    await ensureAppPlansExist();
+    // Ensure all managed database, managed app & object storage plans exist
+    await Promise.all([
+      ensureDatabasePlansExist(),
+      ensureAppPlansExist(),
+      ensureObjectStoragePlansExist(),
+    ]);
 
     // Auto-purge any lingering obsolete plans outside the official active services
     prisma.plan.deleteMany({

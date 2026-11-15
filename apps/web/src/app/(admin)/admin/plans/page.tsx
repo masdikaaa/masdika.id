@@ -32,6 +32,7 @@ const VALID_SERVICES = [
   "ALL",
   "DATABASE",
   "APP",
+  "OBJECT_STORAGE",
   "CDN",
   "TIKTOK",
   "SPOTIFY",
@@ -45,6 +46,7 @@ const SERVICE_LABELS: Record<string, string> = {
   ALL: "All Services",
   DATABASE: "Managed Database",
   APP: "Managed Apps",
+  OBJECT_STORAGE: "Object Storage (S3)",
   CDN: "File CDN",
   TIKTOK: "TikTok API",
   SPOTIFY: "Spotify API",
@@ -429,6 +431,7 @@ export default function AdminPlansPage() {
     switch (service) {
       case "DATABASE": return <Database className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />;
       case "APP": return <Boxes className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />;
+      case "OBJECT_STORAGE": return <HardDrive className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />;
       case "CDN": return <UploadCloud className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />;
       case "TIKTOK": return <FileVideo className={cn("w-4 h-4", isDark ? "text-purple-400" : "text-purple-600")} />;
       case "SPOTIFY": return <Music className={cn("w-4 h-4", isDark ? "text-emerald-400" : "text-emerald-600")} />;
@@ -443,6 +446,33 @@ export default function AdminPlansPage() {
   const renderLimitBadges = (plan: Plan) => {
     try {
       const parsed = JSON.parse(plan.limits);
+      if (plan.service === "OBJECT_STORAGE") {
+        return (
+          <div className="flex flex-wrap items-center gap-1.5 max-w-[340px]">
+            {(parsed.storage || parsed.storageGb) && (
+              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border flex items-center gap-1", isDark ? "bg-cyan-500/10 text-cyan-300 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+                <HardDrive className="w-3 h-3" /> {parsed.storage || `${parsed.storageGb} GB`}
+              </span>
+            )}
+            {parsed.region && (
+              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border flex items-center gap-1", isDark ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200")}>
+                <MapPin className="w-3 h-3" /> {parsed.region}
+              </span>
+            )}
+            {parsed.maxBuckets !== undefined && (
+              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border", isDark ? "bg-amber-500/10 text-amber-300 border-amber-500/20" : "bg-amber-50 text-amber-700 border-amber-200")}>
+                {parsed.maxBuckets === -1 ? "Unlimited Buckets" : `${parsed.maxBuckets} Buckets`}
+              </span>
+            )}
+            {parsed.maxKeys !== undefined && (
+              <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-medium border", isDark ? "bg-white/[0.04] text-zinc-400 border-white/[0.08]" : "bg-slate-100 text-slate-600 border-slate-200")}>
+                {parsed.maxKeys === -1 ? "Unlimited S3 Keys" : `${parsed.maxKeys} S3 Keys`}
+              </span>
+            )}
+          </div>
+        );
+      }
+
       if (plan.service === "DATABASE") {
         return (
           <div className="flex flex-wrap items-center gap-1.5 max-w-[340px]">
@@ -1104,6 +1134,7 @@ export default function AdminPlansPage() {
                     options={[
                       { value: "DATABASE", label: "Managed Database (Kubernetes)" },
                       { value: "APP", label: "Managed Apps (Kubernetes)" },
+                      { value: "OBJECT_STORAGE", label: "Object Storage (S3)" },
                       { value: "CDN", label: "File CDN" },
                       { value: "TIKTOK", label: "TikTok API" },
                       { value: "SPOTIFY", label: "Spotify API" },

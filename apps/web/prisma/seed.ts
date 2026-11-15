@@ -3,6 +3,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from 'pg';
 import crypto from 'crypto';
 import "dotenv/config";
+import { OFFICIAL_OBJECT_STORAGE_PLANS } from '../src/lib/object-storage-plans';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL as string });
 const adapter = new PrismaPg(pool);
@@ -196,6 +197,28 @@ async function main() {
       console.log(`Obsolete plan deleted: Dedicated Database (ID ${obs.id})`);
     } else {
       await prisma.plan.update({ where: { id: obs.id }, data: { isActive: false } });
+    }
+  }
+
+  // 3b. Seed Object Storage (S3) Plans
+  for (const s3Plan of OFFICIAL_OBJECT_STORAGE_PLANS) {
+    const existingS3 = await prisma.plan.findFirst({
+      where: { service: 'OBJECT_STORAGE', name: s3Plan.name },
+    });
+    if (!existingS3) {
+      await prisma.plan.create({
+        data: {
+          name: s3Plan.name,
+          service: s3Plan.service,
+          description: s3Plan.description,
+          price: s3Plan.price,
+          hourlyPrice: s3Plan.hourlyPrice,
+          limits: JSON.stringify(s3Plan.limits),
+          isActive: s3Plan.isActive,
+          isPopular: s3Plan.isPopular,
+        },
+      });
+      console.log(`Object Storage plan created: ${s3Plan.name}`);
     }
   }
 

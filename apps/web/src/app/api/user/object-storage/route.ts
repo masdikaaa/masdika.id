@@ -16,6 +16,7 @@ import {
 } from '@/lib/customer-rustfs';
 import { sendAdminNewOrderEmail, sendCustomerPaymentSuccessEmail } from '@/lib/email';
 import { decryptDeterministic, encryptDeterministic } from '@/lib/encryption';
+import { ensureObjectStoragePlansExist } from '@/lib/object-storage-plans-server';
 
 function buildObjectStoragePlans(ratePerGbMonthly: number) {
   const sizes = [50, 100, 250, 500, 1000];
@@ -40,8 +41,13 @@ export async function GET() {
   const user = authResult.user!;
 
   try {
-    const [cfg, services] = await Promise.all([
+    await ensureObjectStoragePlansExist();
+    const [cfg, dbPlans, services] = await Promise.all([
       getCustomerRustFSConfig(),
+      prisma.plan.findMany({
+        where: { service: 'OBJECT_STORAGE', isActive: true },
+        orderBy: { price: 'asc' },
+      }),
       prisma.objectStorageService.findMany({
         where: { userId: user.id, status: { not: 'TERMINATED' } },
         include: {
@@ -54,6 +60,26 @@ export async function GET() {
         orderBy: { createdAt: 'desc' },
       }),
     ]);
+
+    const parsedPlans =
+      dbPlans.length > 0
+        ? dbPlans.map((p) => {
+            let storageGb = 50;
+            try {
+              const parsed = JSON.parse(p.limits);
+              storageGb = Number(parsed.storageGb) || parseInt(String(parsed.storage || '50'), 10) || 50;
+            } catch {
+              storageGb = 50;
+            }
+            return {
+              id: `s3-${p.id}`,
+              name: p.name,
+              storageGb,
+              monthlyPrice: p.price,
+              hourlyRate: p.hourlyPrice || Math.max(1, Math.ceil(p.price / 730)),
+            };
+          })
+        : buildObjectStoragePlans(cfg.ratePerGbMonthly);
 
     const enriched = await Promise.all(
       services.map(async (svc) => {
@@ -75,7 +101,7 @@ export async function GET() {
       enabled: cfg.objectStorageEnabled && cfg.enabled,
       publicEndpoint: cfg.publicEndpoint,
       ratePerGbMonthly: cfg.ratePerGbMonthly,
-      plans: buildObjectStoragePlans(cfg.ratePerGbMonthly),
+      plans: parsedPlans,
       data: enriched,
     });
   } catch (error: any) {
