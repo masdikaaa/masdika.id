@@ -368,11 +368,16 @@ export async function POST(req: NextRequest) {
         }
       } else if (invoice.type === 'VPS_UPGRADE') {
         if (invoice.vpsServiceId && invoice.details) {
-          const details = JSON.parse(invoice.details);
+          let details: any = null;
+          try {
+            details = JSON.parse(invoice.details);
+          } catch {
+            details = null;
+          }
           const vps = await prisma.vpsService.findUnique({ where: { id: invoice.vpsServiceId } });
           const server = await prisma.proxmoxServer.findFirst({ where: { isActive: true } });
 
-          if (vps && server) {
+          if (vps && server && details) {
             import('@/lib/proxmox').then(async ({ ProxmoxClient }) => {
               try {
                 const proxmox = new ProxmoxClient(server.host, server.tokenId, server.tokenSecret);

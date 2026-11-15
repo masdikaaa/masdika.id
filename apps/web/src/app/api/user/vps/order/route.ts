@@ -340,20 +340,9 @@ export async function POST(req: NextRequest) {
       const hourlyRate = diskCost + backupCost + ipCost + bandwidthCost + cpuCost + ramCost;
       const stoppedRate = hourlyRate;
 
-      // Security: Enforce accumulated active services commitment + 1 month new VPS estimation
+      // Security: Enforce accumulated active services commitment + 1 month new VPS estimation atomically inside transaction
       const newVpsMonthly = Math.round(hourlyRate * 730);
       let requiredBalance = newVpsMonthly;
-      try {
-        const commitmentCheck = await assertSufficientCommitmentBalance({
-          userId,
-          userBalance: user.balance,
-          newServiceMonthly: newVpsMonthly,
-          serviceName: `Cloud VPS (${hostname})`,
-        });
-        requiredBalance = commitmentCheck.requiredBalance;
-      } catch (commitmentErr: any) {
-        return NextResponse.json({ error: commitmentErr.message }, { status: 400 });
-      }
 
       vpsData.cpuCores = safeCpu;
       vpsData.ramGb = safeRam;
@@ -367,12 +356,10 @@ export async function POST(req: NextRequest) {
       const expiresAt = new Date();
       expiresAt.setMonth(expiresAt.getMonth() + 1);
       vpsData.expiresAt = expiresAt;
-      vpsData.expiresAt = expiresAt;
       vpsData.status = "PENDING"; // Instantly start provisioning since no upfront payment is needed
-    // If isKubernetes is true, handle cluster association or creation
-    let k3sClusterId: number | undefined = undefined;
-    if (isKubernetes) {
-      if (action === "add_node" && kubernetesClusterId) {
+
+      // Pre-validate existing cluster ownership before opening the billing transaction
+      if (isKubernetes && action === "add_node" && kubernetesClusterId) {
         const cluster = await prisma.kubernetesCluster.findFirst({
           where: { id: Number(kubernetesClusterId), userId }
         });
@@ -382,32 +369,54 @@ export async function POST(req: NextRequest) {
         if (cluster.status !== "RUNNING") {
           return NextResponse.json({ error: "Cannot add nodes while the cluster is not in RUNNING state. Please wait for the master node to finish provisioning." }, { status: 400 });
         }
-        k3sClusterId = cluster.id;
-        vpsData.kubernetesClusterId = k3sClusterId;
-        vpsData.kubernetesRole = "WORKER";
-      } else {
-        const k3s = await prisma.kubernetesCluster.create({
-          data: {
-            name: hostname,
-            userId,
-            version: kubernetesVersion || "v1.31",
-            status: "PENDING"
-          }
-        });
-        k3sClusterId = k3s.id;
-        vpsData.kubernetesClusterId = k3sClusterId;
-        vpsData.kubernetesRole = "MASTER"; // First node is master
       }
-    }
 
-    // Create the VPS Service record
-    const vpsService = await prisma.vpsService.create({
-      data: vpsData
-    });
-
-
+      let vpsService: any;
+      let k3sClusterId: number | undefined = undefined;
       try {
-        await prisma.$transaction(async (tx) => {
+        const txResult = await prisma.$transaction(async (tx) => {
+          // Serialize concurrent VPS orders per user so commitment checks cannot race
+          await tx.$executeRaw`SELECT id FROM "User" WHERE id = ${userId} FOR UPDATE`;
+
+          const freshUser = await tx.user.findUnique({
+            where: { id: userId },
+            select: { balance: true }
+          });
+
+          const commitmentCheck = await assertSufficientCommitmentBalance({
+            userId,
+            userBalance: freshUser?.balance || 0,
+            newServiceMonthly: newVpsMonthly,
+            serviceName: `Cloud VPS (${hostname})`,
+            tx,
+          });
+          requiredBalance = commitmentCheck.requiredBalance;
+
+          let txClusterId: number | undefined = undefined;
+          if (isKubernetes) {
+            if (action === "add_node" && kubernetesClusterId) {
+              txClusterId = Number(kubernetesClusterId);
+              vpsData.kubernetesClusterId = txClusterId;
+              vpsData.kubernetesRole = "WORKER";
+            } else {
+              const k3s = await tx.kubernetesCluster.create({
+                data: {
+                  name: hostname,
+                  userId,
+                  version: kubernetesVersion || "v1.31",
+                  status: "PENDING"
+                }
+              });
+              txClusterId = k3s.id;
+              vpsData.kubernetesClusterId = txClusterId;
+              vpsData.kubernetesRole = "MASTER"; // First node is master
+            }
+          }
+
+          const createdVps = await tx.vpsService.create({
+            data: vpsData
+          });
+
           // SECURITY: Enforce full 730h minimum balance requirement atomically inside transaction
           const updateResult = await tx.user.updateMany({
             where: { id: userId, balance: { gte: requiredBalance } },
@@ -424,7 +433,7 @@ export async function POST(req: NextRequest) {
             data: {
               invoiceNumber,
               userId,
-              vpsServiceId: vpsService.id,
+              vpsServiceId: createdVps.id,
               amount: vpsData.hourlyRate,
               status: "PAID",
               merchantOrderId: invoiceNumber,
@@ -434,11 +443,14 @@ export async function POST(req: NextRequest) {
               reference: "PAYG_RUNNING"
             }
           });
+
+          return { vpsService: createdVps, k3sClusterId: txClusterId };
         });
+        vpsService = txResult.vpsService;
+        k3sClusterId = txResult.k3sClusterId;
       } catch (txError: any) {
-        await prisma.vpsService.delete({ where: { id: vpsService.id } }).catch(() => {});
-        if (k3sClusterId && action !== "add_node") {
-          await prisma.kubernetesCluster.delete({ where: { id: k3sClusterId } }).catch(() => {});
+        if (txError?.message?.startsWith("Insufficient account balance")) {
+          return NextResponse.json({ error: txError.message }, { status: 400 });
         }
         if (txError.message === "INSUFFICIENT_BALANCE") {
           return NextResponse.json(

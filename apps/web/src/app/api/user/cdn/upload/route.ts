@@ -11,6 +11,7 @@ import { getActiveSubscription } from "@/lib/subscription";
 import { uploadFileToRustFS } from "@/lib/rustfs";
 import { syncMediaToElastic } from "@/lib/sync-elasticsearch";
 import {
+  sanitizeCdnFolderPath,
   validateFileUploadSecurity,
   validateRealImageBuffer,
 } from "@/lib/upload-security";
@@ -61,10 +62,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid or missing upload token" }, { status: 400 });
     }
 
-    const rawNameBase64 = req.headers.get("x-upload-original-name") || "";
-    const rawName = decodeURIComponent(Buffer.from(rawNameBase64, "base64").toString());
-    const folderPathBase64 = req.headers.get("x-upload-folder-path") || "Lw==";
-    const folderPath = decodeURIComponent(Buffer.from(folderPathBase64, "base64").toString());
+    let rawName = "";
+    let decodedFolder = "";
+    try {
+      const rawNameBase64 = req.headers.get("x-upload-original-name") || "";
+      rawName = decodeURIComponent(Buffer.from(rawNameBase64, "base64").toString());
+      const folderPathBase64 = req.headers.get("x-upload-folder-path") || "Lw==";
+      decodedFolder = decodeURIComponent(Buffer.from(folderPathBase64, "base64").toString());
+    } catch {
+      return NextResponse.json({ error: "Invalid upload filename or folder encoding" }, { status: 400 });
+    }
+
+    const folderPath = sanitizeCdnFolderPath(decodedFolder);
+    if (!folderPath) {
+      return NextResponse.json({ error: "Invalid folder path" }, { status: 400 });
+    }
+    if (!rawName.trim()) {
+      return NextResponse.json({ error: "Invalid filename" }, { status: 400 });
+    }
     const isPublicHeader = req.headers.get("x-upload-is-public");
     const isPublic = isPublicHeader === null ? true : isPublicHeader === "true";
 

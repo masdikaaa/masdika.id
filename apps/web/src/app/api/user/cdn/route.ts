@@ -6,17 +6,7 @@ import { requireAuth } from '@/lib/auth-middleware';
 import { v4 as uuidv4 } from "uuid";
 import { hasActiveSubscription } from "@/lib/subscription";
 import { deleteFromRustFS } from "@/lib/rustfs";
-import { hasForbiddenExtension } from "@/lib/upload-security";
-
-function sanitizeCdnFolderPath(raw: unknown): string | null {
-  if (typeof raw !== "string") return null;
-  const trimmed = raw.trim();
-  if (!trimmed || trimmed.includes("\0") || trimmed.includes("\\")) return null;
-  const normalized = ("/" + trimmed).replace(/\/+/g, "/").replace(/\/+$/, "") || "/";
-  const segments = normalized.split("/").filter(Boolean);
-  if (segments.some((s) => s === "." || s === "..")) return null;
-  return normalized.slice(0, 500);
-}
+import { hasForbiddenExtension, sanitizeCdnFolderPath } from "@/lib/upload-security";
 
 export async function GET(req: NextRequest) {
   const auth = await requireAuth({ allowedRoles: ['ADMIN', 'USER'] });

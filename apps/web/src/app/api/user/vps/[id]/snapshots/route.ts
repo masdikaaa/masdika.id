@@ -48,15 +48,27 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const userId = auth.userId!;
     const user = auth.user!;
 
-    const body = await req.json();
-    const { snapname, description, includeRam } = body;
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body !== "object") {
+      return NextResponse.json({ error: "Invalid request payload" }, { status: 400 });
+    }
+    const { snapname, description, includeRam } = body as {
+      snapname?: unknown;
+      description?: string;
+      includeRam?: boolean;
+    };
 
-    if (!snapname || !/^[a-zA-Z0-9]+$/.test(snapname)) {
+    if (!snapname || typeof snapname !== "string" || !/^[a-zA-Z0-9]+$/.test(snapname)) {
         return NextResponse.json({ error: "Invalid snapshot name. Only alphanumeric characters are allowed without spaces." }, { status: 400 });
     }
 
     const { id } = await params;
-    const whereClause: any = { id: parseInt(id) };
+    const vpsId = parseInt(id, 10);
+    if (!Number.isInteger(vpsId) || vpsId <= 0) {
+      return NextResponse.json({ error: "Invalid VPS ID" }, { status: 400 });
+    }
+
+    const whereClause: any = { id: vpsId };
     if (user?.role !== "ADMIN") {
         whereClause.userId = userId;
     }
@@ -67,6 +79,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     if (!vps || !vps.vmid) {
       return NextResponse.json({ error: "VPS not found or not provisioned" }, { status: 404 });
+    }
+
+    if (user?.role !== "ADMIN" && ["SUSPENDED", "TERMINATED", "TERMINATING", "PROVISIONING", "PENDING"].includes(vps.status)) {
+      return NextResponse.json({ error: `Cannot create snapshot while VPS is ${vps.status.toLowerCase()}.` }, { status: 403 });
     }
 
     const server = await prisma.proxmoxServer.findFirst({ where: { isActive: true } });

@@ -106,24 +106,9 @@ export async function POST(req: NextRequest) {
 
     const finalPrice = Math.max(0, finalSubtotal - credit) + lateFee;
 
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    
-    // Security: Enforce accumulated active services commitment + 1 month new plan estimation
+    // Security: Enforce accumulated active services commitment + 1 month new plan estimation atomically inside transaction
     const newServiceMonthly = Math.max(finalPrice, (plan.hourlyPrice || 0) * 730, plan.price || 0);
     let requiredBalance = newServiceMonthly;
-    if (isBalancePayment) {
-      try {
-        const commitmentCheck = await assertSufficientCommitmentBalance({
-          userId,
-          userBalance: user?.balance || 0,
-          newServiceMonthly,
-          serviceName: `${plan.name} (${plan.service || 'Plan'})`,
-        });
-        requiredBalance = commitmentCheck.requiredBalance;
-      } catch (commitmentErr: any) {
-        return NextResponse.json({ error: commitmentErr.message }, { status: 400 });
-      }
-    }
 
     const fee = finalPrice > 0 ? (paymentMethod.fee || 0) : 0;
     const totalAmount = finalPrice + fee;
@@ -137,6 +122,24 @@ export async function POST(req: NextRequest) {
 
     try {
       await prisma.$transaction(async (tx) => {
+        if (isBalancePayment) {
+          // Serialize concurrent checkouts per user so commitment checks cannot race
+          await tx.$executeRaw`SELECT id FROM "User" WHERE id = ${userId} FOR UPDATE`;
+          const freshUser = await tx.user.findUnique({
+            where: { id: userId },
+            select: { balance: true }
+          });
+
+          const commitmentCheck = await assertSufficientCommitmentBalance({
+            userId,
+            userBalance: freshUser?.balance || 0,
+            newServiceMonthly,
+            serviceName: `${plan.name} (${plan.service || 'Plan'})`,
+            tx,
+          });
+          requiredBalance = commitmentCheck.requiredBalance;
+        }
+
         if (initialStatus === 'ACTIVE' && currentSub) {
           const upgraded = await tx.subscription.updateMany({
             where: { id: currentSub.id, userId, status: 'ACTIVE' },
@@ -224,6 +227,9 @@ export async function POST(req: NextRequest) {
         }
       });
     } catch (txError: any) {
+      if (txError?.message?.startsWith("Insufficient account balance")) {
+        return NextResponse.json({ error: txError.message }, { status: 400 });
+      }
       if (txError.message === "INSUFFICIENT_BALANCE") {
         return NextResponse.json({ error: `A minimum balance of Rp ${requiredBalance.toLocaleString('id-ID')} is required.` }, { status: 400 });
       }

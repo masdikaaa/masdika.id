@@ -52,6 +52,19 @@ const MALICIOUS_TEXT_PATTERNS: RegExp[] = [
 ];
 
 /**
+ * Normalizes and validates a customer CDN virtual folder path against traversal (`..`), backslashes, and null bytes.
+ */
+export function sanitizeCdnFolderPath(raw: unknown): string | null {
+  if (typeof raw !== "string") return null;
+  const trimmed = raw.trim();
+  if (!trimmed || trimmed.includes("\0") || trimmed.includes("\\")) return null;
+  const normalized = ("/" + trimmed).replace(/\/+/g, "/").replace(/\/+$/, "") || "/";
+  const segments = normalized.split("/").filter(Boolean);
+  if (segments.some((s) => s === "." || s === "..")) return null;
+  return normalized.slice(0, 500);
+}
+
+/**
  * Checks if a filename has a forbidden extension or dangerous double extension (e.g., `shell.php.jpg`, `.htaccess`).
  */
 export function hasForbiddenExtension(filename: string): { forbidden: boolean; reason?: string } {

@@ -18,18 +18,28 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Too many actions. Please wait a moment." }, { status: 429 });
     }
 
-    const { vpsId, action } = await req.json();
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body !== "object") {
+      return NextResponse.json({ error: "Invalid request payload" }, { status: 400 });
+    }
+
+    const parsedVpsId = Number((body as { vpsId?: unknown }).vpsId);
+    const action = (body as { action?: unknown }).action;
+
+    if (!Number.isInteger(parsedVpsId) || parsedVpsId <= 0 || typeof action !== "string") {
+      return NextResponse.json({ error: "Invalid VPS ID or action" }, { status: 400 });
+    }
 
     const vps = await prisma.vpsService.findUnique({
-      where: { id: vpsId, userId: Number(user.id) },
+      where: { id: parsedVpsId, userId: Number(user.id) },
     });
 
     if (!vps || !vps.vmid) {
       return NextResponse.json({ error: "VPS not found or not provisioned" }, { status: 404 });
     }
 
-    if (vps.status === "SUSPENDED") {
-      return NextResponse.json({ error: "VPS is suspended. You cannot perform this action." }, { status: 403 });
+    if (["SUSPENDED", "TERMINATED", "TERMINATING", "PROVISIONING", "PENDING"].includes(vps.status)) {
+      return NextResponse.json({ error: `VPS is ${vps.status.toLowerCase()}. You cannot perform this action.` }, { status: 403 });
     }
 
     const server = await prisma.proxmoxServer.findFirst({ where: { isActive: true } });
@@ -79,7 +89,7 @@ export async function POST(req: NextRequest) {
     };
     if (newStatus[action]) {
       await prisma.vpsService.update({
-        where: { id: vpsId },
+        where: { id: vps.id },
         data: { status: newStatus[action] },
       });
     }
