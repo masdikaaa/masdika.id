@@ -36,6 +36,8 @@ import {
   Search,
   Terminal,
   ShieldAlert,
+  ShieldCheck,
+  BookOpen,
   Layers,
   X,
 } from 'lucide-react';
@@ -156,7 +158,7 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
   const [loading, setLoading] = useState(true);
   const [service, setService] = useState<any>(null);
   const [publicEndpoint, setPublicEndpoint] = useState('');
-  const [tab, setTab] = useState<'buckets' | 'keys' | 'settings'>('buckets');
+  const [tab, setTab] = useState<'buckets' | 'keys' | 'guide' | 'settings'>('buckets');
 
   // Bucket Browser State
   const [selectedBucket, setSelectedBucket] = useState<string | null>(null);
@@ -762,6 +764,7 @@ s3 = boto3.client(
         {[
           { id: 'buckets', label: 'Buckets & Objects', icon: Database },
           { id: 'keys', label: 'IAM Access Keys & SDK', icon: KeyRound },
+          { id: 'guide', label: 'AWS CLI Guide', icon: BookOpen },
           { id: 'settings', label: 'Scale & Settings', icon: Settings },
         ].map((t) => {
           const Icon = t.icon;
@@ -1130,7 +1133,212 @@ s3 = boto3.client(
         </div>
       )}
 
-      {/* Tab 3: Scale & Settings */}
+      {/* Tab 3: AWS CLI & S3 Guide */}
+      {tab === 'guide' && (
+        <div className="space-y-5">
+          {/* Intro Banner */}
+          <div
+            className={cn(
+              'p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs',
+              isDark ? 'bg-cyan-500/10 border-cyan-500/20 text-cyan-200' : 'bg-cyan-50 border-cyan-200 text-cyan-950'
+            )}
+          >
+            <div className="flex items-start gap-3">
+              <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center border shrink-0', isDark ? 'bg-cyan-500/15 border-cyan-500/30 text-cyan-400' : 'bg-white border-cyan-200 text-cyan-600')}>
+                <Terminal className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="font-bold text-sm">Panduan Penggunaan AWS CLI v2 dengan Masdika Object Storage (S3)</p>
+                <p className={cn('text-xs mt-0.5 leading-relaxed', isDark ? 'text-cyan-200/80' : 'text-cyan-900/80')}>
+                  Gunakan perintah standar AWS CLI dengan endpoint <code className="font-mono font-bold">{endpointVal}</code> dan region <code className="font-mono font-bold">us-east-1</code>.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setTab('keys')}
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 shadow-sm shrink-0 cursor-pointer transition-colors focus:outline-none focus-visible:outline-none"
+            >
+              Kelola IAM Keys →
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
+            {/* Step 1: Install AWS CLI */}
+            <div className={cn('rounded-2xl border p-5 space-y-4', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90 shadow-2xs')}>
+              <div className="flex items-center gap-2.5">
+                <span className="w-6 h-6 rounded-lg bg-cyan-400 text-slate-950 text-xs font-extrabold flex items-center justify-center shrink-0">
+                  1
+                </span>
+                <div>
+                  <h2 className={cn('text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>Install AWS CLI v2</h2>
+                  <p className={cn('text-[11px]', isDark ? 'text-zinc-400' : 'text-slate-500')}>Pilih sistem operasi Anda untuk menginstal AWS CLI.</p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {[
+                  {
+                    label: 'Linux (x86_64)',
+                    cmd: `curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip awscliv2.zip && sudo ./aws/install`,
+                  },
+                  {
+                    label: 'macOS (Homebrew)',
+                    cmd: `brew install awscli`,
+                  },
+                  {
+                    label: 'Windows (PowerShell / Winget)',
+                    cmd: `winget install Amazon.AWSCLI`,
+                  },
+                ].map((osItem) => (
+                  <div key={osItem.label} className="space-y-1.5">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className={cn('font-semibold', isDark ? 'text-zinc-300' : 'text-slate-700')}>{osItem.label}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleCopy(osItem.cmd, osItem.label)}
+                        className={cn('inline-flex items-center gap-1 font-bold cursor-pointer focus:outline-none focus-visible:outline-none', isDark ? 'text-cyan-400 hover:text-cyan-300' : 'text-cyan-600 hover:text-cyan-700')}
+                      >
+                        <Copy className="w-3 h-3" /> Copy
+                      </button>
+                    </div>
+                    <pre className={cn('p-3 rounded-xl font-mono text-[11px] overflow-x-auto border', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-cyan-300' : 'bg-slate-900 border-slate-800 text-cyan-300')}>
+                      {osItem.cmd}
+                    </pre>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Step 2: Configure Credentials */}
+            <div className={cn('rounded-2xl border p-5 space-y-4', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90 shadow-2xs')}>
+              <div className="flex items-center gap-2.5">
+                <span className="w-6 h-6 rounded-lg bg-cyan-400 text-slate-950 text-xs font-extrabold flex items-center justify-center shrink-0">
+                  2
+                </span>
+                <div>
+                  <h2 className={cn('text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>Konfigurasi Profil &amp; Kredensial</h2>
+                  <p className={cn('text-[11px]', isDark ? 'text-zinc-400' : 'text-slate-500')}>Simpan Access Key &amp; Secret Key dari tab IAM Access Keys.</p>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className={cn('font-semibold', isDark ? 'text-zinc-300' : 'text-slate-700')}>Setup Named Profile (Recommended)</span>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy('aws configure --profile masdika', 'Profile command')}
+                    className={cn('inline-flex items-center gap-1 font-bold cursor-pointer focus:outline-none focus-visible:outline-none', isDark ? 'text-cyan-400 hover:text-cyan-300' : 'text-cyan-600 hover:text-cyan-700')}
+                  >
+                    <Copy className="w-3 h-3" /> Copy
+                  </button>
+                </div>
+                <pre className={cn('p-3 rounded-xl font-mono text-[11px] overflow-x-auto border leading-relaxed', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-cyan-300' : 'bg-slate-900 border-slate-800 text-cyan-300')}>
+{`aws configure --profile masdika
+# AWS Access Key ID     : <ACCESS_KEY_ANDA>
+# AWS Secret Access Key : <SECRET_KEY_ANDA>
+# Default region name   : us-east-1
+# Default output format : json`}
+                </pre>
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className={cn('font-semibold', isDark ? 'text-zinc-300' : 'text-slate-700')}>Atau Set Endpoint Default di Profile</span>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(`aws configure set endpoint_url ${endpointVal} --profile masdika`, 'Endpoint config')}
+                    className={cn('inline-flex items-center gap-1 font-bold cursor-pointer focus:outline-none focus-visible:outline-none', isDark ? 'text-cyan-400 hover:text-cyan-300' : 'text-cyan-600 hover:text-cyan-700')}
+                  >
+                    <Copy className="w-3 h-3" /> Copy
+                  </button>
+                </div>
+                <pre className={cn('p-3 rounded-xl font-mono text-[11px] overflow-x-auto border', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-cyan-300' : 'bg-slate-900 border-slate-800 text-cyan-300')}>
+                  {`aws configure set endpoint_url ${endpointVal} --profile masdika`}
+                </pre>
+              </div>
+            </div>
+          </div>
+
+          {/* Step 3: Common Commands */}
+          <div className={cn('rounded-2xl border p-5 space-y-4', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90 shadow-2xs')}>
+            <div className="flex items-center gap-2.5">
+              <span className="w-6 h-6 rounded-lg bg-cyan-400 text-slate-950 text-xs font-extrabold flex items-center justify-center shrink-0">
+                3
+              </span>
+              <div>
+                <h2 className={cn('text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>Perintah S3 yang Sering Digunakan</h2>
+                <p className={cn('text-[11px]', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+                  Siap copy-paste langsung untuk bucket aktif <code className="font-mono font-semibold">{bucketVal}</code>.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {[
+                {
+                  title: 'List Isi Bucket',
+                  cmd: `aws s3 ls s3://${bucketVal} --endpoint-url ${endpointVal} --profile masdika`,
+                },
+                {
+                  title: 'Upload Satu File',
+                  cmd: `aws s3 cp ./file.png s3://${bucketVal}/ --endpoint-url ${endpointVal} --profile masdika`,
+                },
+                {
+                  title: 'Sync Folder Lokal ke Bucket',
+                  cmd: `aws s3 sync ./dist s3://${bucketVal}/assets --endpoint-url ${endpointVal} --profile masdika`,
+                },
+                {
+                  title: 'Download File dari Bucket',
+                  cmd: `aws s3 cp s3://${bucketVal}/file.png ./file.png --endpoint-url ${endpointVal} --profile masdika`,
+                },
+                {
+                  title: 'Buat Presigned URL (15 Menit)',
+                  cmd: `aws s3 presign s3://${bucketVal}/file.png --expires-in 900 --endpoint-url ${endpointVal} --profile masdika`,
+                },
+                {
+                  title: 'Hapus File dari Bucket',
+                  cmd: `aws s3 rm s3://${bucketVal}/file.png --endpoint-url ${endpointVal} --profile masdika`,
+                },
+              ].map((op) => (
+                <div
+                  key={op.title}
+                  className={cn('p-3.5 rounded-xl border space-y-2', isDark ? 'bg-[#0a0a0c] border-white/[0.06]' : 'bg-slate-50 border-slate-200')}
+                >
+                  <div className="flex items-center justify-between gap-2 text-xs">
+                    <span className={cn('font-bold', isDark ? 'text-white' : 'text-slate-900')}>{op.title}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleCopy(op.cmd, op.title)}
+                      className={cn('inline-flex items-center gap-1 text-[11px] font-bold cursor-pointer focus:outline-none focus-visible:outline-none', isDark ? 'text-cyan-400 hover:text-cyan-300' : 'text-cyan-600 hover:text-cyan-700')}
+                    >
+                      <Copy className="w-3 h-3" /> Copy
+                    </button>
+                  </div>
+                  <pre className={cn('p-2.5 rounded-lg font-mono text-[11px] overflow-x-auto', isDark ? 'bg-[#111115] text-cyan-300' : 'bg-slate-900 text-cyan-300')}>
+                    {op.cmd}
+                  </pre>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Step 4: Best Practices */}
+          <div className={cn('rounded-2xl border p-5 flex items-start gap-3 text-xs', isDark ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-200' : 'bg-emerald-50 border-emerald-200 text-emerald-900')}>
+            <ShieldCheck className={cn('w-5 h-5 shrink-0 mt-0.5', isDark ? 'text-emerald-400' : 'text-emerald-600')} />
+            <div className="space-y-1">
+              <p className="font-bold">Tips &amp; Best Practices</p>
+              <ul className="list-disc pl-4 space-y-1 text-[11px] opacity-90">
+                <li>Selalu gunakan region <code className="font-mono font-bold">us-east-1</code> untuk kompatibilitas signing AWS Signature v4.</li>
+                <li>Gunakan <code className="font-mono font-bold">forcePathStyle: true</code> jika menggunakan AWS SDK di Node.js, PHP/Laravel, atau Go.</li>
+                <li>Buat IAM Key terpisah dengan izin <code className="font-mono font-bold">READ_ONLY</code> untuk aplikasi yang hanya membaca aset publik/privat.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab 4: Scale & Settings */}
       {tab === 'settings' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
           <div className={cn('lg:col-span-7 rounded-2xl border p-5 space-y-5', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90 shadow-2xs')}>
