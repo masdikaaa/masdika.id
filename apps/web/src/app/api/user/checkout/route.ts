@@ -255,7 +255,14 @@ export async function POST(req: NextRequest) {
             paymentMethod: paymentMethod.name,
             merchantOrderId: merchantOrderId,
             reference: upgradeSubscriptionId ? `UPGRADE:${upgradeSubscriptionId}` : 'PAYG_RUNNING',
-            paidAt: initialStatus === 'ACTIVE' ? new Date() : null
+            paidAt: initialStatus === 'ACTIVE' ? new Date() : null,
+            details: JSON.stringify({
+              service: plan.service,
+              planName: plan.name,
+              description: plan.description,
+              billingCycle: 'HOURLY',
+              ...(upgradeSubscriptionId ? { upgradeFromId: upgradeSubscriptionId } : {}),
+            }),
           }
         });
 
@@ -273,7 +280,13 @@ export async function POST(req: NextRequest) {
               merchantOrderId: runningOrderId,
               type: 'SUBSCRIPTION',
               reference: 'PAYG_RUNNING',
-              paidAt: new Date()
+              paidAt: new Date(),
+              details: JSON.stringify({
+                service: plan.service,
+                planName: plan.name,
+                description: plan.description,
+                billingCycle: 'HOURLY',
+              }),
             }
           });
         }

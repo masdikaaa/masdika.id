@@ -256,7 +256,12 @@ export async function POST(req: NextRequest) {
           serviceName: cleanName,
           extraDetails: {
             appType: catalogItem.id,
+            appName: catalogItem.name,
             planName: planCodeFinal,
+            cpuShares,
+            memoryMb,
+            storageGb,
+            billingMode: normalizedBillingMode,
           },
         });
 

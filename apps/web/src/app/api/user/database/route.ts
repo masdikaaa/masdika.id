@@ -326,7 +326,12 @@ export async function POST(req: NextRequest) {
           serviceName: cleanName,
           extraDetails: {
             dbType: typeUpper,
+            version: effectiveVersion,
             planName: effectivePlanName,
+            cpuShares,
+            memoryMb,
+            storageGb,
+            billingMode: normalizedBillingMode,
           },
         });
 

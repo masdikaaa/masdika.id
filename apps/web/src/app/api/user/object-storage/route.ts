@@ -252,6 +252,8 @@ export async function POST(req: NextRequest) {
           serviceName: cleanName,
           extraDetails: {
             planName: matchedPlan?.name || `${storageGb} GB`,
+            storageGb,
+            billingMode,
           },
         });
 

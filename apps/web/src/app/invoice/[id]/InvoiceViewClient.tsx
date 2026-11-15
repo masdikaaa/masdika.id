@@ -21,10 +21,12 @@ import {
   Network, 
   Cpu, 
   HardDrive, 
+  Database,
   Globe, 
   CreditCard
 } from 'lucide-react';
 import { getInvoiceServiceIcon } from '@/components/invoice/InvoiceServiceIcon';
+import { getInvoiceDisplayInfo } from '@/lib/invoice-display';
 import { toast } from 'sonner';
 
 interface InvoiceViewClientProps {
@@ -102,15 +104,6 @@ export default function InvoiceViewClient({ invoice, isPaid, decryptedName, decr
     });
   };
 
-  // Helper to determine clean disk specification label (HDD / SSD / Storage)
-  const getDiskBadgeText = (diskGb?: number | null, diskType?: string | null) => {
-    if (!diskGb) return null;
-    const t = (diskType || '').toUpperCase().trim();
-    if (t === 'HDD') return `${diskGb} GB HDD`;
-    if (t === 'SSD') return `${diskGb} GB SSD`;
-    return `${diskGb} GB Storage`;
-  };
-
   const userAddress = [
     invoice.user?.address1,
     invoice.user?.address2,
@@ -120,40 +113,19 @@ export default function InvoiceViewClient({ invoice, isPaid, decryptedName, decr
     invoice.user?.country
   ].filter(Boolean).join(', ');
 
-  // Parse details once for reuse in mobile & desktop views
-  let parsedDetails: any = null;
-  if (!invoice.vpsService && invoice.details) {
-    try {
-      parsedDetails = JSON.parse(invoice.details);
-    } catch {}
-  }
+  const displayInfo = getInvoiceDisplayInfo(invoice);
+  const itemTitle = displayInfo.title;
+  const itemDescription = displayInfo.description;
+  const billingTypeLabel = displayInfo.billingTypeLabel;
 
-  const vpsDiskLabel = invoice.vpsService
-    ? getDiskBadgeText(invoice.vpsService.diskGb, invoice.vpsService.diskType)
-    : parsedDetails
-      ? getDiskBadgeText(parsedDetails.disk || parsedDetails.newDisk, parsedDetails.diskType || parsedDetails.storageType)
-      : null;
-
-  const itemTitle = invoice.type === "TOP_UP" ? "Account Balance Top Up"
-    : invoice.type === "VPS" ? (`Cloud VPS Order (Pay-As-You-Go) - ${invoice.vpsService?.hostname || "New Instance"}`)
-      : invoice.type === "VPS_UPGRADE" ? (`Cloud VPS Specs Upgrade (Pay-As-You-Go) - ${invoice.vpsService?.hostname || "Cloud Instance"}`)
-        : invoice.type === "IP_RESERVATION" ? "Dedicated Reserved IPv4 Address"
-          : invoice.type === "SUBSCRIPTION" && invoice.vpsServiceId ? (`PAYG Final Settlement - ${invoice.vpsService?.hostname || "Cloud VPS"}`)
-            : (invoice.subscription?.plan?.name || "Masdika Cloud Services");
-
-  const itemDescription = invoice.type === "TOP_UP"
-    ? "Addition to account wallet balance for seamless transactions across Masdika services."
-    : invoice.type === "VPS"
-      ? (['PAYG_FIRST_HOUR', 'PAYG_RUNNING', 'PAYG_COMPLETED'].includes(invoice.reference || '')
-          ? 'Pay-As-You-Go Cloud VPS usage for this billing cycle.'
-          : 'New Cloud VPS instance deployment and resource allocation.')
-      : invoice.type === "VPS_UPGRADE"
-        ? "Prorated resource expansion and hardware allocation for existing VPS instance."
-        : invoice.type === "IP_RESERVATION"
-          ? "Premium high-reputation dedicated public IPv4 address reservation."
-          : "Cloud service subscription access and computing resource allowance.";
-
-  const billingTypeLabel = invoice.type === 'VPS' ? 'Hourly Metered' : invoice.type === 'TOP_UP' ? 'One-Time Credit' : 'Service Cycle';
+  const renderSpecIcon = (kind: string) => {
+    if (kind === 'cpu') return <Cpu className="w-3 h-3 text-cyan-400" />;
+    if (kind === 'ram' || kind === 'plan') return <Layers className="w-3 h-3 text-cyan-400" />;
+    if (kind === 'disk') return <HardDrive className="w-3 h-3 text-cyan-400" />;
+    if (kind === 'backup') return <ShieldCheck className="w-3 h-3 text-cyan-400" />;
+    if (kind === 'engine') return <Database className="w-3 h-3 text-cyan-400" />;
+    return <Globe className="w-3 h-3 text-cyan-400" />;
+  };
 
   return (
     <>
@@ -468,52 +440,19 @@ export default function InvoiceViewClient({ invoice, isPaid, decryptedName, decr
                           </p>
 
                           {/* Specification Pills / Badges */}
-                          {invoice.vpsService && (
+                          {displayInfo.specs.length > 0 && (
                             <div className="flex flex-wrap items-center gap-1.5 pt-1.5">
-                              <span className={cn("inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium border", isDark ? "bg-[#060b14] border-slate-800 text-cyan-300" : "bg-slate-100 border-slate-200 text-cyan-800")}>
-                                <Cpu className="w-3 h-3 text-cyan-400" /> {invoice.vpsService.cpuCores} vCPU
-                              </span>
-                              <span className={cn("inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium border", isDark ? "bg-[#060b14] border-slate-800 text-cyan-300" : "bg-slate-100 border-slate-200 text-cyan-800")}>
-                                <Layers className="w-3 h-3 text-cyan-400" /> {invoice.vpsService.ramGb} GB RAM
-                              </span>
-                              {vpsDiskLabel && (
-                                <span className={cn("inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium border", isDark ? "bg-[#060b14] border-slate-800 text-cyan-300" : "bg-slate-100 border-slate-200 text-cyan-800")}>
-                                  <HardDrive className="w-3 h-3 text-cyan-400" /> {vpsDiskLabel}
+                              {displayInfo.specs.map((spec, idx) => (
+                                <span
+                                  key={`${spec.kind}-${idx}`}
+                                  className={cn(
+                                    "inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium border",
+                                    isDark ? "bg-[#060b14] border-slate-800 text-cyan-300" : "bg-slate-100 border-slate-200 text-cyan-800"
+                                  )}
+                                >
+                                  {renderSpecIcon(spec.kind)} {spec.label}
                                 </span>
-                              )}
-                              {invoice.vpsService.backupGb > 0 && (
-                                <span className={cn("inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium border", isDark ? "bg-[#060b14] border-slate-800 text-cyan-300" : "bg-slate-100 border-slate-200 text-cyan-800")}>
-                                  <ShieldCheck className="w-3 h-3 text-cyan-400" /> {invoice.vpsService.backupGb} GB Backup
-                                </span>
-                              )}
-                              <span className={cn("inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium border", isDark ? "bg-[#060b14] border-slate-800 text-cyan-300" : "bg-slate-100 border-slate-200 text-cyan-800")}>
-                                <Globe className="w-3 h-3 text-cyan-400" /> Dedicated IPv4
-                              </span>
-                            </div>
-                          )}
-
-                          {!invoice.vpsService && parsedDetails && (
-                            <div className="flex flex-wrap items-center gap-1.5 pt-1.5">
-                              {(parsedDetails.cpu || parsedDetails.newCpu) && (
-                                <span className={cn("inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium border", isDark ? "bg-[#060b14] border-slate-800 text-cyan-300" : "bg-slate-100 border-slate-200 text-cyan-800")}>
-                                  <Cpu className="w-3 h-3 text-cyan-400" /> {parsedDetails.cpu || parsedDetails.newCpu} vCPU
-                                </span>
-                              )}
-                              {(parsedDetails.ram || parsedDetails.newRam) && (
-                                <span className={cn("inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium border", isDark ? "bg-[#060b14] border-slate-800 text-cyan-300" : "bg-slate-100 border-slate-200 text-cyan-800")}>
-                                  <Layers className="w-3 h-3 text-cyan-400" /> {parsedDetails.ram || parsedDetails.newRam} GB RAM
-                                </span>
-                              )}
-                              {vpsDiskLabel && (
-                                <span className={cn("inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium border", isDark ? "bg-[#060b14] border-slate-800 text-cyan-300" : "bg-slate-100 border-slate-200 text-cyan-800")}>
-                                  <HardDrive className="w-3 h-3 text-cyan-400" /> {vpsDiskLabel}
-                                </span>
-                              )}
-                              {parsedDetails.ipAddress && (
-                                <span className={cn("inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium border", isDark ? "bg-[#060b14] border-slate-800 text-cyan-300" : "bg-slate-100 border-slate-200 text-cyan-800")}>
-                                  <Globe className="w-3 h-3 text-cyan-400" /> IP: {parsedDetails.ipAddress}
-                                </span>
-                              )}
+                              ))}
                             </div>
                           )}
                         </div>
@@ -552,49 +491,19 @@ export default function InvoiceViewClient({ invoice, isPaid, decryptedName, decr
                 </div>
 
                 {/* Specs Badges on Mobile (Full width wrap, no vertical ladder) */}
-                {(invoice.vpsService || parsedDetails) && (
+                {displayInfo.specs.length > 0 && (
                   <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-                    {invoice.vpsService ? (
-                      <>
-                        <span className={cn("inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium border", isDark ? "bg-[#060b14] border-slate-800 text-cyan-300" : "bg-slate-100 border-slate-200 text-cyan-800")}>
-                          <Cpu className="w-3 h-3 text-cyan-400" /> {invoice.vpsService.cpuCores} vCPU
-                        </span>
-                        <span className={cn("inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium border", isDark ? "bg-[#060b14] border-slate-800 text-cyan-300" : "bg-slate-100 border-slate-200 text-cyan-800")}>
-                          <Layers className="w-3 h-3 text-cyan-400" /> {invoice.vpsService.ramGb} GB RAM
-                        </span>
-                        {vpsDiskLabel && (
-                          <span className={cn("inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium border", isDark ? "bg-[#060b14] border-slate-800 text-cyan-300" : "bg-slate-100 border-slate-200 text-cyan-800")}>
-                            <HardDrive className="w-3 h-3 text-cyan-400" /> {vpsDiskLabel}
-                          </span>
+                    {displayInfo.specs.map((spec, idx) => (
+                      <span
+                        key={`${spec.kind}-${idx}`}
+                        className={cn(
+                          "inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium border",
+                          isDark ? "bg-[#060b14] border-slate-800 text-cyan-300" : "bg-slate-100 border-slate-200 text-cyan-800"
                         )}
-                        {invoice.vpsService.backupGb > 0 && (
-                          <span className={cn("inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium border", isDark ? "bg-[#060b14] border-slate-800 text-cyan-300" : "bg-slate-100 border-slate-200 text-cyan-800")}>
-                            <ShieldCheck className="w-3 h-3 text-cyan-400" /> {invoice.vpsService.backupGb} GB Backup
-                          </span>
-                        )}
-                        <span className={cn("inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium border", isDark ? "bg-[#060b14] border-slate-800 text-cyan-300" : "bg-slate-100 border-slate-200 text-cyan-800")}>
-                          <Globe className="w-3 h-3 text-cyan-400" /> Dedicated IPv4
-                        </span>
-                      </>
-                    ) : parsedDetails ? (
-                      <>
-                        {(parsedDetails.cpu || parsedDetails.newCpu) && (
-                          <span className={cn("inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium border", isDark ? "bg-[#060b14] border-slate-800 text-cyan-300" : "bg-slate-100 border-slate-200 text-cyan-800")}>
-                            <Cpu className="w-3 h-3 text-cyan-400" /> {parsedDetails.cpu || parsedDetails.newCpu} vCPU
-                          </span>
-                        )}
-                        {(parsedDetails.ram || parsedDetails.newRam) && (
-                          <span className={cn("inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium border", isDark ? "bg-[#060b14] border-slate-800 text-cyan-300" : "bg-slate-100 border-slate-200 text-cyan-800")}>
-                            <Layers className="w-3 h-3 text-cyan-400" /> {parsedDetails.ram || parsedDetails.newRam} GB RAM
-                          </span>
-                        )}
-                        {vpsDiskLabel && (
-                          <span className={cn("inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium border", isDark ? "bg-[#060b14] border-slate-800 text-cyan-300" : "bg-slate-100 border-slate-200 text-cyan-800")}>
-                            <HardDrive className="w-3 h-3 text-cyan-400" /> {vpsDiskLabel}
-                          </span>
-                        )}
-                      </>
-                    ) : null}
+                      >
+                        {renderSpecIcon(spec.kind)} {spec.label}
+                      </span>
+                    ))}
                   </div>
                 )}
 

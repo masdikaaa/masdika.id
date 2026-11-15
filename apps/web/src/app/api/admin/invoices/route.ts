@@ -4,6 +4,7 @@ import { requireAuth } from "@/lib/auth-middleware";
 import { decryptDeterministic } from "@/lib/encryption";
 import { standardizeInvoiceNumber } from "@/lib/invoice-standardizer";
 import { searchInvoicesElastic } from "@/lib/sync-elasticsearch";
+import { enrichInvoicesWithServiceDetails } from "@/lib/invoice-enrichment";
 
 export async function GET(req: NextRequest) {
   try {
@@ -36,7 +37,7 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    const invoices = await prisma.invoice.findMany({
+    const rawInvoices = await prisma.invoice.findMany({
       where: whereClause,
       orderBy: { createdAt: "desc" },
       include: {
@@ -47,6 +48,8 @@ export async function GET(req: NextRequest) {
         vpsService: { select: { hostname: true } }
       }
     });
+
+    const invoices = await enrichInvoicesWithServiceDetails(rawInvoices);
 
     const decryptedInvoices = invoices.map(invoice => {
       let email = invoice.user?.email || "";

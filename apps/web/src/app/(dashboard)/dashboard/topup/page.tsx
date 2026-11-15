@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Pagination } from "@/components/ui/Pagination";
+import RewardCelebrationModal from "@/components/ui/RewardCelebrationModal";
 
 export default function TopUpPage() {
   const { theme } = useTheme();
@@ -23,6 +24,7 @@ export default function TopUpPage() {
   const [voucherCode, setVoucherCode] = useState("");
   const [appliedVoucher, setAppliedVoucher] = useState<{code: string, description?: string, discountPercent: number} | null>(null);
   const [isCheckingVoucher, setIsCheckingVoucher] = useState(false);
+  const [showVoucherCelebration, setShowVoucherCelebration] = useState(false);
 
   // Pagination State
   const [page, setPage] = useUrlNumber("page", 1);
@@ -91,6 +93,7 @@ export default function TopUpPage() {
       const data = await res.json();
       if (res.ok && data.success) {
         setAppliedVoucher(data.data);
+        setShowVoucherCelebration(true);
         toast.success(`Voucher applied! ${data.data.discountPercent}% discount`);
       } else {
         toast.error(data.error || "Invalid voucher");
@@ -442,6 +445,15 @@ export default function TopUpPage() {
         </motion.div>
 
       </div>
+
+      <RewardCelebrationModal
+        open={showVoucherCelebration}
+        onClose={() => setShowVoucherCelebration(false)}
+        mode="voucher"
+        discountPercent={appliedVoucher?.discountPercent || 0}
+        voucherCode={appliedVoucher?.code || ""}
+        subtitle={appliedVoucher?.description || undefined}
+      />
     </motion.div>
   );
 }

@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import InvoiceViewClient from './InvoiceViewClient';
 import { decryptDeterministic } from '@/lib/encryption';
+import { enrichInvoicesWithServiceDetails } from '@/lib/invoice-enrichment';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -47,10 +48,12 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
   const decryptedName = decryptDeterministic(invoice.user.name) || invoice.user.name || 'Valued Customer';
   const decryptedEmail = decryptDeterministic(invoice.user.email) || invoice.user.email;
 
+  const [enrichedInvoice] = await enrichInvoicesWithServiceDetails([invoice]);
+
   const sanitizedInvoice = {
-    ...invoice,
+    ...enrichedInvoice,
     user: {
-      ...invoice.user,
+      ...enrichedInvoice.user,
       name: decryptedName,
       email: decryptedEmail,
     }

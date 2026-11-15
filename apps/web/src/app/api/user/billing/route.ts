@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
 import { getUserServicesCommitment } from "@/lib/billing-commitment";
+import { enrichInvoicesWithServiceDetails } from "@/lib/invoice-enrichment";
 
 export async function GET(req: NextRequest) {
   try {
@@ -18,7 +19,7 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: "desc" }
     });
 
-    const invoices = await prisma.invoice.findMany({
+    const rawInvoices = await prisma.invoice.findMany({
       where: {
         userId,
         // Exclude legacy hourly billing spam invoices (replaced by PAYG_RUNNING pattern)
@@ -30,6 +31,8 @@ export async function GET(req: NextRequest) {
       },
       orderBy: { createdAt: "desc" }
     });
+
+    const invoices = await enrichInvoicesWithServiceDetails(rawInvoices);
 
     const vpsServices = await prisma.vpsService.findMany({
       where: { userId, status: { not: 'TERMINATED' } },

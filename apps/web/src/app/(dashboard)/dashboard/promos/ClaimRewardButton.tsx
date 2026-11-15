@@ -6,6 +6,7 @@ import { Gift, Loader2, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatRupiah } from "@/lib/billing";
 import { useTheme } from "@/components/ThemeProvider";
+import RewardCelebrationModal from "@/components/ui/RewardCelebrationModal";
 
 interface ClaimRewardButtonProps {
   promoId: number;
@@ -21,6 +22,7 @@ export default function ClaimRewardButton({ promoId, rewardAmount, isClaimed, is
 
   const [loading, setLoading] = useState(false);
   const [claimed, setClaimed] = useState(isClaimed);
+  const [showCelebration, setShowCelebration] = useState(false);
 
   const [nowTime, setNowTime] = useState(0);
   useEffect(() => { setNowTime(Date.now()); }, []);
@@ -44,6 +46,7 @@ export default function ClaimRewardButton({ promoId, rewardAmount, isClaimed, is
       if (data.success) {
         toast.success(`Reward claimed! ${formatRupiah(rewardAmount)} has been added to your balance.`, { id: toastId });
         setClaimed(true);
+        setShowCelebration(true);
         // Dispatch event to update navbar balance
         window.dispatchEvent(new Event('notificationsUpdated'));
       } else {
@@ -58,9 +61,17 @@ export default function ClaimRewardButton({ promoId, rewardAmount, isClaimed, is
 
   if (claimed) {
     return (
-      <div className="w-full bg-cyan-500/10 text-cyan-400 font-semibold py-2.5 rounded-lg text-center border border-cyan-500/20 cursor-default flex items-center justify-center gap-2 text-sm">
-        <Check className="w-4 h-4" /> Reward Claimed!
-      </div>
+      <>
+        <div className="w-full bg-cyan-500/10 text-cyan-400 font-semibold py-2.5 rounded-lg text-center border border-cyan-500/20 cursor-default flex items-center justify-center gap-2 text-sm">
+          <Check className="w-4 h-4" /> Reward Claimed!
+        </div>
+        <RewardCelebrationModal
+          open={showCelebration}
+          onClose={() => setShowCelebration(false)}
+          mode="reward"
+          amount={rewardAmount}
+        />
+      </>
     );
   }
 
