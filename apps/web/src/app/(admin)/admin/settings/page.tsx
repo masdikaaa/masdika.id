@@ -3,7 +3,7 @@ import { useUrlTab } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from "react";
-import { User, Shield, Key, Save, Camera, CheckCircle2, XCircle, Trash2, X, Share2, Layout, Phone, FileText, Search, Check, CheckCircle, Settings, RefreshCw, Info, HardDrive, Eye, EyeOff, Server, AlertCircle, ArrowLeftRight, Rocket, Database, Boxes } from "lucide-react";
+import { User, Shield, Key, Save, Camera, CheckCircle2, XCircle, Trash2, X, Share2, Layout, Phone, FileText, Search, Check, CheckCircle, Settings, RefreshCw, Info, HardDrive, Cloud, Eye, EyeOff, Server, AlertCircle, ArrowLeftRight, Rocket, Database, Boxes } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,7 +19,7 @@ export default function SettingsPage() {
   const isDark = theme === "dark";
   const inputClass = isDark ? inputClassDark : inputClassLight;
   const labelClass = isDark ? labelClassDark : labelClassLight;
-  const [activeTab, setActiveTab] = useUrlTab<'profile' | 'contact' | 'website' | 'seo' | 'security' | 'services' | 'storage' | 'database' | 'apps'>('profile', { allowed: ['profile', 'contact', 'website', 'seo', 'security', 'services', 'storage', 'database', 'apps'] as const });
+  const [activeTab, setActiveTab] = useUrlTab<'profile' | 'contact' | 'website' | 'seo' | 'security' | 'services' | 'storage' | 'customer-storage' | 'database' | 'apps'>('profile', { allowed: ['profile', 'contact', 'website', 'seo', 'security', 'services', 'storage', 'customer-storage', 'database', 'apps'] as const });
 
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User, desc: 'Manage personal info' },
@@ -28,7 +28,8 @@ export default function SettingsPage() {
     { id: 'seo', label: 'SEO', icon: Search, desc: 'Meta tags & Favicon' },
     { id: 'security', label: 'Security', icon: Shield, desc: 'Passwords & 2FA' },
     { id: 'services', label: 'Services', icon: Settings, desc: 'Service Management' },
-    { id: 'storage', label: 'RustFS Storage', icon: HardDrive, desc: 'S3-Compatible CDN Storage' },
+    { id: 'storage', label: 'RustFS Internal', icon: HardDrive, desc: 'Masdika Assets & Secure Media' },
+    { id: 'customer-storage', label: 'RustFS Customer', icon: Cloud, desc: 'File CDN & Object Storage (S3)' },
     { id: 'database', label: 'Managed DB (Kubernetes)', icon: Database, desc: 'Kubernetes Cluster, PMA, pgAdmin & Mongo' },
     { id: 'apps', label: 'Managed Apps (Kubernetes)', icon: Boxes, desc: 'Kubernetes Cluster & Let\'s Encrypt SSL for Apps' },
   ];
@@ -1718,202 +1719,6 @@ export default function SettingsPage() {
                   </div>
                 </motion.div>
 
-                {/* RustFS Customer (File CDN & Object Storage) Card */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-                  className={cn("rounded-2xl p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
-                >
-                  <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 sm:pb-6 relative z-10", isDark ? "border-white/[0.08]" : "border-slate-200")}>
-                    <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
-                      <div className={cn("w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 border", isDark ? "bg-indigo-500/10 border-indigo-500/20 text-indigo-400" : "bg-indigo-50 border-indigo-200 text-indigo-700")}>
-                        <HardDrive className="w-5 h-5 sm:w-6 sm:h-6" />
-                      </div>
-                      <div className="min-w-0">
-                        <h2 className={cn("text-lg sm:text-xl md:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>RustFS Customer (File CDN &amp; Object Storage)</h2>
-                        <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
-                          Dedicated customer-isolated RustFS cluster for Customer File CDN buckets &amp; AWS S3-compatible Object Storage.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 w-full sm:w-auto">
-                      <button
-                        type="button"
-                        onClick={handleTestCustomerRustFS}
-                        disabled={testingCustomerRustFS}
-                        className={cn("w-full sm:w-auto justify-center px-3.5 py-2 rounded-xl text-xs font-bold transition-all border flex items-center gap-2 cursor-pointer", isDark ? "bg-white/5 border-white/10 hover:bg-white/10 text-zinc-300 hover:text-white" : "bg-slate-100 border-slate-200 hover:bg-slate-200 text-slate-700")}
-                      >
-                        <RefreshCw className={cn("w-3.5 h-3.5", testingCustomerRustFS && "animate-spin")} />
-                        <span>{testingCustomerRustFS ? "Testing..." : "Test Connection"}</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  {customerRustFSTestResult && (
-                    <div className={cn("p-4 rounded-xl border flex items-start gap-3", customerRustFSTestResult.success ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" : "bg-red-500/10 border-red-500/30 text-red-400")}>
-                      {customerRustFSTestResult.success ? <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" /> : <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />}
-                      <div className="text-xs md:text-sm">
-                        <span className="font-bold">{customerRustFSTestResult.success ? "Connection Verified" : "Connection Failed"}: </span>
-                        <span>{customerRustFSTestResult.message}</span>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="space-y-6 relative z-20">
-                    {/* Toggle Enable Customer RustFS */}
-                    <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-xl border transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
-                      <div className="pr-4">
-                        <h3 className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>Enable RustFS Customer Cluster</h3>
-                        <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
-                          Routes all Customer File CDN buckets &amp; Object Storage services to this dedicated RustFS cluster.
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setFormData({ ...formData, customer_rustfs_enabled: !formData.customer_rustfs_enabled })}
-                        className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-transparent transition-colors focus:outline-none ${formData.customer_rustfs_enabled ? 'bg-indigo-500' : 'bg-zinc-700'}`}
-                      >
-                        <span className="sr-only">Toggle Customer RustFS</span>
-                        <span aria-hidden="true" className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white ring-0 transition duration-200 ease-in-out ${formData.customer_rustfs_enabled ? 'translate-x-2.5' : '-translate-x-2.5'}`} />
-                      </button>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                      <div className="space-y-2">
-                        <label className={labelClass}>Internal S3 API Endpoint *</label>
-                        <input
-                          type="text"
-                          name="customer_rustfs_endpoint"
-                          value={formData.customer_rustfs_endpoint}
-                          onChange={handleChange}
-                          placeholder="http://192.168.x.x:9000"
-                          className={inputClass}
-                        />
-                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Private LAN/backend S3 endpoint used by Masdika server (port 9000)</p>
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className={labelClass}>Public S3 API Domain *</label>
-                        <input
-                          type="text"
-                          name="customer_rustfs_public_endpoint"
-                          value={formData.customer_rustfs_public_endpoint}
-                          onChange={handleChange}
-                          placeholder="https://s2.yourdomain.com"
-                          className={inputClass}
-                        />
-                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Public S3 endpoint shown to customers &amp; used for presigned S3 URLs</p>
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className={labelClass}>Customer CDN Bucket Prefix *</label>
-                        <input
-                          type="text"
-                          name="customer_rustfs_cdn_bucket_prefix"
-                          value={formData.customer_rustfs_cdn_bucket_prefix}
-                          onChange={handleChange}
-                          placeholder="masdika-cdn-u"
-                          className={inputClass}
-                        />
-                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Default isolated bucket prefix per user (e.g. masdika-cdn-u12)</p>
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className={labelClass}>RustFS Web Console URL</label>
-                        <input
-                          type="text"
-                          name="customer_rustfs_console_url"
-                          value={formData.customer_rustfs_console_url}
-                          onChange={handleChange}
-                          placeholder="http://192.168.x.x:9001"
-                          className={inputClass}
-                        />
-                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Optional admin reference URL for RustFS Web UI</p>
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className={labelClass}>Access Key ID *</label>
-                        <input
-                          type="text"
-                          name="customer_rustfs_access_key"
-                          value={formData.customer_rustfs_access_key}
-                          onChange={handleChange}
-                          placeholder="Customer RustFS Admin Access Key"
-                          className={inputClass}
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className={labelClass}>Secret Access Key *</label>
-                        <div className="relative">
-                          <input
-                            type={showCustomerSecretKey ? "text" : "password"}
-                            name="customer_rustfs_secret_key"
-                            value={formData.customer_rustfs_secret_key}
-                            onChange={handleChange}
-                            placeholder="••••••••••••••••"
-                            className={cn(inputClass, "pr-10")}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowCustomerSecretKey(!showCustomerSecretKey)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white p-1 cursor-pointer"
-                          >
-                            {showCustomerSecretKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Object Storage Product Settings */}
-                    <div className={cn("pt-4 border-t grid grid-cols-1 md:grid-cols-2 gap-5 items-center", isDark ? "border-white/[0.08]" : "border-slate-200")}>
-                      <div className={cn("flex items-center justify-between gap-4 p-4 rounded-xl border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
-                        <div>
-                          <h4 className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>Enable Object Storage Product</h4>
-                          <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>Allow customers to deploy S3-compatible Object Storage</p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setFormData({ ...formData, object_storage_enabled: !formData.object_storage_enabled })}
-                          className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-transparent transition-colors focus:outline-none ${formData.object_storage_enabled ? 'bg-indigo-500' : 'bg-zinc-700'}`}
-                        >
-                          <span className="sr-only">Toggle Object Storage Product</span>
-                          <span aria-hidden="true" className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white ring-0 transition duration-200 ease-in-out ${formData.object_storage_enabled ? 'translate-x-2.5' : '-translate-x-2.5'}`} />
-                        </button>
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className={labelClass}>Object Storage Rate (Rp / GB / Month) *</label>
-                        <input
-                          type="number"
-                          min={1}
-                          name="object_storage_rate_per_gb"
-                          value={formData.object_storage_rate_per_gb}
-                          onChange={handleChange}
-                          placeholder="500"
-                          className={inputClass}
-                        />
-                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Base monthly pricing per GB for PAYG Object Storage plans</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className={cn("pt-6 border-t flex items-center justify-between flex-wrap gap-4", isDark ? "border-white/[0.08]" : "border-slate-200")}>
-                    <p className={cn("text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>
-                      Public S3 domain &amp; credentials take effect immediately for all Customer CDN &amp; Object Storage routes.
-                    </p>
-                    <button
-                      onClick={handleSave}
-                      disabled={saving}
-                      className="flex items-center justify-center gap-2 px-6 py-2.5 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 shadow-sm bg-indigo-500 hover:bg-indigo-400 active:bg-indigo-600 text-white cursor-pointer"
-                    >
-                      {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-3.5 h-3.5" />}
-                      {saving ? "Saving..." : "Save Customer RustFS"}
-                    </button>
-                  </div>
-                </motion.div>
-
-
-
                 {/* Cross-Server & Bucket Migration Card */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
@@ -2180,6 +1985,194 @@ export default function SettingsPage() {
                         <ArrowLeftRight className="w-4 h-4 text-slate-950" />
                       )}
                       <span>{migratingBucket ? "Migrating Media Objects..." : "Start Server / Bucket Migration"}</span>
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+
+            {activeTab === 'customer-storage' && (
+              <motion.div key="customer-storage" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }} className="space-y-6">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+                  className={cn("rounded-2xl p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                >
+                  <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 sm:pb-6 relative z-10", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                    <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
+                      <div className={cn("w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+                        <Cloud className="w-5 h-5 sm:w-6 sm:h-6" />
+                      </div>
+                      <div className="min-w-0">
+                        <h2 className={cn("text-lg sm:text-xl md:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>RustFS Customer (File CDN &amp; Object Storage)</h2>
+                        <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                          Dedicated customer-isolated RustFS cluster for Customer File CDN buckets &amp; AWS S3-compatible Object Storage.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                      <button
+                        type="button"
+                        onClick={handleTestCustomerRustFS}
+                        disabled={testingCustomerRustFS}
+                        className={cn("w-full sm:w-auto justify-center px-3.5 py-2 rounded-xl text-xs font-bold transition-all border flex items-center gap-2 cursor-pointer", isDark ? "bg-white/5 border-white/10 hover:bg-white/10 text-zinc-300 hover:text-white" : "bg-slate-100 border-slate-200 hover:bg-slate-200 text-slate-700")}
+                      >
+                        <RefreshCw className={cn("w-3.5 h-3.5", testingCustomerRustFS && "animate-spin")} />
+                        <span>{testingCustomerRustFS ? "Testing..." : "Test Connection"}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {customerRustFSTestResult && (
+                    <div className={cn("p-4 rounded-xl border flex items-start gap-3", customerRustFSTestResult.success ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" : "bg-red-500/10 border-red-500/30 text-red-400")}>
+                      {customerRustFSTestResult.success ? <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" /> : <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />}
+                      <div className="text-xs md:text-sm">
+                        <span className="font-bold">{customerRustFSTestResult.success ? "Connection Verified" : "Connection Failed"}: </span>
+                        <span>{customerRustFSTestResult.message}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-6 relative z-20">
+                    {/* Toggle Enable RustFS Customer Cluster */}
+                    <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-xl border transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
+                      <div className="pr-4">
+                        <h3 className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>Enable RustFS Customer Cluster</h3>
+                        <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                          Routes all Customer File CDN buckets &amp; Object Storage services to this dedicated RustFS cluster.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, customer_rustfs_enabled: !formData.customer_rustfs_enabled })}
+                        className={cn("relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none", formData.customer_rustfs_enabled ? "bg-cyan-500" : isDark ? "bg-zinc-700" : "bg-slate-300")}
+                      >
+                        <span className={cn("pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out", formData.customer_rustfs_enabled ? "translate-x-5" : "translate-x-0")} />
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className={cn("block text-xs font-semibold uppercase tracking-wider mb-2", isDark ? "text-zinc-400" : "text-slate-500")}>Internal S3 API Endpoint *</label>
+                        <input
+                          type="text"
+                          value={formData.customer_rustfs_endpoint}
+                          onChange={(e) => setFormData({ ...formData, customer_rustfs_endpoint: e.target.value })}
+                          placeholder="http://192.168.79.19:9000"
+                          className={cn("w-full px-4 py-3 rounded-xl border focus:outline-none transition-all text-sm font-mono", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500")}
+                        />
+                        <p className={cn("text-[11px] mt-1.5", isDark ? "text-zinc-500" : "text-slate-500")}>Private LAN/backend S3 endpoint used by Masdika server (port 9000)</p>
+                      </div>
+
+                      <div>
+                        <label className={cn("block text-xs font-semibold uppercase tracking-wider mb-2", isDark ? "text-zinc-400" : "text-slate-500")}>Public S3 API Domain *</label>
+                        <input
+                          type="text"
+                          value={formData.customer_rustfs_public_endpoint}
+                          onChange={(e) => setFormData({ ...formData, customer_rustfs_public_endpoint: e.target.value })}
+                          placeholder="https://s3.yourdomain.com"
+                          className={cn("w-full px-4 py-3 rounded-xl border focus:outline-none transition-all text-sm font-mono", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500")}
+                        />
+                        <p className={cn("text-[11px] mt-1.5", isDark ? "text-zinc-500" : "text-slate-500")}>Public S3 endpoint shown to customers &amp; used for presigned S3 URLs</p>
+                      </div>
+
+                      <div>
+                        <label className={cn("block text-xs font-semibold uppercase tracking-wider mb-2", isDark ? "text-zinc-400" : "text-slate-500")}>Customer CDN Bucket Prefix *</label>
+                        <input
+                          type="text"
+                          value={formData.customer_rustfs_cdn_bucket_prefix}
+                          onChange={(e) => setFormData({ ...formData, customer_rustfs_cdn_bucket_prefix: e.target.value })}
+                          placeholder="masdika-cdn-u"
+                          className={cn("w-full px-4 py-3 rounded-xl border focus:outline-none transition-all text-sm font-mono", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500")}
+                        />
+                        <p className={cn("text-[11px] mt-1.5", isDark ? "text-zinc-500" : "text-slate-500")}>Default isolated bucket prefix per user (e.g. masdika-cdn-u12)</p>
+                      </div>
+
+                      <div>
+                        <label className={cn("block text-xs font-semibold uppercase tracking-wider mb-2", isDark ? "text-zinc-400" : "text-slate-500")}>RustFS Web Console URL</label>
+                        <input
+                          type="text"
+                          value={formData.customer_rustfs_console_url}
+                          onChange={(e) => setFormData({ ...formData, customer_rustfs_console_url: e.target.value })}
+                          placeholder="http://192.168.79.19:9001"
+                          className={cn("w-full px-4 py-3 rounded-xl border focus:outline-none transition-all text-sm font-mono", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500")}
+                        />
+                        <p className={cn("text-[11px] mt-1.5", isDark ? "text-zinc-500" : "text-slate-500")}>Optional admin reference URL for RustFS Web UI</p>
+                      </div>
+
+                      <div>
+                        <label className={cn("block text-xs font-semibold uppercase tracking-wider mb-2", isDark ? "text-zinc-400" : "text-slate-500")}>Access Key ID *</label>
+                        <input
+                          type="text"
+                          value={formData.customer_rustfs_access_key}
+                          onChange={(e) => setFormData({ ...formData, customer_rustfs_access_key: e.target.value })}
+                          placeholder="Customer RustFS Admin Access Key"
+                          className={cn("w-full px-4 py-3 rounded-xl border focus:outline-none transition-all text-sm font-mono", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500")}
+                        />
+                      </div>
+
+                      <div>
+                        <label className={cn("block text-xs font-semibold uppercase tracking-wider mb-2", isDark ? "text-zinc-400" : "text-slate-500")}>Secret Access Key *</label>
+                        <div className="relative">
+                          <input
+                            type={showCustomerSecretKey ? "text" : "password"}
+                            value={formData.customer_rustfs_secret_key}
+                            onChange={(e) => setFormData({ ...formData, customer_rustfs_secret_key: e.target.value })}
+                            placeholder="••••••••••••••••••••••••"
+                            className={cn("w-full pl-4 pr-11 py-3 rounded-xl border focus:outline-none transition-all text-sm font-mono", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder-zinc-600 focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-cyan-500")}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowCustomerSecretKey(!showCustomerSecretKey)}
+                            className={cn("absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md transition-colors cursor-pointer", isDark ? "text-zinc-500 hover:text-zinc-300" : "text-slate-400 hover:text-slate-700")}
+                          >
+                            {showCustomerSecretKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Object Storage Product Config */}
+                    <div className={cn("p-5 rounded-xl border space-y-4", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                          <h3 className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>Object Storage Product (AWS S3 Style)</h3>
+                          <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                            Allow customers to provision isolated S3 Object Storage buckets &amp; IAM access keys via /dashboard/object-storage.
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, object_storage_enabled: !formData.object_storage_enabled })}
+                          className={cn("relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none", formData.object_storage_enabled ? "bg-cyan-500" : isDark ? "bg-zinc-700" : "bg-slate-300")}
+                        >
+                          <span className={cn("pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out", formData.object_storage_enabled ? "translate-x-5" : "translate-x-0")} />
+                        </button>
+                      </div>
+                      <div className="max-w-xs">
+                        <label className={cn("block text-xs font-semibold uppercase tracking-wider mb-1.5", isDark ? "text-zinc-400" : "text-slate-500")}>Rate per GB / Month (IDR)</label>
+                        <input
+                          type="number"
+                          value={formData.object_storage_rate_per_gb}
+                          onChange={(e) => setFormData({ ...formData, object_storage_rate_per_gb: e.target.value })}
+                          placeholder="500"
+                          className={cn("w-full px-4 py-2.5 rounded-xl border focus:outline-none transition-all text-sm font-mono", isDark ? "bg-[#111114] border-white/[0.08] text-white focus:border-cyan-500" : "bg-white border-slate-200 text-slate-900 focus:border-cyan-500")}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={cn("pt-6 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-20", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                    <p className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>
+                      Changes apply immediately to Customer File CDN &amp; Object Storage provisioning.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleSave}
+                      disabled={saving}
+                      className="flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-2.5 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 cursor-pointer"
+                    >
+                      {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-3.5 h-3.5" />}
+                      {saving ? "Saving..." : "Save RustFS Customer"}
                     </button>
                   </div>
                 </motion.div>

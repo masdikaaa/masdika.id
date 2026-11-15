@@ -35,7 +35,7 @@ const SIDEBAR_LINKS = [
   { name: "VPC Routers", href: "/admin/vpc-routers", icon: Network, color: "text-cyan-500", group: "Cloud Services" },
   { name: "Customer VPCs", href: "/admin/customer-vpcs", icon: Boxes, color: "text-blue-400", group: "Cloud Services" },
   { name: "Secure Media", href: "/admin/media", icon: HardDrive, color: "text-sky-400", group: "Cloud Services" },
-  { name: "Object Storage", href: "/admin/object-storage", icon: Database, color: "text-indigo-400", group: "Cloud Services" },
+  { name: "Object Storage", href: "/admin/object-storage", icon: Database, color: "text-cyan-400", group: "Cloud Services" },
   { name: "Customer CDN", href: "/admin/customer-cdn", icon: UploadCloud, color: "text-cyan-400", group: "Cloud Services" },
   { name: "Cloudflared Tunnels", href: "/admin/cloudflared", icon: SiCloudflare, color: "text-[#F38020]", group: "Cloud Services" },
 
