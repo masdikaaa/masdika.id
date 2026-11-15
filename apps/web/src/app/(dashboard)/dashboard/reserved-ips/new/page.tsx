@@ -357,14 +357,9 @@ export default function AllocateElasticIpPage() {
                 : 'bg-white border-slate-200/90 shadow-2xs'
             )}
           >
-            <div className="flex items-center justify-between">
-              <h3 className={cn('text-base font-bold', isDark ? 'text-white' : 'text-slate-900')}>
-                Allocation Summary
-              </h3>
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                PAYG RUNNING
-              </span>
-            </div>
+            <h3 className={cn('text-base font-bold', isDark ? 'text-white' : 'text-slate-900')}>
+              Allocation Summary
+            </h3>
 
             <div className="space-y-4 text-xs">
               <div>
@@ -406,7 +401,7 @@ export default function AllocateElasticIpPage() {
 
               <div className={cn('pt-3 border-t flex items-center justify-between', isDark ? 'border-white/[0.08]' : 'border-slate-100')}>
                 <span className={cn('font-semibold', isDark ? 'text-zinc-400' : 'text-slate-600')}>
-                  Hourly Rate
+                  Cost
                 </span>
                 <span className={cn('text-base font-extrabold font-mono', isDark ? 'text-cyan-400' : 'text-cyan-600')}>
                   {formatRupiah(hourlyRate)}/hour
@@ -505,10 +500,6 @@ export default function AllocateElasticIpPage() {
                 </>
               )}
             </button>
-
-            <p className={cn('text-[11px] text-center', isDark ? 'text-zinc-500' : 'text-slate-500')}>
-              First hour ({formatRupiah(hourlyRate)}) is charged upfront from your account balance.
-            </p>
           </div>
         </div>
       </div>
