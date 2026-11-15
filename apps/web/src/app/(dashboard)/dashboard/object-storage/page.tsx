@@ -148,14 +148,13 @@ export default function ObjectStoragePage() {
             <RefreshCw className={cn('w-3.5 h-3.5', loading && (isDark ? 'animate-spin text-cyan-400' : 'animate-spin text-cyan-600'))} />
             <span>Refresh</span>
           </button>
-          <button
-            onClick={() => setShowDeploy(true)}
-            disabled={!enabled}
-            className="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 flex items-center justify-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:scale-95 text-slate-950 shadow-md disabled:opacity-50 cursor-pointer"
+          <Link
+            href="/dashboard/object-storage/new"
+            className="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 flex items-center justify-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:scale-95 text-slate-950 shadow-md cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Deploy Object Storage</span>
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -247,14 +246,13 @@ export default function ObjectStoragePage() {
           <p className={cn('text-xs sm:text-sm max-w-md mx-auto mb-6 leading-relaxed', isDark ? 'text-zinc-400' : 'text-slate-500')}>
             Deploy an S3-compatible Object Storage space with isolated buckets, IAM Access Keys &amp; PAYG hourly billing starting from Rp {(plans[0]?.monthlyPrice || 5000).toLocaleString('id-ID')}/mo.
           </p>
-          <button
-            onClick={() => setShowDeploy(true)}
-            disabled={!enabled}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all shadow-md disabled:opacity-50 cursor-pointer"
+          <Link
+            href="/dashboard/object-storage/new"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all shadow-md cursor-pointer"
           >
             <Rocket className="w-4 h-4" />
             <span>Deploy Object Storage Now</span>
-          </button>
+          </Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
