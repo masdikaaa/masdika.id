@@ -374,49 +374,47 @@ export default function AppDetailPage({
           </button>
 
           {/* Secondary Action Buttons Grid on Mobile, Flex on Desktop */}
-          <div className="grid grid-cols-4 sm:flex items-center gap-2 w-full sm:w-auto">
-            {isRunning ? (
-              <button
-                type="button"
-                onClick={() => setPowerModalAction("stop")}
-                disabled={powering !== null}
-                className={cn(
-                  "col-span-1 px-3 sm:px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 border",
-                  isDark ? "bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border-amber-500/25" : "bg-amber-50 text-amber-700 hover:bg-amber-100 border-amber-200"
-                )}
-                title="Stop Application"
-              >
-                <Square className="w-3.5 h-3.5" />
-                <span className="hidden xs:inline sm:inline">Stop</span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setPowerModalAction("start")}
-                disabled={powering !== null}
-                className={cn(
-                  "col-span-1 px-3 sm:px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 border",
-                  isDark ? "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border-emerald-500/25" : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-200"
-                )}
-                title="Start Application"
-              >
-                <Play className="w-3.5 h-3.5" />
-                <span className="hidden xs:inline sm:inline">Start</span>
-              </button>
-            )}
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={() => setPowerModalAction("stop")}
+              disabled={powering !== null || !isRunning}
+              className={cn(
+                "flex-1 sm:flex-none px-3 sm:px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed border",
+                isDark ? "bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border-amber-500/25" : "bg-amber-50 text-amber-700 hover:bg-amber-100 border-amber-200"
+              )}
+              title={isRunning ? "Stop Application" : "Application is not running"}
+            >
+              <Square className="w-3.5 h-3.5" />
+              <span>Stop</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setPowerModalAction("start")}
+              disabled={powering !== null || !isStopped}
+              className={cn(
+                "flex-1 sm:flex-none px-3 sm:px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed border",
+                isDark ? "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border-emerald-500/25" : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-200"
+              )}
+              title={isStopped ? "Start Application" : isSuspended ? "Top up balance to reactivate" : "Application is already running"}
+            >
+              <Play className="w-3.5 h-3.5" />
+              <span>Start</span>
+            </button>
 
             <button
               type="button"
               onClick={() => setPowerModalAction("restart")}
               disabled={powering !== null || !isRunning}
               className={cn(
-                "col-span-1 px-3 sm:px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 border",
+                "flex-1 sm:flex-none px-3 sm:px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed border",
                 isDark ? "bg-white/[0.05] text-zinc-300 hover:bg-white/10 border-white/10" : "bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-200"
               )}
               title="Restart Application Pod"
             >
               <RotateCw className={cn("w-3.5 h-3.5", powering === "restart" && "animate-spin")} />
-              <span className="hidden xs:inline sm:inline">Restart</span>
+              <span>Restart</span>
             </button>
 
             {/* Zero-Data-Loss Update Version Button */}
@@ -425,7 +423,7 @@ export default function AppDetailPage({
               onClick={() => setPowerModalAction("update")}
               disabled={powering !== null || !isRunning}
               className={cn(
-                "col-span-1 px-3 sm:px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 border",
+                "flex-1 sm:flex-none px-3 sm:px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed border",
                 isDark
                   ? "bg-violet-500/10 text-violet-400 hover:bg-violet-500/20 border-violet-500/20"
                   : "bg-violet-50 text-violet-700 hover:bg-violet-100 border-violet-200"
@@ -433,14 +431,14 @@ export default function AppDetailPage({
               title="Update Application Image to Latest Release (Zero Data Loss)"
             >
               <ArrowUpCircle className={cn("w-3.5 h-3.5", powering === "update" && "animate-spin")} />
-              <span className="hidden xs:inline sm:inline">Update</span>
+              <span>Update</span>
             </button>
 
             <button
               type="button"
               onClick={() => setIsDeleteModalOpen(true)}
               className={cn(
-                "col-span-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer border",
+                "flex-1 sm:flex-none py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer border",
                 isDark
                   ? "bg-red-500/10 text-red-400 hover:bg-red-500/20 border-red-500/20"
                   : "bg-red-50 text-red-600 hover:bg-red-100 border-red-200"

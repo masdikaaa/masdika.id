@@ -536,34 +536,38 @@ export default function ManagedAppsPage() {
                       <span>Scale</span>
                     </button>
 
-                    {/* Power Toggle */}
-                    {isRunning ? (
-                      <button
-                        type="button"
-                        onClick={() => setConfirmModal({ appId: app.id, action: "stop", name: app.name })}
-                        disabled={isActing}
-                        className={cn(
-                          "p-1.5 rounded-lg border transition-all cursor-pointer",
-                          isDark ? "border-amber-500/30 text-amber-400 hover:bg-amber-500/10" : "border-amber-300 text-amber-700 hover:bg-amber-50"
-                        )}
-                        title="Stop Container"
-                      >
-                        <Square className="w-3.5 h-3.5" />
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => setConfirmModal({ appId: app.id, action: "start", name: app.name })}
-                        disabled={isActing}
-                        className={cn(
-                          "p-1.5 rounded-lg border transition-all cursor-pointer",
-                          isDark ? "border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10" : "border-emerald-300 text-emerald-700 hover:bg-emerald-50"
-                        )}
-                        title="Start Container"
-                      >
-                        <Play className="w-3.5 h-3.5" />
-                      </button>
-                    )}
+                    {/* Power Controls (Stop & Start) */}
+                    <button
+                      type="button"
+                      onClick={() => setConfirmModal({ appId: app.id, action: "stop", name: app.name })}
+                      disabled={isActing || !isRunning}
+                      className={cn(
+                        "p-1.5 rounded-lg border transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed",
+                        isDark ? "border-amber-500/30 text-amber-400 hover:bg-amber-500/10 disabled:hover:bg-transparent" : "border-amber-300 text-amber-700 hover:bg-amber-50 disabled:hover:bg-transparent"
+                      )}
+                      title={isRunning ? "Stop Container" : "Container is not running"}
+                    >
+                      <Square className="w-3.5 h-3.5" />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setConfirmModal({ appId: app.id, action: "start", name: app.name })}
+                      disabled={isActing || app.status !== "STOPPED"}
+                      className={cn(
+                        "p-1.5 rounded-lg border transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed",
+                        isDark ? "border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 disabled:hover:bg-transparent" : "border-emerald-300 text-emerald-700 hover:bg-emerald-50 disabled:hover:bg-transparent"
+                      )}
+                      title={
+                        app.status === "STOPPED"
+                          ? "Start Container"
+                          : app.status === "SUSPENDED"
+                          ? "Top up balance to reactivate"
+                          : "Container is already running"
+                      }
+                    >
+                      <Play className="w-3.5 h-3.5" />
+                    </button>
 
                     {/* Manage Link */}
                     <Link
