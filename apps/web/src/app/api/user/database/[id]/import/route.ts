@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
 import { importDatabaseDump } from "@/lib/k8s-database";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/get-ip";
 
 export const maxDuration = 300; // Allow up to 5 minutes for large SQL imports
 
@@ -11,9 +13,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (authResult.error) return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     const user = authResult.user!;
 
+    const clientIp = getClientIp(req);
+    const rateLimitAllowed = await checkRateLimit("DB_IMPORT", `${user.id}:${clientIp}`, 3, 60);
+    if (!rateLimitAllowed) {
+      return NextResponse.json(
+        { error: "Too many database import requests. Please wait a minute before trying again." },
+        { status: 429 }
+      );
+    }
+
     const { id: dbIdStr } = await params;
     const dbId = parseInt(dbIdStr, 10);
-    if (isNaN(dbId)) return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+    if (isNaN(dbId) || dbId <= 0) return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
 
     const db = await prisma.databaseService.findFirst({
       where: user.role === "ADMIN" ? { id: dbId } : { id: dbId, userId: user.id },

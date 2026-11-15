@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
 import { exportDatabaseDump } from "@/lib/k8s-database";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/get-ip";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -9,9 +11,18 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     if (authResult.error) return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     const user = authResult.user!;
 
+    const clientIp = getClientIp(req);
+    const rateLimitAllowed = await checkRateLimit("DB_EXPORT", `${user.id}:${clientIp}`, 5, 60);
+    if (!rateLimitAllowed) {
+      return NextResponse.json(
+        { error: "Too many database export requests. Please wait a minute before trying again." },
+        { status: 429 }
+      );
+    }
+
     const { id: dbIdStr } = await params;
     const dbId = parseInt(dbIdStr, 10);
-    if (isNaN(dbId)) return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+    if (isNaN(dbId) || dbId <= 0) return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
 
     const db = await prisma.databaseService.findFirst({
       where: user.role === "ADMIN" ? { id: dbId } : { id: dbId, userId: user.id },
@@ -51,7 +62,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: dumpResult.error || "Failed to generate database dump" }, { status: 500 });
     }
 
-    const filename = dumpResult.filename || `${db.name}-backup.sql`;
+    const rawFilename = dumpResult.filename || `${db.name}-backup.sql`;
+    const filename = rawFilename.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 120) || "database-backup.sql";
 
     return new NextResponse(new Uint8Array(dumpResult.data), {
       status: 200,

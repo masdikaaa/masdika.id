@@ -190,39 +190,68 @@ export async function POST(
       }
     }
 
-    // 9. Accumulated Commitment Balance Check (Prevents negative balance exploitation)
+    // 9 & 10. Serialize commitment check + Atomic Concurrency Lock (Prevents parallel race condition scaling)
     const currentDbMonthly = db.monthlyPrice || Math.round((db.hourlyRate || 0) * 720);
     const diffMonthly = monthlyPrice - currentDbMonthly;
+    const shortfallState: { requiredBalance: number; shortfall: number; currentBalance: number } = {
+      requiredBalance: 0,
+      shortfall: 0,
+      currentBalance: 0,
+    };
 
-    if (diffMonthly > 0) {
-      const commitment = await getUserServicesCommitment(user.id);
-      const requiredBalance = commitment.totalMonthly - currentDbMonthly + monthlyPrice;
+    try {
+      await prisma.$transaction(async (tx) => {
+        await tx.$executeRaw`SELECT id FROM "User" WHERE id = ${user.id} FOR UPDATE`;
 
-      if (user.balance < requiredBalance) {
-        const shortfall = requiredBalance - user.balance;
+        const freshUser = await tx.user.findUnique({
+          where: { id: user.id },
+          select: { balance: true, isSuspended: true },
+        });
+        if (!freshUser || freshUser.isSuspended) {
+          throw new Error("USER_SUSPENDED");
+        }
+
+        if (diffMonthly > 0) {
+          const commitment = await getUserServicesCommitment(user.id, tx);
+          const requiredBalance = commitment.totalMonthly - currentDbMonthly + monthlyPrice;
+
+          if (freshUser.balance < requiredBalance) {
+            shortfallState.requiredBalance = requiredBalance;
+            shortfallState.shortfall = requiredBalance - freshUser.balance;
+            shortfallState.currentBalance = freshUser.balance;
+            throw new Error("INSUFFICIENT_COMMITMENT");
+          }
+        }
+
+        const lockResult = await tx.databaseService.updateMany({
+          where: {
+            id: db.id,
+            status: { notIn: ["PROVISIONING", "TERMINATED", "SUSPENDED"] },
+          },
+          data: {
+            status: "PROVISIONING",
+          },
+        });
+
+        if (lockResult.count === 0) {
+          throw new Error("DB_LOCKED");
+        }
+      });
+    } catch (txErr: any) {
+      if (txErr?.message === "INSUFFICIENT_COMMITMENT") {
+        const { requiredBalance, shortfall, currentBalance } = shortfallState;
         return NextResponse.json(
           {
-            error: `Insufficient account balance for upgraded services commitment. Estimated new database cost: Rp ${monthlyPrice.toLocaleString("id-ID")}/mo. Total required balance: Rp ${requiredBalance.toLocaleString("id-ID")}, but your current balance is Rp ${user.balance.toLocaleString("id-ID")} (Shortfall: Rp ${shortfall.toLocaleString("id-ID")}). Please top up your balance to upgrade.`,
+            error: `Insufficient account balance for upgraded services commitment. Estimated new database cost: Rp ${monthlyPrice.toLocaleString("id-ID")}/mo. Total required balance: Rp ${requiredBalance.toLocaleString("id-ID")}, but your current balance is Rp ${currentBalance.toLocaleString("id-ID")} (Shortfall: Rp ${shortfall.toLocaleString("id-ID")}). Please top up your balance to upgrade.`,
             requiredBalance,
             shortfall,
           },
           { status: 400 }
         );
       }
-    }
-
-    // 10. Atomic Concurrency Lock (Prevents double-click / parallel race condition scaling)
-    const lockResult = await prisma.databaseService.updateMany({
-      where: {
-        id: db.id,
-        status: { notIn: ["PROVISIONING", "TERMINATED", "SUSPENDED"] },
-      },
-      data: {
-        status: "PROVISIONING",
-      },
-    });
-
-    if (lockResult.count === 0) {
+      if (txErr?.message === "USER_SUSPENDED") {
+        return NextResponse.json({ error: "Account is currently suspended." }, { status: 403 });
+      }
       return NextResponse.json(
         { error: "Database instance is currently busy, scaling, or locked by another concurrent operation. Please wait." },
         { status: 409 }

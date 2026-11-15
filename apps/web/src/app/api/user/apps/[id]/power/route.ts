@@ -9,6 +9,7 @@ import {
 } from "@/lib/k8s-app";
 import { logClientActivity } from "@/lib/activity-log";
 import { getClientIp } from "@/lib/get-ip";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(
   req: NextRequest,
@@ -20,6 +21,15 @@ export async function POST(
       return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
     const user = authResult.user!;
+
+    const clientIp = getClientIp(req);
+    const rateLimitAllowed = await checkRateLimit("APP_POWER", `${user.id}:${clientIp}`, 10, 30);
+    if (!rateLimitAllowed) {
+      return NextResponse.json(
+        { error: "Too many power actions. Please wait a moment before trying again." },
+        { status: 429 }
+      );
+    }
 
     const { id: idStr } = await params;
     const id = parseInt(idStr, 10);
@@ -33,6 +43,20 @@ export async function POST(
 
     if (!app || app.status === "TERMINATED") {
       return NextResponse.json({ error: "Application not found or terminated" }, { status: 404 });
+    }
+
+    if (app.status === "SUSPENDED") {
+      return NextResponse.json(
+        { error: "Cannot control power on suspended application. Please top up your account balance or contact support." },
+        { status: 403 }
+      );
+    }
+
+    if (app.status === "PROVISIONING") {
+      return NextResponse.json(
+        { error: "Application is currently provisioning or scaling. Please wait until it finishes." },
+        { status: 409 }
+      );
     }
 
     const body = await req.json().catch(() => ({}));
@@ -70,7 +94,6 @@ export async function POST(
       });
     }
 
-    const clientIp = getClientIp(req);
     await logClientActivity({
       userId: user.id,
       description: `${action.toUpperCase()} action executed on Managed App '${app.name}'`,

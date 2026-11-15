@@ -440,20 +440,19 @@ export async function attemptAutoUnsuspendDatabase(dbId: number) {
     if (!db) return { success: false, message: 'Database not found' };
     if (db.status !== 'SUSPENDED') return { success: false, message: 'Database is not suspended' };
 
+    // Security: Admin/abuse suspensions must NEVER be auto-unsuspended by top-up or cron
+    if (!isBillingSuspension(db.suspendReason)) {
+      return { success: false, unsuspended: false, reason: 'NON_BILLING_SUSPENSION' };
+    }
+
     const hourlyRate = db.hourlyRate || 28;
     if (db.user.balance < hourlyRate) {
       return { success: false, unsuspended: false, reason: 'INSUFFICIENT_BALANCE' };
     }
 
     await prisma.$transaction(async (tx) => {
-      const updateResult = await tx.user.updateMany({
-        where: { id: db.userId, balance: { gte: hourlyRate } },
-        data: { balance: { decrement: hourlyRate } }
-      });
-      if (updateResult.count === 0) throw new Error("INSUFFICIENT_BALANCE");
-
-      await tx.databaseService.update({
-        where: { id: db.id },
+      const lockDb = await tx.databaseService.updateMany({
+        where: { id: db.id, status: 'SUSPENDED' },
         data: {
           status: 'RUNNING',
           suspendReason: null,
@@ -462,6 +461,13 @@ export async function attemptAutoUnsuspendDatabase(dbId: number) {
           lastBilledAt: new Date()
         }
       });
+      if (lockDb.count === 0) throw new Error("ALREADY_UNSUSPENDED");
+
+      const updateResult = await tx.user.updateMany({
+        where: { id: db.userId, balance: { gte: hourlyRate } },
+        data: { balance: { decrement: hourlyRate } }
+      });
+      if (updateResult.count === 0) throw new Error("INSUFFICIENT_BALANCE");
     });
 
     // Scale up K8s pod
@@ -510,14 +516,8 @@ export async function attemptAutoUnsuspendApp(appId: number) {
     }
 
     await prisma.$transaction(async (tx) => {
-      const updateResult = await tx.user.updateMany({
-        where: { id: app.userId, balance: { gte: hourlyRate } },
-        data: { balance: { decrement: hourlyRate } }
-      });
-      if (updateResult.count === 0) throw new Error("INSUFFICIENT_BALANCE");
-
-      await tx.appService.update({
-        where: { id: app.id },
+      const lockApp = await tx.appService.updateMany({
+        where: { id: app.id, status: 'SUSPENDED' },
         data: {
           status: 'RUNNING',
           suspendReason: null,
@@ -526,6 +526,13 @@ export async function attemptAutoUnsuspendApp(appId: number) {
           lastBilledAt: new Date()
         }
       });
+      if (lockApp.count === 0) throw new Error("ALREADY_UNSUSPENDED");
+
+      const updateResult = await tx.user.updateMany({
+        where: { id: app.userId, balance: { gte: hourlyRate } },
+        data: { balance: { decrement: hourlyRate } }
+      });
+      if (updateResult.count === 0) throw new Error("INSUFFICIENT_BALANCE");
     });
 
     // Scale up K8s pod to 1 replica

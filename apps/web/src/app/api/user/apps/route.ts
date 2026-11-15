@@ -10,7 +10,8 @@ import {
 } from "@/lib/k8s-app";
 import {
   getAppDefinition,
-  getAppPlan,
+  resolveAuthoritativeAppPlan,
+  sanitizeCustomSubdomain,
 } from "@/lib/app-catalog";
 import { assertSufficientCommitmentBalance } from "@/lib/billing-commitment";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -95,7 +96,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const body = await req.json();
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body !== "object") {
+      return NextResponse.json({ error: "Invalid request payload format" }, { status: 400 });
+    }
     const {
       name,
       appType,
@@ -103,6 +107,11 @@ export async function POST(req: NextRequest) {
       billingMode = "MONTHLY",
       customSubdomain,
     } = body;
+
+    const normalizedBillingMode = typeof billingMode === "string" ? billingMode.trim().toUpperCase() : "MONTHLY";
+    if (!["PAYG", "MONTHLY"].includes(normalizedBillingMode)) {
+      return NextResponse.json({ error: "Invalid billing mode. Allowed: PAYG, MONTHLY" }, { status: 400 });
+    }
 
     // 3. Strict Input Validation
     const cleanName = typeof name === "string" ? name.trim() : "";
@@ -123,50 +132,26 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
-    // 4. Dynamic Server-Side Price & Commitment Calculation (Tamper-Proof from DB)
-    const dbPlan = await prisma.plan.findFirst({
-      where: {
-        service: 'APP',
-        isActive: true,
-        OR: [
-          { name: { contains: planCode, mode: 'insensitive' } },
-          { limits: { contains: `"${planCode}"` } },
-          { limits: { contains: planCode } },
-        ],
-      },
-    });
-
-    const fallbackPlan = getAppPlan(planCode);
-    if (!dbPlan && !fallbackPlan) {
+    // 4. Dynamic Server-Side Price & Commitment Calculation (Tamper-Proof from DB / Catalog)
+    const resolvedPlan = await resolveAuthoritativeAppPlan(planCode, prisma);
+    if (!resolvedPlan) {
       return NextResponse.json({
         error: `Invalid compute plan code. Allowed: 1C1G, 1C2G, 2C2G, 2C4G, 4C4G, 4C8G, 4C16G`,
       }, { status: 400 });
     }
 
-    let parsedLimits: any = {};
-    if (dbPlan) {
-      try { parsedLimits = JSON.parse(dbPlan.limits); } catch {}
-    }
-
-    const planCodeFinal = parsedLimits.planCode || fallbackPlan?.planCode || planCode.toUpperCase();
-    const cpuShares = Number(parsedLimits.cpuShares) || parseFloat(parsedLimits.cpu || "1") || fallbackPlan?.cpuShares || 1.0;
-    const memoryMb = Number(parsedLimits.memoryMb) || (parsedLimits.ram?.includes("GB") ? parseFloat(parsedLimits.ram) * 1024 : (fallbackPlan?.memoryMb || 1024));
-    const storageGb = Number(parsedLimits.storageGb) || fallbackPlan?.storageGb || 10;
-    const monthlyPrice = dbPlan ? dbPlan.price : fallbackPlan!.monthlyPrice;
-    const hourlyRate = dbPlan ? (dbPlan.hourlyPrice || Math.round(dbPlan.price / 720)) : fallbackPlan!.hourlyPrice;
+    const planCodeFinal = resolvedPlan.planCode;
+    const cpuShares = resolvedPlan.cpuShares;
+    const memoryMb = resolvedPlan.memoryMb;
+    const storageGb = resolvedPlan.storageGb;
+    const monthlyPrice = resolvedPlan.monthlyPrice;
+    const hourlyRate = resolvedPlan.hourlyPrice;
 
     if (catalogItem.minMemoryMb && memoryMb < catalogItem.minMemoryMb) {
       return NextResponse.json({
         error: `${catalogItem.name} requires at least ${Math.ceil(catalogItem.minMemoryMb / 1024)} GB RAM (1C2G or higher). Please choose a larger compute plan.`,
       }, { status: 400 });
     }
-
-    await assertSufficientCommitmentBalance({
-      userId: user.id,
-      userBalance: user.balance,
-      newServiceMonthly: monthlyPrice,
-      serviceName: `Managed App (${catalogItem.name} - ${planCodeFinal})`,
-    });
 
     // 4.5 Cluster Hardware Capacity Check (8 Core CPU / 16 GB RAM / 60 GB Disk)
     const clusterCapacity = await checkAppClusterCapacity(cpuShares, memoryMb, storageGb);
@@ -176,34 +161,8 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
-    // 5. Smart Collision-Proof Subdomain Generator & Conflict Resolver
-    let subdomain = "";
-    if (customSubdomain && typeof customSubdomain === "string" && catalogItem.accessProtocol !== "SSH") {
-      const cleanSub = customSubdomain.toLowerCase().trim().replace(/[^a-z0-9-]/g, "").slice(0, 30);
-      if (cleanSub.length >= 3) {
-        // Smart Check: does this subdomain already exist in DB?
-        const existing = await prisma.appService.findUnique({ where: { subdomain: cleanSub } });
-        if (!existing) {
-          subdomain = cleanSub;
-        } else {
-          // CERDAS: Jika nama sudah dipakai user lain, jangan bentrok atau timpa!
-          // Auto-append short unique suffix while preserving the user's custom brand name!
-          let candidate = `${cleanSub.slice(0, 24)}-${crypto.randomBytes(2).toString("hex")}`;
-          while (await prisma.appService.findUnique({ where: { subdomain: candidate } })) {
-            candidate = `${cleanSub.slice(0, 24)}-${crypto.randomBytes(2).toString("hex")}`;
-          }
-          subdomain = candidate;
-        }
-      }
-    }
-
-    if (!subdomain) {
-      let candidate = `${catalogItem.id}-${crypto.randomBytes(3).toString("hex")}`;
-      while (await prisma.appService.findUnique({ where: { subdomain: candidate } })) {
-        candidate = `${catalogItem.id}-${crypto.randomBytes(3).toString("hex")}`;
-      }
-      subdomain = candidate;
-    }
+    // 5. Smart Collision-Proof Subdomain Sanitizer (RFC-1123 & reserved domain guard)
+    const cleanSub = catalogItem.accessProtocol !== "SSH" ? sanitizeCustomSubdomain(customSubdomain) : "";
 
     // 6. Smart NodePort Allocation (Dedicated Range 31500..32767 with in-memory lock & cross-checks)
     const port = await allocateAppPort();
@@ -213,32 +172,94 @@ export async function POST(req: NextRequest) {
     const randomApiKey = `mk_${crypto.randomBytes(16).toString("hex")}`;
     const defaultUsername = (catalogItem.accessProtocol === "SSH" || catalogItem.accessProtocol === "BOTH") ? "root" : "admin";
 
-    // 8. Create Record in Database
-    const appRecord = await prisma.appService.create({
-      data: {
-        userId: user.id,
-        name: cleanName,
-        appType: catalogItem.id,
-        templateName: `${catalogItem.name} (${planCodeFinal})`,
-        planName: planCodeFinal,
-        region: "Sidoarjo",
-        node: "managed-apps",
-        subdomain,
-        host: "app.masdika.id",
-        port,
-        appPort: catalogItem.appPort,
-        username: defaultUsername,
-        password: randomPassword,
-        apiKey: randomApiKey,
-        cpuShares,
-        memoryMb,
-        storageGb,
-        billingMode: billingMode === "PAYG" ? "PAYG" : "MONTHLY",
-        monthlyPrice,
-        hourlyRate,
-        status: "PROVISIONING",
-      },
-    });
+    // 8. Serialize commitment check & record creation per user to eliminate TOCTOU parallel deploy race conditions
+    let appRecord: any;
+    let subdomain = "";
+    try {
+      const txOutcome = await prisma.$transaction(async (tx) => {
+        await tx.$executeRaw`SELECT id FROM "User" WHERE id = ${user.id} FOR UPDATE`;
+
+        const freshUser = await tx.user.findUnique({
+          where: { id: user.id },
+          select: { id: true, balance: true, isSuspended: true, suspendReason: true },
+        });
+        if (!freshUser) {
+          throw new Error("USER_NOT_FOUND");
+        }
+        if (freshUser.isSuspended) {
+          throw new Error(`ACCOUNT_SUSPENDED:${freshUser.suspendReason || "Your account is suspended."}`);
+        }
+
+        await assertSufficientCommitmentBalance({
+          userId: user.id,
+          userBalance: freshUser.balance,
+          newServiceMonthly: monthlyPrice,
+          serviceName: `Managed App (${catalogItem.name} - ${planCodeFinal})`,
+          tx,
+        });
+
+        let resolvedSubdomain = "";
+        if (cleanSub) {
+          const existing = await tx.appService.findUnique({ where: { subdomain: cleanSub } });
+          if (!existing) {
+            resolvedSubdomain = cleanSub;
+          } else {
+            let candidate = `${cleanSub.slice(0, 24)}-${crypto.randomBytes(2).toString("hex")}`;
+            while (await tx.appService.findUnique({ where: { subdomain: candidate } })) {
+              candidate = `${cleanSub.slice(0, 24)}-${crypto.randomBytes(2).toString("hex")}`;
+            }
+            resolvedSubdomain = candidate;
+          }
+        }
+        if (!resolvedSubdomain) {
+          let candidate = `${catalogItem.id}-${crypto.randomBytes(3).toString("hex")}`;
+          while (await tx.appService.findUnique({ where: { subdomain: candidate } })) {
+            candidate = `${catalogItem.id}-${crypto.randomBytes(3).toString("hex")}`;
+          }
+          resolvedSubdomain = candidate;
+        }
+
+        const created = await tx.appService.create({
+          data: {
+            userId: user.id,
+            name: cleanName,
+            appType: catalogItem.id,
+            templateName: `${catalogItem.name} (${planCodeFinal})`,
+            planName: planCodeFinal,
+            region: "Sidoarjo",
+            node: "managed-apps",
+            subdomain: resolvedSubdomain,
+            host: "app.masdika.id",
+            port,
+            appPort: catalogItem.appPort,
+            username: defaultUsername,
+            password: randomPassword,
+            apiKey: randomApiKey,
+            cpuShares,
+            memoryMb,
+            storageGb,
+            billingMode: normalizedBillingMode,
+            monthlyPrice,
+            hourlyRate,
+            status: "PROVISIONING",
+          },
+        });
+
+        return { created, resolvedSubdomain };
+      });
+      appRecord = txOutcome.created;
+      subdomain = txOutcome.resolvedSubdomain;
+    } catch (txErr: any) {
+      releaseReservedAppPort(port);
+      const msg = txErr?.message || "Insufficient account balance";
+      if (msg === "USER_NOT_FOUND") {
+        return NextResponse.json({ error: "User account not found" }, { status: 401 });
+      }
+      if (msg.startsWith("ACCOUNT_SUSPENDED:")) {
+        return NextResponse.json({ error: msg.slice("ACCOUNT_SUSPENDED:".length) }, { status: 403 });
+      }
+      return NextResponse.json({ error: msg }, { status: 400 });
+    }
 
     // 9. Deploy to Kubernetes Asynchronously or Synchronously with rollback on failure
     try {

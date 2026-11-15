@@ -253,6 +253,150 @@ export function getAppPlan(planCodeOrId: string): ManagedAppPlanDefinition | und
   );
 }
 
+export interface ResolvedAppPlanSpecs {
+  planCode: string;
+  cpuLabel: string;
+  cpuShares: number;
+  ramLabel: string;
+  memoryMb: number;
+  storageGb: number;
+  monthlyPrice: number;
+  hourlyPrice: number;
+}
+
+const VALID_APP_PLAN_CODE_REGEX = /^[A-Z0-9_-]{2,20}$/;
+
+const RESERVED_APP_SUBDOMAINS = new Set([
+  'www', 'api', 'admin', 'mail', 'smtp', 'imap', 'pop3', 'ftp', 'ssh',
+  'db', 'app', 'panel', 'billing', 'status', 'traefik', 'rancher', 'argocd',
+  'auth', 'login', 'root', 'system', 'internal', 'localhost', 'masdika',
+]);
+
+/**
+ * Normalizes and validates custom app subdomains against RFC-1123 label rules
+ * and reserved infrastructure hostnames. Returns "" to fall back to random generation.
+ */
+export function sanitizeCustomSubdomain(input: unknown): string {
+  if (typeof input !== 'string') return '';
+  const cleaned = input
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-{2,}/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 30)
+    .replace(/-+$/g, '');
+
+  if (cleaned.length < 3 || RESERVED_APP_SUBDOMAINS.has(cleaned)) {
+    return '';
+  }
+  return cleaned;
+}
+
+/**
+ * Strictly resolves an app compute plan from active DB Plan rows and/or official catalog.
+ * Never performs loose substring (`contains`) matching on limits JSON so attackers cannot
+ * match unintended plans via strings like "1" or "cpuShares".
+ */
+export function matchAppPlanFromRecords(
+  planCodeInput: unknown,
+  activeDbPlans: Array<{ name: string; limits: string; price: number; hourlyPrice: number | null; service?: string; isActive?: boolean }>
+): ResolvedAppPlanSpecs | null {
+  if (typeof planCodeInput !== 'string') return null;
+  const normalized = planCodeInput.trim().toUpperCase();
+  if (!normalized || !VALID_APP_PLAN_CODE_REGEX.test(normalized)) {
+    return null;
+  }
+
+  const catalogPlan = getAppPlan(normalized);
+
+  const matchedDbPlan = activeDbPlans.find((p) => {
+    if (p.service && p.service !== 'APP') return false;
+    if (p.isActive === false) return false;
+    if (p.name.trim().toUpperCase() === normalized) return true;
+    try {
+      const parsed = JSON.parse(p.limits);
+      const limitCode = typeof parsed?.planCode === 'string' ? parsed.planCode.trim().toUpperCase() : '';
+      const limitId = typeof parsed?.id === 'string' ? parsed.id.trim().toUpperCase() : '';
+      return (
+        limitCode === normalized ||
+        limitId === normalized ||
+        (catalogPlan ? limitCode === catalogPlan.planCode.toUpperCase() : false)
+      );
+    } catch {
+      return false;
+    }
+  });
+
+  if (!matchedDbPlan && !catalogPlan) {
+    return null;
+  }
+
+  let parsedLimits: Record<string, any> = {};
+  if (matchedDbPlan) {
+    try {
+      parsedLimits = JSON.parse(matchedDbPlan.limits) || {};
+    } catch {
+      parsedLimits = {};
+    }
+  }
+
+  const finalCode =
+    (typeof parsedLimits.planCode === 'string' && parsedLimits.planCode.trim().toUpperCase()) ||
+    catalogPlan?.planCode ||
+    normalized;
+
+  const cpuShares =
+    Number(parsedLimits.cpuShares) ||
+    parseFloat(String(parsedLimits.cpu || '')) ||
+    catalogPlan?.cpuShares ||
+    1.0;
+
+  const parsedRamNum = typeof parsedLimits.ram === 'string' ? parseFloat(parsedLimits.ram) : NaN;
+  const memoryMb =
+    Number(parsedLimits.memoryMb) ||
+    (typeof parsedLimits.ram === 'string' && parsedLimits.ram.toUpperCase().includes('GB') && !isNaN(parsedRamNum)
+      ? Math.round(parsedRamNum * 1024)
+      : 0) ||
+    catalogPlan?.memoryMb ||
+    1024;
+
+  const storageGb = Number(parsedLimits.storageGb) || catalogPlan?.storageGb || 10;
+  const monthlyPrice = matchedDbPlan ? matchedDbPlan.price : catalogPlan!.monthlyPrice;
+  const hourlyPrice = matchedDbPlan
+    ? matchedDbPlan.hourlyPrice || Math.max(1, Math.round(matchedDbPlan.price / 720))
+    : catalogPlan!.hourlyPrice;
+
+  return {
+    planCode: finalCode,
+    cpuLabel: (typeof parsedLimits.cpu === 'string' && parsedLimits.cpu) || catalogPlan?.cpuLabel || `${cpuShares} CPU`,
+    cpuShares,
+    ramLabel: (typeof parsedLimits.ram === 'string' && parsedLimits.ram) || catalogPlan?.ramLabel || `${memoryMb / 1024} GB RAM`,
+    memoryMb,
+    storageGb,
+    monthlyPrice,
+    hourlyPrice,
+  };
+}
+
+export async function resolveAuthoritativeAppPlan(
+  planCodeInput: unknown,
+  prismaClient: { plan: { findMany: (args: any) => Promise<any[]> } }
+): Promise<ResolvedAppPlanSpecs | null> {
+  if (typeof planCodeInput !== 'string') return null;
+  const normalized = planCodeInput.trim().toUpperCase();
+  if (!normalized || !VALID_APP_PLAN_CODE_REGEX.test(normalized)) {
+    return null;
+  }
+
+  const activeDbPlans = await prismaClient.plan.findMany({
+    where: { service: 'APP', isActive: true },
+    select: { name: true, limits: true, price: true, hourlyPrice: true, service: true, isActive: true },
+  });
+
+  return matchAppPlanFromRecords(normalized, activeDbPlans);
+}
+
 export function formatRupiah(amount: number): string {
   return `Rp ${amount.toLocaleString('id-ID')}`;
 }

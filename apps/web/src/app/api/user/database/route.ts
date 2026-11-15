@@ -5,14 +5,20 @@ import {
   allocateAvailablePort,
   releaseReservedDbPort,
   deployDatabase,
-  parseDatabasePlanLimits,
   getK8sClusterConfig,
   buildConnectionDetails,
   checkDatabaseClusterCapacity,
   getDatabaseStatus,
 } from "@/lib/k8s-database";
+import {
+  DATABASE_STORAGE_MAX_GB,
+  parseStrictStorageGb,
+  calculateAuthoritativeDatabaseOrder,
+} from "@/lib/database-plans";
 import { assertSufficientCommitmentBalance } from "@/lib/billing-commitment";
 import { sendDatabaseProvisionedEmail } from "@/lib/email";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/get-ip";
 import crypto from "crypto";
 
 export async function GET(req: NextRequest) {
@@ -49,7 +55,21 @@ export async function POST(req: NextRequest) {
     if (authResult.error) return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     const user = authResult.user!;
 
-    const body = await req.json();
+    // Rate limiting (5 provisioning requests per 30 seconds per user/IP)
+    const clientIp = getClientIp(req);
+    const rateLimitAllowed = await checkRateLimit("DB_DEPLOY", `${user.id}:${clientIp}`, 5, 30);
+    if (!rateLimitAllowed) {
+      return NextResponse.json(
+        { error: "Too many database provisioning requests. Please wait a moment before trying again." },
+        { status: 429 }
+      );
+    }
+
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body !== "object") {
+      return NextResponse.json({ error: "Invalid request payload format" }, { status: 400 });
+    }
+
     const {
       name,
       type = "MYSQL",
@@ -61,8 +81,12 @@ export async function POST(req: NextRequest) {
       customDbName,
       customUsername,
       customPassword,
-      ratePerGb,
     } = body;
+
+    const normalizedBillingMode = typeof billingMode === "string" ? billingMode.trim().toUpperCase() : "PAYG";
+    if (!["PAYG", "MONTHLY"].includes(normalizedBillingMode)) {
+      return NextResponse.json({ error: "Invalid billing mode. Allowed: PAYG, MONTHLY" }, { status: 400 });
+    }
 
     // Strict Input Validation & Shell Metacharacter Protection
     const cleanName = typeof name === "string" ? name.trim() : "";
@@ -130,94 +154,61 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Dynamic Plan Lookup (supports standard & any admin-created custom plan)
-    let selectedPlan: any = null;
-    if (planId) {
-      selectedPlan = await prisma.plan.findUnique({
-        where: { id: parseInt(String(planId), 10) },
-      });
+    // Strict Server-Authoritative Plan & Storage Validation (Tamper-Proof Pricing)
+    const requestedStorage = parseStrictStorageGb(body.storageGb, 1, 1, DATABASE_STORAGE_MAX_GB);
+    if (requestedStorage === null) {
+      return NextResponse.json({
+        error: `Storage capacity must be an integer between 1 GB and ${DATABASE_STORAGE_MAX_GB} GB.`,
+      }, { status: 400 });
     }
 
-    if (!selectedPlan && planName) {
-      selectedPlan = await prisma.plan.findFirst({
-        where: { service: "DATABASE", name: planName, isActive: true },
-      });
-    }
-
-    // Default fallbacks if no plan specified
-    let cpuShares = 0.5;
-    let memoryMb = 1024;
-    let storageGb = 1;
-    let effectiveTier = "SHARED";
-    let effectivePlanName = "Shared Database";
-    let monthlyPrice = 10000;
-    let hourlyRate = 14;
-
-    const requestedStorage = typeof body.storageGb === 'number' || typeof body.storageGb === 'string'
-      ? Math.max(1, Math.min(100, parseInt(String(body.storageGb), 10) || 1))
-      : null;
-
-    if (selectedPlan && selectedPlan.service === "DATABASE") {
-      const parsed = parseDatabasePlanLimits(selectedPlan.limits);
-      cpuShares = parsed.cpuShares;
-      memoryMb = parsed.memoryMb;
-      effectiveTier = parsed.shared ? "SHARED" : "DEDICATED";
-
-      if (effectiveTier === "SHARED") {
-        storageGb = requestedStorage ?? 1;
-        const rate = typeof ratePerGb === 'number' && ratePerGb > 0 ? ratePerGb : 10000;
-        monthlyPrice = storageGb * rate;
-        hourlyRate = Math.max(1, Math.ceil(monthlyPrice / 720));
-        effectivePlanName = typeof planName === 'string' && planName.trim().length > 0
-          ? `${planName.trim()} (${storageGb} GB)`
-          : `Shared Database (${storageGb} GB)`;
-      } else {
-        storageGb = requestedStorage ?? 1;
-        const storageCost = storageGb * 5000;
-        monthlyPrice = selectedPlan.price + storageCost;
-        hourlyRate = Math.max(1, Math.ceil(monthlyPrice / 720));
-        effectivePlanName = `${selectedPlan.name} (${storageGb} GB)`;
+    let parsedPlanId: number | null = null;
+    if (planId !== undefined && planId !== null && planId !== "") {
+      const pIdNum = typeof planId === "number" ? planId : parseInt(String(planId), 10);
+      if (!Number.isInteger(pIdNum) || pIdNum <= 0) {
+        return NextResponse.json({ error: "Invalid database plan ID." }, { status: 400 });
       }
-    } else {
-      const isDedicated =
-        (typeof tier === 'string' && tier.toUpperCase() === 'DEDICATED') ||
-        (typeof planName === 'string' && planName.toLowerCase().includes('dedi'));
-      if (isDedicated) {
-        effectiveTier = "DEDICATED";
-        effectivePlanName = "Dedicated 1 vCPU / 2 GB";
-        cpuShares = 1.0;
-        memoryMb = 2048;
-        storageGb = requestedStorage ?? 1;
-        const storageCost = storageGb * 5000;
-        monthlyPrice = 45000 + storageCost;
-        hourlyRate = Math.max(1, Math.ceil(monthlyPrice / 720));
-      } else {
-        storageGb = requestedStorage ?? 1;
-        const rate = typeof ratePerGb === 'number' && ratePerGb > 0 ? ratePerGb : 10000;
-        monthlyPrice = storageGb * rate;
-        hourlyRate = Math.max(1, Math.ceil(monthlyPrice / 720));
-        effectivePlanName = typeof planName === 'string' && planName.trim().length > 0
-          ? `${planName.trim()} (${storageGb} GB)`
-          : `Shared Database (${storageGb} GB)`;
-      }
+      parsedPlanId = pIdNum;
     }
 
-    const upfrontCharge = billingMode === "MONTHLY" ? monthlyPrice : hourlyRate;
-    const newDbMonthly = billingMode === "MONTHLY" ? monthlyPrice : (monthlyPrice || Math.round(hourlyRate * 720));
+    const [activeDbPlans, rateSetting] = await Promise.all([
+      prisma.plan.findMany({
+        where: { service: "DATABASE", isActive: true },
+        select: { id: true, name: true, service: true, price: true, limits: true, isActive: true },
+      }),
+      prisma.setting.findUnique({ where: { key: "database_shared_rate_per_gb" } }),
+    ]);
 
-    // Security: Validate accumulated active services commitment + 1 month new database estimation
-    let requiredBalance = newDbMonthly;
-    try {
-      const commitmentCheck = await assertSufficientCommitmentBalance({
-        userId: user.id,
-        userBalance: user.balance,
-        newServiceMonthly: newDbMonthly,
-        serviceName: `${effectivePlanName} (${cleanName})`,
-      });
-      requiredBalance = commitmentCheck.requiredBalance;
-    } catch (commitmentErr: any) {
-      return NextResponse.json({ error: commitmentErr.message }, { status: 400 });
+    const parsedSettingRate = rateSetting ? parseInt(rateSetting.value, 10) : 10000;
+    const baseSharedRatePerGb = !isNaN(parsedSettingRate) && parsedSettingRate > 0 ? parsedSettingRate : 10000;
+
+    const orderSpec = calculateAuthoritativeDatabaseOrder({
+      typeUpper,
+      version: cleanVersion,
+      tier: typeof tier === "string" ? tier : undefined,
+      planId: parsedPlanId,
+      planName: typeof planName === "string" ? planName : undefined,
+      storageGb: requestedStorage,
+      activeDbPlans,
+      baseSharedRatePerGb,
+    });
+
+    if (!orderSpec.ok) {
+      return NextResponse.json({ error: orderSpec.error }, { status: 400 });
     }
+
+    const {
+      cpuShares,
+      memoryMb,
+      storageGb,
+      effectivePlanName,
+      cleanVersion: effectiveVersion,
+      monthlyPrice,
+      hourlyRate,
+    } = orderSpec.data;
+
+    const upfrontCharge = normalizedBillingMode === "MONTHLY" ? monthlyPrice : hourlyRate;
+    const newDbMonthly = monthlyPrice;
 
     // 1. Pre-flight Cluster Resource Capacity Check (prevents charging or errors if server is full)
     const capacityCheck = await checkDatabaseClusterCapacity(cpuShares, memoryMb, storageGb);
@@ -238,24 +229,6 @@ export async function POST(req: NextRequest) {
       }, { status: 503 });
     }
 
-    // 3. Check & atomically decrement user balance with concurrency protection and commitment check
-    const balanceDeduct = await prisma.user.updateMany({
-      where: {
-        id: user.id,
-        balance: { gte: requiredBalance },
-      },
-      data: {
-        balance: { decrement: upfrontCharge },
-      },
-    });
-
-    if (balanceDeduct.count === 0) {
-      releaseReservedDbPort(port);
-      return NextResponse.json({
-        error: `Saldo akun tidak mencukupi untuk akumulasi komitmen layanan aktif (Dibutuhkan minimal saldo Rp ${requiredBalance.toLocaleString("id-ID")}).`,
-      }, { status: 400 });
-    }
-
     // Generate or sanitize credentials safely
     const randSuffix = crypto.randomBytes(3).toString("hex");
     const sanitizedName = cleanName.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 8) || "db";
@@ -273,34 +246,86 @@ export async function POST(req: NextRequest) {
     const clusterConfig = await getK8sClusterConfig().catch(() => null);
     const clusterPublicHost = clusterConfig?.publicDomain || clusterConfig?.publicIp || process.env.MANAGED_DB_PUBLIC_DOMAIN || "";
 
-    // Create DatabaseService record with enforced resource specs
-    const dbRecord = await prisma.databaseService.create({
-      data: {
-        userId: user.id,
-        name: cleanName,
-        type: typeUpper,
-        version: cleanVersion,
-        planName: effectivePlanName,
-        region: "Sidoarjo",
-        node: "managed-database",
-        host: clusterPublicHost,
-        port,
-        dbName,
-        username,
-        password,
-        rootPassword,
-        cpuShares,
-        memoryMb,
-        storageGb,
-        billingMode,
-        monthlyPrice,
-        hourlyRate,
-        accumulatedCost: upfrontCharge,
-        status: "PROVISIONING",
-        k8sNamespace: "managed-db",
-        lastBilledAt: new Date(),
-      },
-    });
+    // 3. Serialize per-user commitment check, atomic upfront charge, and record creation to eliminate TOCTOU race conditions
+    let dbRecord: any;
+    try {
+      dbRecord = await prisma.$transaction(async (tx) => {
+        await tx.$executeRaw`SELECT id FROM "User" WHERE id = ${user.id} FOR UPDATE`;
+
+        const freshUser = await tx.user.findUnique({
+          where: { id: user.id },
+          select: { id: true, balance: true, isSuspended: true, suspendReason: true },
+        });
+        if (!freshUser) {
+          throw new Error("USER_NOT_FOUND");
+        }
+        if (freshUser.isSuspended) {
+          throw new Error(`ACCOUNT_SUSPENDED:${freshUser.suspendReason || "Account is suspended"}`);
+        }
+
+        const commitmentCheck = await assertSufficientCommitmentBalance({
+          userId: user.id,
+          userBalance: freshUser.balance,
+          newServiceMonthly: newDbMonthly,
+          serviceName: `${effectivePlanName} (${cleanName})`,
+          tx,
+        });
+
+        const balanceDeduct = await tx.user.updateMany({
+          where: {
+            id: user.id,
+            balance: { gte: commitmentCheck.requiredBalance },
+          },
+          data: {
+            balance: { decrement: upfrontCharge },
+          },
+        });
+
+        if (balanceDeduct.count === 0) {
+          throw new Error(
+            `Saldo akun tidak mencukupi untuk akumulasi komitmen layanan aktif (Dibutuhkan minimal saldo Rp ${commitmentCheck.requiredBalance.toLocaleString("id-ID")}).`
+          );
+        }
+
+        return await tx.databaseService.create({
+          data: {
+            userId: user.id,
+            name: cleanName,
+            type: typeUpper,
+            version: effectiveVersion,
+            planName: effectivePlanName,
+            region: "Sidoarjo",
+            node: "managed-database",
+            host: clusterPublicHost,
+            port,
+            dbName,
+            username,
+            password,
+            rootPassword,
+            cpuShares,
+            memoryMb,
+            storageGb,
+            billingMode: normalizedBillingMode,
+            monthlyPrice,
+            hourlyRate,
+            accumulatedCost: upfrontCharge,
+            status: "PROVISIONING",
+            k8sNamespace: "managed-db",
+            lastBilledAt: new Date(),
+          },
+        });
+      });
+    } catch (txErr: any) {
+      releaseReservedDbPort(port);
+      const msg = txErr?.message || "Insufficient balance";
+      if (msg === "USER_NOT_FOUND") {
+        return NextResponse.json({ error: "User account not found" }, { status: 401 });
+      }
+      if (msg.startsWith("ACCOUNT_SUSPENDED:")) {
+        return NextResponse.json({ error: msg.slice("ACCOUNT_SUSPENDED:".length) }, { status: 403 });
+      }
+      return NextResponse.json({ error: msg }, { status: 400 });
+    }
 
     // Dispatch Database Credentials Email to user asynchronously
     (async () => {

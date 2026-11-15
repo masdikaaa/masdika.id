@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
 import { scaleAppService, checkAppClusterCapacity } from "@/lib/k8s-app";
-import { getAppPlan, getAppDefinition } from "@/lib/app-catalog";
+import { resolveAuthoritativeAppPlan, getAppDefinition } from "@/lib/app-catalog";
 import { getUserServicesCommitment } from "@/lib/billing-commitment";
 import { getClientIp } from "@/lib/get-ip";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -91,41 +91,14 @@ export async function POST(
       return NextResponse.json({ error: "Plan code is required for scaling" }, { status: 400 });
     }
 
-    // Dynamic resolution from DB Plan record first
-    const dbPlan = await prisma.plan.findFirst({
-      where: {
-        service: 'APP',
-        isActive: true,
-        OR: [
-          { name: { contains: planCode, mode: 'insensitive' } },
-          { limits: { contains: `"${planCode}"` } },
-          { limits: { contains: planCode } },
-        ],
-      },
-    });
-
-    const fallbackPlan = getAppPlan(planCode);
-    if (!dbPlan && !fallbackPlan) {
+    // Dynamic strict resolution from DB Plan record or official catalog (never substring contains)
+    const targetPlan = await resolveAuthoritativeAppPlan(planCode, prisma);
+    if (!targetPlan) {
       return NextResponse.json(
         { error: `Invalid compute plan code: '${planCode}'. Allowed: 1C1G, 1C2G, 2C2G, 2C4G, 4C4G, 4C8G, 4C16G` },
         { status: 400 }
       );
     }
-
-    let parsedLimits: any = {};
-    if (dbPlan) {
-      try { parsedLimits = JSON.parse(dbPlan.limits); } catch {}
-    }
-
-    const targetPlan = {
-      planCode: parsedLimits.planCode || fallbackPlan?.planCode || planCode.toUpperCase(),
-      cpuLabel: parsedLimits.cpu || fallbackPlan?.cpuLabel || `${parsedLimits.cpuShares || 1} CPU`,
-      cpuShares: Number(parsedLimits.cpuShares) || parseFloat(parsedLimits.cpu || "1") || fallbackPlan?.cpuShares || 1.0,
-      ramLabel: parsedLimits.ram || fallbackPlan?.ramLabel || `${(parsedLimits.memoryMb || 1024) / 1024} GB RAM`,
-      memoryMb: Number(parsedLimits.memoryMb) || (parsedLimits.ram?.includes("GB") ? parseFloat(parsedLimits.ram) * 1024 : (fallbackPlan?.memoryMb || 1024)),
-      monthlyPrice: dbPlan ? dbPlan.price : fallbackPlan!.monthlyPrice,
-      hourlyPrice: dbPlan ? (dbPlan.hourlyPrice || Math.round(dbPlan.price / 720)) : fallbackPlan!.hourlyPrice,
-    };
 
     // Check if new specs are identical to current specs
     if (
@@ -134,7 +107,7 @@ export async function POST(
       app.memoryMb === targetPlan.memoryMb
     ) {
       return NextResponse.json(
-        { error: "New compute specifications are identical to current specifications." },
+        { error: "New specifications are identical to current specifications." },
         { status: 400 }
       );
     }
@@ -147,30 +120,9 @@ export async function POST(
       );
     }
 
-    // 5. Server-side Pricing & Commitment Balance Verification
+    // 5. Server-side Pricing & Cluster Capacity Pre-flight Check
     const monthlyPrice = targetPlan.monthlyPrice;
     const hourlyRate = targetPlan.hourlyPrice;
-    const currentAppMonthly = app.monthlyPrice || Math.round((app.hourlyRate || 0) * 720);
-    const diffMonthly = monthlyPrice - currentAppMonthly;
-
-    if (diffMonthly > 0) {
-      const commitment = await getUserServicesCommitment(user.id);
-      const requiredBalance = commitment.totalMonthly - currentAppMonthly + monthlyPrice;
-
-      if (user.balance < requiredBalance) {
-        return NextResponse.json(
-          {
-            error: `Insufficient account balance for this upgrade. Scaling to ${targetPlan.planCode} requires an account balance of at least Rp ${requiredBalance.toLocaleString("id-ID")} to cover your accumulated monthly commitment, but your current balance is Rp ${user.balance.toLocaleString("id-ID")}. Please top up your balance.`,
-            requiredBalance,
-            currentBalance: user.balance,
-            shortfall: requiredBalance - user.balance,
-          },
-          { status: 400 }
-        );
-      }
-    }
-
-    // 5.5 Check Cluster Capacity for Delta Resources
     const diffCpu = Math.max(0, targetPlan.cpuShares - app.cpuShares);
     const diffRam = Math.max(0, targetPlan.memoryMb - app.memoryMb);
     if (diffCpu > 0 || diffRam > 0) {
@@ -183,12 +135,99 @@ export async function POST(
       }
     }
 
-    // 6. Execute Zero-Data-Loss Scaling in Kubernetes
+    // 5.5 Serialize commitment check + Atomic Concurrency Lock (Prevents parallel race condition scaling)
+    const previousStatus = app.status;
+    const shortfallState: { requiredBalance: number; currentBalance: number } = {
+      requiredBalance: 0,
+      currentBalance: 0,
+    };
+    try {
+      const lockOutcome = await prisma.$transaction(async (tx) => {
+        await tx.$executeRaw`SELECT id FROM "User" WHERE id = ${user.id} FOR UPDATE`;
+
+        const freshUser = await tx.user.findUnique({
+          where: { id: user.id },
+          select: { balance: true, isSuspended: true },
+        });
+        if (!freshUser || freshUser.isSuspended) {
+          throw new Error("USER_SUSPENDED");
+        }
+
+        const freshApp = await tx.appService.findUnique({
+          where: { id: app.id },
+        });
+        if (!freshApp || ["PROVISIONING", "TERMINATED", "SUSPENDED"].includes(freshApp.status)) {
+          throw new Error("APP_LOCKED");
+        }
+
+        const currentAppMonthly = freshApp.monthlyPrice || Math.round((freshApp.hourlyRate || 0) * 720);
+        const diffMonthly = monthlyPrice - currentAppMonthly;
+
+        if (diffMonthly > 0) {
+          const commitment = await getUserServicesCommitment(user.id, tx);
+          const requiredBalance = commitment.totalMonthly - currentAppMonthly + monthlyPrice;
+
+          if (freshUser.balance < requiredBalance) {
+            shortfallState.requiredBalance = requiredBalance;
+            shortfallState.currentBalance = freshUser.balance;
+            throw new Error("INSUFFICIENT_COMMITMENT");
+          }
+        }
+
+        const locked = await tx.appService.updateMany({
+          where: {
+            id: app.id,
+            status: { notIn: ["PROVISIONING", "TERMINATED", "SUSPENDED"] },
+          },
+          data: { status: "PROVISIONING" },
+        });
+        if (locked.count === 0) {
+          throw new Error("APP_LOCKED");
+        }
+        return true;
+      });
+      if (!lockOutcome) {
+        return NextResponse.json({ error: "Application is currently busy." }, { status: 409 });
+      }
+    } catch (txErr: any) {
+      if (txErr?.message === "INSUFFICIENT_COMMITMENT") {
+        const { requiredBalance, currentBalance } = shortfallState;
+        return NextResponse.json(
+          {
+            error: `Insufficient account balance for this upgrade. Scaling to ${targetPlan.planCode} requires an account balance of at least Rp ${requiredBalance.toLocaleString("id-ID")} to cover your accumulated monthly commitment, but your current balance is Rp ${currentBalance.toLocaleString("id-ID")}. Please top up your balance.`,
+            requiredBalance,
+            currentBalance,
+            shortfall: requiredBalance - currentBalance,
+          },
+          { status: 400 }
+        );
+      }
+      if (txErr?.message === "USER_SUSPENDED") {
+        return NextResponse.json({ error: "Account is currently suspended." }, { status: 403 });
+      }
+      return NextResponse.json(
+        { error: "Application is currently busy or locked by another operation. Please wait." },
+        { status: 409 }
+      );
+    }
+
+    // 6. Execute Zero-Data-Loss Scaling in Kubernetes (with status rollback on failure)
     const newTemplateName = `${catalogItem?.name || app.appType} (${targetPlan.planCode})`;
 
-    await scaleAppService(app as any, targetPlan.cpuShares, targetPlan.memoryMb);
+    try {
+      await scaleAppService(app as any, targetPlan.cpuShares, targetPlan.memoryMb);
+    } catch (scaleErr: any) {
+      await prisma.appService.update({
+        where: { id: app.id },
+        data: { status: previousStatus },
+      }).catch(() => {});
+      return NextResponse.json(
+        { error: `Failed to scale application pod in cluster: ${scaleErr?.message || "Cluster error"}` },
+        { status: 500 }
+      );
+    }
 
-    // 7. Update App Record in Database
+    // 7. Update App Record in Database & restore operational status
     const updatedApp = await prisma.appService.update({
       where: { id: app.id },
       data: {
@@ -198,6 +237,7 @@ export async function POST(
         memoryMb: targetPlan.memoryMb,
         monthlyPrice,
         hourlyRate,
+        status: previousStatus === "STOPPED" ? "STOPPED" : "RUNNING",
       },
     });
 
