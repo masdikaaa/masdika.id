@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { OG_IMAGE_PATH } from "@/lib/og-image";
 import { ChevronLeft, ChevronRight, Calendar, BookOpen, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { renderMarkdown, cleanHeadingTitle } from "@/lib/markdown";

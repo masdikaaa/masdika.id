@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { OG_IMAGE_PATH } from "@/lib/og-image";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
