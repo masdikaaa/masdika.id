@@ -368,12 +368,12 @@ export default function MyServicesPage() {
                       {vps.status !== 'TERMINATED' ? (
                         <Link
                           href={`/dashboard/vps/${vps.id}`}
-                          className="flex-1 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 px-3.5 py-2 rounded-xl text-xs sm:text-xs font-bold flex items-center justify-center transition-all text-slate-950"
+                          className="flex-1 h-10 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 px-4 rounded-xl text-xs font-bold flex items-center justify-center transition-all text-slate-950"
                         >
                           Manage Instance
                         </Link>
                       ) : (
-                        <div className="flex-1 bg-red-500/5 text-red-500/40 border border-red-500/10 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center cursor-not-allowed">
+                        <div className="flex-1 h-10 bg-red-500/5 text-red-500/40 border border-red-500/10 px-4 rounded-xl text-xs font-bold flex items-center justify-center cursor-not-allowed">
                           Terminated
                         </div>
                       )}
@@ -445,12 +445,12 @@ export default function MyServicesPage() {
                       {k3s.status !== 'TERMINATED' ? (
                         <Link
                           href={`/dashboard/k3s/${k3s.id}`}
-                          className="flex-1 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 px-3.5 py-2 rounded-xl text-xs sm:text-xs font-bold flex items-center justify-center transition-all text-slate-950"
+                          className="flex-1 h-10 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 px-4 rounded-xl text-xs font-bold flex items-center justify-center transition-all text-slate-950"
                         >
                           Manage Cluster
                         </Link>
                       ) : (
-                        <div className="flex-1 bg-red-500/5 text-red-500/40 border border-red-500/10 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center cursor-not-allowed">
+                        <div className="flex-1 h-10 bg-red-500/5 text-red-500/40 border border-red-500/10 px-4 rounded-xl text-xs font-bold flex items-center justify-center cursor-not-allowed">
                           Terminated
                         </div>
                       )}
@@ -518,12 +518,12 @@ export default function MyServicesPage() {
                       {db.status !== 'TERMINATED' ? (
                         <Link
                           href={`/dashboard/database/${db.id}`}
-                          className="flex-1 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 px-3.5 py-2 rounded-xl text-xs sm:text-xs font-bold flex items-center justify-center transition-all text-slate-950"
+                          className="flex-1 h-10 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 px-4 rounded-xl text-xs font-bold flex items-center justify-center transition-all text-slate-950"
                         >
                           Manage Database
                         </Link>
                       ) : (
-                        <div className="flex-1 bg-red-500/5 text-red-500/40 border border-red-500/10 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center cursor-not-allowed">
+                        <div className="flex-1 h-10 bg-red-500/5 text-red-500/40 border border-red-500/10 px-4 rounded-xl text-xs font-bold flex items-center justify-center cursor-not-allowed">
                           Terminated
                         </div>
                       )}
@@ -591,12 +591,12 @@ export default function MyServicesPage() {
                       {app.status !== 'TERMINATED' ? (
                         <Link
                           href={`/dashboard/apps/${app.id}`}
-                          className="flex-1 bg-cyan-400 hover:bg-cyan-300 active:scale-95 px-3.5 py-2.5 rounded-xl text-xs sm:text-xs font-bold flex items-center justify-center transition-all text-slate-950 shadow-md shadow-cyan-400/20"
+                          className="flex-1 h-10 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 px-4 rounded-xl text-xs font-bold flex items-center justify-center transition-all text-slate-950"
                         >
                           Manage App
                         </Link>
                       ) : (
-                        <div className="flex-1 bg-red-500/5 text-red-500/40 border border-red-500/10 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center cursor-not-allowed">
+                        <div className="flex-1 h-10 bg-red-500/5 text-red-500/40 border border-red-500/10 px-4 rounded-xl text-xs font-bold flex items-center justify-center cursor-not-allowed">
                           Terminated
                         </div>
                       )}
@@ -708,7 +708,7 @@ export default function MyServicesPage() {
                           )}
                           <button
                             onClick={() => setTerminateModal({ id: sub.id, name: sub.plan.name, service: sub.plan.service })}
-                            className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 p-2.5 rounded-xl flex items-center justify-center transition-all shrink-0"
+                            className="h-10 w-10 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl flex items-center justify-center transition-all shrink-0"
                             title="Terminate Service"
                           >
                             <XCircle className="w-4 h-4" />
@@ -717,7 +717,7 @@ export default function MyServicesPage() {
                           {sub.status === 'ACTIVE' && hasHigherPlan(sub) && (
                             <Link
                               href={`/dashboard/checkout?upgradeId=${sub.id}`}
-                              className={cn("flex-1 border py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all", isDark ? "bg-white/[0.03] hover:bg-white/[0.08] border-white/[0.08] text-white" : "bg-slate-50/80 hover:bg-slate-100 border-slate-200/90 text-slate-900")}
+                              className={cn("flex-1 h-10 border px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all", isDark ? "bg-white/[0.03] hover:bg-white/[0.08] border-white/[0.08] text-white" : "bg-slate-50/80 hover:bg-slate-100 border-slate-200/90 text-slate-900")}
                             >
                               <ArrowUpCircle className="w-4 h-4" /> Upgrade
                             </Link>
@@ -725,13 +725,13 @@ export default function MyServicesPage() {
 
                           <Link
                             href="/dashboard"
-                            className="flex-1 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 px-3.5 py-2 rounded-xl text-xs font-bold flex items-center justify-center transition-all text-slate-950"
+                            className="flex-1 h-10 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 px-4 rounded-xl text-xs font-bold flex items-center justify-center transition-all text-slate-950"
                           >
                             Manage
                           </Link>
                         </>
                       ) : (
-                        <div className="flex-1 bg-red-500/5 text-red-500/40 border border-red-500/10 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center cursor-not-allowed">
+                        <div className="flex-1 h-10 bg-red-500/5 text-red-500/40 border border-red-500/10 px-4 rounded-xl text-xs font-bold flex items-center justify-center cursor-not-allowed">
                           Terminated
                         </div>
                       )}
