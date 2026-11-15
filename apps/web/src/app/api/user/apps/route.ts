@@ -37,12 +37,13 @@ export async function GET(req: NextRequest) {
     const enriched = apps.map((app) => {
       const fullDomain = `${app.subdomain}.${baseDomain}`;
       const catalog = getAppDefinition(app.appType);
+      const hasSshAccess = catalog?.accessProtocol === "SSH" || catalog?.accessProtocol === "BOTH";
       return {
         ...app,
         fullDomain,
         publicIp: clusterIp,
         httpsUrl: `https://${fullDomain}`,
-        nodePortUrl: clusterIp ? `http://${clusterIp}:${app.port}` : null,
+        nodePortUrl: hasSshAccess && clusterIp ? `http://${clusterIp}:${app.port}` : null,
         catalog,
       };
     });
@@ -153,6 +154,12 @@ export async function POST(req: NextRequest) {
     const storageGb = Number(parsedLimits.storageGb) || fallbackPlan?.storageGb || 10;
     const monthlyPrice = dbPlan ? dbPlan.price : fallbackPlan!.monthlyPrice;
     const hourlyRate = dbPlan ? (dbPlan.hourlyPrice || Math.round(dbPlan.price / 720)) : fallbackPlan!.hourlyPrice;
+
+    if (catalogItem.minMemoryMb && memoryMb < catalogItem.minMemoryMb) {
+      return NextResponse.json({
+        error: `${catalogItem.name} requires at least ${Math.ceil(catalogItem.minMemoryMb / 1024)} GB RAM (1C2G or higher). Please choose a larger compute plan.`,
+      }, { status: 400 });
+    }
 
     await assertSufficientCommitmentBalance({
       userId: user.id,
@@ -304,7 +311,7 @@ export async function POST(req: NextRequest) {
           publicIp: clusterIp,
           httpsUrl: hasWeb ? `https://${fullDomain}` : null,
           sshCommand: hasSsh ? (clusterIp ? `ssh root@${clusterIp} -p ${port}` : null) : null,
-          nodePortUrl: clusterIp ? `http://${clusterIp}:${port}` : null,
+          nodePortUrl: hasSsh && clusterIp ? `http://${clusterIp}:${port}` : null,
         },
         message: `Successfully provisioned ${catalogItem.name}.`,
       });

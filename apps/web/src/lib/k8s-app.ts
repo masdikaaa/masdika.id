@@ -568,6 +568,22 @@ export async function applyKubernetesManifests(kc: k8s.KubeConfig, manifestYaml:
         try {
           await objApi.patch(spec);
         } catch {
+          if (spec.kind === 'Service' && spec.metadata?.name) {
+            const existing = await objApi.read({
+              apiVersion: spec.apiVersion || 'v1',
+              kind: 'Service',
+              metadata: {
+                name: spec.metadata.name,
+                namespace: spec.metadata.namespace || 'default',
+              },
+            }).catch(() => null) as any;
+            if (existing?.metadata?.resourceVersion) {
+              spec.metadata.resourceVersion = existing.metadata.resourceVersion;
+            }
+            if (existing?.spec?.clusterIP && (spec as any).spec) {
+              (spec as any).spec.clusterIP = existing.spec.clusterIP;
+            }
+          }
           await objApi.replace(spec);
         }
       } else {
@@ -711,7 +727,7 @@ export function buildAppContainerSpec(app: AppServiceRecord, domainBase?: string
         command: ["/bin/sh", "-c"]
         args:
           - |
-            (npm install -g 9router@latest --prefer-online --no-audit --no-fund 2>/dev/null && \\
+            (timeout 60 npm install -g 9router@latest --prefer-online --no-audit --no-fund 2>/dev/null && \\
              if [ -d /usr/local/lib/node_modules/9router/app ]; then \\
                cp -a /usr/local/lib/node_modules/9router/app/. /app/ 2>/dev/null || true; \\
              fi || true) && \\
@@ -806,54 +822,104 @@ export function buildAppContainerSpec(app: AppServiceRecord, domainBase?: string
             done
 `;
   } else if (appType === 'openclaw') {
-    image = 'docker.io/library/node:22-alpine';
-    const serverJs = `const http = require('http');
-const server = http.createServer((req, res) => {
-  res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  res.writeHead(200);
-  res.end(\`<!DOCTYPE html>
-<html>
-<head>
-  <title>OpenClaw Agent - Masdika Cloud</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #09090b; color: #f4f4f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-    .card { background: #18181b; border: 1px solid #27272a; border-radius: 16px; padding: 32px; max-width: 580px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 9999px; font-size: 12px; font-weight: 600; margin-bottom: 16px; }
-    h1 { font-size: 24px; font-weight: 800; margin: 0 0 8px 0; color: #fff; }
-    p { font-size: 14px; line-height: 1.6; color: #a1a1aa; margin: 0 0 20px 0; }
-    .info-box { background: #0f0f11; border: 1px solid #27272a; border-radius: 8px; padding: 14px; font-family: monospace; font-size: 13px; color: #e4e4e7; margin-bottom: 20px; word-break: break-all; }
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block; animation: pulse 2s infinite; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-    .btn { display: inline-block; background: #059669; color: #fff; font-weight: 600; font-size: 14px; padding: 10px 20px; border-radius: 8px; text-decoration: none; transition: background 0.2s; }
-    .btn:hover { background: #047857; }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <div class="badge"><span class="status-dot"></span> Ready for Messaging Tasks</div>
-    <h1>OpenClaw Agent Platform</h1>
-    <p>Autonomous crawler & multi-channel chat automation engine operational on Masdika Cloud.</p>
-    <div class="info-box">
-      <div><b>Endpoint:</b> https://${fullDomain}</div>
-      <div><b>Port:</b> ${app.appPort}</div>
-    </div>
-    <a href="https://openclaw.ai" target="_blank" class="btn">OpenClaw Docs &rarr;</a>
-  </div>
-</body>
-</html>\`);
-});
-server.listen(${app.appPort}, '0.0.0.0', () => {
-  console.log('OpenClaw listening on port ${app.appPort}');
-});
+    image = 'ghcr.io/openclaw/openclaw:latest';
+    const gatewayToken = app.password || 'OpenClaw123!';
+    const webPort = app.appPort && app.appPort !== 22 && app.appPort !== 3000 ? app.appPort : 18789;
+    const maxOldSpace = Math.max(384, Math.round((app.memoryMb || 2048) * 0.45));
+
+    envYaml = `
+        - name: HOME
+          value: "/home/node"
+        - name: OPENCLAW_HOME
+          value: "/home/node"
+        - name: OPENCLAW_STATE_DIR
+          value: "/home/node/.openclaw"
+        - name: OPENCLAW_GATEWAY_TOKEN
+          value: "${gatewayToken}"
+        - name: OPENCLAW_GATEWAY_PORT
+          value: "${webPort}"
+        - name: NODE_OPTIONS
+          value: "--max-old-space-size=${maxOldSpace}"
 `;
-    const b64OpenClaw = Buffer.from(serverJs).toString('base64');
+
+    const b64OpenClawMotd = Buffer.from(
+      '════════════════════════════════════════════════════════════\n' +
+      '  Masdika Cloud - Dedicated OpenClaw Gateway Instance\n' +
+      '  Application Mode: Browser Control UI + Multi-Channel CLI\n' +
+      `  Control UI: https://${fullDomain}\n` +
+      '  Persistent Storage: /home/node/.openclaw\n' +
+      '\n' +
+      '  First-Time Browser Pairing & Quickstart:\n' +
+      '    openclaw devices approve --latest  -> Approve browser after opening Control UI\n' +
+      '    openclaw devices list              -> View paired / pending browsers\n' +
+      '    openclaw onboard                   -> Interactive LLM & channel setup\n' +
+      '    openclaw channels login            -> Connect WhatsApp / Telegram / Discord\n' +
+      '════════════════════════════════════════════════════════════\n'
+    ).toString('base64');
+
+    const b64OpenClawProfile = Buffer.from(
+      'export HOME="/home/node"\n' +
+      'export OPENCLAW_HOME="/home/node"\n' +
+      'export OPENCLAW_STATE_DIR="/home/node/.openclaw"\n' +
+      `export OPENCLAW_GATEWAY_TOKEN="${gatewayToken}"\n` +
+      `export OPENCLAW_GATEWAY_PORT="${webPort}"\n` +
+      `export NODE_OPTIONS="--max-old-space-size=${maxOldSpace}"\n` +
+      'cd /home/node/.openclaw 2>/dev/null || true\n'
+    ).toString('base64');
+
+    const b64OpenClawConfigInit = Buffer.from(
+      `const fs = require("fs");\n` +
+      `const p = "/home/node/.openclaw/openclaw.json";\n` +
+      `let cfg = {};\n` +
+      `try { cfg = JSON.parse(fs.readFileSync(p, "utf8")); } catch {}\n` +
+      `cfg.gateway = cfg.gateway || {};\n` +
+      `cfg.gateway.mode = cfg.gateway.mode || "local";\n` +
+      `cfg.gateway.bind = "lan";\n` +
+      `cfg.gateway.port = Number(process.env.OPENCLAW_GATEWAY_PORT || ${webPort});\n` +
+      `cfg.gateway.auth = { mode: "token", token: process.env.OPENCLAW_GATEWAY_TOKEN };\n` +
+      `cfg.gateway.controlUi = cfg.gateway.controlUi || {};\n` +
+      `cfg.gateway.controlUi.enabled = true;\n` +
+      `const origins = new Set(Array.isArray(cfg.gateway.controlUi.allowedOrigins) ? cfg.gateway.controlUi.allowedOrigins : []);\n` +
+      `origins.add("https://${fullDomain}");\n` +
+      `cfg.gateway.controlUi.allowedOrigins = Array.from(origins);\n` +
+      `fs.writeFileSync(p, JSON.stringify(cfg, null, 2));\n`
+    ).toString('base64');
+
     commandYaml = `
+        securityContext:
+          runAsUser: 0
         command: ["/bin/sh", "-c"]
         args:
           - |
-            echo "${b64OpenClaw}" | base64 -d > /server.js && \\
-            exec node /server.js
+            set -e
+            export DEBIAN_FRONTEND=noninteractive
+            if ! command -v sshd >/dev/null 2>&1 || ! command -v pidof >/dev/null 2>&1; then
+              apt-get update -qq && apt-get install -y -qq --no-install-recommends openssh-server procps ca-certificates >/dev/null && rm -rf /var/lib/apt/lists/*
+            fi
+            mkdir -p /run/sshd /var/run/sshd /etc/profile.d ${dataMount}
+            ssh-keygen -A
+            echo "root:${gatewayToken}" | chpasswd
+            sed -i 's/#*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+            grep -q '^PermitRootLogin yes' /etc/ssh/sshd_config || echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+            grep -q '^PasswordAuthentication yes' /etc/ssh/sshd_config || echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
+            grep -q '^AllowTcpForwarding no' /etc/ssh/sshd_config || echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config
+            grep -q '^X11Forwarding no' /etc/ssh/sshd_config || echo "X11Forwarding no" >> /etc/ssh/sshd_config
+            grep -q '^AllowAgentForwarding no' /etc/ssh/sshd_config || echo "AllowAgentForwarding no" >> /etc/ssh/sshd_config
+            grep -q '^PermitTunnel no' /etc/ssh/sshd_config || echo "PermitTunnel no" >> /etc/ssh/sshd_config
+            grep -q '^GatewayPorts no' /etc/ssh/sshd_config || echo "GatewayPorts no" >> /etc/ssh/sshd_config
+            echo "${b64OpenClawMotd}" | base64 -d > /etc/motd
+            echo "${b64OpenClawProfile}" | base64 -d > /etc/profile.d/openclaw.sh
+            grep -q 'OPENCLAW_GATEWAY_TOKEN' /root/.bashrc 2>/dev/null || cat /etc/profile.d/openclaw.sh >> /root/.bashrc
+            grep -q 'OPENCLAW_GATEWAY_TOKEN' /root/.profile 2>/dev/null || cat /etc/profile.d/openclaw.sh >> /root/.profile
+            grep -q 'OPENCLAW_GATEWAY_TOKEN' /etc/profile 2>/dev/null || cat /etc/profile.d/openclaw.sh >> /etc/profile
+            echo "${b64OpenClawConfigInit}" | base64 -d | node -
+            /usr/sbin/sshd -p 22
+            set +e
+            while true; do
+              pidof sshd >/dev/null 2>&1 || /usr/sbin/sshd -p 22
+              node /app/openclaw.mjs gateway --port ${webPort} --bind lan >> /home/node/.openclaw/gateway.log 2>&1
+              sleep 3
+            done
 `;
   }
 
@@ -906,9 +972,13 @@ export async function deployAppService(app: AppServiceRecord): Promise<{
   const appTypeLower = app.appType.toLowerCase();
   const isHermes = appTypeLower === 'hermes';
   const isOpencode = appTypeLower === 'opencode';
-  const isDualWebSsh = catalogItem?.accessProtocol === 'BOTH' || isHermes || isOpencode;
+  const isOpenclaw = appTypeLower === 'openclaw';
+  const isNinerouter = appTypeLower === 'ninerouter';
+  const isDualWebSsh = catalogItem?.accessProtocol === 'BOTH' || isHermes || isOpencode || isOpenclaw;
   const hasWeb = catalogItem?.accessProtocol === 'WEB' || isDualWebSsh;
   const isPureSsh = catalogItem?.accessProtocol === 'SSH' && !isDualWebSsh;
+  const isExtendedBoot = isDualWebSsh || isNinerouter;
+  const serviceType = isDualWebSsh || isPureSsh ? 'NodePort' : 'ClusterIP';
 
   const cpuReq = `${Math.max(0.1, Number((app.cpuShares * 0.4).toFixed(2)))}`;
   const cpuLim = `${app.cpuShares}`;
@@ -920,7 +990,9 @@ export async function deployAppService(app: AppServiceRecord): Promise<{
     ? 9119
     : isOpencode
       ? (app.appPort && app.appPort !== 22 ? app.appPort : 4096)
-      : app.appPort;
+      : isOpenclaw
+        ? (app.appPort && app.appPort !== 22 && app.appPort !== 3000 ? app.appPort : 18789)
+        : app.appPort;
 
   const ingressYaml = hasWeb ? `
 ---
@@ -973,11 +1045,16 @@ spec:
     port: 22
     targetPort: 22
     nodePort: ${app.port}`
-    : `  ports:
+    : isPureSsh
+      ? `  ports:
   - name: app-port
     port: ${app.appPort}
     targetPort: ${app.appPort}
-    nodePort: ${app.port}`;
+    nodePort: ${app.port}`
+      : `  ports:
+  - name: app-port
+    port: ${app.appPort}
+    targetPort: ${app.appPort}`;
 
   const readinessProbePort = isDualWebSsh ? webBackendPort : app.appPort;
   const livenessProbePort = isDualWebSsh ? 22 : app.appPort;
@@ -1030,12 +1107,12 @@ ${containerPortsYaml}${commandYaml}${envYaml ? `\n        env:${envYaml}` : ''}
           tcpSocket:
             port: ${readinessProbePort}
           initialDelaySeconds: 15
-          periodSeconds: ${isDualWebSsh ? 5 : 10}
-          failureThreshold: ${isDualWebSsh ? 36 : 6}
+          periodSeconds: ${isExtendedBoot ? 5 : 10}
+          failureThreshold: ${isExtendedBoot ? 36 : 6}
         livenessProbe:
           tcpSocket:
             port: ${livenessProbePort}
-          initialDelaySeconds: ${isDualWebSsh ? 45 : 30}
+          initialDelaySeconds: ${isExtendedBoot ? 60 : 30}
           periodSeconds: 15
           failureThreshold: 6
         resources:
@@ -1064,7 +1141,7 @@ metadata:
     app: ${name}
     managed-by: masdika-cloud
 spec:
-  type: NodePort
+  type: ${serviceType}
   selector:
     app: ${name}
 ${servicePortsYaml}${ingressYaml}

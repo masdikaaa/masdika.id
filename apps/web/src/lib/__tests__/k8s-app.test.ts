@@ -83,7 +83,10 @@ describe('Managed Apps Catalog & Engine', () => {
       const openclaw = getAppDefinition('openclaw');
       expect(openclaw).toBeDefined();
       expect(openclaw?.icon).toBe('/images/apps/openclaw.png');
-      expect(openclaw?.accessProtocol).toBe('WEB');
+      expect(openclaw?.accessProtocol).toBe('BOTH');
+      expect(openclaw?.appPort).toBe(18789);
+      expect(openclaw?.minMemoryMb).toBe(2048);
+      expect(openclaw?.dataDir).toBe('/home/node/.openclaw');
       expect(router?.accessProtocol).toBe('WEB');
       expect(n8n?.accessProtocol).toBe('WEB');
     });
@@ -218,6 +221,42 @@ spec:
       expect(legacyPortSpec.envYaml).toContain('value: "MkApp_SecurePassword99"');
       expect(legacyPortSpec.commandYaml).toContain('/usr/sbin/sshd -p 22');
       expect(legacyPortSpec.commandYaml).toContain('opencode serve --hostname 0.0.0.0 --port 4096 --cors "https://opencode-dual.app.masdika.id"');
+    });
+
+    it('should configure OpenClaw with official gateway Control UI on port 18789, gateway token, memory cap, and SSH on port 22', () => {
+      const openclawSpec = buildAppContainerSpec({
+        id: 12,
+        userId: 1,
+        name: 'openclaw-gw',
+        appType: 'openclaw',
+        templateName: 'Standard',
+        planName: '1C2G',
+        region: 'SDA',
+        node: 'node1',
+        subdomain: 'openclaw-gw',
+        host: '103.247.10.61',
+        port: 30888,
+        appPort: 3000,
+        cpuShares: 1,
+        memoryMb: 2048,
+        storageGb: 10,
+        billingMode: 'monthly',
+        monthlyPrice: 30000,
+        hourlyRate: 42,
+        accumulatedCost: 0,
+        status: 'RUNNING',
+        username: 'root',
+        password: 'MkApp_OpenClawToken88',
+      } as any);
+
+      expect(openclawSpec.image).toBe('ghcr.io/openclaw/openclaw:latest');
+      expect(openclawSpec.envYaml).toContain('OPENCLAW_GATEWAY_TOKEN');
+      expect(openclawSpec.envYaml).toContain('value: "MkApp_OpenClawToken88"');
+      expect(openclawSpec.envYaml).toContain('value: "18789"');
+      expect(openclawSpec.envYaml).toContain('--max-old-space-size=');
+      expect(openclawSpec.commandYaml).toContain('runAsUser: 0');
+      expect(openclawSpec.commandYaml).toContain('/usr/sbin/sshd -p 22');
+      expect(openclawSpec.commandYaml).toContain('node /app/openclaw.mjs gateway --port 18789 --bind lan');
     });
   });
 

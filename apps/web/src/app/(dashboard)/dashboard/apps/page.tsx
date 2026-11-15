@@ -380,7 +380,7 @@ export default function ManagedAppsPage() {
           {apps.map((app) => {
             const catalog = getAppDefinition(app.appType);
             const appTypeLower = app.appType.toLowerCase();
-            const isDualWebSsh = catalog?.accessProtocol === "BOTH" || appTypeLower === "hermes" || appTypeLower === "opencode";
+            const isDualWebSsh = catalog?.accessProtocol === "BOTH" || appTypeLower === "hermes" || appTypeLower === "opencode" || appTypeLower === "openclaw";
             const hasWeb = catalog?.accessProtocol === "WEB" || isDualWebSsh;
             const hasSsh = catalog?.accessProtocol === "SSH" || isDualWebSsh;
             const fullDomain = (app as any).fullDomain || `${app.subdomain}.app.masdika.id`;

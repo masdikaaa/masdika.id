@@ -137,13 +137,17 @@ export default function AppCheckoutFlow() {
       .catch(() => { });
   }, []);
 
-  // Update instance name default when app changes
+  // Update instance name default and enforce app minimum RAM when app changes
   const handleSelectApp = (app: ManagedAppDefinition) => {
     setSelectedApp(app);
     setAppName(`${app.name} Instance`);
     // auto-suggest subdomain using pure module-scoped generator
     const randomSuffix = generateRandomSuffix();
     setCustomSubdomain(`${app.id}-${randomSuffix}`);
+    if (app.minMemoryMb && selectedPlan.memoryMb < app.minMemoryMb) {
+      const eligible = availablePlans.find((pl) => pl.memoryMb >= app.minMemoryMb!);
+      if (eligible) setSelectedPlan(eligible);
+    }
   };
 
   const currentCost = selectedPlan.monthlyPrice;
@@ -319,12 +323,13 @@ export default function AppCheckoutFlow() {
               const isSelected = selectedPlan.id === plan.id;
               const templateTitle = `${selectedApp.name} (${plan.planCode})`;
               const templateDesc = `${selectedApp.name} with ${plan.cpuShares} CPU and ${plan.memoryMb >= 1024 ? `${plan.memoryMb / 1024}GB` : `${plan.memoryMb}MB`} RAM`;
+              const isBelowAppMin = Boolean(selectedApp.minMemoryMb && plan.memoryMb < selectedApp.minMemoryMb);
               const isPlanExceeds = Boolean(
                 clusterCapacity &&
                 clusterCapacity.totalMemoryMb > 0 &&
                 (clusterCapacity.totalMemoryMb - clusterCapacity.allocatedMemoryMb < plan.memoryMb)
               );
-              const isPlanDisabled = isClusterFull || isPlanExceeds;
+              const isPlanDisabled = isClusterFull || isPlanExceeds || isBelowAppMin;
 
               return (
                 <div
@@ -402,7 +407,11 @@ export default function AppCheckoutFlow() {
                           : "bg-emerald-50 text-emerald-700 border-emerald-200"
                     )}>
                       <span className={cn("w-1.5 h-1.5 rounded-full", isPlanDisabled ? "bg-red-400" : "bg-emerald-400 animate-pulse")} />
-                      {isPlanDisabled ? "Full Capacity" : "Available"}
+                      {isBelowAppMin
+                        ? `Requires ≥ ${Math.ceil((selectedApp.minMemoryMb || 2048) / 1024)} GB RAM`
+                        : isPlanDisabled
+                          ? "Full Capacity"
+                          : "Available"}
                     </span>
 
                     {/* Radio circle indicator */}

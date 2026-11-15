@@ -14,6 +14,7 @@ export interface ManagedAppDefinition {
   github?: string;
   features: string[];
   accessProtocol: 'WEB' | 'SSH' | 'BOTH';
+  minMemoryMb?: number;
 }
 
 export interface ManagedAppPlanDefinition {
@@ -122,23 +123,24 @@ export const MANAGED_APPS_CATALOG: ManagedAppDefinition[] = [
   {
     id: 'openclaw',
     name: 'OpenClaw',
-    tagline: 'AI Agent Platform for Messaging & Web Crawling',
+    tagline: 'Multi-Channel AI Gateway with Control UI & SSH CLI',
     category: 'Autonomous Agent',
-    description: 'Open-source AI agent platform connecting LLMs to WhatsApp, Telegram, Discord, and Slack with real-time browser execution and scheduled tasks.',
+    description: 'Official OpenClaw multi-channel AI agent gateway running token-protected Control UI over HTTPS and direct SSH terminal access with persistent storage.',
     icon: '/images/apps/openclaw.png',
-    appPort: 3000,
-    dataDir: '/data',
-    defaultImage: 'docker.io/library/node:22-alpine',
+    appPort: 18789,
+    dataDir: '/home/node/.openclaw',
+    defaultImage: 'ghcr.io/openclaw/openclaw:latest',
     color: 'from-emerald-500 to-teal-600',
-    badge: 'Multi-Channel AI',
-    accessProtocol: 'WEB',
+    badge: 'WEB + SSH',
+    accessProtocol: 'BOTH',
+    minMemoryMb: 2048,
     website: 'https://openclaw.ai',
     github: 'https://github.com/openclaw/openclaw',
     features: [
-      'Direct WhatsApp, Telegram, Discord & Slack Connectors',
-      'Headless Chromium Web Browsing & Extraction',
-      'Background Task Scheduling & Cron Automations',
-      'Persistent Local Workspace & Secret Storage',
+      'Token-Protected Browser Control UI with Auto SSL',
+      'Direct SSH CLI for Device Pairing & Channel Setup',
+      'WhatsApp, Telegram, Discord & Slack Agent Bridge',
+      'Persistent Workspace & State (/home/node/.openclaw)',
     ],
   },
 ];

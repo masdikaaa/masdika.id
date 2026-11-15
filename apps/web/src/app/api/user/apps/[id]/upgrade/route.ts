@@ -139,6 +139,14 @@ export async function POST(
       );
     }
 
+    const catalogItem = getAppDefinition(app.appType);
+    if (catalogItem?.minMemoryMb && targetPlan.memoryMb < catalogItem.minMemoryMb) {
+      return NextResponse.json(
+        { error: `${catalogItem.name} requires at least ${Math.ceil(catalogItem.minMemoryMb / 1024)} GB RAM (1C2G or higher).` },
+        { status: 400 }
+      );
+    }
+
     // 5. Server-side Pricing & Commitment Balance Verification
     const monthlyPrice = targetPlan.monthlyPrice;
     const hourlyRate = targetPlan.hourlyPrice;
@@ -176,7 +184,6 @@ export async function POST(
     }
 
     // 6. Execute Zero-Data-Loss Scaling in Kubernetes
-    const catalogItem = getAppDefinition(app.appType);
     const newTemplateName = `${catalogItem?.name || app.appType} (${targetPlan.planCode})`;
 
     await scaleAppService(app as any, targetPlan.cpuShares, targetPlan.memoryMb);

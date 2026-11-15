@@ -238,8 +238,9 @@ export default function AppDetailPage({
   const appTypeLower = app.appType.toLowerCase();
   const isHermes = appTypeLower === "hermes";
   const isOpencode = appTypeLower === "opencode";
+  const isOpenclaw = appTypeLower === "openclaw";
   const isN8n = appTypeLower === "n8n";
-  const isDualWebSsh = catalog?.accessProtocol === "BOTH" || isHermes || isOpencode;
+  const isDualWebSsh = catalog?.accessProtocol === "BOTH" || isHermes || isOpencode || isOpenclaw;
   const hasWeb = catalog?.accessProtocol === "WEB" || isDualWebSsh;
   const hasSsh = catalog?.accessProtocol === "SSH" || isDualWebSsh;
   const hostIp = app.publicIp || "";
@@ -466,7 +467,7 @@ export default function AppDetailPage({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                 <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
                   <Globe className="w-4 h-4 shrink-0" />
-                  <span>{isHermes ? "Hermes Web Dashboard & Ingress" : isOpencode ? "OpenCode Web Dashboard & Ingress" : "HTTPS Web Access & Routing"}</span>
+                  <span>{isHermes ? "Hermes Web Dashboard & Ingress" : isOpencode ? "OpenCode Web Dashboard & Ingress" : isOpenclaw ? "OpenClaw Control UI & Ingress" : "HTTPS Web Access & Routing"}</span>
                 </h3>
                 <span className={cn(
                   "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold self-start sm:self-auto shrink-0 border",
@@ -519,6 +520,18 @@ export default function AppDetailPage({
                     <Lock className={cn("w-4 h-4 shrink-0 mt-0.5 sm:mt-0", isDark ? "text-cyan-400" : "text-cyan-700")} />
                     <span>
                       Protected with HTTP Basic Auth. Sign in using username <code className={cn("font-mono font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{app.username || "root"}</code> and your instance password below.
+                    </span>
+                  </div>
+                )}
+
+                {isOpenclaw && (
+                  <div className={cn(
+                    "p-3 rounded-xl border flex items-start gap-2.5 text-xs leading-relaxed",
+                    isDark ? "bg-cyan-500/10 border-cyan-500/20 text-zinc-300" : "bg-cyan-50/70 border-cyan-200 text-slate-700"
+                  )}>
+                    <Lock className={cn("w-4 h-4 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-700")} />
+                    <span>
+                      Protected by Gateway Token + Device Pairing. Open the Control UI, paste your Gateway Token (your instance password below) in Settings, then approve your browser once via SSH with <code className={cn("font-mono font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>openclaw devices approve --latest</code>.
                     </span>
                   </div>
                 )}
@@ -1141,8 +1154,18 @@ export default function AppDetailPage({
             {app.appType === "openclaw" && (
               <div className="space-y-3 text-xs leading-relaxed">
                 <p className={isDark ? "text-zinc-300" : "text-slate-700"}>
-                  OpenClaw is active and ready to bridge your AI agents to WhatsApp, Telegram, Discord, and Slack with automated web scraping and scheduled actions.
+                  OpenClaw Gateway is running in dedicated dual-access mode featuring the HTTPS Control UI (<code className={cn("font-mono font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>OPENCLAW_GATEWAY_TOKEN</code> matches your SSH password) and direct SSH CLI backed by persistent storage at <code className={cn("font-mono font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>/home/node/.openclaw</code>:
                 </p>
+                <div className={cn("p-3.5 rounded-xl border font-mono text-[11px] space-y-2", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-slate-50 border-slate-200/90 text-slate-800 shadow-2xs")}>
+                  <div className={isDark ? "text-zinc-500" : "text-slate-500"}># 1. OpenClaw Control UI (Paste Gateway Token in Settings)</div>
+                  <div className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{httpsUrl}</div>
+                  <div className={cn("pt-1", isDark ? "text-zinc-500" : "text-slate-500")}># 2. Direct SSH Login &amp; One-Time Browser Device Pairing</div>
+                  <div className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{sshCommand}</div>
+                  <div>openclaw devices approve --latest</div>
+                  <div className={cn("pt-1", isDark ? "text-zinc-500" : "text-slate-500")}># 3. Configure Models &amp; Messaging Channels (WhatsApp / Telegram / Discord)</div>
+                  <div>openclaw onboard</div>
+                  <div>openclaw channels login</div>
+                </div>
               </div>
             )}
           </div>

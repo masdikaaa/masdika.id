@@ -48,6 +48,7 @@ export async function GET(
     const clusterIp = clusterConfig?.publicIp || "";
     const fullDomain = `${app.subdomain}.${baseDomain}`;
     const catalog = getAppDefinition(app.appType);
+    const hasSshAccess = catalog?.accessProtocol === "SSH" || catalog?.accessProtocol === "BOTH";
 
     return NextResponse.json({
       success: true,
@@ -56,7 +57,7 @@ export async function GET(
         fullDomain,
         publicIp: clusterIp,
         httpsUrl: `https://${fullDomain}`,
-        nodePortUrl: clusterIp ? `http://${clusterIp}:${app.port}` : null,
+        nodePortUrl: hasSshAccess && clusterIp ? `http://${clusterIp}:${app.port}` : null,
         catalog,
         telemetry,
       },
