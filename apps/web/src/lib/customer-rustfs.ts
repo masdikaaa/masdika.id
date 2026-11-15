@@ -827,6 +827,23 @@ export async function deleteRustFSServiceAccount(accessKey: string): Promise<boo
   return res.ok;
 }
 
+export async function setCustomerBucketQuota(bucketName: string, quotaBytes: number): Promise<boolean> {
+  try {
+    const config = await getCustomerRustFSConfig();
+    if (!config.enabled) return false;
+    const res = await signedRustFSAdminRequest(
+      config,
+      'PUT',
+      `/rustfs/admin/v3/set-bucket-quota?bucket=${encodeURIComponent(bucketName)}`,
+      { quota: quotaBytes, quotatype: 'hard' }
+    );
+    return res.ok;
+  } catch (error) {
+    console.warn('[CustomerRustFS] setCustomerBucketQuota warning:', error);
+    return false;
+  }
+}
+
 export async function syncObjectStorageKeyPolicies(serviceId: number): Promise<void> {
   const [buckets, keys] = await Promise.all([
     prisma.objectStorageBucket.findMany({ where: { serviceId }, select: { name: true } }),

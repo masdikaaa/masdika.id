@@ -4,6 +4,7 @@ import { requireAuth } from '@/lib/auth-middleware';
 import {
   deleteCustomerBucketCompletely,
   ensureCustomerBucketExists,
+  setCustomerBucketQuota,
   setCustomerBucketVisibility,
   syncObjectStorageKeyPolicies,
   validateS3BucketName,
@@ -70,6 +71,7 @@ export async function POST(
   }
 
   await ensureCustomerBucketExists(name, visibility);
+  await setCustomerBucketQuota(name, service.storageGb * 1024 * 1024 * 1024).catch(() => {});
 
   const created = await prisma.objectStorageBucket.create({
     data: {

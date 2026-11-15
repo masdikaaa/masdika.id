@@ -24,13 +24,35 @@ export async function POST(
 
   const service = await prisma.objectStorageService.findFirst({
     where: { id: serviceId, userId: user.id },
-    include: { buckets: { select: { name: true } } },
+    include: {
+      buckets: { select: { name: true } },
+      _count: { select: { accessKeys: true } },
+    },
   });
   if (!service || service.status === 'TERMINATED') {
     return NextResponse.json({ error: 'Service not found' }, { status: 404 });
   }
   if (service.status === 'SUSPENDED') {
     return NextResponse.json({ error: 'Service is suspended' }, { status: 403 });
+  }
+
+  // Enforce maxKeys limit configured in Plan
+  const plan = await prisma.plan.findFirst({
+    where: { service: 'OBJECT_STORAGE', name: service.planName },
+  });
+  if (plan) {
+    try {
+      const limits = JSON.parse(plan.limits);
+      const maxKeys = Number(limits.maxKeys);
+      if (Number.isFinite(maxKeys) && maxKeys > 0 && service._count.accessKeys >= maxKeys) {
+        return NextResponse.json(
+          { error: `S3 key limit reached (${service._count.accessKeys}/${maxKeys}) for plan ${service.planName}.` },
+          { status: 403 }
+        );
+      }
+    } catch {
+      // ignore malformed limits JSON
+    }
   }
 
   const body = await req.json().catch(() => ({}));

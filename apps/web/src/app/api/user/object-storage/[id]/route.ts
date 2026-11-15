@@ -5,6 +5,7 @@ import { assertSufficientCommitmentBalance } from '@/lib/billing-commitment';
 import {
   getCustomerRustFSConfig,
   getCustomerBucketUsage,
+  setCustomerBucketQuota,
   terminateObjectStorageInfrastructure,
 } from '@/lib/customer-rustfs';
 import { sendTerminationEmail } from '@/lib/email';
@@ -83,6 +84,10 @@ export async function PATCH(
 
   const service = await prisma.objectStorageService.findFirst({
     where: { id: serviceId, userId: user.id },
+    include: {
+      buckets: { select: { name: true } },
+      _count: { select: { buckets: true, accessKeys: true } },
+    },
   });
   if (!service || service.status === 'TERMINATED') {
     return NextResponse.json({ error: 'Object Storage service not found' }, { status: 404 });
@@ -101,12 +106,63 @@ export async function PATCH(
 
   if (body.storageGb !== undefined) {
     const nextGb = parseInt(String(body.storageGb), 10);
-    if (!Number.isInteger(nextGb) || nextGb < 10 || nextGb > 10000) {
-      return NextResponse.json({ error: 'Storage capacity must be between 10 GB and 10,000 GB' }, { status: 400 });
+    if (!Number.isInteger(nextGb) || nextGb < 1 || nextGb > 1000) {
+      return NextResponse.json({ error: 'Storage capacity must be between 1 GB and 1,000 GB' }, { status: 400 });
     }
+
+    // Prevent scaling down below currently used bytes
+    const bucketNames = service.buckets.map((b) => b.name);
+    if (bucketNames.length > 0 && nextGb < service.storageGb) {
+      const usageResults = await Promise.all(bucketNames.map((n) => getCustomerBucketUsage(n).catch(() => ({ bytes: 0, count: 0 }))));
+      const totalUsed = usageResults.reduce((acc, u) => acc + u.bytes, 0);
+      const nextQuotaBytes = nextGb * 1024 * 1024 * 1024;
+      if (totalUsed > nextQuotaBytes) {
+        return NextResponse.json(
+          { error: `Cannot scale down to ${nextGb} GB while current usage exceeds the target quota. Delete objects first.` },
+          { status: 400 }
+        );
+      }
+    }
+
     const cfg = await getCustomerRustFSConfig();
-    const nextMonthly = nextGb * cfg.ratePerGbMonthly;
-    const nextHourly = Math.max(1, Math.ceil(nextMonthly / 730));
+    const dbPlans = await prisma.plan.findMany({
+      where: { service: 'OBJECT_STORAGE', isActive: true },
+    });
+    const matchedPlan = dbPlans.find((p) => {
+      try {
+        const parsed = JSON.parse(p.limits);
+        return (Number(parsed.storageGb) || parseInt(String(parsed.storage || '0'), 10)) === nextGb;
+      } catch {
+        return false;
+      }
+    });
+
+    if (matchedPlan) {
+      try {
+        const parsedLimits = JSON.parse(matchedPlan.limits);
+        const maxBuckets = Number(parsedLimits.maxBuckets);
+        const maxKeys = Number(parsedLimits.maxKeys);
+        if (Number.isFinite(maxBuckets) && maxBuckets > 0 && service._count.buckets > maxBuckets) {
+          return NextResponse.json(
+            { error: `Cannot switch to ${matchedPlan.name}: you currently have ${service._count.buckets} buckets (limit: ${maxBuckets}).` },
+            { status: 400 }
+          );
+        }
+        if (Number.isFinite(maxKeys) && maxKeys > 0 && service._count.accessKeys > maxKeys) {
+          return NextResponse.json(
+            { error: `Cannot switch to ${matchedPlan.name}: you currently have ${service._count.accessKeys} S3 keys (limit: ${maxKeys}).` },
+            { status: 400 }
+          );
+        }
+      } catch {
+        // ignore malformed plan limits
+      }
+    }
+
+    const nextMonthly = matchedPlan ? matchedPlan.price : nextGb * Math.max(cfg.ratePerGbMonthly, 2000);
+    const nextHourly = matchedPlan
+      ? matchedPlan.hourlyPrice || Math.max(1, Math.ceil(matchedPlan.price / 730))
+      : Math.max(1, Math.ceil(nextMonthly / 730));
 
     if (nextMonthly > service.monthlyPrice) {
       const freshUser = await prisma.user.findUnique({ where: { id: user.id }, select: { balance: true } });
@@ -119,7 +175,7 @@ export async function PATCH(
     }
 
     updates.storageGb = nextGb;
-    updates.planName = `S3 ${nextGb >= 1000 ? `${nextGb / 1000} TB` : `${nextGb} GB`}`;
+    updates.planName = matchedPlan ? matchedPlan.name : `S3 ${nextGb >= 1000 ? `${nextGb / 1000} TB` : `${nextGb} GB`}`;
     updates.monthlyPrice = nextMonthly;
     updates.hourlyRate = nextHourly;
   }
@@ -128,6 +184,11 @@ export async function PATCH(
     where: { id: service.id },
     data: updates,
   });
+
+  if (updates.storageGb !== undefined && service.buckets.length > 0) {
+    const quotaBytes = updates.storageGb * 1024 * 1024 * 1024;
+    await Promise.all(service.buckets.map((b) => setCustomerBucketQuota(b.name, quotaBytes).catch(() => {})));
+  }
 
   return NextResponse.json({ success: true, service: updated });
 }
