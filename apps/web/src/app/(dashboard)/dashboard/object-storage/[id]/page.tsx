@@ -12,7 +12,7 @@ import {
   type ObjectStorageClusterCapacity,
 } from '@/components/ObjectStorageScaleModal';
 import {
-  ArrowLeft,
+  ChevronLeft,
   Database,
   KeyRound,
   Settings,
@@ -561,20 +561,25 @@ s3 = boto3.client(
 
   return (
     <div className="space-y-6 pb-12">
+      {/* Back Button matching Managed Apps */}
+      <div>
+        <Link
+          href="/dashboard/object-storage"
+          className={cn(
+            'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors',
+            isDark
+              ? 'bg-white/[0.04] border-white/[0.08] text-zinc-400 hover:text-white'
+              : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 shadow-2xs'
+          )}
+        >
+          <ChevronLeft className="w-3.5 h-3.5" />
+          Back to Object Storage
+        </Link>
+      </div>
+
       {/* Header Bar */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
-          <Link
-            href="/dashboard/object-storage"
-            className={cn(
-              'p-2.5 rounded-xl border transition-colors shrink-0',
-              isDark
-                ? 'bg-[#111115] border-white/[0.08] text-zinc-300 hover:border-white/20 hover:text-white'
-                : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300 shadow-2xs'
-            )}
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </Link>
           <div
             className={cn(
               'w-11 h-11 rounded-2xl border flex items-center justify-center shrink-0',
@@ -813,7 +818,7 @@ s3 = boto3.client(
                   key={b.id}
                   onClick={() => { setSelectedBucket(b.name); setPrefix(''); setObjectSearch(''); }}
                   className={cn(
-                    'p-3.5 rounded-xl border cursor-pointer transition-all space-y-2',
+                    'px-3.5 py-2.5 rounded-xl border cursor-pointer transition-all',
                     selectedBucket === b.name
                       ? isDark
                         ? 'border-cyan-500/60 bg-cyan-500/[0.08]'
@@ -853,10 +858,6 @@ s3 = boto3.client(
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
-                  </div>
-                  <div className={cn('text-[11px] flex justify-between font-mono', isDark ? 'text-zinc-400' : 'text-slate-500')}>
-                    <span>{b.objectCount ?? 0} objects</span>
-                    <span>{formatBytes(b.totalBytes ?? 0)}</span>
                   </div>
                 </div>
               ))}
