@@ -24,12 +24,32 @@ export async function POST(
 
   const service = await prisma.objectStorageService.findFirst({
     where: { id: serviceId, userId: user.id },
+    include: { _count: { select: { buckets: true } } },
   });
   if (!service || service.status === 'TERMINATED') {
     return NextResponse.json({ error: 'Object Storage service not found' }, { status: 404 });
   }
   if (service.status === 'SUSPENDED') {
     return NextResponse.json({ error: 'Service is suspended. Please top up to create buckets.' }, { status: 403 });
+  }
+
+  // Enforce maxBuckets limit configured in Plan
+  const plan = await prisma.plan.findFirst({
+    where: { service: 'OBJECT_STORAGE', name: service.planName },
+  });
+  if (plan) {
+    try {
+      const limits = JSON.parse(plan.limits);
+      const maxBuckets = Number(limits.maxBuckets);
+      if (Number.isFinite(maxBuckets) && maxBuckets > 0 && service._count.buckets >= maxBuckets) {
+        return NextResponse.json(
+          { error: `Bucket limit reached (${service._count.buckets}/${maxBuckets}) for plan ${service.planName}.` },
+          { status: 403 }
+        );
+      }
+    } catch {
+      // ignore malformed limits JSON
+    }
   }
 
   const body = await req.json().catch(() => ({}));

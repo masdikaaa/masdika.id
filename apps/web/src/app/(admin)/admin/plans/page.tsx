@@ -80,6 +80,13 @@ interface CdnLimitsState {
   requests: string;
 }
 
+interface ObjectStorageLimitsState {
+  storageGb: string;
+  maxBuckets: string;
+  maxKeys: string;
+  region: string;
+}
+
 interface ApiLimitsState {
   requests: string;
   rateLimit: string;
@@ -141,6 +148,13 @@ export default function AdminPlansPage() {
     storageGB: "10",
     transferGB: "50",
     requests: "unlimited"
+  });
+
+  const [objectStorageLimits, setObjectStorageLimits] = useState<ObjectStorageLimitsState>({
+    storageGb: "10",
+    maxBuckets: "5",
+    maxKeys: "5",
+    region: "Sidoarjo"
   });
 
   const [apiLimits, setApiLimits] = useState<ApiLimitsState>({
@@ -262,6 +276,14 @@ export default function AdminPlansPage() {
           transferGB: String(parsed.transferGB || "50"),
           requests: String(parsed.requests || "unlimited")
         });
+      } else if (plan.service === "OBJECT_STORAGE") {
+        const parsedGb = Number(parsed.storageGb) || parseInt(String(parsed.storage || "10"), 10) || 10;
+        setObjectStorageLimits({
+          storageGb: String(parsedGb),
+          maxBuckets: String(parsed.maxBuckets !== undefined ? parsed.maxBuckets : 5),
+          maxKeys: String(parsed.maxKeys !== undefined ? parsed.maxKeys : 5),
+          region: String(parsed.region || "Sidoarjo")
+        });
       } else {
         setApiLimits({
           requests: String(parsed.requests || "10000"),
@@ -318,6 +340,17 @@ export default function AdminPlansPage() {
         storageGB: Number(cdnLimits.storageGB) || cdnLimits.storageGB,
         transferGB: Number(cdnLimits.transferGB) || cdnLimits.transferGB,
         requests: cdnLimits.requests
+      });
+    } else if (formData.service === "OBJECT_STORAGE") {
+      const gb = Math.max(1, Number(objectStorageLimits.storageGb) || 1);
+      const buckets = Number(objectStorageLimits.maxBuckets);
+      const keys = Number(objectStorageLimits.maxKeys);
+      limitsJsonString = JSON.stringify({
+        storage: gb >= 1000 ? `${gb / 1000} TB` : `${gb} GB`,
+        storageGb: gb,
+        region: objectStorageLimits.region || "Sidoarjo",
+        maxBuckets: Number.isFinite(buckets) ? buckets : 5,
+        maxKeys: Number.isFinite(keys) ? keys : 5
       });
     } else {
       limitsJsonString = JSON.stringify({
@@ -1452,6 +1485,58 @@ export default function AdminPlansPage() {
                           Shared Multi-Tenant (Kubernetes Pods)
                         </div>
                       </div>
+                    </div>
+                  </div>
+                ) : formData.service === "OBJECT_STORAGE" ? (
+                  /* Form for Object Storage (S3) */
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className={cn("text-[11px] font-bold block mb-1", isDark ? "text-zinc-400" : "text-slate-600")}>
+                        Storage Quota (GB)
+                      </label>
+                      <input
+                        type="number"
+                        min={1}
+                        value={objectStorageLimits.storageGb}
+                        onChange={(e) => setObjectStorageLimits({ ...objectStorageLimits, storageGb: e.target.value })}
+                        className={cn("w-full border rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:border-cyan-500", isDark ? "bg-white/[0.03] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
+                      />
+                    </div>
+                    <div>
+                      <label className={cn("text-[11px] font-bold block mb-1", isDark ? "text-zinc-400" : "text-slate-600")}>
+                        Max Buckets (-1 = Unlimited)
+                      </label>
+                      <input
+                        type="number"
+                        min={-1}
+                        value={objectStorageLimits.maxBuckets}
+                        onChange={(e) => setObjectStorageLimits({ ...objectStorageLimits, maxBuckets: e.target.value })}
+                        className={cn("w-full border rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:border-cyan-500", isDark ? "bg-white/[0.03] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
+                      />
+                    </div>
+                    <div>
+                      <label className={cn("text-[11px] font-bold block mb-1", isDark ? "text-zinc-400" : "text-slate-600")}>
+                        Max S3 Keys (-1 = Unlimited)
+                      </label>
+                      <input
+                        type="number"
+                        min={-1}
+                        value={objectStorageLimits.maxKeys}
+                        onChange={(e) => setObjectStorageLimits({ ...objectStorageLimits, maxKeys: e.target.value })}
+                        className={cn("w-full border rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:border-cyan-500", isDark ? "bg-white/[0.03] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
+                      />
+                    </div>
+                    <div>
+                      <label className={cn("text-[11px] font-bold block mb-1", isDark ? "text-zinc-400" : "text-slate-600")}>
+                        Region
+                      </label>
+                      <input
+                        type="text"
+                        value={objectStorageLimits.region}
+                        onChange={(e) => setObjectStorageLimits({ ...objectStorageLimits, region: e.target.value })}
+                        placeholder="Sidoarjo"
+                        className={cn("w-full border rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:border-cyan-500", isDark ? "bg-white/[0.03] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}
+                      />
                     </div>
                   </div>
                 ) : formData.service === "CDN" ? (
