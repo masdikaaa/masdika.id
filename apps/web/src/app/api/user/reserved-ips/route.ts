@@ -4,11 +4,40 @@ import { requireAuth } from "@/lib/auth-middleware";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { assertSufficientCommitmentBalance } from "@/lib/billing-commitment";
-import { Address6 } from 'ip-address';
+import { Address6 } from "ip-address";
 
 const CANONICAL_IPV4_REGEX = /^(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/;
 
-export async function GET(req: NextRequest) {
+function ipv4ToNum(ip: string): number {
+  const parts = ip.split(".").map(Number);
+  return (
+    parts[0] * 16777216 +
+    parts[1] * 65536 +
+    parts[2] * 256 +
+    parts[3]
+  );
+}
+
+function numToIpv4(num: number): string {
+  return [
+    (num >>> 24) & 255,
+    (num >>> 16) & 255,
+    (num >>> 8) & 255,
+    num & 255,
+  ].join(".");
+}
+
+function formatIpv6FromBigInt(val: bigint): string {
+  const hex = val.toString(16).padStart(32, "0");
+  const groups = hex.match(/.{1,4}/g) || [];
+  try {
+    return new Address6(groups.join(":")).correctForm();
+  } catch {
+    return groups.join(":");
+  }
+}
+
+export async function GET() {
   try {
     const authResult = await requireAuth({ allowedRoles: ["USER", "ADMIN"] });
     if (authResult.error) return NextResponse.json({ error: authResult.error }, { status: authResult.status });
@@ -16,9 +45,9 @@ export async function GET(req: NextRequest) {
     const ips = await prisma.reservedIp.findMany({
       where: { userId: authResult.user!.id },
       include: {
-        vps: true
+        vps: true,
       },
-      orderBy: { createdAt: "desc" }
+      orderBy: { createdAt: "desc" },
     });
 
     return NextResponse.json(ips);
@@ -30,13 +59,13 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    // Rate Limit: Max 5 IP reservations per 10 minutes per unspoofable client IP
-    const ip =
+    // Rate Limit: Max 5 IP allocations per 10 minutes per client IP
+    const clientIp =
       req.headers.get("cf-connecting-ip") ||
       req.headers.get("x-real-ip") ||
       req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
       "unknown";
-    const allowed = await checkRateLimit("IP_RESERVE", ip, 5, 600);
+    const allowed = await checkRateLimit("IP_RESERVE", clientIp, 5, 600);
     if (!allowed) {
       return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
     }
@@ -45,86 +74,30 @@ export async function POST(req: NextRequest) {
     if (authResult.error) return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     const user = authResult.user!;
 
+    // Elastic IP model: client selects protocol version only (4 or 6).
+    // Specific IP addresses cannot be hand-picked by the client.
     const body = await req.json().catch(() => ({}));
-    const rawIpAddress = typeof body?.ipAddress === "string" ? body.ipAddress.trim() : "";
-
-    if (!rawIpAddress) return NextResponse.json({ error: "No IP address selected." }, { status: 400 });
-
-    const isIPv6 = rawIpAddress.includes(':');
-    const version = isIPv6 ? 6 : 4;
-
-    let ipAddress = rawIpAddress;
-    let candidateIp6: Address6 | null = null;
-    if (isIPv6) {
-      try {
-        candidateIp6 = new Address6(rawIpAddress);
-        ipAddress = candidateIp6.correctForm();
-      } catch {
-        return NextResponse.json({ error: "Invalid IPv6 address format." }, { status: 400 });
-      }
-    } else {
-      if (!CANONICAL_IPV4_REGEX.test(rawIpAddress)) {
-        return NextResponse.json({ error: "Invalid canonical IPv4 address format." }, { status: 400 });
-      }
-    }
+    const version = Number(body?.version) === 6 ? 6 : 4;
 
     // Get IP pricing (fail closed if unconfigured)
     const pricingItems = await prisma.vpsPricing.findMany();
-    const pricingKey = version === 6 ? 'ipv6' : 'ipv4';
-    const ipPricing = pricingItems.find(p => p.key === pricingKey);
+    const pricingKey = version === 6 ? "ipv6" : "ipv4";
+    const ipPricing = pricingItems.find((p) => p.key === pricingKey);
     if (!ipPricing || !Number.isSafeInteger(ipPricing.pricePerHour) || ipPricing.pricePerHour <= 0) {
-      return NextResponse.json({ error: "Reserved IP pricing is not configured." }, { status: 503 });
+      return NextResponse.json({ error: `Elastic IPv${version} pricing is not configured.` }, { status: 503 });
     }
     const ipPricePerHour = ipPricing.pricePerHour;
 
-    // Verify IP is in a public IP pool
-    const pools = await prisma.ipPool.findMany({ where: { version, type: "PUBLIC" } });
-    let targetPoolId: number | null = null;
-
-    const ipToNum = (parts: number[]) =>
-      (parts[0] * Math.pow(2, 24)) +
-      (parts[1] * Math.pow(2, 16)) +
-      (parts[2] * Math.pow(2, 8)) +
-      parts[3];
-
-    try {
-      const candidateParts = isIPv6 ? [] : ipAddress.split('.').map(Number);
-      const candidateNum = isIPv6 ? null : ipToNum(candidateParts);
-
-      for (const pool of pools) {
-        if (!pool.startIp || !pool.endIp) continue;
-        if (ipAddress === pool.gateway) continue;
-
-        try {
-          if (isIPv6) {
-            const gatewayIp6 = pool.gateway.includes(':') ? new Address6(pool.gateway).correctForm() : pool.gateway;
-            if (ipAddress === gatewayIp6) continue;
-            const startIp = new Address6(pool.startIp);
-            const endIp = new Address6(pool.endIp);
-
-            if ((candidateIp6 as any)!.bigInteger() >= (startIp as any).bigInteger() && (candidateIp6 as any)!.bigInteger() <= (endIp as any).bigInteger()) {
-              targetPoolId = pool.id;
-              break;
-            }
-          } else {
-            if (!CANONICAL_IPV4_REGEX.test(pool.startIp) || !CANONICAL_IPV4_REGEX.test(pool.endIp)) continue;
-            const startNum = ipToNum(pool.startIp.split('.').map(Number));
-            const endNum = ipToNum(pool.endIp.split('.').map(Number));
-            if (candidateNum !== null && candidateNum >= startNum && candidateNum <= endNum) {
-              targetPoolId = pool.id;
-              break;
-            }
-          }
-        } catch {
-          // ignore parsing errors for a specific pool
-        }
-      }
-    } catch {
-      return NextResponse.json({ error: "Invalid IP address format." }, { status: 400 });
+    // Fetch public IP pools for the requested protocol version
+    const pools = await prisma.ipPool.findMany({
+      where: { version, type: "PUBLIC" },
+      orderBy: { id: "asc" },
+    });
+    if (pools.length === 0) {
+      return NextResponse.json({ error: `No public IPv${version} pool is currently configured.` }, { status: 409 });
     }
 
-    if (!targetPoolId) return NextResponse.json({ error: "Invalid IP address or out of range." }, { status: 400 });
-
+    // Commitment balance pre-check before opening transaction
     const currentUser = await prisma.user.findUnique({ where: { id: user.id } });
     const newIpMonthly = ipPricePerHour * 730;
     let requiredBalance = newIpMonthly;
@@ -133,7 +106,7 @@ export async function POST(req: NextRequest) {
         userId: user.id,
         userBalance: currentUser?.balance || 0,
         newServiceMonthly: newIpMonthly,
-        serviceName: `Reserved IP (${ipAddress})`,
+        serviceName: `Elastic IPv${version}`,
       });
       requiredBalance = commitmentCheck.requiredBalance;
     } catch (commitmentErr: any) {
@@ -142,69 +115,135 @@ export async function POST(req: NextRequest) {
 
     try {
       const result = await prisma.$transaction(async (tx) => {
-        // SECURITY: Row-level lock on IpPool to serialize all IP reservations
-        await tx.ipPool.update({
-          where: { id: targetPoolId! },
-          data: { updatedAt: new Date() }
-        });
-
-        // Quota Limit enforced atomically inside serialized transaction: Max 5 Reserved IPs per User Account
+        // Quota Limit enforced atomically inside transaction: Max 5 Reserved IPs per User Account
         if (user.role === "USER") {
           const existingReservedIpsCount = await tx.reservedIp.count({
-            where: { userId: user.id }
+            where: { userId: user.id },
           });
           if (existingReservedIpsCount >= 5) {
             throw new Error("QUOTA_EXCEEDED");
           }
         }
 
-        // Ensure IP is not already in use by any VPS
-        const inUseByVps = await tx.vpsIpAssignment.findFirst({
-          where: { ipPoolId: targetPoolId!, ipAddress }
-        });
-        if (inUseByVps) throw new Error("IP_ALREADY_IN_USE");
+        let allocatedIp: string | null = null;
+        let allocatedPoolId: number | null = null;
 
-        // Ensure IP is not already reserved
-        const alreadyReserved = await tx.reservedIp.findFirst({
-          where: { ipPoolId: targetPoolId!, ipAddress }
-        });
-        if (alreadyReserved) throw new Error("IP_ALREADY_RESERVED");
+        for (const pool of pools) {
+          if (!pool.startIp || !pool.endIp) continue;
+
+          // Row-level lock on IpPool to serialize concurrent allocations
+          await tx.ipPool.update({
+            where: { id: pool.id },
+            data: { updatedAt: new Date() },
+          });
+
+          const [usedByVps, usedByReserved] = await Promise.all([
+            tx.vpsIpAssignment.findMany({
+              where: { ipPoolId: pool.id },
+              select: { ipAddress: true },
+            }),
+            tx.reservedIp.findMany({
+              where: { ipPoolId: pool.id },
+              select: { ipAddress: true },
+            }),
+          ]);
+
+          const takenSet = new Set<string>([
+            ...usedByVps.map((x) => x.ipAddress),
+            ...usedByReserved.map((x) => x.ipAddress),
+          ]);
+          if (pool.gateway) takenSet.add(pool.gateway);
+
+          if (version === 4) {
+            if (!CANONICAL_IPV4_REGEX.test(pool.startIp) || !CANONICAL_IPV4_REGEX.test(pool.endIp)) {
+              continue;
+            }
+            const startNum = ipv4ToNum(pool.startIp);
+            const endNum = ipv4ToNum(pool.endIp);
+            if (endNum < startNum) continue;
+
+            const availableCandidates: string[] = [];
+            const maxScan = Math.min(endNum, startNum + 4096);
+            for (let n = startNum; n <= maxScan; n++) {
+              const candidate = numToIpv4(n);
+              if (!takenSet.has(candidate)) {
+                availableCandidates.push(candidate);
+              }
+            }
+
+            if (availableCandidates.length > 0) {
+              // Pick randomly among available pool IPs so allocation feels elastic & unpredictable
+              const randomIdx = crypto.randomInt(0, availableCandidates.length);
+              allocatedIp = availableCandidates[randomIdx];
+              allocatedPoolId = pool.id;
+              break;
+            }
+          } else {
+            try {
+              const startBig = (new Address6(pool.startIp) as any).bigInteger() as bigint;
+              const endBig = (new Address6(pool.endIp) as any).bigInteger() as bigint;
+              if (endBig < startBig) continue;
+
+              const limit = startBig + BigInt(512);
+              const scanEnd = endBig < limit ? endBig : limit;
+              for (let cur = startBig; cur <= scanEnd; cur += BigInt(1)) {
+                const candidate = formatIpv6FromBigInt(cur);
+                if (!takenSet.has(candidate)) {
+                  allocatedIp = candidate;
+                  allocatedPoolId = pool.id;
+                  break;
+                }
+              }
+              if (allocatedIp) break;
+            } catch {
+              continue;
+            }
+          }
+        }
+
+        if (!allocatedIp || !allocatedPoolId) {
+          throw new Error("NO_AVAILABLE_IPS");
+        }
 
         // Enforce full 730h balance requirement atomically while charging 1st hour upfront
         const updateResult = await tx.user.updateMany({
           where: { id: user.id, balance: { gte: requiredBalance } },
-          data: { balance: { decrement: ipPricePerHour } }
+          data: { balance: { decrement: ipPricePerHour } },
         });
         if (updateResult.count === 0) throw new Error("INSUFFICIENT_BALANCE");
 
         const reservedIp = await tx.reservedIp.create({
           data: {
             userId: user.id,
-            ipPoolId: targetPoolId!,
-            ipAddress,
+            ipPoolId: allocatedPoolId,
+            ipAddress: allocatedIp,
             hourlyRate: ipPricePerHour,
             accumulatedCost: ipPricePerHour,
-          }
+          },
         });
 
-        // Create the initial PAYG invoice
+        // Create initial isolated PAYG_RUNNING invoice
         const timestamp = Date.now().toString();
         const random = crypto.randomBytes(3).toString("hex").toUpperCase();
         const invoiceNumber = `INV-PAYG-${timestamp}-${random}`;
-        
+
         await tx.invoice.create({
           data: {
             invoiceNumber,
             userId: user.id,
             amount: ipPricePerHour,
-            status: 'PAID',
-            paymentMethod: 'Account Balance',
+            status: "PAID",
+            paymentMethod: "Account Balance",
             merchantOrderId: invoiceNumber,
-            type: 'IP_RESERVATION',
-            reference: 'PAYG_RUNNING',
+            type: "IP_RESERVATION",
+            reference: "PAYG_RUNNING",
             paidAt: new Date(),
-            details: JSON.stringify({ reservedIpId: reservedIp.id, ipAddress: ipAddress })
-          }
+            details: JSON.stringify({
+              reservedIpId: reservedIp.id,
+              ipAddress: allocatedIp,
+              billingMode: "PAYG",
+            }),
+          },
         });
 
         return reservedIp;
@@ -212,19 +251,34 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json({ success: true, ip: result });
     } catch (e: any) {
-      if (e.message === 'QUOTA_EXCEEDED') {
-        return NextResponse.json({ error: "Maximum quota reached. You can only reserve up to 5 Public IP addresses." }, { status: 403 });
+      if (e.message === "QUOTA_EXCEEDED") {
+        return NextResponse.json(
+          { error: "Maximum quota reached. You can only allocate up to 5 Elastic IPs." },
+          { status: 403 }
+        );
       }
-      if (e.message === 'IP_ALREADY_IN_USE' || e.message === 'IP_ALREADY_RESERVED' || e.code === 'P2002') {
-        return NextResponse.json({ error: "The selected IP has already been reserved or assigned to a VPS by someone else." }, { status: 409 });
+      if (e.message === "NO_AVAILABLE_IPS") {
+        return NextResponse.json(
+          { error: `No static IPv${version} addresses are currently available in the pool. Please contact support.` },
+          { status: 409 }
+        );
       }
-      if (e.message === 'INSUFFICIENT_BALANCE') {
-        return NextResponse.json({ error: `A minimum balance of Rp ${requiredBalance.toLocaleString('id-ID')} is required.` }, { status: 400 });
+      if (e.message === "IP_ALREADY_IN_USE" || e.message === "IP_ALREADY_RESERVED" || e.code === "P2002") {
+        return NextResponse.json(
+          { error: "IP allocation conflict detected. Please try again." },
+          { status: 409 }
+        );
+      }
+      if (e.message === "INSUFFICIENT_BALANCE") {
+        return NextResponse.json(
+          { error: `A minimum balance of Rp ${requiredBalance.toLocaleString("id-ID")} is required.` },
+          { status: 400 }
+        );
       }
       throw e;
     }
   } catch (error: any) {
-    console.error("Global Reserve IP Error:", error);
+    console.error("Global Allocate Elastic IP Error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
