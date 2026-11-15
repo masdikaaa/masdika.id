@@ -43,31 +43,11 @@ export default async function CloudAlertsPage() {
     }
   });
 
-  // Fetch Managed Databases
-  const dbList = await prisma.databaseService.findMany({
-    where: {
-      userId,
-      status: { in: ['RUNNING', 'STOPPED', 'SUSPENDED'] }
-    },
-    orderBy: { createdAt: 'desc' }
-  });
-
-  // Fetch Managed Applications
-  const appsList = await prisma.appService.findMany({
-    where: {
-      userId,
-      status: { in: ['RUNNING', 'STOPPED', 'SUSPENDED'] }
-    },
-    orderBy: { createdAt: 'desc' }
-  });
-
   return (
     <div className="space-y-6 w-full">
       <UnifiedAlertsClient
         vpsList={vpsList}
         k3sClusters={k3sClusters}
-        dbList={dbList}
-        appsList={appsList}
       />
     </div>
   );

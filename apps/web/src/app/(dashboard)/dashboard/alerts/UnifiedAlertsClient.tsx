@@ -3,7 +3,6 @@
 import { useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { useState } from "react";
 import {
-  Server,
   Terminal,
   Activity,
   Cpu,
@@ -12,9 +11,6 @@ import {
   Search,
   ShieldAlert,
   Settings,
-  Bell,
-  Database,
-  Boxes,
 } from "lucide-react";
 import { SiKubernetes } from "react-icons/si";
 import Link from "next/link";
@@ -33,15 +29,11 @@ interface AlertRule {
 interface UnifiedAlertsClientProps {
   vpsList: any[];
   k3sClusters: any[];
-  dbList?: any[];
-  appsList?: any[];
 }
 
 export default function UnifiedAlertsClient({
   vpsList,
   k3sClusters,
-  dbList = [],
-  appsList = [],
 }: UnifiedAlertsClientProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -49,7 +41,7 @@ export default function UnifiedAlertsClient({
   const [currentPage, setCurrentPage] = useUrlNumber("currentPage", 1);
   const itemsPerPage = 10;
 
-  // Combine items into a unified list
+  // Combine Cloud VPS & Kubernetes VPS cluster items
   const allItems = [
     ...vpsList.map((v) => ({
       type: "vps" as const,
@@ -70,30 +62,6 @@ export default function UnifiedAlertsClient({
       metricsUrl: `/dashboard/metrics/k3s/${k.id}`,
       manageUrl: `/dashboard/alerts/k3s/${k.id}`,
       status: k.status || "RUNNING",
-    })),
-    ...dbList.map((db) => ({
-      type: "database" as const,
-      id: String(db.id),
-      name: db.name,
-      rules: [],
-      details: `${(db.type || "DATABASE").toUpperCase()} • ${
-        db.cpuShares ? (db.cpuShares >= 1000 ? `${db.cpuShares / 1000} vCPU` : `${db.cpuShares}m`) : "Dedicated"
-      } • ${db.memoryMb >= 1024 ? `${db.memoryMb / 1024}GB` : `${db.memoryMb}MB`} RAM • ${db.storageGb}GB SSD`,
-      metricsUrl: `/dashboard/database/${db.id}`,
-      manageUrl: `/dashboard/database/${db.id}`,
-      status: db.status || "RUNNING",
-    })),
-    ...appsList.map((app) => ({
-      type: "apps" as const,
-      id: String(app.id),
-      name: app.name,
-      rules: [],
-      details: `${(app.appType || "APP").toUpperCase()} • ${app.cpuShares || 1} vCPU • ${
-        app.memoryMb >= 1024 ? `${app.memoryMb / 1024}GB` : `${app.memoryMb || 1024}MB`
-      } RAM • ${app.storageGb || 10}GB SSD`,
-      metricsUrl: `/dashboard/apps/${app.id}`,
-      manageUrl: `/dashboard/apps/${app.id}`,
-      status: app.status || "RUNNING",
     })),
   ];
 
@@ -195,7 +163,7 @@ export default function UnifiedAlertsClient({
             </span>
           </div>
           <p className={cn("text-xs sm:text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-            Centralized monitoring and live resource metrics for Cloud VPS, Kubernetes clusters, Managed Databases, and Managed Applications.
+            Centralized monitoring, alert rules, and live resource metrics for your Cloud VPS instances and Kubernetes clusters.
           </p>
         </div>
 
@@ -237,10 +205,10 @@ export default function UnifiedAlertsClient({
             <ShieldAlert className={cn("w-8 h-8", isDark ? "text-zinc-500" : "text-slate-400")} />
           </div>
           <h3 className={cn("text-lg sm:text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>
-            No Active Resources Found
+            No Active VPS Resources Found
           </h3>
           <p className={cn("text-xs sm:text-sm max-w-md mx-auto mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>
-            You don&apos;t have any active Cloud VPS, databases, or application instances running. Deploy a service to start monitoring.
+            You don&apos;t have any active Cloud VPS or Kubernetes VPS cluster running. Deploy a VPS to start monitoring metrics and alert rules.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Link
@@ -248,28 +216,6 @@ export default function UnifiedAlertsClient({
               className="px-3.5 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-xs transition-all shadow-sm inline-flex items-center gap-2"
             >
               Deploy VPS
-            </Link>
-            <Link
-              href="/dashboard/database"
-              className={cn(
-                "px-3.5 py-2 rounded-xl border font-medium text-xs transition-all inline-flex items-center gap-2",
-                isDark
-                  ? "bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.06] text-white"
-                  : "bg-slate-50/80 border-slate-200/90 hover:bg-slate-100 text-slate-700"
-              )}
-            >
-              Deploy Database
-            </Link>
-            <Link
-              href="/dashboard/apps"
-              className={cn(
-                "px-3.5 py-2 rounded-xl border font-medium text-xs transition-all inline-flex items-center gap-2",
-                isDark
-                  ? "bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.06] text-white"
-                  : "bg-slate-50/80 border-slate-200/90 hover:bg-slate-100 text-slate-700"
-              )}
-            >
-              Deploy Application
             </Link>
           </div>
         </div>
@@ -329,12 +275,8 @@ export default function UnifiedAlertsClient({
                           >
                             {item.type === "vps" ? (
                               <Terminal className="w-5 h-5 text-blue-400" />
-                            ) : item.type === "k3s" ? (
-                              <SiKubernetes className="w-5 h-5 text-cyan-400" />
-                            ) : item.type === "database" ? (
-                              <Database className="w-5 h-5 text-emerald-400" />
                             ) : (
-                              <Boxes className="w-5 h-5 text-cyan-400" />
+                              <SiKubernetes className="w-5 h-5 text-cyan-400" />
                             )}
                           </div>
                           <div>
@@ -366,25 +308,11 @@ export default function UnifiedAlertsClient({
                                 Managed Kubernetes
                               </span>
                             </>
-                          ) : item.type === "vps" ? (
+                          ) : (
                             <>
                               <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
                               <span className={cn("font-semibold", isDark ? "text-blue-400" : "text-blue-600")}>
                                 Cloud VPS
-                              </span>
-                            </>
-                          ) : item.type === "database" ? (
-                            <>
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-                              <span className={cn("font-semibold", isDark ? "text-emerald-400" : "text-emerald-700")}>
-                                Managed Database
-                              </span>
-                            </>
-                          ) : (
-                            <>
-                              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
-                              <span className={cn("font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                                Managed Application
                               </span>
                             </>
                           )}
