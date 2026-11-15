@@ -255,6 +255,8 @@ spec:
       expect(openclawSpec.envYaml).toContain('OPENCLAW_GATEWAY_TOKEN');
       expect(openclawSpec.envYaml).toContain('value: "MkApp_OpenClawToken88"');
       expect(openclawSpec.envYaml).toContain('value: "18789"');
+      expect(openclawSpec.envYaml).toContain('OPENCLAW_TRUSTED_PROXIES');
+      expect(openclawSpec.envYaml).toContain('value: "10.42.0.9"');
       expect(openclawSpec.envYaml).toContain('--max-old-space-size=');
       expect(openclawSpec.securityContextYaml).toContain('runAsUser: 0');
       expect(openclawSpec.securityContextYaml).toContain('- NET_ADMIN');
@@ -265,6 +267,38 @@ spec:
       expect(openclawSpec.commandYaml).toContain('/usr/bin/apt-get');
       expect(openclawSpec.commandYaml).toContain('/usr/bin/dpkg');
       expect(openclawSpec.commandYaml).toContain('node /app/openclaw.mjs gateway --port 18789 --bind lan');
+
+      // Verify config-init script configures gateway.trustedProxies from OPENCLAW_TRUSTED_PROXIES
+      const configInitMatch = openclawSpec.commandYaml.match(/echo "([^"]+)" \| base64 -d \| node -/);
+      expect(configInitMatch).not.toBeNull();
+      const decodedConfigInit = Buffer.from(configInitMatch![1], 'base64').toString('utf8');
+      expect(decodedConfigInit).toContain('OPENCLAW_TRUSTED_PROXIES');
+      expect(decodedConfigInit).toContain('cfg.gateway.trustedProxies');
+
+      // Verify custom cluster Traefik pod IPs override default trusted proxies
+      const customProxySpec = buildAppContainerSpec(
+        {
+          id: 12,
+          userId: 1,
+          name: 'openclaw-custom-proxy',
+          appType: 'openclaw',
+          subdomain: 'openclaw-custom-proxy',
+          appPort: 18789,
+          cpuShares: 1,
+          memoryMb: 2048,
+          storageGb: 10,
+          billingMode: 'monthly',
+          monthlyPrice: 30000,
+          hourlyRate: 42,
+          accumulatedCost: 0,
+          status: 'RUNNING',
+          username: 'root',
+          password: 'MkApp_OpenClawToken88',
+        } as any,
+        'app.masdika.id',
+        { trustedProxies: ['10.42.0.15', '10.42.0.16'] }
+      );
+      expect(customProxySpec.envYaml).toContain('value: "10.42.0.15,10.42.0.16"');
 
       const hermesSpec = buildAppContainerSpec({
         id: 13,

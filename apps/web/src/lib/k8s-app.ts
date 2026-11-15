@@ -642,7 +642,11 @@ function buildPkgLockdownSnippet(pm: 'apk' | 'apt'): string {
 /**
  * Build App environment variables and startup command according to App Type
  */
-export function buildAppContainerSpec(app: AppServiceRecord, domainBase?: string) {
+export function buildAppContainerSpec(
+  app: AppServiceRecord,
+  domainBase?: string,
+  options?: { trustedProxies?: string[] }
+) {
   const appType = app.appType.toLowerCase();
   const catalogItem = getAppDefinition(appType);
   const dataMount = catalogItem?.dataDir || '/app/data';
@@ -870,6 +874,9 @@ ${buildPkgLockdownSnippet('apk')}
     const webPort = app.appPort && app.appPort !== 22 && app.appPort !== 3000 ? app.appPort : 18789;
     const maxOldSpace = Math.max(384, Math.round((app.memoryMb || 2048) * 0.45));
 
+    const trustedProxiesList = options?.trustedProxies?.map((s) => s.trim()).filter(Boolean) || [];
+    const effectiveTrustedProxies = trustedProxiesList.length > 0 ? trustedProxiesList : ['10.42.0.9'];
+
     envYaml = `
         - name: HOME
           value: "/home/node"
@@ -881,6 +888,8 @@ ${buildPkgLockdownSnippet('apk')}
           value: "${gatewayToken}"
         - name: OPENCLAW_GATEWAY_PORT
           value: "${webPort}"
+        - name: OPENCLAW_TRUSTED_PROXIES
+          value: "${effectiveTrustedProxies.join(',')}"
         - name: NODE_OPTIONS
           value: "--max-old-space-size=${maxOldSpace}"
 `;
@@ -921,6 +930,8 @@ ${buildPkgLockdownSnippet('apk')}
       `cfg.gateway.bind = "lan";\n` +
       `cfg.gateway.port = Number(process.env.OPENCLAW_GATEWAY_PORT || ${webPort});\n` +
       `cfg.gateway.auth = { mode: "token", token: process.env.OPENCLAW_GATEWAY_TOKEN };\n` +
+      `const rawProxies = (process.env.OPENCLAW_TRUSTED_PROXIES || "").split(",").map((s) => s.trim()).filter(Boolean);\n` +
+      `if (rawProxies.length > 0) cfg.gateway.trustedProxies = rawProxies;\n` +
       `cfg.gateway.controlUi = cfg.gateway.controlUi || {};\n` +
       `cfg.gateway.controlUi.enabled = true;\n` +
       `const origins = new Set(Array.isArray(cfg.gateway.controlUi.allowedOrigins) ? cfg.gateway.controlUi.allowedOrigins : []);\n` +
@@ -1002,7 +1013,33 @@ export async function deployAppService(app: AppServiceRecord): Promise<{
     }
   }
 
-  const { image, dataMount, envYaml, commandYaml, securityContextYaml } = buildAppContainerSpec(app, effectiveBase);
+  let openclawTrustedProxies: string[] | undefined;
+  if (app.appType.toLowerCase() === 'openclaw') {
+    try {
+      const kubeSystemPods = await coreApi.listNamespacedPod({ namespace: 'kube-system' });
+      const traefikIps = (kubeSystemPods.items || [])
+        .filter((p) => {
+          const podName = p.metadata?.name || '';
+          const appLabel = p.metadata?.labels?.['app.kubernetes.io/name'] || p.metadata?.labels?.app || '';
+          return (
+            (appLabel === 'traefik' || /^traefik-[a-z0-9-]+$/i.test(podName)) &&
+            p.status?.phase === 'Running' &&
+            Boolean(p.status?.podIP)
+          );
+        })
+        .map((p) => p.status!.podIP!)
+        .filter(Boolean);
+      if (traefikIps.length > 0) {
+        openclawTrustedProxies = traefikIps;
+      }
+    } catch {
+      // Fall back to default ingress proxy IP when cluster pod lookup is unavailable
+    }
+  }
+
+  const { image, dataMount, envYaml, commandYaml, securityContextYaml } = buildAppContainerSpec(app, effectiveBase, {
+    trustedProxies: openclawTrustedProxies,
+  });
   const catalogItem = getAppDefinition(app.appType);
   const appTypeLower = app.appType.toLowerCase();
   const isHermes = appTypeLower === 'hermes';
