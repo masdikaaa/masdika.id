@@ -747,17 +747,15 @@ s3 = boto3.client(
         </div>
       </div>
 
-      {/* 2-Column Asymmetric Bento Grid (Matching Managed Apps) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: S3 Endpoint & Authentication (7 Cols) */}
-        <div className="lg:col-span-7 space-y-6">
-          {/* Card 1: S3 API Endpoint & Routing */}
-          <div
-            className={cn(
-              'border rounded-2xl p-5 sm:p-6 space-y-5 transition-all shadow-2xs',
-              isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90'
-            )}
-          >
+      {/* 2-Column Asymmetric Bento Grid (Row-Aligned, Zero Wasted Space) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        {/* Row 1 Left: S3 API Endpoint & Routing (7 Cols) */}
+        <div
+          className={cn(
+            'lg:col-span-7 lg:order-1 h-full flex flex-col justify-between border rounded-2xl p-5 sm:p-6 space-y-5 transition-all shadow-2xs',
+            isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90'
+          )}
+        >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
               <h3 className={cn('text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2', isDark ? 'text-cyan-400' : 'text-cyan-700')}>
                 <Globe className="w-4 h-4 shrink-0" />
@@ -831,10 +829,10 @@ s3 = boto3.client(
             </div>
           </div>
 
-          {/* Card 2: S3 Credentials & Authentication */}
+          {/* Row 2 Left: S3 Credentials & Authentication (7 Cols) */}
           <div
             className={cn(
-              'border rounded-2xl p-5 sm:p-6 space-y-4 transition-all shadow-2xs',
+              'lg:col-span-7 lg:order-3 h-full flex flex-col justify-between border rounded-2xl p-5 sm:p-6 space-y-4 transition-all shadow-2xs',
               isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90'
             )}
           >
@@ -934,17 +932,14 @@ s3 = boto3.client(
               </button>
             </div>
           </div>
-        </div>
 
-        {/* Right Column: Storage Telemetry & Allocated Resources (5 Cols) */}
-        <div className="lg:col-span-5 space-y-6">
-          {/* Card 3: Storage & Quota Telemetry */}
-          <div
-            className={cn(
-              'border rounded-2xl p-5 sm:p-6 space-y-4 transition-all shadow-2xs',
-              isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90'
-            )}
-          >
+        {/* Row 1 Right: Storage & Quota Telemetry (5 Cols) */}
+        <div
+          className={cn(
+            'lg:col-span-5 lg:order-2 h-full flex flex-col justify-between border rounded-2xl p-5 sm:p-6 space-y-4 transition-all shadow-2xs',
+            isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90'
+          )}
+        >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <h3 className={cn('text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2', isDark ? 'text-cyan-400' : 'text-cyan-700')}>
                 <Activity className="w-4 h-4 shrink-0" />
@@ -999,10 +994,10 @@ s3 = boto3.client(
             </div>
           </div>
 
-          {/* Card 4: Allocated Storage & Billing */}
+          {/* Row 2 Right: Allocated Storage & Billing (5 Cols) */}
           <div
             className={cn(
-              'border rounded-2xl p-5 sm:p-6 space-y-4 transition-all shadow-2xs',
+              'lg:col-span-5 lg:order-4 h-full flex flex-col justify-between border rounded-2xl p-5 sm:p-6 space-y-4 transition-all shadow-2xs',
               isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90'
             )}
           >
@@ -1052,7 +1047,6 @@ s3 = boto3.client(
               </div>
             </div>
           </div>
-        </div>
       </div>
 
       {/* Initial Credentials One-Time Banner */}
@@ -1099,34 +1093,59 @@ s3 = boto3.client(
         </div>
       )}
 
-      {/* Segmented Navigation Tabs */}
-      <div ref={workspaceRef} className={cn('flex items-center gap-1 p-1 rounded-2xl border overflow-x-auto max-w-full sm:w-fit', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-slate-100 border-slate-200')}>
-        {[
-          { id: 'buckets', label: 'Buckets & Objects', icon: Database },
-          { id: 'keys', label: 'IAM Access Keys & SDK', icon: KeyRound },
-          { id: 'guide', label: 'AWS CLI Guide', icon: BookOpen },
-          { id: 'settings', label: 'Scale & Settings', icon: Settings },
-        ].map((t) => {
-          const Icon = t.icon;
-          const active = tab === t.id;
-          return (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => setTab(t.id as any)}
-              className={cn(
-                'px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0 focus:outline-none focus-visible:outline-none',
-                active
-                  ? 'bg-cyan-400 text-slate-950 shadow-sm'
-                  : isDark
-                    ? 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/70'
-              )}
-            >
-              <Icon className="w-3.5 h-3.5 shrink-0" /> {t.label}
-            </button>
-          );
-        })}
+      {/* Segmented Navigation Tabs + Workspace Summary Bar */}
+      <div ref={workspaceRef} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className={cn('flex items-center gap-1 p-1 rounded-2xl border overflow-x-auto max-w-full sm:w-fit', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-slate-100 border-slate-200')}>
+          {[
+            { id: 'buckets', label: 'Buckets & Objects', icon: Database },
+            { id: 'keys', label: 'IAM Access Keys & SDK', icon: KeyRound },
+            { id: 'guide', label: 'AWS CLI Guide', icon: BookOpen },
+            { id: 'settings', label: 'Scale & Settings', icon: Settings },
+          ].map((t) => {
+            const Icon = t.icon;
+            const active = tab === t.id;
+            return (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setTab(t.id as any)}
+                className={cn(
+                  'px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0 focus:outline-none focus-visible:outline-none',
+                  active
+                    ? 'bg-cyan-400 text-slate-950 shadow-sm'
+                    : isDark
+                      ? 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/70'
+                )}
+              >
+                <Icon className="w-3.5 h-3.5 shrink-0" /> {t.label}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="hidden sm:flex items-center gap-2.5">
+          <span
+            className={cn(
+              'px-3 py-1.5 rounded-xl border text-[11px] font-medium',
+              isDark ? 'bg-[#111115] border-white/[0.08] text-zinc-400' : 'bg-white border-slate-200 text-slate-600 shadow-2xs'
+            )}
+          >
+            {service.buckets?.length || 0} Buckets • {service.keys?.length || 0} IAM Keys
+          </span>
+          <button
+            type="button"
+            onClick={() => fetchService()}
+            className={cn(
+              'px-3 py-1.5 rounded-xl border text-[11px] font-semibold flex items-center gap-1.5 transition-colors cursor-pointer',
+              isDark ? 'bg-[#111115] border-white/[0.08] text-zinc-300 hover:bg-white/[0.05]' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 shadow-2xs'
+            )}
+            title="Refresh Object Storage State"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Refresh</span>
+          </button>
+        </div>
       </div>
 
       {/* Tab 1: Buckets & Objects */}
