@@ -44,7 +44,7 @@ export default function ObjectStoragePage() {
 
   const [showDeploy, setShowDeploy] = useState(false);
   const [deployName, setDeployName] = useState('');
-  const [deployStorageGb, setDeployStorageGb] = useState(50);
+  const [deployStorageGb, setDeployStorageGb] = useState(10);
   const [deployBillingMode, setDeployBillingMode] = useState<'PAYG' | 'MONTHLY'>('PAYG');
   const [deploying, setDeploying] = useState(false);
 
@@ -107,8 +107,9 @@ export default function ObjectStoragePage() {
     }
   };
 
-  const estimatedMonthly = deployStorageGb * ratePerGb;
-  const estimatedHourly = Math.max(1, Math.ceil(estimatedMonthly / 730));
+  const matchedPlan = plans.find((p) => p.storageGb === deployStorageGb);
+  const estimatedMonthly = matchedPlan ? matchedPlan.monthlyPrice : deployStorageGb * Math.max(ratePerGb, 2000);
+  const estimatedHourly = matchedPlan ? matchedPlan.hourlyRate : Math.max(1, Math.ceil(estimatedMonthly / 730));
 
   return (
     <div className="space-y-6 max-w-full pb-16">
@@ -244,7 +245,7 @@ export default function ObjectStoragePage() {
             No Object Storage Services Provisioned
           </h2>
           <p className={cn('text-xs sm:text-sm max-w-md mx-auto mb-6 leading-relaxed', isDark ? 'text-zinc-400' : 'text-slate-500')}>
-            Deploy an S3-compatible Object Storage space with isolated buckets, IAM Access Keys &amp; PAYG hourly billing starting from Rp {(10 * ratePerGb).toLocaleString('id-ID')}/mo.
+            Deploy an S3-compatible Object Storage space with isolated buckets, IAM Access Keys &amp; PAYG hourly billing starting from Rp {(plans[0]?.monthlyPrice || 5000).toLocaleString('id-ID')}/mo.
           </p>
           <button
             onClick={() => setShowDeploy(true)}
@@ -374,7 +375,7 @@ export default function ObjectStoragePage() {
 
                 <div>
                   <label className={cn('block text-xs font-bold mb-1.5', isDark ? 'text-zinc-300' : 'text-slate-700')}>Capacity Quota (GB)</label>
-                  <div className="grid grid-cols-5 gap-2 mb-2">
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-2">
                     {plans.map((p) => (
                       <button
                         type="button"
@@ -395,10 +396,10 @@ export default function ObjectStoragePage() {
                   </div>
                   <input
                     type="number"
-                    min={10}
-                    max={10000}
+                    min={1}
+                    max={1000}
                     value={deployStorageGb}
-                    onChange={(e) => setDeployStorageGb(Math.max(10, parseInt(e.target.value || '10', 10)))}
+                    onChange={(e) => setDeployStorageGb(Math.max(1, parseInt(e.target.value || '1', 10)))}
                     className={cn('w-full rounded-xl px-3.5 py-2 text-xs border focus:outline-none focus:border-cyan-500', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
                   />
                 </div>

@@ -19,7 +19,7 @@ import { decryptDeterministic, encryptDeterministic } from '@/lib/encryption';
 import { ensureObjectStoragePlansExist } from '@/lib/object-storage-plans-server';
 
 function buildObjectStoragePlans(ratePerGbMonthly: number) {
-  const sizes = [50, 100, 250, 500, 1000];
+  const sizes = [1, 5, 10, 25, 50, 100];
   return sizes.map((storageGb) => {
     const monthlyPrice = storageGb * ratePerGbMonthly;
     const hourlyRate = Math.max(1, Math.ceil(monthlyPrice / 730));
@@ -138,8 +138,8 @@ export async function POST(req: NextRequest) {
     }
 
     const storageGb = parseInt(String(body.storageGb), 10);
-    if (!Number.isInteger(storageGb) || storageGb < 10 || storageGb > 10000) {
-      return NextResponse.json({ error: 'Storage capacity must be between 10 GB and 10,000 GB.' }, { status: 400 });
+    if (!Number.isInteger(storageGb) || storageGb < 1 || storageGb > 1000) {
+      return NextResponse.json({ error: 'Storage capacity must be between 1 GB and 1,000 GB.' }, { status: 400 });
     }
 
     const billingMode = typeof body.billingMode === 'string' && body.billingMode.toUpperCase() === 'MONTHLY'
@@ -160,10 +160,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Object Storage product is currently disabled.' }, { status: 403 });
     }
 
-    const monthlyPrice = storageGb * cfg.ratePerGbMonthly;
-    const hourlyRate = Math.max(1, Math.ceil(monthlyPrice / 730));
+    const dbPlans = await prisma.plan.findMany({
+      where: { service: 'OBJECT_STORAGE', isActive: true },
+    });
+    const matchedPlan = dbPlans.find((p) => {
+      try {
+        const parsed = JSON.parse(p.limits);
+        return (Number(parsed.storageGb) || parseInt(String(parsed.storage || '0'), 10)) === storageGb;
+      } catch {
+        return false;
+      }
+    });
+
+    const monthlyPrice = matchedPlan ? matchedPlan.price : storageGb * Math.max(cfg.ratePerGbMonthly, 2000);
+    const hourlyRate = matchedPlan
+      ? matchedPlan.hourlyPrice || Math.max(1, Math.ceil(matchedPlan.price / 730))
+      : Math.max(1, Math.ceil(monthlyPrice / 730));
     const upfrontCharge = billingMode === 'MONTHLY' ? monthlyPrice : hourlyRate;
-    const planName = `S3 ${storageGb >= 1000 ? `${storageGb / 1000} TB` : `${storageGb} GB`}`;
+    const planName = matchedPlan ? matchedPlan.name : `S3 ${storageGb >= 1000 ? `${storageGb / 1000} TB` : `${storageGb} GB`}`;
 
     let serviceRecord: any;
     try {
