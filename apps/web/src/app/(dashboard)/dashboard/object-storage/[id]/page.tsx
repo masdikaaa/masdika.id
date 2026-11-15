@@ -763,7 +763,7 @@ s3 = boto3.client(
       )}
 
       {/* Segmented Navigation Tabs */}
-      <div className={cn('inline-flex flex-wrap gap-1 p-1 rounded-2xl border', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-slate-100 border-slate-200')}>
+      <div className={cn('flex items-center gap-1 p-1 rounded-2xl border overflow-x-auto max-w-full sm:w-fit', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-slate-100 border-slate-200')}>
         {[
           { id: 'buckets', label: 'Buckets & Objects', icon: Database },
           { id: 'keys', label: 'IAM Access Keys & SDK', icon: KeyRound },
@@ -778,7 +778,7 @@ s3 = boto3.client(
               type="button"
               onClick={() => setTab(t.id as any)}
               className={cn(
-                'px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer focus:outline-none',
+                'px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0 focus:outline-none focus-visible:outline-none',
                 active
                   ? 'bg-cyan-400 text-slate-950 shadow-sm'
                   : isDark
@@ -786,7 +786,7 @@ s3 = boto3.client(
                     : 'text-slate-600 hover:text-slate-900 hover:bg-white/70'
               )}
             >
-              <Icon className="w-3.5 h-3.5" /> {t.label}
+              <Icon className="w-3.5 h-3.5 shrink-0" /> {t.label}
             </button>
           );
         })}
@@ -923,8 +923,8 @@ s3 = boto3.client(
                     })}
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <div className="relative">
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <div className="relative flex-1 sm:flex-initial min-w-0">
                       <Search className={cn('w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2', isDark ? 'text-zinc-500' : 'text-slate-400')} />
                       <input
                         type="text"
@@ -932,7 +932,7 @@ s3 = boto3.client(
                         onChange={(e) => setObjectSearch(e.target.value)}
                         placeholder="Filter objects..."
                         className={cn(
-                          'w-36 sm:w-44 rounded-xl pl-8 pr-3 py-2 text-xs border focus:outline-none focus:border-cyan-500',
+                          'w-full sm:w-44 rounded-xl pl-8 pr-3 py-2 text-xs border focus:outline-none focus:border-cyan-500',
                           isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white placeholder-zinc-600' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'
                         )}
                       />
@@ -942,14 +942,14 @@ s3 = boto3.client(
                       onClick={() => fetchObjects(selectedBucket, prefix)}
                       title="Refresh objects"
                       className={cn(
-                        'p-2 rounded-xl border transition-colors cursor-pointer',
+                        'p-2 rounded-xl border transition-colors cursor-pointer shrink-0',
                         isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-zinc-300 hover:border-white/20' : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300'
                       )}
                     >
                       <RefreshCw className={cn('w-3.5 h-3.5', loadingObjects && 'animate-spin')} />
                     </button>
-                    <label className="px-3.5 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 shadow-sm flex items-center gap-1.5 cursor-pointer transition-colors">
-                      <UploadCloud className="w-3.5 h-3.5" /> Upload Object
+                    <label className="px-3.5 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 shadow-sm flex items-center gap-1.5 cursor-pointer transition-colors whitespace-nowrap shrink-0">
+                      <UploadCloud className="w-3.5 h-3.5 shrink-0" /> Upload Object
                       <input type="file" onChange={handleUploadObject} className="hidden" disabled={service.status === 'SUSPENDED'} />
                     </label>
                   </div>

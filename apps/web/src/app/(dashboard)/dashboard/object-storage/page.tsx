@@ -260,79 +260,172 @@ export default function ObjectStoragePage() {
             const quotaBytes = svc.storageGb * 1024 * 1024 * 1024;
             const pct = Math.min(100, Math.round(((svc.usedBytes || 0) / quotaBytes) * 100));
             const isSuspended = svc.status === 'SUSPENDED';
+            const isRunning = svc.status === 'RUNNING' || svc.status === 'ACTIVE';
 
             return (
-              <div
+              <motion.div
                 key={svc.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
                 className={cn(
-                  'rounded-2xl border p-5 flex flex-col justify-between gap-4 transition-all shadow-2xs',
-                  isDark ? 'bg-[#111115] border-white/[0.08] hover:border-cyan-500/40' : 'bg-white border-slate-200/90 hover:border-cyan-300'
+                  'rounded-2xl border p-5 transition-all flex flex-col justify-between group shadow-2xs',
+                  isDark
+                    ? 'bg-[#111115] border-white/[0.08] hover:border-cyan-500/30'
+                    : 'bg-white border-slate-200/90 hover:border-slate-300'
                 )}
               >
-                <div className="space-y-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <span className={cn('text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border', isDark ? 'bg-cyan-500/15 border-cyan-500/30 text-cyan-300' : 'bg-cyan-50 border-cyan-200 text-cyan-700')}>
-                        {svc.planName} • {svc.billingMode}
-                      </span>
-                      <h3 className={cn('text-base font-bold mt-2', isDark ? 'text-white' : 'text-slate-900')}>{svc.name}</h3>
+                <div>
+                  {/* Card Header: Icon, Name, Status */}
+                  <div className="flex items-start justify-between gap-3 mb-4">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div
+                        className={cn(
+                          'w-11 h-11 rounded-xl border flex items-center justify-center shrink-0 transition-transform group-hover:scale-105',
+                          isDark
+                            ? 'bg-cyan-500/10 border-cyan-500/25 text-cyan-400 shadow-sm shadow-cyan-500/10'
+                            : 'bg-cyan-50 border-cyan-200 text-cyan-700 shadow-2xs'
+                        )}
+                      >
+                        <HardDrive className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span
+                            className={cn(
+                              'text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border',
+                              isDark
+                                ? 'bg-cyan-500/15 border-cyan-500/30 text-cyan-300'
+                                : 'bg-cyan-50 border-cyan-200 text-cyan-700'
+                            )}
+                          >
+                            {svc.planName} • {svc.billingMode}
+                          </span>
+                        </div>
+                        <h3
+                          className={cn(
+                            'font-bold text-sm sm:text-base tracking-tight truncate mt-1',
+                            isDark ? 'text-white' : 'text-slate-900'
+                          )}
+                        >
+                          {svc.name}
+                        </h3>
+                      </div>
                     </div>
-                    <span
-                      className={cn(
-                        'text-[10px] font-bold px-2.5 py-1 rounded-full border',
-                        isSuspended
-                          ? isDark ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' : 'bg-amber-50 border-amber-200 text-amber-700'
-                          : isDark ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-emerald-50 border-emerald-200 text-emerald-700'
-                      )}
-                    >
-                      {isSuspended ? 'SUSPENDED (Grace 3 Hari)' : svc.status}
-                    </span>
+
+                    <div className="shrink-0">
+                      <span
+                        className={cn(
+                          'inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full border whitespace-nowrap',
+                          isSuspended
+                            ? isDark
+                              ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                              : 'bg-amber-50 border-amber-200 text-amber-700'
+                            : isRunning
+                              ? isDark
+                                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                                : 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                              : isDark
+                                ? 'bg-zinc-500/10 border-zinc-500/30 text-zinc-400'
+                                : 'bg-slate-100 border-slate-200 text-slate-600'
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            'w-1.5 h-1.5 rounded-full shrink-0',
+                            isSuspended
+                              ? 'bg-amber-400'
+                              : isRunning
+                                ? 'bg-emerald-400 animate-pulse'
+                                : 'bg-zinc-400'
+                          )}
+                        />
+                        {isSuspended ? 'SUSPENDED (3-Day Grace)' : svc.status}
+                      </span>
+                    </div>
                   </div>
 
                   {isSuspended && (
-                    <div className={cn('p-2.5 rounded-xl border text-[11px] flex items-center gap-2', isDark ? 'bg-amber-500/10 border-amber-500/20 text-amber-300' : 'bg-amber-50 border-amber-200 text-amber-800')}>
+                    <div
+                      className={cn(
+                        'p-2.5 rounded-xl border text-[11px] flex items-center gap-2 mb-3',
+                        isDark
+                          ? 'bg-amber-500/10 border-amber-500/20 text-amber-300'
+                          : 'bg-amber-50 border-amber-200 text-amber-800'
+                      )}
+                    >
                       <AlertTriangle className="w-4 h-4 shrink-0" />
                       <span>S3 keys disabled. Top up balance to auto-unsuspend.</span>
                     </div>
                   )}
 
-                  <div>
-                    <div className="flex justify-between text-xs mb-1.5">
-                      <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>Storage Used</span>
-                      <span className={cn('font-semibold', isDark ? 'text-zinc-200' : 'text-slate-800')}>
+                  {/* Storage Quota Box */}
+                  <div
+                    className={cn(
+                      'p-3 rounded-xl border mb-3',
+                      isDark ? 'bg-[#0a0a0c] border-white/[0.06]' : 'bg-slate-50 border-slate-200'
+                    )}
+                  >
+                    <div className="flex items-center justify-between text-xs mb-1.5 gap-2">
+                      <span className={cn('text-[11px] font-medium', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+                        Storage Used
+                      </span>
+                      <span className={cn('font-mono font-bold text-[11px]', isDark ? 'text-zinc-200' : 'text-slate-800')}>
                         {formatBytes(svc.usedBytes || 0)} / {svc.storageGb} GB
                       </span>
                     </div>
-                    <div className={cn('w-full h-2 rounded-full overflow-hidden', isDark ? 'bg-white/[0.06]' : 'bg-slate-100')}>
-                      <div className="h-full bg-cyan-400 rounded-full" style={{ width: `${pct}%` }} />
+                    <div className={cn('w-full h-1.5 rounded-full overflow-hidden', isDark ? 'bg-white/[0.06]' : 'bg-slate-200/80')}>
+                      <div className="h-full bg-cyan-400 rounded-full transition-all" style={{ width: `${pct}%` }} />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
-                    <div className={cn('p-2.5 rounded-xl border flex items-center gap-2', isDark ? 'bg-white/[0.02] border-white/[0.06]' : 'bg-slate-50 border-slate-200')}>
-                      <Database className={cn('w-3.5 h-3.5', isDark ? 'text-cyan-400' : 'text-cyan-700')} />
-                      <span className={isDark ? 'text-zinc-300' : 'text-slate-700'}>{svc.buckets?.length || 0} Buckets</span>
+                  {/* Specs & Metrics Grid */}
+                  <div className="grid grid-cols-2 gap-2 text-xs mb-4">
+                    <div className={cn('p-2 rounded-lg border', isDark ? 'bg-white/[0.02] border-white/5' : 'bg-slate-50 border-slate-200')}>
+                      <span className={cn('text-[10px] font-bold uppercase tracking-wider block', isDark ? 'text-zinc-500' : 'text-slate-400')}>
+                        Buckets
+                      </span>
+                      <span className={cn('font-semibold text-[11px] inline-flex items-center gap-1.5 mt-0.5', isDark ? 'text-zinc-200' : 'text-slate-800')}>
+                        <Database className={cn('w-3.5 h-3.5 shrink-0', isDark ? 'text-cyan-400' : 'text-cyan-700')} />
+                        {svc.buckets?.length || 0} Buckets
+                      </span>
                     </div>
-                    <div className={cn('p-2.5 rounded-xl border flex items-center gap-2', isDark ? 'bg-white/[0.02] border-white/[0.06]' : 'bg-slate-50 border-slate-200')}>
-                      <KeyRound className={cn('w-3.5 h-3.5', isDark ? 'text-cyan-400' : 'text-cyan-700')} />
-                      <span className={isDark ? 'text-zinc-300' : 'text-slate-700'}>{svc.keys?.length || 0} S3 Keys</span>
+                    <div className={cn('p-2 rounded-lg border', isDark ? 'bg-white/[0.02] border-white/5' : 'bg-slate-50 border-slate-200')}>
+                      <span className={cn('text-[10px] font-bold uppercase tracking-wider block', isDark ? 'text-zinc-500' : 'text-slate-400')}>
+                        IAM Keys
+                      </span>
+                      <span className={cn('font-semibold text-[11px] inline-flex items-center gap-1.5 mt-0.5', isDark ? 'text-zinc-200' : 'text-slate-800')}>
+                        <KeyRound className={cn('w-3.5 h-3.5 shrink-0', isDark ? 'text-cyan-400' : 'text-cyan-700')} />
+                        {svc.keys?.length || 0} S3 Keys
+                      </span>
                     </div>
                   </div>
                 </div>
 
-                <div className={cn('pt-3 border-t flex items-center justify-between', isDark ? 'border-white/[0.08]' : 'border-slate-200')}>
-                  <div className="text-xs">
-                    <span className={cn('font-bold', isDark ? 'text-cyan-400' : 'text-cyan-700')}>Rp {svc.hourlyRate.toLocaleString('id-ID')}</span>
-                    <span className={isDark ? 'text-zinc-500' : 'text-slate-500'}>/hr (Rp {svc.monthlyPrice.toLocaleString('id-ID')}/mo)</span>
+                {/* Footer Controls */}
+                <div className={cn('pt-3 border-t flex items-center justify-between gap-2', isDark ? 'border-white/[0.06]' : 'border-slate-100')}>
+                  <div className="min-w-0">
+                    <span className={cn('text-[10px] block', isDark ? 'text-zinc-500' : 'text-slate-400')}>
+                      Commitment
+                    </span>
+                    <div className="flex items-baseline gap-1 flex-wrap">
+                      <span className={cn('font-mono font-bold text-xs sm:text-sm', isDark ? 'text-cyan-400' : 'text-cyan-700')}>
+                        Rp {svc.hourlyRate.toLocaleString('id-ID')}
+                        <span className={cn('text-[10px] font-normal', isDark ? 'text-zinc-500' : 'text-slate-500')}>/hr</span>
+                      </span>
+                      <span className={cn('text-[10px]', isDark ? 'text-zinc-500' : 'text-slate-400')}>
+                        (Rp {svc.monthlyPrice.toLocaleString('id-ID')}/mo)
+                      </span>
+                    </div>
                   </div>
                   <Link
                     href={`/dashboard/object-storage/${svc.id}`}
-                    className={cn('px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-colors', isDark ? 'bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300' : 'bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border border-cyan-200')}
+                    className="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 bg-cyan-400 hover:bg-cyan-300 active:scale-95 text-slate-950 shadow-sm transition-all whitespace-nowrap shrink-0"
                   >
-                    Open Console <ArrowRight className="w-3.5 h-3.5" />
+                    <span>Open Console</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
