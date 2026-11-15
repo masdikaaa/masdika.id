@@ -407,7 +407,9 @@ export async function reconcileUserPaygInvoices(userId: number): Promise<void> {
     }
   }
 
-  // Normalize any remaining legacy INV-S3-... invoices (e.g. from terminated services)
+  // Clean up any remaining legacy INV-S3-... invoices:
+  // If user already has an INV-PAYG-... invoice, delete the legacy INV-S3-... duplicate/remnant;
+  // otherwise normalize it to INV-PAYG-... so no INV-S3-... prefix remains.
   const handledIds = new Set<number>();
   for (const s3 of s3s) {
     for (const inv of existingInvoices) {
@@ -416,20 +418,32 @@ export async function reconcileUserPaygInvoices(userId: number): Promise<void> {
       }
     }
   }
-  for (const inv of existingInvoices) {
-    if (inv.invoiceNumber.startsWith('INV-S3-') && !handledIds.has(inv.id)) {
-      const normalizedNum = normalizeInvoiceNumberToPayg(inv.invoiceNumber);
-      await prisma.invoice.update({
-        where: { id: inv.id },
-        data: {
-          invoiceNumber: normalizedNum,
-          merchantOrderId: normalizedNum,
-          type: 'OBJECT_STORAGE',
-          status: 'PAID',
-          paymentMethod: 'Account Balance',
-          reference: 'PAYG_RUNNING',
-        },
+  const remainingS3Invoices = existingInvoices.filter(
+    (inv) => inv.invoiceNumber.startsWith('INV-S3-') && !handledIds.has(inv.id)
+  );
+  if (remainingS3Invoices.length > 0) {
+    const hasPaygInvoice = existingInvoices.some((inv) =>
+      inv.invoiceNumber.startsWith('INV-PAYG-')
+    );
+    if (hasPaygInvoice && prisma?.invoice?.deleteMany) {
+      await prisma.invoice.deleteMany({
+        where: { id: { in: remainingS3Invoices.map((inv) => inv.id) }, userId },
       });
+    } else {
+      for (const inv of remainingS3Invoices) {
+        const normalizedNum = normalizeInvoiceNumberToPayg(inv.invoiceNumber);
+        await prisma.invoice.update({
+          where: { id: inv.id },
+          data: {
+            invoiceNumber: normalizedNum,
+            merchantOrderId: normalizedNum,
+            type: 'OBJECT_STORAGE',
+            status: 'PAID',
+            paymentMethod: 'Account Balance',
+            reference: 'PAYG_RUNNING',
+          },
+        });
+      }
     }
   }
 }
