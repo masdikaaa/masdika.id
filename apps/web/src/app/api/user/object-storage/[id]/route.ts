@@ -5,6 +5,7 @@ import { assertSufficientCommitmentBalance } from '@/lib/billing-commitment';
 import {
   getCustomerRustFSConfig,
   getCustomerBucketUsage,
+  getObjectStorageClusterCapacity,
   setCustomerBucketQuota,
   terminateObjectStorageInfrastructure,
 } from '@/lib/customer-rustfs';
@@ -110,6 +111,17 @@ export async function PATCH(
       return NextResponse.json({ error: 'Storage capacity must be between 1 GB and 1,000 GB' }, { status: 400 });
     }
 
+    if (nextGb > service.storageGb) {
+      const capacity = await getObjectStorageClusterCapacity();
+      const neededGb = nextGb - service.storageGb;
+      if (!capacity.available || capacity.freeGb < neededGb) {
+        return NextResponse.json(
+          { error: capacity.reason || `Cluster capacity full: only ${capacity.freeGb} GB available for upgrade.` },
+          { status: 503 }
+        );
+      }
+    }
+
     // Prevent scaling down below currently used bytes
     const bucketNames = service.buckets.map((b) => b.name);
     if (bucketNames.length > 0 && nextGb < service.storageGb) {
@@ -166,12 +178,19 @@ export async function PATCH(
 
     if (nextMonthly > service.monthlyPrice) {
       const freshUser = await prisma.user.findUnique({ where: { id: user.id }, select: { balance: true } });
-      await assertSufficientCommitmentBalance({
-        userId: user.id,
-        userBalance: freshUser?.balance || 0,
-        newServiceMonthly: nextMonthly - service.monthlyPrice,
-        serviceName: `Scale ${service.name} to ${nextGb} GB`,
-      });
+      try {
+        await assertSufficientCommitmentBalance({
+          userId: user.id,
+          userBalance: freshUser?.balance || 0,
+          newServiceMonthly: nextMonthly - service.monthlyPrice,
+          serviceName: `Scale ${service.name} to ${nextGb} GB`,
+        });
+      } catch (balErr: any) {
+        return NextResponse.json(
+          { error: balErr?.message || 'Insufficient account balance for upgrade.' },
+          { status: 400 }
+        );
+      }
     }
 
     updates.storageGb = nextGb;
