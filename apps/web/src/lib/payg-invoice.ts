@@ -23,14 +23,32 @@ function normalizeInvoiceNumberToPayg(invoiceNumber: string): string {
 }
 
 function matchesServiceInvoice(
-  inv: { details?: string | null },
+  inv: { invoiceNumber?: string; type?: string | null; details?: string | null },
   serviceIdField: ServiceIdField,
-  serviceId: number
+  serviceId: number,
+  serviceName?: string
 ): boolean {
   if (!inv.details) return false;
   try {
     const parsed = JSON.parse(inv.details);
-    return Number(parsed?.[serviceIdField]) === serviceId;
+    if (Number(parsed?.[serviceIdField]) === serviceId) return true;
+    if (serviceIdField === 'objectStorageServiceId') {
+      if (Number(parsed?.objectStorageId) === serviceId || Number(parsed?.serviceId) === serviceId) {
+        return true;
+      }
+      if (
+        serviceName &&
+        (inv.invoiceNumber?.startsWith('INV-S3-') || inv.type === 'OBJECT_STORAGE') &&
+        typeof parsed?.name === 'string' &&
+        parsed.name === serviceName &&
+        parsed?.objectStorageServiceId === undefined
+      ) {
+        return true;
+      }
+    }
+    if (serviceIdField === 'appServiceId' && Number(parsed?.appId) === serviceId) return true;
+    if (serviceIdField === 'databaseServiceId' && Number(parsed?.dbId) === serviceId) return true;
+    return false;
   } catch {
     return inv.details.includes(`"${serviceIdField}":${serviceId}`);
   }
@@ -103,18 +121,23 @@ export async function upsertPaygRunningInvoice(
   const candidates = await tx.invoice.findMany({
     where: {
       userId: params.userId,
-      type: params.type,
       OR: [
-        { reference: 'PAYG_RUNNING' },
-        { status: 'PAYG_RUNNING' },
-        { invoiceNumber: { startsWith: 'INV-S3-' } },
+        {
+          type: params.type,
+          OR: [
+            { reference: 'PAYG_RUNNING' },
+            { status: 'PAYG_RUNNING' },
+            { invoiceNumber: { startsWith: 'INV-S3-' } },
+          ],
+        },
+        ...(params.type === 'OBJECT_STORAGE' ? [{ invoiceNumber: { startsWith: 'INV-S3-' } }] : []),
       ],
     },
     orderBy: { createdAt: 'desc' },
   });
 
   const target = candidates.find((inv: any) =>
-    matchesServiceInvoice(inv, params.serviceIdField, params.serviceId)
+    matchesServiceInvoice(inv, params.serviceIdField, params.serviceId, params.serviceName)
   );
 
   if (target) {
@@ -208,11 +231,11 @@ export async function reconcileUserPaygInvoices(userId: number): Promise<void> {
     paidAt: Date;
     extraDetails: Record<string, any>;
   }) => {
-    const matched = existingInvoices.find((inv) =>
-      matchesServiceInvoice(inv, item.serviceIdField, item.serviceId)
+    const matches = existingInvoices.filter((inv) =>
+      matchesServiceInvoice(inv, item.serviceIdField, item.serviceId, item.serviceName)
     );
 
-    if (!matched) {
+    if (matches.length === 0) {
       const invoiceNumber = generateInvoiceNumber('INV-PAYG');
       await prisma.invoice.create({
         data: {
@@ -235,13 +258,26 @@ export async function reconcileUserPaygInvoices(userId: number): Promise<void> {
       return;
     }
 
+    // Prefer an existing INV-PAYG-... invoice as primary when deduplicating
+    const matched =
+      matches.find((inv) => inv.invoiceNumber.startsWith('INV-PAYG-')) ?? matches[0];
+    const duplicates = matches.filter((inv) => inv.id !== matched.id);
+    const maxMatchedAmount = matches.reduce((max, inv) => Math.max(max, inv.amount || 0), 0);
+
+    if (duplicates.length > 0 && prisma?.invoice?.deleteMany) {
+      await prisma.invoice.deleteMany({
+        where: { id: { in: duplicates.map((d) => d.id) }, userId },
+      });
+    }
+
     const normalizedNum = normalizeInvoiceNumberToPayg(matched.invoiceNumber);
-    const targetAmount = Math.max(matched.amount, Math.round(item.accumulatedCost));
+    const targetAmount = Math.max(maxMatchedAmount, Math.round(item.accumulatedCost));
     const needsUpdate =
       normalizedNum !== matched.invoiceNumber ||
       matched.status !== 'PAID' ||
       matched.reference !== 'PAYG_RUNNING' ||
       matched.paymentMethod !== 'Account Balance' ||
+      matched.type !== item.type ||
       targetAmount !== matched.amount;
 
     if (needsUpdate) {
@@ -251,6 +287,7 @@ export async function reconcileUserPaygInvoices(userId: number): Promise<void> {
           ...(normalizedNum !== matched.invoiceNumber
             ? { invoiceNumber: normalizedNum, merchantOrderId: normalizedNum }
             : {}),
+          type: item.type,
           amount: targetAmount,
           status: 'PAID',
           paymentMethod: 'Account Balance',
@@ -367,6 +404,32 @@ export async function reconcileUserPaygInvoices(userId: number): Promise<void> {
           },
         });
       }
+    }
+  }
+
+  // Normalize any remaining legacy INV-S3-... invoices (e.g. from terminated services)
+  const handledIds = new Set<number>();
+  for (const s3 of s3s) {
+    for (const inv of existingInvoices) {
+      if (matchesServiceInvoice(inv, 'objectStorageServiceId', s3.id, s3.name)) {
+        handledIds.add(inv.id);
+      }
+    }
+  }
+  for (const inv of existingInvoices) {
+    if (inv.invoiceNumber.startsWith('INV-S3-') && !handledIds.has(inv.id)) {
+      const normalizedNum = normalizeInvoiceNumberToPayg(inv.invoiceNumber);
+      await prisma.invoice.update({
+        where: { id: inv.id },
+        data: {
+          invoiceNumber: normalizedNum,
+          merchantOrderId: normalizedNum,
+          type: 'OBJECT_STORAGE',
+          status: 'PAID',
+          paymentMethod: 'Account Balance',
+          reference: 'PAYG_RUNNING',
+        },
+      });
     }
   }
 }
