@@ -110,7 +110,7 @@ export default function PrivacyPolicyPage() {
               </div>
               <div className="space-y-3 text-sm sm:text-base leading-relaxed text-[var(--text-secondary)] font-normal">
                 <p>
-                  When you use Masdika Cloud services (including Cloud VPS, File CDN, and API Hub), we collect specific types of information to provide and improve our services:
+                  When you use Masdika Cloud services (including Cloud VPS, Object Storage, and File CDN), we collect specific types of information to provide and improve our services:
                 </p>
                 <ul className="list-disc pl-5 space-y-1.5 text-[var(--text-secondary)]">
                   <li><strong className="text-[var(--text-primary)] font-bold">Account Information:</strong> Name, email address, and billing details provided during registration.</li>

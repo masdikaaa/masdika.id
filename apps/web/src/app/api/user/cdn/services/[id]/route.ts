@@ -2,13 +2,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth-middleware';
 import { ensureDefaultCdnBucket } from '@/lib/cdn-bucket';
-import { deleteCustomerBucketCompletely, getCustomerRustFSConfig } from '@/lib/customer-rustfs';
+import { ensureCdnPlansExist } from '@/lib/cdn-plans-server';
+import { assertSufficientCommitmentBalance } from '@/lib/billing-commitment';
+import {
+  deleteCustomerBucketCompletely,
+  getCustomerRustFSConfig,
+  getObjectStorageClusterCapacity,
+  setCustomerBucketQuota,
+} from '@/lib/customer-rustfs';
 
 function parsePlanStorageGb(limitsStr: string | null | undefined): number {
   if (!limitsStr) return 0;
   try {
     const limits = JSON.parse(limitsStr);
-    if (limits.storage === 'unlimited' || limits.storageGB === 'unlimited') return 0;
+    if (limits.storage === 'unlimited' || limits.storageGb === 'unlimited' || limits.storageGB === 'unlimited') return 0;
+    if (limits.storageGb !== undefined) return Number(limits.storageGb) || 0;
     if (limits.storageGB !== undefined) return Number(limits.storageGB) || 0;
     if (limits.storage) {
       const match = String(limits.storage).trim().match(/^(\d+)\s*(GB|MB|KB|TB)$/i);
@@ -129,22 +137,131 @@ export async function PATCH(
   if (isNaN(subId)) return NextResponse.json({ error: 'Invalid File CDN ID' }, { status: 400 });
 
   const body = await req.json().catch(() => ({}));
-  const newName = String(body.name || '').trim().slice(0, 80);
-  if (!newName) {
-    return NextResponse.json({ error: 'Service name is required' }, { status: 400 });
-  }
-
   const sub = await prisma.subscription.findFirst({
-    where: { id: subId, userId, plan: { service: 'CDN' } },
+    where: { id: subId, userId, status: { in: ['ACTIVE', 'SUSPENDED'] }, plan: { service: 'CDN' } },
+    include: {
+      plan: true,
+      cdnBuckets: true,
+    },
   });
   if (!sub) return NextResponse.json({ error: 'File CDN service not found' }, { status: 404 });
 
-  await prisma.subscription.update({
+  const updateData: any = {};
+
+  if (typeof body.name === 'string') {
+    const newName = body.name.trim().slice(0, 80);
+    if (!newName) {
+      return NextResponse.json({ error: 'Service name cannot be empty' }, { status: 400 });
+    }
+    updateData.name = newName;
+  }
+
+  // In-place Plan Upgrade / Scale without losing any files, folders, or API keys
+  if (body.planId !== undefined) {
+    if (sub.status === 'SUSPENDED') {
+      return NextResponse.json(
+        { error: 'File CDN instance is suspended. Top up your balance to reactivate before upgrading.' },
+        { status: 403 }
+      );
+    }
+
+    const nextPlanId = parseInt(String(body.planId), 10);
+    if (isNaN(nextPlanId)) {
+      return NextResponse.json({ error: 'Invalid target plan ID' }, { status: 400 });
+    }
+
+    await ensureCdnPlansExist();
+    const targetPlan = await prisma.plan.findFirst({
+      where: { id: nextPlanId, service: 'CDN', isActive: true },
+    });
+    if (!targetPlan) {
+      return NextResponse.json({ error: 'Target File CDN plan not found or inactive' }, { status: 404 });
+    }
+
+    const currentGb = parsePlanStorageGb(sub.plan?.limits);
+    const nextGb = parsePlanStorageGb(targetPlan.limits);
+
+    if (nextGb > currentGb && currentGb > 0) {
+      const capacity = await getObjectStorageClusterCapacity();
+      const neededGb = nextGb - currentGb;
+      if (!capacity.available || capacity.freeGb < neededGb) {
+        return NextResponse.json(
+          { error: capacity.reason || `Cluster capacity full: only ${capacity.freeGb} GB available for upgrade.` },
+          { status: 503 }
+        );
+      }
+    }
+
+    const bucketNames = sub.cdnBuckets.map((b) => b.name);
+    if (nextGb > 0 && nextGb < currentGb) {
+      const mediaAgg = await prisma.secureMedia.aggregate({
+        where: {
+          userId,
+          isFolder: false,
+          OR: [
+            { subscriptionId: sub.id },
+            ...(bucketNames.length > 0 ? [{ subscriptionId: null, bucket: { in: bucketNames } }] : []),
+          ],
+        },
+        _sum: { size: true },
+      });
+      const usedBytes = Number(mediaAgg._sum.size || 0);
+      const nextQuotaBytes = nextGb * 1024 * 1024 * 1024;
+      if (usedBytes > nextQuotaBytes) {
+        return NextResponse.json(
+          { error: `Cannot downgrade to ${targetPlan.name} (${nextGb} GB): current usage exceeds target quota. Delete files first.` },
+          { status: 400 }
+        );
+      }
+    }
+
+    const currentMonthly = sub.lockedPrice || sub.plan?.price || 0;
+    const nextMonthly = targetPlan.price;
+    const nextHourly = targetPlan.hourlyPrice || Math.max(1, Math.ceil(nextMonthly / 730));
+
+    if (nextMonthly > currentMonthly) {
+      const freshUser = await prisma.user.findUnique({ where: { id: userId }, select: { balance: true } });
+      try {
+        await assertSufficientCommitmentBalance({
+          userId,
+          userBalance: freshUser?.balance || 0,
+          newServiceMonthly: nextMonthly - currentMonthly,
+          serviceName: `Upgrade ${sub.name || 'File CDN'} to ${targetPlan.name}`,
+        });
+      } catch (balErr: any) {
+        return NextResponse.json(
+          { error: balErr?.message || 'Insufficient account balance for upgrade.' },
+          { status: 400 }
+        );
+      }
+    }
+
+    updateData.planId = targetPlan.id;
+    updateData.lockedPrice = nextMonthly;
+    updateData.lockedHourlyPrice = nextHourly;
+
+    if (nextGb > 0 && bucketNames.length > 0) {
+      const quotaBytes = nextGb * 1024 * 1024 * 1024;
+      await Promise.all(bucketNames.map((b) => setCustomerBucketQuota(b, quotaBytes).catch(() => {})));
+    }
+  }
+
+  if (Object.keys(updateData).length === 0) {
+    return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
+  }
+
+  const updated = await prisma.subscription.update({
     where: { id: sub.id },
-    data: { name: newName },
+    data: updateData,
+    include: { plan: true },
   });
 
-  return NextResponse.json({ success: true, name: newName });
+  return NextResponse.json({
+    success: true,
+    name: updated.name,
+    planId: updated.planId,
+    planName: updated.plan?.name,
+  });
 }
 
 export async function DELETE(
@@ -161,36 +278,20 @@ export async function DELETE(
 
   const sub = await prisma.subscription.findFirst({
     where: { id: subId, userId, plan: { service: 'CDN' } },
-    include: { cdnBuckets: true },
   });
   if (!sub) return NextResponse.json({ error: 'File CDN service not found' }, { status: 404 });
 
-  // Clean up physical buckets on Customer RustFS
-  for (const b of sub.cdnBuckets) {
-    await deleteCustomerBucketCompletely(b.name).catch(() => {});
-  }
+  const { cleanupSubscriptionCdnResources } = await import('@/lib/cdn-bucket');
+  await cleanupSubscriptionCdnResources(sub.id, userId);
 
-  await prisma.$transaction([
-    prisma.secureMedia.deleteMany({
-      where: {
-        userId,
-        OR: [
-          { subscriptionId: sub.id },
-          { bucket: { in: sub.cdnBuckets.map((b) => b.name) } },
-        ],
-      },
-    }),
-    prisma.cdnBucket.deleteMany({ where: { subscriptionId: sub.id, userId } }),
-    prisma.cdnApiKey.deleteMany({ where: { subscriptionId: sub.id, userId } }),
-    prisma.subscription.update({
-      where: { id: sub.id },
-      data: {
-        status: 'TERMINATED',
-        terminationDate: new Date(),
-        autoRenew: false,
-      },
-    }),
-  ]);
+  await prisma.subscription.update({
+    where: { id: sub.id },
+    data: {
+      status: 'TERMINATED',
+      terminationDate: new Date(),
+      autoRenew: false,
+    },
+  });
 
   return NextResponse.json({ success: true });
 }

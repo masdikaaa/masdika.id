@@ -396,7 +396,7 @@ export default function MyVpsPage() {
           </button>
 
           <Link
-            href="/dashboard/checkout?service=vps"
+            href="/dashboard/vps/new"
             className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-xs sm:text-xs font-bold rounded-xl transition-all shadow-2xs shrink-0 text-slate-950"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
@@ -428,7 +428,7 @@ export default function MyVpsPage() {
             You don&apos;t have any active VPS instances yet. Deploy your first high-performance cloud server in seconds.
           </p>
           <Link
-            href="/dashboard/checkout?service=vps"
+            href="/dashboard/vps/new"
             className="font-bold text-slate-950 px-4 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 transition-all shadow-2xs inline-flex items-center justify-center gap-1.5 text-xs sm:text-sm"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />

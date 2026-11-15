@@ -102,6 +102,7 @@ export async function GET(req: NextRequest) {
         createdAt: true,
         updatedAt: true,
         vpcIp: true,
+        bandwidthMbps: true,
         assignedIps: {
           select: { ipAddress: true, publicIp: true, isPrimary: true },
         },
@@ -319,7 +320,8 @@ export async function GET(req: NextRequest) {
       if (isNetDisabled) netDisabledCount++;
 
       const rateLimit = live?.rateLimit || null;
-      const isThrottled = typeof rateLimit === "number" && rateLimit > 0 && !isNetDisabled;
+      const orderedRate = vps.bandwidthMbps || 100;
+      const isThrottled = typeof rateLimit === "number" && rateLimit > 0 && rateLimit < orderedRate && !isNetDisabled;
       if (isThrottled) throttledCount++;
 
       const cpuPercent = live?.cpuPercent ?? 0;

@@ -17,9 +17,13 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid folder path' }, { status: 400 });
   }
 
-  const bucket = await resolveCustomerCdnBucket(auth.userId, requestedBucket);
+  const bucket = await resolveCustomerCdnBucket(
+    auth.userId,
+    requestedBucket,
+    auth.subscriptionId ?? undefined
+  );
   if (!bucket) {
-    return NextResponse.json({ error: 'Bucket not found or access denied' }, { status: 404 });
+    return NextResponse.json({ error: 'CDN storage not found or access denied' }, { status: 404 });
   }
 
   const bucketFilter = bucket.isDefault

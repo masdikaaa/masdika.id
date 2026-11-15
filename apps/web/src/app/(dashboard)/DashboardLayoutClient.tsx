@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Key, Settings, LogOut, Bell, Menu, LayoutDashboard, BarChart3, Database, Receipt, ArrowUpCircle, HardDrive, Server, Layers, MessageSquare, Wallet, Ticket, Network, Terminal, UploadCloud, MapPin, Flame, Activity, Gift, Clock, Code2, Sun, Moon, ShieldAlert, Loader2, Plus, ChevronDown, Search, Rocket, Boxes } from "lucide-react";
+import { Key, Settings, LogOut, Bell, Menu, LayoutDashboard, BarChart3, Database, Receipt, HardDrive, Server, Layers, MessageSquare, Wallet, Ticket, Network, Terminal, UploadCloud, MapPin, Flame, Activity, Gift, Clock, Code2, Sun, Moon, ShieldAlert, Loader2, Plus, ChevronDown, Search, Rocket, Boxes } from "lucide-react";
 import { SiKubernetes, SiCloudflare } from "react-icons/si";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -88,12 +88,10 @@ const SIDEBAR_LINKS = [
   { name: "Managed Database", href: "/dashboard/database", icon: Database, color: "text-cyan-400", group: "Storage & Data" },
   { name: "Object Storage", href: "/dashboard/object-storage", icon: HardDrive, color: "text-cyan-400", group: "Storage & Data", badge: "New" },
   { name: "File CDN", href: "/dashboard/cdn", icon: UploadCloud, color: "text-cyan-400", group: "Storage & Data" },
-  { name: "API Keys", href: "/dashboard/api-keys", icon: Key, color: "text-amber-400", group: "Tools" },
   { name: "Reseller API", href: "/dashboard/reseller-api", icon: Code2, color: "text-cyan-400", group: "Tools" },
   { name: "Support Tickets", href: "/dashboard/tickets", icon: MessageSquare, color: "text-cyan-400", group: "Support" },
   { name: "Affiliate Program", href: "/dashboard/affiliate", icon: Gift, color: "text-cyan-400", group: "Affiliate" },
   { name: "Promo & Rewards", href: "/dashboard/promos", icon: Ticket, color: "text-cyan-400", group: "Promotions" },
-  { name: "Order Service", href: "/dashboard/checkout", icon: ArrowUpCircle, color: "text-cyan-400", group: "Billing & Account" },
   { name: "Billing & Invoices", href: "/dashboard/billing", icon: Receipt, color: "text-cyan-400", group: "Billing & Account" },
   { name: "Settings", href: "/dashboard/settings", icon: Settings, color: "text-zinc-400", group: "Billing & Account" },
 ];
@@ -793,17 +791,6 @@ export default function DashboardLayoutClient({
                         <span className="text-[10px] font-mono font-bold text-cyan-400">
                           {formatRupiah(userBalance || 0)}
                         </span>
-                      </Link>
-                      <Link
-                        href="/dashboard/api-keys"
-                        onClick={() => setShowProfileMenu(false)}
-                        className={cn(
-                          "flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-colors",
-                          isDark ? "text-zinc-300 hover:text-white hover:bg-white/[0.05]" : "text-slate-700 hover:text-slate-900 hover:bg-slate-100"
-                        )}
-                      >
-                        <Key className="w-4 h-4 text-amber-400" />
-                        API Keys
                       </Link>
                     </div>
 

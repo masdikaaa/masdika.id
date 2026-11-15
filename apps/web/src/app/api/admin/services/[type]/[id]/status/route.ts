@@ -42,8 +42,19 @@ export async function PUT(req: Request, props: { params: Promise<{ type: string;
 
         result = await prisma.subscription.update({
           where: { id },
-          data: { status: statusValue, suspendReason: suspendReasonValue }
+          data: {
+            status: statusValue,
+            suspendReason: suspendReasonValue,
+            terminationDate: gracePeriodDeadline,
+          }
         });
+
+        if (sub.plan?.service === 'CDN') {
+          await prisma.cdnApiKey.updateMany({
+            where: { subscriptionId: id },
+            data: { isActive: !suspend },
+          });
+        }
 
         if (sub.user) {
           const isCdn = sub.plan?.service === 'CDN';

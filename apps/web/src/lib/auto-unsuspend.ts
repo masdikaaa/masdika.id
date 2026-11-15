@@ -357,6 +357,13 @@ export async function attemptAutoUnsuspendSubscription(subscriptionId: number) {
         throw new Error('ALREADY_UNSUSPENDED');
       }
 
+      if (sub.plan?.service === 'CDN') {
+        await tx.cdnApiKey.updateMany({
+          where: { subscriptionId: sub.id },
+          data: { isActive: true },
+        });
+      }
+
       if (requiredAmount > 0) {
         const updateResult = await tx.user.updateMany({
           where: { id: user.id, balance: { gte: requiredAmount } },

@@ -98,10 +98,6 @@ interface ServiceDef {
 
 const CATEGORIES = [
   { id: "COMPUTE", name: "Cloud Compute", icon: Server },
-  { id: "DATABASE", name: "Managed Database", icon: Database },
-  { id: "MANAGED_APP", name: "Managed Apps", icon: Boxes },
-  { id: "STORAGE_CDN", name: "File CDN", icon: UploadCloud },
-  { id: "DEVELOPER_API", name: "API Hub", icon: Code2 }
 ];
 
 const SERVICES: ServiceDef[] = [
@@ -122,87 +118,6 @@ const SERVICES: ServiceDef[] = [
     desc: "1-Click automated stack deployment for Docker, aaPanel, WordPress, Databases & AI.",
     badge: "1-Click",
     tags: ["Auto-Install", "Pre-configured", "Cloud VPS"]
-  },
-  {
-    id: "DATABASE",
-    name: "Managed Database",
-    category: "DATABASE",
-    icon: Database,
-    desc: "Production-ready MySQL, MariaDB, PostgreSQL & MongoDB with SSD storage & web GUI in Sidoarjo.",
-    badge: "Cloud DB",
-    tags: ["MySQL/PG/Mongo", "phpMyAdmin/pgAdmin", "Pay As You Go", "Sidoarjo Region"]
-  },
-  {
-    id: "MANAGED_APP",
-    name: "Managed Applications",
-    category: "MANAGED_APP",
-    icon: Boxes,
-    desc: "Dedicated containerized AI coding agents, workflow engines & API routers on Kubernetes with auto SSL.",
-    badge: "Kubernetes Native",
-    tags: ["Hermes Agent", "9Router", "n8n", "OpenCode", "OpenClaw", "Auto SSL"]
-  },
-  {
-    id: "CDN",
-    name: "File CDN",
-    category: "STORAGE_CDN",
-    icon: UploadCloud,
-    desc: "Low-latency edge object delivery with automatic media optimization.",
-    badge: "Edge Speed",
-    tags: ["Global Edge", "Image Optimizer", "98.99% SLA"]
-  },
-  {
-    id: "TIKTOK",
-    name: "TikTok API",
-    category: "DEVELOPER_API",
-    icon: FileVideo,
-    desc: "High-throughput video metadata & watermark-free HD stream extraction.",
-    badge: "API v2",
-    tags: ["No-Watermark HD", "Metadata", "Batch Ready"]
-  },
-  {
-    id: "SPOTIFY",
-    name: "Spotify API",
-    category: "DEVELOPER_API",
-    icon: Music,
-    desc: "Track metadata search, album artwork, and high-bitrate audio streams.",
-    badge: "Audio API",
-    tags: ["Track Search", "Album Metadata", "High Bitrate"]
-  },
-  {
-    id: "YOUTUBE",
-    name: "YouTube API",
-    category: "DEVELOPER_API",
-    icon: PlaySquare,
-    desc: "Fast video metadata scraper, caption track & 4K stream extractor.",
-    badge: "Media Stream",
-    tags: ["Up to 4K", "Audio Extract", "Subtitles"]
-  },
-  {
-    id: "BLOG",
-    name: "Blog API",
-    category: "DEVELOPER_API",
-    icon: FileText,
-    desc: "Headless CMS backend API with markdown rendering and edge caching.",
-    badge: "Headless CMS",
-    tags: ["REST & GraphQL", "Markdown", "Edge Cache"]
-  },
-  {
-    id: "BMKG_WEATHER",
-    name: "BMKG Weather API",
-    category: "DEVELOPER_API",
-    icon: Cloud,
-    desc: "Real-time Indonesian meteorological weather forecasts & radar data.",
-    badge: "Real-time",
-    tags: ["All Provinces", "3-Day Forecast", "BMKG Feed"]
-  },
-  {
-    id: "BMKG_EARTHQUAKE",
-    name: "BMKG Earthquake API",
-    category: "DEVELOPER_API",
-    icon: Activity,
-    desc: "Instant seismic event feed, tsunami warnings, and shakemap coordinates.",
-    badge: "Live Alert",
-    tags: ["Seismic Alerts", "Shakemap", "M 5.0+ Feed"]
   },
 ];
 
@@ -627,10 +542,6 @@ function CheckoutContent() {
                                   el.scrollIntoView({ behavior: "smooth", block: "start" });
                                 }
                               }, 100);
-                            } else if (srv.id === "DATABASE") {
-                              router.replace("/dashboard/checkout?service=DATABASE", { scroll: false });
-                            } else if (srv.id === "MANAGED_APP") {
-                              router.replace("/dashboard/checkout?service=MANAGED_APP", { scroll: false });
                             }
                           }}
                           className={cn(

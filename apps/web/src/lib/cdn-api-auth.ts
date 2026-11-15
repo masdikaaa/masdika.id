@@ -55,11 +55,26 @@ export async function authenticateCdnApiKey(req: NextRequest) {
   const isAdmin = record.user.role === 'ADMIN' || record.user.role === 'SUPER_ADMIN';
   let isSuspended = false;
   if (!isAdmin) {
-    const subInfo = await getSubscriptionInfo(record.userId, 'CDN');
-    if (!subInfo.hasSubscription) {
-      return { error: 'Active File CDN subscription required.', status: 403 as const };
+    if (record.subscriptionId) {
+      const targetSub = await prisma.subscription.findFirst({
+        where: {
+          id: record.subscriptionId,
+          userId: record.userId,
+          status: { in: ['ACTIVE', 'SUSPENDED'] },
+        },
+        select: { status: true },
+      });
+      if (!targetSub) {
+        return { error: 'Active File CDN subscription required.', status: 403 as const };
+      }
+      isSuspended = targetSub.status === 'SUSPENDED';
+    } else {
+      const subInfo = await getSubscriptionInfo(record.userId, 'CDN');
+      if (!subInfo.hasSubscription) {
+        return { error: 'Active File CDN subscription required.', status: 403 as const };
+      }
+      isSuspended = subInfo.isSuspended;
     }
-    isSuspended = subInfo.isSuspended;
   }
 
   prisma.cdnApiKey
@@ -72,6 +87,7 @@ export async function authenticateCdnApiKey(req: NextRequest) {
   return {
     userId: record.userId,
     keyId: record.id,
+    subscriptionId: record.subscriptionId ?? null,
     permission: record.permission,
     role: record.user.role,
     isSuspended,

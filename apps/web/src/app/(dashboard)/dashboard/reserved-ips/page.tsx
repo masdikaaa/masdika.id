@@ -164,8 +164,11 @@ export default function ReservedIpsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-[60vh] w-full flex items-center justify-center">
-        <RefreshCw className="w-10 h-10 text-cyan-500 animate-spin" />
+      <div className="min-h-[60vh] w-full flex flex-col items-center justify-center gap-3">
+        <RefreshCw className="w-8 h-8 text-cyan-400 animate-spin" />
+        <p className={cn("text-xs font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
+          Loading reserved IPs...
+        </p>
       </div>
     );
   }
@@ -223,7 +226,7 @@ export default function ReservedIpsPage() {
       </div>
 
       {ips.length === 0 ? (
-        <div className={cn("border rounded-2xl p-8 sm:p-12 text-center", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+        <div className={cn("border rounded-2xl p-8 sm:p-12 text-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
           <div className={cn("w-16 h-16 rounded-2xl border flex items-center justify-center mx-auto mb-5", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
             <Network className={cn("w-8 h-8", isDark ? "text-zinc-500" : "text-slate-400")} />
           </div>
@@ -241,7 +244,7 @@ export default function ReservedIpsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {ips.map(ip => (
-            <div key={ip.id} className={cn("border rounded-2xl p-4 sm:p-5 transition-all relative", isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/[0.15]" : "bg-white border-slate-200/90 hover:border-slate-300 shadow-2xs")}>
+            <div key={ip.id} className={cn("border rounded-2xl p-4 sm:p-5 transition-all relative", isDark ? "bg-[#111115] border-white/[0.08] hover:border-cyan-500/30" : "bg-white border-slate-200/90 hover:border-cyan-300 shadow-2xs")}>
               <div className="absolute top-4 right-4 z-10">
                 <button
                   onClick={() => toggleSelectIp(ip.id)}
@@ -332,21 +335,36 @@ export default function ReservedIpsPage() {
                   <>
                     <button
                       onClick={() => handleOpenAttachModal(ip)}
-                      className="flex-1 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-xl text-xs sm:text-sm font-medium transition-colors"
+                      className={cn(
+                        "flex-1 py-2 rounded-xl text-xs font-semibold border transition-colors cursor-pointer",
+                        isDark
+                          ? "bg-cyan-500/10 hover:bg-cyan-500/20 border-cyan-500/25 text-cyan-400"
+                          : "bg-cyan-50 hover:bg-cyan-100 border-cyan-200 text-cyan-700"
+                      )}
                     >
                       Attach VPS
                     </button>
                     <button
-                      onClick={() => router.push('/dashboard/checkout')}
-                      className="flex-1 py-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-xl text-xs sm:text-sm font-medium transition-colors"
+                      onClick={() => router.push('/dashboard/vps/new')}
+                      className={cn(
+                        "flex-1 py-2 rounded-xl text-xs font-semibold border transition-colors cursor-pointer",
+                        isDark
+                          ? "bg-white/[0.04] hover:bg-white/[0.08] border-white/[0.08] text-zinc-200"
+                          : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700"
+                      )}
                     >
-                      Deploy New
+                      Deploy VPS
                     </button>
                   </>
                 )}
                 <button
                   onClick={() => handleOpenReleaseModal(ip)}
-                  className="flex-1 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl text-xs sm:text-sm font-medium transition-colors"
+                  className={cn(
+                    "flex-1 py-2 rounded-xl text-xs font-semibold border transition-colors cursor-pointer",
+                    isDark
+                      ? "bg-red-500/10 hover:bg-red-500/20 border-red-500/25 text-red-400"
+                      : "bg-red-50 hover:bg-red-100 border-red-200 text-red-700"
+                  )}
                 >
                   Release IP
                 </button>
@@ -381,8 +399,8 @@ export default function ReservedIpsPage() {
       />
 
       {showAttachModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
-          <div className={cn("border rounded-2xl p-6 max-w-md w-full shadow-xl relative", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90")}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className={cn("border rounded-2xl p-6 max-w-md w-full shadow-xl relative", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90")}>
             <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>Attach Reserved IP</h3>
             <p className={cn("text-sm mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>
               Attach <strong className={cn("", isDark ? "text-white" : "text-slate-900")}>{ipToAttach?.ipAddress}</strong> to an existing VPS. This will replace the current primary public IP of the VPS.

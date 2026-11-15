@@ -17,6 +17,7 @@ import {
   getObjectStreamFromCustomerRustFS,
   getCustomerRustFSConfig,
   getDefaultCdnBucketName,
+  deleteFromCustomerRustFS,
 } from "@/lib/customer-rustfs";
 
 const INLINE_ALLOWED_MIME = new Set([
@@ -65,7 +66,15 @@ export async function GET(
       }
     }
 
-    if (media.userId) {
+    if (media.subscriptionId) {
+      const sub = await prisma.subscription.findUnique({
+        where: { id: media.subscriptionId },
+        select: { status: true },
+      });
+      if (!sub || sub.status === "SUSPENDED" || sub.status !== "ACTIVE") {
+        return new NextResponse("Service Suspended", { status: 403 });
+      }
+    } else if (media.userId) {
       const { getSubscriptionInfo } = await import('@/lib/subscription');
       const subInfo = await getSubscriptionInfo(media.userId, "CDN");
       if (subInfo.isSuspended || !subInfo.hasSubscription) {
@@ -75,6 +84,9 @@ export async function GET(
 
     // Expiry check
     if (media.expiresAt && media.expiresAt < new Date()) {
+      if (media.bucket) {
+        deleteFromCustomerRustFS(media.bucket, media.filename).catch(() => {});
+      }
       deleteFromRustFS(media.filename).catch(() => {});
       const candidateDirs = [
         path.join(process.cwd(), "storage", "secure-media"),

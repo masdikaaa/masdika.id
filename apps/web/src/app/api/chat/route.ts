@@ -310,7 +310,6 @@ export async function POST(req: Request): Promise<Response> {
         certifications,
         testimonials,
         seriesList,
-        apiProjects,
         vpsPricings,
       ] = await Promise.all([
         prisma.project.findMany({
@@ -394,10 +393,6 @@ export async function POST(req: Request): Promise<Response> {
           },
           orderBy: { createdAt: 'desc' },
           take: 50,
-        }),
-        prisma.apiProject.findMany({
-          select: { name: true, description: true, endpoint: true, method: true, category: true, isPremium: true },
-          orderBy: { createdAt: 'desc' },
         }),
         prisma.vpsPricing.findMany(),
       ]);
@@ -497,7 +492,7 @@ Location: Sidoarjo, Indonesia
 IT Consulting & Cloud Hosting Mandiri (Self-Service):
 - High-Performance Cloud VPS: Pay-As-You-Go, Custom/Flex CPU & RAM, Private Network (VPC), VNC Console in browser.
 - Managed Kubernetes (K3s): Instant cluster provisioning.
-- File CDN & API Hub.
+- Object Storage (S3-compatible) & File CDN.
 - Consulting: Cloud Architecture, DevOps (CI/CD), & Web Development.
 </services>
 
@@ -588,14 +583,10 @@ ${vpsPricings.length > 0 ? vpsPricings.map(p => `- ${p.name} (${p.key}): Rp ${p.
 Contoh: VPS 4 Core, 8GB RAM, 50GB SSD, 1 IPv4, Backup 1 -> Total per jam dihitung dari komponen tsb, lalu dikali 720. Selalu berikan total bulanan dalam IDR.
 </vps_pricing>
 
-<api_hub>
-${apiProjects.length > 0 ? apiProjects.map(api => `* ${api.name} (${api.method} ${api.endpoint}) [${api.isPremium ? 'Premium' : 'Gratis'}]: ${api.description}`).join('\n') : 'None'}
-</api_hub>
-
 <guidelines_and_rules>
 - VPS is KVM (Proxmox) based, customizable CPU/RAM/SSD. Includes VNC console & SSH access.
 - K3s is agentless instant provisioning — no agent install needed on nodes.
-- API Hub requires creating an account at masdika.id and generating a free API Key. Send as Header \`Authorization: Bearer <API_KEY>\` or query param \`?apikey=<API_KEY>\`.
+- Object Storage is 100% S3-compatible with isolated buckets, scoped IAM keys, and zero-downtime upgrades.
 - All VPS pricing is Pay-As-You-Go (hourly billing). Monthly estimate = hourly rate × 720 hours.
 - For service inquiries beyond what's listed here, always direct users to [me@masdika.id](mailto:me@masdika.id) or the [Contact Page](https://masdika.id/contact).
 - STRICT DOMAIN BOUNDARY REMINDER: You are STRICTLY RESTRICTED to inquiries about Masdika's portfolio, background, and Masdika.id infrastructure services. Under NO circumstances should you answer school/college homework, exams, general academic IT theory (such as general cybersecurity concepts, CIA Triad, threat vs vulnerability, business models), general math (e.g. 1+1), or general trivia. Politely decline any questions outside Masdika's scope using the standard refusal response.

@@ -594,8 +594,11 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-24">
-        <Loader2 className="w-7 h-7 animate-spin text-cyan-400" />
+      <div className="min-h-[60vh] w-full flex flex-col items-center justify-center gap-3">
+        <RefreshCw className="w-8 h-8 text-cyan-400 animate-spin" />
+        <p className={cn('text-xs font-medium', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+          Loading object storage details...
+        </p>
       </div>
     );
   }
@@ -1686,15 +1689,30 @@ s3 = boto3.client(
               </div>
             </div>
 
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => handleCopy(sdkSnippets[sdkTab], 'SDK snippet')}
-                className="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-zinc-200 text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-colors"
-              >
-                <Copy className="w-3 h-3" /> Copy
-              </button>
-              <pre className={cn('p-4 rounded-xl font-mono text-[11px] overflow-x-auto leading-relaxed border', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-cyan-300' : 'bg-slate-900 border-slate-800 text-cyan-300')}>
+            {/* macOS Terminal Window */}
+            <div className={cn('rounded-xl border overflow-hidden', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-slate-50 border-slate-200')}>
+              <div className={cn('px-3.5 py-2 border-b flex items-center justify-between gap-2', isDark ? 'bg-white/[0.03] border-white/[0.06]' : 'bg-slate-100/90 border-slate-200')}>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500/85" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400/85" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/85" />
+                  <span className={cn('ml-2 text-[10px] font-mono font-medium', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+                    {sdkTab === 'cli' ? 'bash — aws-cli' : sdkTab === 'node' ? 'index.mjs — node' : sdkTab === 'python' ? 'main.py — python' : 'filesystems.php — laravel'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCopy(sdkSnippets[sdkTab], 'SDK snippet')}
+                  className={cn(
+                    'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold border transition-colors cursor-pointer',
+                    isDark ? 'bg-white/[0.04] border-white/[0.08] text-zinc-300 hover:text-white' : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900'
+                  )}
+                >
+                  <Copy className="w-3 h-3" />
+                  Copy
+                </button>
+              </div>
+              <pre className={cn('p-3.5 font-mono text-[11px] leading-relaxed overflow-x-auto', isDark ? 'text-cyan-300' : 'text-slate-800')}>
                 {sdkSnippets[sdkTab]}
               </pre>
             </div>
@@ -1749,31 +1767,48 @@ s3 = boto3.client(
                 {[
                   {
                     label: 'Linux (x86_64)',
+                    title: 'bash — linux-install',
                     cmd: `curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip awscliv2.zip && sudo ./aws/install`,
                   },
                   {
                     label: 'macOS (Homebrew)',
+                    title: 'zsh — macos-install',
                     cmd: `brew install awscli`,
                   },
                   {
                     label: 'Windows (PowerShell / Winget)',
+                    title: 'powershell — windows-install',
                     cmd: `winget install Amazon.AWSCLI`,
                   },
                 ].map((osItem) => (
                   <div key={osItem.label} className="space-y-1.5">
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className={cn('font-semibold', isDark ? 'text-zinc-300' : 'text-slate-700')}>{osItem.label}</span>
-                      <button
-                        type="button"
-                        onClick={() => handleCopy(osItem.cmd, osItem.label)}
-                        className={cn('inline-flex items-center gap-1 font-bold cursor-pointer focus:outline-none focus-visible:outline-none', isDark ? 'text-cyan-400 hover:text-cyan-300' : 'text-cyan-600 hover:text-cyan-700')}
-                      >
-                        <Copy className="w-3 h-3" /> Copy
-                      </button>
+                    <span className={cn('text-[11px] font-semibold block', isDark ? 'text-zinc-300' : 'text-slate-700')}>{osItem.label}</span>
+                    <div className={cn('rounded-xl border overflow-hidden', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-slate-50 border-slate-200')}>
+                      <div className={cn('px-3.5 py-2 border-b flex items-center justify-between gap-2', isDark ? 'bg-white/[0.03] border-white/[0.06]' : 'bg-slate-100/90 border-slate-200')}>
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-2.5 h-2.5 rounded-full bg-rose-500/85" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-amber-400/85" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/85" />
+                          <span className={cn('ml-2 text-[10px] font-mono font-medium', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+                            {osItem.title}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleCopy(osItem.cmd, osItem.label)}
+                          className={cn(
+                            'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold border transition-colors cursor-pointer',
+                            isDark ? 'bg-white/[0.04] border-white/[0.08] text-zinc-300 hover:text-white' : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900'
+                          )}
+                        >
+                          <Copy className="w-3 h-3" />
+                          Copy
+                        </button>
+                      </div>
+                      <pre className={cn('p-3.5 font-mono text-[11px] leading-relaxed overflow-x-auto', isDark ? 'text-cyan-300' : 'text-slate-800')}>
+                        {osItem.cmd}
+                      </pre>
                     </div>
-                    <pre className={cn('p-3 rounded-xl font-mono text-[11px] overflow-x-auto border', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-cyan-300' : 'bg-slate-900 border-slate-800 text-cyan-300')}>
-                      {osItem.cmd}
-                    </pre>
                   </div>
                 ))}
               </div>
@@ -1792,39 +1827,67 @@ s3 = boto3.client(
               </div>
 
               <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className={cn('font-semibold', isDark ? 'text-zinc-300' : 'text-slate-700')}>Setup Named Profile (Recommended)</span>
-                  <button
-                    type="button"
-                    onClick={() => handleCopy('aws configure --profile masdika', 'Profile command')}
-                    className={cn('inline-flex items-center gap-1 font-bold cursor-pointer focus:outline-none focus-visible:outline-none', isDark ? 'text-cyan-400 hover:text-cyan-300' : 'text-cyan-600 hover:text-cyan-700')}
-                  >
-                    <Copy className="w-3 h-3" /> Copy
-                  </button>
-                </div>
-                <pre className={cn('p-3 rounded-xl font-mono text-[11px] overflow-x-auto border leading-relaxed', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-cyan-300' : 'bg-slate-900 border-slate-800 text-cyan-300')}>
+                <span className={cn('text-[11px] font-semibold block', isDark ? 'text-zinc-300' : 'text-slate-700')}>Setup Named Profile (Recommended)</span>
+                <div className={cn('rounded-xl border overflow-hidden', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-slate-50 border-slate-200')}>
+                  <div className={cn('px-3.5 py-2 border-b flex items-center justify-between gap-2', isDark ? 'bg-white/[0.03] border-white/[0.06]' : 'bg-slate-100/90 border-slate-200')}>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-rose-500/85" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-amber-400/85" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/85" />
+                      <span className={cn('ml-2 text-[10px] font-mono font-medium', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+                        bash — aws-configure
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleCopy('aws configure --profile masdika', 'Profile command')}
+                      className={cn(
+                        'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold border transition-colors cursor-pointer',
+                        isDark ? 'bg-white/[0.04] border-white/[0.08] text-zinc-300 hover:text-white' : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900'
+                      )}
+                    >
+                      <Copy className="w-3 h-3" />
+                      Copy
+                    </button>
+                  </div>
+                  <pre className={cn('p-3.5 font-mono text-[11px] leading-relaxed overflow-x-auto', isDark ? 'text-cyan-300' : 'text-slate-800')}>
 {`aws configure --profile masdika
 # AWS Access Key ID     : <YOUR_ACCESS_KEY>
 # AWS Secret Access Key : <YOUR_SECRET_KEY>
 # Default region name   : us-east-1
 # Default output format : json`}
-                </pre>
+                  </pre>
+                </div>
               </div>
 
               <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className={cn('font-semibold', isDark ? 'text-zinc-300' : 'text-slate-700')}>Set Default Endpoint on Profile (Optional)</span>
-                  <button
-                    type="button"
-                    onClick={() => handleCopy(`aws configure set endpoint_url ${endpointVal} --profile masdika`, 'Endpoint config')}
-                    className={cn('inline-flex items-center gap-1 font-bold cursor-pointer focus:outline-none focus-visible:outline-none', isDark ? 'text-cyan-400 hover:text-cyan-300' : 'text-cyan-600 hover:text-cyan-700')}
-                  >
-                    <Copy className="w-3 h-3" /> Copy
-                  </button>
+                <span className={cn('text-[11px] font-semibold block', isDark ? 'text-zinc-300' : 'text-slate-700')}>Set Default Endpoint on Profile (Optional)</span>
+                <div className={cn('rounded-xl border overflow-hidden', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-slate-50 border-slate-200')}>
+                  <div className={cn('px-3.5 py-2 border-b flex items-center justify-between gap-2', isDark ? 'bg-white/[0.03] border-white/[0.06]' : 'bg-slate-100/90 border-slate-200')}>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-rose-500/85" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-amber-400/85" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/85" />
+                      <span className={cn('ml-2 text-[10px] font-mono font-medium', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+                        bash — endpoint-url
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleCopy(`aws configure set endpoint_url ${endpointVal} --profile masdika`, 'Endpoint config')}
+                      className={cn(
+                        'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold border transition-colors cursor-pointer',
+                        isDark ? 'bg-white/[0.04] border-white/[0.08] text-zinc-300 hover:text-white' : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900'
+                      )}
+                    >
+                      <Copy className="w-3 h-3" />
+                      Copy
+                    </button>
+                  </div>
+                  <pre className={cn('p-3.5 font-mono text-[11px] leading-relaxed overflow-x-auto', isDark ? 'text-cyan-300' : 'text-slate-800')}>
+                    {`aws configure set endpoint_url ${endpointVal} --profile masdika`}
+                  </pre>
                 </div>
-                <pre className={cn('p-3 rounded-xl font-mono text-[11px] overflow-x-auto border', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-cyan-300' : 'bg-slate-900 border-slate-800 text-cyan-300')}>
-                  {`aws configure set endpoint_url ${endpointVal} --profile masdika`}
-                </pre>
               </div>
             </div>
           </div>
@@ -1872,19 +1935,30 @@ s3 = boto3.client(
               ].map((op) => (
                 <div
                   key={op.title}
-                  className={cn('p-3.5 rounded-xl border space-y-2', isDark ? 'bg-[#0a0a0c] border-white/[0.06]' : 'bg-slate-50 border-slate-200')}
+                  className={cn('rounded-xl border overflow-hidden', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-slate-50 border-slate-200')}
                 >
-                  <div className="flex items-center justify-between gap-2 text-xs">
-                    <span className={cn('font-bold', isDark ? 'text-white' : 'text-slate-900')}>{op.title}</span>
+                  <div className={cn('px-3.5 py-2 border-b flex items-center justify-between gap-2', isDark ? 'bg-white/[0.03] border-white/[0.06]' : 'bg-slate-100/90 border-slate-200')}>
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="w-2.5 h-2.5 rounded-full bg-rose-500/85 shrink-0" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-amber-400/85 shrink-0" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/85 shrink-0" />
+                      <span className={cn('ml-2 text-[10px] font-mono font-medium truncate', isDark ? 'text-zinc-300' : 'text-slate-600')}>
+                        {op.title}
+                      </span>
+                    </div>
                     <button
                       type="button"
                       onClick={() => handleCopy(op.cmd, op.title)}
-                      className={cn('inline-flex items-center gap-1 text-[11px] font-bold cursor-pointer focus:outline-none focus-visible:outline-none', isDark ? 'text-cyan-400 hover:text-cyan-300' : 'text-cyan-600 hover:text-cyan-700')}
+                      className={cn(
+                        'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold border transition-colors cursor-pointer shrink-0',
+                        isDark ? 'bg-white/[0.04] border-white/[0.08] text-zinc-300 hover:text-white' : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900'
+                      )}
                     >
-                      <Copy className="w-3 h-3" /> Copy
+                      <Copy className="w-3 h-3" />
+                      Copy
                     </button>
                   </div>
-                  <pre className={cn('p-2.5 rounded-lg font-mono text-[11px] overflow-x-auto', isDark ? 'bg-[#111115] text-cyan-300' : 'bg-slate-900 text-cyan-300')}>
+                  <pre className={cn('p-3.5 font-mono text-[11px] leading-relaxed overflow-x-auto', isDark ? 'text-cyan-300' : 'text-slate-800')}>
                     {op.cmd}
                   </pre>
                 </div>
@@ -1959,7 +2033,7 @@ s3 = boto3.client(
               <h2 className={cn('text-sm font-bold', isDark ? 'text-red-400' : 'text-red-700')}>Danger Zone</h2>
             </div>
             <p className={cn('text-xs leading-relaxed', isDark ? 'text-zinc-400' : 'text-red-800')}>
-              Terminating permanently deletes all buckets, objects, and S3 Access Keys from Customer RustFS and stops hourly billing.
+              Terminating permanently deletes all buckets, objects, and S3 Access Keys from Masdika Object Storage and stops hourly billing.
             </p>
             <button type="button" onClick={handleTerminate} disabled={terminating} className="w-full py-2.5 rounded-xl text-xs font-bold bg-red-500 hover:bg-red-600 text-white cursor-pointer transition-colors">
               {terminating ? 'Terminating...' : 'Terminate Object Storage'}

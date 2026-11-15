@@ -19,7 +19,8 @@ import {
   ArrowRight,
   ShieldCheck,
   Radio,
-  Cpu
+  Cpu,
+  HardDrive
 } from "lucide-react";
 import { SiKubernetes } from "react-icons/si";
 import Link from "next/link";
@@ -100,7 +101,7 @@ export default function LookingGlassPage() {
   };
 
   const productLinks = [
-    { title: "API Hub", desc: "Discover and test public REST APIs for your projects.", path: "/api-hub", icon: FlaskConical },
+    { title: "Object Storage", desc: "S3-compatible buckets with IAM keys and presigned URLs.", path: "/object-storage", icon: HardDrive },
     { title: "File CDN", desc: "Securely upload temporary files up to 100MB.", path: "/file-cdn", icon: UploadCloud },
     { title: "Cloud VPS", desc: "High-performance virtual private servers with SSD.", path: "/vps", icon: Terminal },
     { title: "Reseller API", desc: "Integrate our cloud provisioning programmatically.", path: "/reseller-api", icon: Code2 },

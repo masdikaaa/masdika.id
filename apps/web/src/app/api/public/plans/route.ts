@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { ensureDatabasePlansExist } from "@/lib/database-plans-server";
 import { ensureAppPlansExist } from "@/lib/app-plans-server";
 import { ensureObjectStoragePlansExist } from "@/lib/object-storage-plans-server";
+import { ensureCdnPlansExist } from "@/lib/cdn-plans-server";
 
 export async function GET() {
   try {
@@ -11,10 +12,11 @@ export async function GET() {
       orderBy: { price: "asc" }
     });
 
-    // If database, app, or object storage plans are missing from a fresh database / CI/CD environment, auto-seed them
+    // If database, app, object storage, or CDN plans are missing from a fresh database / CI/CD environment, auto-seed them
     const hasDbPlans = plans.some((p) => p.service === "DATABASE");
     const hasAppPlans = plans.some((p) => p.service === "APP");
     const hasObjPlans = plans.some((p) => p.service === "OBJECT_STORAGE");
+    const hasCdnPlans = plans.some((p) => p.service === "CDN");
 
     let needsRefetch = false;
     if (!hasDbPlans) {
@@ -27,6 +29,10 @@ export async function GET() {
     }
     if (!hasObjPlans) {
       await ensureObjectStoragePlansExist();
+      needsRefetch = true;
+    }
+    if (!hasCdnPlans) {
+      await ensureCdnPlansExist();
       needsRefetch = true;
     }
 

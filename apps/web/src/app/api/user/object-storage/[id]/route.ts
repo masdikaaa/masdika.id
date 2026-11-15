@@ -103,6 +103,9 @@ export async function PATCH(
   if (!service || service.status === 'TERMINATED') {
     return NextResponse.json({ error: 'Object Storage service not found' }, { status: 404 });
   }
+  if (service.status === 'SUSPENDED') {
+    return NextResponse.json({ error: 'Object Storage service is suspended. Top up balance to reactivate before modifying.' }, { status: 403 });
+  }
 
   const body = await req.json().catch(() => ({}));
   const updates: any = {};
@@ -158,6 +161,10 @@ export async function PATCH(
         return false;
       }
     });
+
+    if (dbPlans.length > 0 && !matchedPlan) {
+      return NextResponse.json({ error: 'Selected storage capacity does not match an active official plan.' }, { status: 400 });
+    }
 
     if (matchedPlan) {
       try {

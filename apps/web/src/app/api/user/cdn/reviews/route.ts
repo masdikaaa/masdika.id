@@ -3,18 +3,38 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
 import { encryptDeterministic, decryptDeterministic } from "@/lib/encryption";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const auth = await requireAuth({ allowedRoles: ["USER", "ADMIN"] });
   if (auth.error) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
 
   try {
+    const subIdParam = req.nextUrl.searchParams.get("subscriptionId");
+    const subId = subIdParam ? parseInt(subIdParam, 10) : NaN;
+    let mediaWhere: any = { userId: auth.userId };
+
+    if (!isNaN(subId)) {
+      const sub = await prisma.subscription.findFirst({
+        where: { id: subId, userId: auth.userId, plan: { service: "CDN" } },
+        include: { cdnBuckets: { select: { name: true } } },
+      });
+      if (!sub) {
+        return NextResponse.json({ error: "File CDN instance not found" }, { status: 404 });
+      }
+      const bucketNames = sub.cdnBuckets.map((b) => b.name);
+      mediaWhere = {
+        userId: auth.userId,
+        OR: [
+          { subscriptionId: sub.id },
+          ...(bucketNames.length > 0 ? [{ subscriptionId: null, bucket: { in: bucketNames } }] : []),
+        ],
+      };
+    }
+
     const comments = await prisma.mediaComment.findMany({
       where: {
-        media: {
-          userId: auth.userId,
-        },
+        media: mediaWhere,
       },
       include: {
         media: {
@@ -32,9 +52,7 @@ export async function GET() {
 
     const ratings = await prisma.mediaRating.findMany({
       where: {
-        media: {
-          userId: auth.userId,
-        },
+        media: mediaWhere,
       },
       include: {
         media: {

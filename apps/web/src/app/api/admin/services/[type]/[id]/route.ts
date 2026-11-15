@@ -23,9 +23,18 @@ export async function DELETE(req: Request, props: { params: Promise<{ type: stri
 
     if (hardDelete) {
       switch (type) {
-        case 'subscriptions': 
-          result = await prisma.subscription.delete({ where: { id } }); 
+        case 'subscriptions': {
+          const subHard = await prisma.subscription.findUnique({
+            where: { id },
+            include: { plan: true, cdnBuckets: true },
+          });
+          if (subHard && (subHard.plan?.service === 'CDN' || subHard.cdnBuckets.length > 0)) {
+            const { cleanupSubscriptionCdnResources } = await import('@/lib/cdn-bucket');
+            await cleanupSubscriptionCdnResources(subHard.id, subHard.userId);
+          }
+          result = await prisma.subscription.delete({ where: { id } });
           break;
+        }
         case 'apikeys': 
           result = await prisma.apiKey.delete({ where: { id } }); 
           break;
@@ -108,11 +117,15 @@ export async function DELETE(req: Request, props: { params: Promise<{ type: stri
       case 'subscriptions': {
         const sub = await prisma.subscription.findUnique({
           where: { id },
-          include: { plan: true, user: true }
+          include: { plan: true, user: true, cdnBuckets: true }
         });
+        if (sub && (sub.plan?.service === 'CDN' || sub.cdnBuckets.length > 0)) {
+          const { cleanupSubscriptionCdnResources } = await import('@/lib/cdn-bucket');
+          await cleanupSubscriptionCdnResources(sub.id, sub.userId);
+        }
         result = await prisma.subscription.update({
           where: { id },
-          data: { status: statusValue, terminationDate: new Date() }
+          data: { status: statusValue, terminationDate: new Date(), autoRenew: false }
         });
         if (sub?.user) {
           sendTerminationEmail(

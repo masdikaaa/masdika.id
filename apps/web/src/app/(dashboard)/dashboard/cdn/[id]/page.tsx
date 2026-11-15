@@ -4,6 +4,7 @@ import { useState, useEffect, use, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { formatRupiah } from '@/lib/billing';
 import { useTheme } from '@/components/ThemeProvider';
 import { toast } from 'sonner';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
@@ -40,6 +41,17 @@ import {
   LayoutGrid,
   List as ListIcon,
   X,
+  FileCheck2,
+  Image as ImageIcon,
+  Film,
+  Music,
+  FileText,
+  Archive,
+  Ban,
+  MessageSquareQuote,
+  Star,
+  Clock,
+  HardDrive,
 } from 'lucide-react';
 
 interface SelectOption<T extends string> {
@@ -147,7 +159,7 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
   const [loading, setLoading] = useState(true);
   const [service, setService] = useState<any>(null);
   const [publicEndpoint, setPublicEndpoint] = useState('');
-  const [tab, setTab] = useState<'files' | 'buckets' | 'api' | 'settings'>('files');
+  const [tab, setTab] = useState<'files' | 'api' | 'reviews' | 'allowed' | 'settings'>('files');
   const workspaceRef = useRef<HTMLDivElement>(null);
 
   // Files & Folders state
@@ -164,7 +176,27 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadVisibility, setUploadVisibility] = useState<'PUBLIC' | 'PRIVATE'>('PUBLIC');
+  const [uploadExpiry, setUploadExpiry] = useState<'permanent' | '3600' | '86400' | '604800' | '2592000'>('permanent');
   const [dragOver, setDragOver] = useState(false);
+
+  // Reviews & Ratings monitoring state
+  const [reviewsData, setReviewsData] = useState<{
+    comments: any[];
+    ratings: any[];
+    stats: { totalComments: number; totalRatings: number; averageRating: number; totalMediaReviewed: number };
+  }>({
+    comments: [],
+    ratings: [],
+    stats: { totalComments: 0, totalRatings: 0, averageRating: 0, totalMediaReviewed: 0 },
+  });
+  const [loadingReviews, setLoadingReviews] = useState(false);
+
+  // In-place Upgrade Plan Modal state
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
+  const [availablePlans, setAvailablePlans] = useState<any[]>([]);
+  const [clusterCapacity, setClusterCapacity] = useState<{ available: boolean; freeGb: number; reason?: string } | null>(null);
+  const [selectedUpgradePlanId, setSelectedUpgradePlanId] = useState<number | null>(null);
+  const [upgradingPlan, setUpgradingPlan] = useState(false);
   const [showCreateFolder, setShowCreateFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
   const [creatingFolder, setCreatingFolder] = useState(false);
@@ -172,10 +204,6 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
   // Rename media modal
   const [renameTarget, setRenameTarget] = useState<{ id: number; name: string } | null>(null);
   const [renaming, setRenaming] = useState(false);
-
-  // Buckets state
-  const [newBucketName, setNewBucketName] = useState('');
-  const [creatingBucket, setCreatingBucket] = useState(false);
 
   // API Keys state
   const [apiKeys, setApiKeys] = useState<any[]>([]);
@@ -197,7 +225,7 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
     onConfirm: () => Promise<void>;
   } | null>(null);
 
-  const jumpToTab = (nextTab: 'files' | 'buckets' | 'api' | 'settings') => {
+  const jumpToTab = (nextTab: 'files' | 'api' | 'reviews' | 'allowed' | 'settings') => {
     setTab(nextTab);
     setTimeout(() => {
       workspaceRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -233,7 +261,7 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
       );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to load files');
-      setMedia(data.media || []);
+      setMedia(data.data || data.media || []);
     } catch (err: any) {
       toast.error(err?.message || 'Failed to load CDN files');
     } finally {
@@ -241,8 +269,82 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
     }
   };
 
+  const fetchReviews = async () => {
+    setLoadingReviews(true);
+    try {
+      const res = await fetch(`/api/user/cdn/reviews?subscriptionId=${id}`);
+      const data = await res.json();
+      if (res.ok) {
+        setReviewsData({
+          comments: data.comments || [],
+          ratings: data.ratings || [],
+          stats: data.stats || { totalComments: 0, totalRatings: 0, averageRating: 0, totalMediaReviewed: 0 },
+        });
+      }
+    } catch {
+      // silent
+    } finally {
+      setLoadingReviews(false);
+    }
+  };
+
+  const openUpgradeModal = async () => {
+    setUpgradeModalOpen(true);
+    setSelectedUpgradePlanId(service?.planId || null);
+    try {
+      const res = await fetch('/api/user/cdn/services');
+      const data = await res.json();
+      if (res.ok) {
+        setAvailablePlans(data.plans || []);
+        setClusterCapacity(data.capacity || null);
+      }
+    } catch {
+      toast.error('Failed to load File CDN plans');
+    }
+  };
+
+  const handleUpgradePlan = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedUpgradePlanId) return;
+    setUpgradingPlan(true);
+    try {
+      const res = await fetch(`/api/user/cdn/services/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planId: selectedUpgradePlanId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to upgrade File CDN plan');
+      toast.success(`Upgraded to ${data.planName || 'new plan'} without losing any data!`);
+      setUpgradeModalOpen(false);
+      fetchService();
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to upgrade plan');
+    } finally {
+      setUpgradingPlan(false);
+    }
+  };
+
+  const handleDeleteReviewItem = (type: 'comment' | 'rating', itemId: number) => {
+    setConfirmState({
+      title: type === 'comment' ? 'Delete Comment' : 'Delete Rating',
+      message: `Remove this ${type} from your File CDN review log?`,
+      confirmText: 'Delete',
+      onConfirm: async () => {
+        const res = await fetch(`/api/user/cdn/reviews?${type === 'comment' ? 'commentId' : 'ratingId'}=${itemId}`, {
+          method: 'DELETE',
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to delete');
+        toast.success(`${type === 'comment' ? 'Comment' : 'Rating'} removed`);
+        fetchReviews();
+      },
+    });
+  };
+
   useEffect(() => {
     fetchService();
+    fetchReviews();
     const timer = setInterval(() => fetchService(true), 15000);
     return () => clearInterval(timer);
   }, [id]);
@@ -270,46 +372,44 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
     if (!selectedBucket || files.length === 0) return;
     setUploading(true);
     const toastId = toast.loading(`Uploading ${files.length} file(s)...`);
+    const CHUNK_SIZE = 40 * 1024 * 1024; // 40MB chunks for Cloudflare / proxy compatibility
     try {
       for (const file of files) {
-        const initRes = await fetch('/api/user/cdn/upload/init', { method: 'POST' });
-        const initData = await initRes.json();
-        if (!initRes.ok || !initData.uploadToken) {
-          throw new Error(initData.error || 'Failed to initialize upload');
-        }
+        const uploadToken =
+          typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+            ? crypto.randomUUID()
+            : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        const totalChunks = Math.max(1, Math.ceil(file.size / CHUNK_SIZE));
+        const encodedName = btoa(encodeURIComponent(file.name));
+        const encodedFolder = btoa(encodeURIComponent(currentFolder || '/'));
 
-        const chunkSize = 5 * 1024 * 1024;
-        for (let offset = 0; offset < file.size; offset += chunkSize) {
-          const chunk = file.slice(offset, offset + chunkSize);
-          const chunkRes = await fetch('/api/user/cdn/upload/chunk', {
+        for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+          const start = chunkIndex * CHUNK_SIZE;
+          const end = Math.min(file.size, start + CHUNK_SIZE);
+          const chunkBlob = file.slice(start, end);
+
+          const res = await fetch('/api/user/cdn/upload-raw', {
             method: 'POST',
             headers: {
-              'x-upload-token': initData.uploadToken,
-              'Content-Type': 'application/octet-stream',
+              'x-upload-token': uploadToken,
+              'x-upload-chunk-index': chunkIndex.toString(),
+              'x-upload-total-chunks': totalChunks.toString(),
+              'x-upload-original-name': encodedName,
+              'x-upload-mime-type': file.type || 'application/octet-stream',
+              'x-upload-file-size': file.size.toString(),
+              'x-upload-folder-path': encodedFolder,
+              'x-upload-is-public': uploadVisibility === 'PUBLIC' ? 'true' : 'false',
+              'x-upload-expires-in': uploadExpiry,
+              'x-upload-bucket': selectedBucket,
+              'x-upload-subscription-id': String(id),
             },
-            body: chunk,
+            body: chunkBlob,
           });
-          if (!chunkRes.ok) {
-            const errData = await chunkRes.json().catch(() => ({}));
-            throw new Error(errData.error || 'Failed to upload file chunk');
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            throw new Error(data.error || `Failed to upload ${file.name}`);
           }
         }
-
-        const encodedName = btoa(unescape(encodeURIComponent(file.name)));
-        const encodedFolder = btoa(unescape(encodeURIComponent(currentFolder || '/')));
-        const finalizeRes = await fetch('/api/user/cdn/upload', {
-          method: 'POST',
-          headers: {
-            'x-upload-token': initData.uploadToken,
-            'x-upload-original-name': encodedName,
-            'x-upload-folder-path': encodedFolder,
-            'x-upload-is-public': uploadVisibility === 'PUBLIC' ? 'true' : 'false',
-            'x-upload-bucket': selectedBucket,
-            'x-upload-subscription-id': String(id),
-          },
-        });
-        const finalizeData = await finalizeRes.json();
-        if (!finalizeRes.ok) throw new Error(finalizeData.error || `Failed to upload ${file.name}`);
       }
       toast.success('Upload complete!', { id: toastId });
       fetchMedia(selectedBucket, currentFolder);
@@ -419,57 +519,6 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
     });
   };
 
-  const handleCreateBucket = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newBucketName.trim()) return;
-    setCreatingBucket(true);
-    try {
-      const res = await fetch('/api/user/cdn', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'createBucket',
-          subscriptionId: Number(id),
-          bucketName: newBucketName.trim().toLowerCase(),
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to create bucket');
-      toast.success(`Bucket "${data.bucket.name}" created`);
-      setNewBucketName('');
-      setSelectedBucket(data.bucket.name);
-      setCurrentFolder('/');
-      fetchService(true);
-    } catch (err: any) {
-      toast.error(err?.message || 'Failed to create bucket');
-    } finally {
-      setCreatingBucket(false);
-    }
-  };
-
-  const handleDeleteBucket = (bucketName: string) => {
-    setConfirmState({
-      title: 'Delete CDN Bucket',
-      message: `Permanently delete bucket "${bucketName}"? Only empty buckets can be deleted.`,
-      confirmText: 'Delete Bucket',
-      onConfirm: async () => {
-        const res = await fetch('/api/user/cdn', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'deleteBucket', bucketName }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Failed to delete bucket');
-        toast.success(`Bucket "${bucketName}" deleted`);
-        if (selectedBucket === bucketName && service?.buckets?.length > 0) {
-          const fallback = service.buckets.find((b: any) => b.name !== bucketName);
-          if (fallback) setSelectedBucket(fallback.name);
-        }
-        fetchService(true);
-      },
-    });
-  };
-
   const handleCreateApiKey = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newKeyName.trim()) return;
@@ -535,7 +584,7 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
   const handleTerminate = () => {
     setConfirmState({
       title: 'Terminate File CDN Service',
-      message: `Permanently terminate "${service?.name}"? All buckets, files, and API keys for this instance will be deleted.`,
+      message: `Permanently terminate "${service?.name}"? All files, folders, and API keys for this instance will be deleted.`,
       confirmText: 'Terminate Service',
       onConfirm: async () => {
         setTerminating(true);
@@ -554,8 +603,11 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
 
   if (loading) {
     return (
-      <div className="min-h-[380px] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-cyan-400" />
+      <div className="min-h-[60vh] w-full flex flex-col items-center justify-center gap-3">
+        <RefreshCw className="w-8 h-8 text-cyan-400 animate-spin" />
+        <p className={cn('text-xs font-medium', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+          Loading File CDN details...
+        </p>
       </div>
     );
   }
@@ -658,12 +710,12 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
               <span className="opacity-30">•</span>
               <button
                 type="button"
-                onClick={() => handleCopy(primaryBucket, 'Primary Bucket')}
+                onClick={() => handleCopy(primaryBucket, 'CDN Space ID')}
                 className={cn(
                   'font-mono px-2 py-0.5 rounded-md text-[11px] font-semibold truncate max-w-[220px] sm:max-w-none transition-colors border cursor-pointer',
                   isDark ? 'text-cyan-400 bg-cyan-950/40 hover:bg-cyan-900/40 border-cyan-500/20' : 'text-cyan-700 bg-cyan-50 hover:bg-cyan-100 border-cyan-200'
                 )}
-                title="Click to copy primary bucket name"
+                title="Click to copy CDN space ID"
               >
                 {primaryBucket}
               </button>
@@ -673,13 +725,14 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
 
         {/* Action Controls */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto pt-3 md:pt-0 shrink-0">
-          <Link
-            href={`/dashboard/checkout?service=CDN&upgrade=${id}`}
+          <button
+            type="button"
+            onClick={openUpgradeModal}
             className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all shadow-md shadow-cyan-400/20 flex items-center justify-center gap-2 cursor-pointer active:scale-95 whitespace-nowrap"
           >
             <Rocket className="w-3.5 h-3.5" />
             <span>Upgrade Plan</span>
-          </Link>
+          </button>
 
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
@@ -750,7 +803,7 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
           <div className="space-y-3">
             <div>
               <label className={cn('text-[11px] font-semibold uppercase tracking-wider block mb-1', isDark ? 'text-zinc-500' : 'text-slate-500')}>
-                Primary Isolated Bucket
+                CDN Space ID
               </label>
               <div className="flex items-center gap-2">
                 <div
@@ -763,9 +816,9 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
                 </div>
                 <button
                   type="button"
-                  onClick={() => handleCopy(primaryBucket, 'Bucket Name')}
+                  onClick={() => handleCopy(primaryBucket, 'CDN Space ID')}
                   className={cn('p-2.5 rounded-xl border transition-colors cursor-pointer shrink-0', isDark ? 'border-white/10 hover:bg-white/5 text-zinc-300' : 'border-slate-300 hover:bg-slate-100 text-slate-700')}
-                  title="Copy Bucket Name"
+                  title="Copy CDN Space ID"
                 >
                   <Copy className="w-4 h-4" />
                 </button>
@@ -786,7 +839,7 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
                   Storage Backend
                 </span>
                 <span className={cn('text-xs font-bold block', isDark ? 'text-cyan-400' : 'text-cyan-700')}>
-                  {publicEndpoint ? publicEndpoint.replace(/^https?:\/\//, '') : 'Edge RustFS Cluster'}
+                  {publicEndpoint ? publicEndpoint.replace(/^https?:\/\//, '') : 'Edge Storage Cluster'}
                 </span>
               </div>
               <div className={cn('p-3 rounded-xl border space-y-1', isDark ? 'bg-[#0a0a0c] border-white/[0.06]' : 'bg-slate-50 border-slate-200')}>
@@ -840,8 +893,8 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
             </div>
 
             <div className={cn('flex items-center justify-between pb-2 border-b', isDark ? 'border-white/[0.06]' : 'border-slate-200')}>
-              <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>Active Buckets:</span>
-              <span className={cn('font-mono font-semibold', isDark ? 'text-white' : 'text-slate-900')}>{service.buckets?.length || 1} Buckets</span>
+              <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>Stored Items:</span>
+              <span className={cn('font-mono font-semibold', isDark ? 'text-white' : 'text-slate-900')}>{media.length} Items</span>
             </div>
 
             <div className="flex items-center justify-between">
@@ -854,11 +907,11 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
         {/* Row 2 Left: REST API Quick Access */}
         <div
           className={cn(
-            'lg:col-span-7 lg:order-3 h-full flex flex-col justify-between border rounded-2xl p-5 sm:p-6 space-y-4 transition-all shadow-2xs',
+            'lg:col-span-7 lg:order-3 h-full flex flex-col border rounded-2xl p-5 sm:p-6 space-y-3.5 transition-all shadow-2xs',
             isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90'
           )}
         >
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <h3 className={cn('text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2', isDark ? 'text-cyan-400' : 'text-cyan-700')}>
               <KeyRound className="w-4 h-4 shrink-0" />
               <span>REST API Quick Upload</span>
@@ -872,11 +925,44 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
             </button>
           </div>
 
-          <pre className={cn('p-3.5 rounded-xl border font-mono text-[11px] leading-relaxed overflow-x-auto', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-cyan-300' : 'bg-slate-900 border-slate-800 text-cyan-300')}>
+          <p className={cn('text-xs', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+            Upload files programmatically to this File CDN instance using any scoped REST API key.
+          </p>
+
+          {/* macOS Terminal Window */}
+          <div className={cn('rounded-xl border overflow-hidden', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-slate-50 border-slate-200')}>
+            <div className={cn('px-3.5 py-2 border-b flex items-center justify-between gap-2', isDark ? 'bg-white/[0.03] border-white/[0.06]' : 'bg-slate-100/90 border-slate-200')}>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-rose-500/85" />
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-400/85" />
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/85" />
+                <span className={cn('ml-2 text-[10px] font-mono font-medium', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+                  bash — cdn-upload
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  handleCopy(
+                    `curl -X POST "${typeof window !== 'undefined' ? window.location.origin : ''}/api/v1/cdn/upload" \\\n  -H "Authorization: Bearer YOUR_API_KEY" \\\n  -F "file=@./image.png" -F "isPublic=true"`,
+                    'cURL command'
+                  )
+                }
+                className={cn(
+                  'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold border transition-colors cursor-pointer',
+                  isDark ? 'bg-white/[0.04] border-white/[0.08] text-zinc-300 hover:text-white' : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900'
+                )}
+              >
+                <Copy className="w-3 h-3" />
+                Copy
+              </button>
+            </div>
+            <pre className={cn('p-3.5 font-mono text-[11px] leading-relaxed overflow-x-auto', isDark ? 'text-cyan-300' : 'text-slate-800')}>
 {`curl -X POST "${typeof window !== 'undefined' ? window.location.origin : ''}/api/v1/cdn/upload" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
-  -F "file=@./image.png" -F "bucket=${selectedBucket || primaryBucket}" -F "isPublic=true"`}
-          </pre>
+  -F "file=@./image.png" -F "isPublic=true"`}
+            </pre>
+          </div>
         </div>
 
         {/* Row 2 Right: Allocated Plan & Billing */}
@@ -891,13 +977,14 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
               <Server className="w-4 h-4 shrink-0" />
               <span>Allocated Plan</span>
             </h3>
-            <Link
-              href={`/dashboard/checkout?service=CDN&upgrade=${id}`}
-              className={cn('text-xs font-bold hover:underline flex items-center gap-1', isDark ? 'text-cyan-400' : 'text-cyan-700')}
+            <button
+              type="button"
+              onClick={openUpgradeModal}
+              className={cn('text-xs font-bold hover:underline flex items-center gap-1 cursor-pointer', isDark ? 'text-cyan-400' : 'text-cyan-700')}
             >
               <span>Upgrade</span>
               <Rocket className="w-3 h-3" />
-            </Link>
+            </button>
           </div>
 
           <div className="space-y-3 text-xs">
@@ -937,8 +1024,9 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
         >
           {[
             { id: 'files', label: 'Files & Folders', icon: Folder, count: media.length },
-            { id: 'buckets', label: 'Buckets', icon: Database, count: service.buckets?.length },
             { id: 'api', label: 'REST API & Keys', icon: KeyRound, count: apiKeys.length },
+            { id: 'reviews', label: 'Reviews & Ratings', icon: MessageSquareQuote, count: reviewsData.stats.totalComments + reviewsData.stats.totalRatings },
+            { id: 'allowed', label: 'Allowed Files', icon: FileCheck2 },
             { id: 'settings', label: 'Settings', icon: Settings },
           ].map((t) => {
             const Icon = t.icon;
@@ -984,7 +1072,7 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
 
         <div className="hidden sm:flex items-center gap-2.5">
           <span className={cn('px-3 py-1.5 rounded-xl border text-[11px] font-medium', isDark ? 'bg-[#111115] border-white/[0.08] text-zinc-400' : 'bg-white border-slate-200 text-slate-600 shadow-2xs')}>
-            {service.buckets?.length || 1} Buckets • {apiKeys.length} API Keys
+            {media.length} Items • {apiKeys.length} API Keys
           </span>
           <button
             type="button"
@@ -1014,19 +1102,8 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
         >
           {/* Toolbar */}
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <CustomSelect
-                value={selectedBucket}
-                onChange={(val) => { setSelectedBucket(val); setCurrentFolder('/'); }}
-                isDark={isDark}
-                className="w-56"
-                options={(service.buckets || []).map((b: any) => ({
-                  value: b.name,
-                  label: b.isDefault ? `${b.name} (Primary)` : b.name,
-                }))}
-              />
-
-              <div className={cn('flex items-center gap-1 text-xs font-mono px-3 py-2 rounded-xl border flex-wrap', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-slate-50 border-slate-200')}>
+            <div className="flex flex-wrap items-center gap-2 min-w-0">
+              <div className={cn('flex items-center gap-1 text-xs font-mono px-3 py-2 rounded-xl border flex-wrap max-w-full', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-slate-50 border-slate-200')}>
                 {breadcrumbs().map((c, idx) => (
                   <span key={c.path} className="flex items-center gap-1">
                     {idx > 0 && <ChevronRight className={cn('w-3.5 h-3.5', isDark ? 'text-zinc-500' : 'text-slate-400')} />}
@@ -1042,28 +1119,43 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="relative flex-1 sm:flex-initial min-w-0">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full lg:w-auto">
+              <div className="relative w-full sm:w-48">
                 <Search className={cn('w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2', isDark ? 'text-zinc-500' : 'text-slate-400')} />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search files..."
-                  className={cn('w-full sm:w-44 rounded-xl pl-8 pr-3 py-2 text-xs border focus:outline-none focus:border-cyan-500', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white placeholder-zinc-600' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400')}
+                  className={cn('w-full rounded-xl pl-8 pr-3 py-2 text-xs border focus:outline-none focus:border-cyan-500', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white placeholder-zinc-600' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400')}
                 />
               </div>
 
-              <CustomSelect
-                value={uploadVisibility}
-                onChange={setUploadVisibility}
-                isDark={isDark}
-                className="w-28 shrink-0"
-                options={[
-                  { value: 'PUBLIC', label: 'Public' },
-                  { value: 'PRIVATE', label: 'Private' },
-                ]}
-              />
+              <div className="flex flex-wrap items-center gap-2">
+                <CustomSelect
+                  value={uploadVisibility}
+                  onChange={setUploadVisibility}
+                  isDark={isDark}
+                  className="w-28 shrink-0"
+                  options={[
+                    { value: 'PUBLIC', label: 'Public' },
+                    { value: 'PRIVATE', label: 'Private' },
+                  ]}
+                />
+
+                <CustomSelect
+                  value={uploadExpiry}
+                  onChange={setUploadExpiry}
+                  isDark={isDark}
+                  className="w-36 shrink-0"
+                  options={[
+                    { value: 'permanent', label: 'Permanent' },
+                    { value: '3600', label: 'Temp: 1 Hour' },
+                    { value: '86400', label: 'Temp: 24 Hours' },
+                    { value: '604800', label: 'Temp: 7 Days' },
+                    { value: '2592000', label: 'Temp: 30 Days' },
+                  ]}
+                />
 
               <div className={cn('hidden sm:flex border rounded-xl p-0.5 shrink-0', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-slate-50 border-slate-200')}>
                 <button type="button" onClick={() => setViewMode('list')} className={cn('p-1.5 rounded-lg cursor-pointer', viewMode === 'list' ? (isDark ? 'bg-cyan-500/20 text-cyan-400' : 'bg-white text-cyan-700 shadow-2xs') : 'text-zinc-500')}>
@@ -1093,6 +1185,7 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
                 {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UploadCloud className="w-3.5 h-3.5" />}
                 <span>{uploading ? 'Uploading...' : 'Upload Files'}</span>
               </button>
+              </div>
             </div>
           </div>
 
@@ -1132,7 +1225,7 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
                           }}
                         >
                           {item.isFolder ? (
-                            <Folder className={cn('w-4 h-4 shrink-0', isDark ? 'text-amber-400' : 'text-amber-600')} />
+                            <Folder className={cn('w-4 h-4 shrink-0', isDark ? 'text-cyan-400' : 'text-cyan-600')} />
                           ) : (
                             <File className={cn('w-4 h-4 shrink-0', isDark ? 'text-cyan-400' : 'text-cyan-600')} />
                           )}
@@ -1158,6 +1251,18 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
                                 {item.isPublic !== false ? <Globe className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
                                 {item.isPublic !== false ? 'PUBLIC' : 'PRIVATE'}
                               </button>
+                              {item.expiresAt && (
+                                <span
+                                  title={`Expires at ${new Date(item.expiresAt).toLocaleString()}`}
+                                  className={cn(
+                                    'hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold border',
+                                    isDark ? 'bg-cyan-500/10 border-cyan-500/25 text-cyan-300' : 'bg-cyan-50 border-cyan-200 text-cyan-700'
+                                  )}
+                                >
+                                  <Clock className="w-3 h-3" />
+                                  Temp • {new Date(item.expiresAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' })}
+                                </span>
+                              )}
                               <button
                                 type="button"
                                 onClick={() => handleCopy(shareUrl, 'CDN Link')}
@@ -1204,7 +1309,7 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
                           }}
                         >
                           {item.isFolder ? (
-                            <Folder className={cn('w-5 h-5 shrink-0', isDark ? 'text-amber-400' : 'text-amber-600')} />
+                            <Folder className={cn('w-5 h-5 shrink-0', isDark ? 'text-cyan-400' : 'text-cyan-600')} />
                           ) : (
                             <File className={cn('w-5 h-5 shrink-0', isDark ? 'text-cyan-400' : 'text-cyan-600')} />
                           )}
@@ -1279,73 +1384,6 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
               </div>
             </div>
           )}
-        </div>
-      )}
-
-      {/* Tab 2: Buckets */}
-      {tab === 'buckets' && (
-        <div className={cn('rounded-2xl border p-5 space-y-4', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90 shadow-2xs')}>
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className={cn('text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>Isolated CDN Buckets</h2>
-              <p className={cn('text-xs mt-0.5', isDark ? 'text-zinc-400' : 'text-slate-500')}>
-                Each bucket name is globally unique across the Masdika Edge RustFS cluster.
-              </p>
-            </div>
-          </div>
-
-          <form onSubmit={handleCreateBucket} className="flex flex-col sm:flex-row gap-2 max-w-xl">
-            <input
-              type="text"
-              value={newBucketName}
-              onChange={(e) => setNewBucketName(e.target.value.toLowerCase())}
-              placeholder="new-unique-bucket-name"
-              className={cn('flex-1 rounded-xl px-3.5 py-2 text-xs border focus:outline-none focus:border-cyan-500', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white placeholder-zinc-600' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400')}
-            />
-            <button
-              type="submit"
-              disabled={creatingBucket || !newBucketName.trim()}
-              className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-50 cursor-pointer whitespace-nowrap"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>{creatingBucket ? 'Creating...' : 'Create Bucket'}</span>
-            </button>
-          </form>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {(service.buckets || []).map((b: any) => (
-              <div key={b.id} className={cn('p-3.5 rounded-xl border flex items-center justify-between gap-3 text-xs', isDark ? 'bg-[#0a0a0c] border-white/[0.06]' : 'bg-slate-50 border-slate-200')}>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className={cn('font-mono font-bold truncate', isDark ? 'text-cyan-400' : 'text-cyan-700')}>{b.name}</span>
-                    {b.isDefault && (
-                      <span className={cn('px-2 py-0.5 rounded-md text-[10px] font-bold', isDark ? 'bg-cyan-500/15 text-cyan-300' : 'bg-cyan-100 text-cyan-800')}>
-                        PRIMARY
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => handleCopy(b.name, 'Bucket Name')}
-                    className={cn('p-1.5 rounded-lg cursor-pointer', isDark ? 'text-zinc-400 hover:text-white hover:bg-white/[0.05]' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200')}
-                  >
-                    <Copy className="w-3.5 h-3.5" />
-                  </button>
-                  {!b.isDefault && (
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteBucket(b.name)}
-                      className={cn('p-1.5 rounded-lg cursor-pointer', isDark ? 'text-red-400 hover:bg-red-500/10' : 'text-red-600 hover:bg-red-50')}
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       )}
 
@@ -1432,22 +1470,293 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
               <Terminal className={cn('w-4 h-4', isDark ? 'text-cyan-400' : 'text-cyan-600')} />
               <h2 className={cn('text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>Quick API Examples</h2>
             </div>
-            <pre className={cn('overflow-x-auto p-3.5 rounded-xl border font-mono text-[11px] leading-relaxed', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-cyan-300' : 'bg-slate-900 border-slate-800 text-cyan-300')}>
-{`# Upload file to bucket "${selectedBucket || primaryBucket}"
+            {/* macOS Terminal Window */}
+            <div className={cn('rounded-xl border overflow-hidden', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-slate-50 border-slate-200')}>
+              <div className={cn('px-3.5 py-2 border-b flex items-center justify-between gap-2', isDark ? 'bg-white/[0.03] border-white/[0.06]' : 'bg-slate-100/90 border-slate-200')}>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500/85" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400/85" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/85" />
+                  <span className={cn('ml-2 text-[10px] font-mono font-medium', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+                    bash — api-examples
+                  </span>
+                </div>
+              </div>
+              <pre className={cn('overflow-x-auto p-3.5 font-mono text-[11px] leading-relaxed', isDark ? 'text-cyan-300' : 'text-slate-800')}>
+{`# Upload file to this File CDN
 curl -X POST "${typeof window !== 'undefined' ? window.location.origin : ''}/api/v1/cdn/upload" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -F "file=@./image.png" \\
-  -F "bucket=${selectedBucket || primaryBucket}" \\
   -F "isPublic=true"
 
-# List files in this bucket
+# List files in this File CDN
 curl -H "Authorization: Bearer YOUR_API_KEY" \\
-  "${typeof window !== 'undefined' ? window.location.origin : ''}/api/v1/cdn/files?bucket=${selectedBucket || primaryBucket}"
+  "${typeof window !== 'undefined' ? window.location.origin : ''}/api/v1/cdn/files"
 
 # Download file via API
 curl -L -H "Authorization: Bearer YOUR_API_KEY" \\
   "${typeof window !== 'undefined' ? window.location.origin : ''}/api/v1/cdn/files/FILE_TOKEN" -o output.bin`}
-            </pre>
+              </pre>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab: Reviews & Ratings Monitoring */}
+      {tab === 'reviews' && (
+        <div className="space-y-5">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+            <div className={cn('rounded-2xl border p-4 space-y-1', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90 shadow-2xs')}>
+              <span className={cn('text-[11px] font-bold uppercase tracking-wider', isDark ? 'text-zinc-500' : 'text-slate-500')}>Average Rating</span>
+              <div className="flex items-center gap-2">
+                <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+                <span className={cn('text-xl font-extrabold font-mono', isDark ? 'text-white' : 'text-slate-900')}>
+                  {reviewsData.stats.averageRating > 0 ? reviewsData.stats.averageRating.toFixed(1) : '—'}
+                </span>
+              </div>
+            </div>
+            <div className={cn('rounded-2xl border p-4 space-y-1', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90 shadow-2xs')}>
+              <span className={cn('text-[11px] font-bold uppercase tracking-wider', isDark ? 'text-zinc-500' : 'text-slate-500')}>Total Ratings</span>
+              <div className={cn('text-xl font-extrabold font-mono', isDark ? 'text-cyan-400' : 'text-cyan-700')}>
+                {reviewsData.stats.totalRatings}
+              </div>
+            </div>
+            <div className={cn('rounded-2xl border p-4 space-y-1', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90 shadow-2xs')}>
+              <span className={cn('text-[11px] font-bold uppercase tracking-wider', isDark ? 'text-zinc-500' : 'text-slate-500')}>Total Comments</span>
+              <div className={cn('text-xl font-extrabold font-mono', isDark ? 'text-white' : 'text-slate-900')}>
+                {reviewsData.stats.totalComments}
+              </div>
+            </div>
+            <div className={cn('rounded-2xl border p-4 space-y-1', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90 shadow-2xs')}>
+              <span className={cn('text-[11px] font-bold uppercase tracking-wider', isDark ? 'text-zinc-500' : 'text-slate-500')}>Files Reviewed</span>
+              <div className={cn('text-xl font-extrabold font-mono', isDark ? 'text-emerald-400' : 'text-emerald-600')}>
+                {reviewsData.stats.totalMediaReviewed}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+            {/* Comments & Who Commented */}
+            <div className={cn('lg:col-span-7 rounded-2xl border p-5 space-y-4', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90 shadow-2xs')}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <MessageSquareQuote className={cn('w-4 h-4', isDark ? 'text-cyan-400' : 'text-cyan-600')} />
+                  <h2 className={cn('text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>Comments &amp; Discussions</h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={fetchReviews}
+                  className={cn('text-[11px] font-semibold flex items-center gap-1 cursor-pointer', isDark ? 'text-cyan-400 hover:underline' : 'text-cyan-700 hover:underline')}
+                >
+                  <RefreshCw className={cn('w-3 h-3', loadingReviews && 'animate-spin')} /> Refresh
+                </button>
+              </div>
+
+              {reviewsData.comments.length === 0 ? (
+                <div className={cn('p-8 rounded-xl border border-dashed text-center text-xs', isDark ? 'border-white/[0.08] text-zinc-500' : 'border-slate-200 text-slate-500')}>
+                  No comments yet on files in this File CDN instance.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {reviewsData.comments.map((c: any) => (
+                    <div key={c.id} className={cn('p-3.5 rounded-xl border space-y-2 text-xs', isDark ? 'bg-[#0a0a0c] border-white/[0.06]' : 'bg-slate-50 border-slate-200')}>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <img src={c.avatar} alt={c.name} className="w-7 h-7 rounded-full object-cover shrink-0 border border-white/10" />
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className={cn('font-bold truncate', isDark ? 'text-white' : 'text-slate-900')}>{c.name}</span>
+                              <span className={cn('text-[10px] font-mono truncate', isDark ? 'text-zinc-500' : 'text-slate-500')}>{c.email}</span>
+                            </div>
+                            <div className={cn('text-[10px]', isDark ? 'text-zinc-500' : 'text-slate-500')}>
+                              on <span className={cn('font-mono font-semibold', isDark ? 'text-cyan-400' : 'text-cyan-700')}>{c.media?.originalName || 'File'}</span> • {new Date(c.createdAt).toLocaleString()}
+                            </div>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteReviewItem('comment', c.id)}
+                          title="Delete Comment"
+                          className={cn('p-1.5 rounded-lg shrink-0 cursor-pointer', isDark ? 'text-red-400 hover:bg-red-500/10' : 'text-red-600 hover:bg-red-50')}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      <p className={cn('leading-relaxed', isDark ? 'text-zinc-300' : 'text-slate-700')}>{c.comment}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Star Ratings */}
+            <div className={cn('lg:col-span-5 rounded-2xl border p-5 space-y-4', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90 shadow-2xs')}>
+              <div className="flex items-center gap-2">
+                <Star className="w-4 h-4 text-amber-400" />
+                <h2 className={cn('text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>Recent Star Ratings</h2>
+              </div>
+
+              {reviewsData.ratings.length === 0 ? (
+                <div className={cn('p-8 rounded-xl border border-dashed text-center text-xs', isDark ? 'border-white/[0.08] text-zinc-500' : 'border-slate-200 text-slate-500')}>
+                  No star ratings submitted yet.
+                </div>
+              ) : (
+                <div className="space-y-2.5">
+                  {reviewsData.ratings.map((r: any) => (
+                    <div key={r.id} className={cn('p-3 rounded-xl border flex items-center justify-between gap-2 text-xs', isDark ? 'bg-[#0a0a0c] border-white/[0.06]' : 'bg-slate-50 border-slate-200')}>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="inline-flex items-center gap-0.5 text-amber-400 font-bold">
+                            <Star className="w-3.5 h-3.5 fill-amber-400" /> {r.rating}.0
+                          </span>
+                          <span className={cn('font-semibold truncate', isDark ? 'text-white' : 'text-slate-900')}>
+                            {r.userName || r.userEmail || 'Anonymous'}
+                          </span>
+                        </div>
+                        <p className={cn('text-[10px] truncate mt-0.5', isDark ? 'text-zinc-500' : 'text-slate-500')}>
+                          {r.media?.originalName || 'File'} • {new Date(r.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteReviewItem('rating', r.id)}
+                        title="Delete Rating"
+                        className={cn('p-1.5 rounded-lg shrink-0 cursor-pointer', isDark ? 'text-red-400 hover:bg-red-500/10' : 'text-red-600 hover:bg-red-50')}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab: Allowed Files */}
+      {tab === 'allowed' && (
+        <div className="space-y-5">
+          {/* Top Overview Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className={cn('rounded-2xl border p-5 space-y-2.5', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90 shadow-2xs')}>
+              <div className="flex items-center gap-2">
+                <UploadCloud className={cn('w-4 h-4', isDark ? 'text-cyan-400' : 'text-cyan-600')} />
+                <h2 className={cn('text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>Upload Size Limits</h2>
+              </div>
+              <div className="space-y-1.5 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>Dashboard / Browser Upload:</span>
+                  <span className={cn('font-mono font-bold', isDark ? 'text-cyan-400' : 'text-cyan-700')}>Up to 10 GB / file</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>REST API Single Request:</span>
+                  <span className={cn('font-mono font-bold', isDark ? 'text-cyan-400' : 'text-cyan-700')}>Up to 100 MB / request</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>Total Storage Quota:</span>
+                  <span className={cn('font-mono font-bold', isDark ? 'text-white' : 'text-slate-900')}>{service.storageLimitGb || 10} GB Edge CDN</span>
+                </div>
+              </div>
+            </div>
+
+            <div className={cn('rounded-2xl border p-5 space-y-2.5', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90 shadow-2xs')}>
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <h2 className={cn('text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>Security &amp; Validation Policy</h2>
+              </div>
+              <p className={cn('text-xs leading-relaxed', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+                Every uploaded file undergoes automatic magic-byte &amp; MIME signature verification before being stored. Files with spoofed extensions or unsupported formats are automatically rejected.
+              </p>
+            </div>
+          </div>
+
+          {/* Supported Categories */}
+          <div className={cn('rounded-2xl border p-5 space-y-4', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90 shadow-2xs')}>
+            <div>
+              <h2 className={cn('text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>Supported File Extensions</h2>
+              <p className={cn('text-xs mt-0.5', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+                Only the extensions listed below are permitted on Masdika File CDN (both Dashboard and REST API).
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[
+                {
+                  title: 'Images',
+                  subtitle: 'Validated & edge-cached',
+                  icon: ImageIcon,
+                  exts: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'heic', 'heif'],
+                },
+                {
+                  title: 'Videos',
+                  subtitle: 'Streaming & media assets',
+                  icon: Film,
+                  exts: ['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv'],
+                },
+                {
+                  title: 'Audio',
+                  subtitle: 'Podcasts & sound files',
+                  icon: Music,
+                  exts: ['mp3', 'wav', 'm4a', 'flac', 'aac'],
+                },
+                {
+                  title: 'Documents & Data',
+                  subtitle: 'Office, docs & config',
+                  icon: FileText,
+                  exts: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'csv', 'md', 'json'],
+                },
+                {
+                  title: 'Archives',
+                  subtitle: 'Compressed bundles',
+                  icon: Archive,
+                  exts: ['zip', 'rar', '7z', 'gz'],
+                },
+              ].map((cat) => {
+                const CatIcon = cat.icon;
+                return (
+                  <div
+                    key={cat.title}
+                    className={cn('p-4 rounded-xl border space-y-3', isDark ? 'bg-[#0a0a0c] border-white/[0.06]' : 'bg-slate-50 border-slate-200')}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className={cn('w-8 h-8 rounded-lg border flex items-center justify-center shrink-0', isDark ? 'bg-cyan-500/10 border-cyan-500/20 text-cyan-400' : 'bg-cyan-50 border-cyan-200 text-cyan-700')}>
+                        <CatIcon className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h3 className={cn('text-xs font-bold', isDark ? 'text-white' : 'text-slate-900')}>{cat.title}</h3>
+                        <p className={cn('text-[11px]', isDark ? 'text-zinc-500' : 'text-slate-500')}>{cat.subtitle}</p>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {cat.exts.map((ext) => (
+                        <span
+                          key={ext}
+                          className={cn(
+                            'px-2 py-0.5 rounded-md text-[11px] font-mono font-semibold border',
+                            isDark ? 'bg-white/[0.03] border-white/[0.08] text-cyan-300' : 'bg-white border-slate-200 text-cyan-700'
+                          )}
+                        >
+                          .{ext}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Blocked Formats Notice */}
+          <div className={cn('rounded-2xl border p-4 flex items-start gap-3 text-xs', isDark ? 'border-red-500/25 bg-red-500/[0.04] text-zinc-300' : 'border-red-200 bg-red-50/70 text-slate-700')}>
+            <Ban className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p className={cn('font-bold', isDark ? 'text-red-300' : 'text-red-800')}>Blocked &amp; Restricted Formats</p>
+              <p className="leading-relaxed">
+                Executable binaries, server-side scripts, and active web payloads (such as <code className="font-mono">.exe</code>, <code className="font-mono">.sh</code>, <code className="font-mono">.bat</code>, <code className="font-mono">.php</code>, <code className="font-mono">.js</code>, <code className="font-mono">.html</code>, <code className="font-mono">.svg</code>) are strictly prohibited on File CDN to prevent XSS and malware distribution.
+              </p>
+            </div>
           </div>
         </div>
       )}
@@ -1482,7 +1791,7 @@ curl -L -H "Authorization: Bearer YOUR_API_KEY" \\
               <span>Danger Zone</span>
             </div>
             <p className={cn('text-xs leading-relaxed', isDark ? 'text-zinc-400' : 'text-slate-600')}>
-              Terminating permanently deletes all buckets, files, and REST API keys for this File CDN instance and stops hourly billing.
+              Terminating permanently deletes all files, folders, and REST API keys for this File CDN instance and stops hourly billing.
             </p>
             <button
               type="button"
@@ -1543,6 +1852,99 @@ curl -L -H "Authorization: Bearer YOUR_API_KEY" \\
               <button type="button" onClick={() => setRenameTarget(null)} className={cn('px-4 py-2 rounded-xl text-xs font-bold border cursor-pointer', isDark ? 'border-white/[0.08] text-zinc-300' : 'border-slate-200 text-slate-700')}>Cancel</button>
               <button type="submit" disabled={renaming} className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 cursor-pointer">
                 {renaming ? 'Saving...' : 'Save Name'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Upgrade / Scale Plan Modal (Zero Data Loss) */}
+      {upgradeModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <form
+            onSubmit={handleUpgradePlan}
+            className={cn(
+              'w-full max-w-lg rounded-2xl border p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto',
+              isDark ? 'bg-[#101014] border-white/[0.08] text-white' : 'bg-white border-slate-200 text-slate-900'
+            )}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-bold">Upgrade / Scale File CDN Plan</h3>
+                <p className={cn('text-[11px] mt-0.5', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+                  Switch tiers in-place — all files, folders, share links, and API keys remain 100% intact.
+                </p>
+              </div>
+              <button type="button" onClick={() => setUpgradeModalOpen(false)} className="p-1.5 rounded-lg opacity-70 hover:opacity-100 cursor-pointer">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              {availablePlans.map((p: any) => {
+                const isCurrent = p.id === service.planId;
+                const isSelected = p.id === selectedUpgradePlanId;
+                const gb = Number(p.storageGb || 0);
+                const currentGb = Number(service.limitGB || 0);
+                const neededGb = Math.max(0, gb - currentGb);
+                const hasCap = clusterCapacity ? clusterCapacity.available && clusterCapacity.freeGb >= neededGb : true;
+                const tooSmallForUsage = gb > 0 && gb * 1024 * 1024 * 1024 < Number(service.usedBytes || 0);
+                const disabled = !hasCap || tooSmallForUsage;
+
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => !disabled && setSelectedUpgradePlanId(p.id)}
+                    className={cn(
+                      'w-full text-left p-3.5 rounded-xl border transition-all flex items-center justify-between gap-3',
+                      disabled
+                        ? isDark ? 'bg-[#0a0a0c]/60 border-white/[0.04] opacity-50 cursor-not-allowed' : 'bg-slate-50 border-slate-200 opacity-50 cursor-not-allowed'
+                        : isSelected
+                          ? isDark ? 'bg-cyan-500/10 border-cyan-500/50 cursor-pointer' : 'bg-cyan-50 border-cyan-500 cursor-pointer'
+                          : isDark ? 'bg-[#0a0a0c] border-white/[0.08] hover:border-white/20 cursor-pointer' : 'bg-slate-50 border-slate-200 hover:border-cyan-300 cursor-pointer'
+                    )}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <HardDrive className={cn('w-4 h-4 shrink-0', isSelected ? 'text-cyan-400' : 'text-zinc-400')} />
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold">{p.name}</span>
+                          {isCurrent && (
+                            <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full', isDark ? 'bg-white/10 text-zinc-300' : 'bg-slate-200 text-slate-700')}>
+                              Current
+                            </span>
+                          )}
+                        </div>
+                        <p className={cn('text-[11px] font-mono', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+                          {gb} GB SSD • {formatRupiah(p.price)}/mo ({formatRupiah(p.hourlyPrice || Math.ceil(p.price / 730))}/hr)
+                        </p>
+                      </div>
+                    </div>
+                    <div className={cn('w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0', isSelected ? 'border-cyan-400 bg-cyan-400 text-slate-950' : isDark ? 'border-zinc-600' : 'border-slate-300')}>
+                      {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setUpgradeModalOpen(false)}
+                className={cn('px-4 py-2 rounded-xl text-xs font-bold border cursor-pointer', isDark ? 'border-white/[0.08] text-zinc-300' : 'border-slate-200 text-slate-700')}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={upgradingPlan || !selectedUpgradePlanId || selectedUpgradePlanId === service.planId}
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
+              >
+                {upgradingPlan ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Rocket className="w-3.5 h-3.5" />}
+                <span>{upgradingPlan ? 'Upgrading...' : 'Apply Plan Change'}</span>
               </button>
             </div>
           </form>

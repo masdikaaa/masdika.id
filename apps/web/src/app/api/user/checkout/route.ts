@@ -58,6 +58,39 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "CDN service is currently disabled." }, { status: 403 });
     }
 
+    // Pre-Flight Capacity Check for new File CDN orders
+    if (plan.service === 'CDN' && !upgradeSubscriptionId) {
+      let planStorageGb = 0;
+      try {
+        const parsedLimits = JSON.parse(plan.limits || '{}');
+        if (parsedLimits.storageGb !== undefined) {
+          planStorageGb = Number(parsedLimits.storageGb) || 0;
+        } else if (parsedLimits.storageGB !== undefined) {
+          planStorageGb = Number(parsedLimits.storageGB) || 0;
+        } else if (parsedLimits.storage) {
+          const m = String(parsedLimits.storage).trim().match(/^(\d+)\s*(GB|MB|KB|TB)$/i);
+          if (m) {
+            const val = parseInt(m[1], 10);
+            const u = m[2].toUpperCase();
+            planStorageGb = u === 'TB' ? val * 1024 : u === 'GB' ? val : u === 'MB' ? val / 1024 : val / (1024 * 1024);
+          }
+        }
+      } catch {
+        planStorageGb = 0;
+      }
+
+      if (planStorageGb > 0) {
+        const { getObjectStorageClusterCapacity } = await import('@/lib/customer-rustfs');
+        const capacity = await getObjectStorageClusterCapacity();
+        if (!capacity.available || capacity.freeGb < planStorageGb) {
+          return NextResponse.json(
+            { error: capacity.reason || `Cluster capacity full: only ${capacity.freeGb} GB available in storage pool.` },
+            { status: 400 }
+          );
+        }
+      }
+    }
+
 
 
     const { getSuspendedSubscription } = await import('@/lib/subscription');

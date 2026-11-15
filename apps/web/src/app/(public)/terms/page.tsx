@@ -198,7 +198,7 @@ export default function TermsPage() {
               </div>
               <div className="space-y-3 text-sm sm:text-base leading-relaxed text-[var(--text-secondary)] font-normal">
                 <p>
-                  <strong className="text-[var(--text-primary)] font-bold">All sales and payments are strictly final (No Refunds).</strong> We do not offer refunds, partial or in full, under any circumstances for any of our services (including but not limited to VPS, Managed K3s, File CDN, and API Hub). Please ensure you have read the rules carefully and reviewed your order before making a payment.
+                  <strong className="text-[var(--text-primary)] font-bold">All sales and payments are strictly final (No Refunds).</strong> We do not offer refunds, partial or in full, under any circumstances for any of our services (including but not limited to VPS, Managed K3s, Object Storage, and File CDN). Please ensure you have read the rules carefully and reviewed your order before making a payment.
                 </p>
               </div>
             </div>

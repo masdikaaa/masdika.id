@@ -10,25 +10,20 @@ export async function GET(req: NextRequest) {
     const userId = auth.userId;
     const apiKeys = await prisma.apiKey.findMany({
       where: { userId: userId },
-      include: {
-        project: true
-      }
     });
 
     const totalRequests = apiKeys.reduce((acc, key) => acc + key.usageCount, 0);
     const totalKeys = apiKeys.length;
     const activeKeys = apiKeys.filter(k => k.lastUsed && (new Date().getTime() - new Date(k.lastUsed).getTime()) < 30 * 24 * 60 * 60 * 1000).length; // Active in last 30 days
 
-    // Group usage by project
+    // Group usage by service
     const projectUsageMap: Record<string, number> = {};
     apiKeys.forEach(key => {
-      let projectName = key.project?.name;
-      if (!projectName) {
-        if (key.service) {
-          projectName = key.service.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
-        } else {
-          projectName = "Unknown Service";
-        }
+      let projectName: string;
+      if (key.service) {
+        projectName = key.service.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+      } else {
+        projectName = "Reseller API";
       }
       projectUsageMap[projectName] = (projectUsageMap[projectName] || 0) + key.usageCount;
     });
@@ -43,10 +38,9 @@ export async function GET(req: NextRequest) {
       .sort((a, b) => b.usageCount - a.usageCount)
       .slice(0, 5)
       .map(k => {
-        let pName = k.project?.name;
-        if (!pName) {
-          pName = k.service ? k.service.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') : "Unknown Service";
-        }
+        const pName = k.service
+          ? k.service.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
+          : "Reseller API";
         return {
           name: k.name || "Unnamed Key",
           usage: k.usageCount,

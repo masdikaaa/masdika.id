@@ -15,6 +15,7 @@ import {
   AlertTriangle,
   Rocket,
   Loader2,
+  RefreshCw,
   Check,
 } from 'lucide-react';
 
@@ -244,7 +245,7 @@ export default function NewObjectStoragePage() {
       {!loading && !enabled && (
         <div className={cn('p-4 rounded-2xl border flex items-center gap-3 text-xs', isDark ? 'bg-amber-500/10 border-amber-500/30 text-amber-300' : 'bg-amber-50 border-amber-200 text-amber-800')}>
           <AlertTriangle className="w-4 h-4 shrink-0" />
-          <span>Object Storage provisioning is currently disabled by Administrator. Please check Admin Settings → RustFS Customer.</span>
+          <span>Object Storage provisioning is currently disabled by Administrator.</span>
         </div>
       )}
 
@@ -264,8 +265,11 @@ export default function NewObjectStoragePage() {
             </div>
 
             {loading ? (
-              <div className="py-12 flex items-center justify-center">
-                <Loader2 className="w-6 h-6 animate-spin text-cyan-400" />
+              <div className="min-h-[350px] w-full flex flex-col items-center justify-center gap-3">
+                <RefreshCw className="w-8 h-8 text-cyan-400 animate-spin" />
+                <p className={cn('text-xs font-medium', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+                  Loading object storage plans...
+                </p>
               </div>
             ) : (
               <div className="space-y-2.5">

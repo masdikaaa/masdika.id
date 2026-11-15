@@ -15,7 +15,8 @@ import {
   MessageSquare,
   Layout,
   CheckCircle,
-  FileText
+  FileText,
+  HardDrive
 } from "lucide-react";
 import { SiKubernetes } from "react-icons/si";
 import { cn } from "@/lib/utils";
@@ -28,12 +29,12 @@ import { FadeIn } from "@/components/animations/FadeIn";
 export default function ServicesPage() {
   const PRODUCTS = [
     {
-      icon: Code,
-      title: "API Hub",
-      type: "SaaS",
+      icon: HardDrive,
+      title: "Object Storage",
+      type: "Storage",
       percentage: 99,
-      description: "A centralized hub to discover, manage, and consume high-performance APIs with seamless integration and monitoring.",
-      href: "/api-hub"
+      description: "S3-compatible object storage with isolated buckets, IAM access keys, presigned URLs, and zero-downtime upgrades.",
+      href: "/object-storage"
     },
     {
       icon: Terminal,

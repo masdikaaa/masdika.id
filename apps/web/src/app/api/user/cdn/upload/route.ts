@@ -32,6 +32,42 @@ const ALLOWED_EXTENSIONS = new Set([
 ]);
 
 const IMAGE_EXTENSIONS = new Set(["jpg", "jpeg", "png", "gif", "webp", "avif", "heic", "heif"]);
+const MAX_TEMP_TTL_SECONDS = 365 * 24 * 60 * 60;
+
+function parsePlanStorageGb(limitsStr: string | null | undefined): number {
+  if (!limitsStr) return 0;
+  try {
+    const limits = JSON.parse(limitsStr);
+    if (limits.storage === "unlimited" || limits.storageGb === "unlimited" || limits.storageGB === "unlimited") return 0;
+    if (limits.storageGb !== undefined) return Number(limits.storageGb) || 0;
+    if (limits.storageGB !== undefined) return Number(limits.storageGB) || 0;
+    if (limits.storage) {
+      const match = String(limits.storage).trim().match(/^(\d+)\s*(GB|MB|KB|TB)$/i);
+      if (match) {
+        const val = parseInt(match[1], 10);
+        const unit = match[2].toUpperCase();
+        if (unit === "KB") return val / (1024 * 1024);
+        if (unit === "MB") return val / 1024;
+        if (unit === "GB") return val;
+        if (unit === "TB") return val * 1024;
+      }
+    }
+  } catch {
+    // ignore malformed limits
+  }
+  return 0;
+}
+
+function parseUploadExpiresAt(rawHeader: string | null): { valid: boolean; expiresAt: Date | null } {
+  if (!rawHeader || rawHeader === "permanent") {
+    return { valid: true, expiresAt: null };
+  }
+  const ttlSeconds = Number(rawHeader);
+  if (!Number.isInteger(ttlSeconds) || ttlSeconds < 60 || ttlSeconds > MAX_TEMP_TTL_SECONDS) {
+    return { valid: false, expiresAt: null };
+  }
+  return { valid: true, expiresAt: new Date(Date.now() + ttlSeconds * 1000) };
+}
 
 function sanitizeFilename(name: string): string {
   const base = name.replace(/[/\\]/g, "").trim();
@@ -84,6 +120,11 @@ export async function POST(req: NextRequest) {
     const isPublicHeader = req.headers.get("x-upload-is-public");
     const isPublic = isPublicHeader === null ? true : isPublicHeader === "true";
 
+    const expiryParsed = parseUploadExpiresAt(req.headers.get("x-upload-expires-in"));
+    if (!expiryParsed.valid) {
+      return NextResponse.json({ error: "Invalid expiration duration" }, { status: 400 });
+    }
+
     const requestedBucket = req.headers.get("x-upload-bucket");
     const rawSubId = req.headers.get("x-upload-subscription-id");
     const parsedSubId = rawSubId ? parseInt(rawSubId, 10) : undefined;
@@ -91,6 +132,24 @@ export async function POST(req: NextRequest) {
     const targetBucket = await resolveCustomerCdnBucket(userId, requestedBucket, validSubId);
     if (!targetBucket) {
       return NextResponse.json({ error: "Target CDN bucket not found or access denied" }, { status: 404 });
+    }
+
+    const targetSubId = validSubId ?? targetBucket.subscriptionId ?? null;
+    const targetSub = targetSubId
+      ? await prisma.subscription.findFirst({
+          where: { id: targetSubId, userId, plan: { service: "CDN" } },
+          include: { plan: true },
+        })
+      : cdnSub;
+
+    if (!targetSub && auth.user?.role !== "ADMIN") {
+      return NextResponse.json({ error: "Target File CDN subscription not found" }, { status: 403 });
+    }
+    if (targetSub && targetSub.status === "SUSPENDED") {
+      return NextResponse.json({ error: "File CDN instance is suspended. Top up balance to reactivate." }, { status: 403 });
+    }
+    if (targetSub && targetSub.status !== "ACTIVE" && auth.user?.role !== "ADMIN") {
+      return NextResponse.json({ error: "File CDN instance is not active." }, { status: 403 });
     }
 
     // SECURITY: Read actual file size on disk rather than trusting client headers
@@ -104,19 +163,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "File exceeds 10GB limit" }, { status: 413 });
     }
 
-    if (auth.user?.role !== 'ADMIN' && cdnSub) {
-      const limits = JSON.parse(cdnSub.plan.limits);
-      const storageLimitGB = Number(limits.storageGB || 0);
+    if (auth.user?.role !== 'ADMIN' && targetSub) {
+      const storageLimitGB = parsePlanStorageGb(targetSub.plan?.limits);
       const storageLimitBytes = storageLimitGB * 1024 * 1024 * 1024;
 
-      const aggregate = await prisma.secureMedia.aggregate({
-        where: { userId },
-        _sum: { size: true }
-      });
-      const currentStorageBytes = Number(aggregate._sum.size || 0);
+      if (storageLimitGB > 0) {
+        const aggregate = await prisma.secureMedia.aggregate({
+          where: {
+            userId,
+            isFolder: false,
+            OR: [
+              ...(targetSub.id ? [{ subscriptionId: targetSub.id }] : []),
+              { subscriptionId: null, bucket: targetBucket.name },
+            ],
+          },
+          _sum: { size: true },
+        });
+        const currentStorageBytes = Number(aggregate._sum.size || 0);
 
-      if (currentStorageBytes + fileSize > storageLimitBytes) {
-        return NextResponse.json({ error: `Storage quota exceeded. Your plan limit is ${storageLimitGB} GB.` }, { status: 403 });
+        if (currentStorageBytes + fileSize > storageLimitBytes) {
+          return NextResponse.json({ error: `Storage quota exceeded. Your plan limit is ${storageLimitGB} GB.` }, { status: 403 });
+        }
       }
     }
 
@@ -228,6 +295,7 @@ export async function POST(req: NextRequest) {
         folderPath,
         isFolder: false,
         isPublic,
+        expiresAt: expiryParsed.expiresAt,
         token: shareToken,
         userId: userId,
       },

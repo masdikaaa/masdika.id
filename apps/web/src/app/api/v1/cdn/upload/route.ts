@@ -53,6 +53,16 @@ export async function POST(req: NextRequest) {
     let requestedFolder = req.headers.get('x-folder') || '/';
     let isPublic = req.headers.get('x-public') !== 'false';
 
+    let expiresAt: Date | null = null;
+    const parseTtl = (raw: string | null) => {
+      if (!raw || raw.trim() === '' || raw.trim() === 'permanent') return null;
+      const ttl = Number(raw.trim());
+      if (!Number.isInteger(ttl) || ttl < 60 || ttl > 365 * 24 * 60 * 60) {
+        throw new Error('INVALID_TTL');
+      }
+      return new Date(Date.now() + ttl * 1000);
+    };
+
     const contentType = req.headers.get('content-type') || '';
     if (contentType.includes('multipart/form-data')) {
       const form = await req.formData();
@@ -64,9 +74,19 @@ export async function POST(req: NextRequest) {
       if (form.get('bucket')) requestedBucket = String(form.get('bucket'));
       if (form.get('folder')) requestedFolder = String(form.get('folder'));
       if (form.get('isPublic') !== null) isPublic = String(form.get('isPublic')) !== 'false';
+      try {
+        expiresAt = parseTtl(form.get('expiresIn') !== null ? String(form.get('expiresIn')) : null);
+      } catch {
+        return NextResponse.json({ error: 'Invalid expiresIn (must be permanent or 60..31536000 seconds)' }, { status: 400 });
+      }
       rawBuffer = Buffer.from(await file.arrayBuffer());
     } else {
       rawFilename = req.headers.get('x-filename') || 'upload.bin';
+      try {
+        expiresAt = parseTtl(req.headers.get('x-expires-in'));
+      } catch {
+        return NextResponse.json({ error: 'Invalid x-expires-in (must be permanent or 60..31536000 seconds)' }, { status: 400 });
+      }
       rawBuffer = Buffer.from(await req.arrayBuffer());
     }
 
@@ -82,27 +102,39 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid folder path' }, { status: 400 });
     }
 
-    const targetBucket = await resolveCustomerCdnBucket(auth.userId, requestedBucket);
+    const targetBucket = await resolveCustomerCdnBucket(
+      auth.userId,
+      requestedBucket,
+      auth.subscriptionId ?? undefined
+    );
     if (!targetBucket) {
-      return NextResponse.json({ error: 'Target CDN bucket not found or access denied' }, { status: 404 });
+      return NextResponse.json({ error: 'Target CDN storage not found or access denied' }, { status: 404 });
     }
 
     // Quota check
     const isAdmin = auth.role === 'ADMIN' || auth.role === 'SUPER_ADMIN';
     if (!isAdmin) {
-      const cdnSub = await getActiveSubscription(auth.userId, 'CDN');
+      const cdnSub = auth.subscriptionId
+        ? await prisma.subscription.findFirst({
+            where: { id: auth.subscriptionId, userId: auth.userId, status: 'ACTIVE' },
+            include: { plan: true },
+          })
+        : await getActiveSubscription(auth.userId, 'CDN');
       if (!cdnSub) {
         return NextResponse.json({ error: 'Active File CDN subscription required' }, { status: 403 });
       }
       const limits = JSON.parse(cdnSub.plan.limits || '{}');
-      const storageLimitGB = Number(limits.storageGB || 0);
+      const storageLimitGB = Number(limits.storageGB || limits.storageGb || 0);
       const storageLimitBytes = storageLimitGB * 1024 * 1024 * 1024;
       const aggregate = await prisma.secureMedia.aggregate({
-        where: { userId: auth.userId },
+        where: {
+          userId: auth.userId,
+          ...(auth.subscriptionId ? { subscriptionId: auth.subscriptionId } : {}),
+        },
         _sum: { size: true },
       });
       const usedBytes = Number(aggregate._sum.size || 0);
-      if (usedBytes + rawBuffer.length > storageLimitBytes) {
+      if (storageLimitBytes > 0 && usedBytes + rawBuffer.length > storageLimitBytes) {
         return NextResponse.json(
           { error: `Storage quota exceeded. Plan limit: ${storageLimitGB} GB.` },
           { status: 403 }
@@ -159,9 +191,11 @@ export async function POST(req: NextRequest) {
         mimeType: securityCheck.resolvedMime,
         size: rawBuffer.length,
         bucket: targetBucket.name,
+        subscriptionId: auth.subscriptionId ?? targetBucket.subscriptionId ?? null,
         folderPath,
         isFolder: false,
         isPublic,
+        expiresAt,
         token: shareToken,
         userId: auth.userId,
       },

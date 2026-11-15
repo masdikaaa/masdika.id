@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth-middleware';
 import { ensureDefaultCdnBucket } from '@/lib/cdn-bucket';
+import { ensureCdnPlansExist } from '@/lib/cdn-plans-server';
+import { getObjectStorageClusterCapacity } from '@/lib/customer-rustfs';
 
 function parsePlanStorageGb(limitsStr: string | null | undefined): number {
   if (!limitsStr) return 0;
@@ -32,7 +34,9 @@ export async function GET() {
 
   const userId = auth.userId!;
 
-  const [subs, cdnSetting, cdnPlans] = await Promise.all([
+  await ensureCdnPlansExist();
+
+  const [subs, cdnSetting, cdnPlans, capacity] = await Promise.all([
     prisma.subscription.findMany({
       where: {
         userId,
@@ -51,6 +55,7 @@ export async function GET() {
       where: { service: 'CDN', isActive: true },
       orderBy: { price: 'asc' },
     }),
+    getObjectStorageClusterCapacity(),
   ]);
 
   const enriched = await Promise.all(
@@ -105,6 +110,7 @@ export async function GET() {
   return NextResponse.json({
     success: true,
     enabled: cdnSetting ? cdnSetting.value !== 'false' : true,
+    capacity,
     data: enriched,
     plans: cdnPlans.map((p) => ({
       id: p.id,

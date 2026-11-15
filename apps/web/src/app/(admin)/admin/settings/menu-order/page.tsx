@@ -15,7 +15,7 @@ const MENU_META: Record<string, { label: string; description: string; icon: Reac
   blog:      { label: "Blog & Articles",     description: "Read our latest technical insights and tutorials.",            icon: FileText,  color: "text-cyan-400", bg: "bg-cyan-500/10" },
   series:    { label: "Series",              description: "Structured learning paths covering networking, cloud, DevOps.", icon: BookOpen,  color: "text-cyan-400",   bg: "bg-cyan-500/10"   },
   upload:    { label: "File CDN",       description: "Securely upload temporary files up to 100MB.",                 icon: UploadCloud, color: "text-cyan-400", bg: "bg-cyan-500/10" },
-  "api-hub": { label: "API Hub",             description: "Discover and test public REST APIs for your projects.",        icon: Code,      color: "text-cyan-400", bg: "bg-cyan-500/10" },
+  "object-storage": { label: "Object Storage", description: "S3-compatible buckets with IAM keys and presigned URLs.", icon: Database, color: "text-cyan-400", bg: "bg-cyan-500/10" },
   "reseller-api": { label: "Reseller API",   description: "White-label VPS provisioning API.",                            icon: CodeXml,   color: "text-cyan-400", bg: "bg-cyan-500/10" },
   vps:       { label: "Cloud VPS",           description: "High-performance virtual private servers.",                    icon: Terminal,     color: "text-cyan-400", bg: "bg-cyan-500/10" },
   "app-catalog": { label: "App Catalog",     description: "1-Click automated deployment for Docker & AI stacks.",          icon: Rocket,    color: "text-cyan-400", bg: "bg-cyan-500/10" },
@@ -30,8 +30,8 @@ const MENU_META: Record<string, { label: string; description: string; icon: Reac
 const DEFAULT_ORDER  = ['events', 'vacancies', 'community', 'blog', 'series'];
 const DEFAULT_BADGES = { events: 'New', vacancies: 'New', series: 'New' } as Record<string, string | false>;
 
-const DEFAULT_DEV_ORDER  = ['api-hub', 'reseller-api', 'upload', 'vps', 'app-catalog', 'managed-db', 'managed-apps'];
-const DEFAULT_DEV_BADGES = { 'api-hub': 'New', 'reseller-api': 'New', upload: 'New', vps: 'Premium', 'app-catalog': '1-Click', 'managed-db': 'New', 'managed-apps': 'New' } as Record<string, string | false>;
+const DEFAULT_DEV_ORDER  = ['object-storage', 'reseller-api', 'upload', 'vps', 'app-catalog', 'managed-db', 'managed-apps'];
+const DEFAULT_DEV_BADGES = { 'object-storage': 'New', 'reseller-api': 'New', upload: 'New', vps: 'Premium', 'app-catalog': '1-Click', 'managed-db': 'New', 'managed-apps': 'New' } as Record<string, string | false>;
 
 const DEFAULT_COMPANY_ORDER  = ['about', 'services', 'portfolio', 'skills'];
 const DEFAULT_COMPANY_BADGES = {} as Record<string, string | false>;

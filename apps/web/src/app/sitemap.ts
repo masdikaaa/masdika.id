@@ -17,7 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '/portfolio', priority: 0.7, changeFrequency: 'weekly' },
     { path: '/community', priority: 0.6, changeFrequency: 'weekly' },
     { path: '/contact', priority: 0.7, changeFrequency: 'monthly' },
-    { path: '/api-hub', priority: 0.6, changeFrequency: 'monthly' },
+    { path: '/object-storage', priority: 0.85, changeFrequency: 'weekly' },
     { path: '/file-cdn', priority: 0.6, changeFrequency: 'monthly' },
     { path: '/series', priority: 0.6, changeFrequency: 'weekly' },
     { path: '/skills', priority: 0.6, changeFrequency: 'monthly' },

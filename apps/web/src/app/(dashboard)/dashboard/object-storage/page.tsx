@@ -122,11 +122,11 @@ export default function ObjectStoragePage() {
             </h1>
             <div className="flex flex-wrap items-center gap-2 shrink-0">
               <span className={cn('inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-semibold border whitespace-nowrap shrink-0', isDark ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' : 'bg-cyan-50 text-cyan-700 border-cyan-200')}>
-                <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', isDark ? 'bg-cyan-400' : 'bg-cyan-600')} />
+                <HardDrive className="w-3 h-3 shrink-0" />
                 S3 Compatible
               </span>
               <span className={cn('inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-semibold border whitespace-nowrap shrink-0', isDark ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-emerald-50 text-emerald-700 border-emerald-200')}>
-                <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', isDark ? 'bg-emerald-400' : 'bg-emerald-600')} />
+                <KeyRound className="w-3 h-3 shrink-0" />
                 IAM Ready
               </span>
             </div>
@@ -183,7 +183,7 @@ export default function ObjectStoragePage() {
       {!loading && !enabled && (
         <div className={cn('p-4 rounded-2xl border flex items-center gap-3 text-xs', isDark ? 'bg-amber-500/10 border-amber-500/30 text-amber-300' : 'bg-amber-50 border-amber-200 text-amber-800')}>
           <AlertTriangle className="w-4 h-4 shrink-0" />
-          <span>Object Storage provisioning is currently disabled. Enable <strong>RustFS Customer Cluster</strong> &amp; <strong>Object Storage Product</strong> in Admin Settings to allow deployments.</span>
+          <span>Object Storage provisioning is currently disabled by Administrator. Please check Admin Settings to enable deployments.</span>
         </div>
       )}
 

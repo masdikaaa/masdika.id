@@ -16,6 +16,7 @@ import {
   RefreshCw,
   Rocket,
   MessageSquareQuote,
+  ShieldCheck,
 } from 'lucide-react';
 
 function formatBytes(bytes: number) {
@@ -71,7 +72,7 @@ export default function FileCdnListPage() {
                   isDark ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' : 'bg-cyan-50 text-cyan-700 border-cyan-200'
                 )}
               >
-                <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', isDark ? 'bg-cyan-400' : 'bg-cyan-600')} />
+                <Cloud className="w-3 h-3 shrink-0" />
                 Global Edge Network
               </span>
               <span
@@ -80,13 +81,13 @@ export default function FileCdnListPage() {
                   isDark ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                 )}
               >
-                <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', isDark ? 'bg-emerald-400' : 'bg-emerald-600')} />
+                <ShieldCheck className="w-3 h-3 shrink-0" />
                 AES-256 Encrypted
               </span>
             </div>
           </div>
           <p className={cn('text-xs sm:text-sm font-medium mt-1.5 max-w-2xl leading-relaxed', isDark ? 'text-zinc-400' : 'text-slate-500')}>
-            Deploy isolated File CDN spaces with unique S3-backed buckets, instant edge delivery links, and REST API keys.
+            Deploy isolated File CDN spaces with encrypted edge storage, instant delivery links, and REST API keys.
           </p>
         </div>
 
@@ -152,7 +153,7 @@ export default function FileCdnListPage() {
             No File CDN Services Provisioned
           </h2>
           <p className={cn('text-xs sm:text-sm max-w-md mx-auto mb-6 leading-relaxed', isDark ? 'text-zinc-400' : 'text-slate-500')}>
-            Deploy an encrypted File CDN instance with its own unique bucket, instant share links &amp; REST API access starting from Rp {(plans[0]?.price || 15000).toLocaleString('id-ID')}/mo.
+            Deploy an encrypted File CDN instance with its own isolated storage space, instant share links &amp; REST API access starting from Rp {(plans[0]?.price || 15000).toLocaleString('id-ID')}/mo.
           </p>
           <Link
             href="/dashboard/cdn/new"
@@ -267,11 +268,11 @@ export default function FileCdnListPage() {
                   <div className="grid grid-cols-2 gap-2 text-xs mb-4">
                     <div className={cn('p-2 rounded-lg border', isDark ? 'bg-white/[0.02] border-white/5' : 'bg-slate-50 border-slate-200')}>
                       <span className={cn('text-[10px] font-bold uppercase tracking-wider block', isDark ? 'text-zinc-500' : 'text-slate-400')}>
-                        Buckets
+                        Storage Quota
                       </span>
                       <span className={cn('font-semibold text-[11px] inline-flex items-center gap-1.5 mt-0.5', isDark ? 'text-zinc-200' : 'text-slate-800')}>
                         <Database className={cn('w-3.5 h-3.5 shrink-0', isDark ? 'text-cyan-400' : 'text-cyan-700')} />
-                        {svc.buckets?.length || 1} Buckets
+                        {svc.storageLimitGb || svc.quotaGb || 10} GB Edge CDN
                       </span>
                     </div>
                     <div className={cn('p-2 rounded-lg border', isDark ? 'bg-white/[0.02] border-white/5' : 'bg-slate-50 border-slate-200')}>

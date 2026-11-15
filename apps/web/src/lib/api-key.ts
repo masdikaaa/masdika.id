@@ -15,10 +15,9 @@ export async function validateApiKey(req: NextRequest, requiredProjectSlug?: str
       return { error: "API Key is required", status: 401 };
     }
 
-    // 2. Fetch API Key and related project
+    // 2. Fetch API Key
     const keyData = await prisma.apiKey.findUnique({
       where: { key: apiKey },
-      include: { project: true }
     });
 
     if (!keyData) {
@@ -29,22 +28,10 @@ export async function validateApiKey(req: NextRequest, requiredProjectSlug?: str
       return { error: "This API Key has been suspended", status: 403 };
     }
 
-    // 3. Validate Service/Project isolation constraints
+    // 3. Validate Service isolation constraints
     if (requiredProjectSlug) {
-      // If the key is bound to a project, it MUST match the required project
-      if (keyData.projectId !== null && keyData.project?.slug !== requiredProjectSlug) {
-        return {
-          error: {
-            message: `This API Key is not authorized for the '${requiredProjectSlug}' service.`,
-            action: `It is bound to '${keyData.project?.name || 'another service'}'.`
-          } as any,
-          status: 403
-        };
-      }
-
-      // Check service binding if project is not used
       const expectedService = requiredProjectSlug.toUpperCase().replace('-', '_');
-      if (keyData.projectId === null && keyData.service && keyData.service !== expectedService) {
+      if (keyData.service && keyData.service !== expectedService) {
         return {
           error: {
             message: `This API Key is not authorized for the '${requiredProjectSlug}' service.`,
@@ -56,7 +43,7 @@ export async function validateApiKey(req: NextRequest, requiredProjectSlug?: str
     }
 
     // 4. Validate Subscription Quota and update usage
-    const targetService = (requiredProjectSlug ? requiredProjectSlug.toUpperCase().replace('-', '_') : keyData.service) || (keyData.project?.slug.toUpperCase().replace('-', '_'));
+    const targetService = requiredProjectSlug ? requiredProjectSlug.toUpperCase().replace('-', '_') : keyData.service;
 
     if (targetService) {
       const subscription = await prisma.subscription.findFirst({

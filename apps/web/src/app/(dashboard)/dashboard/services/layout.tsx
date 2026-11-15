@@ -3,10 +3,10 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "My Services",
-  description: "View and manage all your active and past subscriptions, including VPS, File CDN, and API Hub.",
+  description: "View and manage all your active and past subscriptions, including VPS, Object Storage, and File CDN.",
   openGraph: {
     title: "My Services",
-    description: "View and manage all your active and past subscriptions, including VPS, File CDN, and API Hub.",
+    description: "View and manage all your active and past subscriptions, including VPS, Object Storage, and File CDN.",
     url: "https://masdika.com/dashboard/services",
     siteName: "Masdika",
     images: [
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "My Services",
-    description: "View and manage all your active and past subscriptions, including VPS, File CDN, and API Hub.",
+    description: "View and manage all your active and past subscriptions, including VPS, Object Storage, and File CDN.",
     images: [OG_IMAGE_PATH],
   },
 };

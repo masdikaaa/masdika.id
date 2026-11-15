@@ -231,11 +231,11 @@ export default function ManagedAppsPage() {
             </h1>
             <div className="flex flex-wrap items-center gap-2 shrink-0">
               <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-semibold border whitespace-nowrap shrink-0", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
-                <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", isDark ? "bg-cyan-400" : "bg-cyan-600")} />
+                <Boxes className="w-3 h-3 shrink-0" />
                 Kubernetes Native
               </span>
               <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-semibold border whitespace-nowrap shrink-0", isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200")}>
-                <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", isDark ? "bg-emerald-400" : "bg-emerald-600")} />
+                <ShieldCheck className="w-3 h-3 shrink-0" />
                 Auto SSL
               </span>
             </div>

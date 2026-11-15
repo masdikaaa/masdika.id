@@ -893,17 +893,49 @@ export async function getObjectStorageClusterCapacity(): Promise<{
   reason?: string;
 }> {
   try {
-    const [health, poolSetting, agg] = await Promise.all([
+    const [health, poolSetting, agg, cdnSubs] = await Promise.all([
       checkCustomerRustFSHealth(),
       prisma.setting.findUnique({ where: { key: 'customer_rustfs_max_pool_gb' } }),
       prisma.objectStorageService.aggregate({
         _sum: { storageGb: true },
         where: { status: { not: 'TERMINATED' } },
       }),
+      prisma.subscription.findMany({
+        where: {
+          status: { in: ['ACTIVE', 'SUSPENDED'] },
+          plan: { service: 'CDN' },
+        },
+        select: { plan: { select: { limits: true } } },
+      }),
     ]);
 
+    const parseCdnPlanGb = (limitsStr: string | null | undefined): number => {
+      if (!limitsStr) return 0;
+      try {
+        const limits = JSON.parse(limitsStr);
+        if (limits.storageGb !== undefined) return Number(limits.storageGb) || 0;
+        if (limits.storageGB !== undefined) return Number(limits.storageGB) || 0;
+        if (limits.storage) {
+          const match = String(limits.storage).trim().match(/^(\d+)\s*(GB|MB|KB|TB)$/i);
+          if (match) {
+            const val = parseInt(match[1], 10);
+            const unit = match[2].toUpperCase();
+            if (unit === 'KB') return val / (1024 * 1024);
+            if (unit === 'MB') return val / 1024;
+            if (unit === 'GB') return val;
+            if (unit === 'TB') return val * 1024;
+          }
+        }
+      } catch {
+        // ignore malformed limits
+      }
+      return 0;
+    };
+
     const totalPoolGb = Math.max(10, Number(poolSetting?.value || 500) || 500);
-    const allocatedGb = Number(agg._sum.storageGb || 0);
+    const objectStorageAllocatedGb = Number(agg._sum.storageGb || 0);
+    const cdnAllocatedGb = cdnSubs.reduce((sum, sub) => sum + parseCdnPlanGb(sub.plan?.limits), 0);
+    const allocatedGb = objectStorageAllocatedGb + cdnAllocatedGb;
     const freeGb = Math.max(0, totalPoolGb - allocatedGb);
 
     if (!health.available) {
@@ -912,7 +944,7 @@ export async function getObjectStorageClusterCapacity(): Promise<{
         totalPoolGb,
         allocatedGb,
         freeGb: 0,
-        reason: health.error || 'Object Storage cluster is offline',
+        reason: health.error || 'Storage cluster is offline',
       };
     }
 
@@ -921,7 +953,7 @@ export async function getObjectStorageClusterCapacity(): Promise<{
       totalPoolGb,
       allocatedGb,
       freeGb,
-      reason: freeGb <= 0 ? 'Object Storage server pool is full' : undefined,
+      reason: freeGb <= 0 ? 'Storage server pool is full' : undefined,
     };
   } catch (error: any) {
     return {

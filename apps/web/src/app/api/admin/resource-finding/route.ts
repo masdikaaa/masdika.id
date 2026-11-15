@@ -381,7 +381,7 @@ export async function GET(req: NextRequest) {
         netSpeedOut,
         netSpeedTotal,
         rateLimit,
-        isThrottled: Boolean(rateLimit && rateLimit > 0 && !isNetDisabled),
+        isThrottled: Boolean(rateLimit && rateLimit > 0 && rateLimit < (vps.bandwidthMbps || 100) && !isNetDisabled),
         isNetDisabled,
         uptime: live?.uptime || pve?.uptime || 0,
         severity,

@@ -27,6 +27,7 @@ import {
   Moon,
   Database,
   Boxes,
+  HardDrive,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
@@ -120,17 +121,17 @@ const DEV_MENU_ITEMS: MenuItem[] = [
     badge: "New",
   },
   {
+    title: "Object Storage",
+    description: "S3-compatible buckets with IAM keys and presigned URLs.",
+    href: "/object-storage",
+    icon: HardDrive,
+    badge: "New",
+  },
+  {
     title: "File CDN",
     description: "Securely upload temporary files up to 100MB.",
     href: "/file-cdn",
     icon: UploadCloud,
-    badge: "New",
-  },
-  {
-    title: "API Hub",
-    description: "Discover and test public REST APIs for your projects.",
-    href: "/api-hub",
-    icon: CodeXml,
     badge: "New",
   },
   {
@@ -507,18 +508,18 @@ export function Navbar({ socialLinks }: { socialLinks?: any }) {
                     ? "Discover new events, connect with the community, and find your next big career move."
                     : activeMenu === "Profile"
                       ? "Learn about our services, view our portfolio, and discover our core expertise."
-                      : "Build powerful integrations with our public REST APIs and secure file delivery network."}
+                      : "Deploy S3-compatible object storage, edge CDN, managed databases, and cloud servers."}
                 </p>
 
                 <Link
-                  href={activeMenu === "Explore" ? "/opportunities" : activeMenu === "Profile" ? "/resume" : "/api-hub"}
+                  href={activeMenu === "Explore" ? "/opportunities" : activeMenu === "Profile" ? "/resume" : "/object-storage"}
                   onClick={() => {
                     setActiveMenu(null);
                     if (timeoutRef.current) clearTimeout(timeoutRef.current);
                   }}
                   className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-cyan-400 hover:bg-cyan-300 text-slate-950 rounded-lg font-semibold text-sm transition-colors w-fit shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
                 >
-                  {activeMenu === "Explore" ? "View All" : activeMenu === "Profile" ? "About Us" : "Browse APIs"}
+                  {activeMenu === "Explore" ? "View All" : activeMenu === "Profile" ? "About Us" : "Explore Storage"}
                   <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>

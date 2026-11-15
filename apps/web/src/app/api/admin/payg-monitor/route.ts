@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
 
     const activeSubscriptions = await prisma.subscription.findMany({
       where: {
-        status: 'ACTIVE',
+        status: { in: ['ACTIVE', 'SUSPENDED'] },
         plan: { hourlyPrice: { gt: 0 } }
       },
       include: { 

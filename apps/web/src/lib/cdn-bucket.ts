@@ -139,3 +139,60 @@ export async function deleteCustomerCdnBucket(userId: number, bucketName: string
   await deleteCustomerBucketCompletely(normalized).catch(() => {});
   await prisma.cdnBucket.delete({ where: { id: bucket.id } });
 }
+
+/**
+ * Physically deletes all RustFS buckets/objects and database records
+ * associated with a File CDN subscription (including legacy unlinked
+ * user buckets if no other active CDN subscription remains).
+ */
+export async function cleanupSubscriptionCdnResources(
+  subscriptionId: number,
+  userId: number
+): Promise<void> {
+  const [subBuckets, otherActiveCdnCount] = await Promise.all([
+    prisma.cdnBucket.findMany({
+      where: { subscriptionId, userId },
+    }),
+    prisma.subscription.count({
+      where: {
+        userId,
+        id: { not: subscriptionId },
+        status: { not: 'TERMINATED' },
+        plan: { service: 'CDN' },
+      },
+    }),
+  ]);
+
+  let orphanBuckets: typeof subBuckets = [];
+  if (otherActiveCdnCount === 0) {
+    orphanBuckets = await prisma.cdnBucket.findMany({
+      where: { userId, subscriptionId: null },
+    });
+  }
+
+  const allBuckets = [...subBuckets, ...orphanBuckets];
+  const bucketNames = Array.from(new Set(allBuckets.map((b) => b.name)));
+  const bucketIds = allBuckets.map((b) => b.id);
+
+  await Promise.all(
+    bucketNames.map((name) => deleteCustomerBucketCompletely(name).catch(() => false))
+  );
+
+  await prisma.$transaction([
+    prisma.secureMedia.deleteMany({
+      where: {
+        userId,
+        OR: [
+          { subscriptionId },
+          ...(bucketNames.length > 0 ? [{ bucket: { in: bucketNames } }] : []),
+        ],
+      },
+    }),
+    ...(bucketIds.length > 0
+      ? [prisma.cdnBucket.deleteMany({ where: { id: { in: bucketIds } } })]
+      : []),
+    prisma.cdnApiKey.deleteMany({
+      where: { subscriptionId, userId },
+    }),
+  ]);
+}

@@ -167,10 +167,17 @@ export async function GET(req: Request) {
             terminationDate: defaultTermination
           }
         });
+        if (sub.plan?.service === 'CDN') {
+          await prisma.cdnApiKey.updateMany({
+            where: { subscriptionId: sub.id },
+            data: { isActive: false },
+          });
+        }
         suspendedCount++;
 
         // Send email notification
         try {
+          const { sendAdminServiceSuspendedEmail } = await import('@/lib/email');
           const rawEmail = sub.user.email || '';
           const decEmail = decryptDeterministic(rawEmail) || rawEmail;
           const rawName = sub.user.name || 'Customer';
@@ -182,9 +189,50 @@ export async function GET(req: Request) {
             sub.plan.name,
             sub.plan.service
           );
+          await sendAdminServiceSuspendedEmail(decName, decEmail, sub.plan.name, sub.plan.service).catch(console.error);
         } catch (emailErr) {
           console.error("Failed to send suspension email:", emailErr);
         }
+      }
+    }
+
+    // Terminate expired SUSPENDED subscriptions after 3-day grace period
+    let subTerminated = 0;
+    const expiredSubscriptions = await prisma.subscription.findMany({
+      where: {
+        status: 'SUSPENDED',
+        terminationDate: { lte: now },
+      },
+      include: { plan: true, user: true },
+    });
+
+    for (const expSub of expiredSubscriptions) {
+      try {
+        if (expSub.plan?.service === 'CDN') {
+          const { cleanupSubscriptionCdnResources } = await import('@/lib/cdn-bucket');
+          await cleanupSubscriptionCdnResources(expSub.id, expSub.userId);
+        }
+        await prisma.subscription.update({
+          where: { id: expSub.id },
+          data: { status: 'TERMINATED', autoRenew: false },
+        });
+        subTerminated++;
+
+        try {
+          const { sendTerminationEmail } = await import('@/lib/email');
+          const decEmail = decryptDeterministic(expSub.user.email) || expSub.user.email;
+          const decName = decryptDeterministic(expSub.user.name) || expSub.user.name || 'Customer';
+          await sendTerminationEmail(
+            decEmail,
+            decName,
+            expSub.plan?.name || 'Subscription',
+            expSub.plan?.service || 'Subscription'
+          );
+        } catch (emailErr) {
+          console.error(`Failed to send subscription termination email ${expSub.id}:`, emailErr);
+        }
+      } catch (termErr) {
+        console.error(`Failed to terminate expired subscription ${expSub.id}:`, termErr);
       }
     }
 
@@ -915,7 +963,8 @@ export async function GET(req: Request) {
     const billingSummary = {
       subscriptions: {
         processed: processedCount,
-        suspended: suspendedCount
+        suspended: suspendedCount,
+        terminated: subTerminated
       },
       vps: {
         processed: vpsProcessed,

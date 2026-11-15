@@ -27,6 +27,7 @@ import {
   ChevronRight,
   ChevronDown,
   Boxes,
+  HardDrive,
 } from "lucide-react";
 import {
   SiKubernetes,
@@ -59,16 +60,16 @@ const TypeAnimation = dynamic(
 
 const PRODUCTS = [
   {
-    icon: Code,
-    title: "API Hub",
-    subtitle: "Developer Gateway & Telemetry",
+    icon: HardDrive,
+    title: "Object Storage",
+    subtitle: "S3-Compatible Object Storage",
     description:
-      "Centralized API gateway with automated key rotation, real-time latency telemetry, and per-route rate limiting.",
-    href: "/api-hub",
-    type: "SaaS",
+      "Scalable S3-compatible object storage with isolated buckets, scoped IAM access keys, presigned URLs, and instant zero-loss upgrades.",
+    href: "/object-storage",
+    type: "Storage",
     sla: "98.99% SLA",
-    specs: ["REST & Webhook", "Rate Limiting", "Live Analytics"],
-    cta: "Explore API Hub",
+    specs: ["S3 SigV4 API", "IAM Access Keys", "Zero-Loss Upgrades"],
+    cta: "Explore Object Storage",
   },
   {
     icon: Terminal,
@@ -111,7 +112,7 @@ const PRODUCTS = [
     title: "File CDN",
     subtitle: "Global Edge Content Delivery",
     description:
-      "High-throughput edge media and file delivery powered by RustFS with byte-range video streaming and token access control.",
+      "High-throughput edge media and file delivery with byte-range video streaming and token access control.",
     href: "/file-cdn",
     type: "PaaS",
     sla: "98.99% SLA",
