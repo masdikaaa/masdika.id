@@ -1861,7 +1861,7 @@ s3 = boto3.client(
               </div>
 
               <div className="space-y-1.5">
-                <span className={cn('text-[11px] font-semibold block', isDark ? 'text-zinc-300' : 'text-slate-700')}>Set Default Endpoint on Profile (Optional)</span>
+                <span className={cn('text-[11px] font-semibold block', isDark ? 'text-zinc-300' : 'text-slate-700')}>Quick One-Shot Setup (Recommended for Beginners)</span>
                 <div className={cn('rounded-xl border overflow-hidden', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-slate-50 border-slate-200')}>
                   <div className={cn('px-3.5 py-2 border-b flex items-center justify-between gap-2', isDark ? 'bg-white/[0.03] border-white/[0.06]' : 'bg-slate-100/90 border-slate-200')}>
                     <div className="flex items-center gap-1.5">
@@ -1869,12 +1869,17 @@ s3 = boto3.client(
                       <span className="w-2.5 h-2.5 rounded-full bg-amber-400/85" />
                       <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/85" />
                       <span className={cn('ml-2 text-[10px] font-mono font-medium', isDark ? 'text-zinc-400' : 'text-slate-500')}>
-                        bash — endpoint-url
+                        bash — quick-setup
                       </span>
                     </div>
                     <button
                       type="button"
-                      onClick={() => handleCopy(`aws configure set endpoint_url ${endpointVal} --profile masdika`, 'Endpoint config')}
+                      onClick={() =>
+                        handleCopy(
+                          `aws configure set aws_access_key_id ${service.accessKeys?.[0]?.accessKey || '<YOUR_ACCESS_KEY>'} --profile masdika\naws configure set aws_secret_access_key <YOUR_SECRET_KEY> --profile masdika\naws configure set region us-east-1 --profile masdika\naws configure set endpoint_url ${endpointVal} --profile masdika`,
+                          'Quick setup commands'
+                        )
+                      }
                       className={cn(
                         'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold border transition-colors cursor-pointer',
                         isDark ? 'bg-white/[0.04] border-white/[0.08] text-zinc-300 hover:text-white' : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900'
@@ -1885,9 +1890,15 @@ s3 = boto3.client(
                     </button>
                   </div>
                   <pre className={cn('p-3.5 font-mono text-[11px] leading-relaxed overflow-x-auto', isDark ? 'text-cyan-300' : 'text-slate-800')}>
-                    {`aws configure set endpoint_url ${endpointVal} --profile masdika`}
+{`aws configure set aws_access_key_id ${service.accessKeys?.[0]?.accessKey || '<YOUR_ACCESS_KEY>'} --profile masdika
+aws configure set aws_secret_access_key <YOUR_SECRET_KEY> --profile masdika
+aws configure set region us-east-1 --profile masdika
+aws configure set endpoint_url ${endpointVal} --profile masdika`}
                   </pre>
                 </div>
+                <p className={cn('text-[11px] leading-relaxed pt-1', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+                  Tip: Always include <code className="font-mono font-semibold">--profile masdika</code> when configuring credentials so it matches the commands below. If <code className="font-mono font-semibold">aws s3 ls</code> returns no output without errors, your connection succeeded and the bucket is currently empty.
+                </p>
               </div>
             </div>
           </div>
