@@ -37,6 +37,7 @@ import {
   Terminal,
   ShieldAlert,
   Layers,
+  X,
 } from 'lucide-react';
 
 interface SelectOption<T extends string> {
@@ -185,6 +186,13 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
   const [capacity, setCapacity] = useState<ObjectStorageClusterCapacity | null>(null);
   const [savingSettings, setSavingSettings] = useState(false);
   const [terminating, setTerminating] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    title: string;
+    description: string;
+    confirmLabel: string;
+    onConfirm: () => Promise<void>;
+  } | null>(null);
+  const [confirmLoading, setConfirmLoading] = useState(false);
 
   const fetchScaleMetadata = async () => {
     try {
@@ -332,20 +340,26 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
     }
   };
 
-  const handleDeleteBucket = async (bucketName: string) => {
-    if (!confirm(`Delete bucket "${bucketName}" and all objects inside?`)) return;
-    try {
-      const res = await fetch(`/api/user/object-storage/${id}/buckets?name=${encodeURIComponent(bucketName)}`, {
-        method: 'DELETE',
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      toast.success(`Bucket "${bucketName}" deleted`);
-      if (selectedBucket === bucketName) setSelectedBucket(null);
-      fetchService();
-    } catch (err: any) {
-      toast.error(err?.message || 'Failed to delete bucket');
-    }
+  const handleDeleteBucket = (bucketName: string) => {
+    setConfirmDialog({
+      title: 'Delete S3 Bucket',
+      description: `Permanently delete bucket "${bucketName}" and all objects inside? This action cannot be undone.`,
+      confirmLabel: 'Delete Bucket',
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`/api/user/object-storage/${id}/buckets?name=${encodeURIComponent(bucketName)}`, {
+            method: 'DELETE',
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error);
+          toast.success(`Bucket "${bucketName}" deleted`);
+          if (selectedBucket === bucketName) setSelectedBucket(null);
+          fetchService();
+        } catch (err: any) {
+          toast.error(err?.message || 'Failed to delete bucket');
+        }
+      },
+    });
   };
 
   const uploadSingleFile = async (file: File) => {
@@ -436,16 +450,22 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
     }
   };
 
-  const handleDeleteKey = async (keyId: number) => {
-    if (!confirm('Revoke this S3 Access Key? Any applications using it will lose access immediately.')) return;
-    try {
-      const res = await fetch(`/api/user/object-storage/${id}/keys?keyId=${keyId}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Failed');
-      toast.success('S3 key revoked');
-      fetchService();
-    } catch {
-      toast.error('Failed to revoke key');
-    }
+  const handleDeleteKey = (keyId: number) => {
+    setConfirmDialog({
+      title: 'Revoke S3 Access Key',
+      description: 'Revoke this S3 Access Key? Any applications using it will lose access immediately.',
+      confirmLabel: 'Revoke Key',
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`/api/user/object-storage/${id}/keys?keyId=${keyId}`, { method: 'DELETE' });
+          if (!res.ok) throw new Error('Failed');
+          toast.success('S3 key revoked');
+          fetchService();
+        } catch {
+          toast.error('Failed to revoke key');
+        }
+      },
+    });
   };
 
   const handleSaveSettings = async (e: React.FormEvent) => {
@@ -468,18 +488,24 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
     }
   };
 
-  const handleTerminate = async () => {
-    if (!confirm('Permanently delete this Object Storage service, all buckets, objects, and S3 keys?')) return;
-    setTerminating(true);
-    try {
-      const res = await fetch(`/api/user/object-storage/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Failed');
-      toast.success('Object Storage service terminated');
-      router.push('/dashboard/object-storage');
-    } catch {
-      toast.error('Failed to terminate service');
-      setTerminating(false);
-    }
+  const handleTerminate = () => {
+    setConfirmDialog({
+      title: 'Terminate Object Storage',
+      description: `Permanently delete "${service?.name || 'this service'}", all buckets, objects, and S3 Access Keys? Hourly billing will stop immediately.`,
+      confirmLabel: 'Terminate Service',
+      onConfirm: async () => {
+        setTerminating(true);
+        try {
+          const res = await fetch(`/api/user/object-storage/${id}`, { method: 'DELETE' });
+          if (!res.ok) throw new Error('Failed');
+          toast.success('Object Storage service terminated');
+          router.push('/dashboard/object-storage');
+        } catch {
+          toast.error('Failed to terminate service');
+          setTerminating(false);
+        }
+      },
+    });
   };
 
   if (loading) {
@@ -1192,6 +1218,81 @@ s3 = boto3.client(
         }}
         isDark={isDark}
       />
+
+      {/* Consistent Confirmation Modal */}
+      {confirmDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div
+            className={cn(
+              'w-full max-w-md rounded-2xl border p-6 space-y-5 shadow-2xl relative',
+              isDark
+                ? 'bg-[#101014] border-white/[0.08] text-white'
+                : 'bg-white border-slate-200 text-slate-900 shadow-xl'
+            )}
+          >
+            <button
+              type="button"
+              onClick={() => !confirmLoading && setConfirmDialog(null)}
+              disabled={confirmLoading}
+              className={cn(
+                'absolute top-4 right-4 p-2 rounded-xl transition-colors cursor-pointer',
+                isDark ? 'text-zinc-400 hover:text-white hover:bg-white/5' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+              )}
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="flex items-start gap-3.5 pr-6">
+              <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 shrink-0">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold tracking-tight">{confirmDialog.title}</h3>
+                <p className={cn('text-xs mt-1 leading-relaxed', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+                  {confirmDialog.description}
+                </p>
+              </div>
+            </div>
+
+            <div className={cn('flex items-center justify-end gap-2.5 pt-3 border-t', isDark ? 'border-white/[0.08]' : 'border-slate-200')}>
+              <button
+                type="button"
+                onClick={() => setConfirmDialog(null)}
+                disabled={confirmLoading}
+                className={cn(
+                  'px-4 py-2 rounded-xl text-xs font-bold border transition-colors cursor-pointer',
+                  isDark ? 'bg-white/[0.04] border-white/[0.08] text-zinc-300 hover:text-white' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                )}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={confirmLoading}
+                onClick={async () => {
+                  setConfirmLoading(true);
+                  try {
+                    await confirmDialog.onConfirm();
+                    setConfirmDialog(null);
+                  } finally {
+                    setConfirmLoading(false);
+                  }
+                }}
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-red-500 hover:bg-red-600 text-white shadow-sm flex items-center gap-1.5 disabled:opacity-50 cursor-pointer transition-colors"
+              >
+                {confirmLoading ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Processing...</span>
+                  </>
+                ) : (
+                  <span>{confirmDialog.confirmLabel}</span>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
