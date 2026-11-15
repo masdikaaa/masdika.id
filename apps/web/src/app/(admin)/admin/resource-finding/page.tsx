@@ -37,6 +37,8 @@ import {
   Wifi,
   WifiOff,
   Info,
+  Database,
+  Boxes,
 } from "lucide-react";
 import {
   AreaChart,
@@ -52,6 +54,9 @@ import { AdminLoader } from "@/components/admin/AdminLoader";
 import { Pagination } from "@/components/ui/Pagination";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { Select, SelectOption } from "@/components/ui/Select";
+import { K8sResourceMonitor } from "@/components/admin/K8sResourceMonitor";
+import type { K8sResourceItem, K8sResourceSummary } from "@/app/api/admin/resource-finding/k8s/route";
+import type { K8sNodeLiveMetric } from "@/lib/k8s-metrics";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -167,6 +172,44 @@ export default function AdminResourceFindingPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string>("");
   const [autoRefreshInterval, setAutoRefreshInterval] = useState<number>(30); // in seconds, 0 = off
+  const [resourceSource, setResourceSource] = useState<"vps" | "database" | "apps">("vps");
+
+  const emptyK8sBucket = (): {
+    summary: K8sResourceSummary;
+    items: K8sResourceItem[];
+    clusterNodes: K8sNodeLiveMetric[];
+    metricsAvailable: boolean;
+    clusterError: string | null;
+  } => ({
+    summary: {
+      totalCount: 0,
+      runningCount: 0,
+      criticalCount: 0,
+      warningCount: 0,
+      highCpuCount: 0,
+      highRamCount: 0,
+      restartAlertCount: 0,
+      totalRestarts: 0,
+      oomCount: 0,
+      allocatedCpu: 0,
+      allocatedMemBytes: 0,
+      allocatedStorageGb: 0,
+      usedCpuMillicores: 0,
+      usedMemBytes: 0,
+    },
+    items: [],
+    clusterNodes: [],
+    metricsAvailable: true,
+    clusterError: null,
+  });
+
+  const [k8sData, setK8sData] = useState<{
+    databases: ReturnType<typeof emptyK8sBucket>;
+    apps: ReturnType<typeof emptyK8sBucket>;
+  }>({
+    databases: emptyK8sBucket(),
+    apps: emptyK8sBucket(),
+  });
 
   const [summary, setSummary] = useState<SummaryData>({
     totalVps: 0,
@@ -225,16 +268,37 @@ export default function AdminResourceFindingPage() {
   const fetchData = async (isManual = false) => {
     if (isManual) setRefreshing(true);
     try {
-      const res = await fetch("/api/admin/resource-finding", { cache: "no-store" });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setSummary(data.summary);
-        setVpsList(data.vpsList || []);
-        const now = new Date();
-        setLastUpdated(now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
-      } else {
-        toast.error(data.error || "Failed to load resource metrics");
+      const [vpsSettled, k8sSettled] = await Promise.allSettled([
+        fetch("/api/admin/resource-finding", { cache: "no-store" }),
+        fetch("/api/admin/resource-finding/k8s", { cache: "no-store" }),
+      ]);
+
+      if (vpsSettled.status === "fulfilled") {
+        const res = vpsSettled.value;
+        const data = await res.json();
+        if (res.ok && data.success) {
+          setSummary(data.summary);
+          setVpsList(data.vpsList || []);
+        } else if (resourceSource === "vps") {
+          toast.error(data.error || "Failed to load VPS resource metrics");
+        }
       }
+
+      if (k8sSettled.status === "fulfilled") {
+        const k8sRes = k8sSettled.value;
+        const k8sJson = await k8sRes.json();
+        if (k8sRes.ok && k8sJson.success) {
+          setK8sData({
+            databases: k8sJson.databases || emptyK8sBucket(),
+            apps: k8sJson.apps || emptyK8sBucket(),
+          });
+        } else if (resourceSource !== "vps") {
+          toast.error(k8sJson.error || "Failed to load Kubernetes resource metrics");
+        }
+      }
+
+      const now = new Date();
+      setLastUpdated(now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
     } catch (err) {
       console.error(err);
       toast.error("Network error while fetching resource finding metrics");
@@ -245,6 +309,13 @@ export default function AdminResourceFindingPage() {
   };
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const src = params.get("source");
+      if (src === "database" || src === "apps" || src === "vps") {
+        setResourceSource(src);
+      }
+    }
     fetchData();
   }, []);
 
@@ -433,7 +504,11 @@ export default function AdminResourceFindingPage() {
             Resource Finding
           </h1>
           <p className={cn("text-xs sm:text-sm mt-1 max-w-2xl", isDark ? "text-zinc-400" : "text-slate-500")}>
-            Identify customer VPS instances consuming high CPU, saturated RAM, or heavy network bandwidth in real-time.
+            {resourceSource === "vps"
+              ? "Identify customer VPS instances consuming high CPU, saturated RAM, or heavy network bandwidth in real-time."
+              : resourceSource === "database"
+              ? "Monitor live Kubernetes CPU, memory utilization, OOM events & restart health across Managed Database pods."
+              : "Monitor live Kubernetes CPU, memory utilization, OOM events & restart health across Managed Application pods."}
           </p>
         </div>
 
@@ -465,21 +540,114 @@ export default function AdminResourceFindingPage() {
           </button>
 
           <Link
-            href="/admin/vps"
+            href={resourceSource === "database" ? "/admin/database" : resourceSource === "apps" ? "/admin/apps" : "/admin/vps"}
             className={cn(
-              "flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-xs font-semibold transition-all",
+              "flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-xs font-semibold transition-all whitespace-nowrap",
               isDark
                 ? "bg-cyan-950/40 hover:bg-cyan-900/60 text-cyan-400 border border-cyan-500/20"
                 : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border border-cyan-200"
             )}
           >
-            <Server className="w-3.5 h-3.5" />
-            <span>VPS Manager</span>
+            {resourceSource === "database" ? (
+              <Database className="w-3.5 h-3.5" />
+            ) : resourceSource === "apps" ? (
+              <Boxes className="w-3.5 h-3.5" />
+            ) : (
+              <Server className="w-3.5 h-3.5" />
+            )}
+            <span>{resourceSource === "database" ? "Database Manager" : resourceSource === "apps" ? "Apps Manager" : "VPS Manager"}</span>
             <ExternalLink className="w-3 h-3 ml-0.5 opacity-70" />
           </Link>
         </div>
       </div>
 
+      {/* Resource Pillar Switcher: Proxmox VPS | Managed Database | Managed Apps */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
+        {[
+          {
+            id: "vps" as const,
+            label: "Proxmox VPS",
+            sub: "KVM Virtual Machines",
+            icon: Server,
+            total: summary.totalVps,
+            alerts: summary.criticalCount,
+          },
+          {
+            id: "database" as const,
+            label: "Managed Database",
+            sub: "Kubernetes DB Pods",
+            icon: Database,
+            total: k8sData.databases.summary.totalCount,
+            alerts: k8sData.databases.summary.criticalCount,
+          },
+          {
+            id: "apps" as const,
+            label: "Managed Apps",
+            sub: "Kubernetes App Pods",
+            icon: Boxes,
+            total: k8sData.apps.summary.totalCount,
+            alerts: k8sData.apps.summary.criticalCount,
+          },
+        ].map((pillar) => {
+          const isSelected = resourceSource === pillar.id;
+          const Icon = pillar.icon;
+          return (
+            <button
+              key={pillar.id}
+              type="button"
+              onClick={() => setResourceSource(pillar.id)}
+              className={cn(
+                "p-3.5 rounded-2xl border text-left transition-all flex items-center justify-between gap-3 cursor-pointer",
+                isSelected
+                  ? isDark
+                    ? "bg-cyan-500/10 border-cyan-500/50 ring-1 ring-cyan-500/30"
+                    : "bg-cyan-50 border-cyan-400 ring-1 ring-cyan-500/20"
+                  : isDark
+                  ? "bg-[#0c0c0e] border-white/10 hover:border-white/25"
+                  : "bg-white border-slate-200 hover:border-slate-300"
+              )}
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <div
+                  className={cn(
+                    "w-9 h-9 rounded-xl border flex items-center justify-center shrink-0",
+                    isSelected
+                      ? isDark
+                        ? "bg-cyan-500/20 border-cyan-500/40 text-cyan-400"
+                        : "bg-cyan-100 border-cyan-300 text-cyan-700"
+                      : isDark
+                      ? "bg-white/5 border-white/10 text-zinc-400"
+                      : "bg-slate-100 border-slate-200 text-slate-600"
+                  )}
+                >
+                  <Icon className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className={cn("text-xs sm:text-sm font-bold truncate", isDark ? "text-white" : "text-slate-900")}>
+                    {pillar.label}
+                  </div>
+                  <div className={cn("text-[11px] truncate", isDark ? "text-zinc-400" : "text-slate-500")}>
+                    {pillar.sub}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                {pillar.alerts > 0 && (
+                  <span className={cn("px-2 py-0.5 rounded-full text-[11px] font-bold border", isDark ? "bg-rose-500/15 text-rose-400 border-rose-500/30" : "bg-rose-50 text-rose-700 border-rose-200")}>
+                    {pillar.alerts} crit
+                  </span>
+                )}
+                <span className={cn("px-2 py-0.5 rounded-lg text-xs font-mono font-bold border", isSelected ? (isDark ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/30" : "bg-cyan-200/70 text-cyan-900 border-cyan-300") : isDark ? "bg-white/5 text-zinc-300 border-white/10" : "bg-slate-100 text-slate-700 border-slate-200")}>
+                  {pillar.total}
+                </span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {resourceSource === "vps" ? (
+      <>
       {/* 4 Top KPI Stat Cards - Unified Design.md Containers */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* Card 1: Critical Alerts */}
@@ -1857,6 +2025,28 @@ export default function AdminResourceFindingPage() {
           </div>
         )}
       </div>
+      </>
+      ) : resourceSource === "database" ? (
+        <K8sResourceMonitor
+          kind="database"
+          summary={k8sData.databases.summary}
+          items={k8sData.databases.items}
+          clusterNodes={k8sData.databases.clusterNodes}
+          metricsAvailable={k8sData.databases.metricsAvailable}
+          clusterError={k8sData.databases.clusterError}
+          onRefresh={() => fetchData(true)}
+        />
+      ) : (
+        <K8sResourceMonitor
+          kind="app"
+          summary={k8sData.apps.summary}
+          items={k8sData.apps.items}
+          clusterNodes={k8sData.apps.clusterNodes}
+          metricsAvailable={k8sData.apps.metricsAvailable}
+          clusterError={k8sData.apps.clusterError}
+          onRefresh={() => fetchData(true)}
+        />
+      )}
 
       {/* Inspect Deep Telemetry & RRD Modal */}
       {inspectVps && (

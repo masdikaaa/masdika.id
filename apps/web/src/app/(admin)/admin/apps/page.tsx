@@ -171,18 +171,25 @@ export default function AdminManagedAppsPage() {
 
   return (
     <div className="space-y-6 max-w-full pb-16">
-      {/* Top Banner Header (Consistent with Gambar 3 Managed Database) */}
+      {/* Top Banner Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2.5 flex-wrap">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
               Managed Applications Clusters
             </h1>
-            <span className={cn("px-2.5 py-0.5 rounded-full text-xs font-bold border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
-              Kubernetes Native
-            </span>
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-semibold border whitespace-nowrap shrink-0", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+                <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", isDark ? "bg-cyan-400" : "bg-cyan-600")} />
+                Kubernetes Native
+              </span>
+              <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-semibold border whitespace-nowrap shrink-0", isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200")}>
+                <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", isDark ? "bg-emerald-400" : "bg-emerald-600")} />
+                Auto SSL
+              </span>
+            </div>
           </div>
-          <p className={cn("text-xs sm:text-sm font-medium mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+          <p className={cn("text-xs sm:text-sm font-medium mt-1.5 max-w-2xl leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
             Manage all customer AI agents, gateways &amp; workflow pods deployed on Kubernetes.
           </p>
         </div>
@@ -199,6 +206,16 @@ export default function AdminManagedAppsPage() {
             <RefreshCw className={cn("w-3.5 h-3.5", (refreshing || loading) && "animate-spin text-cyan-400")} />
             <span>Refresh</span>
           </button>
+          <Link
+            href="/admin/resource-finding?source=apps"
+            className={cn(
+              "px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-1.5 border",
+              isDark ? "bg-cyan-950/40 hover:bg-cyan-900/60 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border-cyan-200"
+            )}
+          >
+            <Activity className="w-3.5 h-3.5" />
+            <span>Resource Monitor</span>
+          </Link>
           <Link
             href="/admin/settings?tab=apps"
             className="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
