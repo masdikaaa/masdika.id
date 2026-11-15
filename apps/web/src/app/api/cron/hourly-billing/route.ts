@@ -650,6 +650,17 @@ export async function GET(req: Request) {
               lastBilledAt: now
             }
           });
+
+          const { upsertPaygRunningInvoice } = await import('@/lib/payg-invoice');
+          await upsertPaygRunningInvoice(tx, {
+            userId: db.userId,
+            serviceIdField: 'databaseServiceId',
+            serviceId: db.id,
+            type: 'MANAGED_DATABASE',
+            amountToAdd: costThisHour,
+            serviceName: db.name,
+            fallbackAmount: (db.accumulatedCost || 0) + costThisHour,
+          });
           paymentSuccess = true;
         });
         dbProcessed++;
@@ -765,6 +776,17 @@ export async function GET(req: Request) {
               lastBilledAt: now
             }
           });
+
+          const { upsertPaygRunningInvoice } = await import('@/lib/payg-invoice');
+          await upsertPaygRunningInvoice(tx, {
+            userId: app.userId,
+            serviceIdField: 'appServiceId',
+            serviceId: app.id,
+            type: 'MANAGED_APP',
+            amountToAdd: costThisHour,
+            serviceName: app.name,
+            fallbackAmount: (app.accumulatedCost || 0) + costThisHour,
+          });
         });
         appProcessed++;
       } catch (e: any) {
@@ -876,6 +898,17 @@ export async function GET(req: Request) {
               accumulatedCost: { increment: costThisHour },
               lastBilledAt: now,
             },
+          });
+
+          const { upsertPaygRunningInvoice } = await import('@/lib/payg-invoice');
+          await upsertPaygRunningInvoice(tx, {
+            userId: obj.userId,
+            serviceIdField: 'objectStorageServiceId',
+            serviceId: obj.id,
+            type: 'OBJECT_STORAGE',
+            amountToAdd: costThisHour,
+            serviceName: obj.name,
+            fallbackAmount: (obj.accumulatedCost || 0) + costThisHour,
           });
         });
         objProcessed++;

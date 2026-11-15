@@ -241,16 +241,17 @@ export async function POST(req: NextRequest) {
           },
         });
 
-        const invoiceNumber = `INV-S3-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-        await tx.invoice.create({
-          data: {
-            invoiceNumber,
-            merchantOrderId: invoiceNumber,
-            userId: user.id,
-            amount: upfrontCharge,
-            status: billingMode === 'MONTHLY' ? 'PAID' : 'PAYG_RUNNING',
-            reference: billingMode === 'MONTHLY' ? cleanName : 'PAYG_RUNNING',
-            paidAt: new Date(),
+        const { createServiceOrderInvoice } = await import('@/lib/payg-invoice');
+        await createServiceOrderInvoice(tx, {
+          userId: user.id,
+          serviceIdField: 'objectStorageServiceId',
+          serviceId: created.id,
+          type: 'OBJECT_STORAGE',
+          amount: upfrontCharge,
+          billingMode,
+          serviceName: cleanName,
+          extraDetails: {
+            planName: matchedPlan?.name || `${storageGb} GB`,
           },
         });
 

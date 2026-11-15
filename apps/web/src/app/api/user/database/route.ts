@@ -287,7 +287,7 @@ export async function POST(req: NextRequest) {
           );
         }
 
-        return await tx.databaseService.create({
+        const createdDb = await tx.databaseService.create({
           data: {
             userId: user.id,
             name: cleanName,
@@ -314,6 +314,23 @@ export async function POST(req: NextRequest) {
             lastBilledAt: new Date(),
           },
         });
+
+        const { createServiceOrderInvoice } = await import('@/lib/payg-invoice');
+        await createServiceOrderInvoice(tx, {
+          userId: user.id,
+          serviceIdField: 'databaseServiceId',
+          serviceId: createdDb.id,
+          type: 'MANAGED_DATABASE',
+          amount: upfrontCharge,
+          billingMode: normalizedBillingMode,
+          serviceName: cleanName,
+          extraDetails: {
+            dbType: typeUpper,
+            planName: effectivePlanName,
+          },
+        });
+
+        return createdDb;
       });
     } catch (txErr: any) {
       releaseReservedDbPort(port);

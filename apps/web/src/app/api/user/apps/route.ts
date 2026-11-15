@@ -245,6 +245,21 @@ export async function POST(req: NextRequest) {
           },
         });
 
+        const { createServiceOrderInvoice } = await import('@/lib/payg-invoice');
+        await createServiceOrderInvoice(tx, {
+          userId: user.id,
+          serviceIdField: 'appServiceId',
+          serviceId: created.id,
+          type: 'MANAGED_APP',
+          amount: normalizedBillingMode === 'MONTHLY' ? monthlyPrice : 0,
+          billingMode: normalizedBillingMode,
+          serviceName: cleanName,
+          extraDetails: {
+            appType: catalogItem.id,
+            planName: planCodeFinal,
+          },
+        });
+
         return { created, resolvedSubdomain };
       });
       appRecord = txOutcome.created;
