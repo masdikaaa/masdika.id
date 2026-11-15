@@ -45,6 +45,7 @@ import {
   Activity,
   Server,
   Rocket,
+  ArrowRightLeft,
 } from 'lucide-react';
 
 interface SelectOption<T extends string> {
@@ -202,7 +203,15 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
   } | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [showPrimarySecret, setShowPrimarySecret] = useState(false);
+  const [objectPage, setObjectPage] = useState(1);
+  const [moveModal, setMoveModal] = useState<{
+    key: string;
+    targetBucket: string;
+    targetKey: string;
+  } | null>(null);
+  const [movingObject, setMovingObject] = useState(false);
   const workspaceRef = useRef<HTMLDivElement>(null);
+  const OBJECTS_PER_PAGE = 10;
 
   const jumpToTab = (nextTab: 'buckets' | 'keys' | 'guide' | 'settings') => {
     setTab(nextTab);
@@ -250,8 +259,8 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
     }
   };
 
-  const fetchService = async () => {
-    setLoading(true);
+  const fetchService = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const res = await fetch(`/api/user/object-storage/${id}`);
       const data = await res.json();
@@ -263,9 +272,9 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
         setSelectedBucket(data.service.buckets[0].name);
       }
     } catch (err: any) {
-      toast.error(err?.message || 'Failed to load Object Storage console');
+      if (!silent) toast.error(err?.message || 'Failed to load Object Storage console');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -299,7 +308,15 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
     } catch {
       // ignore storage errors
     }
+    const timer = setInterval(() => {
+      fetchService(true);
+    }, 15000);
+    return () => clearInterval(timer);
   }, [id]);
+
+  useEffect(() => {
+    setObjectPage(1);
+  }, [selectedBucket, prefix, objectSearch]);
 
   useEffect(() => {
     if (selectedBucket && service?.status !== 'SUSPENDED') {
@@ -394,7 +411,7 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
       if (!res.ok) throw new Error(data.error);
       toast.success(`Uploaded ${file.name}`, { id: toastId });
       fetchObjects(selectedBucket, prefix);
-      fetchService();
+      fetchService(true);
     } catch (err: any) {
       toast.error(err?.message || 'Upload failed', { id: toastId });
     }
@@ -428,19 +445,69 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
     }
   };
 
-  const handleDeleteObject = async (key: string) => {
+  const handleDeleteObject = (key: string) => {
     if (!selectedBucket) return;
+    setConfirmDialog({
+      title: 'Delete Object',
+      description: `Permanently delete "${key}" from bucket "${selectedBucket}"? This action cannot be undone.`,
+      confirmLabel: 'Delete Object',
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`/api/user/object-storage/${id}/buckets/${encodeURIComponent(selectedBucket)}/objects?key=${encodeURIComponent(key)}`, {
+            method: 'DELETE',
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error);
+          toast.success('Object deleted');
+          fetchObjects(selectedBucket, prefix);
+          fetchService(true);
+        } catch (err: any) {
+          toast.error(err?.message || 'Delete failed');
+        }
+      },
+    });
+  };
+
+  const openMoveModal = (key: string) => {
+    const otherBuckets = (service?.buckets || []).filter((b: any) => b.name !== selectedBucket);
+    if (otherBuckets.length === 0) {
+      toast.error('Create another bucket first to move objects between buckets.');
+      return;
+    }
+    setMoveModal({
+      key,
+      targetBucket: otherBuckets[0].name,
+      targetKey: key,
+    });
+  };
+
+  const handleMoveObject = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!moveModal || !selectedBucket) return;
+    setMovingObject(true);
     try {
-      const res = await fetch(`/api/user/object-storage/${id}/buckets/${encodeURIComponent(selectedBucket)}/objects?key=${encodeURIComponent(key)}`, {
-        method: 'DELETE',
-      });
+      const res = await fetch(
+        `/api/user/object-storage/${id}/buckets/${encodeURIComponent(selectedBucket)}/objects`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            key: moveModal.key,
+            targetBucket: moveModal.targetBucket,
+            targetKey: moveModal.targetKey.trim() || moveModal.key,
+          }),
+        }
+      );
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      toast.success('Object deleted');
+      if (!res.ok) throw new Error(data.error || 'Move failed');
+      toast.success(`Moved "${moveModal.key}" to ${moveModal.targetBucket}`);
+      setMoveModal(null);
       fetchObjects(selectedBucket, prefix);
-      fetchService();
+      fetchService(true);
     } catch (err: any) {
-      toast.error(err?.message || 'Delete failed');
+      toast.error(err?.message || 'Failed to move object');
+    } finally {
+      setMovingObject(false);
     }
   };
 
@@ -550,7 +617,15 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
   const maxBucketsLabel = activePlanMeta?.maxBuckets === -1 ? '∞' : activePlanMeta?.maxBuckets ?? '—';
   const maxKeysLabel = activePlanMeta?.maxKeys === -1 ? '∞' : activePlanMeta?.maxKeys ?? '—';
   const quotaBytes = service.storageGb * 1024 * 1024 * 1024;
-  const usedPercent = quotaBytes > 0 ? Math.min(100, Math.round(((service.usedBytes || 0) / quotaBytes) * 100)) : 0;
+  const rawUsedPct = quotaBytes > 0 ? Math.min(100, ((service.usedBytes || 0) / quotaBytes) * 100) : 0;
+  const usedPercentLabel =
+    rawUsedPct === 0
+      ? '0%'
+      : rawUsedPct < 0.01
+        ? '< 0.01%'
+        : rawUsedPct < 1
+          ? `${rawUsedPct.toFixed(2)}%`
+          : `${Math.round(rawUsedPct)}%`;
 
   const filteredFolders = folders.filter((f) =>
     f.slice(prefix.length).toLowerCase().includes(objectSearch.trim().toLowerCase())
@@ -558,6 +633,13 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
   const filteredObjects = objects.filter((o) =>
     o.key.slice(prefix.length).toLowerCase().includes(objectSearch.trim().toLowerCase())
   );
+  const totalObjectPages = Math.max(1, Math.ceil(filteredObjects.length / OBJECTS_PER_PAGE));
+  const safeObjectPage = Math.min(objectPage, totalObjectPages);
+  const paginatedObjects = filteredObjects.slice(
+    (safeObjectPage - 1) * OBJECTS_PER_PAGE,
+    safeObjectPage * OBJECTS_PER_PAGE
+  );
+  const otherBuckets = (service.buckets || []).filter((b: any) => b.name !== selectedBucket);
 
   const endpointVal = publicEndpoint || 'https://s3.masdika.id';
   const bucketVal = selectedBucket || 'your-bucket';
@@ -963,11 +1045,11 @@ s3 = boto3.client(
                 <div className="flex items-center justify-between">
                   <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>Storage Used:</span>
                   <span className={cn('font-mono font-semibold', isDark ? 'text-white' : 'text-slate-900')}>
-                    {formatBytes(service.usedBytes || 0)} / {service.storageGb} GB ({usedPercent}%)
+                    {formatBytes(service.usedBytes || 0)} / {service.storageGb} GB ({usedPercentLabel})
                   </span>
                 </div>
                 <div className={cn('h-1.5 rounded-full overflow-hidden', isDark ? 'bg-white/[0.06]' : 'bg-slate-200')}>
-                  <div className="h-full bg-cyan-400 rounded-full transition-all" style={{ width: `${Math.max(usedPercent, 2)}%` }} />
+                  <div className="h-full bg-cyan-400 rounded-full transition-all duration-300" style={{ width: `${rawUsedPct}%` }} />
                 </div>
               </div>
 
@@ -1339,29 +1421,93 @@ s3 = boto3.client(
                     </div>
                   </div>
                 ) : (
-                  <div className={cn('divide-y border rounded-xl overflow-hidden', isDark ? 'divide-white/[0.06] border-white/[0.06] bg-[#0a0a0c]' : 'divide-slate-200 border-slate-200 bg-white')}>
-                    {filteredFolders.map((f) => (
-                      <div key={f} onClick={() => setPrefix(f)} className={cn('p-3 flex items-center justify-between cursor-pointer text-xs', isDark ? 'hover:bg-white/[0.03]' : 'hover:bg-slate-50')}>
-                        <div className={cn('flex items-center gap-2.5 font-semibold', isDark ? 'text-amber-400' : 'text-amber-600')}>
-                          <Folder className="w-4 h-4" /> {f.slice(prefix.length)}
+                  <>
+                    <div className={cn('divide-y border rounded-xl overflow-hidden', isDark ? 'divide-white/[0.06] border-white/[0.06] bg-[#0a0a0c]' : 'divide-slate-200 border-slate-200 bg-white')}>
+                      {safeObjectPage === 1 && filteredFolders.map((f) => (
+                        <div key={f} onClick={() => setPrefix(f)} className={cn('p-3 flex items-center justify-between cursor-pointer text-xs', isDark ? 'hover:bg-white/[0.03]' : 'hover:bg-slate-50')}>
+                          <div className={cn('flex items-center gap-2.5 font-semibold', isDark ? 'text-amber-400' : 'text-amber-600')}>
+                            <Folder className="w-4 h-4" /> {f.slice(prefix.length)}
+                          </div>
+                          <ChevronRight className={cn('w-3.5 h-3.5', isDark ? 'text-zinc-600' : 'text-slate-400')} />
                         </div>
-                        <ChevronRight className={cn('w-3.5 h-3.5', isDark ? 'text-zinc-600' : 'text-slate-400')} />
+                      ))}
+                      {paginatedObjects.map((obj) => (
+                        <div key={obj.key} className={cn('p-3 flex items-center justify-between gap-3 text-xs', isDark ? 'hover:bg-white/[0.03]' : 'hover:bg-slate-50')}>
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <File className={cn('w-4 h-4 shrink-0', isDark ? 'text-cyan-400' : 'text-cyan-600')} />
+                            <span className={cn('truncate font-mono', isDark ? 'text-zinc-200' : 'text-slate-800')}>{obj.key.slice(prefix.length)}</span>
+                          </div>
+                          <div className="flex items-center gap-2.5 shrink-0">
+                            <span className={cn('font-mono text-[11px]', isDark ? 'text-zinc-500' : 'text-slate-500')}>{formatBytes(obj.size)}</span>
+                            {otherBuckets.length > 0 && (
+                              <button
+                                type="button"
+                                onClick={() => openMoveModal(obj.key)}
+                                title="Move to another bucket"
+                                className={cn('p-1.5 rounded-lg transition-colors cursor-pointer', isDark ? 'text-zinc-400 hover:text-cyan-400 hover:bg-white/[0.05]' : 'text-slate-500 hover:text-cyan-700 hover:bg-slate-100')}
+                              >
+                                <ArrowRightLeft className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => handlePresign(obj.key)}
+                              title="Copy 15-min Presigned URL"
+                              className={cn('p-1.5 rounded-lg transition-colors cursor-pointer', isDark ? 'text-cyan-400 hover:text-cyan-300 hover:bg-white/[0.05]' : 'text-cyan-600 hover:text-cyan-700 hover:bg-cyan-50')}
+                            >
+                              <Link2 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteObject(obj.key)}
+                              title="Delete Object"
+                              className={cn('p-1.5 rounded-lg transition-colors cursor-pointer', isDark ? 'text-red-400 hover:text-red-300 hover:bg-red-500/10' : 'text-red-600 hover:text-red-700 hover:bg-red-50')}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Object Browser Pagination */}
+                    {filteredObjects.length > 0 && (
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 text-[11px]">
+                        <span className={isDark ? 'text-zinc-500' : 'text-slate-500'}>
+                          Showing {(safeObjectPage - 1) * OBJECTS_PER_PAGE + 1}–{Math.min(safeObjectPage * OBJECTS_PER_PAGE, filteredObjects.length)} of {filteredObjects.length} objects
+                        </span>
+                        {totalObjectPages > 1 && (
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => setObjectPage((p) => Math.max(1, p - 1))}
+                              disabled={safeObjectPage <= 1}
+                              className={cn(
+                                'px-2.5 py-1 rounded-lg border font-semibold transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed',
+                                isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-zinc-300 hover:bg-white/[0.05]' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                              )}
+                            >
+                              Prev
+                            </button>
+                            <span className={cn('px-2 font-mono font-semibold', isDark ? 'text-zinc-300' : 'text-slate-700')}>
+                              Page {safeObjectPage} / {totalObjectPages}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setObjectPage((p) => Math.min(totalObjectPages, p + 1))}
+                              disabled={safeObjectPage >= totalObjectPages}
+                              className={cn(
+                                'px-2.5 py-1 rounded-lg border font-semibold transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed',
+                                isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-zinc-300 hover:bg-white/[0.05]' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                              )}
+                            >
+                              Next
+                            </button>
+                          </div>
+                        )}
                       </div>
-                    ))}
-                    {filteredObjects.map((obj) => (
-                      <div key={obj.key} className={cn('p-3 flex items-center justify-between gap-3 text-xs', isDark ? 'hover:bg-white/[0.03]' : 'hover:bg-slate-50')}>
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <File className={cn('w-4 h-4 shrink-0', isDark ? 'text-cyan-400' : 'text-cyan-600')} />
-                          <span className={cn('truncate font-mono', isDark ? 'text-zinc-200' : 'text-slate-800')}>{obj.key.slice(prefix.length)}</span>
-                        </div>
-                        <div className="flex items-center gap-3 shrink-0">
-                          <span className={cn('font-mono text-[11px]', isDark ? 'text-zinc-500' : 'text-slate-500')}>{formatBytes(obj.size)}</span>
-                          <button type="button" onClick={() => handlePresign(obj.key)} title="Copy 15-min Presigned URL" className={cn('p-1 cursor-pointer', isDark ? 'text-cyan-400 hover:text-cyan-300' : 'text-cyan-600 hover:text-cyan-700')}><Link2 className="w-3.5 h-3.5" /></button>
-                          <button type="button" onClick={() => handleDeleteObject(obj.key)} title="Delete Object" className={cn('p-1 cursor-pointer', isDark ? 'text-red-400 hover:text-red-300' : 'text-red-600 hover:text-red-700')}><Trash2 className="w-3.5 h-3.5" /></button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                    )}
+                  </>
                 )}
               </>
             )}
@@ -1818,6 +1964,105 @@ s3 = boto3.client(
         }}
         isDark={isDark}
       />
+
+      {/* Move Object Between Buckets Modal */}
+      {moveModal && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <div
+            className={cn(
+              'w-full max-w-md rounded-2xl border p-6 space-y-5 shadow-2xl relative',
+              isDark
+                ? 'bg-[#101014] border-white/[0.08] text-white'
+                : 'bg-white border-slate-200 text-slate-900 shadow-xl'
+            )}
+          >
+            <button
+              type="button"
+              onClick={() => !movingObject && setMoveModal(null)}
+              disabled={movingObject}
+              className={cn(
+                'absolute top-4 right-4 p-2 rounded-xl transition-colors cursor-pointer',
+                isDark ? 'text-zinc-400 hover:text-white hover:bg-white/5' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+              )}
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="flex items-start gap-3.5 pr-6">
+              <div className={cn('w-10 h-10 rounded-xl border flex items-center justify-center shrink-0', isDark ? 'bg-cyan-500/10 border-cyan-500/20 text-cyan-400' : 'bg-cyan-50 border-cyan-200 text-cyan-700')}>
+                <ArrowRightLeft className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <h3 className="text-base font-bold tracking-tight">Move Object to Bucket</h3>
+                <p className={cn('text-xs mt-1 leading-relaxed truncate font-mono', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+                  {selectedBucket}/{moveModal.key}
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={handleMoveObject} className="space-y-4">
+              <div>
+                <label className={cn('block text-[11px] font-bold uppercase tracking-wider mb-1.5', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+                  Destination Bucket
+                </label>
+                <CustomSelect
+                  value={moveModal.targetBucket}
+                  onChange={(val) => setMoveModal({ ...moveModal, targetBucket: val })}
+                  isDark={isDark}
+                  options={otherBuckets.map((b: any) => ({
+                    value: b.name,
+                    label: `${b.name} (${b.visibility})`,
+                  }))}
+                />
+              </div>
+
+              <div>
+                <label className={cn('block text-[11px] font-bold uppercase tracking-wider mb-1.5', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+                  Destination Key / Path
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={moveModal.targetKey}
+                  onChange={(e) => setMoveModal({ ...moveModal, targetKey: e.target.value })}
+                  className={cn(
+                    'w-full rounded-xl px-3.5 py-2.5 text-xs font-mono border focus:outline-none focus:border-cyan-500',
+                    isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+                  )}
+                />
+              </div>
+
+              <div className={cn('flex items-center justify-end gap-2.5 pt-3 border-t', isDark ? 'border-white/[0.08]' : 'border-slate-200')}>
+                <button
+                  type="button"
+                  onClick={() => setMoveModal(null)}
+                  disabled={movingObject}
+                  className={cn(
+                    'px-4 py-2 rounded-xl text-xs font-bold border transition-colors cursor-pointer',
+                    isDark ? 'bg-white/[0.04] border-white/[0.08] text-zinc-300 hover:text-white' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                  )}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={movingObject || !moveModal.targetBucket}
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 shadow-sm flex items-center gap-1.5 disabled:opacity-50 cursor-pointer transition-colors"
+                >
+                  {movingObject ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Moving...</span>
+                    </>
+                  ) : (
+                    <span>Move Object</span>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Consistent Confirmation Modal */}
       {confirmDialog && (

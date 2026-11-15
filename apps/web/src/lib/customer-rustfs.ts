@@ -2,6 +2,7 @@ import {
   S3Client,
   PutObjectCommand,
   GetObjectCommand,
+  CopyObjectCommand,
   DeleteObjectCommand,
   DeleteObjectsCommand,
   HeadObjectCommand,
@@ -431,6 +432,41 @@ export async function deleteFromCustomerRustFS(bucketName: string, key: string):
     await client.send(new DeleteObjectCommand({ Bucket: bucketName, Key: key }));
     return true;
   } catch {
+    return false;
+  }
+}
+
+export async function moveCustomerRustFSObject(
+  sourceBucket: string,
+  sourceKey: string,
+  targetBucket: string,
+  targetKey: string
+): Promise<boolean> {
+  const { client, enabled } = await getCustomerRustFSS3Client();
+  if (!enabled || !client) return false;
+  try {
+    const encodedSource = `${encodeURIComponent(sourceBucket)}/${sourceKey
+      .split('/')
+      .map((seg) => encodeURIComponent(seg))
+      .join('/')}`;
+    await client.send(
+      new CopyObjectCommand({
+        Bucket: targetBucket,
+        Key: targetKey,
+        CopySource: encodedSource,
+      })
+    );
+    if (sourceBucket !== targetBucket || sourceKey !== targetKey) {
+      await client.send(
+        new DeleteObjectCommand({
+          Bucket: sourceBucket,
+          Key: sourceKey,
+        })
+      );
+    }
+    return true;
+  } catch (err) {
+    console.error('[CustomerRustFS] moveCustomerRustFSObject error:', err);
     return false;
   }
 }

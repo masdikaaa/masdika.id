@@ -7,6 +7,7 @@ import {
   getCustomerRustFSConfig,
   getObjectStorageServiceUsageBytes,
   listCustomerBucketObjects,
+  moveCustomerRustFSObject,
   uploadBufferToCustomerRustFS,
 } from '@/lib/customer-rustfs';
 
@@ -165,4 +166,64 @@ export async function DELETE(
 
   await deleteFromCustomerRustFS(bucket.name, key);
   return NextResponse.json({ success: true, key });
+}
+
+export async function PATCH(
+  req: NextRequest,
+  context: { params: Promise<{ id: string; bucketName: string }> }
+) {
+  const authResult = await requireAuth({ allowedRoles: ['USER', 'ADMIN'] });
+  if (authResult.error) {
+    return NextResponse.json({ error: authResult.error }, { status: authResult.status });
+  }
+  const user = authResult.user!;
+  const { id, bucketName } = await context.params;
+  const serviceId = parseInt(id, 10);
+  if (isNaN(serviceId)) return NextResponse.json({ error: 'Invalid service ID' }, { status: 400 });
+
+  const service = await prisma.objectStorageService.findFirst({
+    where: { id: serviceId, userId: user.id },
+    include: { buckets: true },
+  });
+  if (!service || service.status === 'TERMINATED') {
+    return NextResponse.json({ error: 'Service not found' }, { status: 404 });
+  }
+  if (service.status === 'SUSPENDED') {
+    return NextResponse.json({ error: 'Service is suspended' }, { status: 403 });
+  }
+
+  const body = await req.json().catch(() => ({}));
+  const cleanKey = sanitizeObjectKey(String(body.key || ''));
+  const targetBucketName = String(body.targetBucket || '').trim();
+  const cleanTargetKey = sanitizeObjectKey(String(body.targetKey || cleanKey));
+
+  if (!cleanKey || !targetBucketName || !cleanTargetKey) {
+    return NextResponse.json({ error: 'key and targetBucket are required' }, { status: 400 });
+  }
+
+  const sourceBucket = service.buckets.find((b) => b.name === bucketName);
+  const targetBucket = service.buckets.find((b) => b.name === targetBucketName);
+  if (!sourceBucket || !targetBucket) {
+    return NextResponse.json({ error: 'Source or target bucket not found' }, { status: 404 });
+  }
+  if (sourceBucket.name === targetBucket.name && cleanKey === cleanTargetKey) {
+    return NextResponse.json({ error: 'Source and destination are identical' }, { status: 400 });
+  }
+
+  const ok = await moveCustomerRustFSObject(
+    sourceBucket.name,
+    cleanKey,
+    targetBucket.name,
+    cleanTargetKey
+  );
+  if (!ok) {
+    return NextResponse.json({ error: 'Failed to move object in RustFS' }, { status: 502 });
+  }
+
+  return NextResponse.json({
+    success: true,
+    sourceBucket: sourceBucket.name,
+    targetBucket: targetBucket.name,
+    key: cleanTargetKey,
+  });
 }
