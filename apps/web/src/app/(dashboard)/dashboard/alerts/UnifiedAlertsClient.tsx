@@ -38,6 +38,7 @@ export default function UnifiedAlertsClient({
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const [searchFilter, setSearchFilter] = useUrlString<string>("searchFilter", "");
+  const [typeFilter, setTypeFilter] = useState<"ALL" | "vps" | "k3s">("ALL");
   const [currentPage, setCurrentPage] = useUrlNumber("currentPage", 1);
   const itemsPerPage = 10;
 
@@ -65,13 +66,21 @@ export default function UnifiedAlertsClient({
     })),
   ];
 
-  const filteredList = allItems.filter(
-    (item) =>
+  const filteredList = allItems.filter((item) => {
+    if (typeFilter !== "ALL" && item.type !== typeFilter) return false;
+    return (
       !searchFilter ||
       item.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
       item.type.toLowerCase().includes(searchFilter.toLowerCase()) ||
       item.details.toLowerCase().includes(searchFilter.toLowerCase())
+    );
+  });
+
+  const totalAlertRules = allItems.reduce(
+    (acc, item) => acc + item.rules.filter((r: AlertRule) => r.isEnabled).length,
+    0
   );
+  const runningResourcesCount = allItems.filter((item) => item.status === "RUNNING").length;
 
   const totalPages = Math.max(1, Math.ceil(filteredList.length / itemsPerPage));
   const paginatedList = filteredList.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -145,55 +154,147 @@ export default function UnifiedAlertsClient({
   };
 
   return (
-    <div className="w-full space-y-6">
+    <div className="w-full space-y-6 pb-10">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
-        <div className="space-y-1">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
           <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            <h1 className={cn("text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
               Metric &amp; Alert
             </h1>
             <span
               className={cn(
-                "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border",
+                "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border",
                 isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700"
               )}
             >
               <Activity className="w-3 h-3" /> Monitoring &amp; Metrics
             </span>
           </div>
-          <p className={cn("text-xs sm:text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
+          <p className={cn("text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-600")}>
             Centralized monitoring, alert rules, and live resource metrics for your Cloud VPS instances and Kubernetes clusters.
           </p>
         </div>
+      </div>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="relative flex-1 sm:w-64">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-cyan-500/50" />
-            <input
-              type="text"
-              placeholder="Search resources..."
-              value={searchFilter}
-              onChange={(e) => {
-                setSearchFilter(e.target.value);
-                setCurrentPage(1);
-              }}
-              className={cn(
-                "w-full border rounded-xl pl-9 pr-4 py-2 text-xs sm:text-sm focus:outline-none transition-colors",
-                isDark
-                  ? "bg-[#111115] border-white/[0.08] text-white placeholder:text-zinc-500 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-                  : "bg-slate-50/80 border-slate-200/90 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-              )}
-            />
+      {/* 3 Summary Stat Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className={cn("rounded-2xl border p-5 transition-colors", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-medium uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+              Monitored Resources
+            </span>
+            <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
+              <Terminal className="w-4 h-4" />
+            </div>
           </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>{allItems.length}</span>
+            <span className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>nodes</span>
+          </div>
+          <p className={cn("text-xs mt-2.5", isDark ? "text-zinc-500" : "text-slate-500")}>
+            Cloud VPS &amp; Managed Kubernetes clusters.
+          </p>
+        </div>
+
+        <div className={cn("rounded-2xl border p-5 transition-colors", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-medium uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+              Active Alert Rules
+            </span>
+            <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
+              <ShieldAlert className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>{totalAlertRules}</span>
+            <span className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>thresholds enabled</span>
+          </div>
+          <p className={cn("text-xs mt-2.5", isDark ? "text-zinc-500" : "text-slate-500")}>
+            Real-time CPU, RAM &amp; Disk notifications.
+          </p>
+        </div>
+
+        <div className={cn("rounded-2xl border p-5 transition-colors", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-medium uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+              Online Status
+            </span>
+            <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
+              <Activity className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>{runningResourcesCount}</span>
+            <span className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>/ {allItems.length} running</span>
+          </div>
+          <p className={cn("text-xs mt-2.5", isDark ? "text-zinc-500" : "text-slate-500")}>
+            Live telemetry streaming every cycle.
+          </p>
+        </div>
+      </div>
+
+      {/* Search & Filter Toolbar */}
+      <div
+        className={cn(
+          "flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-2xl border",
+          isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm"
+        )}
+      >
+        <div className="relative flex-1 max-w-md">
+          <Search className={cn("w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2", isDark ? "text-zinc-500" : "text-slate-400")} />
+          <input
+            type="text"
+            placeholder="Search resources by name or specs..."
+            value={searchFilter}
+            onChange={(e) => {
+              setSearchFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className={cn(
+              "w-full pl-10 pr-4 py-2 rounded-xl text-sm border outline-none transition-colors",
+              isDark
+                ? "bg-zinc-900/80 border-white/[0.08] text-white placeholder:text-zinc-500 focus:border-cyan-500/50"
+                : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500"
+            )}
+          />
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          {([
+            { id: "ALL", label: "All" },
+            { id: "vps", label: "Cloud VPS" },
+            { id: "k3s", label: "Kubernetes" },
+          ] as const).map((tab) => {
+            const active = typeFilter === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setTypeFilter(tab.id);
+                  setCurrentPage(1);
+                }}
+                className={cn(
+                  "px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all",
+                  active
+                    ? "bg-cyan-400 text-zinc-950"
+                    : isDark
+                    ? "bg-zinc-900 text-zinc-400 hover:text-white border border-white/[0.06]"
+                    : "bg-slate-100 text-slate-600 hover:text-slate-900"
+                )}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {allItems.length === 0 ? (
         <div
           className={cn(
-            "border rounded-2xl p-8 sm:p-12 text-center",
-            isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
+            "border rounded-2xl p-12 text-center",
+            isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm"
           )}
         >
           <div
@@ -223,7 +324,7 @@ export default function UnifiedAlertsClient({
         <div
           className={cn(
             "border rounded-2xl overflow-hidden flex flex-col",
-            isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
+            isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm"
           )}
         >
           {totalPages > 1 && (
@@ -274,7 +375,7 @@ export default function UnifiedAlertsClient({
                             )}
                           >
                             {item.type === "vps" ? (
-                              <Terminal className="w-5 h-5 text-blue-400" />
+                              <Terminal className="w-5 h-5 text-cyan-400" />
                             ) : (
                               <SiKubernetes className="w-5 h-5 text-cyan-400" />
                             )}
@@ -310,8 +411,8 @@ export default function UnifiedAlertsClient({
                             </>
                           ) : (
                             <>
-                              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
-                              <span className={cn("font-semibold", isDark ? "text-blue-400" : "text-blue-600")}>
+                              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
+                              <span className={cn("font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>
                                 Cloud VPS
                               </span>
                             </>
@@ -328,11 +429,11 @@ export default function UnifiedAlertsClient({
                             className={cn(
                               "inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-xl transition-colors border shadow-2xs",
                               isDark
-                                ? "bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 border-teal-500/20"
-                                : "bg-white hover:bg-slate-50 text-teal-700 border-slate-200/90"
+                                ? "bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border-white/[0.08]"
+                                : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200"
                             )}
                           >
-                            <Activity className="w-3.5 h-3.5" /> Metrics
+                            <Activity className="w-3.5 h-3.5 text-cyan-400" /> Metrics
                           </Link>
                           <Link
                             href={item.manageUrl}

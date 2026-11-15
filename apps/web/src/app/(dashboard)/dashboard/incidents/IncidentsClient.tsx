@@ -429,125 +429,68 @@ export default function IncidentsClient() {
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full lg:w-auto">
-          <div className="relative flex-1 sm:w-60 lg:w-64">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-cyan-500/50" />
-            <input
-              type="text"
-              placeholder="Search instances..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className={cn(
-                "w-full border rounded-xl pl-9 pr-4 py-2 text-xs sm:text-sm focus:outline-none transition-colors",
-                isDark
-                  ? "bg-[#111115] border-white/[0.08] text-white placeholder-zinc-500 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-                  : "bg-slate-50/80 border-slate-200/90 text-slate-900 placeholder-slate-400 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-              )}
-            />
-          </div>
+        <div className="flex items-center gap-2.5 shrink-0">
+          <button
+            onClick={() => fetchIncidents(true)}
+            disabled={refreshing}
+            className={cn(
+              "p-2.5 rounded-xl border text-sm transition-all",
+              isDark ? "bg-[#111115] border-white/[0.08] text-zinc-400 hover:text-white hover:bg-white/[0.04]" : "bg-white border-slate-200 text-slate-600 hover:text-slate-900 shadow-sm"
+            )}
+            title="Refresh live data"
+          >
+            <RefreshCw className={cn("w-4 h-4", refreshing && "animate-spin text-cyan-500")} />
+          </button>
 
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={() => fetchIncidents(true)}
-              disabled={refreshing}
-              className={cn(
-                "p-2 sm:p-2.5 rounded-xl border text-sm transition-all",
-                isDark ? "bg-[#111115] border-white/[0.08] text-zinc-400 hover:text-white hover:bg-white/[0.04]" : "bg-white border-slate-200/90 text-slate-600 hover:text-slate-900 shadow-2xs"
-              )}
-              title="Refresh live data"
-            >
-              <RefreshCw className={cn("w-4 h-4", refreshing && "animate-spin text-cyan-500")} />
-            </button>
+          <button
+            onClick={handleExportCsv}
+            disabled={loading || !data?.incidents?.length}
+            className={cn(
+              "px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-all flex items-center justify-center gap-2 whitespace-nowrap",
+              isDark
+                ? "bg-[#111115] border-white/[0.08] text-zinc-200 hover:bg-white/[0.04]"
+                : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50 shadow-sm"
+            )}
+          >
+            <Download className="w-4 h-4 text-cyan-400" />
+            <span>Export CSV</span>
+          </button>
 
-            <button
-              onClick={handleExportCsv}
-              disabled={loading || !data?.incidents?.length}
-              className={cn(
-                "flex-1 sm:flex-initial px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 whitespace-nowrap",
-                isDark
-                  ? "bg-[#111115] border-white/[0.08] text-cyan-400 hover:bg-white/[0.04] hover:border-cyan-500/40"
-                  : "bg-white border-slate-200/90 text-cyan-700 hover:bg-slate-50 shadow-2xs"
-              )}
-            >
-              <Download className="w-4 h-4" />
-              <span>Export CSV</span>
-            </button>
-
-            <button
-              onClick={() => {
-                setIsFleetReport(true);
-                setReportModalItem(null);
-              }}
-              disabled={loading || !data?.incidents?.length}
-              className="flex-1 sm:flex-initial px-4 py-2 sm:py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs sm:text-sm font-bold transition-all shadow-sm flex items-center justify-center gap-2 whitespace-nowrap"
-            >
-              <Printer className="w-4 h-4" />
-              <span>Official Report</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Bandwidth Policy & Node Protection Notice Banner */}
-      <div
-        className={cn(
-          "rounded-xl sm:rounded-2xl p-4 sm:p-5 border transition-all no-print flex items-start gap-3 sm:gap-3.5",
-          isDark
-            ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200"
-            : "bg-cyan-50 border-cyan-200 text-cyan-800"
-        )}
-      >
-        <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
-        <div className="space-y-1 flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <h2 className={cn("font-medium text-xs sm:text-sm", isDark ? "text-cyan-400" : "text-cyan-900")}>
-              Unmetered Bandwidth & Automated Safeguard Guarantee:
-            </h2>
-            <span
-              className={cn(
-                "text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border shrink-0",
-                isDark
-                  ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20"
-                  : "bg-cyan-50 text-cyan-700 border-cyan-200"
-              )}
-            >
-              100% Free Bandwidth
-            </span>
-          </div>
-          <p className={cn("text-[11px] sm:text-xs leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>
-            Masdika Cloud VPS provides <strong>unmetered traffic with zero overage billing</strong>. If an instance experiences
-            sudden abnormal outbound traffic floods, temporary bandwidth throttling (e.g., 10 MB/s) is engaged dynamically
-            as a safeguard to shield host node stability, keeping your server reachable rather than suspended.
-          </p>
+          <button
+            onClick={() => {
+              setIsFleetReport(true);
+              setReportModalItem(null);
+            }}
+            disabled={loading || !data?.incidents?.length}
+            className="px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-zinc-950 text-sm font-semibold transition-all shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2 whitespace-nowrap"
+          >
+            <Printer className="w-4 h-4" />
+            <span>Official Report</span>
+          </button>
         </div>
       </div>
 
       {/* Summary KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 no-print">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 no-print">
         {/* Total VPS */}
         <div
           className={cn(
-            "rounded-2xl p-4 sm:p-5 border transition-all",
-            isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
+            "rounded-2xl p-5 border transition-colors",
+            isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm"
           )}
         >
-          <div className="flex items-center justify-between mb-2">
-            <span className={cn("text-[11px] sm:text-xs font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-medium uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
               Total Instances
             </span>
-            <div
-              className={cn(
-                "p-1.5 sm:p-2 rounded-xl border",
-                isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-100 text-cyan-700"
-              )}
-            >
-              <Server className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
+              <Server className="w-4 h-4" />
             </div>
           </div>
-          <div className={cn("text-xl sm:text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>
             {loading ? "..." : data?.summary?.totalVps ?? 0}
           </div>
-          <div className={cn("text-[10px] sm:text-xs mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+          <div className={cn("text-xs mt-2", isDark ? "text-zinc-500" : "text-slate-500")}>
             {data?.summary?.runningCount ?? 0} Running online
           </div>
         </div>
@@ -555,27 +498,22 @@ export default function IncidentsClient() {
         {/* Healthy Instances */}
         <div
           className={cn(
-            "rounded-2xl p-4 sm:p-5 border transition-all",
-            isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
+            "rounded-2xl p-5 border transition-colors",
+            isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm"
           )}
         >
-          <div className="flex items-center justify-between mb-2">
-            <span className={cn("text-[11px] sm:text-xs font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
-              Healthy & Optimal
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-medium uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+              Healthy &amp; Optimal
             </span>
-            <div
-              className={cn(
-                "p-1.5 sm:p-2 rounded-xl border",
-                isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-100 text-cyan-700"
-              )}
-            >
-              <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
+              <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
-          <div className={cn("text-xl sm:text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>
             {loading ? "..." : data?.summary?.healthyCount ?? 0}
           </div>
-          <div className={cn("text-[10px] sm:text-xs mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+          <div className={cn("text-xs mt-2", isDark ? "text-zinc-500" : "text-slate-500")}>
             Normal bounds
           </div>
         </div>
@@ -583,27 +521,22 @@ export default function IncidentsClient() {
         {/* Throttled Safeguard Active */}
         <div
           className={cn(
-            "rounded-2xl p-4 sm:p-5 border transition-all",
-            isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
+            "rounded-2xl p-5 border transition-colors",
+            isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm"
           )}
         >
-          <div className="flex items-center justify-between mb-2">
-            <span className={cn("text-[11px] sm:text-xs font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-medium uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
               Rate Limited
             </span>
-            <div
-              className={cn(
-                "p-1.5 sm:p-2 rounded-xl border",
-                isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-100 text-cyan-700"
-              )}
-            >
-              <SlidersHorizontal className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
+              <SlidersHorizontal className="w-4 h-4" />
             </div>
           </div>
-          <div className={cn("text-xl sm:text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>
             {loading ? "..." : data?.summary?.throttledCount ?? 0}
           </div>
-          <div className={cn("text-[10px] sm:text-xs mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+          <div className={cn("text-xs mt-2", isDark ? "text-zinc-500" : "text-slate-500")}>
             Safeguard active
           </div>
         </div>
@@ -611,60 +544,78 @@ export default function IncidentsClient() {
         {/* Suspended / Critical */}
         <div
           className={cn(
-            "rounded-2xl p-4 sm:p-5 border transition-all",
-            isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
+            "rounded-2xl p-5 border transition-colors",
+            isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm"
           )}
         >
-          <div className="flex items-center justify-between mb-2">
-            <span className={cn("text-[11px] sm:text-xs font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-medium uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
               Suspended
             </span>
-            <div
-              className={cn(
-                "p-1.5 sm:p-2 rounded-xl border",
-                isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-100 text-cyan-700"
-              )}
-            >
-              <AlertTriangle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
+              <AlertTriangle className="w-4 h-4" />
             </div>
           </div>
-          <div className={cn("text-xl sm:text-3xl font-extrabold", isDark ? "text-white" : "text-slate-900")}>
+          <div className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>
             {loading ? "..." : data?.summary?.suspendedCount ?? 0}
           </div>
-          <div className={cn("text-[10px] sm:text-xs mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+          <div className={cn("text-xs mt-2", isDark ? "text-zinc-500" : "text-slate-500")}>
             {data?.summary?.suspendedCount ? "Action required" : "Zero suspended"}
           </div>
         </div>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex items-center gap-1.5 overflow-x-auto py-1 no-print">
-        {[
-          { id: "ALL", label: `All (${data?.incidents?.length ?? 0})` },
-          { id: "INCIDENTS", label: `Incidents (${data?.summary?.incidentCount ?? 0})` },
-          { id: "ISOLATED", label: `Net Isolated (${data?.summary?.netDisabledCount ?? 0})` },
-          { id: "THROTTLED", label: `Throttled (${data?.summary?.throttledCount ?? 0})` },
-          { id: "SUSPENDED", label: `Suspended (${data?.summary?.suspendedCount ?? 0})` },
-          { id: "HEALTHY", label: `Healthy (${data?.summary?.healthyCount ?? 0})` },
-        ].map((tab) => {
-          const isActive = statusFilter === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setStatusFilter(tab.id as any)}
-              className={cn(
-                "px-3 sm:px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap border",
-                isActive
-                  ? "bg-cyan-400 text-slate-950 border-cyan-400 shadow-sm"
-                  : isDark
-                  ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-400 hover:text-white hover:border-white/[0.15]"
-                  : "bg-white border-slate-200/90 text-slate-600 hover:text-slate-900 hover:border-slate-300 shadow-2xs"
-              )}
-            >
-              {tab.label}
-            </button>
-          );
-        })}
+      {/* Search & Filter Toolbar */}
+      <div
+        className={cn(
+          "flex flex-col lg:flex-row lg:items-center justify-between gap-3 p-3 rounded-2xl border no-print",
+          isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm"
+        )}
+      >
+        <div className="relative flex-1 max-w-md">
+          <Search className={cn("w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2", isDark ? "text-zinc-500" : "text-slate-400")} />
+          <input
+            type="text"
+            placeholder="Search by hostname, VMID, or IP..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className={cn(
+              "w-full pl-10 pr-4 py-2 rounded-xl text-sm border outline-none transition-colors",
+              isDark
+                ? "bg-zinc-900/80 border-white/[0.08] text-white placeholder:text-zinc-500 focus:border-cyan-500/50"
+                : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500"
+            )}
+          />
+        </div>
+
+        <div className="flex items-center gap-1.5 overflow-x-auto">
+          {[
+            { id: "ALL", label: `All (${data?.incidents?.length ?? 0})` },
+            { id: "INCIDENTS", label: `Incidents (${data?.summary?.incidentCount ?? 0})` },
+            { id: "ISOLATED", label: `Net Isolated (${data?.summary?.netDisabledCount ?? 0})` },
+            { id: "THROTTLED", label: `Throttled (${data?.summary?.throttledCount ?? 0})` },
+            { id: "SUSPENDED", label: `Suspended (${data?.summary?.suspendedCount ?? 0})` },
+            { id: "HEALTHY", label: `Healthy (${data?.summary?.healthyCount ?? 0})` },
+          ].map((tab) => {
+            const isActive = statusFilter === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setStatusFilter(tab.id as any)}
+                className={cn(
+                  "px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap",
+                  isActive
+                    ? "bg-cyan-400 text-zinc-950"
+                    : isDark
+                    ? "bg-zinc-900 text-zinc-400 hover:text-white border border-white/[0.06]"
+                    : "bg-slate-100 text-slate-600 hover:text-slate-900"
+                )}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Main Content Area */}
@@ -672,7 +623,7 @@ export default function IncidentsClient() {
         <div
           className={cn(
             "rounded-2xl p-8 sm:p-12 border text-center flex flex-col items-center justify-center space-y-4",
-            isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
+            isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm"
           )}
         >
           <RefreshCw className="w-8 h-8 text-cyan-500 animate-spin" />
@@ -689,7 +640,7 @@ export default function IncidentsClient() {
         <div
           className={cn(
             "rounded-2xl p-8 sm:p-12 border text-center flex flex-col items-center justify-center space-y-4",
-            isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
+            isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm"
           )}
         >
           <div

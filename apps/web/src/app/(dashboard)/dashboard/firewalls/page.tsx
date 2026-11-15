@@ -3,7 +3,7 @@
 import { useUrlNumber } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
 import { useTheme } from "@/components/ThemeProvider";
-import { ShieldCheck, ShieldAlert, Plus, Trash2, RefreshCw, Server, Settings2, X, CheckCircle, Search, Info } from "lucide-react";
+import { ShieldCheck, ShieldAlert, Plus, Trash2, RefreshCw, Server, Settings2, X, CheckCircle, Activity } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { Pagination } from "@/components/ui/Pagination";
@@ -207,53 +207,110 @@ export default function FirewallsDashboardPage() {
     visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
   };
 
+  const inboundCount = firewallRules.filter((r) => r.type === "in").length;
+  const outboundCount = firewallRules.length - inboundCount;
+
   return (
     <motion.div className="space-y-6 pb-10" variants={containerVariants} initial="hidden" animate="visible">
-      {/* Compact Unboxed Page Header */}
+      {/* Header */}
       <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="space-y-1">
+        <div>
           <div className="flex items-center gap-2.5 flex-wrap">
-            <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            <h1 className={cn("text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
               Cloud Firewalls
             </h1>
-            <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 border-cyan-500/20 text-cyan-800")}>
+            <span className={cn("inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
               <ShieldCheck className="w-3 h-3" /> Security Groups
             </span>
           </div>
-          <p className={cn("text-xs sm:text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-            Manage inbound and outbound traffic rules across your VPS instances securely from one place.
+          <p className={cn("text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-600")}>
+            Manage inbound and outbound traffic rules across your Cloud VPS instances with instant enforcement.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
-          <button
-            onClick={() => {
-              if(!selectedVpsId) return toast.error("Please select a VPS first");
-              setEditingRule(null);
-              setShowFirewallModal(true);
-            }}
-            disabled={!selectedVpsId}
-            className="w-full sm:w-auto px-3.5 py-2 rounded-xl text-xs sm:text-xs font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-2xs"
-          >
-            <Plus className="w-4 h-4" /> Add Rule
-          </button>
+        <button
+          onClick={() => {
+            if (!selectedVpsId) return toast.error("Please select a VPS first");
+            setEditingRule(null);
+            setShowFirewallModal(true);
+          }}
+          disabled={!selectedVpsId}
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed bg-cyan-400 hover:bg-cyan-300 text-zinc-950 shrink-0"
+        >
+          <Plus className="w-4 h-4" /> Add Rule
+        </button>
+      </motion.div>
+
+      {/* 3 Summary Stat Cards */}
+      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className={cn("rounded-2xl border p-5 transition-colors", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-medium uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+              Protected Instances
+            </span>
+            <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
+              <Server className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>{vpsList.length}</span>
+            <span className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>Cloud VPS</span>
+          </div>
+          <p className={cn("text-xs mt-2.5", isDark ? "text-zinc-500" : "text-slate-500")}>
+            Select an instance below to configure rules.
+          </p>
+        </div>
+
+        <div className={cn("rounded-2xl border p-5 transition-colors", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-medium uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+              Active Rules
+            </span>
+            <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
+              <ShieldCheck className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>{firewallRules.length}</span>
+            <span className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>rules configured</span>
+          </div>
+          <p className={cn("text-xs mt-2.5", isDark ? "text-zinc-500" : "text-slate-500")}>
+            Changes apply immediately without reboot.
+          </p>
+        </div>
+
+        <div className={cn("rounded-2xl border p-5 transition-colors", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-medium uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+              Traffic Direction
+            </span>
+            <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
+              <Activity className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-4">
+            <div>
+              <span className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>{inboundCount}</span>
+              <span className="text-xs text-cyan-400 ml-1.5 font-medium">Inbound</span>
+            </div>
+            <span className={cn("text-sm", isDark ? "text-zinc-600" : "text-slate-300")}>/</span>
+            <div>
+              <span className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>{outboundCount}</span>
+              <span className={cn("text-xs ml-1.5 font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>Outbound</span>
+            </div>
+          </div>
+          <p className={cn("text-xs mt-2.5", isDark ? "text-zinc-500" : "text-slate-500")}>
+            Stateful packet filtering on host hypervisor.
+          </p>
         </div>
       </motion.div>
 
-      <motion.div variants={itemVariants} className={cn("rounded-2xl overflow-hidden relative border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+      <motion.div variants={itemVariants} className={cn("rounded-2xl overflow-hidden relative border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
         <div className="p-4 sm:p-5">
-          <div className={cn("border rounded-xl sm:rounded-2xl p-4 sm:p-5 mb-6 flex items-start gap-3 sm:gap-3.5 transition-all", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800 shadow-2xs")}>
-            <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
-            <div className="space-y-1 flex-1 min-w-0">
-              <p className={cn("font-medium text-xs sm:text-sm", isDark ? "text-cyan-400" : "text-cyan-900")}>Global Firewall Management:</p>
-              <p className={cn("text-xs sm:text-sm leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>Select a VPS instance below to manage its security group rules. Changes take effect immediately without requiring a restart.</p>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 mb-5">
             <div className="w-full sm:w-1/2 md:w-1/3">
-              <label className={cn("block text-xs sm:text-sm font-medium mb-2", isDark ? "text-zinc-300" : "text-slate-700")}>Select Instance</label>
+              <label className={cn("block text-xs font-medium uppercase tracking-wider mb-2", isDark ? "text-zinc-400" : "text-slate-500")}>Target Instance</label>
               {loadingVps ? (
-                <div className={cn("w-full border rounded-xl px-3.5 py-2 text-xs flex items-center gap-2", isDark ? "bg-white/[0.02] border-white/[0.08] text-zinc-500" : "bg-slate-50/80 border-slate-200/90 text-slate-500")}>
+                <div className={cn("w-full border rounded-xl px-3.5 py-2 text-xs flex items-center gap-2", isDark ? "bg-zinc-900/80 border-white/[0.08] text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-500")}>
                   <RefreshCw className="w-4 h-4 animate-spin" /> Loading instances...
                 </div>
               ) : (
@@ -265,22 +322,10 @@ export default function FirewallsDashboardPage() {
                     label: `${vps.hostname} (${vps.assignedIps?.[0]?.publicIp || vps.assignedIps?.[0]?.ipAddress || 'No IP'})`
                   }))}
                   placeholder={vpsList.length === 0 ? "No VPS instances found" : "Select a VPS Instance"}
-                  className={cn("w-full border rounded-xl px-3.5 py-2 focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-white/[0.02] border-white/[0.08] text-white" : "bg-slate-50/80 border-slate-200/90 text-slate-900 shadow-2xs")}
+                  className={cn("w-full border rounded-xl px-3.5 py-2 focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-zinc-900/80 border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
                 />
               )}
             </div>
-            
-            <button
-              onClick={() => {
-                if(!selectedVpsId) return toast.error("Please select a VPS first");
-                setEditingRule(null);
-                setShowFirewallModal(true);
-              }}
-              disabled={!selectedVpsId}
-              className="w-full sm:w-auto px-3.5 py-2 rounded-xl text-xs sm:text-xs font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-2xs"
-            >
-              <Plus className="w-4 h-4" /> Add Rule
-            </button>
           </div>
 
           {!selectedVpsId && !loadingVps ? (
@@ -373,7 +418,7 @@ export default function FirewallsDashboardPage() {
                           {rule.type === "in" ? (
                             <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-cyan-400"></span>Inbound</span>
                           ) : (
-                            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500"></span>Outbound</span>
+                            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-zinc-400"></span>Outbound</span>
                           )}
                         </td>
                         <td className="px-4 py-4">{rule.proto?.toUpperCase() || "ALL"}</td>

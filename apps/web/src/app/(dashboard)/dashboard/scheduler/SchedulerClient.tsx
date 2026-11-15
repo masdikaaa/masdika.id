@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Clock, Server, Save, Calendar, Power, RefreshCw, Info } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Clock, Server, Save, Calendar, Power, RefreshCw, ShieldCheck, Activity } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
@@ -74,50 +74,106 @@ export default function SchedulerClient({ vpsList }: { vpsList: any[] }) {
     }));
   };
 
+  const activeScheduleCount = useMemo(
+    () => Object.values(schedules).filter((s: any) => s?.enabled).length,
+    [schedules]
+  );
+  const runningVpsCount = useMemo(
+    () => Object.values(vpsStatuses).filter((st) => st === "RUNNING").length,
+    [vpsStatuses]
+  );
+
   return (
-    <div className="w-full space-y-4 sm:space-y-6">
+    <div className="w-full space-y-6 pb-10">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
-        <div className="space-y-1">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
           <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            <h1 className={cn("text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
               Auto Scheduler
             </h1>
-            <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+            <span className={cn("inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
               <Clock className="w-3 h-3" /> Cost Optimizer
             </span>
           </div>
-          <p className={cn("text-xs sm:text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-            Schedule your VPS instances to turn on and off automatically, saving costs on hourly billing.
+          <p className={cn("text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-600")}>
+            Schedule your VPS instances to turn on and off automatically according to your operational hours.
           </p>
         </div>
       </div>
 
-      <div className={cn("border rounded-xl sm:rounded-2xl p-4 sm:p-5 flex items-start gap-3 sm:gap-3.5 transition-all", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800")}>
-        <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
-        <div className="space-y-1 flex-1 min-w-0">
-          <p className={cn("font-medium text-xs sm:text-sm", isDark ? "text-cyan-400" : "text-cyan-900")}>Auto Scheduler Policy:</p>
-          <p className={cn("text-xs sm:text-sm leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>
-            The Auto Scheduler automatically starts and stops your VPS according to your set schedule. Dedicated instance resources remain reserved on the hypervisor and continue to be billed hourly.
+      {/* 3 Summary Stat Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className={cn("rounded-2xl border p-5 transition-colors", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-medium uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+              Eligible Instances
+            </span>
+            <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
+              <Server className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>{vpsList.length}</span>
+            <span className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>{runningVpsCount} running</span>
+          </div>
+          <p className={cn("text-xs mt-2.5", isDark ? "text-zinc-500" : "text-slate-500")}>
+            Cloud VPS instances available for scheduling.
+          </p>
+        </div>
+
+        <div className={cn("rounded-2xl border p-5 transition-colors", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-medium uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+              Active Schedules
+            </span>
+            <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
+              <Activity className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>{activeScheduleCount}</span>
+            <span className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>/ {vpsList.length} enabled</span>
+          </div>
+          <p className={cn("text-xs mt-2.5", isDark ? "text-zinc-500" : "text-slate-500")}>
+            Automated power-on &amp; power-off rules.
+          </p>
+        </div>
+
+        <div className={cn("rounded-2xl border p-5 transition-colors", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-medium uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+              Scheduler Timezone
+            </span>
+            <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
+              <Clock className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>WIB</span>
+            <span className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>Asia/Jakarta (UTC+7)</span>
+          </div>
+          <p className={cn("text-xs mt-2.5", isDark ? "text-zinc-500" : "text-slate-500")}>
+            Resources remain reserved and billed hourly.
           </p>
         </div>
       </div>
 
       {vpsList.length === 0 ? (
-        <div className={cn("border rounded-2xl p-8 sm:p-12 text-center", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
-          <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-5 border", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
-            <Server className={cn("w-8 h-8", isDark ? "text-zinc-500" : "text-slate-400")} />
+        <div className={cn("border rounded-2xl p-12 text-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
+          <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
+            <Server className="w-7 h-7" />
           </div>
-          <h3 className={cn("text-lg sm:text-xl font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>No VPS Found</h3>
-          <p className={cn("text-xs sm:text-sm max-w-md mx-auto", isDark ? "text-zinc-400" : "text-slate-500")}>Deploy a VPS instance first to configure schedules.</p>
+          <h3 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-slate-900")}>No VPS Found</h3>
+          <p className={cn("text-sm max-w-md mx-auto mt-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>Deploy a Cloud VPS instance first to configure automated start and stop schedules.</p>
         </div>
       ) : (
         <div className="space-y-4 sm:space-y-5">
           {vpsList.length > 1 && (
-            <div className={cn("p-4 sm:p-5 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+            <div className={cn("p-4 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
               <div>
-                <h3 className={cn("text-sm sm:text-base font-bold", isDark ? "text-white" : "text-slate-900")}>Select VPS Instance</h3>
-                <p className={cn("text-xs sm:text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Choose the server you want to schedule.</p>
+                <h3 className={cn("text-sm font-semibold", isDark ? "text-white" : "text-slate-900")}>Select VPS Instance</h3>
+                <p className={cn("text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>Choose the server you want to schedule.</p>
               </div>
               <div className="w-full sm:w-64">
                 <Select 
@@ -134,7 +190,7 @@ export default function SchedulerClient({ vpsList }: { vpsList: any[] }) {
               const sched = schedules[vps.id];
               const isOnline = vpsStatuses[vps.id] === 'RUNNING';
               return (
-                <div key={vps.id} className={cn("border rounded-2xl p-4 sm:p-5 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+                <div key={vps.id} className={cn("border rounded-2xl p-5 transition-all", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
                   {/* Header: VPS Info + Status + Toggle */}
                   <div className={cn("flex items-center justify-between gap-3 mb-5 pb-4 sm:pb-5 border-b", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>
                     <div className="flex items-center gap-3 sm:gap-3.5 min-w-0">
@@ -187,7 +243,7 @@ export default function SchedulerClient({ vpsList }: { vpsList: any[] }) {
                       </div>
                       <div className="space-y-2">
                         <label className={cn("text-xs sm:text-sm font-bold flex items-center gap-1.5 sm:gap-2", isDark ? "text-zinc-300" : "text-slate-600")}>
-                          <Power className={cn("w-3.5 h-3.5 sm:w-4 sm:h-4", isDark ? "text-red-400" : "text-red-600")} />
+                          <Power className={cn("w-3.5 h-3.5 sm:w-4 sm:h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />
                           <span>Stop Time</span>
                         </label>
                         <input
@@ -224,11 +280,15 @@ export default function SchedulerClient({ vpsList }: { vpsList: any[] }) {
                     </div>
 
                     {/* Save Button */}
-                    <div className={cn("pt-4 sm:pt-5 mt-4 sm:mt-5 border-t flex justify-end", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>
+                    <div className={cn("pt-4 sm:pt-5 mt-4 sm:mt-5 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-3", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>
+                      <p className={cn("text-[11px] flex items-center gap-1.5", isDark ? "text-zinc-500" : "text-slate-500")}>
+                        <ShieldCheck className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                        Dedicated resources remain reserved on the hypervisor and continue hourly billing.
+                      </p>
                       <button
                         onClick={() => handleSave(vps.id)}
                         disabled={loading[vps.id]}
-                        className="px-3.5 py-2 text-xs sm:text-xs font-bold rounded-xl transition-all shadow-sm disabled:opacity-50 flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950"
+                        className="px-4 py-2.5 text-sm font-semibold rounded-xl transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50 flex items-center justify-center gap-2 bg-cyan-400 hover:bg-cyan-300 text-zinc-950 shrink-0"
                       >
                         {loading[vps.id] ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                         Save Schedule

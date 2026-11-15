@@ -649,27 +649,30 @@ export default function VpcDashboardPage() {
     visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
   };
 
+  const totalAttachedVms = vpcs.reduce((acc, v) => acc + (v._count?.vpsServices || 0), 0);
+  const natEnabledCount = vpcs.filter((v) => v.isNatEnabled).length;
+
   return (
     <motion.div className="space-y-6 pb-10" variants={containerVariants} initial="hidden" animate="visible">
       <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="space-y-1">
+        <div>
           <div className="flex items-center gap-2.5 flex-wrap">
-            <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            <h1 className={cn("text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
               Virtual Private Cloud
             </h1>
-            <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 border-cyan-500/20 text-cyan-800")}>
+            <span className={cn("inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
               <VpcIcon className="w-3 h-3" /> Secure Networking
             </span>
           </div>
-          <p className={cn("text-xs sm:text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-            Manage your isolated private networks, subnets, and configure secure VPC peerings.
+          <p className={cn("text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-600")}>
+            Manage isolated private networks, subnets, NAT gateways, and secure VPC peerings.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
           {activeTab === "vpcs" ? (
             <button
               onClick={() => setShowAddVpcModal(true)}
-              className="w-full sm:w-auto px-3.5 py-2 rounded-xl text-xs sm:text-xs font-bold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 flex items-center justify-center gap-2 transition-all shadow-2xs"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-cyan-400 hover:bg-cyan-300 text-zinc-950 transition-all shadow-lg shadow-cyan-500/20"
             >
               <Plus className="w-4 h-4" />
               Create VPC
@@ -677,7 +680,7 @@ export default function VpcDashboardPage() {
           ) : (
             <button
               onClick={() => setShowAddPeeringModal(true)}
-              className="w-full sm:w-auto px-3.5 py-2 rounded-xl text-xs sm:text-xs font-bold bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 flex items-center justify-center gap-2 transition-all shadow-2xs"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-cyan-400 hover:bg-cyan-300 text-zinc-950 transition-all shadow-lg shadow-cyan-500/20"
             >
               <Link2 className="w-4 h-4" />
               Create Peering
@@ -686,7 +689,64 @@ export default function VpcDashboardPage() {
         </div>
       </motion.div>
 
-      <motion.div variants={itemVariants} className={cn("rounded-2xl overflow-hidden relative border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+      {/* 3 Summary Stat Cards */}
+      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className={cn("rounded-2xl border p-5 transition-colors", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-medium uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+              Private Networks
+            </span>
+            <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
+              <Network className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>{vpcs.length}</span>
+            <span className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>{natEnabledCount} with NAT</span>
+          </div>
+          <p className={cn("text-xs mt-2.5", isDark ? "text-zinc-500" : "text-slate-500")}>
+            Isolated RFC 1918 VLAN subnets.
+          </p>
+        </div>
+
+        <div className={cn("rounded-2xl border p-5 transition-colors", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-medium uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+              Attached Instances
+            </span>
+            <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
+              <Server className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>{totalAttachedVms}</span>
+            <span className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>Cloud VPS</span>
+          </div>
+          <p className={cn("text-xs mt-2.5", isDark ? "text-zinc-500" : "text-slate-500")}>
+            Instances communicating over private interfaces.
+          </p>
+        </div>
+
+        <div className={cn("rounded-2xl border p-5 transition-colors", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-medium uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+              VPC Peerings
+            </span>
+            <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
+              <Link2 className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>{peerings.length}</span>
+            <span className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>connections</span>
+          </div>
+          <p className={cn("text-xs mt-2.5", isDark ? "text-zinc-500" : "text-slate-500")}>
+            Cross-VPC private IP routing links.
+          </p>
+        </div>
+      </motion.div>
+
+      <motion.div variants={itemVariants} className={cn("rounded-2xl overflow-hidden relative border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
         <div className={cn("flex border-b relative z-10", isDark ? "border-white/[0.08] bg-white/[0.02]" : "border-slate-200/90 bg-slate-50/80")}>
           <button
             onClick={() => setActiveTab("vpcs")}
@@ -714,14 +774,6 @@ export default function VpcDashboardPage() {
 
         {activeTab === "vpcs" && (
           <div className="p-4 sm:p-5">
-            <div className={cn("border rounded-xl sm:rounded-2xl p-4 sm:p-5 mb-6 flex items-start gap-3 sm:gap-3.5 transition-all", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800 shadow-2xs")}>
-              <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
-              <div className="space-y-1 flex-1 min-w-0">
-                <p className={cn("font-medium text-xs sm:text-sm", isDark ? "text-cyan-400" : "text-cyan-900")}>About Virtual Private Cloud:</p>
-                <p className={cn("text-xs sm:text-sm leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>A VPC is a secure, isolated private cloud hosted within the public cloud. It allows you to launch resources in a virtual network that you define.</p>
-              </div>
-            </div>
-
             {loadingVpcs ? (
               <div className={cn("py-16 text-center", isDark ? "text-zinc-400" : "text-slate-500")}>
                 <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-cyan-400" />
@@ -775,13 +827,6 @@ export default function VpcDashboardPage() {
                       </>
                     )}
                   </AnimatePresence>
-                  <button
-                    onClick={() => setShowAddVpcModal(true)}
-                    className="bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold px-4 py-2 rounded-xl flex items-center gap-2 transition-colors text-xs sm:text-sm shadow-2xs"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Create VPC
-                  </button>
                 </div>
 
                 <div className="overflow-x-auto pb-2">
@@ -960,14 +1005,6 @@ export default function VpcDashboardPage() {
 
       {activeTab === "peering" && (
         <div className="p-4 sm:p-5">
-          <div className={cn("border rounded-xl sm:rounded-2xl p-4 sm:p-5 mb-6 flex items-start gap-3 sm:gap-3.5 transition-all", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-200" : "bg-cyan-50 border-cyan-200 text-cyan-800 shadow-2xs")}>
-            <Info className={cn("w-5 h-5 shrink-0 mt-0.5", isDark ? "text-cyan-400" : "text-cyan-600")} />
-            <div className="space-y-1 flex-1 min-w-0">
-              <p className={cn("font-medium text-xs sm:text-sm", isDark ? "text-cyan-400" : "text-cyan-900")}>About VPC Peering:</p>
-              <p className={cn("text-xs sm:text-sm leading-relaxed", isDark ? "text-cyan-200/90" : "text-slate-600")}>VPC Peering allows instances in two different VPCs to communicate with each other using private IP addresses. CIDR ranges of peered VPCs must not overlap.</p>
-            </div>
-          </div>
-
           {loadingPeerings ? (
             <div className={cn("py-16 text-center", isDark ? "text-zinc-400" : "text-slate-500")}>
               <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-cyan-400" />

@@ -899,45 +899,152 @@ export default function CloudflaredPage() {
     );
   }
 
+  const healthyTunnelCount = tunnels.filter((t) => t.status?.toLowerCase() === "healthy" || t.status?.toLowerCase() === "active").length;
+
   return (
-    <div className="w-full space-y-6 animate-in fade-in duration-300">
-      {/* Compact Unboxed Page Header */}
+    <div className="w-full space-y-6 pb-10 animate-in fade-in duration-300">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full min-w-0">
-        <div className="space-y-1 min-w-0">
+        <div className="min-w-0">
           <div className="flex items-center gap-2.5 flex-wrap">
-            <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            <h1 className={cn("text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
               Cloudflared Tunnels
             </h1>
-            <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 border-cyan-500/20 text-cyan-700")}>
+            <span className={cn("inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
               <Network className="w-3 h-3" /> Secure Connections
             </span>
           </div>
-          <p className={cn("text-xs sm:text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
+          <p className={cn("text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-600")}>
             Add your domains, create tunnels, and securely expose your local services to the internet.
           </p>
         </div>
-        <button onClick={() => { fetchDomains(); fetchTunnels(); }}
-          className={cn("p-2.5 rounded-xl border transition-colors shrink-0 self-start sm:self-center cursor-pointer", isDark ? "bg-[#111115] text-cyan-400 border-white/[0.08] hover:bg-white/[0.04]" : "bg-white text-slate-700 border-slate-200/90 hover:bg-slate-50 shadow-2xs")}
-          title="Refresh">
-          <RefreshCw className={cn("w-4 h-4", (domainsLoading || tunnelsLoading) && "animate-spin")} />
-        </button>
+
+        <div className="flex items-center gap-2.5 shrink-0">
+          <button
+            onClick={() => { fetchDomains(); fetchTunnels(); }}
+            className={cn("p-2.5 rounded-xl border transition-colors cursor-pointer", isDark ? "bg-[#111115] text-zinc-400 hover:text-white border-white/[0.08] hover:bg-white/[0.04]" : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 shadow-sm")}
+            title="Refresh"
+          >
+            <RefreshCw className={cn("w-4 h-4", (domainsLoading || tunnelsLoading) && "animate-spin")} />
+          </button>
+
+          {activeTab === "domains" ? (
+            domains.length < MAX_DOMAINS && (
+              <button
+                onClick={() => {
+                  if (userVpsCount === 0) {
+                    toast.error("Smart System: You must order and have an active VPS first to add a Domain.");
+                    return;
+                  }
+                  setShowAddDomain(!showAddDomain);
+                }}
+                className={cn(
+                  "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg",
+                  userVpsCount === 0
+                    ? "bg-zinc-700 text-zinc-400 cursor-not-allowed shadow-none"
+                    : "bg-cyan-400 hover:bg-cyan-300 text-zinc-950 shadow-cyan-500/20"
+                )}
+              >
+                <Plus className="w-4 h-4" /> Add Domain
+              </button>
+            )
+          ) : (
+            !showCreateTunnel && domains.length > 0 && tunnels.length < MAX_TUNNELS && (
+              <button
+                onClick={() => {
+                  if (userVpsCount === 0) {
+                    toast.error("Smart System: You must order and have an active VPS first to create a Cloudflare Tunnel.");
+                    return;
+                  }
+                  resetCreateForm();
+                  setShowCreateTunnel(true);
+                }}
+                className={cn(
+                  "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg",
+                  userVpsCount === 0
+                    ? "bg-zinc-700 text-zinc-400 cursor-not-allowed shadow-none"
+                    : "bg-cyan-400 hover:bg-cyan-300 text-zinc-950 shadow-cyan-500/20"
+                )}
+              >
+                <Plus className="w-4 h-4" /> Create Tunnel
+              </button>
+            )
+          )}
+        </div>
+      </div>
+
+      {/* 3 Summary Stat Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className={cn("rounded-2xl border p-5 transition-colors", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-medium uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+              Domains Quota
+            </span>
+            <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
+              <Globe className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>{domains.length} / {MAX_DOMAINS}</span>
+            <span className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>domains</span>
+          </div>
+          <div className={cn("mt-3 h-1.5 rounded-full overflow-hidden", isDark ? "bg-zinc-800" : "bg-slate-100")}>
+            <div className="h-full bg-cyan-400 rounded-full transition-all duration-300" style={{ width: `${Math.min(100, (domains.length / MAX_DOMAINS) * 100)}%` }} />
+          </div>
+        </div>
+
+        <div className={cn("rounded-2xl border p-5 transition-colors", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-medium uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+              Tunnels Quota
+            </span>
+            <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
+              <Network className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>{tunnels.length} / {MAX_TUNNELS}</span>
+            <span className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>tunnels</span>
+          </div>
+          <div className={cn("mt-3 h-1.5 rounded-full overflow-hidden", isDark ? "bg-zinc-800" : "bg-slate-100")}>
+            <div className="h-full bg-cyan-400 rounded-full transition-all duration-300" style={{ width: `${Math.min(100, (tunnels.length / MAX_TUNNELS) * 100)}%` }} />
+          </div>
+        </div>
+
+        <div className={cn("rounded-2xl border p-5 transition-colors", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-xs font-medium uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+              Active Connections
+            </span>
+            <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
+              <Activity className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>{healthyTunnelCount}</span>
+            <span className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>healthy tunnels</span>
+          </div>
+          <p className={cn("text-xs mt-2.5", isDark ? "text-zinc-500" : "text-slate-500")}>
+            Zero-trust encrypted ingress without open ports.
+          </p>
+        </div>
       </div>
 
       {/* Tabs */}
-      <div className={cn("flex items-center gap-1 border rounded-xl p-1", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+      <div className={cn("flex items-center gap-1.5 border rounded-2xl p-1.5", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
         <button onClick={() => setActiveTab("domains")}
-          className={cn("flex-1 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer",
-            activeTab === "domains" ? (isDark ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20" : "bg-white text-cyan-700 border border-cyan-200 shadow-2xs") : (isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100/50")
+          className={cn("flex-1 px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer",
+            activeTab === "domains" ? "bg-cyan-400 text-zinc-950" : (isDark ? "text-zinc-400 hover:text-white" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100")
           )}>
           <Globe className="w-4 h-4" /> Domains
-          <span className="text-xs bg-white/5 px-2 py-0.5 rounded-full">{domains.length}</span>
+          <span className={cn("text-[11px] px-2 py-0.5 rounded-full", activeTab === "domains" ? "bg-zinc-950/15 text-zinc-950" : isDark ? "bg-white/5 text-zinc-400" : "bg-slate-100 text-slate-600")}>{domains.length}</span>
         </button>
         <button onClick={() => setActiveTab("tunnels")}
-          className={cn("flex-1 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer",
-            activeTab === "tunnels" ? (isDark ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20" : "bg-white text-cyan-700 border border-cyan-200 shadow-2xs") : (isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100/50")
+          className={cn("flex-1 px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer",
+            activeTab === "tunnels" ? "bg-cyan-400 text-zinc-950" : (isDark ? "text-zinc-400 hover:text-white" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100")
           )}>
           <Network className="w-4 h-4" /> Tunnels
-          <span className="text-xs bg-white/5 px-2 py-0.5 rounded-full">{tunnels.length}</span>
+          <span className={cn("text-[11px] px-2 py-0.5 rounded-full", activeTab === "tunnels" ? "bg-zinc-950/15 text-zinc-950" : isDark ? "bg-white/5 text-zinc-400" : "bg-slate-100 text-slate-600")}>{tunnels.length}</span>
         </button>
       </div>
 
@@ -977,26 +1084,6 @@ export default function CloudflaredPage() {
               </div>
             </div>
           )}
-
-          {/* Domain Actions Bar */}
-          <div className="flex items-center justify-between">
-            <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-              <span className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>{domains.length}</span> / {MAX_DOMAINS} domains
-            </p>
-            {domains.length < MAX_DOMAINS && (
-              <button
-                onClick={() => {
-                  if (userVpsCount === 0) {
-                    toast.error("Smart System: You must order and have an active VPS first to add a Domain.");
-                    return;
-                  }
-                  setShowAddDomain(!showAddDomain);
-                }}
-                className={cn("flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all", userVpsCount === 0 ? (isDark ? "bg-white/10 text-zinc-500 cursor-not-allowed" : "bg-slate-100 text-slate-400 cursor-not-allowed") : "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm")}>
-                <Plus className="w-4 h-4" /> Add Domain
-              </button>
-            )}
-          </div>
 
           {/* Add Domain Form */}
           {showAddDomain && (
@@ -1062,8 +1149,8 @@ export default function CloudflaredPage() {
                       <tr key={d.id} className={cn("transition-colors", isDark ? "hover:bg-slate-800/30" : "hover:bg-slate-50")}>
                         <td className="py-4 pl-6 pr-4 align-middle">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 shrink-0 bg-blue-500/10 rounded-xl flex items-center justify-center">
-                              <Globe className="w-5 h-5 text-blue-400" />
+                            <div className="w-10 h-10 shrink-0 bg-cyan-500/10 rounded-xl flex items-center justify-center">
+                              <Globe className="w-5 h-5 text-cyan-400" />
                             </div>
                             <span className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>{d.domain}</span>
                           </div>
@@ -1134,30 +1221,12 @@ export default function CloudflaredPage() {
           )}
 
           {/* Tunnel Actions Bar */}
-          {!showCreateTunnel && (
-            <div className="flex items-center justify-between">
-              <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-                <span className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>{tunnels.length}</span> / {MAX_TUNNELS} tunnels
-              </p>
-              {domains.length > 0 && tunnels.length < MAX_TUNNELS && (
-                <button
-                  onClick={() => {
-                    if (userVpsCount === 0) {
-                      toast.error("Smart System: You must order and have an active VPS first to create a Cloudflare Tunnel.");
-                      return;
-                    }
-                    resetCreateForm(); setShowCreateTunnel(true);
-                  }}
-                  className={cn("flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all", userVpsCount === 0 ? (isDark ? "bg-white/10 text-zinc-500 cursor-not-allowed" : "bg-slate-100 text-slate-400 cursor-not-allowed") : "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm")}>
-                  <Plus className="w-4 h-4" /> Create Tunnel
-                </button>
-              )}
-              {showCreateTunnel && (
-                <button onClick={() => { resetCreateForm(); setShowCreateTunnel(false); }}
-                  className={cn("flex items-center gap-2 px-3.5 py-2 text-xs font-medium rounded-lg transition-all border", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200 shadow-sm")}>
-                  Back to List
-                </button>
-              )}
+          {showCreateTunnel && (
+            <div className="flex items-center justify-end">
+              <button onClick={() => { resetCreateForm(); setShowCreateTunnel(false); }}
+                className={cn("inline-flex items-center gap-2 px-3.5 py-2 text-xs font-medium rounded-xl transition-all border", isDark ? "bg-[#111115] hover:bg-white/[0.04] text-zinc-300 border-white/[0.08]" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200 shadow-sm")}>
+                <ChevronLeft className="w-4 h-4" /> Back to List
+              </button>
             </div>
           )}
 
