@@ -42,6 +42,9 @@ import {
   Eye,
   EyeOff,
   X,
+  Activity,
+  Server,
+  Rocket,
 } from 'lucide-react';
 
 interface SelectOption<T extends string> {
@@ -198,6 +201,15 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
     onConfirm: () => Promise<void>;
   } | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
+  const [showPrimarySecret, setShowPrimarySecret] = useState(false);
+  const workspaceRef = useRef<HTMLDivElement>(null);
+
+  const jumpToTab = (nextTab: 'buckets' | 'keys' | 'guide' | 'settings') => {
+    setTab(nextTab);
+    setTimeout(() => {
+      workspaceRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  };
 
   const fetchScaleMetadata = async () => {
     try {
@@ -608,27 +620,32 @@ s3 = boto3.client(
         </Link>
       </div>
 
-      {/* Header Bar */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
+      {/* Hero Header Card (Matching Managed Apps) */}
+      <div
+        className={cn(
+          'border rounded-2xl p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all shadow-2xs',
+          isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90'
+        )}
+      >
+        <div className="flex items-start sm:items-center gap-4 min-w-0">
           <div
             className={cn(
-              'w-11 h-11 rounded-2xl border flex items-center justify-center shrink-0',
+              'w-12 h-12 rounded-xl border flex items-center justify-center shrink-0',
               isDark
-                ? 'bg-cyan-500/10 border-cyan-500/25 text-cyan-400'
-                : 'bg-cyan-50 border-cyan-200 text-cyan-600'
+                ? 'bg-cyan-500/10 border-cyan-500/25 text-cyan-400 shadow-sm shadow-cyan-500/10'
+                : 'bg-cyan-50 border-cyan-200 text-cyan-600 shadow-2xs'
             )}
           >
-            <HardDrive className="w-5 h-5" />
+            <HardDrive className="w-6 h-6" />
           </div>
-          <div>
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2.5 flex-wrap">
-              <h1 className={cn('text-xl font-extrabold tracking-tight', isDark ? 'text-white' : 'text-slate-900')}>
+              <h1 className={cn('text-lg sm:text-xl font-bold tracking-tight truncate', isDark ? 'text-white' : 'text-slate-900')}>
                 {service.name}
               </h1>
               <span
                 className={cn(
-                  'inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full border',
+                  'inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full border whitespace-nowrap',
                   service.status === 'SUSPENDED'
                     ? isDark
                       ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
@@ -638,83 +655,403 @@ s3 = boto3.client(
                       : 'bg-emerald-50 border-emerald-200 text-emerald-700'
                 )}
               >
-                <span className={cn('w-1.5 h-1.5 rounded-full', service.status === 'SUSPENDED' ? 'bg-amber-400' : 'bg-emerald-400')} />
-                {service.status === 'SUSPENDED' ? 'Suspended (Grace Period 3 Hari)' : service.status}
+                <span
+                  className={cn(
+                    'w-1.5 h-1.5 rounded-full shrink-0',
+                    service.status === 'SUSPENDED' ? 'bg-amber-400' : 'bg-emerald-400 animate-pulse'
+                  )}
+                />
+                {service.status === 'SUSPENDED' ? 'SUSPENDED (3-Day Grace)' : service.status}
               </span>
             </div>
-            <p className={cn('text-xs mt-0.5', isDark ? 'text-zinc-400' : 'text-slate-600')}>
-              {service.planName} • Sidoarjo (ID-SDA) • AWS S3 Compatible
-            </p>
+
+            <div className={cn('flex items-center gap-2 flex-wrap text-xs font-medium mt-1.5', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+              <span>{service.planName}</span>
+              <span className="opacity-30">•</span>
+              <span>Region: Sidoarjo</span>
+              {publicEndpoint && (
+                <>
+                  <span className="opacity-30">•</span>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(publicEndpoint, 'S3 Endpoint')}
+                    className={cn(
+                      'font-mono px-2 py-0.5 rounded-md text-[11px] font-semibold break-all truncate max-w-[220px] sm:max-w-none transition-colors border cursor-pointer',
+                      isDark
+                        ? 'text-cyan-400 bg-cyan-950/40 hover:bg-cyan-900/40 border-cyan-500/20'
+                        : 'text-cyan-700 bg-cyan-50 hover:bg-cyan-100 border-cyan-200'
+                    )}
+                    title="Click to copy S3 Endpoint"
+                  >
+                    {publicEndpoint.replace(/^https?:\/\//, '')}
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          {publicEndpoint && (
-            <button
-              type="button"
-              onClick={() => handleCopy(publicEndpoint, 'S3 Endpoint')}
-              className={cn(
-                'px-3.5 py-2.5 rounded-xl border text-xs flex items-center gap-2 transition-colors cursor-pointer focus:outline-none focus-visible:outline-none',
-                isDark
-                  ? 'text-cyan-400 bg-cyan-950/40 hover:bg-cyan-900/40 border-cyan-500/20'
-                  : 'text-cyan-700 bg-cyan-50 hover:bg-cyan-100 border-cyan-200'
-              )}
-              title="Click to copy S3 Endpoint"
-            >
-              <Globe className="w-3.5 h-3.5 shrink-0" />
-              <code className="font-mono font-semibold">{publicEndpoint}</code>
-              <Copy className="w-3.5 h-3.5 shrink-0 opacity-75" />
-            </button>
-          )}
-
+        {/* Action Controls */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto pt-3 md:pt-0 shrink-0">
           <button
             type="button"
             onClick={() => setScaleModalOpen(true)}
-            className="px-4 py-2.5 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all shadow-md shadow-cyan-400/20 flex items-center justify-center gap-2 cursor-pointer active:scale-95 focus:outline-none focus-visible:outline-none"
+            className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all shadow-md shadow-cyan-400/20 flex items-center justify-center gap-2 cursor-pointer active:scale-95 whitespace-nowrap focus:outline-none focus-visible:outline-none"
           >
-            <TrendingUp className="w-3.5 h-3.5" />
+            <Rocket className="w-3.5 h-3.5" />
             <span>Scale Storage</span>
           </button>
+
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={() => jumpToTab('guide')}
+              className={cn(
+                'flex-1 sm:flex-none px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer border whitespace-nowrap',
+                isDark ? 'bg-white/[0.05] text-zinc-300 hover:bg-white/10 border-white/10' : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-200'
+              )}
+              title="AWS CLI & SDK Guide"
+            >
+              <Terminal className="w-3.5 h-3.5" />
+              <span>CLI Guide</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => jumpToTab('settings')}
+              className={cn(
+                'flex-1 sm:flex-none px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer border whitespace-nowrap',
+                isDark ? 'bg-white/[0.05] text-zinc-300 hover:bg-white/10 border-white/10' : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-200'
+              )}
+              title="Rename & Settings"
+            >
+              <Settings className="w-3.5 h-3.5" />
+              <span>Settings</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleTerminate}
+              disabled={terminating}
+              className={cn(
+                'py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer border disabled:opacity-40',
+                isDark
+                  ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20 border-red-500/20'
+                  : 'bg-red-50 text-red-600 hover:bg-red-100 border-red-200'
+              )}
+              title="Terminate Object Storage"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Overview Stats Strip */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className={cn('p-4 rounded-2xl border space-y-2', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90 shadow-2xs')}>
-          <div className="flex items-center justify-between text-[11px] font-semibold">
-            <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>STORAGE QUOTA</span>
-            <span className={cn('font-mono font-bold', isDark ? 'text-cyan-400' : 'text-cyan-600')}>{usedPercent}%</span>
+      {/* 2-Column Asymmetric Bento Grid (Matching Managed Apps) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Left Column: S3 Endpoint & Authentication (7 Cols) */}
+        <div className="lg:col-span-7 space-y-6">
+          {/* Card 1: S3 API Endpoint & Routing */}
+          <div
+            className={cn(
+              'border rounded-2xl p-5 sm:p-6 space-y-5 transition-all shadow-2xs',
+              isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90'
+            )}
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <h3 className={cn('text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2', isDark ? 'text-cyan-400' : 'text-cyan-700')}>
+                <Globe className="w-4 h-4 shrink-0" />
+                <span>S3 API Endpoint &amp; Routing</span>
+              </h3>
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold self-start sm:self-auto shrink-0 border',
+                  isDark ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                )}
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>Let&apos;s Encrypt SSL Active</span>
+              </span>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className={cn('text-[11px] font-semibold uppercase tracking-wider block mb-1', isDark ? 'text-zinc-500' : 'text-slate-500')}>
+                  S3 Compatible Endpoint URL
+                </label>
+                <div className="flex items-center gap-2">
+                  <div
+                    className={cn(
+                      'flex-1 px-3.5 py-2.5 rounded-xl border font-mono text-xs font-bold truncate',
+                      isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-cyan-400' : 'bg-slate-50 border-slate-200/90 text-cyan-800 shadow-2xs'
+                    )}
+                  >
+                    {publicEndpoint || 'https://s3.masdika.id'}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(publicEndpoint || 'https://s3.masdika.id', 'S3 Endpoint')}
+                    className={cn(
+                      'p-2.5 rounded-xl border transition-colors cursor-pointer shrink-0',
+                      isDark ? 'border-white/10 hover:bg-white/5 text-zinc-300' : 'border-slate-300 hover:bg-slate-100 text-slate-700'
+                    )}
+                    title="Copy Endpoint URL"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => jumpToTab('guide')}
+                    className="px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shrink-0 cursor-pointer active:scale-95 whitespace-nowrap"
+                  >
+                    <BookOpen className="w-3.5 h-3.5" />
+                    <span>AWS CLI Guide</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div className={cn('p-3 rounded-xl border space-y-1', isDark ? 'bg-[#0a0a0c] border-white/[0.06]' : 'bg-slate-50 border-slate-200')}>
+                  <span className={cn('text-[10px] font-bold uppercase tracking-wider block', isDark ? 'text-zinc-500' : 'text-slate-500')}>
+                    Addressing Style
+                  </span>
+                  <span className={cn('text-xs font-bold block', isDark ? 'text-cyan-400' : 'text-cyan-700')}>
+                    Path-Style &amp; Virtual-Host
+                  </span>
+                </div>
+                <div className={cn('p-3 rounded-xl border space-y-1', isDark ? 'bg-[#0a0a0c] border-white/[0.06]' : 'bg-slate-50 border-slate-200')}>
+                  <span className={cn('text-[10px] font-bold uppercase tracking-wider block', isDark ? 'text-zinc-500' : 'text-slate-500')}>
+                    TLS Encryption
+                  </span>
+                  <span className={cn('text-xs font-bold block', isDark ? 'text-emerald-400' : 'text-emerald-700')}>
+                    Automated Let&apos;s Encrypt (us-east-1)
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className={cn('text-sm font-bold font-mono', isDark ? 'text-white' : 'text-slate-900')}>
-            {formatBytes(service.usedBytes || 0)} <span className={cn('text-xs font-normal', isDark ? 'text-zinc-500' : 'text-slate-400')}>/ {service.storageGb} GB</span>
-          </div>
-          <div className={cn('h-1.5 rounded-full overflow-hidden', isDark ? 'bg-white/[0.06]' : 'bg-slate-100')}>
-            <div className="h-full bg-cyan-400 rounded-full transition-all" style={{ width: `${Math.max(usedPercent, 2)}%` }} />
+
+          {/* Card 2: S3 Credentials & Authentication */}
+          <div
+            className={cn(
+              'border rounded-2xl p-5 sm:p-6 space-y-4 transition-all shadow-2xs',
+              isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90'
+            )}
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <h3 className={cn('text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2', isDark ? 'text-cyan-400' : 'text-cyan-700')}>
+                <KeyRound className="w-4 h-4 shrink-0" />
+                <span>S3 IAM Credentials &amp; Authentication</span>
+              </h3>
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold self-start sm:self-auto shrink-0 border',
+                  isDark ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                )}
+              >
+                <span className={cn('w-1.5 h-1.5 rounded-full', isDark ? 'bg-emerald-400' : 'bg-emerald-600')} />
+                <span>{service.keys?.length || 0} IAM Key Ready</span>
+              </span>
+            </div>
+
+            {service.keys?.[0] ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className={cn('p-3 rounded-xl border space-y-1', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-slate-50 border-slate-200')}>
+                  <span className={cn('text-[10px] font-bold uppercase tracking-wider block', isDark ? 'text-zinc-500' : 'text-slate-500')}>
+                    Primary Access Key ID
+                  </span>
+                  <div className="flex items-center justify-between gap-2 font-mono text-xs font-bold">
+                    <span className={cn('truncate', isDark ? 'text-cyan-400' : 'text-cyan-700')}>{service.keys[0].accessKey}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleCopy(service.keys[0].accessKey, 'Access Key')}
+                      className={cn('cursor-pointer transition-colors shrink-0', isDark ? 'text-zinc-400 hover:text-cyan-400' : 'text-slate-500 hover:text-cyan-700')}
+                      title="Copy Access Key"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className={cn('p-3 rounded-xl border space-y-1', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-slate-50 border-slate-200')}>
+                  <span className={cn('text-[10px] font-bold uppercase tracking-wider block', isDark ? 'text-zinc-500' : 'text-slate-500')}>
+                    Primary Secret Access Key
+                  </span>
+                  <div className="flex items-center justify-between gap-2 font-mono text-xs font-bold">
+                    <span className={cn('truncate', isDark ? 'text-emerald-400' : 'text-emerald-700')}>
+                      {service.keys[0].secretKey
+                        ? showPrimarySecret
+                          ? service.keys[0].secretKey
+                          : '••••••••••••••••••••••••'
+                        : 'Hidden'}
+                    </span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {service.keys[0].secretKey && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => setShowPrimarySecret((v) => !v)}
+                            className={cn('cursor-pointer transition-colors', isDark ? 'text-zinc-400 hover:text-cyan-400' : 'text-slate-500 hover:text-cyan-700')}
+                            title={showPrimarySecret ? 'Hide Secret Key' : 'Show Secret Key'}
+                          >
+                            {showPrimarySecret ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleCopy(service.keys[0].secretKey, 'Secret Key')}
+                            className={cn('cursor-pointer transition-colors', isDark ? 'text-zinc-400 hover:text-cyan-400' : 'text-slate-500 hover:text-cyan-700')}
+                            title="Copy Secret Key"
+                          >
+                            <Copy className="w-3.5 h-3.5" />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className={cn('p-3 rounded-xl border text-xs', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-zinc-400' : 'bg-slate-50 border-slate-200 text-slate-600')}>
+                No IAM Access Keys provisioned yet. Create one in the <strong>IAM Access Keys &amp; SDK</strong> tab below.
+              </div>
+            )}
+
+            <div
+              className={cn(
+                'p-3 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs',
+                isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-zinc-300' : 'bg-cyan-50/60 border-cyan-200 text-slate-700'
+              )}
+            >
+              <p className="text-[11px] leading-relaxed">
+                Authenticate any AWS S3 SDK, rclone, or AWS CLI using the keys above. You can create scoped Read-Only or Read-Write keys anytime.
+              </p>
+              <button
+                type="button"
+                onClick={() => jumpToTab('keys')}
+                className={cn('text-xs font-bold shrink-0 hover:underline cursor-pointer self-start sm:self-center', isDark ? 'text-cyan-400' : 'text-cyan-700')}
+              >
+                Manage Keys →
+              </button>
+            </div>
           </div>
         </div>
 
-        <div className={cn('p-4 rounded-2xl border space-y-1', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90 shadow-2xs')}>
-          <div className={cn('text-[11px] font-semibold', isDark ? 'text-zinc-400' : 'text-slate-500')}>S3 BUCKETS</div>
-          <div className={cn('text-lg font-extrabold font-mono', isDark ? 'text-white' : 'text-slate-900')}>
-            {service.buckets?.length || 0} <span className={cn('text-xs font-normal', isDark ? 'text-zinc-500' : 'text-slate-400')}>/ {maxBucketsLabel}</span>
-          </div>
-          <div className={cn('text-[11px]', isDark ? 'text-zinc-500' : 'text-slate-500')}>Isolated namespaces</div>
-        </div>
+        {/* Right Column: Storage Telemetry & Allocated Resources (5 Cols) */}
+        <div className="lg:col-span-5 space-y-6">
+          {/* Card 3: Storage & Quota Telemetry */}
+          <div
+            className={cn(
+              'border rounded-2xl p-5 sm:p-6 space-y-4 transition-all shadow-2xs',
+              isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90'
+            )}
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <h3 className={cn('text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2', isDark ? 'text-cyan-400' : 'text-cyan-700')}>
+                <Activity className="w-4 h-4 shrink-0" />
+                <span>Storage Telemetry</span>
+              </h3>
+              <span className={cn('text-[11px] font-mono self-start sm:self-auto', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+                Live S3 Quota
+              </span>
+            </div>
 
-        <div className={cn('p-4 rounded-2xl border space-y-1', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90 shadow-2xs')}>
-          <div className={cn('text-[11px] font-semibold', isDark ? 'text-zinc-400' : 'text-slate-500')}>IAM ACCESS KEYS</div>
-          <div className={cn('text-lg font-extrabold font-mono', isDark ? 'text-white' : 'text-slate-900')}>
-            {service.keys?.length || 0} <span className={cn('text-xs font-normal', isDark ? 'text-zinc-500' : 'text-slate-400')}>/ {maxKeysLabel}</span>
-          </div>
-          <div className={cn('text-[11px]', isDark ? 'text-zinc-500' : 'text-slate-500')}>Scoped S3 credentials</div>
-        </div>
+            <div className="space-y-3 text-xs">
+              <div className={cn('flex items-center justify-between pb-2 border-b', isDark ? 'border-white/[0.06]' : 'border-slate-200')}>
+                <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>Service Status:</span>
+                <span className={cn('font-bold flex items-center gap-1.5', service.status === 'SUSPENDED' ? (isDark ? 'text-amber-400' : 'text-amber-700') : (isDark ? 'text-emerald-400' : 'text-emerald-700'))}>
+                  <span className={cn('w-2 h-2 rounded-full', service.status === 'SUSPENDED' ? 'bg-amber-400' : 'bg-emerald-400 animate-pulse')} />
+                  {service.status === 'SUSPENDED' ? 'Suspended (Grace)' : 'Running (Ready)'}
+                </span>
+              </div>
 
-        <div className={cn('p-4 rounded-2xl border space-y-1', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90 shadow-2xs')}>
-          <div className={cn('text-[11px] font-semibold', isDark ? 'text-zinc-400' : 'text-slate-500')}>BILLING RATE</div>
-          <div className={cn('text-lg font-extrabold font-mono', isDark ? 'text-cyan-400' : 'text-cyan-600')}>
-            Rp {currentMonthly.toLocaleString('id-ID')}<span className={cn('text-xs font-normal', isDark ? 'text-zinc-500' : 'text-slate-400')}>/mo</span>
+              <div className={cn('pb-2.5 border-b space-y-1.5', isDark ? 'border-white/[0.06]' : 'border-slate-200')}>
+                <div className="flex items-center justify-between">
+                  <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>Storage Used:</span>
+                  <span className={cn('font-mono font-semibold', isDark ? 'text-white' : 'text-slate-900')}>
+                    {formatBytes(service.usedBytes || 0)} / {service.storageGb} GB ({usedPercent}%)
+                  </span>
+                </div>
+                <div className={cn('h-1.5 rounded-full overflow-hidden', isDark ? 'bg-white/[0.06]' : 'bg-slate-200')}>
+                  <div className="h-full bg-cyan-400 rounded-full transition-all" style={{ width: `${Math.max(usedPercent, 2)}%` }} />
+                </div>
+              </div>
+
+              <div className={cn('flex items-center justify-between pb-2 border-b', isDark ? 'border-white/[0.06]' : 'border-slate-200')}>
+                <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>Active Buckets:</span>
+                <span className={cn('font-mono font-semibold', isDark ? 'text-white' : 'text-slate-900')}>
+                  {service.buckets?.length || 0} / {maxBucketsLabel}
+                </span>
+              </div>
+
+              <div className={cn('flex items-center justify-between pb-2 border-b', isDark ? 'border-white/[0.06]' : 'border-slate-200')}>
+                <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>IAM Access Keys:</span>
+                <span className={cn('font-mono font-semibold', isDark ? 'text-white' : 'text-slate-900')}>
+                  {service.keys?.length || 0} / {maxKeysLabel}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>Edge Network:</span>
+                <span className={cn('font-semibold text-xs', isDark ? 'text-cyan-400' : 'text-cyan-700')}>
+                  Sidoarjo (ID-SDA) • Auto SSL
+                </span>
+              </div>
+            </div>
           </div>
-          <div className={cn('text-[11px] font-mono', isDark ? 'text-zinc-500' : 'text-slate-500')}>~Rp {service.hourlyRate.toLocaleString('id-ID')}/hr PAYG</div>
+
+          {/* Card 4: Allocated Storage & Billing */}
+          <div
+            className={cn(
+              'border rounded-2xl p-5 sm:p-6 space-y-4 transition-all shadow-2xs',
+              isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90'
+            )}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <h3 className={cn('text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2', isDark ? 'text-cyan-400' : 'text-cyan-700')}>
+                <Server className="w-4 h-4 shrink-0" />
+                <span>Allocated Storage</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setScaleModalOpen(true)}
+                className={cn('text-xs font-bold hover:underline cursor-pointer flex items-center gap-1', isDark ? 'text-cyan-400' : 'text-cyan-700')}
+              >
+                <span>Scale</span>
+                <Rocket className="w-3 h-3" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div className={cn('flex items-center justify-between pb-2 border-b', isDark ? 'border-white/[0.06]' : 'border-slate-200')}>
+                <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>Storage Tier:</span>
+                <span className={cn('font-bold', isDark ? 'text-white' : 'text-slate-900')}>{service.planName}</span>
+              </div>
+
+              <div className={cn('flex items-center justify-between pb-2 border-b', isDark ? 'border-white/[0.06]' : 'border-slate-200')}>
+                <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>Allocated Quota:</span>
+                <span className={cn('font-mono font-semibold', isDark ? 'text-white' : 'text-slate-900')}>{service.storageGb} GB NVMe S3</span>
+              </div>
+
+              <div className={cn('flex items-center justify-between pb-2 border-b', isDark ? 'border-white/[0.06]' : 'border-slate-200')}>
+                <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>Billing Mode:</span>
+                <span className={cn('font-semibold', isDark ? 'text-zinc-200' : 'text-slate-800')}>{service.billingMode}</span>
+              </div>
+
+              <div className={cn('flex items-center justify-between pb-2 border-b', isDark ? 'border-white/[0.06]' : 'border-slate-200')}>
+                <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>Hourly Rate:</span>
+                <span className={cn('font-mono font-semibold', isDark ? 'text-white' : 'text-slate-900')}>
+                  Rp {service.hourlyRate.toLocaleString('id-ID')}/hour
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>Monthly Billing:</span>
+                <span className={cn('font-mono font-bold text-sm', isDark ? 'text-cyan-400' : 'text-cyan-700')}>
+                  Rp {currentMonthly.toLocaleString('id-ID')}/month
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -763,7 +1100,7 @@ s3 = boto3.client(
       )}
 
       {/* Segmented Navigation Tabs */}
-      <div className={cn('flex items-center gap-1 p-1 rounded-2xl border overflow-x-auto max-w-full sm:w-fit', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-slate-100 border-slate-200')}>
+      <div ref={workspaceRef} className={cn('flex items-center gap-1 p-1 rounded-2xl border overflow-x-auto max-w-full sm:w-fit', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-slate-100 border-slate-200')}>
         {[
           { id: 'buckets', label: 'Buckets & Objects', icon: Database },
           { id: 'keys', label: 'IAM Access Keys & SDK', icon: KeyRound },
