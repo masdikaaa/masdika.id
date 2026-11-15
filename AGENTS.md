@@ -194,8 +194,9 @@ Setiap layanan baru **wajib** menghasilkan dan menampilkan invoice yang 100% kon
   * **Monthly:** Nomor invoice menggunakan prefix `INV-ORD-...`, `status: 'PAID'`, `paymentMethod: 'Account Balance'`, dan `reference: 'MONTHLY_PAID'`.
 * **Wajib isi metadata paket di `details` (JSON):** Sertakan `<serviceIdField>`, `name`, `planName`, `billingMode`, serta spesifikasi resource (`storageGb`, `cpuShares`, `memoryMb`, `appType`/`appName`, `dbType`, `version`, dll.) agar detail paket selalu jelas terbaca.
 
-### B. Sinkronisasi Nominal PAYG Setiap Jam (`hourly-billing/route.ts`)
+### B. Sinkronisasi Nominal PAYG Setiap Jam (`hourly-billing/route.ts`) & Anti-Duplikat
 * Di dalam `$transaction` pemotongan saldo per jam pada `apps/web/src/app/api/cron/hourly-billing/route.ts`, **wajib** memanggil `upsertPaygRunningInvoice` agar nominal invoice `PAYG_RUNNING` selalu bertambah sesuai biaya per jam dan memiliki *safety net* (`fallbackAmount: accumulatedCost + costThisHour`) jika ada instance aktif yang belum memiliki invoice.
+* **1 Instance = 1 Invoice `PAYG_RUNNING`:** Daftarkan layanan baru ke `reconcileUserPaygInvoices` di `apps/web/src/lib/payg-invoice.ts` serta pastikan `serviceIdField` pada `details` JSON konsisten (`<serviceName>ServiceId`) agar tidak pernah tercipta invoice ganda.
 
 ### C. Tampilan Paket & Enrichment di UI Invoice
 * Daftarkan tipe layanan baru ke:
