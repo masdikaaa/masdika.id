@@ -26,8 +26,10 @@ export async function GET(req: Request, props: { params: Promise<{ id: string }>
     try {
       const { attemptAutoUnsuspendAllForUser } = await import('@/lib/auto-unsuspend');
       const { healPaygCycleInvoicesForUser } = await import('@/lib/payg-cycle-heal');
+      const { reconcileUserPaygInvoices } = await import('@/lib/payg-invoice');
       await attemptAutoUnsuspendAllForUser(userId);
       await healPaygCycleInvoicesForUser(userId);
+      await reconcileUserPaygInvoices(userId);
     } catch (healErr) {
       console.warn("Self-healing check on user profile failed:", healErr);
     }

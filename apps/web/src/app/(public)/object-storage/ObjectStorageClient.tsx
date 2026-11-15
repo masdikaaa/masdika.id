@@ -206,10 +206,10 @@ export default function ObjectStorageClient({
               </div>
             </div>
 
-            {/* Right – Hero Avatar (object-storage-mascot.webp) with 4 Floating Badges */}
+            {/* Right – Hero Avatar (object-storage.webp) with 4 Floating Badges */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0">
               <HeroAvatarFrame
-                imageSrc="/images/object-storage-mascot.webp"
+                imageSrc="/images/mascots/object-storage.webp"
                 imageAlt="Masdika S3-Compatible Object Storage"
                 imageWidth={1536}
                 imageHeight={1024}

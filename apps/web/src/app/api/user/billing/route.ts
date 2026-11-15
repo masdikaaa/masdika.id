@@ -13,6 +13,13 @@ export async function GET(req: NextRequest) {
 
     const userId = auth.userId!;
 
+    try {
+      const { reconcileUserPaygInvoices } = await import("@/lib/payg-invoice");
+      await reconcileUserPaygInvoices(userId);
+    } catch (reconcileErr) {
+      console.warn("PAYG invoice reconciliation warning:", reconcileErr);
+    }
+
     const subscriptions = await prisma.subscription.findMany({
       where: { userId, status: { not: 'TERMINATED' } },
       include: { plan: true },
