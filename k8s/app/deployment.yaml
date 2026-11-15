@@ -68,7 +68,7 @@ spec:
         - name: dockerhub-secret
       containers:
         - name: app
-          image: andikaferdialvianto/masdika-id:192bfd7bf4b230a5d120bbe5abb9555930110649
+          image: andikaferdialvianto/masdika-id:9025aa04285a31f7247c967f1ac5cad0d159e8ac
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
@@ -231,7 +231,7 @@ spec:
         - name: dockerhub-secret
       containers:
         - name: worker
-          image: andikaferdialvianto/masdika-id:192bfd7bf4b230a5d120bbe5abb9555930110649
+          image: andikaferdialvianto/masdika-id:9025aa04285a31f7247c967f1ac5cad0d159e8ac
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
@@ -360,7 +360,7 @@ spec:
         - name: dockerhub-secret
       containers:
         - name: vnc-proxy
-          image: andikaferdialvianto/masdika-id:192bfd7bf4b230a5d120bbe5abb9555930110649
+          image: andikaferdialvianto/masdika-id:9025aa04285a31f7247c967f1ac5cad0d159e8ac
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
