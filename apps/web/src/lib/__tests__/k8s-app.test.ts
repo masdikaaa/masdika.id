@@ -157,7 +157,7 @@ describe('Managed Apps Catalog & Engine', () => {
           password: 'TestPassword123!',
         };
 
-        const { image, dataMount, envYaml, commandYaml } = buildAppContainerSpec(dummyApp);
+        const { image, envYaml, commandYaml, securityContextYaml } = buildAppContainerSpec(dummyApp);
         expect(image).toBeDefined();
 
         const manifestYaml = `apiVersion: apps/v1
@@ -180,7 +180,7 @@ spec:
         image: ${image}
         ports:
         - name: app-port
-          containerPort: ${dummyApp.appPort}${commandYaml}${envYaml ? `\n        env:${envYaml}` : ''}
+          containerPort: ${dummyApp.appPort}${securityContextYaml}${commandYaml}${envYaml ? `\n        env:${envYaml}` : ''}
 `;
 
         expect(() => k8s.loadAllYaml(manifestYaml)).not.toThrow();
@@ -220,6 +220,8 @@ spec:
       expect(legacyPortSpec.envYaml).toContain('OPENCODE_SERVER_PASSWORD');
       expect(legacyPortSpec.envYaml).toContain('value: "MkApp_SecurePassword99"');
       expect(legacyPortSpec.commandYaml).toContain('/usr/sbin/sshd -p 22');
+      expect(legacyPortSpec.commandYaml).toContain('/sbin/apk');
+      expect(legacyPortSpec.commandYaml).toContain('AllowTcpForwarding no');
       expect(legacyPortSpec.commandYaml).toContain('opencode serve --hostname 0.0.0.0 --port 4096 --cors "https://opencode-dual.app.masdika.id"');
     });
 
@@ -254,9 +256,28 @@ spec:
       expect(openclawSpec.envYaml).toContain('value: "MkApp_OpenClawToken88"');
       expect(openclawSpec.envYaml).toContain('value: "18789"');
       expect(openclawSpec.envYaml).toContain('--max-old-space-size=');
-      expect(openclawSpec.commandYaml).toContain('runAsUser: 0');
+      expect(openclawSpec.securityContextYaml).toContain('runAsUser: 0');
+      expect(openclawSpec.securityContextYaml).toContain('- NET_ADMIN');
+      expect(openclawSpec.securityContextYaml).toContain('- NET_RAW');
       expect(openclawSpec.commandYaml).toContain('/usr/sbin/sshd -p 22');
+      expect(openclawSpec.commandYaml).toContain('AllowTcpForwarding no');
+      expect(openclawSpec.commandYaml).toContain('PermitTunnel no');
+      expect(openclawSpec.commandYaml).toContain('/usr/bin/apt-get');
+      expect(openclawSpec.commandYaml).toContain('/usr/bin/dpkg');
       expect(openclawSpec.commandYaml).toContain('node /app/openclaw.mjs gateway --port 18789 --bind lan');
+
+      const hermesSpec = buildAppContainerSpec({
+        id: 13,
+        userId: 1,
+        name: 'hermes-sec',
+        appType: 'hermes',
+        subdomain: 'hermes-sec',
+        appPort: 9119,
+        password: 'TestPass',
+      } as any);
+      expect(hermesSpec.securityContextYaml).toContain('- NET_ADMIN');
+      expect(hermesSpec.commandYaml).toContain('/usr/bin/apt-get');
+      expect(hermesSpec.commandYaml).toContain('PermitTunnel no');
     });
   });
 

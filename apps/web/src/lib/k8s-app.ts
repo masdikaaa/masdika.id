@@ -593,6 +593,52 @@ export async function applyKubernetesManifests(kc: k8s.KubeConfig, manifestYaml:
   }
 }
 
+const B64_PKG_RESTRICT_APK = Buffer.from(
+  '#!/bin/sh\necho "Security Notice: Package installation (apk) is restricted on Masdika Cloud Managed Applications." >&2\nexit 1\n'
+).toString('base64');
+
+const B64_PKG_RESTRICT_APT = Buffer.from(
+  '#!/bin/sh\necho "Security Notice: Package installation (apt/dpkg) is restricted on Masdika Cloud Managed Applications." >&2\nexit 1\n'
+).toString('base64');
+
+/**
+ * Shared hardened sshd bootstrap lines (disables port/agent/X11/TUN forwarding to block SSH VPN tunneling).
+ */
+function buildHardenedSshdSnippet(sshPassword: string): string {
+  return [
+    `            ssh-keygen -A`,
+    `            echo "root:${sshPassword}" | chpasswd`,
+    `            sed -i 's/#*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config`,
+    `            grep -q '^PermitRootLogin yes' /etc/ssh/sshd_config || echo "PermitRootLogin yes" >> /etc/ssh/sshd_config`,
+    `            grep -q '^PasswordAuthentication yes' /etc/ssh/sshd_config || echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config`,
+    `            grep -q '^AllowTcpForwarding no' /etc/ssh/sshd_config || echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config`,
+    `            grep -q '^X11Forwarding no' /etc/ssh/sshd_config || echo "X11Forwarding no" >> /etc/ssh/sshd_config`,
+    `            grep -q '^AllowAgentForwarding no' /etc/ssh/sshd_config || echo "AllowAgentForwarding no" >> /etc/ssh/sshd_config`,
+    `            grep -q '^PermitTunnel no' /etc/ssh/sshd_config || echo "PermitTunnel no" >> /etc/ssh/sshd_config`,
+    `            grep -q '^GatewayPorts no' /etc/ssh/sshd_config || echo "GatewayPorts no" >> /etc/ssh/sshd_config`,
+  ].join('\n');
+}
+
+/**
+ * Shared OS package manager lockdown executed after initial runtime bootstrap.
+ */
+function buildPkgLockdownSnippet(pm: 'apk' | 'apt'): string {
+  if (pm === 'apk') {
+    return [
+      `            rm -rf /etc/apk /var/cache/apk /lib/apk`,
+      `            echo "${B64_PKG_RESTRICT_APK}" | base64 -d > /sbin/apk`,
+      `            chmod 755 /sbin/apk`,
+    ].join('\n');
+  }
+  return [
+    `            rm -rf /var/cache/apt /var/lib/apt/lists /etc/apt/sources.list*`,
+    `            echo "${B64_PKG_RESTRICT_APT}" | base64 -d > /usr/bin/apt`,
+    `            echo "${B64_PKG_RESTRICT_APT}" | base64 -d > /usr/bin/apt-get`,
+    `            echo "${B64_PKG_RESTRICT_APT}" | base64 -d > /usr/bin/dpkg`,
+    `            chmod 755 /usr/bin/apt /usr/bin/apt-get /usr/bin/dpkg`,
+  ].join('\n');
+}
+
 /**
  * Build App environment variables and startup command according to App Type
  */
@@ -606,6 +652,14 @@ export function buildAppContainerSpec(app: AppServiceRecord, domainBase?: string
   let image = catalogItem?.defaultImage || 'docker.io/library/node:22-alpine';
   let envYaml = '';
   let commandYaml = '';
+  const securityContextYaml = `
+        securityContext:
+          ${appType === 'openclaw' ? 'runAsUser: 0\n          ' : ''}capabilities:
+            drop:
+              - NET_ADMIN
+              - NET_RAW
+              - SYS_ADMIN
+              - SYS_MODULE`;
 
   if (appType === 'n8n') {
     image = 'docker.io/n8nio/n8n:latest';
@@ -653,6 +707,7 @@ export function buildAppContainerSpec(app: AppServiceRecord, domainBase?: string
       '  Application Mode: Production AI Coding Agent (Web + SSH)\n' +
       `  Web Dashboard: https://${fullDomain} (User: ${authUser})\n` +
       '  Persistent Storage: /app/data\n' +
+      '  Security Notice: Package installation & tunneling restricted.\n' +
       '\n' +
       '  Quickstart Commands:\n' +
       '    hermes model      -> Set up LLM provider & API keys\n' +
@@ -674,27 +729,20 @@ export function buildAppContainerSpec(app: AppServiceRecord, domainBase?: string
           - |
             set -e
             export DEBIAN_FRONTEND=noninteractive
-            apt-get update
-            apt-get install -y --no-install-recommends openssh-server ca-certificates procps
+            if [ -f /etc/apt/sources.list ] || [ -d /etc/apt/sources.list.d ]; then
+              apt-get update
+              apt-get install -y --no-install-recommends openssh-server ca-certificates procps bash git curl nano nodejs
+            fi
             mkdir -p /run/sshd /var/run/sshd ${dataMount} /app/data/.hermes
             rm -rf /root/.hermes && ln -sfn /app/data/.hermes /root/.hermes
-            ssh-keygen -A
-            echo "root:${sshPassword}" | chpasswd
-            sed -i 's/#*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
-            grep -q '^PermitRootLogin yes' /etc/ssh/sshd_config || echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
-            grep -q '^PasswordAuthentication yes' /etc/ssh/sshd_config || echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
-            grep -q '^AllowTcpForwarding no' /etc/ssh/sshd_config || echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config
-            grep -q '^X11Forwarding no' /etc/ssh/sshd_config || echo "X11Forwarding no" >> /etc/ssh/sshd_config
-            grep -q '^AllowAgentForwarding no' /etc/ssh/sshd_config || echo "AllowAgentForwarding no" >> /etc/ssh/sshd_config
-            grep -q '^PermitTunnel no' /etc/ssh/sshd_config || echo "PermitTunnel no" >> /etc/ssh/sshd_config
-            grep -q '^GatewayPorts no' /etc/ssh/sshd_config || echo "GatewayPorts no" >> /etc/ssh/sshd_config
+${buildHardenedSshdSnippet(sshPassword)}
+${buildPkgLockdownSnippet('apt')}
             echo "${b64HermesMotd}" | base64 -d > /etc/motd
             echo "${b64HermesProfile}" | base64 -d > /etc/profile.d/hermes.sh
             grep -q 'HERMES_HOME' /root/.bashrc 2>/dev/null || cat /etc/profile.d/hermes.sh >> /root/.bashrc
             grep -q 'HERMES_HOME' /root/.profile 2>/dev/null || cat /etc/profile.d/hermes.sh >> /root/.profile
             grep -q 'HERMES_HOME' /etc/profile 2>/dev/null || cat /etc/profile.d/hermes.sh >> /etc/profile
             /usr/sbin/sshd -p 22
-            apt-get install -y --no-install-recommends bash git curl nano nodejs && rm -rf /var/lib/apt/lists/*
             if [ ! -x /app/data/venv/bin/pip ]; then
               python3 -m venv /app/data/venv
             fi
@@ -744,6 +792,7 @@ export function buildAppContainerSpec(app: AppServiceRecord, domainBase?: string
       '  Application Mode: Browser Web UI & SSH Coding Environment\n' +
       `  Web Dashboard: https://${fullDomain} (User: ${authUser})\n` +
       '  Persistent Storage: /workspace\n' +
+      '  Security Notice: Package installation & tunneling restricted.\n' +
       '\n' +
       '  Quickstart Commands:\n' +
       '    opencode auth login  -> Connect OpenAI / Anthropic / Zen / API keys\n' +
@@ -773,22 +822,16 @@ export function buildAppContainerSpec(app: AppServiceRecord, domainBase?: string
         args:
           - |
             set -e
-            apk add --no-cache openssh bash git curl nano tar gzip libstdc++ libgcc ripgrep
+            if [ -d /etc/apk ]; then
+              apk add --no-cache openssh bash git curl nano tar gzip libstdc++ libgcc ripgrep
+            fi
             mkdir -p /run/sshd /var/run/sshd /etc/profile.d ${dataMount} /workspace/.opencode/home/bin /workspace/.opencode/share /workspace/.opencode/config /root/.local/share /root/.config
             rm -rf /root/.opencode /root/.local/share/opencode /root/.config/opencode
             ln -sfn /workspace/.opencode/home /root/.opencode
             ln -sfn /workspace/.opencode/share /root/.local/share/opencode
             ln -sfn /workspace/.opencode/config /root/.config/opencode
-            ssh-keygen -A
-            echo "root:${sshPassword}" | chpasswd
-            sed -i 's/#*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
-            grep -q '^PermitRootLogin yes' /etc/ssh/sshd_config || echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
-            grep -q '^PasswordAuthentication yes' /etc/ssh/sshd_config || echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
-            grep -q '^AllowTcpForwarding no' /etc/ssh/sshd_config || echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config
-            grep -q '^X11Forwarding no' /etc/ssh/sshd_config || echo "X11Forwarding no" >> /etc/ssh/sshd_config
-            grep -q '^AllowAgentForwarding no' /etc/ssh/sshd_config || echo "AllowAgentForwarding no" >> /etc/ssh/sshd_config
-            grep -q '^PermitTunnel no' /etc/ssh/sshd_config || echo "PermitTunnel no" >> /etc/ssh/sshd_config
-            grep -q '^GatewayPorts no' /etc/ssh/sshd_config || echo "GatewayPorts no" >> /etc/ssh/sshd_config
+${buildHardenedSshdSnippet(sshPassword)}
+${buildPkgLockdownSnippet('apk')}
             echo "${b64OpenCodeMotd}" | base64 -d > /etc/motd
             echo "${b64OpenCodeProfile}" | base64 -d > /etc/profile.d/opencode.sh
             grep -q '/root/.opencode/bin' /root/.bashrc 2>/dev/null || cat /etc/profile.d/opencode.sh >> /root/.bashrc
@@ -848,6 +891,7 @@ export function buildAppContainerSpec(app: AppServiceRecord, domainBase?: string
       '  Application Mode: Browser Control UI + Multi-Channel CLI\n' +
       `  Control UI: https://${fullDomain}\n` +
       '  Persistent Storage: /home/node/.openclaw\n' +
+      '  Security Notice: Package installation & tunneling restricted.\n' +
       '\n' +
       '  First-Time Browser Pairing & Quickstart:\n' +
       '    openclaw devices approve --latest  -> Approve browser after opening Control UI\n' +
@@ -886,27 +930,17 @@ export function buildAppContainerSpec(app: AppServiceRecord, domainBase?: string
     ).toString('base64');
 
     commandYaml = `
-        securityContext:
-          runAsUser: 0
         command: ["/bin/sh", "-c"]
         args:
           - |
             set -e
             export DEBIAN_FRONTEND=noninteractive
-            if ! command -v sshd >/dev/null 2>&1 || ! command -v pidof >/dev/null 2>&1; then
-              apt-get update -qq && apt-get install -y -qq --no-install-recommends openssh-server procps ca-certificates >/dev/null && rm -rf /var/lib/apt/lists/*
+            if [ -f /etc/apt/sources.list ] || [ -d /etc/apt/sources.list.d ]; then
+              apt-get update -qq && apt-get install -y -qq --no-install-recommends openssh-server procps ca-certificates >/dev/null
             fi
             mkdir -p /run/sshd /var/run/sshd /etc/profile.d ${dataMount}
-            ssh-keygen -A
-            echo "root:${gatewayToken}" | chpasswd
-            sed -i 's/#*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
-            grep -q '^PermitRootLogin yes' /etc/ssh/sshd_config || echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
-            grep -q '^PasswordAuthentication yes' /etc/ssh/sshd_config || echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
-            grep -q '^AllowTcpForwarding no' /etc/ssh/sshd_config || echo "AllowTcpForwarding no" >> /etc/ssh/sshd_config
-            grep -q '^X11Forwarding no' /etc/ssh/sshd_config || echo "X11Forwarding no" >> /etc/ssh/sshd_config
-            grep -q '^AllowAgentForwarding no' /etc/ssh/sshd_config || echo "AllowAgentForwarding no" >> /etc/ssh/sshd_config
-            grep -q '^PermitTunnel no' /etc/ssh/sshd_config || echo "PermitTunnel no" >> /etc/ssh/sshd_config
-            grep -q '^GatewayPorts no' /etc/ssh/sshd_config || echo "GatewayPorts no" >> /etc/ssh/sshd_config
+${buildHardenedSshdSnippet(gatewayToken)}
+${buildPkgLockdownSnippet('apt')}
             echo "${b64OpenClawMotd}" | base64 -d > /etc/motd
             echo "${b64OpenClawProfile}" | base64 -d > /etc/profile.d/openclaw.sh
             grep -q 'OPENCLAW_GATEWAY_TOKEN' /root/.bashrc 2>/dev/null || cat /etc/profile.d/openclaw.sh >> /root/.bashrc
@@ -928,6 +962,7 @@ export function buildAppContainerSpec(app: AppServiceRecord, domainBase?: string
     dataMount,
     envYaml,
     commandYaml,
+    securityContextYaml,
   };
 }
 
@@ -967,7 +1002,7 @@ export async function deployAppService(app: AppServiceRecord): Promise<{
     }
   }
 
-  const { image, dataMount, envYaml, commandYaml } = buildAppContainerSpec(app, effectiveBase);
+  const { image, dataMount, envYaml, commandYaml, securityContextYaml } = buildAppContainerSpec(app, effectiveBase);
   const catalogItem = getAppDefinition(app.appType);
   const appTypeLower = app.appType.toLowerCase();
   const isHermes = appTypeLower === 'hermes';
@@ -1102,7 +1137,7 @@ spec:
       - name: ${name}
         image: ${image}
         imagePullPolicy: Always
-${containerPortsYaml}${commandYaml}${envYaml ? `\n        env:${envYaml}` : ''}
+${containerPortsYaml}${securityContextYaml}${commandYaml}${envYaml ? `\n        env:${envYaml}` : ''}
         readinessProbe:
           tcpSocket:
             port: ${readinessProbePort}
