@@ -80,7 +80,7 @@ export default function AdminObjectStoragePage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className={cn('text-2xl font-bold tracking-tight flex items-center gap-2.5', isDark ? 'text-white' : 'text-slate-900')}>
-            <Database className="w-6 h-6 text-indigo-400" /> Object Storage Monitor
+            <Database className={cn('w-6 h-6', isDark ? 'text-cyan-400' : 'text-cyan-700')} /> Object Storage Monitor
           </h1>
           <p className={cn('text-xs sm:text-sm mt-1', isDark ? 'text-zinc-400' : 'text-slate-500')}>
             Monitor customer S3 Object Storage services, bucket quotas, IAM keys &amp; cluster usage ({publicEndpoint || 'No public domain configured'}).
@@ -113,7 +113,7 @@ export default function AdminObjectStoragePage() {
       {/* Table */}
       <div className={cn('rounded-2xl border overflow-hidden', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-white border-slate-200')}>
         {loading ? (
-          <div className="py-16 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-indigo-400" /></div>
+          <div className="py-16 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-cyan-400" /></div>
         ) : services.length === 0 ? (
           <div className="py-16 text-center text-xs text-zinc-500">No customer Object Storage services deployed yet.</div>
         ) : (
@@ -138,7 +138,7 @@ export default function AdminObjectStoragePage() {
                       <div className="text-[11px] text-zinc-500">{svc.planName}</div>
                     </td>
                     <td className="px-4 py-3">
-                      <Link href={`/admin/customers/${svc.user.id}`} className="text-indigo-400 hover:underline font-semibold flex items-center gap-1">
+                      <Link href={`/admin/customers/${svc.user.id}`} className={cn('hover:underline font-semibold flex items-center gap-1', isDark ? 'text-cyan-400' : 'text-cyan-700')}>
                         {svc.user.name} <ExternalLink className="w-3 h-3" />
                       </Link>
                       <div className="text-[11px] text-zinc-500">{svc.user.email}</div>
