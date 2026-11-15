@@ -1,3 +1,4 @@
+import { OG_IMAGE_PATH } from "@/lib/og-image";
 import { prisma } from "@/lib/prisma";
 import { Metadata } from "next";
 import VpsClient from "./VpsClient";
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
     siteName: "Masdika",
     images: [
       {
-        url: "/images/brand/og-image.webp",
+        url: OG_IMAGE_PATH,
         width: 1200,
         height: 630,
         alt: "Masdika Cloud VPS - High Performance Compute",
@@ -46,7 +47,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Cloud VPS - High Performance Compute & Enterprise SSD",
     description: "Deploy scalable, lightning-fast Cloud VPS powered by enterprise Intel Xeon, high-speed Enterprise SSD & SAS HDD storage, and sub-20ms latency across Indonesia.",
-    images: ["/images/brand/og-image.webp"],
+    images: [OG_IMAGE_PATH],
   },
 };
 
@@ -86,7 +87,7 @@ export default async function VpsLandingPage() {
         "mpn": "VPS-ID-01",
         "description": "High-Performance Cloud Virtual Private Servers powered by enterprise Intel Xeon, high-speed Enterprise SSD & SAS HDD storage, isolated KVM virtualization, and flexible hourly Pay-As-You-Go billing.",
         "category": "Cloud Computing > Virtual Private Server",
-        "image": "https://www.masdika.id/images/brand/og-image.webp",
+        "image": "${"https://www.masdika.id"}${OG_IMAGE_PATH}",
         "brand": {
           "@type": "Brand",
           "name": "Masdika"

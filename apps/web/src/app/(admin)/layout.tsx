@@ -1,3 +1,4 @@
+import { OG_IMAGE_PATH } from "@/lib/og-image";
 import type { Metadata } from 'next';
 import { requireAuth } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/prisma';
@@ -11,13 +12,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Admin Panel',
     description: 'Masdika centralized admin dashboard for managing servers, billing, users, and cloud resources.',
-    images: [{ url: '/images/brand/og-image.webp', width: 1200, height: 630 }],
+    images: [{ url: OG_IMAGE_PATH, width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Admin Panel',
     description: 'Masdika centralized admin dashboard for managing servers, billing, users, and cloud resources.',
-    images: ['/images/brand/og-image.webp'],
+    images: [OG_IMAGE_PATH],
   }
 };
 

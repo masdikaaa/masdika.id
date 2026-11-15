@@ -1,3 +1,4 @@
+import { OG_IMAGE_PATH } from "@/lib/og-image";
 import { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { getCachedData } from "@/lib/cache";
@@ -36,7 +37,7 @@ export const metadata: Metadata = {
     siteName: "Masdika",
     images: [
       {
-        url: "/images/brand/og-image.webp",
+        url: OG_IMAGE_PATH,
         width: 1200,
         height: 630,
         alt: "Masdika App Catalog - 1-Click Cloud Stacks",
@@ -50,7 +51,7 @@ export const metadata: Metadata = {
     title: "App Catalog - 1-Click Cloud Applications & Stacks",
     description:
       "Deploy scalable 1-Click Applications on Cloud VPS in seconds. Automated Cloud-Init deployment for aaPanel, Docker, WordPress, Coolify, Nextcloud, and enterprise developer stacks.",
-    images: ["/images/brand/og-image.webp"],
+    images: [OG_IMAGE_PATH],
   },
 };
 

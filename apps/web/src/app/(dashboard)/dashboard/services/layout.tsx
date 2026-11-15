@@ -1,3 +1,4 @@
+import { OG_IMAGE_PATH } from "@/lib/og-image";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
     siteName: "Masdika",
     images: [
       {
-        url: "/images/brand/og-image.webp", 
+        url: OG_IMAGE_PATH, 
         width: 1200,
         height: 630,
         alt: "Masdika Services",
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "My Services",
     description: "View and manage all your active and past subscriptions, including VPS, File CDN, and API Hub.",
-    images: ["/images/brand/og-image.webp"],
+    images: [OG_IMAGE_PATH],
   },
 };
 

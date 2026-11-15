@@ -1,3 +1,4 @@
+import { OG_IMAGE_PATH } from "@/lib/og-image";
 import { Metadata } from "next";
 import ManagedAppsClient from "./ManagedAppsClient";
 import { MANAGED_APPS_CATALOG } from "@/lib/app-catalog";
@@ -34,7 +35,7 @@ export const metadata: Metadata = {
     siteName: "Masdika",
     images: [
       {
-        url: "/images/brand/og-image.webp",
+        url: OG_IMAGE_PATH,
         width: 1200,
         height: 630,
         alt: "Masdika Managed Applications - Kubernetes Production AI & Microservice Hosting",
@@ -47,7 +48,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Managed Applications - Kubernetes Production AI & Microservice Hosting",
     description: "Deploy autonomous AI agents, multi-LLM gateways, and workflow engines (Hermes Agent, 9Router, n8n, OpenCode, OpenClaw) in seconds. Powered by Kubernetes isolation, automated Let's Encrypt SSL, and sandboxed SSH terminal access.",
-    images: ["/images/brand/og-image.webp"],
+    images: [OG_IMAGE_PATH],
   },
 };
 
@@ -63,7 +64,7 @@ export default async function ManagedAppsLandingPage() {
         "mpn": "MAPP-K8S-01",
         "description": "High-Performance Managed Cloud Applications powered by Kubernetes, container isolation, automated Let's Encrypt SSL, and flexible monthly pricing starting from Rp 20.000 / month.",
         "category": "Cloud Computing > Managed Applications",
-        "image": "https://www.masdika.id/images/brand/og-image.webp",
+        "image": "${"https://www.masdika.id"}${OG_IMAGE_PATH}",
         "brand": {
           "@type": "Brand",
           "name": "Masdika"

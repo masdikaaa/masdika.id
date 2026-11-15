@@ -1,3 +1,4 @@
+import { OG_IMAGE_PATH } from "@/lib/og-image";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
@@ -22,7 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!opportunity) return { title: "Not Found" };
 
   // Cek apakah gambar persegi, kalau iya pakai og-image.webp
-  let ogImage = ['/images/brand/og-image.webp'];
+  let ogImage = [OG_IMAGE_PATH];
   if (opportunity.image) {
     try {
       const sharpModule = await import('sharp');
@@ -33,18 +34,18 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         const meta = await sharp(imgPath).metadata();
         const ratio = (meta.width || 1) / (meta.height || 1);
         // Kalau landscape (ratio > 1.3), pakai gambar asli. Kalau persegi/portrait, pakai og-image.
-        ogImage = ratio > 1.3 ? [opportunity.image] : ['/images/brand/og-image.webp'];
+        ogImage = ratio > 1.3 ? [opportunity.image] : [OG_IMAGE_PATH];
       } else {
         // Untuk gambar external (URL), fetch lalu cek dimensi
         const res = await fetch(opportunity.image, { signal: AbortSignal.timeout(3000) });
         const buffer = Buffer.from(await res.arrayBuffer());
         const meta = await sharp(buffer).metadata();
         const ratio = (meta.width || 1) / (meta.height || 1);
-        ogImage = ratio > 1.3 ? [opportunity.image] : ['/images/brand/og-image.webp'];
+        ogImage = ratio > 1.3 ? [opportunity.image] : [OG_IMAGE_PATH];
       }
     } catch {
       // Kalau gagal cek dimensi, fallback ke og-image.webp
-      ogImage = ['/images/brand/og-image.webp'];
+      ogImage = [OG_IMAGE_PATH];
     }
   }
 

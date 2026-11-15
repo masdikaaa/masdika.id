@@ -3,42 +3,46 @@ import { getPublicSettings } from "@/lib/settings";
 import { getCachedData } from "@/lib/cache";
 import { prisma } from "@/lib/prisma";
 import { HomeClient } from "./HomeClient";
+import { getFreshOgImagePath } from "@/lib/og-image";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 export const fetchCache = 'force-no-store';
 
-export const metadata: Metadata = {
-  title: {
-    absolute: "Masdika | Cloud & DevOps Engineer",
-  },
-  description: "Portfolio of Masdika, Cloud & DevOps Engineer. Discover enterprise infrastructure projects, high-performance Cloud VPS hosting, Managed Kubernetes, and scalable cloud solutions.",
-  alternates: {
-    canonical: "https://www.masdika.id",
-  },
-  openGraph: {
-    title: "Masdika | Cloud & DevOps Engineer",
+export async function generateMetadata(): Promise<Metadata> {
+  const ogImageUrl = getFreshOgImagePath();
+  return {
+    title: {
+      absolute: "Masdika | Cloud & DevOps Engineer",
+    },
     description: "Portfolio of Masdika, Cloud & DevOps Engineer. Discover enterprise infrastructure projects, high-performance Cloud VPS hosting, Managed Kubernetes, and scalable cloud solutions.",
-    url: "https://www.masdika.id",
-    siteName: "Masdika",
-    images: [
-      {
-        url: "/images/brand/og-image.webp",
-        width: 1200,
-        height: 630,
-        alt: "Masdika | Cloud & DevOps Engineer",
-      },
-    ],
-    locale: "en_US",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Masdika | Cloud & DevOps Engineer",
-    description: "Portfolio of Masdika, Cloud & DevOps Engineer. Discover enterprise infrastructure projects, high-performance Cloud VPS hosting, Managed Kubernetes, and scalable cloud solutions.",
-    images: ["/images/brand/og-image.webp"],
-  },
-};
+    alternates: {
+      canonical: "https://www.masdika.id",
+    },
+    openGraph: {
+      title: "Masdika | Cloud & DevOps Engineer",
+      description: "Portfolio of Masdika, Cloud & DevOps Engineer. Discover enterprise infrastructure projects, high-performance Cloud VPS hosting, Managed Kubernetes, and scalable cloud solutions.",
+      url: "https://www.masdika.id",
+      siteName: "Masdika",
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: "Masdika | Cloud & DevOps Engineer",
+        },
+      ],
+      locale: "en_US",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "Masdika | Cloud & DevOps Engineer",
+      description: "Portfolio of Masdika, Cloud & DevOps Engineer. Discover enterprise infrastructure projects, high-performance Cloud VPS hosting, Managed Kubernetes, and scalable cloud solutions.",
+      images: [ogImageUrl],
+    },
+  };
+}
 
 const fetchProjects = () =>
   prisma.project.findMany({

@@ -1,3 +1,4 @@
+import { OG_IMAGE_PATH } from "@/lib/og-image";
 import { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
 import ApiHubClient from './ApiHubClient';
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
     siteName: 'Masdika',
     images: [
       {
-        url: '/images/brand/og-image.webp',
+        url: OG_IMAGE_PATH,
         width: 1200,
         height: 630,
         alt: 'Masdika API Hub',

@@ -1,3 +1,4 @@
+import { OG_IMAGE_PATH } from "@/lib/og-image";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -6,7 +7,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Reserved IPs",
     description: "Reserve static IPv4 and IPv6 addresses to use with your Cloud VPS or Managed Kubernetes deployments.",
-    images: ["/images/brand/og-image.webp"],
+    images: [OG_IMAGE_PATH],
   },
 };
 

@@ -1,3 +1,4 @@
+import { OG_IMAGE_PATH } from "@/lib/og-image";
 import { requireAuth } from '@/lib/auth-middleware';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
     siteName: 'Masdika',
     images: [
       {
-        url: '/images/brand/og-image.webp',
+        url: OG_IMAGE_PATH,
         width: 1200,
         height: 630,
         alt: 'Masdika Cloud Services',
@@ -31,7 +32,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Dashboard',
     description: 'Manage your API keys, subscriptions, and Masdika cloud services.',
-    images: ['/images/brand/og-image.webp'],
+    images: [OG_IMAGE_PATH],
   },
 };
 

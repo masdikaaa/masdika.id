@@ -1,3 +1,4 @@
+import { OG_IMAGE_PATH } from "@/lib/og-image";
 import { prisma } from "@/lib/prisma";
 import { getCachedData } from "@/lib/cache";
 import { PortfolioClient } from "./PortfolioClient";
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
   title: "Portfolio - Projects & Engineering Work",
   description: "Explore enterprise cloud infrastructure, Kubernetes deployments, and automated CI/CD systems built by Masdika.",
   openGraph: {
-    images: ["/images/brand/og-image.webp"],
+    images: [OG_IMAGE_PATH],
   },
 };
 

@@ -1,3 +1,4 @@
+import { OG_IMAGE_PATH } from "@/lib/og-image";
 import type { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth-middleware';
@@ -36,13 +37,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title,
       description,
-      images: [{ url: '/images/brand/og-image.webp', width: 1200, height: 630 }],
+      images: [{ url: OG_IMAGE_PATH, width: 1200, height: 630 }],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: ['/images/brand/og-image.webp'],
+      images: [OG_IMAGE_PATH],
     },
   };
 }

@@ -1,3 +1,4 @@
+import { OG_IMAGE_PATH } from "@/lib/og-image";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -6,13 +7,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Learning Series",
     description: "Structured learning series covering networking, cloud infrastructure, DevOps, and more.",
-    images: [{ url: "/images/brand/og-image.webp" }],
+    images: [{ url: OG_IMAGE_PATH }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Learning Series",
     description: "Structured learning series covering networking, cloud infrastructure, DevOps, and more.",
-    images: ["/images/brand/og-image.webp"],
+    images: [OG_IMAGE_PATH],
   },
 };
 

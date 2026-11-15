@@ -1,3 +1,4 @@
+import { OG_IMAGE_PATH } from "@/lib/og-image";
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -6,7 +7,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Service Level Agreement',
     description: 'Our commitment to providing reliable, highly-available cloud services.',
-    images: ['/images/brand/og-image.webp'],
+    images: [OG_IMAGE_PATH],
   },
 };
 

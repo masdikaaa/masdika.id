@@ -1,3 +1,4 @@
+import { OG_IMAGE_PATH } from "@/lib/og-image";
 import { redirect } from "next/navigation";
 import { requireAuth } from "@/lib/auth-middleware";
 import { prisma } from "@/lib/prisma";
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
     siteName: 'Masdika',
     images: [
       {
-        url: '/images/brand/og-image.webp',
+        url: OG_IMAGE_PATH,
         width: 1200,
         height: 630,
         alt: 'Masdika Auto Scheduler',
@@ -28,7 +29,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Auto Scheduler',
     description: 'Schedule your VPS to automatically start and stop to save costs.',
-    images: ['/images/brand/og-image.webp'],
+    images: [OG_IMAGE_PATH],
   },
 };
 

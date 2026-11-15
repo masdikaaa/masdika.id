@@ -1,3 +1,4 @@
+import { OG_IMAGE_PATH } from "@/lib/og-image";
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -6,7 +7,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Register',
     description: 'Create a new Masdika account to start managing your services and cloud infrastructure.',
-    images: ['/images/brand/og-image.webp'],
+    images: [OG_IMAGE_PATH],
   }
 };
 

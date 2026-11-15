@@ -1,3 +1,4 @@
+import { OG_IMAGE_PATH } from "@/lib/og-image";
 import { Metadata } from 'next';
 
 import { prisma } from '@/lib/prisma';
@@ -16,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const rawSiteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.masdika.id';
   const siteUrl = rawSiteUrl.replace(/^["']|["']$/g, '').trim();
   const title = 'Developer Community Groups';
-  const ogImageUrl = '/images/brand/og-image.webp';
+  const ogImageUrl = OG_IMAGE_PATH;
 
   return {
     title,

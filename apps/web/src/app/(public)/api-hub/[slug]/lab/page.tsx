@@ -1,3 +1,4 @@
+import { OG_IMAGE_PATH } from "@/lib/og-image";
 import { Metadata } from 'next';
 import ApiLabClient from './ApiLabClient';
 import { prisma } from '@/lib/prisma';
@@ -19,7 +20,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       type: 'website',
       images: [
         {
-          url: '/images/brand/og-image.webp',
+          url: OG_IMAGE_PATH,
           width: 1200,
           height: 630,
         },
@@ -29,7 +30,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       card: 'summary_large_image',
       title: `${project.name} Lab - API Hub`,
       description: project.description,
-      images: ['/images/brand/og-image.webp'],
+      images: [OG_IMAGE_PATH],
     }
   };
 }

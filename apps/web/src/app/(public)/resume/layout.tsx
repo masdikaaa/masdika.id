@@ -1,3 +1,4 @@
+import { OG_IMAGE_PATH } from "@/lib/og-image";
 import { Metadata } from 'next';
 
 import { prisma } from '@/lib/prisma';
@@ -20,12 +21,12 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title,
       description,
-      images: ['/images/brand/og-image.webp'],
+      images: [OG_IMAGE_PATH],
     },
     twitter: {
       title,
       description,
-      images: ['/images/brand/og-image.webp'],
+      images: [OG_IMAGE_PATH],
     },
   };
 }

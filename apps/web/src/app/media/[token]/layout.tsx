@@ -1,3 +1,4 @@
+import { OG_IMAGE_PATH } from "@/lib/og-image";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { PremiumBackground } from "@/components/ui/PremiumBackground";
@@ -252,13 +253,13 @@ export async function generateMetadata({
         url: `${siteUrl}/media/${token}`,
         siteName: "Masdika Secure Media",
         type: "website",
-        images: [{ url: "/images/brand/og-image.webp", width: 1200, height: 630, alt: media.originalName }],
+        images: [{ url: OG_IMAGE_PATH, width: 1200, height: 630, alt: media.originalName }],
       },
       twitter: {
         card: "summary_large_image",
         title,
         description,
-        images: ["/images/brand/og-image.webp"],
+        images: [OG_IMAGE_PATH],
       },
     };
   } catch {

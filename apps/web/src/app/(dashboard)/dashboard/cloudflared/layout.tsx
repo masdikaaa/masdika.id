@@ -1,3 +1,4 @@
+import { OG_IMAGE_PATH } from "@/lib/og-image";
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
     siteName: 'Masdika',
     images: [
       {
-        url: '/images/brand/og-image.webp',
+        url: OG_IMAGE_PATH,
         width: 1200,
         height: 630,
         alt: 'Masdika Cloudflared Tunnels',
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Cloudflared Tunnels',
     description: 'Add your domains, create tunnels, and securely expose your local services to the internet.',
-    images: ['/images/brand/og-image.webp'],
+    images: [OG_IMAGE_PATH],
   },
 };
 

@@ -1,3 +1,4 @@
+import { OG_IMAGE_PATH } from "@/lib/og-image";
 import { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
 import { getCachedData } from '@/lib/cache';
@@ -47,13 +48,13 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       url: `${siteUrl}/contact`,
       siteName: 'Masdika',
-      images: ['/images/brand/og-image.webp'],
+      images: [OG_IMAGE_PATH],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: ['/images/brand/og-image.webp'],
+      images: [OG_IMAGE_PATH],
     },
   };
 }

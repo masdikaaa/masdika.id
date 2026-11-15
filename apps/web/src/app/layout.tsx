@@ -24,6 +24,7 @@ const geistMono = Geist_Mono({
 });
 
 import { getCachedData } from '@/lib/cache';
+import { getFreshOgImagePath } from '@/lib/og-image';
 
 const getCachedMetaDescription = () =>
   getCachedData('setting:meta_description', 3600, () =>
@@ -43,8 +44,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   const rawSiteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.masdika.id';
   const siteUrl = rawSiteUrl.replace(/^["']|["']$/g, '').trim();
-  const timestamp = Date.now();
-  const ogImageUrl = `/images/brand/og-image.webp?v=${timestamp}`;
+  const ogImageUrl = getFreshOgImagePath();
 
   return {
     metadataBase: new URL(siteUrl),

@@ -1,3 +1,4 @@
+import { OG_IMAGE_PATH } from "@/lib/og-image";
 import { prisma } from "@/lib/prisma";
 import { Calendar, Briefcase, Video, ExternalLink } from "lucide-react";
 import { AnimatedSection } from "@/components/ui/AnimatedSection";
@@ -22,13 +23,13 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title,
       description,
-      images: ['/images/brand/og-image.webp'],
+      images: [OG_IMAGE_PATH],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: ['/images/brand/og-image.webp'],
+      images: [OG_IMAGE_PATH],
     },
     robots: {
       index: false,
