@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, use, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -23,8 +23,109 @@ import {
   Loader2,
   AlertTriangle,
   ChevronRight,
+  ChevronDown,
+  Check,
   RefreshCw,
 } from 'lucide-react';
+
+interface SelectOption<T extends string> {
+  value: T;
+  label: string;
+}
+
+function CustomSelect<T extends string>({
+  value,
+  onChange,
+  options,
+  isDark,
+  className,
+}: {
+  value: T;
+  onChange: (val: T) => void;
+  options: SelectOption<T>[];
+  isDark: boolean;
+  className?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutside);
+    return () => document.removeEventListener('mousedown', handleOutside);
+  }, []);
+
+  const selected = options.find((o) => o.value === value) || options[0];
+
+  return (
+    <div ref={containerRef} className={cn('relative', className)}>
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        className={cn(
+          'w-full flex items-center justify-between gap-2 rounded-xl px-3 py-2 text-xs font-medium border transition-colors cursor-pointer focus:outline-none',
+          open
+            ? 'border-cyan-500'
+            : isDark
+              ? 'border-white/[0.08] hover:border-white/20'
+              : 'border-slate-200 hover:border-slate-300',
+          isDark ? 'bg-[#0a0a0c] text-white' : 'bg-slate-50 text-slate-900'
+        )}
+      >
+        <span className="truncate">{selected?.label}</span>
+        <ChevronDown
+          className={cn(
+            'w-3.5 h-3.5 shrink-0 transition-transform',
+            isDark ? 'text-zinc-400' : 'text-slate-500',
+            open && 'rotate-180'
+          )}
+        />
+      </button>
+
+      {open && (
+        <div
+          className={cn(
+            'absolute right-0 mt-1.5 min-w-full w-40 rounded-xl border py-1 z-50',
+            isDark
+              ? 'bg-[#16161b] border-white/[0.12] shadow-2xl'
+              : 'bg-white border-slate-200 shadow-lg'
+          )}
+        >
+          {options.map((opt) => {
+            const isActive = opt.value === value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => {
+                  onChange(opt.value);
+                  setOpen(false);
+                }}
+                className={cn(
+                  'w-full px-3 py-2 text-left text-xs flex items-center justify-between gap-2 transition-colors cursor-pointer',
+                  isActive
+                    ? isDark
+                      ? 'bg-cyan-500/10 text-cyan-400 font-semibold'
+                      : 'bg-cyan-50 text-cyan-700 font-semibold'
+                    : isDark
+                      ? 'text-zinc-300 hover:bg-white/[0.05]'
+                      : 'text-slate-700 hover:bg-slate-50'
+                )}
+              >
+                <span className="truncate">{opt.label}</span>
+                {isActive && <Check className="w-3.5 h-3.5 shrink-0" />}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function formatBytes(bytes: number) {
   if (!bytes) return '0 B';
@@ -108,6 +209,18 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
 
   useEffect(() => {
     fetchService();
+    try {
+      const raw = sessionStorage.getItem(`obj_init_creds_${id}`);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.accessKey && parsed?.secretKey) {
+          setRevealedCred({ accessKey: parsed.accessKey, secretKey: parsed.secretKey });
+        }
+        sessionStorage.removeItem(`obj_init_creds_${id}`);
+      }
+    } catch {
+      // ignore storage errors
+    }
   }, [id]);
 
   useEffect(() => {
@@ -296,7 +409,7 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="w-7 h-7 animate-spin text-indigo-400" />
+        <Loader2 className="w-7 h-7 animate-spin text-cyan-400" />
       </div>
     );
   }
@@ -304,8 +417,8 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
   if (!service) {
     return (
       <div className="p-8 text-center space-y-3">
-        <p className="text-sm text-zinc-400">Object Storage service not found.</p>
-        <Link href="/dashboard/object-storage" className="text-indigo-400 text-xs font-bold">
+        <p className={cn('text-sm', isDark ? 'text-zinc-400' : 'text-slate-600')}>Object Storage service not found.</p>
+        <Link href="/dashboard/object-storage" className={cn('text-xs font-bold', isDark ? 'text-cyan-400' : 'text-cyan-600')}>
           Back to Object Storage
         </Link>
       </div>
@@ -319,62 +432,107 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
       {/* Top Nav */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <Link href="/dashboard/object-storage" className={cn('p-2 rounded-xl border', isDark ? 'bg-white/5 border-white/10 text-zinc-300' : 'bg-white border-slate-200 text-slate-700')}>
+          <Link
+            href="/dashboard/object-storage"
+            className={cn(
+              'p-2 rounded-xl border transition-colors',
+              isDark ? 'bg-[#111115] border-white/[0.08] text-zinc-300 hover:border-white/20' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300 shadow-2xs'
+            )}
+          >
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <div>
             <div className="flex items-center gap-2">
               <h1 className={cn('text-xl font-bold', isDark ? 'text-white' : 'text-slate-900')}>{service.name}</h1>
-              <span className={cn('text-[10px] font-bold px-2.5 py-0.5 rounded-full border', service.status === 'SUSPENDED' ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400')}>
+              <span
+                className={cn(
+                  'text-[10px] font-bold px-2.5 py-0.5 rounded-full border',
+                  service.status === 'SUSPENDED'
+                    ? isDark
+                      ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                      : 'bg-amber-50 border-amber-200 text-amber-700'
+                    : isDark
+                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                      : 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                )}
+              >
                 {service.status === 'SUSPENDED' ? 'Suspended (Grace Period 3 Hari)' : service.status}
               </span>
             </div>
-            <p className="text-xs text-zinc-400 mt-0.5">
+            <p className={cn('text-xs mt-0.5', isDark ? 'text-zinc-400' : 'text-slate-600')}>
               {service.planName} • {formatBytes(service.usedBytes || 0)} / {service.storageGb} GB used • Rp {service.hourlyRate.toLocaleString('id-ID')}/hr
             </p>
           </div>
         </div>
 
         {publicEndpoint && (
-          <div className={cn('px-3.5 py-2 rounded-xl border text-xs flex items-center gap-2', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-white border-slate-200')}>
-            <Globe className="w-3.5 h-3.5 text-indigo-400" />
-            <code className="font-mono text-indigo-400">{publicEndpoint}</code>
-            <button onClick={() => { navigator.clipboard.writeText(publicEndpoint); toast.success('Copied!'); }} className="text-zinc-400 hover:text-white"><Copy className="w-3.5 h-3.5" /></button>
+          <div className={cn('px-3.5 py-2 rounded-xl border text-xs flex items-center gap-2', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}>
+            <Globe className={cn('w-3.5 h-3.5', isDark ? 'text-cyan-400' : 'text-cyan-600')} />
+            <code className={cn('font-mono', isDark ? 'text-cyan-400' : 'text-cyan-600')}>{publicEndpoint}</code>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(publicEndpoint);
+                toast.success('Copied!');
+              }}
+              className={cn('transition-colors cursor-pointer', isDark ? 'text-zinc-400 hover:text-white' : 'text-slate-400 hover:text-slate-900')}
+            >
+              <Copy className="w-3.5 h-3.5" />
+            </button>
           </div>
         )}
       </div>
 
+      {revealedCred && (
+        <div className={cn('p-4 rounded-2xl border text-xs space-y-1.5 font-mono', isDark ? 'border-emerald-500/35 bg-emerald-500/10' : 'border-emerald-200 bg-emerald-50')}>
+          <div className="flex items-center justify-between gap-2">
+            <span className={cn('font-sans font-bold', isDark ? 'text-emerald-400' : 'text-emerald-800')}>
+              Initial S3 IAM Credentials (copy Secret Key now — shown once):
+            </span>
+            <button
+              type="button"
+              onClick={() => setRevealedCred(null)}
+              className={cn('font-sans text-[11px] font-semibold cursor-pointer', isDark ? 'text-zinc-400 hover:text-white' : 'text-slate-500 hover:text-slate-900')}
+            >
+              Dismiss
+            </button>
+          </div>
+          <div className={cn('break-all', isDark ? 'text-cyan-300' : 'text-cyan-800')}>Access Key: {revealedCred.accessKey}</div>
+          <div className={cn('break-all', isDark ? 'text-emerald-300' : 'text-emerald-800')}>Secret Key: {revealedCred.secretKey}</div>
+        </div>
+      )}
+
       {service.status === 'SUSPENDED' && (
-        <div className="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-200">
+        <div className={cn('p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs', isDark ? 'border-amber-500/30 bg-amber-500/10 text-amber-200' : 'border-amber-200 bg-amber-50 text-amber-900')}>
           <div className="flex items-center gap-2.5">
-            <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />
+            <AlertTriangle className={cn('w-5 h-5 shrink-0', isDark ? 'text-amber-400' : 'text-amber-600')} />
             <span>Service suspended due to insufficient balance (3-day grace period). Top up your wallet to automatically re-enable your S3 keys.</span>
           </div>
-          <Link href="/dashboard/billing" className="px-4 py-2 rounded-xl bg-amber-400 text-slate-950 font-bold shrink-0 text-center">
+          <Link href="/dashboard/billing" className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold shrink-0 text-center">
             Top Up Now
           </Link>
         </div>
       )}
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-white/[0.08] pb-3">
+      <div className={cn('flex flex-wrap gap-2 border-b pb-3', isDark ? 'border-white/[0.08]' : 'border-slate-200')}>
         {[
           { id: 'buckets', label: 'Buckets & Objects', icon: Database },
           { id: 'keys', label: 'IAM Access Keys & SDK', icon: KeyRound },
           { id: 'settings', label: 'Scale & Settings', icon: Settings },
         ].map((t) => {
           const Icon = t.icon;
+          const active = tab === t.id;
           return (
             <button
               key={t.id}
               onClick={() => setTab(t.id as any)}
               className={cn(
                 'px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer',
-                tab === t.id
-                  ? 'bg-indigo-500 text-white'
+                active
+                  ? 'bg-cyan-400 text-slate-950 shadow-sm'
                   : isDark
-                    ? 'bg-white/[0.04] text-zinc-400 hover:text-white'
-                    : 'bg-slate-100 text-slate-600 hover:text-slate-900'
+                    ? 'bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.07]'
+                    : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200/70'
               )}
             >
               <Icon className="w-3.5 h-3.5" /> {t.label}
@@ -387,27 +545,40 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
       {tab === 'buckets' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
           {/* Left: Buckets List */}
-          <div className={cn('lg:col-span-4 rounded-2xl border p-4 space-y-4', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-white border-slate-200')}>
+          <div className={cn('lg:col-span-4 rounded-2xl border p-4 space-y-4', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90 shadow-2xs')}>
             <div className="flex items-center justify-between">
               <h2 className={cn('text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>S3 Buckets</h2>
-              <span className="text-[11px] text-zinc-500">{service.buckets?.length || 0} total</span>
+              <span className={cn('text-[11px]', isDark ? 'text-zinc-400' : 'text-slate-500')}>{service.buckets?.length || 0} total</span>
             </div>
 
-            <form onSubmit={handleCreateBucket} className="space-y-2">
+            <form onSubmit={handleCreateBucket} className="space-y-2.5">
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={newBucketName}
                   onChange={(e) => setNewBucketName(e.target.value.toLowerCase())}
                   placeholder="new-bucket-name"
-                  className={cn('flex-1 rounded-xl px-3 py-2 text-xs border focus:outline-none focus:border-indigo-500', isDark ? 'bg-[#111115] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
+                  className={cn(
+                    'flex-1 min-w-0 rounded-xl px-3 py-2 text-xs border focus:outline-none focus:border-cyan-500',
+                    isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white placeholder-zinc-600' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'
+                  )}
                 />
-                <select value={newBucketVis} onChange={(e) => setNewBucketVis(e.target.value as any)} className={cn('rounded-xl px-2 py-2 text-xs border', isDark ? 'bg-[#111115] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}>
-                  <option value="PRIVATE">Private</option>
-                  <option value="PUBLIC">Public</option>
-                </select>
+                <CustomSelect
+                  value={newBucketVis}
+                  onChange={setNewBucketVis}
+                  isDark={isDark}
+                  className="w-28 shrink-0"
+                  options={[
+                    { value: 'PRIVATE', label: 'Private' },
+                    { value: 'PUBLIC', label: 'Public' },
+                  ]}
+                />
               </div>
-              <button type="submit" disabled={creatingBucket || !newBucketName.trim() || service.status === 'SUSPENDED'} className="w-full py-2 rounded-xl text-xs font-bold bg-indigo-500 hover:bg-indigo-400 text-white flex items-center justify-center gap-1.5 disabled:opacity-50 cursor-pointer">
+              <button
+                type="submit"
+                disabled={creatingBucket || !newBucketName.trim() || service.status === 'SUSPENDED'}
+                className="w-full py-2.5 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-50 cursor-pointer transition-colors"
+              >
                 <Plus className="w-3.5 h-3.5" /> {creatingBucket ? 'Creating...' : 'Create Bucket'}
               </button>
             </form>
@@ -420,10 +591,12 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
                   className={cn(
                     'p-3 rounded-xl border cursor-pointer transition-all space-y-2',
                     selectedBucket === b.name
-                      ? 'border-indigo-500 bg-indigo-500/10'
+                      ? isDark
+                        ? 'border-cyan-500/60 bg-cyan-500/[0.08]'
+                        : 'border-cyan-500 bg-cyan-50/70'
                       : isDark
-                        ? 'border-white/[0.06] bg-[#111115] hover:border-white/20'
-                        : 'border-slate-200 bg-slate-50'
+                        ? 'border-white/[0.06] bg-[#0a0a0c] hover:border-white/20'
+                        : 'border-slate-200 bg-slate-50 hover:border-cyan-300'
                   )}
                 >
                   <div className="flex items-center justify-between gap-2">
@@ -432,17 +605,30 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
                       <button
                         onClick={() => handleToggleBucketVis(b.name, b.visibility)}
                         title="Toggle Public/Private ACL"
-                        className={cn('px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1', b.visibility === 'PUBLIC' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-amber-500/15 text-amber-400')}
+                        className={cn(
+                          'px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1 cursor-pointer',
+                          b.visibility === 'PUBLIC'
+                            ? isDark
+                              ? 'bg-emerald-500/15 text-emerald-400'
+                              : 'bg-emerald-100 text-emerald-700'
+                            : isDark
+                              ? 'bg-amber-500/15 text-amber-400'
+                              : 'bg-amber-100 text-amber-800'
+                        )}
                       >
                         {b.visibility === 'PUBLIC' ? <Globe className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
                         {b.visibility}
                       </button>
-                      <button onClick={() => handleDeleteBucket(b.name)} className="text-zinc-500 hover:text-red-400 p-1">
+                      <button
+                        onClick={() => handleDeleteBucket(b.name)}
+                        title="Delete Bucket"
+                        className={cn('p-1 transition-colors cursor-pointer', isDark ? 'text-zinc-500 hover:text-red-400' : 'text-slate-400 hover:text-red-600')}
+                      >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
-                  <div className="text-[11px] text-zinc-400 flex justify-between">
+                  <div className={cn('text-[11px] flex justify-between', isDark ? 'text-zinc-400' : 'text-slate-500')}>
                     <span>{b.objectCount ?? 0} objects</span>
                     <span>{formatBytes(b.totalBytes ?? 0)}</span>
                   </div>
@@ -452,29 +638,35 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
           </div>
 
           {/* Right: Object Browser */}
-          <div className={cn('lg:col-span-8 rounded-2xl border p-4 space-y-4', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-white border-slate-200')}>
+          <div className={cn('lg:col-span-8 rounded-2xl border p-4 space-y-4', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90 shadow-2xs')}>
             {!selectedBucket ? (
-              <div className="py-16 text-center text-xs text-zinc-500">Select or create a bucket to browse objects.</div>
+              <div className={cn('py-16 text-center text-xs', isDark ? 'text-zinc-500' : 'text-slate-500')}>Select or create a bucket to browse objects.</div>
             ) : (
               <>
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-1.5 text-xs font-mono flex-wrap">
-                    <button onClick={() => setPrefix('')} className="text-indigo-400 font-bold hover:underline">{selectedBucket}</button>
+                    <button onClick={() => setPrefix('')} className={cn('font-bold hover:underline cursor-pointer', isDark ? 'text-cyan-400' : 'text-cyan-600')}>{selectedBucket}</button>
                     {prefix.split('/').filter(Boolean).map((seg, i, arr) => {
                       const pathUpTo = arr.slice(0, i + 1).join('/') + '/';
                       return (
                         <span key={pathUpTo} className="flex items-center gap-1">
-                          <ChevronRight className="w-3.5 h-3.5 text-zinc-500" />
-                          <button onClick={() => setPrefix(pathUpTo)} className="text-zinc-300 hover:text-white">{seg}</button>
+                          <ChevronRight className={cn('w-3.5 h-3.5', isDark ? 'text-zinc-500' : 'text-slate-400')} />
+                          <button onClick={() => setPrefix(pathUpTo)} className={cn('cursor-pointer', isDark ? 'text-zinc-300 hover:text-white' : 'text-slate-700 hover:text-slate-900')}>{seg}</button>
                         </span>
                       );
                     })}
                   </div>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => fetchObjects(selectedBucket, prefix)} className={cn('p-2 rounded-xl border', isDark ? 'bg-white/5 border-white/10 text-zinc-300' : 'bg-slate-50 border-slate-200')}>
+                    <button
+                      onClick={() => fetchObjects(selectedBucket, prefix)}
+                      className={cn(
+                        'p-2 rounded-xl border transition-colors cursor-pointer',
+                        isDark ? 'bg-white/[0.04] border-white/[0.08] text-zinc-300 hover:border-white/20' : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300'
+                      )}
+                    >
                       <RefreshCw className={cn('w-3.5 h-3.5', loadingObjects && 'animate-spin')} />
                     </button>
-                    <label className="px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-500 hover:bg-indigo-400 text-white flex items-center gap-1.5 cursor-pointer">
+                    <label className="px-3.5 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 shadow-sm flex items-center gap-1.5 cursor-pointer transition-colors">
                       <UploadCloud className="w-3.5 h-3.5" /> Upload Object
                       <input type="file" onChange={handleUploadObject} className="hidden" disabled={service.status === 'SUSPENDED'} />
                     </label>
@@ -482,20 +674,20 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
                 </div>
 
                 {activeBucketObj?.visibility === 'PUBLIC' && publicEndpoint && (
-                  <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-300">
+                  <div className={cn('p-2.5 rounded-xl border text-[11px]', isDark ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300' : 'bg-emerald-50 border-emerald-200 text-emerald-800')}>
                     Public Bucket URL base: <code className="font-mono">{publicEndpoint}/{selectedBucket}/&lt;object-key&gt;</code>
                   </div>
                 )}
 
                 {loadingObjects ? (
-                  <div className="py-12 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-indigo-400" /></div>
+                  <div className="py-12 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-cyan-400" /></div>
                 ) : folders.length === 0 && objects.length === 0 ? (
-                  <div className="py-16 text-center text-xs text-zinc-500">This bucket prefix is empty. Upload an object or use any S3 SDK.</div>
+                  <div className={cn('py-16 text-center text-xs', isDark ? 'text-zinc-500' : 'text-slate-500')}>This bucket prefix is empty. Upload an object or use any S3 SDK.</div>
                 ) : (
-                  <div className="divide-y divide-white/[0.06] border border-white/[0.06] rounded-xl overflow-hidden">
+                  <div className={cn('divide-y border rounded-xl overflow-hidden', isDark ? 'divide-white/[0.06] border-white/[0.06]' : 'divide-slate-200 border-slate-200')}>
                     {folders.map((f) => (
                       <div key={f} onClick={() => setPrefix(f)} className={cn('p-3 flex items-center justify-between cursor-pointer text-xs', isDark ? 'hover:bg-white/[0.03]' : 'hover:bg-slate-50')}>
-                        <div className="flex items-center gap-2.5 font-semibold text-amber-400">
+                        <div className={cn('flex items-center gap-2.5 font-semibold', isDark ? 'text-amber-400' : 'text-amber-600')}>
                           <Folder className="w-4 h-4" /> {f.slice(prefix.length)}
                         </div>
                       </div>
@@ -503,13 +695,13 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
                     {objects.map((obj) => (
                       <div key={obj.key} className={cn('p-3 flex items-center justify-between gap-3 text-xs', isDark ? 'hover:bg-white/[0.03]' : 'hover:bg-slate-50')}>
                         <div className="flex items-center gap-2.5 min-w-0">
-                          <File className="w-4 h-4 text-indigo-400 shrink-0" />
+                          <File className={cn('w-4 h-4 shrink-0', isDark ? 'text-cyan-400' : 'text-cyan-600')} />
                           <span className={cn('truncate font-mono', isDark ? 'text-zinc-200' : 'text-slate-800')}>{obj.key.slice(prefix.length)}</span>
                         </div>
                         <div className="flex items-center gap-3 shrink-0">
-                          <span className="text-zinc-500">{formatBytes(obj.size)}</span>
-                          <button onClick={() => handlePresign(obj.key)} title="Copy Presigned URL" className="text-cyan-400 hover:text-cyan-300 p-1"><Link2 className="w-3.5 h-3.5" /></button>
-                          <button onClick={() => handleDeleteObject(obj.key)} title="Delete Object" className="text-red-400 hover:text-red-300 p-1"><Trash2 className="w-3.5 h-3.5" /></button>
+                          <span className={isDark ? 'text-zinc-500' : 'text-slate-500'}>{formatBytes(obj.size)}</span>
+                          <button onClick={() => handlePresign(obj.key)} title="Copy Presigned URL" className={cn('p-1 cursor-pointer', isDark ? 'text-cyan-400 hover:text-cyan-300' : 'text-cyan-600 hover:text-cyan-700')}><Link2 className="w-3.5 h-3.5" /></button>
+                          <button onClick={() => handleDeleteObject(obj.key)} title="Delete Object" className={cn('p-1 cursor-pointer', isDark ? 'text-red-400 hover:text-red-300' : 'text-red-600 hover:text-red-700')}><Trash2 className="w-3.5 h-3.5" /></button>
                         </div>
                       </div>
                     ))}
@@ -524,16 +716,8 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
       {/* Tab 2: IAM Access Keys & SDK Examples */}
       {tab === 'keys' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-          <div className={cn('lg:col-span-6 rounded-2xl border p-5 space-y-4', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-white border-slate-200')}>
+          <div className={cn('lg:col-span-6 rounded-2xl border p-5 space-y-4', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90 shadow-2xs')}>
             <h2 className={cn('text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>Isolated S3 IAM Access Keys</h2>
-
-            {revealedCred && (
-              <div className="p-3.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-xs space-y-1.5 font-mono">
-                <div className="font-sans font-bold text-emerald-400">Copy Secret Key now (shown once):</div>
-                <div className="text-cyan-300 break-all">Access Key: {revealedCred.accessKey}</div>
-                <div className="text-emerald-300 break-all">Secret Key: {revealedCred.secretKey}</div>
-              </div>
-            )}
 
             <form onSubmit={handleCreateKey} className="flex flex-col sm:flex-row gap-2">
               <input
@@ -541,40 +725,53 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
                 value={newKeyName}
                 onChange={(e) => setNewKeyName(e.target.value)}
                 placeholder="Key name (e.g. backend-app)"
-                className={cn('flex-1 rounded-xl px-3 py-2 text-xs border', isDark ? 'bg-[#111115] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
+                className={cn(
+                  'flex-1 rounded-xl px-3 py-2 text-xs border focus:outline-none focus:border-cyan-500',
+                  isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white placeholder-zinc-600' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'
+                )}
               />
-              <select value={newKeyPerm} onChange={(e) => setNewKeyPerm(e.target.value as any)} className={cn('rounded-xl px-3 py-2 text-xs border', isDark ? 'bg-[#111115] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}>
-                <option value="READ_WRITE">Read &amp; Write</option>
-                <option value="READ_ONLY">Read Only</option>
-              </select>
-              <button type="submit" disabled={creatingKey || !newKeyName.trim()} className="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-500 hover:bg-indigo-400 text-white disabled:opacity-50 cursor-pointer">
+              <CustomSelect
+                value={newKeyPerm}
+                onChange={setNewKeyPerm}
+                isDark={isDark}
+                className="w-full sm:w-36 shrink-0"
+                options={[
+                  { value: 'READ_WRITE', label: 'Read & Write' },
+                  { value: 'READ_ONLY', label: 'Read Only' },
+                ]}
+              />
+              <button
+                type="submit"
+                disabled={creatingKey || !newKeyName.trim()}
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 shadow-sm disabled:opacity-50 cursor-pointer transition-colors shrink-0"
+              >
                 {creatingKey ? 'Creating...' : 'Create Key'}
               </button>
             </form>
 
             <div className="space-y-2">
               {(service.keys || []).map((k: any) => (
-                <div key={k.id} className={cn('p-3 rounded-xl border flex items-center justify-between text-xs', isDark ? 'bg-[#111115] border-white/[0.06]' : 'bg-slate-50 border-slate-200')}>
+                <div key={k.id} className={cn('p-3 rounded-xl border flex items-center justify-between text-xs', isDark ? 'bg-[#0a0a0c] border-white/[0.06]' : 'bg-slate-50 border-slate-200')}>
                   <div>
                     <div className={cn('font-bold', isDark ? 'text-white' : 'text-slate-900')}>{k.name}</div>
-                    <div className="font-mono text-zinc-400 text-[11px]">{k.accessKey}</div>
+                    <div className={cn('font-mono text-[11px]', isDark ? 'text-zinc-400' : 'text-slate-500')}>{k.accessKey}</div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-400 text-[10px] font-bold">{k.permission}</span>
-                    <span className={cn('px-2 py-0.5 rounded text-[10px] font-bold', k.isActive ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400')}>
+                    <span className={cn('px-2 py-0.5 rounded text-[10px] font-bold', isDark ? 'bg-cyan-500/15 text-cyan-400' : 'bg-cyan-100 text-cyan-800')}>{k.permission}</span>
+                    <span className={cn('px-2 py-0.5 rounded text-[10px] font-bold', k.isActive ? (isDark ? 'bg-emerald-500/15 text-emerald-400' : 'bg-emerald-100 text-emerald-700') : (isDark ? 'bg-red-500/15 text-red-400' : 'bg-red-100 text-red-700'))}>
                       {k.isActive ? 'ACTIVE' : 'DISABLED'}
                     </span>
-                    <button onClick={() => handleDeleteKey(k.id)} className="text-red-400 hover:text-red-300 p-1"><Trash2 className="w-3.5 h-3.5" /></button>
+                    <button onClick={() => handleDeleteKey(k.id)} className={cn('p-1 cursor-pointer', isDark ? 'text-red-400 hover:text-red-300' : 'text-red-600 hover:text-red-700')}><Trash2 className="w-3.5 h-3.5" /></button>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className={cn('lg:col-span-6 rounded-2xl border p-5 space-y-3', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-white border-slate-200')}>
+          <div className={cn('lg:col-span-6 rounded-2xl border p-5 space-y-3', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90 shadow-2xs')}>
             <h2 className={cn('text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>AWS CLI &amp; SDK Configuration</h2>
-            <p className="text-xs text-zinc-400">Use any standard AWS S3 SDK or CLI with your dynamic endpoint:</p>
-            <pre className="p-3.5 rounded-xl bg-black/70 text-cyan-300 font-mono text-[11px] overflow-x-auto leading-relaxed">{`# AWS CLI Example
+            <p className={cn('text-xs', isDark ? 'text-zinc-400' : 'text-slate-600')}>Use any standard AWS S3 SDK or CLI with your dynamic endpoint:</p>
+            <pre className={cn('p-3.5 rounded-xl font-mono text-[11px] overflow-x-auto leading-relaxed border', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-cyan-300' : 'bg-slate-900 border-slate-800 text-cyan-300')}>{`# AWS CLI Example
 export AWS_ACCESS_KEY_ID="YOUR_ACCESS_KEY"
 export AWS_SECRET_ACCESS_KEY="YOUR_SECRET_KEY"
 aws s3 ls s3://${selectedBucket || 'your-bucket'} \\
@@ -594,26 +791,43 @@ const s3 = new S3Client({
       {/* Tab 3: Settings & Danger Zone */}
       {tab === 'settings' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          <form onSubmit={handleSaveSettings} className={cn('rounded-2xl border p-5 space-y-4', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-white border-slate-200')}>
+          <form onSubmit={handleSaveSettings} className={cn('rounded-2xl border p-5 space-y-4', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90 shadow-2xs')}>
             <h2 className={cn('text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>Scale Storage &amp; Rename</h2>
             <div>
-              <label className="block text-xs text-zinc-400 mb-1">Service Name</label>
-              <input value={editName} onChange={(e) => setEditName(e.target.value)} className={cn('w-full rounded-xl px-3.5 py-2 text-xs border', isDark ? 'bg-[#111115] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')} />
+              <label className={cn('block text-xs font-medium mb-1', isDark ? 'text-zinc-400' : 'text-slate-600')}>Service Name</label>
+              <input
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                className={cn(
+                  'w-full rounded-xl px-3.5 py-2 text-xs border focus:outline-none focus:border-cyan-500',
+                  isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+                )}
+              />
             </div>
             <div>
-              <label className="block text-xs text-zinc-400 mb-1">Storage Quota (GB)</label>
-              <input type="number" min={10} max={10000} value={editStorageGb} onChange={(e) => setEditStorageGb(parseInt(e.target.value || '10', 10))} className={cn('w-full rounded-xl px-3.5 py-2 text-xs border', isDark ? 'bg-[#111115] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')} />
-              <p className="text-[11px] text-zinc-500 mt-1">New rate: Rp {(editStorageGb * ratePerGb).toLocaleString('id-ID')}/mo</p>
+              <label className={cn('block text-xs font-medium mb-1', isDark ? 'text-zinc-400' : 'text-slate-600')}>Storage Quota (GB)</label>
+              <input
+                type="number"
+                min={1}
+                max={1000}
+                value={editStorageGb}
+                onChange={(e) => setEditStorageGb(parseInt(e.target.value || '1', 10))}
+                className={cn(
+                  'w-full rounded-xl px-3.5 py-2 text-xs border focus:outline-none focus:border-cyan-500',
+                  isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+                )}
+              />
+              <p className={cn('text-[11px] mt-1', isDark ? 'text-zinc-500' : 'text-slate-500')}>New rate: Rp {(editStorageGb * ratePerGb).toLocaleString('id-ID')}/mo</p>
             </div>
-            <button type="submit" disabled={savingSettings} className="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-500 hover:bg-indigo-400 text-white cursor-pointer">
+            <button type="submit" disabled={savingSettings} className="px-4 py-2.5 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 shadow-sm cursor-pointer transition-colors">
               {savingSettings ? 'Saving...' : 'Save Changes'}
             </button>
           </form>
 
-          <div className={cn('rounded-2xl border border-red-500/30 p-5 space-y-3', isDark ? 'bg-red-500/5' : 'bg-red-50')}>
-            <h2 className="text-sm font-bold text-red-400">Danger Zone</h2>
-            <p className="text-xs text-zinc-400">Terminating permanently deletes all buckets, objects, and S3 Access Keys from Customer RustFS and stops hourly billing.</p>
-            <button onClick={handleTerminate} disabled={terminating} className="px-4 py-2 rounded-xl text-xs font-bold bg-red-500 hover:bg-red-600 text-white cursor-pointer">
+          <div className={cn('rounded-2xl border p-5 space-y-3', isDark ? 'border-red-500/30 bg-red-500/5' : 'border-red-200 bg-red-50')}>
+            <h2 className={cn('text-sm font-bold', isDark ? 'text-red-400' : 'text-red-700')}>Danger Zone</h2>
+            <p className={cn('text-xs', isDark ? 'text-zinc-400' : 'text-red-800')}>Terminating permanently deletes all buckets, objects, and S3 Access Keys from Customer RustFS and stops hourly billing.</p>
+            <button onClick={handleTerminate} disabled={terminating} className="px-4 py-2.5 rounded-xl text-xs font-bold bg-red-500 hover:bg-red-600 text-white cursor-pointer transition-colors">
               {terminating ? 'Terminating...' : 'Terminate Object Storage'}
             </button>
           </div>
