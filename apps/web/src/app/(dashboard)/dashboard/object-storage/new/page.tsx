@@ -168,18 +168,23 @@ export default function NewObjectStoragePage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Deploy failed');
 
+      const createdService = data.service || data.data;
       toast.success('Object Storage deployed!');
-      if (data.initialCredentials) {
+      if (data.initialCredentials && createdService?.id) {
         try {
           sessionStorage.setItem(
-            `obj_init_creds_${data.data.id}`,
+            `obj_init_creds_${createdService.id}`,
             JSON.stringify(data.initialCredentials)
           );
         } catch {
           // ignore storage quota errors
         }
       }
-      router.push(`/dashboard/object-storage/${data.data.id}`);
+      if (createdService?.id) {
+        router.push(`/dashboard/object-storage/${createdService.id}`);
+      } else {
+        router.push('/dashboard/object-storage');
+      }
     } catch (err: any) {
       toast.error(err?.message || 'Failed to deploy Object Storage');
     } finally {
