@@ -48,6 +48,16 @@ export async function ensureObjectStoragePlansExist(): Promise<void> {
             isPopular: def.isPopular,
           },
         });
+      } else if (def.name === 'S3 Business 100 GB' && existing.price === 180000) {
+        await prisma.plan.update({
+          where: { id: existing.id },
+          data: {
+            description: def.description,
+            price: def.price,
+            hourlyPrice: def.hourlyPrice,
+            limits: JSON.stringify(def.limits),
+          },
+        });
       }
     }
   } catch (error) {
