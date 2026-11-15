@@ -479,7 +479,12 @@ export async function GET(req: Request) {
     let ipReleased = 0;
     let ipSuspended = 0;
 
+    const oneHourAgo = new Date(now.getTime() - 55 * 60 * 1000);
     for (const ip of activeReservedIps) {
+      // Skip if IP was just created <55m ago and already paid its 1st hour upfront
+      if (ip.createdAt > oneHourAgo && (ip.accumulatedCost || 0) <= ip.hourlyRate) {
+        continue;
+      }
       const costThisHour = ip.hourlyRate;
       let paymentSuccess = false;
 
@@ -496,50 +501,41 @@ export async function GET(req: Request) {
             data: { accumulatedCost: { increment: costThisHour } }
           });
           
-          // ADD TO INVOICE SO IT APPEARS CONSISTENTLY FOR USER
-          if (ip.isAttached && ip.vpsId) {
-            const runningInvoice = await tx.invoice.findFirst({
-              where: { vpsServiceId: ip.vpsId, reference: 'PAYG_RUNNING', type: 'VPS' },
-              orderBy: { createdAt: 'desc' }
+          // Always keep Reserved IP billing isolated on its own IP_RESERVATION PAYG_RUNNING invoice
+          // (never mix into VPS invoice, whether attached or detached).
+          const runningInvoices = await tx.invoice.findMany({
+            where: { userId: ip.userId, reference: 'PAYG_RUNNING', type: 'IP_RESERVATION' },
+            orderBy: { createdAt: 'desc' }
+          });
+          const targetInvoice = runningInvoices.find(inv => inv.details?.includes(`"reservedIpId":${ip.id}`));
+          
+          if (targetInvoice) {
+            await tx.invoice.update({
+              where: { id: targetInvoice.id },
+              data: {
+                amount: { increment: costThisHour },
+                status: 'PAID',
+                paymentMethod: 'Account Balance',
+              }
             });
-            if (runningInvoice) {
-              await tx.invoice.update({
-                where: { id: runningInvoice.id },
-                data: { amount: { increment: costThisHour } }
-              });
-            }
           } else {
-            // Find running invoice for this detached IP
-            const runningInvoices = await tx.invoice.findMany({
-              where: { userId: ip.userId, reference: 'PAYG_RUNNING', type: 'IP_RESERVATION' },
-              orderBy: { createdAt: 'desc' }
+            const timestamp = Date.now().toString();
+            const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            const invoiceNumber = `INV-PAYG-${timestamp}-${random}`;
+            await tx.invoice.create({
+              data: {
+                invoiceNumber,
+                userId: ip.userId,
+                amount: (ip.accumulatedCost || 0) + costThisHour,
+                status: 'PAID',
+                paymentMethod: 'Account Balance',
+                merchantOrderId: invoiceNumber,
+                type: 'IP_RESERVATION',
+                reference: 'PAYG_RUNNING',
+                paidAt: new Date(),
+                details: JSON.stringify({ reservedIpId: ip.id, ipAddress: ip.ipAddress, billingMode: 'PAYG' })
+              }
             });
-            const targetInvoice = runningInvoices.find(inv => inv.details?.includes(`"reservedIpId":${ip.id}`));
-            
-            if (targetInvoice) {
-              await tx.invoice.update({
-                where: { id: targetInvoice.id },
-                data: { amount: { increment: costThisHour } }
-              });
-            } else {
-              const timestamp = Date.now().toString();
-              const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-              const invoiceNumber = `INV-PAYG-${timestamp}-${random}`;
-              await tx.invoice.create({
-                data: {
-                  invoiceNumber,
-                  userId: ip.userId,
-                  amount: costThisHour,
-                  status: 'PAID',
-                  paymentMethod: 'Account Balance',
-                  merchantOrderId: invoiceNumber,
-                  type: 'IP_RESERVATION',
-                  reference: 'PAYG_RUNNING',
-                  paidAt: new Date(),
-                  details: JSON.stringify({ reservedIpId: ip.id, ipAddress: ip.ipAddress })
-                }
-              });
-            }
           }
         });
         paymentSuccess = true;
@@ -552,44 +548,44 @@ export async function GET(req: Request) {
           // SECURITY FIX: Actually act on insufficient balance - suspend attached VPS with 3-day grace period
           try {
             if (ip.isAttached && ip.vpsId) {
-              const defaultTermination = new Date(now);
-              defaultTermination.setDate(defaultTermination.getDate() + 3);
-
-              await prisma.vpsService.update({
-                where: { id: ip.vpsId },
-                data: {
-                  status: 'SUSPENDED',
-                  suspendReason: `[SYSTEM] Attached Reserved IP (${(ip as any).ipAddress || ip.id}) billing failed due to insufficient balance.`,
-                  terminationDate: defaultTermination
-                }
-              });
-              
-              const vps = await prisma.vpsService.findUnique({
+              const existingVps = await prisma.vpsService.findUnique({
                 where: { id: ip.vpsId },
                 include: { user: true, vpc: true }
               });
 
-              if (vps) {
+              if (existingVps && existingVps.status !== 'SUSPENDED' && existingVps.status !== 'TERMINATED') {
+                const defaultTermination = new Date(now);
+                defaultTermination.setDate(defaultTermination.getDate() + 3);
+
+                await prisma.vpsService.update({
+                  where: { id: ip.vpsId },
+                  data: {
+                    status: 'SUSPENDED',
+                    suspendReason: `[SYSTEM] Attached Reserved IP (${(ip as any).ipAddress || ip.id}) billing failed due to insufficient balance.`,
+                    terminationDate: defaultTermination
+                  }
+                });
+
                 // Stop the VM on Proxmox
-                if (vps.vmid) {
+                if (existingVps.vmid) {
                   const proxmoxServer = await prisma.proxmoxServer.findFirst({ where: { isActive: true } });
                   if (proxmoxServer) {
                     const proxmox = new ProxmoxClient(proxmoxServer.host, proxmoxServer.tokenId, proxmoxServer.tokenSecret);
-                    await proxmox.stopVm(vps.node, vps.vmid).catch(err => console.error(`Failed to stop VM for reserved IP suspension:`, err));
+                    await proxmox.stopVm(existingVps.node, existingVps.vmid).catch(err => console.error(`Failed to stop VM for reserved IP suspension:`, err));
                   }
                 }
 
                 // Send suspension email informing about 3-day grace period
-                const email = decryptDeterministic(vps.user.email) || vps.user.email;
-                const name = decryptDeterministic(vps.user.name) || vps.user.name;
+                const email = decryptDeterministic(existingVps.user.email) || existingVps.user.email;
+                const name = decryptDeterministic(existingVps.user.name) || existingVps.user.name;
                 await sendVpsSuspendedGracePeriodEmail({
                   email,
                   userName: name,
-                  vpsHostname: vps.hostname || "VPS Server",
+                  vpsHostname: existingVps.hostname || "VPS Server",
                   terminationDate: defaultTermination,
-                  hourlyRate: vps.hourlyRate || 0,
+                  hourlyRate: existingVps.hourlyRate || 0,
                   reason: `Attached Reserved IP (${(ip as any).ipAddress || ip.id}) billing failed due to insufficient balance`,
-                  vpcName: vps.vpc?.name || null
+                  vpcName: existingVps.vpc?.name || null
                 }).catch(err => console.error("Failed to send Reserved IP VPS suspension email:", err));
               }
             } else {

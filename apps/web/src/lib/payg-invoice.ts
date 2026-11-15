@@ -173,7 +173,7 @@ export async function reconcileUserPaygInvoices(userId: number): Promise<void> {
 
   const activeStatuses = ['PROVISIONING', 'RUNNING', 'STOPPED', 'SUSPENDED', 'ACTIVE'];
 
-  const [apps, dbs, s3s, existingInvoices] = await Promise.all([
+  const [apps, dbs, s3s, reservedIps, existingInvoices] = await Promise.all([
     prisma.appService.findMany({
       where: { userId, billingMode: 'PAYG', status: { in: activeStatuses } },
     }),
@@ -183,11 +183,14 @@ export async function reconcileUserPaygInvoices(userId: number): Promise<void> {
     prisma.objectStorageService.findMany({
       where: { userId, billingMode: 'PAYG', status: { in: activeStatuses } },
     }),
+    prisma.reservedIp.findMany({
+      where: { userId, hourlyRate: { gt: 0 } },
+    }),
     prisma.invoice.findMany({
       where: {
         userId,
         OR: [
-          { type: { in: ['MANAGED_APP', 'MANAGED_DATABASE', 'OBJECT_STORAGE'] } },
+          { type: { in: ['MANAGED_APP', 'MANAGED_DATABASE', 'OBJECT_STORAGE', 'IP_RESERVATION'] } },
           { invoiceNumber: { startsWith: 'INV-S3-' } },
           { status: 'PAYG_RUNNING' },
         ],
@@ -315,5 +318,55 @@ export async function reconcileUserPaygInvoices(userId: number): Promise<void> {
         billingMode: s3.billingMode,
       },
     });
+  }
+
+  for (const ip of reservedIps) {
+    const matchedIpInv = existingInvoices.find((inv) => {
+      if (inv.type !== 'IP_RESERVATION' || !inv.details) return false;
+      try {
+        return Number(JSON.parse(inv.details)?.reservedIpId) === ip.id;
+      } catch {
+        return inv.details.includes(`"reservedIpId":${ip.id}`);
+      }
+    });
+
+    if (!matchedIpInv) {
+      const invoiceNumber = generateInvoiceNumber('INV-PAYG');
+      await prisma.invoice.create({
+        data: {
+          invoiceNumber,
+          merchantOrderId: invoiceNumber,
+          userId,
+          amount: Math.max(0, Math.round(ip.accumulatedCost || 0)),
+          status: 'PAID',
+          paymentMethod: 'Account Balance',
+          type: 'IP_RESERVATION',
+          reference: 'PAYG_RUNNING',
+          paidAt: ip.createdAt,
+          details: JSON.stringify({
+            reservedIpId: ip.id,
+            ipAddress: ip.ipAddress,
+            billingMode: 'PAYG',
+          }),
+        },
+      });
+    } else {
+      const targetAmount = Math.max(matchedIpInv.amount, Math.round(ip.accumulatedCost || 0));
+      if (
+        matchedIpInv.status !== 'PAID' ||
+        matchedIpInv.reference !== 'PAYG_RUNNING' ||
+        targetAmount !== matchedIpInv.amount
+      ) {
+        await prisma.invoice.update({
+          where: { id: matchedIpInv.id },
+          data: {
+            amount: targetAmount,
+            status: 'PAID',
+            paymentMethod: 'Account Balance',
+            reference: 'PAYG_RUNNING',
+          },
+        });
+      }
+    }
   }
 }

@@ -834,7 +834,10 @@ export async function GET(req: Request) {
     // ============================================
     const expiredReservedIps = await prisma.reservedIp.findMany({
       where: {
-        expiresAt: { lt: now }
+        expiresAt: { lt: now },
+        // PAYG Reserved IPs (hourlyRate > 0) are billed hourly by /api/cron/hourly-billing.
+        // Never double-bill accumulatedCost here.
+        hourlyRate: { lte: 0 },
       },
       include: { user: true }
     });
