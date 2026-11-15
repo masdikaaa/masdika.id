@@ -158,8 +158,8 @@ export default function ObjectStoragePage() {
         </div>
       </div>
 
-      {/* Global S3 Endpoint Banner (from DB Settings) */}
-      {publicEndpoint && (
+      {/* Global S3 Endpoint Banner (only shown after customer has ordered) */}
+      {publicEndpoint && services.length > 0 && (
         <div className={cn('p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90')}>
           <div className="flex items-center gap-3 text-xs">
             <div className={cn('w-8 h-8 rounded-lg border flex items-center justify-center shrink-0', isDark ? 'bg-cyan-500/10 border-cyan-500/20 text-cyan-400' : 'bg-cyan-50 border-cyan-200 text-cyan-700')}>
@@ -177,6 +177,13 @@ export default function ObjectStoragePage() {
           >
             <Copy className="w-3.5 h-3.5" /> Copy Endpoint
           </button>
+        </div>
+      )}
+
+      {!loading && !enabled && (
+        <div className={cn('p-4 rounded-2xl border flex items-center gap-3 text-xs', isDark ? 'bg-amber-500/10 border-amber-500/30 text-amber-300' : 'bg-amber-50 border-amber-200 text-amber-800')}>
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          <span>Object Storage provisioning is currently disabled. Enable <strong>RustFS Customer Cluster</strong> &amp; <strong>Object Storage Product</strong> in Admin Settings to allow deployments.</span>
         </div>
       )}
 
