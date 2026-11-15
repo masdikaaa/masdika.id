@@ -84,7 +84,7 @@ describe('getInvoiceDisplayInfo', () => {
 
     expect(info.title).toBe('File CDN • 1 GB');
     expect(info.description).toContain('File CDN 1 GB');
-    expect(info.specs.map((s) => s.label)).toContain('Paket 1 GB');
+    expect(info.specs.map((s) => s.label)).toContain('1 GB Plan');
   });
 
   it('formats Promo Reward invoice cleanly', () => {

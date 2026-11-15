@@ -173,12 +173,12 @@ export default function RewardCelebrationModal({
 
   const heading =
     title ||
-    (mode === "reward" ? "Selamat! Reward Berhasil Diklaim" : "Yeay! Voucher Berhasil Dipasang");
+    (mode === "reward" ? "Reward Claimed Successfully!" : "Voucher Applied Successfully!");
   const description =
     subtitle ||
     (mode === "reward"
-      ? "Saldo reward telah otomatis ditambahkan ke wallet akun Masdika Anda."
-      : "Potongan diskon voucher otomatis diterapkan pada transaksi Anda.");
+      ? "The reward credit has been automatically added to your Masdika wallet balance."
+      : "Your voucher discount has been applied to this transaction.");
 
   return (
     <AnimatePresence>
@@ -307,7 +307,7 @@ export default function RewardCelebrationModal({
               ) : (
                 <div className="flex flex-col items-center gap-1">
                   <div className="text-2xl font-black tracking-tight bg-gradient-to-r from-cyan-300 via-white to-emerald-300 bg-clip-text text-transparent">
-                    DISKON {discountPercent}%
+                    {discountPercent}% OFF
                   </div>
                   {voucherCode && (
                     <span className="text-xs font-mono font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-md bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
@@ -336,7 +336,7 @@ export default function RewardCelebrationModal({
               className="relative z-10 w-full py-3 px-5 rounded-xl font-bold text-sm text-slate-950 bg-gradient-to-r from-cyan-400 to-emerald-400 hover:from-cyan-300 hover:to-emerald-300 shadow-[0_8px_25px_-6px_rgba(0,212,255,0.6)] transition-all flex items-center justify-center gap-2"
             >
               <CheckCircle2 className="w-4 h-4" />
-              Mantap, Lanjutkan!
+              Awesome, Continue!
             </motion.button>
           </motion.div>
         </motion.div>

@@ -184,11 +184,38 @@ File: `apps/web/src/lib/email.ts`
 
 ---
 
-## 8. Checklist Verifikasi Saat Membuat Fitur/Layanan Baru
+## 8. Standar Invoice, Sinkronisasi PAYG, Detail Paket & Bahasa UI
+
+Setiap layanan baru **wajib** menghasilkan dan menampilkan invoice yang 100% konsisten dengan layanan lain:
+
+### A. Penamaan & Pembuatan Invoice Saat Order (`apps/web/src/lib/payg-invoice.ts`)
+* Gunakan helper terpusat `createServiceOrderInvoice` di dalam `$transaction` order layanan baru:
+  * **PAYG:** Nomor invoice wajib menggunakan prefix `INV-PAYG-...`, `status: 'PAID'`, `paymentMethod: 'Account Balance'`, dan `reference: 'PAYG_RUNNING'`. Jangan membuat prefix custom seperti `INV-S3-...` atau `status: 'PAYG_RUNNING'`.
+  * **Monthly:** Nomor invoice menggunakan prefix `INV-ORD-...`, `status: 'PAID'`, `paymentMethod: 'Account Balance'`, dan `reference: 'MONTHLY_PAID'`.
+* **Wajib isi metadata paket di `details` (JSON):** Sertakan `<serviceIdField>`, `name`, `planName`, `billingMode`, serta spesifikasi resource (`storageGb`, `cpuShares`, `memoryMb`, `appType`/`appName`, `dbType`, `version`, dll.) agar detail paket selalu jelas terbaca.
+
+### B. Sinkronisasi Nominal PAYG Setiap Jam (`hourly-billing/route.ts`)
+* Di dalam `$transaction` pemotongan saldo per jam pada `apps/web/src/app/api/cron/hourly-billing/route.ts`, **wajib** memanggil `upsertPaygRunningInvoice` agar nominal invoice `PAYG_RUNNING` selalu bertambah sesuai biaya per jam dan memiliki *safety net* (`fallbackAmount: accumulatedCost + costThisHour`) jika ada instance aktif yang belum memiliki invoice.
+
+### C. Tampilan Paket & Enrichment di UI Invoice
+* Daftarkan tipe layanan baru ke:
+  1. `apps/web/src/lib/invoice-display.ts` (`getInvoiceDisplayInfo`): pastikan judul, subtitle, deskripsi paket (misal: `Object Storage • 1 GB (ono-test)`, `File CDN • 1 GB`, `Managed App • 9Router (starter)`), dan badge spesifikasi tampil seragam.
+  2. `apps/web/src/lib/invoice-enrichment.ts` (`enrichInvoicesWithServiceDetails`): lengkapi invoice lama yang belum memiliki metadata paket di JSON `details`.
+  3. `apps/web/src/components/invoice/InvoiceServiceIcon.tsx` (`getInvoiceServiceIcon` & `InvoiceItemDescription`): pastikan ikon dan ringkasan paket tampil konsisten di `/dashboard/billing`, `/admin/invoices`, dan `/invoice/[id]`.
+
+### D. Standar Bahasa UI (English Only)
+* Seluruh teks UI customer dan admin (judul halaman, modal, tombol CTA, deskripsi invoice, badge status, dan toast/notifikasi UI) **wajib menggunakan Bahasa Inggris** yang profesional dan konsisten dengan keseluruhan antarmuka Masdika Cloud.
+
+---
+
+## 9. Checklist Verifikasi Saat Membuat Fitur/Layanan Baru
 
 Sebelum menandai pembuatan layanan baru selesai, pastikan checklist ini terpenuhi:
 - [ ] Model Prisma memiliki kolom status, billing, suspendReason, dan terminationDate.
-- [ ] Deduct saldo di `hourly-billing/route.ts` dan implementasi logic grace period 3 hari.
+- [ ] Order layanan membuat invoice seragam via `createServiceOrderInvoice` (`INV-PAYG-...` / `INV-ORD-...`) lengkap dengan metadata paket di `details`.
+- [ ] Deduct saldo di `hourly-billing/route.ts` memanggil `upsertPaygRunningInvoice` dan mengimplementasikan logic grace period 3 hari.
+- [ ] Terdaftar di `invoice-display.ts`, `invoice-enrichment.ts`, dan `InvoiceServiceIcon.tsx` sehingga detail paket tampil jelas di semua halaman invoice.
+- [ ] Seluruh teks UI (termasuk modal, badge, dan deskripsi invoice) menggunakan Bahasa Inggris yang konsisten.
 - [ ] Auto-unsuspend di `auto-unsuspend.ts` saat saldo cukup.
 - [ ] Masuk ke perhitungan kalkulasi burn rate di `low-balance-alert.ts`.
 - [ ] Masuk ke query dan tampilan `payg-monitor`.

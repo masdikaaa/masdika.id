@@ -215,7 +215,7 @@ export function getInvoiceDisplayInfo(invoice: any): InvoiceDisplayInfo {
       category: 'OBJECT_STORAGE',
       title: `Object Storage${pkgText ? ` • ${pkgText}` : ''}`,
       subtitle: payg ? 'Pay-As-You-Go' : 'Monthly Plan',
-      description: `S3-compatible Object Storage bucket & IAM capacity allocation${planLabel ? ` (Paket ${planLabel})` : ''}${instanceName ? ` untuk instance "${instanceName}"` : ''}.`,
+      description: `S3-compatible Object Storage bucket & IAM capacity allocation${planLabel ? ` (${planLabel} Plan)` : ''}${instanceName ? ` for instance "${instanceName}"` : ''}.`,
       billingTypeLabel: payg ? 'Hourly Metered' : 'Monthly Cycle',
       specs,
       parsedDetails: details,
@@ -243,7 +243,7 @@ export function getInvoiceDisplayInfo(invoice: any): InvoiceDisplayInfo {
       category: 'MANAGED_APP',
       title: `Managed App • ${pkgText}`,
       subtitle: payg ? 'Pay-As-You-Go' : 'Monthly Plan',
-      description: `Managed application deployment ${appTitle}${planLabel ? ` (Paket ${planLabel})` : ''}${instanceName ? ` — instance "${instanceName}"` : ''}.`,
+      description: `Managed application deployment ${appTitle}${planLabel ? ` (${planLabel} Plan)` : ''}${instanceName ? ` — instance "${instanceName}"` : ''}.`,
       billingTypeLabel: payg ? 'Hourly Metered' : 'Monthly Cycle',
       specs,
       parsedDetails: details,
@@ -272,7 +272,7 @@ export function getInvoiceDisplayInfo(invoice: any): InvoiceDisplayInfo {
       category: 'MANAGED_DATABASE',
       title: `Managed Database • ${pkgText}`,
       subtitle: payg ? 'Pay-As-You-Go' : 'Monthly Plan',
-      description: `Managed ${dbEngine}${dbVersion} database cluster${planLabel ? ` (Paket ${planLabel})` : ''}${instanceName ? ` — instance "${instanceName}"` : ''}.`,
+      description: `Managed ${dbEngine}${dbVersion} database cluster${planLabel ? ` (${planLabel} Plan)` : ''}${instanceName ? ` — instance "${instanceName}"` : ''}.`,
       billingTypeLabel: payg ? 'Hourly Metered' : 'Monthly Cycle',
       specs,
       parsedDetails: details,
@@ -287,7 +287,7 @@ export function getInvoiceDisplayInfo(invoice: any): InvoiceDisplayInfo {
     const isUpgrade = ref.startsWith('UPGRADE:');
 
     const specs: InvoiceSpecBadge[] = [];
-    if (planName) specs.push({ kind: 'plan', label: `Paket ${planName}` });
+    if (planName) specs.push({ kind: 'plan', label: `${planName} Plan` });
     if (rawService.toUpperCase() === 'CDN') {
       specs.push({ kind: 'ip', label: 'Global Edge CDN' });
     }
@@ -296,7 +296,7 @@ export function getInvoiceDisplayInfo(invoice: any): InvoiceDisplayInfo {
       category: 'SUBSCRIPTION',
       title: `${serviceName}${planName ? ` • ${planName}` : ''}`,
       subtitle: isUpgrade ? 'Plan Upgrade' : payg ? 'Pay-As-You-Go' : 'Monthly Plan',
-      description: planDesc || `${serviceName} subscription & resource quota${planName ? ` (Paket ${planName})` : ''}.`,
+      description: planDesc || `${serviceName} subscription & resource quota${planName ? ` (${planName} Plan)` : ''}.`,
       billingTypeLabel: payg ? 'Hourly Metered' : 'Service Cycle',
       specs,
       parsedDetails: details,
