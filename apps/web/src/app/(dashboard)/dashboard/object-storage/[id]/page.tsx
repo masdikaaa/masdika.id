@@ -644,37 +644,32 @@ s3 = boto3.client(
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          <button
-            type="button"
-            onClick={() => setScaleModalOpen(true)}
-            className={cn(
-              'px-3.5 py-2 rounded-xl text-xs font-bold border flex items-center gap-1.5 transition-colors cursor-pointer focus:outline-none',
-              isDark
-                ? 'bg-[#111115] border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10'
-                : 'bg-cyan-50 border-cyan-200 text-cyan-700 hover:bg-cyan-100'
-            )}
-          >
-            <TrendingUp className="w-3.5 h-3.5" />
-            Scale / Upgrade
-          </button>
-
           {publicEndpoint && (
             <button
               type="button"
               onClick={() => handleCopy(publicEndpoint, 'S3 Endpoint')}
               className={cn(
-                'px-3.5 py-2 rounded-xl border text-xs flex items-center gap-2 transition-colors cursor-pointer focus:outline-none',
+                'px-3.5 py-2.5 rounded-xl border text-xs flex items-center gap-2 transition-colors cursor-pointer focus:outline-none focus-visible:outline-none',
                 isDark
-                  ? 'bg-[#111115] border-white/[0.08] hover:border-white/20'
-                  : 'bg-white border-slate-200 hover:border-slate-300 shadow-2xs'
+                  ? 'text-cyan-400 bg-cyan-950/40 hover:bg-cyan-900/40 border-cyan-500/20'
+                  : 'text-cyan-700 bg-cyan-50 hover:bg-cyan-100 border-cyan-200'
               )}
               title="Click to copy S3 Endpoint"
             >
-              <Globe className={cn('w-3.5 h-3.5', isDark ? 'text-cyan-400' : 'text-cyan-600')} />
-              <code className={cn('font-mono font-semibold', isDark ? 'text-cyan-400' : 'text-cyan-600')}>{publicEndpoint}</code>
-              <Copy className={cn('w-3.5 h-3.5', isDark ? 'text-zinc-400' : 'text-slate-400')} />
+              <Globe className="w-3.5 h-3.5 shrink-0" />
+              <code className="font-mono font-semibold">{publicEndpoint}</code>
+              <Copy className="w-3.5 h-3.5 shrink-0 opacity-75" />
             </button>
           )}
+
+          <button
+            type="button"
+            onClick={() => setScaleModalOpen(true)}
+            className="px-4 py-2.5 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all shadow-md shadow-cyan-400/20 flex items-center justify-center gap-2 cursor-pointer active:scale-95 focus:outline-none focus-visible:outline-none"
+          >
+            <TrendingUp className="w-3.5 h-3.5" />
+            <span>Scale Storage</span>
+          </button>
         </div>
       </div>
 
@@ -910,13 +905,13 @@ s3 = boto3.client(
               <>
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className={cn('flex items-center gap-1.5 text-xs font-mono px-3 py-1.5 rounded-xl border flex-wrap', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-slate-50 border-slate-200')}>
-                    <button type="button" onClick={() => setPrefix('')} className={cn('font-bold hover:underline cursor-pointer', isDark ? 'text-cyan-400' : 'text-cyan-600')}>{selectedBucket}</button>
+                    <button type="button" onClick={() => setPrefix('')} className={cn('font-bold hover:underline cursor-pointer focus:outline-none focus-visible:outline-none', isDark ? 'text-cyan-400' : 'text-cyan-600')}>{selectedBucket}</button>
                     {prefix.split('/').filter(Boolean).map((seg, i, arr) => {
                       const pathUpTo = arr.slice(0, i + 1).join('/') + '/';
                       return (
                         <span key={pathUpTo} className="flex items-center gap-1">
                           <ChevronRight className={cn('w-3.5 h-3.5', isDark ? 'text-zinc-500' : 'text-slate-400')} />
-                          <button type="button" onClick={() => setPrefix(pathUpTo)} className={cn('cursor-pointer', isDark ? 'text-zinc-300 hover:text-white' : 'text-slate-700 hover:text-slate-900')}>{seg}</button>
+                          <button type="button" onClick={() => setPrefix(pathUpTo)} className={cn('cursor-pointer focus:outline-none focus-visible:outline-none', isDark ? 'text-zinc-300 hover:text-white' : 'text-slate-700 hover:text-slate-900')}>{seg}</button>
                         </span>
                       );
                     })}
