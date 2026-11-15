@@ -87,7 +87,7 @@ export default async function VpsLandingPage() {
         "mpn": "VPS-ID-01",
         "description": "High-Performance Cloud Virtual Private Servers powered by enterprise Intel Xeon, high-speed Enterprise SSD & SAS HDD storage, isolated KVM virtualization, and flexible hourly Pay-As-You-Go billing.",
         "category": "Cloud Computing > Virtual Private Server",
-        "image": "${"https://www.masdika.id"}${OG_IMAGE_PATH}",
+        "image": `https://www.masdika.id${OG_IMAGE_PATH}`,
         "brand": {
           "@type": "Brand",
           "name": "Masdika"

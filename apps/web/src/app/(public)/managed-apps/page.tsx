@@ -64,7 +64,7 @@ export default async function ManagedAppsLandingPage() {
         "mpn": "MAPP-K8S-01",
         "description": "High-Performance Managed Cloud Applications powered by Kubernetes, container isolation, automated Let's Encrypt SSL, and flexible monthly pricing starting from Rp 20.000 / month.",
         "category": "Cloud Computing > Managed Applications",
-        "image": "${"https://www.masdika.id"}${OG_IMAGE_PATH}",
+        "image": `https://www.masdika.id${OG_IMAGE_PATH}`,
         "brand": {
           "@type": "Brand",
           "name": "Masdika"
