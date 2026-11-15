@@ -7,6 +7,11 @@ import { cn } from '@/lib/utils';
 import { useTheme } from '@/components/ThemeProvider';
 import { toast } from 'sonner';
 import {
+  ObjectStorageScaleModal,
+  type ObjectStoragePlanOption,
+  type ObjectStorageClusterCapacity,
+} from '@/components/ObjectStorageScaleModal';
+import {
   ArrowLeft,
   Database,
   KeyRound,
@@ -188,23 +193,18 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
   const [revealedCred, setRevealedCred] = useState<{ accessKey: string; secretKey: string } | null>(null);
 
   // Scale / Rename State
+  const [scaleModalOpen, setScaleModalOpen] = useState(false);
   const [editName, setEditName] = useState('');
-  const [editStorageGb, setEditStorageGb] = useState(50);
-  const [plans, setPlans] = useState<StoragePlanOption[]>([]);
-  const [capacity, setCapacity] = useState<StorageClusterCapacity | null>(null);
-  const [userBalance, setUserBalance] = useState(0);
-  const [activeCommitment, setActiveCommitment] = useState(0);
-  const [loadingBilling, setLoadingBilling] = useState(true);
+  const [plans, setPlans] = useState<ObjectStoragePlanOption[]>([]);
+  const [capacity, setCapacity] = useState<ObjectStorageClusterCapacity | null>(null);
   const [savingSettings, setSavingSettings] = useState(false);
   const [terminating, setTerminating] = useState(false);
 
   const fetchScaleMetadata = async () => {
-    setLoadingBilling(true);
     try {
-      const [pubRes, capRes, billRes] = await Promise.all([
+      const [pubRes, capRes] = await Promise.all([
         fetch('/api/public/plans').then((r) => r.json()).catch(() => null),
         fetch('/api/user/object-storage/capacity').then((r) => r.json()).catch(() => null),
-        fetch('/api/user/billing').then((r) => r.json()).catch(() => null),
       ]);
 
       if (capRes?.data) setCapacity(capRes.data);
@@ -213,7 +213,7 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
         ? pubRes.data.filter((p: any) => p.service === 'OBJECT_STORAGE')
         : [];
       if (pubObjPlans.length > 0) {
-        const mapped: StoragePlanOption[] = pubObjPlans.map((p: any) => {
+        const mapped: ObjectStoragePlanOption[] = pubObjPlans.map((p: any) => {
           let limits: any = {};
           try {
             limits = JSON.parse(p.limits || '{}');
@@ -229,23 +229,13 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
             hourlyRate: p.hourlyPrice || Math.max(1, Math.ceil(p.price / 730)),
             maxBuckets: limits.maxBuckets !== undefined ? Number(limits.maxBuckets) : undefined,
             maxKeys: limits.maxKeys !== undefined ? Number(limits.maxKeys) : undefined,
+            isPopular: Boolean(p.isPopular),
           };
         });
         setPlans(mapped);
       }
-
-      if (billRes?.data?.balance !== undefined) {
-        setUserBalance(billRes.data.balance);
-      } else if (billRes?.user?.balance !== undefined) {
-        setUserBalance(billRes.user.balance);
-      }
-      if (billRes?.data?.commitment?.totalMonthly !== undefined) {
-        setActiveCommitment(billRes.data.commitment.totalMonthly);
-      } else if (billRes?.commitment?.totalMonthly !== undefined) {
-        setActiveCommitment(billRes.commitment.totalMonthly);
-      }
-    } finally {
-      setLoadingBilling(false);
+    } catch {
+      // ignore metadata errors
     }
   };
 
@@ -259,7 +249,6 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
       setPublicEndpoint(data.publicEndpoint || '');
       setRatePerGb(data.ratePerGbMonthly || 500);
       setEditName(data.service.name);
-      setEditStorageGb(data.service.storageGb);
       if (!selectedBucket && data.service.buckets?.length > 0) {
         setSelectedBucket(data.service.buckets[0].name);
       }
@@ -458,7 +447,7 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
       const res = await fetch(`/api/user/object-storage/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: editName, storageGb: editStorageGb }),
+        body: JSON.stringify({ name: editName }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -506,28 +495,7 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
   }
 
   const activeBucketObj = service.buckets?.find((b: any) => b.name === selectedBucket);
-
-  const currentMonthly = service.monthlyPrice || Math.round((service.hourlyRate || 0) * 730);
-  const selectedScalePlan = plans.find((p) => p.storageGb === editStorageGb) || null;
-  const newMonthlyPrice = selectedScalePlan
-    ? selectedScalePlan.monthlyPrice
-    : editStorageGb === service.storageGb
-      ? currentMonthly
-      : editStorageGb * Math.max(ratePerGb, 2000);
-  const newHourlyRate = selectedScalePlan
-    ? selectedScalePlan.hourlyRate
-    : Math.max(1, Math.ceil(newMonthlyPrice / 730));
-  const isUpgradePrice = newMonthlyPrice > currentMonthly;
-  const requiredBalance = isUpgradePrice
-    ? Math.max(newMonthlyPrice, activeCommitment - currentMonthly + newMonthlyPrice)
-    : 0;
-  const isScaleBalanceInsufficient = !loadingBilling && isUpgradePrice && userBalance < requiredBalance;
-  const scaleShortfall = Math.max(0, requiredBalance - userBalance);
-  const scaleDeltaGb = Math.max(0, editStorageGb - service.storageGb);
-  const hasScaleClusterCapacity = scaleDeltaGb === 0 || !capacity
-    ? true
-    : capacity.available && capacity.freeGb >= scaleDeltaGb;
-  const isScaleUnchanged = editName.trim() === service.name && editStorageGb === service.storageGb;
+  const currentMonthly = service.monthlyPrice || Math.round((service.hourlyRate || 0) * 720);
 
   return (
     <div className="space-y-6 pb-12">
@@ -570,7 +538,7 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
         <div className="flex flex-wrap items-center gap-2.5">
           <button
             type="button"
-            onClick={() => setTab('settings')}
+            onClick={() => setScaleModalOpen(true)}
             className={cn(
               'px-3.5 py-2 rounded-xl text-xs font-bold border flex items-center gap-1.5 transition-colors cursor-pointer',
               isDark
@@ -906,244 +874,83 @@ const s3 = new S3Client({
         </div>
       )}
 
-      {/* Tab 3: Scale & Settings (Matching Managed DB Scale Modal UI) */}
+      {/* Tab 3: Settings & Danger Zone */}
       {tab === 'settings' && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-          <form onSubmit={handleSaveSettings} className={cn('lg:col-span-8 rounded-2xl border p-5 sm:p-6 space-y-5', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90 shadow-2xs')}>
-            {/* Header matching DatabaseScaleModal */}
-            <div className={cn('flex items-center gap-3 pb-4 border-b', isDark ? 'border-white/[0.08]' : 'border-slate-200')}>
-              <div
-                className={cn(
-                  'w-10 h-10 rounded-xl flex items-center justify-center border shrink-0',
-                  isDark ? 'bg-cyan-500/10 border-cyan-500/20 text-cyan-400' : 'bg-cyan-50 border-cyan-200 text-cyan-600'
-                )}
-              >
-                <TrendingUp className="w-5 h-5" />
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div className={cn('rounded-2xl border p-5 space-y-5', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90 shadow-2xs')}>
+            <div className="flex items-center justify-between gap-3">
               <div>
-                <h2 className={cn('text-base font-bold tracking-tight', isDark ? 'text-white' : 'text-slate-900')}>
-                  Scale &amp; Upgrade Object Storage
-                </h2>
-                <p className={cn('text-xs', isDark ? 'text-zinc-400' : 'text-slate-500')}>
-                  Scale storage tier, bucket limits, and IAM key quotas with zero data loss.
+                <h2 className={cn('text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>Storage Tier &amp; Rename</h2>
+                <p className={cn('text-xs mt-0.5', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+                  Active tier: <strong className={isDark ? 'text-cyan-400' : 'text-cyan-600'}>{service.planName}</strong> ({service.storageGb} GB • Rp {currentMonthly.toLocaleString('id-ID')}/mo)
                 </p>
               </div>
+              <button
+                type="button"
+                onClick={() => setScaleModalOpen(true)}
+                className="px-3.5 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 shadow-sm flex items-center gap-1.5 cursor-pointer transition-colors shrink-0"
+              >
+                <TrendingUp className="w-3.5 h-3.5" />
+                Upgrade Tier
+              </button>
             </div>
 
-            {/* Current Allocation Callout */}
-            <div
-              className={cn(
-                'p-3.5 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs',
-                isDark ? 'bg-[#0a0a0c] border-white/[0.06]' : 'bg-slate-50 border-slate-200'
-              )}
-            >
+            <form onSubmit={handleSaveSettings} className={cn('pt-4 border-t space-y-3', isDark ? 'border-white/[0.08]' : 'border-slate-200')}>
               <div>
-                <span className={cn('text-[10px] font-bold uppercase tracking-wider block', isDark ? 'text-zinc-500' : 'text-slate-400')}>
-                  Current Allocation ({service.name})
-                </span>
-                <span className={cn('font-semibold text-sm', isDark ? 'text-white' : 'text-slate-900')}>
-                  {service.planName} • {service.storageGb} GB SSD
-                </span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className={cn('px-2.5 py-1 rounded-lg border font-mono font-bold', isDark ? 'bg-white/[0.03] border-white/10 text-cyan-300' : 'bg-white border-slate-200 text-slate-700')}>
-                  {formatBytes(service.usedBytes || 0)} / {service.storageGb} GB used
-                </span>
-                <span className={cn('font-mono text-xs font-bold', isDark ? 'text-cyan-400' : 'text-cyan-600')}>
-                  Rp {currentMonthly.toLocaleString('id-ID')}/mo
-                </span>
-              </div>
-            </div>
-
-            {/* Service Name */}
-            <div>
-              <label className={cn('block text-xs font-bold uppercase tracking-wider mb-2', isDark ? 'text-zinc-400' : 'text-slate-600')}>
-                Service Name
-              </label>
-              <input
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                className={cn(
-                  'w-full rounded-xl px-3.5 py-2.5 text-xs border focus:outline-none focus:border-cyan-500',
-                  isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
-                )}
-              />
-            </div>
-
-            {/* 1. Choose Storage Plan */}
-            <div>
-              <label className={cn('block text-xs font-bold uppercase tracking-wider mb-2', isDark ? 'text-zinc-400' : 'text-slate-600')}>
-                1. Choose Storage Plan (SSD Quota &amp; Limits)
-              </label>
-
-              {plans.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-                  {plans.map((plan) => {
-                    const isSelected = editStorageGb === plan.storageGb;
-                    const isCurrent = service.storageGb === plan.storageGb;
-                    const deltaGb = Math.max(0, plan.storageGb - service.storageGb);
-                    const planHasCap = deltaGb === 0 || !capacity
-                      ? true
-                      : capacity.available && capacity.freeGb >= deltaGb;
-                    const usedExceedsPlan = (service.usedBytes || 0) > plan.storageGb * 1024 * 1024 * 1024;
-                    const bucketsExceedPlan = plan.maxBuckets !== undefined && plan.maxBuckets > 0 && (service.buckets?.length || 0) > plan.maxBuckets;
-                    const keysExceedPlan = plan.maxKeys !== undefined && plan.maxKeys > 0 && (service.keys?.length || 0) > plan.maxKeys;
-                    const isDisabled = !planHasCap || usedExceedsPlan || bucketsExceedPlan || keysExceedPlan;
-
-                    return (
-                      <button
-                        key={plan.id}
-                        type="button"
-                        disabled={isDisabled}
-                        onClick={() => !isDisabled && setEditStorageGb(plan.storageGb)}
-                        className={cn(
-                          'p-3.5 rounded-xl border text-left transition-all relative flex flex-col justify-between',
-                          isDisabled
-                            ? isDark
-                              ? 'bg-[#0a0a0c]/50 border-white/[0.04] text-zinc-600 opacity-50 cursor-not-allowed'
-                              : 'bg-slate-100 border-slate-200 text-slate-400 opacity-55 cursor-not-allowed'
-                            : isSelected
-                              ? isDark
-                                ? 'bg-cyan-500/10 border-cyan-400 ring-1 ring-cyan-400/30 text-white cursor-pointer'
-                                : 'bg-cyan-50 border-cyan-400 ring-1 ring-cyan-400/20 text-slate-950 cursor-pointer'
-                              : isDark
-                                ? 'bg-[#0a0a0c] border-white/[0.06] hover:border-white/20 text-zinc-300 cursor-pointer'
-                                : 'bg-white border-slate-200 hover:border-slate-300 text-slate-700 shadow-2xs cursor-pointer'
-                        )}
-                      >
-                        <div>
-                          <div className="flex items-center justify-between gap-1 mb-1">
-                            <span className="font-bold text-xs truncate">{plan.name}</span>
-                            {isCurrent ? (
-                              <span className={cn('px-1.5 py-0.5 rounded text-[9px] font-bold uppercase border', isDark ? 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30' : 'bg-slate-200 text-slate-600 border-slate-300')}>
-                                Current
-                              </span>
-                            ) : !planHasCap ? (
-                              <span className={cn('px-1.5 py-0.5 rounded text-[9px] font-bold uppercase border', isDark ? 'bg-red-500/15 text-red-400 border-red-500/30' : 'bg-red-50 text-red-600 border-red-200')}>
-                                Full
-                              </span>
-                            ) : isSelected ? (
-                              <Check className={cn('w-3.5 h-3.5 shrink-0', isDark ? 'text-cyan-400' : 'text-cyan-600')} />
-                            ) : null}
-                          </div>
-                          <div className="flex items-center gap-1.5 text-[11px] font-medium opacity-85">
-                            <HardDrive className={cn('w-3 h-3 shrink-0', isDark ? 'text-cyan-400' : 'text-cyan-600')} />
-                            <span>
-                              {plan.storageGb} GB • {plan.maxBuckets === -1 ? '∞' : plan.maxBuckets ?? '-'} Buckets • {plan.maxKeys === -1 ? '∞' : plan.maxKeys ?? '-'} Keys
-                            </span>
-                          </div>
-                        </div>
-                        <div className={cn('mt-2.5 pt-2 border-t text-[11px] font-mono font-bold', isDark ? 'border-white/[0.06] text-cyan-400' : 'border-slate-200 text-cyan-600')}>
-                          Rp {plan.monthlyPrice.toLocaleString('id-ID')}/mo
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : (
+                <label className={cn('block text-xs font-medium mb-1', isDark ? 'text-zinc-400' : 'text-slate-600')}>Service Name</label>
                 <input
-                  type="number"
-                  min={1}
-                  max={1000}
-                  value={editStorageGb}
-                  onChange={(e) => setEditStorageGb(parseInt(e.target.value || '1', 10))}
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
                   className={cn(
-                    'w-full rounded-xl px-3.5 py-2.5 text-xs border focus:outline-none focus:border-cyan-500',
+                    'w-full rounded-xl px-3.5 py-2 text-xs border focus:outline-none focus:border-cyan-500',
                     isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                   )}
                 />
-              )}
-            </div>
-
-            {/* Zero Data Loss Guarantee Banner */}
-            <div
-              className={cn(
-                'p-3 rounded-xl border flex items-start gap-2.5 text-xs',
-                isDark
-                  ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300'
-                  : 'bg-emerald-50 border-emerald-200 text-emerald-900'
-              )}
-            >
-              <ShieldCheck className={cn('w-4 h-4 shrink-0 mt-0.5', isDark ? 'text-emerald-400' : 'text-emerald-600')} />
-              <p className="leading-snug">
-                <strong>Zero Data Loss Guarantee:</strong> Your existing buckets, objects, and S3 IAM Access Keys remain completely intact. Storage quotas and bucket/key limits update immediately with zero downtime.
-              </p>
-            </div>
-
-            {/* Pricing Breakdown & Balance Verification */}
-            <div className={cn('p-4 rounded-xl border space-y-2 text-xs', isDark ? 'bg-[#0a0a0c] border-white/[0.06]' : 'bg-slate-50 border-slate-200')}>
-              <div className="flex items-center justify-between">
-                <span className={isDark ? 'text-zinc-400' : 'text-slate-600'}>New Storage Plan Price:</span>
-                <span className={cn('font-mono font-bold text-sm', isDark ? 'text-cyan-400' : 'text-cyan-600')}>
-                  Rp {newMonthlyPrice.toLocaleString('id-ID')}/mo (~Rp {newHourlyRate.toLocaleString('id-ID')}/hr)
-                </span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className={isDark ? 'text-zinc-400' : 'text-slate-600'}>Current Monthly Burn:</span>
-                <span className={cn('font-mono font-medium', isDark ? 'text-zinc-300' : 'text-slate-700')}>
-                  Rp {currentMonthly.toLocaleString('id-ID')}/mo
-                </span>
-              </div>
-              <div className={cn('flex items-center justify-between border-t pt-2', isDark ? 'border-white/[0.06]' : 'border-slate-200')}>
-                <span className={isDark ? 'text-zinc-400' : 'text-slate-600'}>Your Current Balance:</span>
-                <span className={cn('font-mono font-bold', isScaleBalanceInsufficient ? (isDark ? 'text-red-400' : 'text-red-600') : (isDark ? 'text-emerald-400' : 'text-emerald-600'))}>
-                  {loadingBilling ? '...' : `Rp ${userBalance.toLocaleString('id-ID')}`}
-                </span>
-              </div>
-              {isUpgradePrice && (
-                <div className="flex items-center justify-between">
-                  <span className={isDark ? 'text-zinc-400' : 'text-slate-600'}>Required Commitment Balance:</span>
-                  <span className={cn('font-mono font-bold', isScaleBalanceInsufficient ? (isDark ? 'text-red-400' : 'text-red-600') : (isDark ? 'text-cyan-400' : 'text-cyan-600'))}>
-                    Rp {requiredBalance.toLocaleString('id-ID')}
-                  </span>
-                </div>
-              )}
-            </div>
+              <button
+                type="submit"
+                disabled={savingSettings || editName.trim() === service.name || !editName.trim()}
+                className="px-4 py-2.5 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 shadow-sm disabled:opacity-50 cursor-pointer transition-colors"
+              >
+                {savingSettings ? 'Saving...' : 'Save Name'}
+              </button>
+            </form>
+          </div>
 
-            {isScaleBalanceInsufficient && (
-              <div className={cn('p-3.5 rounded-xl border text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2', isDark ? 'bg-red-500/15 border-red-500/35 text-red-200' : 'bg-red-50 border-red-300 text-red-900')}>
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className={cn('w-4 h-4 shrink-0', isDark ? 'text-red-400' : 'text-red-600')} />
-                  <span>
-                    Insufficient balance for upgrade. Shortfall: <strong>Rp {scaleShortfall.toLocaleString('id-ID')}</strong>
-                  </span>
-                </div>
-                <Link href="/dashboard/topup" className={cn('font-bold underline shrink-0', isDark ? 'text-red-300 hover:text-white' : 'text-red-700 hover:text-red-950')}>
-                  Top Up Balance →
-                </Link>
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={savingSettings || isScaleUnchanged || isScaleBalanceInsufficient || !hasScaleClusterCapacity}
-              className="w-full py-3 rounded-xl text-xs sm:text-sm font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer transition-colors"
-            >
-              {savingSettings ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Applying Changes...</span>
-                </>
-              ) : (
-                <>
-                  <Zap className="w-4 h-4" />
-                  <span>{editStorageGb !== service.storageGb ? 'Upgrade & Apply Plan' : 'Save Changes'}</span>
-                </>
-              )}
-            </button>
-          </form>
-
-          <div className={cn('lg:col-span-4 rounded-2xl border p-5 space-y-3', isDark ? 'border-red-500/30 bg-red-500/5' : 'border-red-200 bg-red-50')}>
+          <div className={cn('rounded-2xl border p-5 space-y-3', isDark ? 'border-red-500/30 bg-red-500/5' : 'border-red-200 bg-red-50')}>
             <h2 className={cn('text-sm font-bold', isDark ? 'text-red-400' : 'text-red-700')}>Danger Zone</h2>
             <p className={cn('text-xs leading-relaxed', isDark ? 'text-zinc-400' : 'text-red-800')}>
               Terminating permanently deletes all buckets, objects, and S3 Access Keys from Customer RustFS and stops hourly billing.
             </p>
-            <button onClick={handleTerminate} disabled={terminating} className="w-full py-2.5 rounded-xl text-xs font-bold bg-red-500 hover:bg-red-600 text-white cursor-pointer transition-colors">
+            <button onClick={handleTerminate} disabled={terminating} className="px-4 py-2.5 rounded-xl text-xs font-bold bg-red-500 hover:bg-red-600 text-white cursor-pointer transition-colors">
               {terminating ? 'Terminating...' : 'Terminate Object Storage'}
             </button>
           </div>
         </div>
       )}
+
+      <ObjectStorageScaleModal
+        isOpen={scaleModalOpen}
+        onClose={() => setScaleModalOpen(false)}
+        service={{
+          id: service.id,
+          name: service.name,
+          planName: service.planName,
+          storageGb: service.storageGb,
+          monthlyPrice: service.monthlyPrice,
+          hourlyRate: service.hourlyRate,
+          usedBytes: service.usedBytes,
+          bucketsCount: service.buckets?.length || 0,
+          keysCount: service.keys?.length || 0,
+        }}
+        plans={plans}
+        capacity={capacity}
+        onSuccess={() => {
+          fetchService();
+          fetchScaleMetadata();
+        }}
+        isDark={isDark}
+      />
     </div>
   );
 }
