@@ -1588,7 +1588,7 @@ export default function SettingsPage() {
                   </div>
 
                   {rustFSTestResult && (
-                    <div className={cn("p-4 rounded-xl border flex items-start gap-3", rustFSTestResult.success ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" : "bg-red-500/10 border-red-500/30 text-red-400")}>
+                    <div className={cn("p-4 rounded-xl border flex items-start gap-3", rustFSTestResult.success ? (isDark ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-800") : (isDark ? "bg-red-500/10 border-red-500/30 text-red-400" : "bg-red-50 border-red-200 text-red-800"))}>
                       {rustFSTestResult.success ? <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" /> : <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />}
                       <div className="text-xs md:text-sm">
                         <span className="font-bold">{rustFSTestResult.success ? "Connection Verified" : "Connection Failed"}: </span>
@@ -1773,7 +1773,7 @@ export default function SettingsPage() {
                     </h4>
 
                     {targetTestResult && (
-                      <div className={cn("p-3.5 rounded-xl border text-xs flex items-center gap-2.5", targetTestResult.success ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-red-500/10 border-red-500/20 text-red-400")}>
+                      <div className={cn("p-3.5 rounded-xl border text-xs flex items-center gap-2.5", targetTestResult.success ? (isDark ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-800") : (isDark ? "bg-red-500/10 border-red-500/20 text-red-400" : "bg-red-50 border-red-200 text-red-800"))}>
                         {targetTestResult.success ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <XCircle className="w-4 h-4 shrink-0" />}
                         <span>{targetTestResult.message}</span>
                       </div>
@@ -2023,7 +2023,7 @@ export default function SettingsPage() {
                   </div>
 
                   {customerRustFSTestResult && (
-                    <div className={cn("p-4 rounded-xl border flex items-start gap-3", customerRustFSTestResult.success ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" : "bg-red-500/10 border-red-500/30 text-red-400")}>
+                    <div className={cn("p-4 rounded-xl border flex items-start gap-3", customerRustFSTestResult.success ? (isDark ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-800") : (isDark ? "bg-red-500/10 border-red-500/30 text-red-400" : "bg-red-50 border-red-200 text-red-800"))}>
                       {customerRustFSTestResult.success ? <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" /> : <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />}
                       <div className="text-xs md:text-sm">
                         <span className="font-bold">{customerRustFSTestResult.success ? "Connection Verified" : "Connection Failed"}: </span>
@@ -2214,7 +2214,7 @@ export default function SettingsPage() {
                   </div>
 
                   {k3sTestResult && (
-                    <div className={cn("p-4 rounded-xl border flex items-start gap-3", k3sTestResult.success ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" : "bg-red-500/10 border-red-500/30 text-red-400")}>
+                    <div className={cn("p-4 rounded-xl border flex items-start gap-3", k3sTestResult.success ? (isDark ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-800") : (isDark ? "bg-red-500/10 border-red-500/30 text-red-400" : "bg-red-50 border-red-200 text-red-800"))}>
                       {k3sTestResult.success ? <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" /> : <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />}
                       <div className="text-xs md:text-sm space-y-1">
                         <div>
