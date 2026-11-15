@@ -569,12 +569,25 @@ export default function AppCheckoutFlow() {
 
           <div className="space-y-4 text-xs">
             <div>
-              <p className={cn("text-[11px] font-semibold uppercase tracking-wider mb-1", isDark ? "text-zinc-500" : "text-slate-400")}>
+              <p className={cn("text-[11px] font-semibold uppercase tracking-wider mb-1.5", isDark ? "text-zinc-500" : "text-slate-400")}>
                 App Type
               </p>
-              <p className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>
-                {selectedApp.id}
-              </p>
+              <div className={cn("flex items-center gap-2 font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>
+                <span className={cn(
+                  "w-6 h-6 rounded-lg flex items-center justify-center shrink-0 p-1 border",
+                  isDark ? "bg-white/[0.04] border-white/[0.1]" : "bg-slate-50 border-slate-200"
+                )}>
+                  <Image
+                    src={selectedApp.icon}
+                    alt={selectedApp.name}
+                    width={16}
+                    height={16}
+                    className="object-contain w-full h-full"
+                    unoptimized
+                  />
+                </span>
+                <span>{selectedApp.name}</span>
+              </div>
             </div>
 
             <div>
