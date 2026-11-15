@@ -76,6 +76,16 @@ export async function GET(req: NextRequest) {
       }
     });
 
+    const activeObjectStorage = await prisma.objectStorageService.findMany({
+      where: {
+        status: { in: ['RUNNING', 'STOPPED', 'SUSPENDED'] },
+        hourlyRate: { gt: 0 }
+      },
+      include: {
+        user: { select: { id: true, name: true, email: true, image: true, balance: true } }
+      }
+    });
+
     // 3. Group by customer
     const customersMap = new Map<number, any>();
 
@@ -183,6 +193,21 @@ export async function GET(req: NextRequest) {
         accumulatedCost: app.accumulatedCost || 0,
         status: app.status,
         createdAt: app.createdAt
+      });
+    }
+
+    for (const obj of activeObjectStorage) {
+      addServiceToCustomer(obj.user.id, obj.user, {
+        id: `object-storage-${obj.id}`,
+        type: 'Object Storage',
+        name: `${obj.name} (${obj.storageGb} GB)`,
+        ipAddress: obj.planName,
+        publicIp: null,
+        hourlyRate: obj.status === 'SUSPENDED' ? 0 : obj.hourlyRate,
+        fullHourlyRate: obj.hourlyRate,
+        accumulatedCost: obj.accumulatedCost || 0,
+        status: obj.status,
+        createdAt: obj.createdAt
       });
     }
 

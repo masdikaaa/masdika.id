@@ -6,6 +6,13 @@ import { requireAuth } from '@/lib/auth-middleware';
 import { v4 as uuidv4 } from "uuid";
 import { hasActiveSubscription } from "@/lib/subscription";
 import { deleteFromRustFS } from "@/lib/rustfs";
+import { deleteFromCustomerRustFS, getCustomerRustFSConfig } from "@/lib/customer-rustfs";
+import {
+  createCustomerCdnBucket,
+  deleteCustomerCdnBucket,
+  ensureDefaultCdnBucket,
+  resolveCustomerCdnBucket,
+} from "@/lib/cdn-bucket";
 import { hasForbiddenExtension, sanitizeCdnFolderPath } from "@/lib/upload-security";
 
 export async function GET(req: NextRequest) {
@@ -28,10 +35,24 @@ export async function GET(req: NextRequest) {
     }
 
     const { searchParams } = new URL(req.url);
+    const requestedBucket = searchParams.get('bucket');
     const folderPath = sanitizeCdnFolderPath(searchParams.get('folder') || '/');
     if (!folderPath) {
       return NextResponse.json({ error: "Invalid folder path" }, { status: 400 });
     }
+
+    const activeBucket = await resolveCustomerCdnBucket(userId, requestedBucket);
+    if (!activeBucket) {
+      return NextResponse.json({ error: "Bucket not found or access denied" }, { status: 404 });
+    }
+
+    const [buckets, rustfsCfg] = await Promise.all([
+      prisma.cdnBucket.findMany({
+        where: { userId },
+        orderBy: [{ isDefault: 'desc' }, { createdAt: 'asc' }],
+      }),
+      getCustomerRustFSConfig(),
+    ]);
 
     // Lazy Cleanup: Delete expired media for this user
     const now = new Date();
@@ -41,7 +62,11 @@ export async function GET(req: NextRequest) {
 
     for (const em of expiredMedia) {
       if (!em.isFolder) {
-        deleteFromRustFS(em.filename).catch(() => {});
+        const targetBucket = em.bucket || activeBucket.name;
+        deleteFromCustomerRustFS(targetBucket, em.filename).catch(() => {});
+        if (!em.bucket) {
+          deleteFromRustFS(em.filename).catch(() => {});
+        }
         const secureDir = path.join(process.cwd(), "storage", "secure-media");
         const filePath = path.join(secureDir, path.basename(em.filename));
         if (fs.existsSync(filePath)) {
@@ -51,8 +76,12 @@ export async function GET(req: NextRequest) {
       await prisma.secureMedia.delete({ where: { id: em.id } });
     }
 
+    const bucketFilter = activeBucket.isDefault
+      ? { OR: [{ bucket: activeBucket.name }, { bucket: null }] }
+      : { bucket: activeBucket.name };
+
     const media = await prisma.secureMedia.findMany({
-      where: { userId, folderPath },
+      where: { userId, folderPath, ...bucketFilter },
       orderBy: [
         { isFolder: 'desc' },
         { createdAt: 'desc' }
@@ -66,6 +95,7 @@ export async function GET(req: NextRequest) {
         const descendants = await prisma.secureMedia.findMany({
           where: {
             userId,
+            ...bucketFilter,
             folderPath: {
               startsWith: childrenPathPrefix
             }
@@ -77,18 +107,27 @@ export async function GET(req: NextRequest) {
         
         return {
           ...item,
+          bucket: item.bucket || activeBucket.name,
           itemCount,
-          folderSize: folderSize.toString() // BigInt needs to be stringified or converted
+          folderSize: folderSize.toString()
         };
       }
       
       return {
         ...item,
+        bucket: item.bucket || activeBucket.name,
         size: item.size.toString()
       };
     }));
 
-    return NextResponse.json({ success: true, data: enrichedMedia, isSuspended });
+    return NextResponse.json({
+      success: true,
+      data: enrichedMedia,
+      buckets,
+      activeBucket: activeBucket.name,
+      publicEndpoint: rustfsCfg.publicEndpoint,
+      isSuspended,
+    });
   } catch (error) {
     console.error("List CDN media error:", error);
     return NextResponse.json({ error: "Failed to list media" }, { status: 500 });
@@ -112,8 +151,39 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { action } = body;
 
+    if (action === 'createBucket') {
+      const { bucketName } = body;
+      if (!bucketName || typeof bucketName !== 'string') {
+        return NextResponse.json({ error: "Bucket name is required" }, { status: 400 });
+      }
+      try {
+        await ensureDefaultCdnBucket(userId);
+        const created = await createCustomerCdnBucket(userId, bucketName);
+        return NextResponse.json({ success: true, bucket: created });
+      } catch (err: any) {
+        return NextResponse.json({ error: err?.message || "Failed to create bucket" }, { status: 400 });
+      }
+    }
+
+    if (action === 'deleteBucket') {
+      const { bucketName } = body;
+      if (!bucketName || typeof bucketName !== 'string') {
+        return NextResponse.json({ error: "Bucket name is required" }, { status: 400 });
+      }
+      try {
+        await deleteCustomerCdnBucket(userId, bucketName);
+        return NextResponse.json({ success: true });
+      } catch (err: any) {
+        return NextResponse.json({ error: err?.message || "Failed to delete bucket" }, { status: 400 });
+      }
+    }
+
     if (action === 'mkdir') {
-      const { currentFolder, folderName } = body;
+      const { currentFolder, folderName, bucket } = body;
+      const activeBucket = await resolveCustomerCdnBucket(userId, bucket);
+      if (!activeBucket) {
+        return NextResponse.json({ error: "Bucket not found or access denied" }, { status: 404 });
+      }
       const safeFolder = sanitizeCdnFolderPath(currentFolder || '/');
       if (!safeFolder) return NextResponse.json({ error: "Invalid parent folder path" }, { status: 400 });
       const sanitizedName = typeof folderName === "string" ? folderName.replace(/[/\\\0]/g, "").trim().slice(0, 120) : "";
@@ -121,9 +191,13 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Invalid folder name" }, { status: 400 });
       }
 
+      const bucketFilter = activeBucket.isDefault
+        ? { OR: [{ bucket: activeBucket.name }, { bucket: null }] }
+        : { bucket: activeBucket.name };
+
       // Check if exists
       const existing = await prisma.secureMedia.findFirst({
-        where: { userId, folderPath: safeFolder, originalName: sanitizedName, isFolder: true }
+        where: { userId, folderPath: safeFolder, originalName: sanitizedName, isFolder: true, ...bucketFilter }
       });
       if (existing) return NextResponse.json({ error: "Folder already exists" }, { status: 400 });
 
@@ -133,6 +207,7 @@ export async function POST(req: NextRequest) {
           originalName: sanitizedName,
           mimeType: "inode/directory",
           size: 0,
+          bucket: activeBucket.name,
           folderPath: safeFolder,
           isFolder: true,
           token: uuidv4(),
@@ -279,8 +354,13 @@ export async function DELETE(req: NextRequest) {
         return NextResponse.json({ error: "Folder is not empty" }, { status: 400 });
       }
     } else {
-      // Delete from RustFS & filesystem
-      deleteFromRustFS(media.filename).catch(() => {});
+      // Delete from Customer RustFS & legacy fallback
+      const defBucket = await ensureDefaultCdnBucket(userId);
+      const targetBucket = media.bucket || defBucket.name;
+      deleteFromCustomerRustFS(targetBucket, media.filename).catch(() => {});
+      if (!media.bucket) {
+        deleteFromRustFS(media.filename).catch(() => {});
+      }
       const candidateDirs = [
         path.join(process.cwd(), "storage", "secure-media"),
         path.join(process.cwd(), "apps", "web", "storage", "secure-media")

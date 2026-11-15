@@ -12,6 +12,12 @@ import {
   getObjectStreamFromRustFS,
   deleteFromRustFS,
 } from "@/lib/rustfs";
+import {
+  downloadBufferFromCustomerRustFS,
+  getObjectStreamFromCustomerRustFS,
+  getCustomerRustFSConfig,
+  getDefaultCdnBucketName,
+} from "@/lib/customer-rustfs";
 
 const INLINE_ALLOWED_MIME = new Set([
   "image/jpeg", "image/png", "image/gif", "image/webp",
@@ -129,21 +135,38 @@ export async function GET(
     const rangeHeader = req.headers.get("range");
 
     // ── FAST PATH: Direct Zero-Copy Streaming when not AES-encrypted ──────────
+    const isCustomerMedia = Boolean(media.bucket || media.userId !== null);
+    let customerBucketName: string | null = media.bucket || null;
+    if (!customerBucketName && media.userId !== null) {
+      const cfg = await getCustomerRustFSConfig();
+      customerBucketName = getDefaultCdnBucketName(media.userId, cfg.cdnBucketPrefix);
+    }
+
     if (!isEncrypted) {
-      // 1. Stream directly from RustFS with native S3 Range pass-through
-      const rustStream = await getObjectStreamFromRustFS(media.filename, rangeHeader);
+      // 1. Stream directly from Customer RustFS (for Customer CDN) or Internal RustFS
+      let rustStream: any = null;
+      if (isCustomerMedia && customerBucketName) {
+        rustStream = await getObjectStreamFromCustomerRustFS(customerBucketName, media.filename, rangeHeader || undefined);
+      }
+      if (!rustStream) {
+        rustStream = await getObjectStreamFromRustFS(media.filename, rangeHeader);
+      }
       if (rustStream) {
         const headers: Record<string, string> = {
           ...securityHeaders,
-          "Content-Length": String(rustStream.contentLength),
+          "Content-Length": String(rustStream.contentLength ?? ""),
         };
         if (rustStream.contentRange) {
           headers["Content-Range"] = rustStream.contentRange;
         }
-        if (rustStream.etag) {
+        if ("etag" in rustStream && rustStream.etag) {
           headers["ETag"] = rustStream.etag;
         }
-        return new NextResponse(rustStream.stream, {
+        const bodyStream =
+          rustStream.stream instanceof Readable
+            ? (Readable.toWeb(rustStream.stream) as unknown as ReadableStream<Uint8Array>)
+            : rustStream.stream;
+        return new NextResponse(bodyStream, {
           status: rustStream.statusCode,
           headers,
         });
@@ -207,7 +230,13 @@ export async function GET(
     }
 
     // ── ENCRYPTED PATH: Full buffer download & AES-256-CBC decryption ─────────
-    let encryptedBuf: Buffer | null = await downloadBufferFromRustFS(media.filename);
+    let encryptedBuf: Buffer | null = null;
+    if (isCustomerMedia && customerBucketName) {
+      encryptedBuf = await downloadBufferFromCustomerRustFS(customerBucketName, media.filename);
+    }
+    if (!encryptedBuf) {
+      encryptedBuf = await downloadBufferFromRustFS(media.filename);
+    }
 
     if (!encryptedBuf) {
       const candidateDirs = [

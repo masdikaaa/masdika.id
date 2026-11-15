@@ -231,6 +231,53 @@ export async function PUT(req: Request, props: { params: Promise<{ type: string;
         break;
       }
 
+      case 'object-storage': {
+        const obj = await prisma.objectStorageService.findUnique({
+          where: { id },
+          include: { user: true }
+        });
+        if (!obj) return NextResponse.json({ error: 'Object Storage service not found' }, { status: 404 });
+
+        try {
+          const { suspendObjectStorageInfrastructure, unsuspendObjectStorageInfrastructure } = await import('@/lib/customer-rustfs');
+          if (suspend) {
+            await suspendObjectStorageInfrastructure(obj.id);
+          } else {
+            await unsuspendObjectStorageInfrastructure(obj.id);
+          }
+        } catch (err) {
+          console.error(`Failed to update Customer RustFS keys for ObjectStorage ${obj.id}:`, err);
+        }
+
+        result = await prisma.objectStorageService.update({
+          where: { id },
+          data: {
+            status: suspend ? 'SUSPENDED' : 'RUNNING',
+            suspendReason: suspendReasonValue,
+            terminationDate: gracePeriodDeadline
+          }
+        });
+
+        if (obj.user) {
+          if (suspend) {
+            sendAppSuspendedGracePeriodEmail({
+              email: obj.user.email,
+              userName: obj.user.name || 'Customer',
+              appName: obj.name,
+              appType: `Object Storage (${obj.planName})`,
+              terminationDate: gracePeriodDeadline!,
+              hourlyRate: obj.hourlyRate,
+              reason: suspendReasonValue || 'Administrative suspension'
+            }).catch(console.error);
+            sendAdminServiceSuspendedEmail(obj.user.name || 'Customer', obj.user.email, obj.name, 'Object Storage').catch(console.error);
+          } else {
+            sendReactivatedEmail(obj.user.email, obj.user.name || 'Customer', obj.planName, obj.name).catch(console.error);
+            sendAdminServiceReactivatedEmail(obj.user.name || 'Customer', obj.user.email, obj.name, 'Object Storage').catch(console.error);
+          }
+        }
+        break;
+      }
+
       case 'kubernetes': {
         const cluster = await prisma.kubernetesCluster.findUnique({
           where: { id },

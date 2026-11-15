@@ -798,6 +798,108 @@ export async function GET(req: Request) {
     }
 
     // ----------------------------------------------------
+    // PROCESS OBJECT STORAGE HOURLY BILLING (PAYG + 3-DAY GRACE)
+    // ----------------------------------------------------
+    let objProcessed = 0;
+    let objSuspended = 0;
+    let objTerminated = 0;
+
+    const activeObjStorages = await prisma.objectStorageService.findMany({
+      where: {
+        status: { in: ['RUNNING', 'STOPPED'] },
+        hourlyRate: { gt: 0 },
+      },
+      include: { user: true },
+    });
+
+    for (const obj of activeObjStorages) {
+      const costThisHour = obj.hourlyRate;
+      try {
+        await prisma.$transaction(async (tx) => {
+          const updateResult = await tx.user.updateMany({
+            where: { id: obj.userId, balance: { gte: costThisHour } },
+            data: { balance: { decrement: costThisHour } },
+          });
+          if (updateResult.count === 0) throw new Error('INSUFFICIENT_BALANCE');
+
+          await tx.objectStorageService.update({
+            where: { id: obj.id },
+            data: {
+              accumulatedCost: { increment: costThisHour },
+              lastBilledAt: now,
+            },
+          });
+        });
+        objProcessed++;
+      } catch (e: any) {
+        if (e.message === 'INSUFFICIENT_BALANCE') {
+          objSuspended++;
+          const defaultTermination = new Date(now);
+          defaultTermination.setDate(defaultTermination.getDate() + 3);
+
+          await prisma.objectStorageService.update({
+            where: { id: obj.id },
+            data: {
+              status: 'SUSPENDED',
+              suspendReason: 'Insufficient balance for Pay as You Go hourly object storage billing.',
+              terminationDate: defaultTermination,
+            },
+          });
+
+          try {
+            const { suspendObjectStorageInfrastructure } = await import('@/lib/customer-rustfs');
+            await suspendObjectStorageInfrastructure(obj.id);
+          } catch (stopErr) {
+            console.error(`Failed to disable keys for ObjectStorage ${obj.id}:`, stopErr);
+          }
+
+          try {
+            const { sendAdminServiceSuspendedEmail } = await import('@/lib/email');
+            const email = decryptDeterministic(obj.user.email) || obj.user.email;
+            const name = decryptDeterministic(obj.user.name) || obj.user.name;
+            await sendPaygSuspendedEmail(email, name, `${obj.name} (${obj.planName})`, 'Insufficient balance for hourly billing');
+            await sendAdminServiceSuspendedEmail(name, email, obj.name, 'Object Storage').catch((err) => console.error(err));
+          } catch (emailErr) {
+            console.error(`Failed to send object storage suspension email ${obj.id}:`, emailErr);
+          }
+        }
+      }
+    }
+
+    const expiredObjStorages = await prisma.objectStorageService.findMany({
+      where: {
+        status: 'SUSPENDED',
+        terminationDate: { lte: now },
+      },
+      include: { user: true },
+    });
+
+    for (const expObj of expiredObjStorages) {
+      try {
+        const { terminateObjectStorageInfrastructure } = await import('@/lib/customer-rustfs');
+        await terminateObjectStorageInfrastructure(expObj.id);
+        await prisma.objectStorageKey.deleteMany({ where: { serviceId: expObj.id } });
+        await prisma.objectStorageBucket.deleteMany({ where: { serviceId: expObj.id } });
+        await prisma.objectStorageService.update({
+          where: { id: expObj.id },
+          data: { status: 'TERMINATED' },
+        });
+        objTerminated++;
+
+        try {
+          const { sendTerminationEmail } = await import('@/lib/email');
+          const email = decryptDeterministic(expObj.user.email) || expObj.user.email;
+          const name = decryptDeterministic(expObj.user.name) || expObj.user.name;
+          await sendTerminationEmail(email, name, expObj.planName, expObj.name);
+        } catch (emailErr) {
+          console.error('Failed to send object storage termination email:', emailErr);
+        }
+      } catch (termErr) {
+        console.error(`Failed to terminate expired object storage ${expObj.id}:`, termErr);
+      }
+    }
+
+    // ----------------------------------------------------
     // LOW BALANCE NOTIFICATIONS (ALL PAYG SERVICES)
     // Checks all active services (VPS, IPs, Subscriptions)
     // and sends warning email to customers with remaining runtime <= 24 hours.
@@ -823,6 +925,7 @@ export async function GET(req: Request) {
       reservedIps: { processed: ipProcessed, insufficientBalance: ipReleased },
       databases: { processed: dbProcessed, suspended: dbSuspended, terminated: dbTerminated },
       apps: { processed: appProcessed, suspended: appSuspended, terminated: appTerminated },
+      objectStorage: { processed: objProcessed, suspended: objSuspended, terminated: objTerminated },
       lowBalanceAlerts: lowBalanceSummary
     };
 

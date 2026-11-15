@@ -58,8 +58,13 @@ model User {
   emailLogs          EmailLog[]
   activityLogs       ClientActivityLog[]
   sshKeys            UserSshKey[]
-  databaseServices   DatabaseService[]
-  appServices        AppService[]
+  databaseServices      DatabaseService[]
+  appServices           AppService[]
+  cdnBuckets            CdnBucket[]
+  cdnApiKeys            CdnApiKey[]
+  objectStorageServices ObjectStorageService[]
+  objectStorageBuckets  ObjectStorageBucket[]
+  objectStorageKeys     ObjectStorageKey[]
 
   @@index([createdAt])
 }
@@ -316,6 +321,7 @@ model SecureMedia {
   isFolder     Boolean   @default(false)
   isPinned     Boolean   @default(false)
   isPublic     Boolean   @default(true)
+  bucket       String?
   token        String    @unique
   expiresAt    DateTime?
   userId       Int?
@@ -326,6 +332,7 @@ model SecureMedia {
   comments     MediaComment[]
 
   @@index([userId])
+  @@index([userId, bucket])
 }
 
 model MediaRating {
@@ -1248,5 +1255,105 @@ model AppService {
   @@index([status])
   @@index([port])
   @@index([createdAt])
+}
+
+model CdnBucket {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  name      String   @unique
+  isDefault Boolean  @default(false)
+  isPublic  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model CdnApiKey {
+  id         Int       @id @default(autoincrement())
+  userId     Int
+  name       String
+  keyPrefix  String
+  keyHash    String    @unique
+  permission String    @default("READ_WRITE") // "READ_WRITE" | "READ_ONLY"
+  isActive   Boolean   @default(true)
+  lastUsedAt DateTime?
+  createdAt  DateTime  @default(now())
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model ObjectStorageService {
+  id              Int       @id @default(autoincrement())
+  userId          Int
+  name            String
+  region          String    @default("ID-SDA")
+  planName        String    // e.g. "S3-50GB", "S3-100GB", "S3-250GB", "S3-500GB", "S3-1TB", "CUSTOM"
+
+  // Resource Specs (AGENTS.md Standard)
+  cpuShares       Float     @default(0)
+  memoryMb        Int       @default(0)
+  storageGb       Int       @default(50)
+
+  // Billing Fields (AGENTS.md Standard)
+  billingMode     String    @default("PAYG") // "PAYG" | "MONTHLY"
+  monthlyPrice    Int       @default(15000)
+  hourlyRate      Int       @default(21)
+  accumulatedCost Int       @default(0)
+  lastBilledAt    DateTime?
+
+  // Lifecycle Management (AGENTS.md Standard)
+  status          String    @default("PROVISIONING") // "PROVISIONING", "RUNNING", "STOPPED", "SUSPENDED", "TERMINATED"
+  suspendReason   String?
+  terminationDate DateTime?
+
+  // Physical / Infrastructure Reference
+  node            String?   @default("rustfs-customer")
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  buckets         ObjectStorageBucket[]
+  accessKeys      ObjectStorageKey[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model ObjectStorageBucket {
+  id         Int                  @id @default(autoincrement())
+  serviceId  Int
+  userId     Int
+  name       String               @unique
+  visibility String               @default("PRIVATE") // "PRIVATE" | "PUBLIC"
+  versioning Boolean              @default(false)
+  createdAt  DateTime             @default(now())
+  updatedAt  DateTime             @updatedAt
+  service    ObjectStorageService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  user       User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([serviceId])
+  @@index([userId])
+}
+
+model ObjectStorageKey {
+  id         Int                  @id @default(autoincrement())
+  serviceId  Int
+  userId     Int
+  name       String
+  accessKey  String               @unique
+  secretKey  String
+  permission String               @default("READ_WRITE") // "READ_WRITE" | "READ_ONLY"
+  isActive   Boolean              @default(true)
+  lastUsedAt DateTime?
+  createdAt  DateTime             @default(now())
+  service    ObjectStorageService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  user       User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([serviceId])
+  @@index([userId])
 }
 

@@ -7,6 +7,7 @@ import path from 'path';
 import { requireAuth } from '@/lib/auth-middleware';
 import { getUploadsDir } from '@/lib/file-utils';
 import { invalidateRustFSCache } from '@/lib/rustfs';
+import { invalidateCustomerRustFSCache } from '@/lib/customer-rustfs';
 import { invalidateK8sClusterConfigCache } from '@/lib/k8s-database';
 import { invalidatePublicSettingsCache } from '@/lib/settings';
 import { revalidatePath } from 'next/cache';
@@ -41,6 +42,18 @@ export async function GET() {
     settingsObj['rustfs_media_bucket'] = settingsObj['rustfs_media_bucket'] || process.env.RUSTFS_MEDIA_BUCKET || 'masdika-media';
     settingsObj['rustfs_ticket_bucket'] = settingsObj['rustfs_ticket_bucket'] || process.env.RUSTFS_TICKET_BUCKET || 'masdika-ticket';
     settingsObj['rustfs_enabled'] = settingsObj['rustfs_enabled'] ?? (process.env.RUSTFS_ENABLED ?? 'false');
+
+    // Customer RustFS (File CDN & Object Storage) Settings
+    const hasCustomerRustFsSecret = Boolean(settingsObj['customer_rustfs_secret_key'] || process.env.CUSTOMER_RUSTFS_SECRET_KEY);
+    settingsObj['customer_rustfs_enabled'] = settingsObj['customer_rustfs_enabled'] ?? (process.env.CUSTOMER_RUSTFS_ENABLED ?? 'false');
+    settingsObj['customer_rustfs_endpoint'] = settingsObj['customer_rustfs_endpoint'] || process.env.CUSTOMER_RUSTFS_ENDPOINT || '';
+    settingsObj['customer_rustfs_public_endpoint'] = settingsObj['customer_rustfs_public_endpoint'] || process.env.CUSTOMER_RUSTFS_PUBLIC_ENDPOINT || '';
+    settingsObj['customer_rustfs_console_url'] = settingsObj['customer_rustfs_console_url'] || process.env.CUSTOMER_RUSTFS_CONSOLE_URL || '';
+    settingsObj['customer_rustfs_access_key'] = settingsObj['customer_rustfs_access_key'] || process.env.CUSTOMER_RUSTFS_ACCESS_KEY || '';
+    settingsObj['customer_rustfs_secret_key'] = hasCustomerRustFsSecret ? MASKED_SECRET : '';
+    settingsObj['customer_rustfs_cdn_bucket_prefix'] = settingsObj['customer_rustfs_cdn_bucket_prefix'] || 'masdika-cdn-u';
+    settingsObj['object_storage_enabled'] = settingsObj['object_storage_enabled'] ?? 'true';
+    settingsObj['object_storage_rate_per_gb'] = settingsObj['object_storage_rate_per_gb'] || '500';
 
     // Managed Database (Kubernetes API) Cluster Settings
     const hasKubeconfig = Boolean(settingsObj['managed_db_kubeconfig'] || process.env.MANAGED_DB_KUBECONFIG);
@@ -171,6 +184,31 @@ export async function PUT(req: Request) {
     if (rustfs_ticket_bucket !== undefined) settingsToUpdate.push({ key: 'rustfs_ticket_bucket', value: String(rustfs_ticket_bucket) });
     if (rustfs_enabled !== undefined) settingsToUpdate.push({ key: 'rustfs_enabled', value: String(rustfs_enabled) });
 
+    // Customer RustFS (File CDN & Object Storage) Settings
+    const {
+      customer_rustfs_enabled,
+      customer_rustfs_endpoint,
+      customer_rustfs_public_endpoint,
+      customer_rustfs_console_url,
+      customer_rustfs_access_key,
+      customer_rustfs_secret_key,
+      customer_rustfs_cdn_bucket_prefix,
+      object_storage_enabled,
+      object_storage_rate_per_gb,
+    } = body;
+
+    if (customer_rustfs_enabled !== undefined) settingsToUpdate.push({ key: 'customer_rustfs_enabled', value: String(customer_rustfs_enabled) });
+    if (customer_rustfs_endpoint !== undefined) settingsToUpdate.push({ key: 'customer_rustfs_endpoint', value: String(customer_rustfs_endpoint).trim().replace(/\/+$/, '') });
+    if (customer_rustfs_public_endpoint !== undefined) settingsToUpdate.push({ key: 'customer_rustfs_public_endpoint', value: String(customer_rustfs_public_endpoint).trim().replace(/\/+$/, '') });
+    if (customer_rustfs_console_url !== undefined) settingsToUpdate.push({ key: 'customer_rustfs_console_url', value: String(customer_rustfs_console_url).trim().replace(/\/+$/, '') });
+    if (customer_rustfs_access_key !== undefined) settingsToUpdate.push({ key: 'customer_rustfs_access_key', value: String(customer_rustfs_access_key).trim() });
+    if (customer_rustfs_secret_key !== undefined && customer_rustfs_secret_key !== MASKED_SECRET) {
+      settingsToUpdate.push({ key: 'customer_rustfs_secret_key', value: String(customer_rustfs_secret_key).trim() });
+    }
+    if (customer_rustfs_cdn_bucket_prefix !== undefined) settingsToUpdate.push({ key: 'customer_rustfs_cdn_bucket_prefix', value: String(customer_rustfs_cdn_bucket_prefix).trim().toLowerCase() || 'masdika-cdn-u' });
+    if (object_storage_enabled !== undefined) settingsToUpdate.push({ key: 'object_storage_enabled', value: String(object_storage_enabled) });
+    if (object_storage_rate_per_gb !== undefined) settingsToUpdate.push({ key: 'object_storage_rate_per_gb', value: String(Math.max(1, Number(object_storage_rate_per_gb) || 500)) });
+
     // Managed Database (Kubernetes API) Cluster Settings
     if (managed_db_auth_mode !== undefined) settingsToUpdate.push({ key: 'managed_db_auth_mode', value: String(managed_db_auth_mode).trim() });
     if (managed_db_api_server !== undefined) settingsToUpdate.push({ key: 'managed_db_api_server', value: String(managed_db_api_server).trim() });
@@ -211,6 +249,7 @@ export async function PUT(req: Request) {
     }
 
     invalidateRustFSCache();
+    invalidateCustomerRustFSCache();
     invalidateK8sClusterConfigCache();
     await invalidatePublicSettingsCache();
     try {

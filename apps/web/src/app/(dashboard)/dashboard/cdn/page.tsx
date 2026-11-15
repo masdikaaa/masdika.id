@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
-import { UploadCloud, Trash2, File, Link as LinkIcon, HardDrive, CheckCircle2, Eye, X, FileImage, FileVideo, FileAudio, FileText, Presentation, CheckCircle, Search, LayoutGrid, List as ListIcon, Folder, FolderPlus, Edit2, MoveRight, ChevronRight, Loader2, Cloud, RefreshCw, AlertTriangle, Lock, Globe, MessageSquareQuote } from "lucide-react";
+import { UploadCloud, Trash2, File, Link as LinkIcon, HardDrive, CheckCircle2, Eye, X, FileImage, FileVideo, FileAudio, FileText, Presentation, CheckCircle, Search, LayoutGrid, List as ListIcon, Folder, FolderPlus, Edit2, MoveRight, ChevronRight, Loader2, Cloud, RefreshCw, AlertTriangle, Lock, Globe, MessageSquareQuote, Database, KeyRound, Plus, Copy } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
@@ -297,6 +297,21 @@ export default function UserCDNLibrary() {
 
   const [isSuspended, setIsSuspended] = useState(false);
 
+  // Bucket & Programmatic API State
+  const [buckets, setBuckets] = useState<Array<{ id: number; name: string; isDefault: boolean }>>([]);
+  const [activeBucket, setActiveBucket] = useState<string>("");
+  const [showCreateBucket, setShowCreateBucket] = useState(false);
+  const [newBucketName, setNewBucketName] = useState("");
+  const [creatingBucket, setCreatingBucket] = useState(false);
+
+  const [showApiModal, setShowApiModal] = useState(false);
+  const [apiKeys, setApiKeys] = useState<any[]>([]);
+  const [loadingApiKeys, setLoadingApiKeys] = useState(false);
+  const [newKeyName, setNewKeyName] = useState("");
+  const [newKeyScope, setNewKeyScope] = useState<"READ_WRITE" | "READ_ONLY">("READ_WRITE");
+  const [creatingApiKey, setCreatingApiKey] = useState(false);
+  const [revealedApiKey, setRevealedApiKey] = useState<string | null>(null);
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const folder = params.get("folder");
@@ -305,10 +320,12 @@ export default function UserCDNLibrary() {
     }
   }, []);
 
-  const fetchMedia = async () => {
+  const fetchMedia = async (bucketOverride?: string) => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/user/cdn?folder=${encodeURIComponent(currentFolder)}`);
+      const targetBucket = bucketOverride !== undefined ? bucketOverride : activeBucket;
+      const bucketQuery = targetBucket ? `&bucket=${encodeURIComponent(targetBucket)}` : "";
+      const res = await fetch(`/api/user/cdn?folder=${encodeURIComponent(currentFolder)}${bucketQuery}`);
       const data = await res.json();
       if (res.status === 403) {
         setHasAccess(false);
@@ -317,6 +334,8 @@ export default function UserCDNLibrary() {
       }
       if (!res.ok) throw new Error(data.error);
       setMedia(data.data || []);
+      if (Array.isArray(data.buckets)) setBuckets(data.buckets);
+      if (data.activeBucket && !activeBucket) setActiveBucket(data.activeBucket);
       setIsSuspended(!!data.isSuspended);
     } catch (err: any) {
       toast.error("Failed to load CDN library");
@@ -336,7 +355,95 @@ export default function UserCDNLibrary() {
 
   useEffect(() => {
     fetchMedia();
-  }, [currentFolder]);
+  }, [currentFolder, activeBucket]);
+
+  const fetchApiKeys = async () => {
+    setLoadingApiKeys(true);
+    try {
+      const res = await fetch("/api/user/cdn/keys");
+      const data = await res.json();
+      if (res.ok) setApiKeys(data.keys || []);
+    } catch {}
+    finally {
+      setLoadingApiKeys(false);
+    }
+  };
+
+  const handleCreateBucket = async () => {
+    if (!newBucketName.trim()) return;
+    setCreatingBucket(true);
+    try {
+      const res = await fetch("/api/user/cdn", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "createBucket", bucketName: newBucketName.trim().toLowerCase() }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      toast.success(`Bucket "${data.bucket.name}" created!`);
+      setShowCreateBucket(false);
+      setNewBucketName("");
+      setActiveBucket(data.bucket.name);
+      setCurrentFolder("/");
+      fetchMedia(data.bucket.name);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to create bucket");
+    } finally {
+      setCreatingBucket(false);
+    }
+  };
+
+  const handleDeleteBucket = async (bucketName: string) => {
+    try {
+      const res = await fetch("/api/user/cdn", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "deleteBucket", bucketName }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      toast.success(`Bucket "${bucketName}" deleted`);
+      const fallback = buckets.find((b) => b.isDefault)?.name || "";
+      setActiveBucket(fallback);
+      setCurrentFolder("/");
+      fetchMedia(fallback);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete bucket");
+    }
+  };
+
+  const handleCreateApiKey = async () => {
+    if (!newKeyName.trim()) return;
+    setCreatingApiKey(true);
+    try {
+      const res = await fetch("/api/user/cdn/keys", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newKeyName.trim(), scope: newKeyScope }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setRevealedApiKey(data.rawKey);
+      setNewKeyName("");
+      toast.success("API Key generated! Copy it now — it won't be shown again.");
+      fetchApiKeys();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to generate API Key");
+    } finally {
+      setCreatingApiKey(false);
+    }
+  };
+
+  const handleDeleteApiKey = async (id: number) => {
+    try {
+      const res = await fetch(`/api/user/cdn/keys?id=${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed");
+      toast.success("API Key revoked");
+      fetchApiKeys();
+    } catch {
+      toast.error("Failed to revoke API Key");
+    }
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -357,7 +464,7 @@ export default function UserCDNLibrary() {
       const res = await fetch("/api/user/cdn", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "mkdir", currentFolder, folderName: newFolderName })
+        body: JSON.stringify({ action: "mkdir", currentFolder, folderName: newFolderName, bucket: activeBucket })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -564,6 +671,9 @@ export default function UserCDNLibrary() {
           xhr.setRequestHeader("x-upload-folder-path", btoa(encodeURIComponent(currentFolder)));
           xhr.setRequestHeader("x-upload-expires-in", expiresIn);
           xhr.setRequestHeader("x-upload-is-public", isPublicUpload ? "true" : "false");
+          if (activeBucket) {
+            xhr.setRequestHeader("x-upload-bucket", activeBucket);
+          }
 
           xhr.send(chunkBlob);
         });
@@ -778,6 +888,10 @@ export default function UserCDNLibrary() {
             <button onClick={() => setViewMode("list")} className={cn("p-2 rounded-lg transition-all", viewMode === "list" ? (isDark ? "bg-cyan-500/20 text-cyan-400" : "bg-white text-cyan-700 shadow-2xs") : (isDark ? "text-zinc-500 hover:text-white" : "text-slate-500 hover:text-slate-900"))}><ListIcon className="w-4 h-4" /></button>
           </div>
 
+          <button onClick={() => { setShowApiModal(true); fetchApiKeys(); }} className={cn("border px-3.5 py-2 rounded-xl text-xs sm:text-xs font-semibold flex items-center justify-center gap-2 shrink-0 transition-all flex-1 sm:flex-none", isDark ? "bg-[#111115] border-white/[0.08] hover:bg-white/[0.06] text-indigo-400" : "bg-white border-slate-200/90 hover:bg-slate-50 text-indigo-700 shadow-2xs")}>
+            <KeyRound className="w-4 h-4" /> API Access
+          </button>
+
           <button onClick={() => setShowCreateFolder(true)} disabled={isSuspended} className={cn("border px-3.5 py-2 rounded-xl text-xs sm:text-xs font-semibold flex items-center justify-center gap-2 shrink-0 transition-all flex-1 sm:flex-none disabled:opacity-50", isDark ? "bg-[#111115] border-white/[0.08] hover:bg-white/[0.06] text-white" : "bg-white border-slate-200/90 hover:bg-slate-50 text-slate-700 shadow-2xs")}>
             <FolderPlus className="w-4 h-4" /> New Folder
           </button>
@@ -787,6 +901,51 @@ export default function UserCDNLibrary() {
             <UploadCloud className="w-4 h-4" /> Upload
           </button>
         </div>
+      </motion.div>
+
+      {/* Isolated Customer Buckets Bar */}
+      <motion.div variants={itemVariants} className={cn("flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className={cn("text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 mr-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+            <Database className="w-3.5 h-3.5 text-cyan-400" /> Buckets:
+          </span>
+          {buckets.map((b) => (
+            <div key={b.id} className="inline-flex items-center">
+              <button
+                onClick={() => { setActiveBucket(b.name); setCurrentFolder("/"); }}
+                className={cn(
+                  "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 border",
+                  activeBucket === b.name
+                    ? isDark
+                      ? "bg-cyan-500/15 border-cyan-500/40 text-cyan-300"
+                      : "bg-cyan-50 border-cyan-300 text-cyan-800"
+                    : isDark
+                      ? "bg-white/[0.03] border-white/[0.06] text-zinc-400 hover:text-white"
+                      : "bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900"
+                )}
+              >
+                <span>{b.name}</span>
+                {b.isDefault && <span className="text-[10px] opacity-70">(default)</span>}
+              </button>
+              {!b.isDefault && activeBucket === b.name && (
+                <button
+                  onClick={() => handleDeleteBucket(b.name)}
+                  title="Delete empty bucket"
+                  className="ml-1 p-1 text-zinc-500 hover:text-red-400 transition-colors"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+        <button
+          onClick={() => setShowCreateBucket(true)}
+          disabled={isSuspended}
+          className={cn("px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border transition-all disabled:opacity-50", isDark ? "bg-white/[0.04] border-white/10 hover:bg-white/10 text-zinc-200" : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-700")}
+        >
+          <Plus className="w-3.5 h-3.5" /> New Bucket
+        </button>
       </motion.div>
 
       {/* Toolbar / Actions (appears when selected) */}
@@ -1186,6 +1345,114 @@ export default function UserCDNLibrary() {
                   {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UploadCloud className="w-4 h-4" />}
                   Confirm Upload
                 </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Create Bucket Modal */}
+      <AnimatePresence>
+        {showCreateBucket && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className={cn("rounded-2xl max-w-md w-full p-6 border shadow-2xl", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200")}>
+              <h3 className={cn("text-lg font-bold mb-1", isDark ? "text-white" : "text-slate-900")}>Create Isolated CDN Bucket</h3>
+              <p className={cn("text-xs mb-4", isDark ? "text-zinc-400" : "text-slate-500")}>Lowercase letters, numbers, and hyphens only (3-63 chars). Dedicated &amp; isolated on Customer RustFS.</p>
+              <input
+                type="text"
+                value={newBucketName}
+                onChange={(e) => setNewBucketName(e.target.value.toLowerCase())}
+                placeholder="e.g. my-app-assets"
+                className={cn("w-full rounded-xl px-3.5 py-2.5 text-xs border mb-5 focus:outline-none focus:border-cyan-500", isDark ? "bg-[#111115] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
+              />
+              <div className="flex gap-3">
+                <button onClick={() => setShowCreateBucket(false)} className={cn("flex-1 py-2 rounded-xl text-xs font-semibold border", isDark ? "border-white/10 text-zinc-300" : "border-slate-200 text-slate-700")}>Cancel</button>
+                <button onClick={handleCreateBucket} disabled={creatingBucket || !newBucketName.trim()} className="flex-1 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 disabled:opacity-50">
+                  {creatingBucket ? "Creating..." : "Create Bucket"}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* File CDN API Access & Docs Modal */}
+      <AnimatePresence>
+        {showApiModal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className={cn("rounded-2xl max-w-2xl w-full p-6 border shadow-2xl max-h-[90vh] overflow-y-auto space-y-5", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200")}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className={cn("text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                    <KeyRound className="w-5 h-5 text-indigo-400" /> File CDN REST API &amp; Keys
+                  </h3>
+                  <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>Upload, list, download, and manage your CDN files programmatically.</p>
+                </div>
+                <button onClick={() => { setShowApiModal(false); setRevealedApiKey(null); }} className="p-1.5 rounded-lg text-zinc-400 hover:text-white"><X className="w-4 h-4" /></button>
+              </div>
+
+              {revealedApiKey && (
+                <div className="p-3.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 text-xs space-y-2">
+                  <p className="font-bold">New API Key Created (copy now, shown once):</p>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 bg-black/40 px-3 py-1.5 rounded-lg font-mono break-all">{revealedApiKey}</code>
+                    <button onClick={() => { navigator.clipboard.writeText(revealedApiKey); toast.success("Copied!"); }} className="px-2.5 py-1.5 rounded-lg bg-emerald-500 text-slate-950 font-bold"><Copy className="w-3.5 h-3.5" /></button>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  type="text"
+                  value={newKeyName}
+                  onChange={(e) => setNewKeyName(e.target.value)}
+                  placeholder="Key label (e.g. CI/CD Uploader)"
+                  className={cn("flex-1 rounded-xl px-3.5 py-2 text-xs border focus:outline-none focus:border-indigo-500", isDark ? "bg-[#111115] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
+                />
+                <select value={newKeyScope} onChange={(e) => setNewKeyScope(e.target.value as any)} className={cn("rounded-xl px-3 py-2 text-xs border", isDark ? "bg-[#111115] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}>
+                  <option value="READ_WRITE">Read &amp; Write</option>
+                  <option value="READ_ONLY">Read Only</option>
+                </select>
+                <button onClick={handleCreateApiKey} disabled={creatingApiKey || !newKeyName.trim()} className="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-500 hover:bg-indigo-400 text-white disabled:opacity-50">
+                  {creatingApiKey ? "Generating..." : "Generate Key"}
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                {loadingApiKeys ? (
+                  <p className="text-xs text-zinc-400">Loading API keys...</p>
+                ) : apiKeys.length === 0 ? (
+                  <p className="text-xs text-zinc-500">No API keys created yet.</p>
+                ) : (
+                  apiKeys.map((k) => (
+                    <div key={k.id} className={cn("flex items-center justify-between p-3 rounded-xl border text-xs", isDark ? "bg-[#111115] border-white/[0.06]" : "bg-slate-50 border-slate-200")}>
+                      <div>
+                        <span className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>{k.name}</span>
+                        <span className="ml-2 font-mono text-zinc-400">{k.keyPrefix}...</span>
+                        <span className="ml-2 px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-400 text-[10px] font-semibold">{k.scope}</span>
+                      </div>
+                      <button onClick={() => handleDeleteApiKey(k.id)} className="text-red-400 hover:text-red-300 p-1"><Trash2 className="w-3.5 h-3.5" /></button>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <div className={cn("p-4 rounded-xl border text-xs space-y-2", isDark ? "bg-[#050507] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
+                <p className={cn("font-bold uppercase tracking-wider text-[11px]", isDark ? "text-zinc-300" : "text-slate-700")}>Quick API Examples</p>
+                <pre className={cn("overflow-x-auto p-3 rounded-lg font-mono text-[11px] leading-relaxed", isDark ? "bg-black/60 text-cyan-300" : "bg-slate-900 text-cyan-300")}>{`# Upload file to bucket "${activeBucket || 'default'}"
+curl -X POST "${typeof window !== 'undefined' ? window.location.origin : ''}/api/v1/cdn/upload" \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -F "file=@./image.png" \\
+  -F "bucket=${activeBucket || ''}" \\
+  -F "isPublic=true"
+
+# List files
+curl -H "Authorization: Bearer YOUR_API_KEY" \\
+  "${typeof window !== 'undefined' ? window.location.origin : ''}/api/v1/cdn/files?bucket=${activeBucket || ''}"
+
+# Download file via API
+curl -L -H "Authorization: Bearer YOUR_API_KEY" \\
+  "${typeof window !== 'undefined' ? window.location.origin : ''}/api/v1/cdn/files/FILE_TOKEN" -o output.bin`}</pre>
               </div>
             </motion.div>
           </motion.div>

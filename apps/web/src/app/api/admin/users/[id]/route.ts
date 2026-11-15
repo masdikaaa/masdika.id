@@ -43,6 +43,7 @@ export async function GET(req: Request, props: { params: Promise<{ id: string }>
         kubernetesClusters: true,
         databaseServices: true,
         appServices: true,
+        objectStorageServices: true,
       }
     });
 
@@ -163,7 +164,27 @@ export async function DELETE(req: Request, props: { params: Promise<{ id: string
       }
     }
 
-    // 5. Find all SecureMedia files for this user and delete physically
+    // 5. Cleanup Object Storage & Customer CDN Buckets on Customer RustFS
+    try {
+      const objServices = await prisma.objectStorageService.findMany({ where: { userId: user.id }, select: { id: true } });
+      if (objServices.length > 0) {
+        const { terminateObjectStorageInfrastructure } = await import('@/lib/customer-rustfs');
+        for (const objSvc of objServices) {
+          await terminateObjectStorageInfrastructure(objSvc.id).catch(() => {});
+        }
+      }
+      const cdnBuckets = await prisma.cdnBucket.findMany({ where: { userId: user.id }, select: { name: true } });
+      if (cdnBuckets.length > 0) {
+        const { deleteCustomerBucketCompletely } = await import('@/lib/customer-rustfs');
+        for (const b of cdnBuckets) {
+          await deleteCustomerBucketCompletely(b.name).catch(() => {});
+        }
+      }
+    } catch (e: any) {
+      console.warn('Admin User Deletion: Failed to cleanup Customer RustFS resources:', e?.message);
+    }
+
+    // 6. Find all SecureMedia files for this user and delete physically
     const secureFiles = await prisma.secureMedia.findMany({
       where: { userId: user.id, isFolder: false }
     });

@@ -6,12 +6,14 @@ export interface UserServicesCommitment {
   appMonthly: number;
   subMonthly: number;
   reservedIpMonthly: number;
+  objectStorageMonthly: number;
   totalMonthly: number;
   activeVpsCount: number;
   activeDbCount: number;
   activeAppCount: number;
   activeSubCount: number;
   activeIpCount: number;
+  activeObjectStorageCount: number;
   totalActiveCount: number;
 }
 
@@ -28,7 +30,7 @@ export async function getUserServicesCommitment(
   userId: number,
   tx: any = prisma
 ): Promise<UserServicesCommitment> {
-  const [activeVps, activeDb, activeApps, activeSubs, activeIps] = await Promise.all([
+  const [activeVps, activeDb, activeApps, activeSubs, activeIps, activeObj] = await Promise.all([
     tx.vpsService.findMany({
       where: {
         userId,
@@ -68,6 +70,13 @@ export async function getUserServicesCommitment(
       },
       select: { hourlyRate: true },
     }),
+    tx.objectStorageService.findMany({
+      where: {
+        userId,
+        status: { notIn: ["TERMINATED"] },
+      },
+      select: { monthlyPrice: true, hourlyRate: true, billingMode: true },
+    }),
   ]);
 
   const vpsMonthly = activeVps.reduce(
@@ -95,8 +104,13 @@ export async function getUserServicesCommitment(
     0
   );
 
-  const totalMonthly = vpsMonthly + dbMonthly + appMonthly + subMonthly + reservedIpMonthly;
-  const totalActiveCount = activeVps.length + activeDb.length + activeApps.length + activeSubs.length + activeIps.length;
+  const objectStorageMonthly = activeObj.reduce((sum: number, o: any) => {
+    const cost = o.monthlyPrice || Math.round((o.hourlyRate || 0) * 730);
+    return sum + (cost || 0);
+  }, 0);
+
+  const totalMonthly = vpsMonthly + dbMonthly + appMonthly + subMonthly + reservedIpMonthly + objectStorageMonthly;
+  const totalActiveCount = activeVps.length + activeDb.length + activeApps.length + activeSubs.length + activeIps.length + activeObj.length;
 
   return {
     vpsMonthly,
@@ -104,12 +118,14 @@ export async function getUserServicesCommitment(
     appMonthly,
     subMonthly,
     reservedIpMonthly,
+    objectStorageMonthly,
     totalMonthly,
     activeVpsCount: activeVps.length,
     activeDbCount: activeDb.length,
     activeAppCount: activeApps.length,
     activeSubCount: activeSubs.length,
     activeIpCount: activeIps.length,
+    activeObjectStorageCount: activeObj.length,
     totalActiveCount,
   };
 }
@@ -144,6 +160,7 @@ export async function assertSufficientCommitmentBalance({
     if (commitment.activeAppCount > 0) breakdownParts.push(`${commitment.activeAppCount} Managed App (Rp ${commitment.appMonthly.toLocaleString("id-ID")}/mo)`);
     if (commitment.activeSubCount > 0) breakdownParts.push(`${commitment.activeSubCount} Subscription/CDN (Rp ${commitment.subMonthly.toLocaleString("id-ID")}/mo)`);
     if (commitment.activeIpCount > 0) breakdownParts.push(`${commitment.activeIpCount} Reserved IP (Rp ${commitment.reservedIpMonthly.toLocaleString("id-ID")}/mo)`);
+    if (commitment.activeObjectStorageCount > 0) breakdownParts.push(`${commitment.activeObjectStorageCount} Object Storage (Rp ${commitment.objectStorageMonthly.toLocaleString("id-ID")}/mo)`);
 
     const activeDetails =
       commitment.totalMonthly > 0

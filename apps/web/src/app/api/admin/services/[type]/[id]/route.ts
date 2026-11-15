@@ -81,6 +81,18 @@ export async function DELETE(req: Request, props: { params: Promise<{ type: stri
           result = await prisma.appService.delete({ where: { id } });
           break;
         }
+        case 'object-storage': {
+          try {
+            const { terminateObjectStorageInfrastructure } = await import('@/lib/customer-rustfs');
+            await terminateObjectStorageInfrastructure(id);
+          } catch (err) {
+            console.warn(`[RustFS-Cleanup] Failed to delete object storage ${id} resources:`, err);
+          }
+          await prisma.objectStorageKey.deleteMany({ where: { serviceId: id } });
+          await prisma.objectStorageBucket.deleteMany({ where: { serviceId: id } });
+          result = await prisma.objectStorageService.delete({ where: { id } });
+          break;
+        }
         case 'kubernetes': 
           await prisma.vpsService.deleteMany({ where: { kubernetesClusterId: id } });
           result = await prisma.kubernetesCluster.delete({ where: { id } }); 
@@ -208,6 +220,35 @@ export async function DELETE(req: Request, props: { params: Promise<{ type: stri
             appSoft.user.name || 'Customer',
             appSoft.planName,
             appSoft.name
+          ).catch(console.error);
+        }
+        break;
+      }
+      case 'object-storage': {
+        const objSoft = await prisma.objectStorageService.findUnique({
+          where: { id },
+          include: { user: true }
+        });
+        if (objSoft) {
+          try {
+            const { terminateObjectStorageInfrastructure } = await import('@/lib/customer-rustfs');
+            await terminateObjectStorageInfrastructure(id);
+          } catch (err) {
+            console.warn(`[RustFS-Cleanup] Failed to terminate object storage ${id} resources:`, err);
+          }
+          await prisma.objectStorageKey.deleteMany({ where: { serviceId: id } });
+          await prisma.objectStorageBucket.deleteMany({ where: { serviceId: id } });
+        }
+        result = await prisma.objectStorageService.update({
+          where: { id },
+          data: { status: statusValue, terminationDate: new Date() }
+        });
+        if (objSoft?.user) {
+          sendTerminationEmail(
+            objSoft.user.email,
+            objSoft.user.name || 'Customer',
+            objSoft.planName,
+            objSoft.name
           ).catch(console.error);
         }
         break;

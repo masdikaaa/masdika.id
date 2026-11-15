@@ -42,6 +42,11 @@ export async function POST(req: NextRequest) {
         where: { id: Number(id) },
         data: updateData
       });
+    } else if (type === 'object-storage') {
+      await prisma.objectStorageService.update({
+        where: { id: Number(id) },
+        data: updateData
+      });
     } else {
        return NextResponse.json({ error: "Unknown service type" }, { status: 400 });
     }

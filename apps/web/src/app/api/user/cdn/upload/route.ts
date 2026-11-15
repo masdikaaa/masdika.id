@@ -8,7 +8,8 @@ import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import { requireAuth } from '@/lib/auth-middleware';
 import { getActiveSubscription } from "@/lib/subscription";
-import { uploadFileToRustFS } from "@/lib/rustfs";
+import { uploadStreamToCustomerRustFS } from "@/lib/customer-rustfs";
+import { resolveCustomerCdnBucket } from "@/lib/cdn-bucket";
 import { syncMediaToElastic } from "@/lib/sync-elasticsearch";
 import {
   sanitizeCdnFolderPath,
@@ -82,6 +83,12 @@ export async function POST(req: NextRequest) {
     }
     const isPublicHeader = req.headers.get("x-upload-is-public");
     const isPublic = isPublicHeader === null ? true : isPublicHeader === "true";
+
+    const requestedBucket = req.headers.get("x-upload-bucket");
+    const targetBucket = await resolveCustomerCdnBucket(userId, requestedBucket);
+    if (!targetBucket) {
+      return NextResponse.json({ error: "Target CDN bucket not found or access denied" }, { status: 404 });
+    }
 
     // SECURITY: Read actual file size on disk rather than trusting client headers
     const fileStats = await stat(tempPath).catch(() => null);
@@ -182,9 +189,16 @@ export async function POST(req: NextRequest) {
 
     await unlink(tempPath).catch(() => {});
 
-    // Upload to RustFS and cleanup local disk
+    // Upload to Customer RustFS and cleanup local disk
     try {
-      const uploaded = await uploadFileToRustFS(filePath, uniqueFilename, resolvedMime);
+      const encryptedStat = await stat(filePath);
+      const uploaded = await uploadStreamToCustomerRustFS(
+        targetBucket.name,
+        uniqueFilename,
+        createReadStream(filePath),
+        encryptedStat.size,
+        resolvedMime
+      );
       if (uploaded && existsSync(filePath)) {
         unlinkSync(filePath);
         try {
@@ -196,7 +210,7 @@ export async function POST(req: NextRequest) {
         } catch {}
       }
     } catch (e) {
-      console.warn('[User CDN Upload] RustFS upload failed, keeping on local disk as fallback:', e);
+      console.warn('[User CDN Upload] Customer RustFS upload failed, keeping on local disk as fallback:', e);
     }
 
     const shareToken = uuidv4();
@@ -206,6 +220,7 @@ export async function POST(req: NextRequest) {
         originalName,
         mimeType: resolvedMime,
         size: fileSize,
+        bucket: targetBucket.name,
         folderPath,
         isFolder: false,
         isPublic,

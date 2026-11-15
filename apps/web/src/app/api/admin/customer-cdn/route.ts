@@ -5,6 +5,7 @@ import path from "path";
 import { requireAuth } from "@/lib/auth-middleware";
 import { decryptDeterministic } from "@/lib/encryption";
 import { deleteFromRustFS } from "@/lib/rustfs";
+import { deleteFromCustomerRustFS, getCustomerRustFSConfig, getDefaultCdnBucketName } from "@/lib/customer-rustfs";
 
 export async function GET(req: NextRequest) {
   const auth = await requireAuth({ allowedRoles: ["ADMIN"] });
@@ -181,9 +182,16 @@ export async function DELETE(req: NextRequest) {
     await prisma.mediaRating.deleteMany({ where: { mediaId } });
     await prisma.mediaComment.deleteMany({ where: { mediaId } });
 
-    // Delete from RustFS & filesystem if not a directory
+    // Delete from Customer RustFS, Internal RustFS fallback & filesystem if not a directory
     if (!media.isFolder) {
-      deleteFromRustFS(media.filename).catch(() => {});
+      const cfg = await getCustomerRustFSConfig();
+      const targetBucket = media.bucket || (media.userId ? getDefaultCdnBucketName(media.userId, cfg.cdnBucketPrefix) : null);
+      if (targetBucket) {
+        deleteFromCustomerRustFS(targetBucket, media.filename).catch(() => {});
+      }
+      if (!media.bucket) {
+        deleteFromRustFS(media.filename).catch(() => {});
+      }
       const candidateDirs = [
         path.join(process.cwd(), "storage", "secure-media"),
         path.join(process.cwd(), "apps", "web", "storage", "secure-media")

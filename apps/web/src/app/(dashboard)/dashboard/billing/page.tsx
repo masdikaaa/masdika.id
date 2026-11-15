@@ -136,14 +136,16 @@ export default function CustomerBillingPage() {
   const activeVps = data.vpsServices.filter(s => s.status === 'RUNNING' || s.status === 'STOPPED' || s.status === 'SUSPENDED');
   const activeDbs = (data.databases || []).filter(d => d.status === 'RUNNING' || d.status === 'STOPPED' || d.status === 'SUSPENDED');
   const activeApps = (data.appServices || []).filter(a => a.status === 'RUNNING' || a.status === 'STOPPED' || a.status === 'SUSPENDED');
+  const activeObjStorages = ((data as any).objectStorageServices || []).filter((o: any) => o.status === 'RUNNING' || o.status === 'STOPPED' || o.status === 'SUSPENDED');
   const activeIps = data.reservedIps;
-  const totalActive = activeSubscriptions.length + activeVps.length + activeDbs.length + activeApps.length + activeIps.length;
+  const totalActive = activeSubscriptions.length + activeVps.length + activeDbs.length + activeApps.length + activeObjStorages.length + activeIps.length;
 
   const unifiedServices = [
     ...activeSubscriptions.map(s => ({ type: 'SUBSCRIPTION', data: s, key: `sub-${s.id}` })),
     ...activeVps.map(v => ({ type: 'VPS', data: v, key: `vps-${v.id}` })),
     ...activeDbs.map(db => ({ type: 'DATABASE', data: db, key: `db-${db.id}` })),
     ...activeApps.map(app => ({ type: 'APP', data: app, key: `app-${app.id}` })),
+    ...activeObjStorages.map((obj: any) => ({ type: 'OBJECT_STORAGE', data: obj, key: `obj-${obj.id}` })),
     ...activeIps.map(ip => ({ type: 'RESERVED_IP', data: ip, key: `ip-${ip.id}` }))
   ];
   
@@ -360,6 +362,46 @@ export default function CustomerBillingPage() {
                             <Link
                               href={`/dashboard/apps/${app.id}`}
                               className="px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-colors bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20"
+                            >
+                              Manage
+                            </Link>
+                          </div>
+                        </div>
+                      );
+
+                    } else if (type === 'OBJECT_STORAGE') {
+                      const obj = item.data;
+                      const isSuspended = obj.status === 'SUSPENDED';
+                      return (
+                        <div key={key} className={cn("flex items-center justify-between p-3 rounded-xl transition-colors border mb-1", isDark ? "hover:bg-white/[0.04] border-transparent hover:border-white/[0.08]" : "hover:bg-white border-transparent hover:border-slate-200/90")}>
+                          <div className="flex items-center gap-3 overflow-hidden">
+                            <HardDrive className="w-4 h-4 text-indigo-400 shrink-0" />
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className={cn("text-sm font-bold truncate", isDark ? "text-white" : "text-slate-900")}>{obj.name}</span>
+                                {isSuspended && (
+                                  <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-rose-500/15 text-rose-400 border border-rose-500/30">
+                                    Suspended (Grace Period 3 Hari)
+                                  </span>
+                                )}
+                              </div>
+                              <div className={cn("text-xs truncate", isDark ? "text-zinc-500" : "text-slate-500")}>
+                                OBJECT STORAGE ({obj.storageGb} GB) • {obj.billingMode === 'MONTHLY' ? `${formatRupiah(obj.monthlyPrice)}/bln` : `${formatRupiah(obj.hourlyRate)}/jam (PAYG)`}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0 pl-2">
+                            {isSuspended && (
+                              <button
+                                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                                className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-400 text-slate-950"
+                              >
+                                Top Up
+                              </button>
+                            )}
+                            <Link
+                              href={`/dashboard/object-storage/${obj.id}`}
+                              className="px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-colors bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border-indigo-500/20"
                             >
                               Manage
                             </Link>

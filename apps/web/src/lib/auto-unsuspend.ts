@@ -557,11 +557,71 @@ export async function attemptAutoUnsuspendApp(appId: number) {
   }
 }
 
+export async function attemptAutoUnsuspendObjectStorage(serviceId: number) {
+  try {
+    const obj = await prisma.objectStorageService.findUnique({
+      where: { id: serviceId },
+      include: { user: true },
+    });
+    if (!obj || !obj.user) return { success: false, message: 'Object Storage not found' };
+    if (obj.status !== 'SUSPENDED') return { success: false, message: 'Object Storage is not suspended' };
+
+    const isBillingSuspended = !obj.suspendReason || obj.suspendReason.toLowerCase().includes('insufficient balance');
+    if (!isBillingSuspended) {
+      return { success: false, unsuspended: false, reason: 'NON_BILLING_SUSPENSION' };
+    }
+
+    const cost = obj.hourlyRate > 0 ? obj.hourlyRate : 1;
+    if (obj.user.balance < cost) {
+      return { success: false, unsuspended: false, reason: 'INSUFFICIENT_BALANCE' };
+    }
+
+    await prisma.$transaction(async (tx) => {
+      const lockObj = await tx.objectStorageService.updateMany({
+        where: { id: obj.id, status: 'SUSPENDED' },
+        data: {
+          status: 'RUNNING',
+          suspendReason: null,
+          terminationDate: null,
+          accumulatedCost: { increment: cost },
+          lastBilledAt: new Date(),
+        },
+      });
+      if (lockObj.count === 0) throw new Error('ALREADY_UNSUSPENDED');
+
+      const updateResult = await tx.user.updateMany({
+        where: { id: obj.userId, balance: { gte: cost } },
+        data: { balance: { decrement: cost } },
+      });
+      if (updateResult.count === 0) throw new Error('INSUFFICIENT_BALANCE');
+    });
+
+    try {
+      const { unsuspendObjectStorageInfrastructure } = await import('@/lib/customer-rustfs');
+      await unsuspendObjectStorageInfrastructure(obj.id);
+    } catch (startErr) {
+      console.error(`[Auto-Unsuspend] Failed to re-enable RustFS keys for ObjectStorage ${obj.id}:`, startErr);
+    }
+
+    const email = decryptDeterministic(obj.user.email) || obj.user.email;
+    const name = decryptDeterministic(obj.user.name) || obj.user.name;
+    if (email) {
+      sendReactivatedEmail(email, name, obj.name, 'Object Storage').catch(console.error);
+      sendAdminServiceReactivatedEmail(name, email, obj.name, 'Object Storage').catch(console.error);
+    }
+
+    return { success: true, unsuspended: true };
+  } catch (err: any) {
+    return { success: false, message: err.message };
+  }
+}
+
 export async function attemptAutoUnsuspendAllForUser(userId: number) {
   let vpsCount = 0;
   let subCount = 0;
   let dbCount = 0;
   let appCount = 0;
+  let objCount = 0;
   const errors: any[] = [];
 
   try {
@@ -624,12 +684,25 @@ export async function attemptAutoUnsuspendAllForUser(userId: number) {
       const res = await attemptAutoUnsuspendApp(app.id);
       if (res.unsuspended) appCount++;
     }
+
+    const suspendedObjStorages = await prisma.objectStorageService.findMany({
+      where: {
+        userId,
+        status: 'SUSPENDED',
+      },
+      select: { id: true },
+    });
+
+    for (const obj of suspendedObjStorages) {
+      const res = await attemptAutoUnsuspendObjectStorage(obj.id);
+      if (res.unsuspended) objCount++;
+    }
   } catch (err) {
     console.error(`[Auto-Unsuspend] Failed to auto-unsuspend all for user ${userId}:`, err);
     errors.push(err);
   }
 
-  return { vpsCount, subCount, dbCount, appCount, errors };
+  return { vpsCount, subCount, dbCount, appCount, objCount, errors };
 }
 
 /**
@@ -690,6 +763,16 @@ export async function attemptAutoUnsuspendAll() {
     for (const app of suspendedApps) {
       const res = await attemptAutoUnsuspendApp(app.id);
       if (res.unsuspended) appCount++;
+    }
+
+    let objCount = 0;
+    const suspendedObjStorages = await prisma.objectStorageService.findMany({
+      where: { status: 'SUSPENDED' },
+      select: { id: true },
+    });
+    for (const obj of suspendedObjStorages) {
+      const res = await attemptAutoUnsuspendObjectStorage(obj.id);
+      if (res.unsuspended) objCount++;
     }
   } catch (err) {
     console.error('[Auto-Unsuspend] Global auto-unsuspend batch failed:', err);

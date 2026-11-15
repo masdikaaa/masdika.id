@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-middleware';
 import { testRustFSConnection } from '@/lib/rustfs';
+import { testCustomerRustFSConnection } from '@/lib/customer-rustfs';
 
 export async function POST(req: NextRequest) {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
@@ -9,6 +10,10 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json().catch(() => ({}));
+    if (body?.target === 'customer') {
+      const result = await testCustomerRustFSConnection(body);
+      return NextResponse.json(result);
+    }
     const result = await testRustFSConnection(body);
     return NextResponse.json(result);
   } catch (error: any) {

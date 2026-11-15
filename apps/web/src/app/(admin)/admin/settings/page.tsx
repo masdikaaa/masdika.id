@@ -52,10 +52,15 @@ export default function SettingsPage() {
   const [faviconKey, setFaviconKey] = useState(0); // to force refresh image
   useEffect(() => { setFaviconKey(Date.now()); }, []);
 
-  // RustFS State
+  // RustFS Internal State
   const [testingRustFS, setTestingRustFS] = useState(false);
   const [rustFSTestResult, setRustFSTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [showSecretKey, setShowSecretKey] = useState(false);
+
+  // RustFS Customer (File CDN & Object Storage) State
+  const [testingCustomerRustFS, setTestingCustomerRustFS] = useState(false);
+  const [customerRustFSTestResult, setCustomerRustFSTestResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [showCustomerSecretKey, setShowCustomerSecretKey] = useState(false);
 
   // Target Server / Bucket Migration State
   const [targetConfig, setTargetConfig] = useState({
@@ -129,6 +134,16 @@ export default function SettingsPage() {
     rustfs_media_bucket: "masdika-media",
     rustfs_ticket_bucket: "masdika-ticket",
     rustfs_enabled: false,
+
+    customer_rustfs_enabled: false,
+    customer_rustfs_endpoint: "",
+    customer_rustfs_public_endpoint: "",
+    customer_rustfs_console_url: "",
+    customer_rustfs_access_key: "",
+    customer_rustfs_secret_key: "",
+    customer_rustfs_cdn_bucket_prefix: "masdika-cdn-u",
+    object_storage_enabled: true,
+    object_storage_rate_per_gb: "500",
 
     // Managed Database (Kubernetes API) Cluster Settings
     managed_db_auth_mode: "KUBECONFIG",
@@ -209,6 +224,16 @@ export default function SettingsPage() {
             rustfs_media_bucket: data.settings?.rustfs_media_bucket || "masdika-media",
             rustfs_ticket_bucket: data.settings?.rustfs_ticket_bucket || "masdika-ticket",
             rustfs_enabled: data.settings?.rustfs_enabled !== undefined ? (data.settings.rustfs_enabled === "true" || data.settings.rustfs_enabled === true) : false,
+
+            customer_rustfs_enabled: data.settings?.customer_rustfs_enabled !== undefined ? (data.settings.customer_rustfs_enabled === "true" || data.settings.customer_rustfs_enabled === true) : false,
+            customer_rustfs_endpoint: data.settings?.customer_rustfs_endpoint || "",
+            customer_rustfs_public_endpoint: data.settings?.customer_rustfs_public_endpoint || "",
+            customer_rustfs_console_url: data.settings?.customer_rustfs_console_url || "",
+            customer_rustfs_access_key: data.settings?.customer_rustfs_access_key || "",
+            customer_rustfs_secret_key: data.settings?.customer_rustfs_secret_key || "",
+            customer_rustfs_cdn_bucket_prefix: data.settings?.customer_rustfs_cdn_bucket_prefix || "masdika-cdn-u",
+            object_storage_enabled: data.settings?.object_storage_enabled !== "false",
+            object_storage_rate_per_gb: data.settings?.object_storage_rate_per_gb || "500",
 
             managed_db_auth_mode: data.settings?.managed_db_auth_mode || "KUBECONFIG",
             managed_db_api_server: data.settings?.managed_db_api_server || "",
@@ -315,6 +340,38 @@ export default function SettingsPage() {
       setRustFSTestResult({ success: false, message: e?.message || "Connection failed" });
     } finally {
       setTestingRustFS(false);
+    }
+  };
+
+  const handleTestCustomerRustFS = async () => {
+    setTestingCustomerRustFS(true);
+    setCustomerRustFSTestResult(null);
+    const toastId = toast.loading("Testing connection to RustFS Customer...");
+    try {
+      const res = await fetch('/api/admin/rustfs/test-connection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          target: 'customer',
+          endpoint: formData.customer_rustfs_endpoint,
+          publicEndpoint: formData.customer_rustfs_public_endpoint,
+          accessKey: formData.customer_rustfs_access_key,
+          secretKey: formData.customer_rustfs_secret_key,
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(data.message, { id: toastId });
+        setCustomerRustFSTestResult({ success: true, message: data.message });
+      } else {
+        toast.error(data.message || "Connection failed", { id: toastId });
+        setCustomerRustFSTestResult({ success: false, message: data.message || "Failed to connect to RustFS Customer" });
+      }
+    } catch (e: any) {
+      toast.error(e?.message || "Connection failed", { id: toastId });
+      setCustomerRustFSTestResult({ success: false, message: e?.message || "Connection failed" });
+    } finally {
+      setTestingCustomerRustFS(false);
     }
   };
 
@@ -1510,9 +1567,9 @@ export default function SettingsPage() {
                         <HardDrive className="w-5 h-5 sm:w-6 sm:h-6" />
                       </div>
                       <div className="min-w-0">
-                        <h2 className={cn("text-lg sm:text-xl md:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>RustFS S3 Object Storage</h2>
+                        <h2 className={cn("text-lg sm:text-xl md:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>RustFS Internal (Masdika Assets &amp; Secure Media)</h2>
                         <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
-                          Distributed S3-compatible high-performance object storage for File CDN & videos.
+                          Internal S3-compatible object storage exclusively for Masdika website media, tickets &amp; admin Secure Media.
                         </p>
                       </div>
                     </div>
@@ -1656,7 +1713,201 @@ export default function SettingsPage() {
                       className="flex items-center justify-center gap-2 px-6 py-2.5 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 shadow-sm bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 cursor-pointer"
                     >
                       {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-3.5 h-3.5" />}
-                      {saving ? "Saving..." : "Save RustFS Settings"}
+                      {saving ? "Saving..." : "Save RustFS Internal"}
+                    </button>
+                  </div>
+                </motion.div>
+
+                {/* RustFS Customer (File CDN & Object Storage) Card */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+                  className={cn("rounded-2xl p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
+                >
+                  <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 sm:pb-6 relative z-10", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                    <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
+                      <div className={cn("w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 border", isDark ? "bg-indigo-500/10 border-indigo-500/20 text-indigo-400" : "bg-indigo-50 border-indigo-200 text-indigo-700")}>
+                        <HardDrive className="w-5 h-5 sm:w-6 sm:h-6" />
+                      </div>
+                      <div className="min-w-0">
+                        <h2 className={cn("text-lg sm:text-xl md:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>RustFS Customer (File CDN &amp; Object Storage)</h2>
+                        <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                          Dedicated customer-isolated RustFS cluster for Customer File CDN buckets &amp; AWS S3-compatible Object Storage.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                      <button
+                        type="button"
+                        onClick={handleTestCustomerRustFS}
+                        disabled={testingCustomerRustFS}
+                        className={cn("w-full sm:w-auto justify-center px-3.5 py-2 rounded-xl text-xs font-bold transition-all border flex items-center gap-2 cursor-pointer", isDark ? "bg-white/5 border-white/10 hover:bg-white/10 text-zinc-300 hover:text-white" : "bg-slate-100 border-slate-200 hover:bg-slate-200 text-slate-700")}
+                      >
+                        <RefreshCw className={cn("w-3.5 h-3.5", testingCustomerRustFS && "animate-spin")} />
+                        <span>{testingCustomerRustFS ? "Testing..." : "Test Connection"}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {customerRustFSTestResult && (
+                    <div className={cn("p-4 rounded-xl border flex items-start gap-3", customerRustFSTestResult.success ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" : "bg-red-500/10 border-red-500/30 text-red-400")}>
+                      {customerRustFSTestResult.success ? <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" /> : <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />}
+                      <div className="text-xs md:text-sm">
+                        <span className="font-bold">{customerRustFSTestResult.success ? "Connection Verified" : "Connection Failed"}: </span>
+                        <span>{customerRustFSTestResult.message}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-6 relative z-20">
+                    {/* Toggle Enable Customer RustFS */}
+                    <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-xl border transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
+                      <div className="pr-4">
+                        <h3 className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>Enable RustFS Customer Cluster</h3>
+                        <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                          Routes all Customer File CDN buckets &amp; Object Storage services to this dedicated RustFS cluster.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, customer_rustfs_enabled: !formData.customer_rustfs_enabled })}
+                        className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-transparent transition-colors focus:outline-none ${formData.customer_rustfs_enabled ? 'bg-indigo-500' : 'bg-zinc-700'}`}
+                      >
+                        <span className="sr-only">Toggle Customer RustFS</span>
+                        <span aria-hidden="true" className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white ring-0 transition duration-200 ease-in-out ${formData.customer_rustfs_enabled ? 'translate-x-2.5' : '-translate-x-2.5'}`} />
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div className="space-y-2">
+                        <label className={labelClass}>Internal S3 API Endpoint *</label>
+                        <input
+                          type="text"
+                          name="customer_rustfs_endpoint"
+                          value={formData.customer_rustfs_endpoint}
+                          onChange={handleChange}
+                          placeholder="http://192.168.x.x:9000"
+                          className={inputClass}
+                        />
+                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Private LAN/backend S3 endpoint used by Masdika server (port 9000)</p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className={labelClass}>Public S3 API Domain *</label>
+                        <input
+                          type="text"
+                          name="customer_rustfs_public_endpoint"
+                          value={formData.customer_rustfs_public_endpoint}
+                          onChange={handleChange}
+                          placeholder="https://s2.yourdomain.com"
+                          className={inputClass}
+                        />
+                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Public S3 endpoint shown to customers &amp; used for presigned S3 URLs</p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className={labelClass}>Customer CDN Bucket Prefix *</label>
+                        <input
+                          type="text"
+                          name="customer_rustfs_cdn_bucket_prefix"
+                          value={formData.customer_rustfs_cdn_bucket_prefix}
+                          onChange={handleChange}
+                          placeholder="masdika-cdn-u"
+                          className={inputClass}
+                        />
+                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Default isolated bucket prefix per user (e.g. masdika-cdn-u12)</p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className={labelClass}>RustFS Web Console URL</label>
+                        <input
+                          type="text"
+                          name="customer_rustfs_console_url"
+                          value={formData.customer_rustfs_console_url}
+                          onChange={handleChange}
+                          placeholder="http://192.168.x.x:9001"
+                          className={inputClass}
+                        />
+                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Optional admin reference URL for RustFS Web UI</p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className={labelClass}>Access Key ID *</label>
+                        <input
+                          type="text"
+                          name="customer_rustfs_access_key"
+                          value={formData.customer_rustfs_access_key}
+                          onChange={handleChange}
+                          placeholder="Customer RustFS Admin Access Key"
+                          className={inputClass}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className={labelClass}>Secret Access Key *</label>
+                        <div className="relative">
+                          <input
+                            type={showCustomerSecretKey ? "text" : "password"}
+                            name="customer_rustfs_secret_key"
+                            value={formData.customer_rustfs_secret_key}
+                            onChange={handleChange}
+                            placeholder="••••••••••••••••"
+                            className={cn(inputClass, "pr-10")}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowCustomerSecretKey(!showCustomerSecretKey)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white p-1 cursor-pointer"
+                          >
+                            {showCustomerSecretKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Object Storage Product Settings */}
+                    <div className={cn("pt-4 border-t grid grid-cols-1 md:grid-cols-2 gap-5 items-center", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                      <div className={cn("flex items-center justify-between gap-4 p-4 rounded-xl border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
+                        <div>
+                          <h4 className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>Enable Object Storage Product</h4>
+                          <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>Allow customers to deploy S3-compatible Object Storage</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, object_storage_enabled: !formData.object_storage_enabled })}
+                          className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-transparent transition-colors focus:outline-none ${formData.object_storage_enabled ? 'bg-indigo-500' : 'bg-zinc-700'}`}
+                        >
+                          <span className="sr-only">Toggle Object Storage Product</span>
+                          <span aria-hidden="true" className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white ring-0 transition duration-200 ease-in-out ${formData.object_storage_enabled ? 'translate-x-2.5' : '-translate-x-2.5'}`} />
+                        </button>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className={labelClass}>Object Storage Rate (Rp / GB / Month) *</label>
+                        <input
+                          type="number"
+                          min={1}
+                          name="object_storage_rate_per_gb"
+                          value={formData.object_storage_rate_per_gb}
+                          onChange={handleChange}
+                          placeholder="500"
+                          className={inputClass}
+                        />
+                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>Base monthly pricing per GB for PAYG Object Storage plans</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={cn("pt-6 border-t flex items-center justify-between flex-wrap gap-4", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                    <p className={cn("text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>
+                      Public S3 domain &amp; credentials take effect immediately for all Customer CDN &amp; Object Storage routes.
+                    </p>
+                    <button
+                      onClick={handleSave}
+                      disabled={saving}
+                      className="flex items-center justify-center gap-2 px-6 py-2.5 font-semibold text-xs rounded-lg transition-all disabled:opacity-50 shadow-sm bg-indigo-500 hover:bg-indigo-400 active:bg-indigo-600 text-white cursor-pointer"
+                    >
+                      {saving ? <div className={cn("w-5 h-5 border-2 border-t-white rounded-full animate-spin", isDark ? "border-white/20" : "border-slate-200")} /> : <Save className="w-3.5 h-3.5" />}
+                      {saving ? "Saving..." : "Save Customer RustFS"}
                     </button>
                   </div>
                 </motion.div>

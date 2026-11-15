@@ -98,6 +98,18 @@ export async function checkAndSendLowBalanceAlerts(): Promise<LowBalanceCheckRes
       },
     });
 
+    // Category F: Object Storage Services (Running or Stopped with hourlyRate > 0)
+    const activeObjectStorage = await prisma.objectStorageService.findMany({
+      where: {
+        status: { in: ["RUNNING", "STOPPED"] },
+        hourlyRate: { gt: 0 },
+        user: { isSuspended: false },
+      },
+      include: {
+        user: { select: { id: true, name: true, email: true, balance: true } },
+      },
+    });
+
     // 3. Pricing lookup for effective rates (e.g. stopped VPS storage rate)
     const pricingItems = await prisma.vpsPricing.findMany();
     const pricing: Record<string, number> = {};
@@ -202,6 +214,16 @@ export async function checkAndSendLowBalanceAlerts(): Promise<LowBalanceCheckRes
         hourlyRate: app.hourlyRate,
         ipAddress: app.port ? `${appHost}:${app.port}` : appHost,
         publicIp: appHost || null,
+      });
+    }
+
+    for (const obj of activeObjectStorage) {
+      addService(obj.user, {
+        name: `${obj.name} (${obj.storageGb} GB)`,
+        type: "Object Storage",
+        hourlyRate: obj.hourlyRate,
+        ipAddress: obj.planName,
+        publicIp: null,
       });
     }
 

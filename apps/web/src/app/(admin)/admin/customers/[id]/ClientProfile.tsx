@@ -575,6 +575,39 @@ export default function ClientProfile({ userId }: { userId: string }) {
       createdAt: app.createdAt,
       rawData: app
     })) || []),
+    ...(user.objectStorageServices?.map((obj: any) => ({
+      id: obj.id,
+      category: 'Object Storage',
+      type: 'object-storage',
+      name: obj.name || `Object Storage #${obj.id}`,
+      detail: (
+        <div className="flex flex-col gap-0.5 mt-0.5">
+          <div className="text-sm font-medium truncate">
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-2">
+                <span className={cn("font-semibold", isDark ? "text-zinc-300" : "text-slate-800")}>
+                  {obj.billingMode === 'PAYG' ? 'Pay As You Go' : 'Monthly'}
+                </span>
+              </div>
+              <span className={cn(isDark ? "text-zinc-300" : "text-slate-600")}>
+                Expires: {obj.terminationDate ? new Date(obj.terminationDate).toLocaleDateString() : 'N/A'}
+              </span>
+              <span className={cn("text-[11px] font-normal font-mono", isDark ? "text-zinc-400" : "text-slate-500")}>
+                Registration Date: {obj.createdAt ? new Date(obj.createdAt).toLocaleDateString() : 'N/A'}
+              </span>
+            </div>
+          </div>
+          <div className={cn("text-[11px] font-mono truncate", isDark ? "text-zinc-500" : "text-slate-500")}>
+            {obj.planName} • {obj.storageGb} GB S3 Quota • Rp {obj.hourlyRate?.toLocaleString('id-ID')}/hr
+          </div>
+        </div>
+      ),
+      status: obj.status,
+      suspendReason: obj.suspendReason,
+      icon: <Database className={cn("w-4 h-4", isDark ? "text-indigo-400" : "text-indigo-700")} />,
+      createdAt: obj.createdAt,
+      rawData: obj
+    })) || []),
 
   ] : [];
 
