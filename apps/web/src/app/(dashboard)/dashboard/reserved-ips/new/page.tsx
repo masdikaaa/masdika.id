@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import {
-  ArrowLeft,
+  ChevronLeft,
   Globe,
   Lock,
   ShieldCheck,
@@ -13,7 +13,7 @@ import {
   Sparkles,
   Loader2,
   CheckCircle2,
-  Zap,
+  Rocket,
   Server,
   AlertCircle,
 } from 'lucide-react';
@@ -93,24 +93,29 @@ export default function AllocateElasticIpPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 pb-12">
-      {/* Back Navigation & Title */}
-      <div className="space-y-2">
+    <div className="space-y-6 max-w-full pb-14">
+      {/* Back Navigation */}
+      <div>
         <Link
           href="/dashboard/reserved-ips"
           className={cn(
-            'inline-flex items-center gap-1.5 text-xs font-medium transition-colors',
-            isDark ? 'text-zinc-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
+            'inline-flex items-center gap-2 text-xs font-medium px-3.5 py-2 rounded-xl transition-all border w-fit',
+            isDark
+              ? 'text-zinc-400 hover:text-white bg-[#0a0a0c] hover:bg-white/[0.04] border-white/[0.08] hover:border-cyan-500/40'
+              : 'text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border-slate-200/90 shadow-2xs'
           )}
         >
-          <ArrowLeft className="w-3.5 h-3.5" />
+          <ChevronLeft className="w-4 h-4" />
           Back to Elastic Static IPs
         </Link>
+      </div>
 
+      {/* Title */}
+      <div className="space-y-1">
         <div className="flex flex-wrap items-center gap-2.5">
           <h1
             className={cn(
-              'text-2xl font-bold tracking-tight',
+              'text-lg sm:text-2xl font-bold tracking-tight',
               isDark ? 'text-white' : 'text-slate-900'
             )}
           >
@@ -128,16 +133,16 @@ export default function AllocateElasticIpPage() {
             Auto-Assigned from Pool
           </span>
         </div>
-        <p className={cn('text-sm', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+        <p className={cn('text-xs sm:text-sm', isDark ? 'text-zinc-400' : 'text-slate-600')}>
           Choose your IP protocol version. Our system automatically assigns an available static
           public IP from the pool and locks it permanently to your account.
         </p>
       </div>
 
-      {/* 2-Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+      {/* 2-Column Full-Space Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left: Configuration */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-8 space-y-6">
           {/* Protocol Selector */}
           <div
             className={cn(
@@ -183,14 +188,7 @@ export default function AllocateElasticIpPage() {
                     )}
                   >
                     <div className="flex items-center justify-between mb-3">
-                      <span
-                        className={cn(
-                          'inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold',
-                          version === 4
-                            ? 'bg-cyan-500/15 text-cyan-400'
-                            : 'bg-purple-500/15 text-purple-400'
-                        )}
-                      >
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold bg-cyan-500/15 text-cyan-400">
                         IPv{version} Public
                       </span>
                       {isSelected && <CheckCircle2 className="w-5 h-5 text-cyan-400" />}
@@ -276,7 +274,7 @@ export default function AllocateElasticIpPage() {
                   isDark ? 'bg-zinc-900/50 border-white/[0.06]' : 'bg-slate-50 border-slate-200'
                 )}
               >
-                <div className="flex items-center gap-2 text-sm font-semibold text-emerald-400">
+                <div className="flex items-center gap-2 text-sm font-semibold text-cyan-400">
                   <Receipt className="w-4 h-4" />
                   Independent PAYG Running Invoice
                 </div>
@@ -293,7 +291,7 @@ export default function AllocateElasticIpPage() {
                   isDark ? 'bg-zinc-900/50 border-white/[0.06]' : 'bg-slate-50 border-slate-200'
                 )}
               >
-                <div className="flex items-center gap-2 text-sm font-semibold text-amber-400">
+                <div className="flex items-center gap-2 text-sm font-semibold text-cyan-400">
                   <Server className="w-4 h-4" />
                   Hot-Swappable Across VPS
                 </div>
@@ -309,7 +307,7 @@ export default function AllocateElasticIpPage() {
                   isDark ? 'bg-zinc-900/50 border-white/[0.06]' : 'bg-slate-50 border-slate-200'
                 )}
               >
-                <div className="flex items-center gap-2 text-sm font-semibold text-purple-400">
+                <div className="flex items-center gap-2 text-sm font-semibold text-cyan-400">
                   <ShieldCheck className="w-4 h-4" />
                   Account Quota Protection
                 </div>
@@ -323,7 +321,7 @@ export default function AllocateElasticIpPage() {
         </div>
 
         {/* Right: Sticky Allocation Summary */}
-        <div className="lg:sticky lg:top-6">
+        <div className="lg:col-span-4 lg:sticky lg:top-6">
           <div
             className={cn(
               'rounded-2xl border p-6 space-y-5',
@@ -419,7 +417,7 @@ export default function AllocateElasticIpPage() {
                 </>
               ) : (
                 <>
-                  <Zap className="w-4 h-4" />
+                  <Rocket className="w-4 h-4" />
                   Allocate IPv{selectedVersion} Now
                 </>
               )}

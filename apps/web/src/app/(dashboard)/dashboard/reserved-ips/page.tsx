@@ -16,7 +16,6 @@ import {
   Lock,
   ShieldCheck,
   Receipt,
-  Sparkles,
   Loader2,
   X,
   ArrowRight,
@@ -54,17 +53,6 @@ interface VpsItem {
   vpcIp?: string;
 }
 
-interface PoolStatus {
-  ipv4: {
-    availableCount: number;
-    pricePerHour: number;
-  };
-  ipv6: {
-    availableCount: number;
-    pricePerHour: number;
-  };
-}
-
 const MAX_ELASTIC_IP_QUOTA = 5;
 
 function isIpv6Address(ip: string): boolean {
@@ -77,19 +65,12 @@ export default function ElasticIpsPage() {
 
   const [ips, setIps] = useState<ReservedIp[]>([]);
   const [vpsList, setVpsList] = useState<VpsItem[]>([]);
-  const [poolStatus, setPoolStatus] = useState<PoolStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'ATTACHED' | 'AVAILABLE'>('ALL');
-
-  // Allocate Modal State
-  const [isAllocateModalOpen, setIsAllocateModalOpen] = useState(false);
-  const [selectedVersion, setSelectedVersion] = useState<4 | 6>(4);
-  const [allocating, setAllocating] = useState(false);
-  const [loadingPool, setLoadingPool] = useState(false);
 
   // Attach Modal State
   const [attachingIp, setAttachingIp] = useState<ReservedIp | null>(null);
@@ -130,24 +111,8 @@ export default function ElasticIpsPage() {
     }
   };
 
-  const fetchPoolStatus = async () => {
-    setLoadingPool(true);
-    try {
-      const res = await fetch('/api/user/reserved-ips/pool-status');
-      const data = await res.json();
-      if (res.ok && data?.success) {
-        setPoolStatus(data.data);
-      }
-    } catch {
-      // Non-fatal; user still sees fallback pricing
-    } finally {
-      setLoadingPool(false);
-    }
-  };
-
   useEffect(() => {
     fetchData();
-    fetchPoolStatus();
   }, []);
 
   const handleCopy = (value: string, key: string) => {
@@ -155,42 +120,6 @@ export default function ElasticIpsPage() {
     setCopiedKey(key);
     toast.success('IP address copied to clipboard');
     setTimeout(() => setCopiedKey(null), 2000);
-  };
-
-  const openAllocateModal = () => {
-    setIsAllocateModalOpen(true);
-    fetchPoolStatus();
-  };
-
-  const handleAllocate = async () => {
-    if (ips.length >= MAX_ELASTIC_IP_QUOTA) {
-      toast.error(`Quota exceeded: Maximum ${MAX_ELASTIC_IP_QUOTA} Elastic IPs allowed per account`);
-      return;
-    }
-
-    setAllocating(true);
-    try {
-      const res = await fetch('/api/user/reserved-ips', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ version: selectedVersion }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        toast.error(data.error || 'Failed to allocate Elastic IP');
-        return;
-      }
-
-      const assignedLabel = data?.ip?.publicIp || data?.ip?.ipAddress || 'Static IP';
-      toast.success(`Elastic IP ${assignedLabel} allocated and locked to your account`);
-      setIsAllocateModalOpen(false);
-      await Promise.all([fetchData(), fetchPoolStatus()]);
-    } catch {
-      toast.error('Network error while allocating Elastic IP');
-    } finally {
-      setAllocating(false);
-    }
   };
 
   const handleAttach = async () => {
@@ -256,7 +185,7 @@ export default function ElasticIpsPage() {
       } else {
         toast.success('Elastic IP permanently released');
         setReleasingIp(null);
-        await Promise.all([fetchData(), fetchPoolStatus()]);
+        await fetchData();
       }
     } catch {
       toast.error('Failed to release Elastic IP');
@@ -291,7 +220,7 @@ export default function ElasticIpsPage() {
     toast.success(`Released ${successCount} unattached Elastic IP(s)`);
     setIsBulkReleaseOpen(false);
     setBulkReleasing(false);
-    await Promise.all([fetchData(), fetchPoolStatus()]);
+    await fetchData();
   };
 
   const filteredIps = useMemo(() => {
@@ -310,7 +239,6 @@ export default function ElasticIpsPage() {
     });
   }, [ips, searchQuery, statusFilter]);
 
-  const activePoolInfo = selectedVersion === 4 ? poolStatus?.ipv4 : poolStatus?.ipv6;
   const quotaReached = ips.length >= MAX_ELASTIC_IP_QUOTA;
 
   return (
@@ -360,19 +288,22 @@ export default function ElasticIpsPage() {
               Release Unattached ({unattachedIps.length})
             </button>
           )}
-          <button
-            onClick={openAllocateModal}
-            disabled={quotaReached}
-            className={cn(
-              'inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg',
-              quotaReached
-                ? 'bg-zinc-700 text-zinc-400 cursor-not-allowed shadow-none'
-                : 'bg-cyan-400 hover:bg-cyan-300 text-zinc-950 shadow-cyan-500/20'
-            )}
-          >
-            <Plus className="w-4 h-4" />
-            Allocate Elastic IP
-          </button>
+          {quotaReached ? (
+            <span
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-zinc-700 text-zinc-400 cursor-not-allowed"
+            >
+              <Plus className="w-4 h-4" />
+              Quota Reached ({MAX_ELASTIC_IP_QUOTA}/{MAX_ELASTIC_IP_QUOTA})
+            </span>
+          ) : (
+            <Link
+              href="/dashboard/reserved-ips/new"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg bg-cyan-400 hover:bg-cyan-300 text-zinc-950 shadow-cyan-500/20"
+            >
+              <Plus className="w-4 h-4" />
+              Allocate Elastic IP
+            </Link>
+          )}
         </div>
       </div>
 
@@ -571,13 +502,13 @@ export default function ElasticIpsPage() {
             Allocate a static public IPv4 or IPv6 address automatically from our pool. Your IP
             never changes and can be attached to any Cloud VPS on demand.
           </p>
-          <button
-            onClick={openAllocateModal}
+          <Link
+            href="/dashboard/reserved-ips/new"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-zinc-950 font-semibold text-sm transition-all shadow-lg shadow-cyan-500/20"
           >
             <Plus className="w-4 h-4" />
             Allocate Your First Elastic IP
-          </button>
+          </Link>
         </div>
       ) : filteredIps.length === 0 ? (
         <div
@@ -620,14 +551,7 @@ export default function ElasticIpsPage() {
                   {/* Left: IP Info & Badges */}
                   <div className="space-y-3 min-w-0">
                     <div className="flex flex-wrap items-center gap-2.5">
-                      <span
-                        className={cn(
-                          'inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold uppercase tracking-wider',
-                          isIpv6
-                            ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
-                            : 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'
-                        )}
-                      >
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold uppercase tracking-wider bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
                         {isIpv6 ? 'IPv6' : 'IPv4'}
                       </span>
 
@@ -809,142 +733,6 @@ export default function ElasticIpsPage() {
               </div>
             );
           })}
-        </div>
-      )}
-
-      {/* Allocate Elastic IP Modal */}
-      {isAllocateModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div
-            className={cn(
-              'w-full max-w-lg rounded-2xl border p-6 shadow-2xl space-y-5',
-              isDark ? 'bg-[#111115] border-white/[0.1]' : 'bg-white border-slate-200'
-            )}
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-cyan-400" />
-                  <h2 className={cn('text-lg font-bold', isDark ? 'text-white' : 'text-slate-900')}>
-                    Allocate Elastic Static IP
-                  </h2>
-                </div>
-                <p className={cn('text-xs mt-1', isDark ? 'text-zinc-400' : 'text-slate-600')}>
-                  An available static public IP will be automatically assigned from our pool and
-                  permanently locked to your account.
-                </p>
-              </div>
-              <button
-                onClick={() => setIsAllocateModalOpen(false)}
-                className={cn(
-                  'p-1.5 rounded-lg transition-colors',
-                  isDark ? 'text-zinc-400 hover:text-white hover:bg-white/[0.06]' : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'
-                )}
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Protocol Selection */}
-            <div className="grid grid-cols-2 gap-3">
-              {([4, 6] as const).map((ver) => {
-                const isSelected = selectedVersion === ver;
-                const info = ver === 4 ? poolStatus?.ipv4 : poolStatus?.ipv6;
-                const available = info?.availableCount ?? null;
-                const price = info?.pricePerHour ?? (ver === 4 ? 21 : 7);
-
-                return (
-                  <button
-                    key={ver}
-                    type="button"
-                    onClick={() => setSelectedVersion(ver)}
-                    className={cn(
-                      'text-left p-4 rounded-xl border transition-all',
-                      isSelected
-                        ? 'border-cyan-400 bg-cyan-500/10 ring-1 ring-cyan-400/40'
-                        : isDark
-                        ? 'border-white/[0.08] bg-zinc-900/60 hover:border-white/[0.18]'
-                        : 'border-slate-200 bg-slate-50 hover:border-slate-300'
-                    )}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span
-                        className={cn(
-                          'text-sm font-bold',
-                          isSelected ? 'text-cyan-400' : isDark ? 'text-white' : 'text-slate-900'
-                        )}
-                      >
-                        IPv{ver} Public
-                      </span>
-                      <span className="text-xs font-semibold text-cyan-400">
-                        {formatRupiah(price)}/hr
-                      </span>
-                    </div>
-                    <p className={cn('text-xs', isDark ? 'text-zinc-400' : 'text-slate-600')}>
-                      {loadingPool
-                        ? 'Checking pool...'
-                        : available !== null
-                        ? `${available} address${available === 1 ? '' : 'es'} available`
-                        : 'Auto-assigned from pool'}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Info Box */}
-            <div
-              className={cn(
-                'rounded-xl border p-3.5 space-y-1.5 text-xs',
-                isDark
-                  ? 'bg-zinc-900/70 border-white/[0.06] text-zinc-300'
-                  : 'bg-slate-50 border-slate-200 text-slate-700'
-              )}
-            >
-              <div className="flex items-center gap-2 font-semibold text-cyan-400">
-                <Lock className="w-3.5 h-3.5" />
-                Auto-Assigned & Permanently Static
-              </div>
-              <p className={isDark ? 'text-zinc-400' : 'text-slate-600'}>
-                Just like AWS Elastic IP, you cannot hand-pick a specific IP. Once allocated, your
-                assigned IP remains static until you release it and is billed independently via its
-                own <span className="font-semibold">PAYG Running</span> invoice.
-              </p>
-            </div>
-
-            <div className="flex items-center justify-between pt-2">
-              <Link
-                href="/dashboard/reserved-ips/new"
-                className="text-xs font-medium text-cyan-400 hover:text-cyan-300"
-              >
-                Open full allocation page
-              </Link>
-              <div className="flex items-center gap-2.5">
-                <button
-                  onClick={() => setIsAllocateModalOpen(false)}
-                  className={cn(
-                    'px-4 py-2 rounded-xl text-sm font-medium border transition-colors',
-                    isDark
-                      ? 'border-white/[0.08] text-zinc-300 hover:bg-white/[0.05]'
-                      : 'border-slate-200 text-slate-700 hover:bg-slate-100'
-                  )}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleAllocate}
-                  disabled={
-                    allocating ||
-                    (activePoolInfo !== undefined && activePoolInfo.availableCount <= 0)
-                  }
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-cyan-400 hover:bg-cyan-300 text-zinc-950 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  {allocating && <Loader2 className="w-4 h-4 animate-spin" />}
-                  {allocating ? 'Allocating...' : `Allocate IPv${selectedVersion}`}
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
       )}
 
