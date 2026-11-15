@@ -141,8 +141,8 @@ export default function AdminInvoicesPage() {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(amount);
   };
 
-  const getStatusBadge = (status: string) => {
-    return <StatusBadge status={status} />;
+  const getStatusBadge = (status: string, reference?: string | null) => {
+    return <StatusBadge status={status} reference={reference} />;
   };
 
   const handlePrint = () => {
@@ -455,7 +455,7 @@ export default function AdminInvoicesPage() {
                       </div>
                     </td>
                     <td className="px-3.5 py-2.5 whitespace-nowrap">
-                      {getStatusBadge(invoice.status)}
+                      {getStatusBadge(invoice.status, invoice.reference)}
                     </td>
                     <td className="px-3.5 py-2.5 text-right whitespace-nowrap">
                       {new Date(invoice.createdAt).toLocaleDateString('id-ID', {
@@ -536,7 +536,7 @@ export default function AdminInvoicesPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className={cn("p-4 rounded-2xl border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                   <div className={cn("text-sm mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>Status</div>
-                  <div>{getStatusBadge(selectedInvoiceDetails.status)}</div>
+                  <div>{getStatusBadge(selectedInvoiceDetails.status, selectedInvoiceDetails.reference)}</div>
                 </div>
                 <div className={cn("p-4 rounded-2xl border", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                   <div className={cn("text-sm mb-1", isDark ? "text-zinc-400" : "text-slate-500")}>Total Amount</div>

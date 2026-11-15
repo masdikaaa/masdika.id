@@ -1,7 +1,14 @@
 import { CheckCircle, Clock, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export function StatusBadge({ status, className }: { status: string; className?: string }) {
+export function StatusBadge({ status, reference, className }: { status: string; reference?: string | null; className?: string }) {
+  if (reference === 'PAYG_RUNNING' || status === 'PAYG_RUNNING') {
+    return (
+      <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/25 whitespace-nowrap", className)}>
+        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" /> PAYG RUNNING
+      </span>
+    );
+  }
   switch (status) {
     case 'PAID':
       return (

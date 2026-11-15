@@ -306,7 +306,7 @@ export default function InvoiceViewClient({ invoice, isPaid, decryptedName, decr
                       <>
                         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse print:hidden" />
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>PAID</span>
+                        <span>{invoice.reference === 'PAYG_RUNNING' ? 'PAYG RUNNING' : 'PAID'}</span>
                       </>
                     ) : (
                       <>

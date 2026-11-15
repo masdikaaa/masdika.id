@@ -590,7 +590,7 @@ export default function CustomerBillingPage() {
                     </td>
                     <td className="px-3.5 py-2 whitespace-nowrap">
                       <div className="flex items-center gap-3">
-                        <StatusBadge status={invoice.status} />
+                        <StatusBadge status={invoice.status} reference={invoice.reference} />
                         {invoice.status === 'PENDING' && invoice.type === 'TOP_UP' && invoice.paymentUrl && (
                           <a 
                             href={invoice.paymentUrl}

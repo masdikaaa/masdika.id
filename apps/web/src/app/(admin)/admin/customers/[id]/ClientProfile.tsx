@@ -28,10 +28,17 @@ const formatInvoiceNumber = (num: string) => {
   return num;
 };
 
-const StatusBadge = ({ status }: { status: string }) => {
+const StatusBadge = ({ status, reference }: { status: string; reference?: string | null }) => {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const upperStatus = status?.toUpperCase() || 'UNKNOWN';
+  if (reference === 'PAYG_RUNNING' || upperStatus === 'PAYG_RUNNING') {
+    return (
+      <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold border whitespace-nowrap", isDark ? "bg-cyan-500/10 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" /> PAYG RUNNING
+      </span>
+    );
+  }
   if (upperStatus === 'ACTIVE' || upperStatus === 'PAID' || upperStatus === 'RUNNING') {
     return (
       <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold border", isDark ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700")}>
@@ -1055,7 +1062,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                   <td className={cn("px-3.5 py-2.5 text-sm whitespace-nowrap", isDark ? "text-zinc-300" : "text-slate-600")}>{new Date(inv.createdAt).toLocaleDateString()}</td>
                   <td className={cn("px-3.5 py-2.5 text-sm font-semibold whitespace-nowrap", isDark ? "text-zinc-200" : "text-slate-900")}>{formatRupiah(inv.amount)}</td>
                   <td className="px-3.5 py-2.5 text-right">
-                    <StatusBadge status={inv.status} />
+                    <StatusBadge status={inv.status} reference={inv.reference} />
                   </td>
                 </tr>
               )}
