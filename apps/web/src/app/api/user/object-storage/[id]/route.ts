@@ -33,7 +33,7 @@ export async function GET(
       buckets: { orderBy: { createdAt: 'asc' } },
       accessKeys: {
         orderBy: { createdAt: 'desc' },
-        select: { id: true, name: true, accessKey: true, permission: true, isActive: true, createdAt: true },
+        select: { id: true, name: true, accessKey: true, secretKey: true, permission: true, isActive: true, createdAt: true },
       },
     },
   });
@@ -55,13 +55,23 @@ export async function GET(
 
   const usedBytes = bucketsWithUsage.reduce((acc: number, b: any) => acc + b.totalBytes, 0);
 
+  const decryptedKeys = service.accessKeys.map((k: any) => ({
+    id: k.id,
+    name: k.name,
+    accessKey: k.accessKey,
+    secretKey: k.secretKey ? decryptDeterministic(k.secretKey) || k.secretKey : null,
+    permission: k.permission,
+    isActive: k.isActive,
+    createdAt: k.createdAt,
+  }));
+
   return NextResponse.json({
     success: true,
     publicEndpoint: cfg.publicEndpoint,
     ratePerGbMonthly: cfg.ratePerGbMonthly,
     service: {
       ...service,
-      keys: service.accessKeys,
+      keys: decryptedKeys,
       buckets: bucketsWithUsage,
       usedBytes,
     },

@@ -39,6 +39,8 @@ import {
   ShieldCheck,
   BookOpen,
   Layers,
+  Eye,
+  EyeOff,
   X,
 } from 'lucide-react';
 
@@ -179,6 +181,7 @@ export default function ObjectStorageConsolePage({ params }: { params: Promise<{
   const [newKeyPerm, setNewKeyPerm] = useState<'READ_WRITE' | 'READ_ONLY'>('READ_WRITE');
   const [creatingKey, setCreatingKey] = useState(false);
   const [revealedCred, setRevealedCred] = useState<{ accessKey: string; secretKey: string } | null>(null);
+  const [revealedKeyIds, setRevealedKeyIds] = useState<Record<number, boolean>>({});
   const [sdkTab, setSdkTab] = useState<'cli' | 'node' | 'python' | 'laravel'>('cli');
 
   // Scale / Rename State
@@ -1054,32 +1057,70 @@ s3 = boto3.client(
               </button>
             </form>
 
-            <div className="space-y-2">
-              {(service.keys || []).map((k: any) => (
-                <div key={k.id} className={cn('p-3.5 rounded-xl border flex items-center justify-between gap-3 text-xs', isDark ? 'bg-[#0a0a0c] border-white/[0.06]' : 'bg-slate-50 border-slate-200')}>
-                  <div className="min-w-0">
-                    <div className={cn('font-bold truncate', isDark ? 'text-white' : 'text-slate-900')}>{k.name}</div>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <code className={cn('font-mono text-[11px] truncate', isDark ? 'text-zinc-400' : 'text-slate-500')}>{k.accessKey}</code>
-                      <button
-                        type="button"
-                        onClick={() => handleCopy(k.accessKey, 'Access Key')}
-                        title="Copy Access Key"
-                        className={cn('p-0.5 cursor-pointer', isDark ? 'text-zinc-500 hover:text-cyan-400' : 'text-slate-400 hover:text-cyan-600')}
-                      >
-                        <Copy className="w-3 h-3" />
-                      </button>
+            <div className="space-y-2.5">
+              {(service.keys || []).map((k: any) => {
+                const isSecretVisible = Boolean(revealedKeyIds[k.id]);
+                return (
+                  <div key={k.id} className={cn('p-3.5 rounded-xl border space-y-2.5 text-xs', isDark ? 'bg-[#0a0a0c] border-white/[0.06]' : 'bg-slate-50 border-slate-200')}>
+                    <div className="flex items-center justify-between gap-3">
+                      <div className={cn('font-bold truncate', isDark ? 'text-white' : 'text-slate-900')}>{k.name}</div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className={cn('px-2 py-0.5 rounded-md text-[10px] font-bold', isDark ? 'bg-cyan-500/15 text-cyan-400' : 'bg-cyan-100 text-cyan-800')}>{k.permission}</span>
+                        <span className={cn('px-2 py-0.5 rounded-md text-[10px] font-bold', k.isActive ? (isDark ? 'bg-emerald-500/15 text-emerald-400' : 'bg-emerald-100 text-emerald-700') : (isDark ? 'bg-red-500/15 text-red-400' : 'bg-red-100 text-red-700'))}>
+                          {k.isActive ? 'ACTIVE' : 'DISABLED'}
+                        </span>
+                        <button type="button" onClick={() => handleDeleteKey(k.id)} title="Revoke Key" className={cn('p-1 cursor-pointer', isDark ? 'text-red-400 hover:text-red-300' : 'text-red-600 hover:text-red-700')}><Trash2 className="w-3.5 h-3.5" /></button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-1.5 font-mono text-[11px]">
+                      <div className={cn('px-2.5 py-1.5 rounded-lg border flex items-center justify-between gap-2', isDark ? 'bg-[#111115] border-white/[0.06]' : 'bg-white border-slate-200')}>
+                        <span className="truncate">
+                          <span className={cn('font-sans font-semibold mr-1.5', isDark ? 'text-zinc-500' : 'text-slate-400')}>Access Key:</span>
+                          <span className={isDark ? 'text-cyan-300' : 'text-cyan-700'}>{k.accessKey}</span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleCopy(k.accessKey, 'Access Key')}
+                          title="Copy Access Key"
+                          className={cn('p-0.5 cursor-pointer shrink-0', isDark ? 'text-zinc-400 hover:text-cyan-400' : 'text-slate-400 hover:text-cyan-600')}
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      {k.secretKey && (
+                        <div className={cn('px-2.5 py-1.5 rounded-lg border flex items-center justify-between gap-2', isDark ? 'bg-[#111115] border-white/[0.06]' : 'bg-white border-slate-200')}>
+                          <span className="truncate">
+                            <span className={cn('font-sans font-semibold mr-1.5', isDark ? 'text-zinc-500' : 'text-slate-400')}>Secret Key:</span>
+                            <span className={isDark ? 'text-emerald-300' : 'text-emerald-700'}>
+                              {isSecretVisible ? k.secretKey : '••••••••••••••••••••••••••••••••'}
+                            </span>
+                          </span>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => setRevealedKeyIds((prev) => ({ ...prev, [k.id]: !prev[k.id] }))}
+                              title={isSecretVisible ? 'Hide Secret Key' : 'Show Secret Key'}
+                              className={cn('p-0.5 cursor-pointer', isDark ? 'text-zinc-400 hover:text-white' : 'text-slate-400 hover:text-slate-900')}
+                            >
+                              {isSecretVisible ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleCopy(k.secretKey, 'Secret Key')}
+                              title="Copy Secret Key"
+                              className={cn('p-0.5 cursor-pointer', isDark ? 'text-zinc-400 hover:text-cyan-400' : 'text-slate-400 hover:text-cyan-600')}
+                            >
+                              <Copy className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className={cn('px-2 py-0.5 rounded-md text-[10px] font-bold', isDark ? 'bg-cyan-500/15 text-cyan-400' : 'bg-cyan-100 text-cyan-800')}>{k.permission}</span>
-                    <span className={cn('px-2 py-0.5 rounded-md text-[10px] font-bold', k.isActive ? (isDark ? 'bg-emerald-500/15 text-emerald-400' : 'bg-emerald-100 text-emerald-700') : (isDark ? 'bg-red-500/15 text-red-400' : 'bg-red-100 text-red-700'))}>
-                      {k.isActive ? 'ACTIVE' : 'DISABLED'}
-                    </span>
-                    <button type="button" onClick={() => handleDeleteKey(k.id)} title="Revoke Key" className={cn('p-1 cursor-pointer', isDark ? 'text-red-400 hover:text-red-300' : 'text-red-600 hover:text-red-700')}><Trash2 className="w-3.5 h-3.5" /></button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -1148,9 +1189,9 @@ s3 = boto3.client(
                 <Terminal className="w-4 h-4" />
               </div>
               <div>
-                <p className="font-bold text-sm">Panduan Penggunaan AWS CLI v2 dengan Masdika Object Storage (S3)</p>
+                <p className="font-bold text-sm">AWS CLI v2 Usage Guide for Masdika Object Storage (S3)</p>
                 <p className={cn('text-xs mt-0.5 leading-relaxed', isDark ? 'text-cyan-200/80' : 'text-cyan-900/80')}>
-                  Gunakan perintah standar AWS CLI dengan endpoint <code className="font-mono font-bold">{endpointVal}</code> dan region <code className="font-mono font-bold">us-east-1</code>.
+                  Use standard AWS CLI commands with endpoint <code className="font-mono font-bold">{endpointVal}</code> and region <code className="font-mono font-bold">us-east-1</code>.
                 </p>
               </div>
             </div>
@@ -1159,7 +1200,7 @@ s3 = boto3.client(
               onClick={() => setTab('keys')}
               className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 shadow-sm shrink-0 cursor-pointer transition-colors focus:outline-none focus-visible:outline-none"
             >
-              Kelola IAM Keys →
+              Manage IAM Keys →
             </button>
           </div>
 
@@ -1172,7 +1213,7 @@ s3 = boto3.client(
                 </span>
                 <div>
                   <h2 className={cn('text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>Install AWS CLI v2</h2>
-                  <p className={cn('text-[11px]', isDark ? 'text-zinc-400' : 'text-slate-500')}>Pilih sistem operasi Anda untuk menginstal AWS CLI.</p>
+                  <p className={cn('text-[11px]', isDark ? 'text-zinc-400' : 'text-slate-500')}>Choose your operating system to install AWS CLI.</p>
                 </div>
               </div>
 
@@ -1217,8 +1258,8 @@ s3 = boto3.client(
                   2
                 </span>
                 <div>
-                  <h2 className={cn('text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>Konfigurasi Profil &amp; Kredensial</h2>
-                  <p className={cn('text-[11px]', isDark ? 'text-zinc-400' : 'text-slate-500')}>Simpan Access Key &amp; Secret Key dari tab IAM Access Keys.</p>
+                  <h2 className={cn('text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>Configure Profile &amp; Credentials</h2>
+                  <p className={cn('text-[11px]', isDark ? 'text-zinc-400' : 'text-slate-500')}>Save your Access Key &amp; Secret Key from the IAM Access Keys tab.</p>
                 </div>
               </div>
 
@@ -1235,8 +1276,8 @@ s3 = boto3.client(
                 </div>
                 <pre className={cn('p-3 rounded-xl font-mono text-[11px] overflow-x-auto border leading-relaxed', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-cyan-300' : 'bg-slate-900 border-slate-800 text-cyan-300')}>
 {`aws configure --profile masdika
-# AWS Access Key ID     : <ACCESS_KEY_ANDA>
-# AWS Secret Access Key : <SECRET_KEY_ANDA>
+# AWS Access Key ID     : <YOUR_ACCESS_KEY>
+# AWS Secret Access Key : <YOUR_SECRET_KEY>
 # Default region name   : us-east-1
 # Default output format : json`}
                 </pre>
@@ -1244,7 +1285,7 @@ s3 = boto3.client(
 
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-[11px]">
-                  <span className={cn('font-semibold', isDark ? 'text-zinc-300' : 'text-slate-700')}>Atau Set Endpoint Default di Profile</span>
+                  <span className={cn('font-semibold', isDark ? 'text-zinc-300' : 'text-slate-700')}>Set Default Endpoint on Profile (Optional)</span>
                   <button
                     type="button"
                     onClick={() => handleCopy(`aws configure set endpoint_url ${endpointVal} --profile masdika`, 'Endpoint config')}
@@ -1267,9 +1308,9 @@ s3 = boto3.client(
                 3
               </span>
               <div>
-                <h2 className={cn('text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>Perintah S3 yang Sering Digunakan</h2>
+                <h2 className={cn('text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>Common S3 Operations</h2>
                 <p className={cn('text-[11px]', isDark ? 'text-zinc-400' : 'text-slate-500')}>
-                  Siap copy-paste langsung untuk bucket aktif <code className="font-mono font-semibold">{bucketVal}</code>.
+                  Ready-to-run commands pre-filled for active bucket <code className="font-mono font-semibold">{bucketVal}</code>.
                 </p>
               </div>
             </div>
@@ -1277,27 +1318,27 @@ s3 = boto3.client(
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {[
                 {
-                  title: 'List Isi Bucket',
+                  title: 'List Bucket Objects',
                   cmd: `aws s3 ls s3://${bucketVal} --endpoint-url ${endpointVal} --profile masdika`,
                 },
                 {
-                  title: 'Upload Satu File',
+                  title: 'Upload a File',
                   cmd: `aws s3 cp ./file.png s3://${bucketVal}/ --endpoint-url ${endpointVal} --profile masdika`,
                 },
                 {
-                  title: 'Sync Folder Lokal ke Bucket',
+                  title: 'Sync Local Folder to Bucket',
                   cmd: `aws s3 sync ./dist s3://${bucketVal}/assets --endpoint-url ${endpointVal} --profile masdika`,
                 },
                 {
-                  title: 'Download File dari Bucket',
+                  title: 'Download a File',
                   cmd: `aws s3 cp s3://${bucketVal}/file.png ./file.png --endpoint-url ${endpointVal} --profile masdika`,
                 },
                 {
-                  title: 'Buat Presigned URL (15 Menit)',
+                  title: 'Generate Presigned URL (15 Min)',
                   cmd: `aws s3 presign s3://${bucketVal}/file.png --expires-in 900 --endpoint-url ${endpointVal} --profile masdika`,
                 },
                 {
-                  title: 'Hapus File dari Bucket',
+                  title: 'Delete an Object',
                   cmd: `aws s3 rm s3://${bucketVal}/file.png --endpoint-url ${endpointVal} --profile masdika`,
                 },
               ].map((op) => (
@@ -1329,9 +1370,9 @@ s3 = boto3.client(
             <div className="space-y-1">
               <p className="font-bold">Tips &amp; Best Practices</p>
               <ul className="list-disc pl-4 space-y-1 text-[11px] opacity-90">
-                <li>Selalu gunakan region <code className="font-mono font-bold">us-east-1</code> untuk kompatibilitas signing AWS Signature v4.</li>
-                <li>Gunakan <code className="font-mono font-bold">forcePathStyle: true</code> jika menggunakan AWS SDK di Node.js, PHP/Laravel, atau Go.</li>
-                <li>Buat IAM Key terpisah dengan izin <code className="font-mono font-bold">READ_ONLY</code> untuk aplikasi yang hanya membaca aset publik/privat.</li>
+                <li>Always use region <code className="font-mono font-bold">us-east-1</code> for AWS Signature v4 compatibility.</li>
+                <li>Enable <code className="font-mono font-bold">forcePathStyle: true</code> when using AWS SDKs in Node.js, PHP/Laravel, or Go.</li>
+                <li>Provision separate IAM Keys with <code className="font-mono font-bold">READ_ONLY</code> permission for apps that only read assets.</li>
               </ul>
             </div>
           </div>
