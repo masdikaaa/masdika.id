@@ -362,7 +362,7 @@ export default function ManagedAppsClient({
             {[
               { icon: Box, title: "Kubernetes Pod Isolation", desc: "Every application runs inside dedicated container pods with strict CPU and memory resource quotas." },
               { icon: Globe, title: "Automated Let's Encrypt SSL", desc: "Zero-configuration Ingress routing on *.app.masdika.id with automated SSL certificate provisioning." },
-              { icon: RefreshCw, title: "Self-Healing Orchestration", desc: "Automated container restarts and node failover reconciliation guarantee 99.9% uptime." },
+              { icon: RefreshCw, title: "Self-Healing Orchestration", desc: "Automated container restarts and node failover reconciliation guarantee 98.99% uptime." },
               { icon: Activity, title: "Local Sidoarjo DC", desc: "Under 20ms ultra-low ping across Indonesia with direct IIX, OpenIX, and CDIX peering." },
             ].map((pillar, i) => (
               <FadeIn key={i} delay={i * 0.1} direction="up" className="h-full">
@@ -550,7 +550,7 @@ export default function ManagedAppsClient({
                   </div>
                   <div>
                     <div className="text-sm font-bold text-[var(--text-primary)]">
-                      99.9% Application Availability
+                      98.99% Application Availability
                     </div>
                     <div className="text-xs text-[var(--text-muted)] mt-0.5">
                       Orchestrated auto-restart and zero-touch pod health reconciliation

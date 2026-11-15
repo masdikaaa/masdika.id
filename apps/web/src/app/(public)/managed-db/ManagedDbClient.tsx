@@ -703,7 +703,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                   </div>
                   <div>
                     <div className="text-sm font-bold text-[var(--text-primary)]">
-                      99.9% Database Availability
+                      98.99% Database Availability
                     </div>
                     <div className="text-xs text-[var(--text-muted)] mt-0.5">
                       Orchestrated auto-restart and zero-touch node health reconciliation
