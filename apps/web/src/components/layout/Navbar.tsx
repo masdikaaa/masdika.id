@@ -114,13 +114,6 @@ const COMPANY_MENU_ITEMS: MenuItem[] = [
 
 const DEV_MENU_ITEMS: MenuItem[] = [
   {
-    title: "Reseller API",
-    description: "White-label VPS provisioning API for hosts.",
-    href: "/reseller-api",
-    icon: CodeXml,
-    badge: "New",
-  },
-  {
     title: "Object Storage",
     description: "S3-compatible buckets with IAM keys and presigned URLs.",
     href: "/object-storage",

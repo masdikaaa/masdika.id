@@ -49,7 +49,6 @@ const SIDEBAR_LINKS = [
   { name: "PAYG Monitor", href: "/admin/payg-monitor", icon: Activity, color: "text-cyan-400", group: "Billing & Subscriptions" },
   { name: "Revenue", href: "/admin/revenue", icon: Wallet, color: "text-emerald-400", group: "Billing & Subscriptions" },
 
-  { name: "Resellers", href: "/admin/resellers", icon: Users, color: "text-amber-400", group: "System & Security" },
   { name: "Blocked Users", href: "/admin/blocked", icon: ShieldBan, color: "text-red-400", group: "System & Security" },
   { name: "Login Logs", href: "/admin/login-logs", icon: ShieldAlert, color: "text-violet-400", group: "System & Security" },
   { name: "Announcements", href: "/admin/announcements", icon: Bell, color: "text-cyan-400", group: "System & Security" },

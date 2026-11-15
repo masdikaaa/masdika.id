@@ -40,30 +40,23 @@ export async function POST(req: NextRequest) {
     const user = auth.user!;
 
     const body = await req.json();
-    const { name, service = "RESELLER" } = body;
+    const { name, service = "VPS" } = body;
 
-    if (service !== "RESELLER") {
+    if (service !== "VPS" && service !== "RESELLER") {
       return NextResponse.json({ error: "Unsupported API key service type" }, { status: 400 });
     }
 
     const safeName = typeof name === "string" && name.trim().length > 0
       ? name.trim().slice(0, 64)
-      : "Reseller API Key";
-
-    // Validate Reseller Balance Requirement (Min Rp 66,430 - Cost of basic VPS with public IP)
-    if (user.balance < 66430) {
-      return NextResponse.json({ 
-        error: "Insufficient balance to generate Reseller API Key. Minimum balance required is Rp 66.430." 
-      }, { status: 400 });
-    }
+      : "VPS API Key";
 
     const key = `masdika_${crypto.randomBytes(24).toString('hex')}`;
 
     const newKey = await prisma.$transaction(async (tx) => {
-      const existingResellerKey = await tx.apiKey.findFirst({
-        where: { userId: user.id, service: "RESELLER" }
+      const existingCount = await tx.apiKey.count({
+        where: { userId: user.id }
       });
-      if (existingResellerKey) {
+      if (existingCount >= 5) {
         throw new Error("KEY_LIMIT_REACHED");
       }
 
@@ -72,7 +65,7 @@ export async function POST(req: NextRequest) {
           name: safeName,
           key,
           userId: user.id,
-          service: "RESELLER"
+          service: "VPS"
         }
       });
     });
@@ -81,7 +74,7 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     if (error?.message === "KEY_LIMIT_REACHED") {
       return NextResponse.json({ 
-        error: "You can only have one active Reseller API key. Please revoke your existing key before generating a new one." 
+        error: "Maximum limit of 5 API keys reached. Please revoke an existing key before generating a new one." 
       }, { status: 400 });
     }
     console.error("API Keys POST error:", error);

@@ -88,7 +88,7 @@ const SIDEBAR_LINKS = [
   { name: "Managed Database", href: "/dashboard/database", icon: Database, color: "text-cyan-400", group: "Storage & Data" },
   { name: "Object Storage", href: "/dashboard/object-storage", icon: HardDrive, color: "text-cyan-400", group: "Storage & Data", badge: "New" },
   { name: "File CDN", href: "/dashboard/cdn", icon: UploadCloud, color: "text-cyan-400", group: "Storage & Data" },
-  { name: "Reseller API", href: "/dashboard/reseller-api", icon: Code2, color: "text-cyan-400", group: "Tools" },
+  { name: "API VPS", href: "/dashboard/api-vps", icon: Code2, color: "text-cyan-400", group: "Tools" },
   { name: "Support Tickets", href: "/dashboard/tickets", icon: MessageSquare, color: "text-cyan-400", group: "Support" },
   { name: "Affiliate Program", href: "/dashboard/affiliate", icon: Gift, color: "text-cyan-400", group: "Affiliate" },
   { name: "Promo & Rewards", href: "/dashboard/promos", icon: Ticket, color: "text-cyan-400", group: "Promotions" },
