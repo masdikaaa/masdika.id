@@ -1177,10 +1177,15 @@ s3 = boto3.client(
 
       {/* Segmented Navigation Tabs + Workspace Summary Bar */}
       <div ref={workspaceRef} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className={cn('flex items-center gap-1 p-1 rounded-2xl border overflow-x-auto max-w-full sm:w-fit', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-slate-100 border-slate-200')}>
+        <div
+          className={cn(
+            'flex items-center gap-1 p-1 rounded-2xl border overflow-x-auto max-w-full sm:w-fit [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden',
+            isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-slate-100 border-slate-200'
+          )}
+        >
           {[
-            { id: 'buckets', label: 'Buckets & Objects', icon: Database },
-            { id: 'keys', label: 'IAM Access Keys & SDK', icon: KeyRound },
+            { id: 'buckets', label: 'Buckets & Objects', icon: Database, count: service.buckets?.length },
+            { id: 'keys', label: 'IAM Access Keys & SDK', icon: KeyRound, count: service.keys?.length },
             { id: 'guide', label: 'AWS CLI Guide', icon: BookOpen },
             { id: 'settings', label: 'Scale & Settings', icon: Settings },
           ].map((t) => {
@@ -1192,15 +1197,34 @@ s3 = boto3.client(
                 type="button"
                 onClick={() => setTab(t.id as any)}
                 className={cn(
-                  'px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0 focus:outline-none focus-visible:outline-none',
+                  'px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0 border focus:outline-none focus-visible:outline-none',
                   active
-                    ? 'bg-cyan-400 text-slate-950 shadow-sm'
+                    ? isDark
+                      ? 'bg-cyan-500/10 border-cyan-500/30 text-white shadow-sm'
+                      : 'bg-white border-cyan-300 text-slate-900 shadow-xs'
                     : isDark
-                      ? 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/70'
+                      ? 'border-transparent text-zinc-400 hover:text-white hover:bg-white/[0.04]'
+                      : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-white/70'
                 )}
               >
-                <Icon className="w-3.5 h-3.5 shrink-0" /> {t.label}
+                <Icon className={cn('w-3.5 h-3.5 shrink-0', active && (isDark ? 'text-cyan-400' : 'text-cyan-600'))} />
+                <span>{t.label}</span>
+                {typeof t.count === 'number' && (
+                  <span
+                    className={cn(
+                      'px-1.5 py-0.5 rounded-md text-[10px] font-mono font-bold leading-none',
+                      active
+                        ? isDark
+                          ? 'bg-cyan-500/20 text-cyan-400'
+                          : 'bg-cyan-50 text-cyan-700'
+                        : isDark
+                          ? 'bg-white/[0.06] text-zinc-400'
+                          : 'bg-slate-200/80 text-slate-600'
+                    )}
+                  >
+                    {t.count}
+                  </span>
+                )}
               </button>
             );
           })}
