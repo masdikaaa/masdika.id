@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth-middleware';
 import {
   deleteCustomerBucketCompletely,
+  doesCustomerBucketExistInRustFS,
   ensureCustomerBucketExists,
   setCustomerBucketQuota,
   setCustomerBucketVisibility,
@@ -62,12 +63,13 @@ export async function POST(
     return NextResponse.json({ error: validation.error }, { status: 400 });
   }
 
-  const [conflictObj, conflictCdn] = await Promise.all([
+  const [conflictObj, conflictCdn, existsOnCluster] = await Promise.all([
     prisma.objectStorageBucket.findUnique({ where: { name } }),
     prisma.cdnBucket.findUnique({ where: { name } }),
+    doesCustomerBucketExistInRustFS(name),
   ]);
-  if (conflictObj || conflictCdn) {
-    return NextResponse.json({ error: `Bucket "${name}" already exists.` }, { status: 409 });
+  if (conflictObj || conflictCdn || existsOnCluster) {
+    return NextResponse.json({ error: `Bucket "${name}" already exists on the storage cluster. Please choose another unique name.` }, { status: 409 });
   }
 
   await ensureCustomerBucketExists(name, visibility);

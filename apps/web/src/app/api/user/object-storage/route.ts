@@ -10,9 +10,12 @@ import {
   createRustFSServiceAccount,
   deleteCustomerBucketCompletely,
   deleteRustFSServiceAccount,
+  doesCustomerBucketExistInRustFS,
   ensureCustomerBucketExists,
   getCustomerRustFSConfig,
+  getObjectStorageClusterCapacity,
   getObjectStorageServiceUsageBytes,
+  setCustomerBucketQuota,
 } from '@/lib/customer-rustfs';
 import { sendAdminNewOrderEmail, sendCustomerPaymentSuccessEmail } from '@/lib/email';
 import { decryptDeterministic, encryptDeterministic } from '@/lib/encryption';
@@ -147,10 +150,19 @@ export async function POST(req: NextRequest) {
       : 'PAYG';
 
     // Pre-Flight Capacity & Cluster Health Check BEFORE touching DB
-    const health = await checkCustomerRustFSHealth();
+    const [health, capacity] = await Promise.all([
+      checkCustomerRustFSHealth(),
+      getObjectStorageClusterCapacity(),
+    ]);
     if (!health.available) {
       return NextResponse.json(
         { error: `Object Storage cluster unavailable: ${health.error || 'Pre-flight check failed'}` },
+        { status: 503 }
+      );
+    }
+    if (!capacity.available || capacity.freeGb < storageGb) {
+      return NextResponse.json(
+        { error: `Cluster capacity full: only ${capacity.freeGb} GB available on Object Storage server (requested ${storageGb} GB).` },
         { status: 503 }
       );
     }
@@ -253,8 +265,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: msg }, { status: 400 });
     }
 
-    // Physical Provisioning on Customer RustFS with strict Rollback Safeguard
-    const defaultBucketName = `masdika-s3-u${user.id}-s${serviceRecord.id}`;
+    // Physical Provisioning on Customer RustFS with strict Rollback Safeguard & Collision Prevention
+    let defaultBucketName = `masdika-s3-u${user.id}-s${serviceRecord.id}`;
+    const [dbObjConflict, dbCdnConflict, rustfsExists] = await Promise.all([
+      prisma.objectStorageBucket.findUnique({ where: { name: defaultBucketName } }),
+      prisma.cdnBucket.findUnique({ where: { name: defaultBucketName } }),
+      doesCustomerBucketExistInRustFS(defaultBucketName),
+    ]);
+    if (dbObjConflict || dbCdnConflict || rustfsExists) {
+      defaultBucketName = `${defaultBucketName}-${crypto.randomBytes(2).toString('hex')}`;
+    }
     const initialAccessKey = `mcs3_${crypto.randomBytes(8).toString('hex')}`;
     const initialSecretKey = crypto.randomBytes(24).toString('hex');
     let bucketCreated = false;
@@ -263,6 +283,7 @@ export async function POST(req: NextRequest) {
     try {
       await ensureCustomerBucketExists(defaultBucketName, 'PRIVATE');
       bucketCreated = true;
+      await setCustomerBucketQuota(defaultBucketName, storageGb * 1024 * 1024 * 1024).catch(() => {});
 
       await createRustFSServiceAccount({
         accessKey: initialAccessKey,

@@ -16,9 +16,15 @@ import {
   Rocket,
   Loader2,
   Check,
-  Clock,
-  Calendar,
 } from 'lucide-react';
+
+interface StorageClusterCapacity {
+  available: boolean;
+  totalPoolGb: number;
+  allocatedGb: number;
+  freeGb: number;
+  reason?: string;
+}
 
 interface StoragePlan {
   id: string;
@@ -46,8 +52,8 @@ export default function NewObjectStoragePage() {
   const [plans, setPlans] = useState<StoragePlan[]>([]);
   const [selectedPlanGb, setSelectedPlanGb] = useState<number>(10);
   const [serviceName, setServiceName] = useState('');
-  const [billingMode, setBillingMode] = useState<'PAYG' | 'MONTHLY'>('PAYG');
   const [deploying, setDeploying] = useState(false);
+  const [capacity, setCapacity] = useState<StorageClusterCapacity | null>(null);
 
   const [userBalance, setUserBalance] = useState(0);
   const [activeCommitment, setActiveCommitment] = useState(0);
@@ -57,12 +63,19 @@ export default function NewObjectStoragePage() {
     Promise.all([
       fetch('/api/user/object-storage').then((r) => r.json()),
       fetch('/api/public/plans').then((r) => r.json()),
+      fetch('/api/user/object-storage/capacity').then((r) => r.json()).catch(() => null),
     ])
-      .then(([objRes, pubRes]) => {
+      .then(([objRes, pubRes, capRes]) => {
         setEnabled(Boolean(objRes.enabled));
+        const capData: StorageClusterCapacity | null = capRes?.data || null;
+        if (capData) setCapacity(capData);
+
         const pubObjPlans = Array.isArray(pubRes?.data)
           ? pubRes.data.filter((p: any) => p.service === 'OBJECT_STORAGE')
           : [];
+
+        const fitsCapacity = (gb: number) =>
+          capData ? capData.available && capData.freeGb >= gb : true;
 
         if (pubObjPlans.length > 0) {
           const mapped: StoragePlan[] = pubObjPlans.map((p: any) => {
@@ -86,11 +99,15 @@ export default function NewObjectStoragePage() {
             };
           });
           setPlans(mapped);
-          const featured = mapped.find((m) => m.isPopular) || mapped[0];
+          const featured = mapped.find((m) => m.isPopular && fitsCapacity(m.storageGb))
+            || mapped.find((m) => fitsCapacity(m.storageGb))
+            || mapped.find((m) => m.isPopular)
+            || mapped[0];
           if (featured) setSelectedPlanGb(featured.storageGb);
         } else if (Array.isArray(objRes?.plans)) {
           setPlans(objRes.plans);
-          if (objRes.plans[0]) setSelectedPlanGb(objRes.plans[0].storageGb);
+          const firstFitting = objRes.plans.find((m: StoragePlan) => fitsCapacity(m.storageGb)) || objRes.plans[0];
+          if (firstFitting) setSelectedPlanGb(firstFitting.storageGb);
         }
       })
       .catch(() => toast.error('Failed to load Object Storage plans'))
@@ -114,7 +131,9 @@ export default function NewObjectStoragePage() {
 
   const selectedPlan = plans.find((p) => p.storageGb === selectedPlanGb) || plans[0];
   const monthlyEstimate = selectedPlan ? selectedPlan.monthlyPrice : 0;
-  const hourlyEstimate = selectedPlan ? selectedPlan.hourlyRate : 0;
+  const selectedPlanHasCapacity = capacity
+    ? capacity.available && capacity.freeGb >= (selectedPlan?.storageGb || 0)
+    : true;
   const totalRequiredBalance = activeCommitment + monthlyEstimate;
   const isBalanceInsufficient = !loadingBalance && userBalance < totalRequiredBalance;
   const shortfall = Math.max(0, totalRequiredBalance - userBalance);
@@ -122,6 +141,10 @@ export default function NewObjectStoragePage() {
   const handleDeploy = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedPlan) return;
+    if (!selectedPlanHasCapacity) {
+      toast.error(capacity?.reason || 'Cluster capacity full for this storage tier.');
+      return;
+    }
     if (!serviceName.trim()) {
       toast.error('Please enter a service name');
       return;
@@ -139,7 +162,7 @@ export default function NewObjectStoragePage() {
         body: JSON.stringify({
           name: serviceName.trim(),
           storageGb: selectedPlan.storageGb,
-          billingMode,
+          billingMode: 'PAYG',
         }),
       });
       const data = await res.json();
@@ -243,20 +266,26 @@ export default function NewObjectStoragePage() {
               <div className="space-y-2.5">
                 {plans.map((plan) => {
                   const isSelected = selectedPlan?.storageGb === plan.storageGb;
+                  const hasCapacity = capacity ? capacity.available && capacity.freeGb >= plan.storageGb : true;
                   return (
                     <button
                       type="button"
                       key={plan.id}
-                      onClick={() => setSelectedPlanGb(plan.storageGb)}
+                      disabled={!hasCapacity}
+                      onClick={() => hasCapacity && setSelectedPlanGb(plan.storageGb)}
                       className={cn(
-                        'w-full text-left p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer',
-                        isSelected
+                        'w-full text-left p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4',
+                        !hasCapacity
                           ? isDark
-                            ? 'bg-cyan-500/[0.06] border-cyan-500/60 shadow-[0_0_0_1px_rgba(6,182,212,0.2)]'
-                            : 'bg-cyan-50/70 border-cyan-500 shadow-2xs'
-                          : isDark
-                            ? 'bg-[#111115] border-white/[0.08] hover:border-white/20'
-                            : 'bg-white border-slate-200/90 hover:border-cyan-300 shadow-2xs'
+                            ? 'bg-[#111115]/60 border-white/[0.05] opacity-60 cursor-not-allowed'
+                            : 'bg-slate-50 border-slate-200/70 opacity-60 cursor-not-allowed'
+                          : isSelected
+                            ? isDark
+                              ? 'bg-cyan-500/[0.06] border-cyan-500/60 shadow-[0_0_0_1px_rgba(6,182,212,0.2)] cursor-pointer'
+                              : 'bg-cyan-50/70 border-cyan-500 shadow-2xs cursor-pointer'
+                            : isDark
+                              ? 'bg-[#111115] border-white/[0.08] hover:border-white/20 cursor-pointer'
+                              : 'bg-white border-slate-200/90 hover:border-cyan-300 shadow-2xs cursor-pointer'
                       )}
                     >
                       <div className="flex items-start gap-3.5 min-w-0">
@@ -315,10 +344,17 @@ export default function NewObjectStoragePage() {
                       </div>
 
                       <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
-                        <span className={cn('inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border', isDark ? 'bg-emerald-500/10 border-emerald-500/25 text-emerald-400' : 'bg-emerald-50 border-emerald-200 text-emerald-700')}>
-                          <span className={cn('w-1.5 h-1.5 rounded-full', isDark ? 'bg-emerald-400' : 'bg-emerald-600')} />
-                          Available
-                        </span>
+                        {hasCapacity ? (
+                          <span className={cn('inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border', isDark ? 'bg-emerald-500/10 border-emerald-500/25 text-emerald-400' : 'bg-emerald-50 border-emerald-200 text-emerald-700')}>
+                            <span className={cn('w-1.5 h-1.5 rounded-full', isDark ? 'bg-emerald-400' : 'bg-emerald-600')} />
+                            Available
+                          </span>
+                        ) : (
+                          <span className={cn('inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border', isDark ? 'bg-red-500/10 border-red-500/25 text-red-400' : 'bg-red-50 border-red-200 text-red-700')}>
+                            <span className={cn('w-1.5 h-1.5 rounded-full', isDark ? 'bg-red-400' : 'bg-red-600')} />
+                            Cluster Capacity Full
+                          </span>
+                        )}
                         <div
                           className={cn(
                             'w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all',
@@ -339,10 +375,10 @@ export default function NewObjectStoragePage() {
             )}
           </div>
 
-          {/* Step 2: Configuration & Billing */}
+          {/* Step 2: Configuration */}
           <div className={cn('p-5 rounded-2xl border space-y-5', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90 shadow-2xs')}>
             <h2 className={cn('text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>
-              2. Configuration &amp; Billing Cycle
+              2. Configuration
             </h2>
 
             <div>
@@ -363,65 +399,6 @@ export default function NewObjectStoragePage() {
               <p className={cn('text-[11px] mt-1.5', isDark ? 'text-zinc-500' : 'text-slate-500')}>
                 2–50 characters (letters, numbers, spaces, dots, hyphens, underscores).
               </p>
-            </div>
-
-            <div>
-              <label className={cn('block text-xs font-bold mb-2', isDark ? 'text-zinc-300' : 'text-slate-700')}>
-                Billing Cycle
-              </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setBillingMode('PAYG')}
-                  className={cn(
-                    'p-3.5 rounded-xl border text-left transition-all cursor-pointer',
-                    billingMode === 'PAYG'
-                      ? isDark
-                        ? 'bg-cyan-500/10 border-cyan-500 text-white'
-                        : 'bg-cyan-50 border-cyan-500 text-slate-900'
-                      : isDark
-                        ? 'bg-[#0a0a0c] border-white/[0.08] text-zinc-400 hover:border-white/20'
-                        : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300'
-                  )}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold flex items-center gap-1.5">
-                      <Clock className={cn('w-3.5 h-3.5', billingMode === 'PAYG' ? (isDark ? 'text-cyan-400' : 'text-cyan-600') : '')} />
-                      Pay-As-You-Go (Hourly)
-                    </span>
-                    {billingMode === 'PAYG' && <Check className={cn('w-4 h-4', isDark ? 'text-cyan-400' : 'text-cyan-600')} />}
-                  </div>
-                  <p className={cn('text-[11px] mt-1 font-mono', isDark ? 'text-zinc-400' : 'text-slate-500')}>
-                    {formatRupiah(hourlyEstimate)}/hour
-                  </p>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setBillingMode('MONTHLY')}
-                  className={cn(
-                    'p-3.5 rounded-xl border text-left transition-all cursor-pointer',
-                    billingMode === 'MONTHLY'
-                      ? isDark
-                        ? 'bg-cyan-500/10 border-cyan-500 text-white'
-                        : 'bg-cyan-50 border-cyan-500 text-slate-900'
-                      : isDark
-                        ? 'bg-[#0a0a0c] border-white/[0.08] text-zinc-400 hover:border-white/20'
-                        : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300'
-                  )}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold flex items-center gap-1.5">
-                      <Calendar className={cn('w-3.5 h-3.5', billingMode === 'MONTHLY' ? (isDark ? 'text-cyan-400' : 'text-cyan-600') : '')} />
-                      Monthly
-                    </span>
-                    {billingMode === 'MONTHLY' && <Check className={cn('w-4 h-4', isDark ? 'text-cyan-400' : 'text-cyan-600')} />}
-                  </div>
-                  <p className={cn('text-[11px] mt-1 font-mono', isDark ? 'text-zinc-400' : 'text-slate-500')}>
-                    {formatRupiah(monthlyEstimate)}/month
-                  </p>
-                </button>
-              </div>
             </div>
           </div>
         </div>
@@ -472,16 +449,16 @@ export default function NewObjectStoragePage() {
                   BILLING CYCLE
                 </div>
                 <div className={cn('font-semibold', isDark ? 'text-zinc-200' : 'text-slate-800')}>
-                  {billingMode === 'MONTHLY' ? 'Monthly' : 'Pay-As-You-Go (Hourly)'}
+                  Monthly
                 </div>
               </div>
 
               <div className={cn('pt-3 border-t flex items-center justify-between', isDark ? 'border-white/[0.08]' : 'border-slate-100')}>
                 <span className={cn('font-semibold', isDark ? 'text-zinc-400' : 'text-slate-600')}>
-                  {billingMode === 'MONTHLY' ? 'Monthly Cost' : 'Hourly Rate'}
+                  Cost
                 </span>
                 <span className={cn('text-base font-extrabold font-mono', isDark ? 'text-cyan-400' : 'text-cyan-600')}>
-                  {billingMode === 'MONTHLY' ? `${formatRupiah(monthlyEstimate)}/month` : `${formatRupiah(hourlyEstimate)}/hour`}
+                  {formatRupiah(monthlyEstimate)}/month
                 </span>
               </div>
 
@@ -550,9 +527,28 @@ export default function NewObjectStoragePage() {
               </div>
             )}
 
+            {!selectedPlanHasCapacity && (
+              <div
+                className={cn(
+                  'p-3.5 rounded-xl border text-xs flex items-start gap-2.5',
+                  isDark ? 'bg-red-500/15 border-red-500/35 text-red-200' : 'bg-red-50 border-red-300 text-red-950 shadow-2xs'
+                )}
+              >
+                <AlertTriangle className={cn('w-4 h-4 shrink-0 mt-0.5', isDark ? 'text-red-400' : 'text-red-600')} />
+                <div>
+                  <p className={cn('font-bold tracking-tight text-xs', isDark ? 'text-red-300' : 'text-red-900')}>
+                    Cluster Capacity Full
+                  </p>
+                  <p className={cn('text-[11px] mt-0.5 leading-relaxed', isDark ? 'text-red-200/90' : 'text-red-800')}>
+                    {capacity?.reason || 'Storage pool capacity is currently full for this tier. Please choose a smaller plan or try again later.'}
+                  </p>
+                </div>
+              </div>
+            )}
+
             <button
               type="submit"
-              disabled={deploying || !enabled || !selectedPlan || !serviceName.trim() || isBalanceInsufficient}
+              disabled={deploying || !enabled || !selectedPlan || !selectedPlanHasCapacity || !serviceName.trim() || isBalanceInsufficient}
               className="w-full py-3 rounded-xl text-xs sm:text-sm font-bold bg-cyan-400 hover:bg-cyan-300 active:scale-[0.99] text-slate-950 shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
             >
               {deploying ? (

@@ -827,6 +827,72 @@ export async function deleteRustFSServiceAccount(accessKey: string): Promise<boo
   return res.ok;
 }
 
+export async function doesCustomerBucketExistInRustFS(bucketName: string): Promise<boolean> {
+  try {
+    const config = await getCustomerRustFSConfig();
+    if (!config.enabled) return false;
+    const client = createCustomerS3Client(config);
+    await client.send(new HeadBucketCommand({ Bucket: bucketName }));
+    return true;
+  } catch (err: any) {
+    const status = err?.$metadata?.httpStatusCode;
+    if (status === 404 || err?.name === 'NotFound' || err?.name === 'NoSuchBucket') {
+      return false;
+    }
+    // Any other status (403, etc.) means bucket name is taken or inaccessible
+    return status === 403;
+  }
+}
+
+export async function getObjectStorageClusterCapacity(): Promise<{
+  available: boolean;
+  totalPoolGb: number;
+  allocatedGb: number;
+  freeGb: number;
+  reason?: string;
+}> {
+  try {
+    const [health, poolSetting, agg] = await Promise.all([
+      checkCustomerRustFSHealth(),
+      prisma.setting.findUnique({ where: { key: 'customer_rustfs_max_pool_gb' } }),
+      prisma.objectStorageService.aggregate({
+        _sum: { storageGb: true },
+        where: { status: { not: 'TERMINATED' } },
+      }),
+    ]);
+
+    const totalPoolGb = Math.max(10, Number(poolSetting?.value || 500) || 500);
+    const allocatedGb = Number(agg._sum.storageGb || 0);
+    const freeGb = Math.max(0, totalPoolGb - allocatedGb);
+
+    if (!health.available) {
+      return {
+        available: false,
+        totalPoolGb,
+        allocatedGb,
+        freeGb: 0,
+        reason: health.error || 'Object Storage cluster is offline',
+      };
+    }
+
+    return {
+      available: freeGb > 0,
+      totalPoolGb,
+      allocatedGb,
+      freeGb,
+      reason: freeGb <= 0 ? 'Object Storage server pool is full' : undefined,
+    };
+  } catch (error: any) {
+    return {
+      available: false,
+      totalPoolGb: 500,
+      allocatedGb: 0,
+      freeGb: 0,
+      reason: error?.message || 'Failed to check Object Storage capacity',
+    };
+  }
+}
+
 export async function setCustomerBucketQuota(bucketName: string, quotaBytes: number): Promise<boolean> {
   try {
     const config = await getCustomerRustFSConfig();
