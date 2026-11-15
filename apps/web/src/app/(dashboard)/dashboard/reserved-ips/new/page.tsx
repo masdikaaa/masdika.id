@@ -16,6 +16,7 @@ import {
   Rocket,
   Server,
   AlertCircle,
+  AlertTriangle,
 } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { cn } from '@/lib/utils';
@@ -42,6 +43,10 @@ export default function AllocateElasticIpPage() {
   const [loadingPool, setLoadingPool] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
+  const [userBalance, setUserBalance] = useState(0);
+  const [activeCommitment, setActiveCommitment] = useState(0);
+  const [loadingBalance, setLoadingBalance] = useState(true);
+
   useEffect(() => {
     const loadPoolStatus = async () => {
       try {
@@ -58,6 +63,21 @@ export default function AllocateElasticIpPage() {
     };
 
     loadPoolStatus();
+
+    fetch('/api/user/billing')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.data?.balance !== undefined) {
+          setUserBalance(data.data.balance);
+        }
+        if (data.data?.commitment?.totalMonthly !== undefined) {
+          setActiveCommitment(data.data.commitment.totalMonthly);
+        } else if (data.data?.activeMonthlyCommitment !== undefined) {
+          setActiveCommitment(data.data.activeMonthlyCommitment);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoadingBalance(false));
   }, []);
 
   const currentPool = selectedVersion === 4 ? poolStatus?.ipv4 : poolStatus?.ipv6;
@@ -65,8 +85,15 @@ export default function AllocateElasticIpPage() {
   const availableCount = currentPool?.availableCount ?? null;
   const monthlyEstimate = hourlyRate * 730;
   const isOutOfStock = availableCount !== null && availableCount <= 0;
+  const totalRequiredBalance = activeCommitment + monthlyEstimate;
+  const isBalanceInsufficient = !loadingBalance && userBalance < totalRequiredBalance;
+  const shortfall = Math.max(0, totalRequiredBalance - userBalance);
 
   const handleAllocate = async () => {
+    if (isBalanceInsufficient) {
+      toast.error(`Insufficient account balance. You need at least ${formatRupiah(totalRequiredBalance)} to allocate.`);
+      return;
+    }
     setSubmitting(true);
     try {
       const res = await fetch('/api/user/reserved-ips', {
@@ -324,76 +351,132 @@ export default function AllocateElasticIpPage() {
         <div className="lg:col-span-4 lg:sticky lg:top-6">
           <div
             className={cn(
-              'rounded-2xl border p-6 space-y-5',
+              'rounded-2xl border p-5 sm:p-6 space-y-5',
               isDark
                 ? 'bg-[#111115] border-white/[0.08]'
-                : 'bg-white border-slate-200 shadow-sm'
+                : 'bg-white border-slate-200/90 shadow-2xs'
             )}
           >
             <div className="flex items-center justify-between">
-              <h2 className={cn('text-base font-bold', isDark ? 'text-white' : 'text-slate-900')}>
+              <h3 className={cn('text-base font-bold', isDark ? 'text-white' : 'text-slate-900')}>
                 Allocation Summary
-              </h2>
+              </h3>
               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
                 PAYG RUNNING
               </span>
             </div>
 
-            <div
-              className={cn(
-                'space-y-3 text-sm border-y py-4',
-                isDark ? 'border-white/[0.08]' : 'border-slate-200'
-              )}
-            >
-              <div className="flex items-center justify-between">
-                <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>Protocol</span>
-                <span className={cn('font-semibold', isDark ? 'text-white' : 'text-slate-900')}>
+            <div className="space-y-4 text-xs">
+              <div>
+                <div className={cn('text-[10px] font-bold uppercase tracking-wider mb-1', isDark ? 'text-zinc-500' : 'text-slate-400')}>
+                  PROTOCOL
+                </div>
+                <div className={cn('font-bold text-sm flex items-center gap-2', isDark ? 'text-white' : 'text-slate-900')}>
+                  <Globe className={cn('w-4 h-4', isDark ? 'text-cyan-400' : 'text-cyan-600')} />
                   IPv{selectedVersion} Public
-                </span>
+                </div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>IP Assignment</span>
-                <span className="font-semibold text-cyan-400">Auto-Assigned from Pool</span>
+              <div>
+                <div className={cn('text-[10px] font-bold uppercase tracking-wider mb-1', isDark ? 'text-zinc-500' : 'text-slate-400')}>
+                  IP ASSIGNMENT
+                </div>
+                <div className="font-semibold text-cyan-400">
+                  Auto-Assigned from Pool
+                </div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>Persistence</span>
-                <span className={cn('font-semibold', isDark ? 'text-white' : 'text-slate-900')}>
+              <div>
+                <div className={cn('text-[10px] font-bold uppercase tracking-wider mb-1', isDark ? 'text-zinc-500' : 'text-slate-400')}>
+                  PERSISTENCE
+                </div>
+                <div className={cn('font-semibold', isDark ? 'text-zinc-200' : 'text-slate-800')}>
                   Permanently Static
-                </span>
+                </div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>Billing Mode</span>
-                <span className={cn('font-semibold', isDark ? 'text-white' : 'text-slate-900')}>
+              <div>
+                <div className={cn('text-[10px] font-bold uppercase tracking-wider mb-1', isDark ? 'text-zinc-500' : 'text-slate-400')}>
+                  BILLING MODE
+                </div>
+                <div className={cn('font-semibold', isDark ? 'text-zinc-200' : 'text-slate-800')}>
                   Pay-As-You-Go (Hourly)
-                </span>
+                </div>
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <div className="flex items-baseline justify-between">
-                <span className={cn('text-sm', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+              <div className={cn('pt-3 border-t flex items-center justify-between', isDark ? 'border-white/[0.08]' : 'border-slate-100')}>
+                <span className={cn('font-semibold', isDark ? 'text-zinc-400' : 'text-slate-600')}>
                   Hourly Rate
                 </span>
-                <span className={cn('text-2xl font-bold', isDark ? 'text-white' : 'text-slate-900')}>
-                  {formatRupiah(hourlyRate)}
-                  <span className={cn('text-xs font-normal ml-1', isDark ? 'text-zinc-400' : 'text-slate-500')}>
-                    / hr
-                  </span>
+                <span className={cn('text-base font-extrabold font-mono', isDark ? 'text-cyan-400' : 'text-cyan-600')}>
+                  {formatRupiah(hourlyRate)}/hour
                 </span>
               </div>
 
-              <div className="flex items-center justify-between text-xs">
-                <span className={isDark ? 'text-zinc-500' : 'text-slate-500'}>
-                  Est. Monthly Cap (730 hrs)
-                </span>
-                <span className={isDark ? 'text-zinc-300' : 'text-slate-700'}>
-                  ~{formatRupiah(monthlyEstimate)} / mo
-                </span>
+              {/* Account Balance & Commitment */}
+              <div className={cn('pt-3 border-t space-y-2', isDark ? 'border-white/[0.08]' : 'border-slate-100')}>
+                <div className="space-y-1.5 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className={isDark ? 'text-zinc-400' : 'text-slate-600'}>Account Balance:</span>
+                    <span className={cn('font-bold font-mono', !isBalanceInsufficient ? (isDark ? 'text-emerald-400' : 'text-emerald-600') : (isDark ? 'text-red-400' : 'text-red-600'))}>
+                      {loadingBalance ? '...' : formatRupiah(userBalance)}
+                    </span>
+                  </div>
+                  {activeCommitment > 0 && (
+                    <div className={cn('flex items-center justify-between text-[11px]', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+                      <span>Active Services Commitment:</span>
+                      <span className={cn('font-mono font-medium', isDark ? 'text-zinc-300' : 'text-slate-700')}>
+                        {formatRupiah(activeCommitment)}/mo
+                      </span>
+                    </div>
+                  )}
+                  <div className={cn('flex items-center justify-between text-[11px]', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+                    <span>New Elastic IP Estimate (730h):</span>
+                    <span className={cn('font-mono font-medium', isDark ? 'text-zinc-300' : 'text-slate-700')}>
+                      {formatRupiah(monthlyEstimate)}/mo
+                    </span>
+                  </div>
+                  <div className={cn('flex items-center justify-between text-xs pt-1.5 border-t font-semibold', isDark ? 'border-white/[0.06]' : 'border-slate-200')}>
+                    <span className={isDark ? 'text-zinc-300' : 'text-slate-700'}>Total Required Balance:</span>
+                    <span className={cn('font-mono font-bold', !isBalanceInsufficient ? (isDark ? 'text-cyan-400' : 'text-cyan-600') : (isDark ? 'text-red-400' : 'text-red-600'))}>
+                      {formatRupiah(totalRequiredBalance)}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
+
+            {isBalanceInsufficient && (
+              <div
+                className={cn(
+                  'p-3.5 rounded-xl border text-xs space-y-2 transition-colors',
+                  isDark ? 'bg-red-500/15 border-red-500/35 text-red-200' : 'bg-red-50 border-red-300 text-red-950 shadow-2xs'
+                )}
+              >
+                <div className="flex items-start gap-2.5">
+                  <AlertTriangle className={cn('w-4 h-4 shrink-0 mt-0.5', isDark ? 'text-red-400' : 'text-red-600')} />
+                  <div>
+                    <p className={cn('font-bold tracking-tight text-xs', isDark ? 'text-red-300' : 'text-red-900')}>
+                      Insufficient Account Balance
+                    </p>
+                    <p className={cn('text-[11px] mt-0.5 leading-relaxed', isDark ? 'text-red-200/90' : 'text-red-800')}>
+                      Allocating a PAYG Elastic IP requires sufficient balance to cover the accumulated monthly commitment of your active services plus this IP&apos;s 730-hour cap.
+                    </p>
+                  </div>
+                </div>
+                <div className={cn('pl-6 pt-2 flex items-center justify-between border-t', isDark ? 'border-red-500/25' : 'border-red-200')}>
+                  <span className={cn('text-[11px] font-semibold', isDark ? 'text-red-200' : 'text-red-900')}>
+                    Shortfall: <strong className={cn(isDark ? 'text-red-300 font-extrabold' : 'text-red-700 font-extrabold')}>{formatRupiah(shortfall)}</strong>
+                  </span>
+                  <Link
+                    href="/dashboard/topup"
+                    className={cn('font-bold underline transition-colors text-xs inline-flex items-center gap-1', isDark ? 'text-red-300 hover:text-white' : 'text-red-700 hover:text-red-950')}
+                  >
+                    Top Up Balance →
+                  </Link>
+                </div>
+              </div>
+            )}
 
             {isOutOfStock && (
               <div className="flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-red-400">
@@ -407,18 +490,18 @@ export default function AllocateElasticIpPage() {
 
             <button
               onClick={handleAllocate}
-              disabled={submitting || isOutOfStock}
-              className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-zinc-950 font-semibold text-sm transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={submitting || isOutOfStock || isBalanceInsufficient}
+              className="w-full py-3 rounded-xl text-xs sm:text-sm font-bold bg-cyan-400 hover:bg-cyan-300 active:scale-[0.99] text-slate-950 shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
             >
               {submitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Allocating Static IP...
+                  <span>Allocating Static IP...</span>
                 </>
               ) : (
                 <>
                   <Rocket className="w-4 h-4" />
-                  Allocate IPv{selectedVersion} Now
+                  <span>Allocate IPv{selectedVersion} Now</span>
                 </>
               )}
             </button>
