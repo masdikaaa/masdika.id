@@ -1405,9 +1405,11 @@ s3 = boto3.client(
                 )}
 
                 {loadingObjects ? (
-                  <div className="py-16 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-cyan-400" /></div>
+                  <div className="min-h-[240px] flex items-center justify-center">
+                    <Loader2 className="w-6 h-6 animate-spin text-cyan-400" />
+                  </div>
                 ) : filteredFolders.length === 0 && filteredObjects.length === 0 ? (
-                  <div className={cn('py-14 px-6 rounded-2xl border border-dashed text-center space-y-3', isDark ? 'border-white/[0.1] bg-[#0a0a0c]/50' : 'border-slate-300 bg-slate-50/70')}>
+                  <div className={cn('min-h-[240px] flex flex-col items-center justify-center px-6 rounded-2xl border border-dashed text-center space-y-3', isDark ? 'border-white/[0.1] bg-[#0a0a0c]/50' : 'border-slate-300 bg-slate-50/70')}>
                     <div className={cn('w-10 h-10 rounded-xl mx-auto flex items-center justify-center border', isDark ? 'bg-cyan-500/10 border-cyan-500/20 text-cyan-400' : 'bg-cyan-50 border-cyan-200 text-cyan-600')}>
                       <UploadCloud className="w-5 h-5" />
                     </div>
@@ -1421,7 +1423,7 @@ s3 = boto3.client(
                     </div>
                   </div>
                 ) : (
-                  <>
+                  <div className="min-h-[240px] flex flex-col justify-between gap-3">
                     <div className={cn('divide-y border rounded-xl overflow-hidden', isDark ? 'divide-white/[0.06] border-white/[0.06] bg-[#0a0a0c]' : 'divide-slate-200 border-slate-200 bg-white')}>
                       {safeObjectPage === 1 && filteredFolders.map((f) => (
                         <div key={f} onClick={() => setPrefix(f)} className={cn('p-3 flex items-center justify-between cursor-pointer text-xs', isDark ? 'hover:bg-white/[0.03]' : 'hover:bg-slate-50')}>
@@ -1507,7 +1509,7 @@ s3 = boto3.client(
                         )}
                       </div>
                     )}
-                  </>
+                  </div>
                 )}
               </>
             )}
