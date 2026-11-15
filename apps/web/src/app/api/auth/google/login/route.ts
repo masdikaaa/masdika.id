@@ -25,6 +25,9 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'Google OAuth is not configured. Missing GOOGLE_CLIENT_ID.' }, { status: 500 });
   }
 
+  const { searchParams } = new URL(req.url);
+  const switchAccount = searchParams.get('switch') === '1';
+
   const state = crypto.randomBytes(32).toString('hex');
   const params = new URLSearchParams({
     client_id: clientId,
@@ -32,7 +35,7 @@ export async function GET(req: Request) {
     response_type: 'code',
     scope: 'email profile',
     access_type: 'online',
-    prompt: 'consent',
+    ...(switchAccount ? { prompt: 'select_account' } : {}),
     state,
   });
 
