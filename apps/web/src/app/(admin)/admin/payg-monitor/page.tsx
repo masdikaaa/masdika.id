@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 import React, { useState, useEffect, Fragment } from "react";
@@ -157,7 +157,7 @@ export default function PaygMonitorPage() {
       case 'VPS': return <Terminal className={cn("w-4 h-4 sm:w-5 sm:h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />;
       case 'Reserved IP': return <Network className={cn("w-4 h-4 sm:w-5 sm:h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />;
       case 'Database': return <Database className={cn("w-4 h-4 sm:w-5 sm:h-5", isDark ? "text-emerald-400" : "text-emerald-700")} />;
-      default: return <Package className={cn("w-4 h-4 sm:w-5 sm:h-5", isDark ? "text-purple-400" : "text-purple-700")} />;
+      default: return <Package className={cn("w-4 h-4 sm:w-5 sm:h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />;
     }
   };
 

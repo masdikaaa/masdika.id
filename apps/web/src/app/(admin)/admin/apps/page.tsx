@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
@@ -512,7 +512,7 @@ export default function AdminManagedAppsPage() {
                         <span className={cn("px-2 py-0.5 rounded font-mono text-[11px] font-semibold border", isDark ? "bg-cyan-500/10 text-cyan-300 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
                           {app.cpuShares} vCPU
                         </span>
-                        <span className={cn("px-2 py-0.5 rounded font-mono text-[11px] font-semibold border", isDark ? "bg-purple-500/10 text-purple-300 border-purple-500/20" : "bg-purple-50 text-purple-700 border-purple-200")}>
+                        <span className={cn("px-2 py-0.5 rounded font-mono text-[11px] font-semibold border", isDark ? "bg-cyan-500/10 text-cyan-300 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
                           {app.memoryMb >= 1024 ? `${app.memoryMb / 1024} GB` : `${app.memoryMb} MB`}
                         </span>
                         <span className={cn("px-2 py-0.5 rounded font-mono text-[10px] font-medium border", isDark ? "bg-white/[0.04] text-zinc-400 border-white/[0.08]" : "bg-slate-100 text-slate-600 border-slate-200")}>
@@ -724,7 +724,7 @@ export default function AdminManagedAppsPage() {
                       <span className={cn("px-1.5 py-0.5 rounded border font-semibold", isDark ? "bg-cyan-500/10 text-cyan-300 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
                         {app.cpuShares} vCPU
                       </span>
-                      <span className={cn("px-1.5 py-0.5 rounded border font-semibold", isDark ? "bg-purple-500/10 text-purple-300 border-purple-500/20" : "bg-purple-50 text-purple-700 border-purple-200")}>
+                      <span className={cn("px-1.5 py-0.5 rounded border font-semibold", isDark ? "bg-cyan-500/10 text-cyan-300 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
                         {app.memoryMb >= 1024 ? `${app.memoryMb / 1024} GB` : `${app.memoryMb} MB`}
                       </span>
                     </div>

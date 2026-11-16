@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useUpdateEffect, useUrlNumber, useUrlString, useUrlTab } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
@@ -1190,7 +1190,7 @@ export default function VpsManagementPage() {
               {/* Storage */}
               <div className={cn("p-6 rounded-2xl border space-y-4", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                 <h3 className={cn("text-sm font-bold flex items-center gap-2 mb-4", isDark ? "text-white" : "text-slate-900")}>
-                  <HardDrive className={cn("w-4 h-4", isDark ? "text-purple-400" : "text-purple-600")} /> Storage Configuration
+                  <HardDrive className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} /> Storage Configuration
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
                   <div>
@@ -2569,7 +2569,7 @@ export default function VpsManagementPage() {
                                 <button
                                   onClick={() => handleOpenIpModal(vps)}
                                   title="Manage IPs"
-                                  className={cn("w-8 h-8 rounded-lg flex items-center justify-center transition-all border shadow-2xs", isDark ? "bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border-purple-500/20" : "bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200")}
+                                  className={cn("w-8 h-8 rounded-lg flex items-center justify-center transition-all border shadow-2xs", isDark ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border-cyan-200")}
                                 >
                                   <Globe className="w-3.5 h-3.5" />
                                 </button>

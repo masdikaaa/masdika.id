@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
@@ -662,7 +662,7 @@ export default function AdminCustomersPage() {
                          <div className="flex items-center justify-end gap-2">
                            <button 
                              onClick={() => fetchReferrals(u)}
-                             className={cn("p-2 bg-purple-500/10 hover:bg-purple-500/20 hover:text-purple-300 rounded-lg transition-colors", isDark ? "text-purple-400" : "text-purple-700")}
+                             className={cn("p-2 bg-cyan-500/10 hover:bg-cyan-500/20 hover:text-cyan-300 rounded-lg transition-colors", isDark ? "text-cyan-400" : "text-cyan-700")}
                              title="Manage Referrals"
                            >
                              <Gift className="w-4 h-4" />
@@ -815,7 +815,7 @@ export default function AdminCustomersPage() {
             <div className={cn("p-4 sm:p-6 border-b flex items-start justify-between gap-3 shrink-0", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
               <div className="min-w-0">
                 <h3 className={cn("text-sm sm:text-base font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                  <Gift className={cn("w-5 h-5 shrink-0", isDark ? "text-purple-400" : "text-purple-700")} />
+                  <Gift className={cn("w-5 h-5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-700")} />
                   <span className="truncate">Referrals for {referralsUser.name || 'Unnamed'}</span>
                 </h3>
                 <p className={cn("text-sm mt-1 truncate", isDark ? "text-zinc-400" : "text-slate-500")}>{referralsUser.email}</p>
@@ -829,7 +829,7 @@ export default function AdminCustomersPage() {
             <div className="p-4 sm:p-6 overflow-y-auto flex-1">
               {loadingReferrals ? (
                 <div className="flex flex-col items-center justify-center py-12 gap-3">
-                  <RefreshCw className={cn("w-8 h-8 animate-spin", isDark ? "text-purple-500" : "text-purple-700")} />
+                  <RefreshCw className={cn("w-8 h-8 animate-spin", isDark ? "text-cyan-500" : "text-cyan-700")} />
                   <p className={cn(isDark ? "text-zinc-400" : "text-slate-500")}>Loading referrals data...</p>
                 </div>
               ) : referralsData ? (

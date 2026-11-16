@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useUrlNumber, useUrlTab } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
@@ -392,7 +392,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
         icon = <Activity className="w-4 h-4 text-orange-400" />;
       } else if (serviceName === 'TIKTOK' || serviceName === 'YOUTUBE' || serviceName === 'BLOG') {
         category = 'API Hub';
-        icon = <Globe className="w-4 h-4 text-purple-400" />;
+        icon = <Globe className="w-4 h-4 text-cyan-400" />;
       } else {
         category = 'API Hub';
       }
@@ -611,7 +611,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
       ),
       status: obj.status,
       suspendReason: obj.suspendReason,
-      icon: <Database className={cn("w-4 h-4", isDark ? "text-indigo-400" : "text-indigo-700")} />,
+      icon: <Database className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} />,
       createdAt: obj.createdAt,
       rawData: obj
     })) || []),
@@ -1442,7 +1442,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                               "px-2 py-0.5 rounded-full text-[10px] font-semibold",
                               log.username === "System" 
                                 ? (isDark ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border border-cyan-200")
-                                : (isDark ? "bg-purple-500/10 text-purple-400 border border-purple-500/20" : "bg-purple-50 text-purple-700 border border-purple-200")
+                                : (isDark ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border border-cyan-200")
                             )}>
                               {log.username || "System"}
                             </span>

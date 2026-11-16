@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useUpdateEffect, useUrlNumber, useUrlTab } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
@@ -457,7 +457,7 @@ export default function AdminPlansPage() {
       case "APP": return <Boxes className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />;
       case "OBJECT_STORAGE": return <HardDrive className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />;
       case "CDN": return <UploadCloud className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />;
-      case "TIKTOK": return <FileVideo className={cn("w-4 h-4", isDark ? "text-purple-400" : "text-purple-600")} />;
+      case "TIKTOK": return <FileVideo className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />;
       case "SPOTIFY": return <Music className={cn("w-4 h-4", isDark ? "text-emerald-400" : "text-emerald-600")} />;
       case "YOUTUBE": return <PlaySquare className={cn("w-4 h-4", isDark ? "text-red-400" : "text-red-600")} />;
       case "BLOG": return <FileText className={cn("w-4 h-4", isDark ? "text-amber-400" : "text-amber-600")} />;
@@ -479,12 +479,12 @@ export default function AdminPlansPage() {
               </span>
             )}
             {parsed.region && (
-              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border flex items-center gap-1", isDark ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200")}>
-                <MapPin className="w-3 h-3" /> {parsed.region}
+              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border flex items-center gap-1", isDark ? "bg-white/[0.04] text-zinc-300 border-white/[0.08]" : "bg-slate-100 text-slate-700 border-slate-200")}>
+                <MapPin className="w-3 h-3 text-cyan-400" /> {parsed.region}
               </span>
             )}
             {parsed.maxBuckets !== undefined && (
-              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border", isDark ? "bg-amber-500/10 text-amber-300 border-amber-500/20" : "bg-amber-50 text-amber-700 border-amber-200")}>
+              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border", isDark ? "bg-cyan-500/10 text-cyan-300 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
                 {parsed.maxBuckets === -1 ? "Unlimited Buckets" : `${parsed.maxBuckets} Buckets`}
               </span>
             )}
@@ -506,22 +506,22 @@ export default function AdminPlansPage() {
               </span>
             )}
             {parsed.ram && (
-              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border flex items-center gap-1", isDark ? "bg-purple-500/10 text-purple-300 border-purple-500/20" : "bg-purple-50 text-purple-700 border-purple-200")}>
+              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border flex items-center gap-1", isDark ? "bg-cyan-500/10 text-cyan-300 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
                 <Layers className="w-3 h-3" /> {parsed.ram}
               </span>
             )}
             {parsed.storage && (
-              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border flex items-center gap-1", isDark ? "bg-amber-500/10 text-amber-300 border-amber-500/20" : "bg-amber-50 text-amber-700 border-amber-200")}>
+              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border flex items-center gap-1", isDark ? "bg-cyan-500/10 text-cyan-300 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
                 <HardDrive className="w-3 h-3" /> {parsed.storage}
               </span>
             )}
             {parsed.region && (
-              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border flex items-center gap-1", isDark ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200")}>
-                <MapPin className="w-3 h-3" /> {parsed.region}
+              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border flex items-center gap-1", isDark ? "bg-white/[0.04] text-zinc-300 border-white/[0.08]" : "bg-slate-100 text-slate-700 border-slate-200")}>
+                <MapPin className="w-3 h-3 text-cyan-400" /> {parsed.region}
               </span>
             )}
             {(parsed.storage || parsed.storageGb) && (
-              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border flex items-center gap-1", isDark ? "bg-amber-500/10 text-amber-300 border-amber-500/20" : "bg-amber-50 text-amber-700 border-amber-200")}>
+              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border flex items-center gap-1", isDark ? "bg-cyan-500/10 text-cyan-300 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
                 <HardDrive className="w-3 h-3" /> {parsed.storage || `${parsed.storageGb} GB`}
               </span>
             )}
@@ -541,17 +541,17 @@ export default function AdminPlansPage() {
               </span>
             )}
             {parsed.ram && (
-              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border flex items-center gap-1", isDark ? "bg-purple-500/10 text-purple-300 border-purple-500/20" : "bg-purple-50 text-purple-700 border-purple-200")}>
+              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border flex items-center gap-1", isDark ? "bg-cyan-500/10 text-cyan-300 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
                 <Layers className="w-3 h-3" /> {parsed.ram}
               </span>
             )}
             {parsed.region && (
-              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border flex items-center gap-1", isDark ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200")}>
-                <MapPin className="w-3 h-3" /> {parsed.region}
+              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border flex items-center gap-1", isDark ? "bg-white/[0.04] text-zinc-300 border-white/[0.08]" : "bg-slate-100 text-slate-700 border-slate-200")}>
+                <MapPin className="w-3 h-3 text-cyan-400" /> {parsed.region}
               </span>
             )}
             {(parsed.storage || parsed.storageGb) && (
-              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border flex items-center gap-1", isDark ? "bg-amber-500/10 text-amber-300 border-amber-500/20" : "bg-amber-50 text-amber-700 border-amber-200")}>
+              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border flex items-center gap-1", isDark ? "bg-cyan-500/10 text-cyan-300 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
                 <HardDrive className="w-3 h-3" /> {parsed.storage || `${parsed.storageGb} GB`}
               </span>
             )}
@@ -576,12 +576,12 @@ export default function AdminPlansPage() {
               </span>
             )}
             {parsed.transferGB && (
-              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border", isDark ? "bg-purple-500/10 text-purple-300 border-purple-500/20" : "bg-purple-50 text-purple-700 border-purple-200")}>
+              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border", isDark ? "bg-cyan-500/10 text-cyan-300 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
                 {parsed.transferGB} GB Bandwidth
               </span>
             )}
             {parsed.requests && (
-              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border", isDark ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200")}>
+              <span className={cn("px-2 py-0.5 rounded-md text-[11px] font-semibold border", isDark ? "bg-white/[0.04] text-zinc-300 border-white/[0.08]" : "bg-slate-100 text-slate-700 border-slate-200")}>
                 {parsed.requests === "unlimited" ? "Unlimited Requests" : `${parsed.requests} req`}
               </span>
             )}
@@ -733,26 +733,26 @@ export default function AdminPlansPage() {
         <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-xs")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-[11px] font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>SERVICES COVERED</span>
-            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-purple-500/15 border-purple-500/25 text-purple-400" : "bg-purple-50 border-purple-200 text-purple-700")}>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
               <Server className="w-4 h-4" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
             <span className={cn("text-2xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>{distinctServices}</span>
-            <span className={cn("text-xs font-semibold", isDark ? "text-purple-400" : "text-purple-600")}>Modules</span>
+            <span className={cn("text-xs font-semibold", isDark ? "text-cyan-400" : "text-cyan-600")}>Modules</span>
           </div>
         </div>
 
         <div className={cn("relative overflow-hidden rounded-2xl border p-5 transition-all", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-xs")}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-[11px] font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>POPULAR HIGHLIGHTS</span>
-            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-amber-500/15 border-amber-500/25 text-amber-400" : "bg-amber-50 border-amber-200 text-amber-700")}>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
               <Zap className="w-4 h-4" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
             <span className={cn("text-2xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>{popularCount}</span>
-            <span className={cn("text-xs font-semibold", isDark ? "text-amber-400" : "text-amber-600")}>Featured</span>
+            <span className={cn("text-xs font-semibold", isDark ? "text-cyan-400" : "text-cyan-600")}>Featured</span>
           </div>
         </div>
       </div>
@@ -903,7 +903,7 @@ export default function AdminPlansPage() {
                               {plan.name}
                             </span>
                             {plan.isPopular && (
-                              <span className={cn("px-2 py-0.5 rounded text-[10px] font-extrabold border flex items-center gap-1", isDark ? "bg-amber-500/15 text-amber-300 border-amber-500/30" : "bg-amber-50 text-amber-800 border-amber-200")}>
+                              <span className={cn("px-2 py-0.5 rounded text-[10px] font-extrabold border flex items-center gap-1", isDark ? "bg-cyan-500/15 text-cyan-300 border-cyan-500/30" : "bg-cyan-50 text-cyan-800 border-cyan-200")}>
                                 <Sparkles className="w-3 h-3" /> Featured
                               </span>
                             )}
@@ -931,7 +931,7 @@ export default function AdminPlansPage() {
                             {formatRupiah(plan.price)}
                             <span className={cn("text-[11px] font-normal ml-1", isDark ? "text-zinc-500" : "text-slate-500")}>/bln</span>
                           </div>
-                          <div className={cn("text-xs font-semibold mt-0.5 flex items-center gap-1", isDark ? "text-purple-400" : "text-purple-700")}>
+                          <div className={cn("text-xs font-semibold mt-0.5 flex items-center gap-1", isDark ? "text-zinc-400" : "text-slate-500")}>
                             <span>{formatRupiah(plan.hourlyPrice || Math.round(plan.price / 720))}</span>
                             <span className="text-[10px] opacity-75 font-normal">/jam (PAYG)</span>
                           </div>
@@ -1031,7 +1031,7 @@ export default function AdminPlansPage() {
 
                       <div className="flex items-center gap-1.5">
                         {plan.isPopular && (
-                          <span className={cn("px-2 py-0.5 rounded text-[10px] font-extrabold border flex items-center gap-1", isDark ? "bg-amber-500/15 text-amber-300 border-amber-500/30" : "bg-amber-50 text-amber-800 border-amber-200")}>
+                          <span className={cn("px-2 py-0.5 rounded text-[10px] font-extrabold border flex items-center gap-1", isDark ? "bg-cyan-500/15 text-cyan-300 border-cyan-500/30" : "bg-cyan-50 text-cyan-800 border-cyan-200")}>
                             <Sparkles className="w-3 h-3" /> Featured
                           </span>
                         )}
@@ -1063,7 +1063,7 @@ export default function AdminPlansPage() {
                           <span className={cn("text-xs font-normal ml-1", isDark ? "text-zinc-500" : "text-slate-500")}>/bln</span>
                         </div>
                       </div>
-                      <div className={cn("text-xs font-bold text-right", isDark ? "text-purple-400" : "text-purple-700")}>
+                      <div className={cn("text-xs font-bold text-right", isDark ? "text-zinc-400" : "text-slate-500")}>
                         {formatRupiah(plan.hourlyPrice || Math.round(plan.price / 720))}
                         <span className="text-[10px] font-normal block opacity-80">/jam PAYG</span>
                       </div>
@@ -1230,7 +1230,7 @@ export default function AdminPlansPage() {
                       min="0"
                       value={formData.hourlyPrice}
                       onChange={(e) => setFormData({ ...formData, hourlyPrice: Number(e.target.value) })}
-                      className={cn("w-full border rounded-xl pl-11 pr-3.5 py-2.5 text-sm font-bold focus:outline-none focus:border-purple-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-purple-400" : "bg-slate-50 border-slate-200 text-purple-700")}
+                      className={cn("w-full border rounded-xl pl-11 pr-3.5 py-2.5 text-sm font-bold focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-cyan-400" : "bg-slate-50 border-slate-200 text-cyan-700")}
                     />
                   </div>
                 </div>

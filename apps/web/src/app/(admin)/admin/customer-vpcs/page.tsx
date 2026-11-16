@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect, useMemo } from "react";
 import {
@@ -645,7 +645,7 @@ export default function AdminCustomerVpcsPage() {
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
               VPC Peerings
             </span>
-            <div className="p-2 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
+            <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
               <ArrowRightLeft className="w-4 h-4" />
             </div>
           </div>
@@ -653,7 +653,7 @@ export default function AdminCustomerVpcsPage() {
             {stats.totalPeerings}
           </div>
           <p className={cn("text-[11px] mt-1 flex items-center gap-1", isDark ? "text-zinc-400" : "text-slate-500")}>
-            <Link2 className="w-3 h-3 text-purple-400 inline" /> Inter-VPC connections
+            <Link2 className="w-3 h-3 text-cyan-400 inline" /> Inter-VPC connections
           </p>
         </div>
 
@@ -1122,7 +1122,7 @@ export default function AdminCustomerVpcsPage() {
 
                       {/* Peering Link Icon */}
                       <td className="py-3.5 px-4 text-center">
-                        <div className="inline-flex p-1.5 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                        <div className="inline-flex p-1.5 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
                           <ArrowRightLeft className="w-3.5 h-3.5" />
                         </div>
                       </td>
@@ -1776,7 +1776,7 @@ export default function AdminCustomerVpcsPage() {
             >
               <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-white/[0.08]">
                 <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                  <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
                     <ArrowRightLeft className="w-5 h-5" />
                   </div>
                   <div>
@@ -1890,7 +1890,7 @@ export default function AdminCustomerVpcsPage() {
                             forceDbOnly: e.target.checked,
                           })
                         }
-                        className="w-4 h-4 rounded text-purple-500 focus:ring-purple-400"
+                        className="w-4 h-4 rounded text-cyan-500 focus:ring-cyan-400"
                       />
                     </div>
                   </>

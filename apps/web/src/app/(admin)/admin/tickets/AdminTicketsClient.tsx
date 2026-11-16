@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useUrlString } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
@@ -18,7 +18,7 @@ function StatusBadge({ status, isDark }: { status: string; isDark?: boolean }) {
   if (status === 'OPEN') return <span className={cn("bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded text-xs font-semibold", isDark ? "text-emerald-400" : "text-emerald-700")}>OPEN</span>;
   if (status === 'ANSWERED') return <span className={cn("bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded text-xs font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>ANSWERED</span>;
   if (status === "CUSTOMER_REPLY") return <span className={cn("bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded text-xs font-semibold", isDark ? "text-orange-400" : "text-orange-700")}>CUSTOMER REPLY</span>;
-  if (status === 'MERGED') return <span className={cn("bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded text-xs font-semibold", isDark ? "text-purple-400" : "text-purple-700")}>MERGED</span>;
+  if (status === 'MERGED') return <span className={cn("bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded text-xs font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>MERGED</span>;
   return <span className={cn("bg-zinc-500/10 border border-zinc-500/20 px-2 py-0.5 rounded text-xs font-semibold", isDark ? "text-zinc-400" : "text-slate-500")}>CLOSED</span>;
 }
 

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useUpdateEffect, useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
@@ -697,7 +697,7 @@ export default function AdminMediaLibrary() {
 
           {selectedIds.length > 0 && (
             <>
-              <button onClick={() => { setShowMoveModal(true); setMoveDest(currentFolder); }} className={cn("bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 px-3.5 py-2 rounded-xl text-sm font-bold flex items-center gap-2 shrink-0 transition-all border border-cyan-400/20", isDark ? "text-white" : "text-slate-900")}>
+              <button onClick={() => { setShowMoveModal(true); setMoveDest(currentFolder); }} className={cn("bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 px-3.5 py-2 rounded-xl text-sm font-bold flex items-center gap-2 shrink-0 transition-all border border-cyan-400/20", isDark ? "text-white" : "text-slate-900")}>
                 <MoveRight className="w-4 h-4 shrink-0" /> Move ({selectedIds.length})
               </button>
               <button onClick={() => setShowDeleteAllModal(true)} className={cn("bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 px-3.5 py-2 rounded-xl text-sm font-bold flex items-center gap-2 shrink-0 transition-all", isDark ? "text-red-400" : "text-red-700")}>

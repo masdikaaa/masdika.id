@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useUrlNumber } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
@@ -209,11 +209,11 @@ export default function AdminNotificationsPage() {
                           <AlertCircle className="w-4 h-4" />
                         </div>
                       ) : notif.type === 'COMMUNITY' ? (
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center border ${notif.isRead ? (isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-zinc-400' : 'bg-slate-100 border-slate-200 text-slate-500') : 'bg-purple-500/15 border-purple-500/25 text-purple-400'}`}>
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center border ${notif.isRead ? (isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-zinc-400' : 'bg-slate-100 border-slate-200 text-slate-500') : 'bg-cyan-500/15 border-cyan-500/25 text-cyan-400'}`}>
                           <Users className="w-3.5 h-3.5" />
                         </div>
                       ) : (
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center border ${notif.isRead ? (isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-zinc-400' : 'bg-slate-100 border-slate-200 text-slate-500') : 'bg-indigo-500/15 border-indigo-500/25 text-indigo-400'}`}>
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center border ${notif.isRead ? (isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-zinc-400' : 'bg-slate-100 border-slate-200 text-slate-500') : 'bg-cyan-500/15 border-cyan-500/25 text-cyan-400'}`}>
                           <HardDrive className="w-3.5 h-3.5" />
                         </div>
                       )}

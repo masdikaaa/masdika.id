@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useUrlTab } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
@@ -1750,8 +1750,8 @@ export default function SettingsPage() {
                           <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
                           CDN: <strong className="font-mono">{formData.rustfs_cdn_bucket || formData.rustfs_bucket || 'masdika-cdn'}</strong>
                         </span>
-                        <span className="px-2.5 py-1 rounded-md bg-purple-950/40 text-purple-300 border border-purple-800/40 text-[11px] font-medium flex items-center gap-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                        <span className="px-2.5 py-1 rounded-md bg-cyan-950/40 text-cyan-300 border border-cyan-800/40 text-[11px] font-medium flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
                           Media: <strong className="font-mono">{formData.rustfs_media_bucket || 'masdika-media'}</strong>
                         </span>
                         <span className="px-2.5 py-1 rounded-md bg-blue-950/40 text-blue-300 border border-blue-800/40 text-[11px] font-medium flex items-center gap-1.5">
@@ -1945,7 +1945,7 @@ export default function SettingsPage() {
                             </span>
                           </div>
                           <div className={cn("p-3 rounded-lg border", isDark ? "bg-slate-900/60 border-white/[0.08]" : "bg-white border-slate-200")}>
-                            <span className="font-semibold text-purple-400 block mb-1">2. Website Media ({targetConfig.mediaBucket || 'masdika-media'})</span>
+                            <span className="font-semibold text-cyan-400 block mb-1">2. Website Media ({targetConfig.mediaBucket || 'masdika-media'})</span>
                             <span className="text-zinc-400">
                               {bucketMigrationResult.categories.media?.migrated || 0} transferred • {bucketMigrationResult.categories.media?.skipped || 0} skipped
                             </span>
@@ -2309,7 +2309,7 @@ export default function SettingsPage() {
 
                     {/* Section 2: Public DNS & IP Routing */}
                     <div className="pt-4 border-t border-white/[0.06]">
-                      <h3 className={cn("text-sm font-bold uppercase tracking-wider mb-3 flex items-center gap-2", isDark ? "text-purple-400" : "text-purple-700")}>
+                      <h3 className={cn("text-sm font-bold uppercase tracking-wider mb-3 flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
                         <HardDrive className="w-4 h-4" /> 2. Public Networking & Domain Routing
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

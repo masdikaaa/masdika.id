@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { cn } from "@/lib/utils";
 
 import { useState, useRef, useEffect } from 'react';
@@ -35,7 +35,7 @@ function linkifyHtml(html: string) {
     }
     if (url) {
       if (inAnchor) return url;
-      return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-fuchsia-400 hover:text-fuchsia-300 underline underline-offset-4 decoration-fuchsia-400/30 hover:decoration-fuchsia-300/50 transition-all font-medium">${url}</a>`;
+      return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300 underline underline-offset-4 decoration-cyan-400/30 hover:decoration-cyan-300/50 transition-all font-medium">${url}</a>`;
     }
     return match;
   });
@@ -59,7 +59,7 @@ function StatusBadge({ status }: { status: string }) {
   if (status === 'OPEN') return <span className={cn("border px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase", isDark ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200")}>OPEN</span>;
   if (status === 'ANSWERED') return <span className={cn("border px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase", isDark ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/30" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>ANSWERED</span>;
   if (status === 'CUSTOMER_REPLY') return <span className={cn("border px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase", isDark ? "bg-orange-500/20 text-orange-300 border-orange-500/30" : "bg-orange-50 text-orange-700 border-orange-200")}>CUSTOMER REPLY</span>;
-  if (status === 'MERGED') return <span className={cn("border px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase", isDark ? "bg-purple-500/20 text-purple-300 border-purple-500/30" : "bg-purple-50 text-purple-700 border-purple-200")}>MERGED</span>;
+  if (status === 'MERGED') return <span className={cn("border px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase", isDark ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/30" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>MERGED</span>;
   return <span className={cn("border px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase", isDark ? "bg-zinc-500/20 border-zinc-500/30 text-zinc-300" : "bg-slate-100 border-slate-200 text-slate-700")}>CLOSED</span>;
 }
 
@@ -262,7 +262,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
               <>
                 <button
                   onClick={() => setShowMergeModal(true)}
-                  className={cn("flex-1 sm:flex-initial px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 sm:gap-2 border whitespace-nowrap", isDark ? "bg-purple-500/10 hover:bg-purple-500/20 border-purple-500/20 hover:border-purple-500/30 text-purple-400" : "bg-purple-50 hover:bg-purple-100 border-purple-200 hover:border-purple-300 text-purple-700")}
+                  className={cn("flex-1 sm:flex-initial px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 sm:gap-2 border whitespace-nowrap", isDark ? "bg-cyan-500/10 hover:bg-cyan-500/20 border-cyan-500/20 hover:border-cyan-500/30 text-cyan-400" : "bg-cyan-50 hover:bg-cyan-100 border-cyan-200 hover:border-cyan-300 text-cyan-700")}
                 >
                   <GitMerge className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" /> Merge
                 </button>
@@ -288,11 +288,11 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
       {/* Messages Area */}
       <div className="space-y-5 md:space-y-6 mt-6 sm:mt-8">
         {ticket.status === 'MERGED' && ticket.mergedInto && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={cn("border p-4 sm:p-5 rounded-2xl flex items-center gap-3 sm:gap-4 text-purple-200", isDark ? "bg-purple-500/10 border-purple-500/20" : "bg-purple-50 border-purple-200")}>
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-purple-500/20 flex items-center justify-center shrink-0">
-              <ShieldAlert className={cn("w-5 h-5", isDark ? "text-purple-400" : "text-purple-700")} />
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={cn("border p-4 sm:p-5 rounded-2xl flex items-center gap-3 sm:gap-4 text-cyan-200", isDark ? "bg-cyan-500/10 border-cyan-500/20" : "bg-cyan-50 border-cyan-200")}>
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-cyan-500/20 flex items-center justify-center shrink-0">
+              <ShieldAlert className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />
             </div>
-            <p className="text-xs sm:text-sm">This ticket has been merged into <Link href={`/admin/tickets/${ticket.mergedInto.ticketId.toLowerCase()}`} className={cn("font-bold hover:underline", isDark ? "text-purple-400" : "text-purple-700")}>#{ticket.mergedInto.ticketId}</Link>. All further communication will happen there.</p>
+            <p className="text-xs sm:text-sm">This ticket has been merged into <Link href={`/admin/tickets/${ticket.mergedInto.ticketId.toLowerCase()}`} className={cn("font-bold hover:underline", isDark ? "text-cyan-400" : "text-cyan-700")}>#{ticket.mergedInto.ticketId}</Link>. All further communication will happen there.</p>
           </motion.div>
         )}
 
@@ -659,7 +659,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
           <div className={cn("border rounded-2xl w-full max-w-md overflow-hidden", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white shadow-2xl" : "bg-white border-slate-200 text-slate-900 shadow-2xl")}>
             <div className={cn("p-6 border-b flex justify-between items-center", isDark ? "border-white/[0.08]" : "border-slate-200")}>
               <h3 className={cn("font-bold flex items-center gap-2 text-lg", isDark ? "text-white" : "text-slate-900")}>
-                <GitMerge className={cn("w-5 h-5", isDark ? "text-purple-400" : "text-purple-600")} />
+                <GitMerge className={cn("w-5 h-5", isDark ? "text-cyan-400" : "text-cyan-600")} />
                 Merge Ticket
               </h3>
               <button onClick={() => setShowMergeModal(false)} className={cn("transition-colors p-2 rounded-xl", isDark ? "text-zinc-400 hover:text-white hover:bg-white/10" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100")}>
@@ -669,7 +669,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
             
             <form onSubmit={handleMerge} className="p-6 space-y-5">
               <p className={cn("text-sm", isDark ? "text-zinc-300" : "text-slate-600")}>
-                This will move all messages from the current ticket into the target ticket and mark this ticket as <span className={cn("font-bold", isDark ? "text-purple-400" : "text-purple-700")}>MERGED</span>.
+                This will move all messages from the current ticket into the target ticket and mark this ticket as <span className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>MERGED</span>.
               </p>
               <div>
                 <label className={cn("text-xs font-bold uppercase tracking-wider mb-2 block", isDark ? "text-zinc-400" : "text-slate-500")}>Target Ticket ID</label>
@@ -678,7 +678,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
                   type="text"
                   value={mergeTarget}
                   onChange={e => setMergeTarget(e.target.value)}
-                  className={cn("w-full border rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-purple-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                   placeholder="e.g. TKT-123456"
                 />
               </div>
@@ -695,7 +695,7 @@ export default function AdminTicketThreadClient({ ticketId }: { ticketId: string
                 <button
                   type="submit"
                   disabled={isMerging || !mergeTarget}
-                  className="w-full sm:w-auto px-4 py-2 text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white rounded-xl transition-colors disabled:opacity-50 flex justify-center items-center shadow-sm"
+                  className="w-full sm:w-auto px-4 py-2 text-xs font-bold bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl transition-colors disabled:opacity-50 flex justify-center items-center shadow-sm"
                 >
                   {isMerging ? 'Merging...' : 'Merge Ticket'}
                 </button>
