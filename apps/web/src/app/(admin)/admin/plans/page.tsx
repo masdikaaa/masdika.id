@@ -291,8 +291,11 @@ export default function AdminPlansPage() {
     setIsModalOpen(true);
   };
 
+  const calculateHourlyFromMonthly = (monthlyPrice: number) =>
+    monthlyPrice > 0 ? Math.max(1, Math.ceil(monthlyPrice / 730)) : 0;
+
   const handleAutoCalculateHourly = () => {
-    const hourly = Math.round(formData.price / 720);
+    const hourly = calculateHourlyFromMonthly(formData.price);
     setFormData(prev => ({ ...prev, hourlyPrice: hourly }));
     toast.success(`Calculated PAYG: ${formatRupiah(hourly)} / hour`);
   };
@@ -1193,7 +1196,14 @@ export default function AdminPlansPage() {
                       required
                       min="0"
                       value={formData.price}
-                      onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
+                      onChange={(e) => {
+                        const nextPrice = Math.max(0, Number(e.target.value) || 0);
+                        setFormData(prev => ({
+                          ...prev,
+                          price: nextPrice,
+                          hourlyPrice: calculateHourlyFromMonthly(nextPrice),
+                        }));
+                      }}
                       className={cn("w-full border rounded-xl pl-11 pr-3.5 py-2.5 text-sm font-bold focus:outline-none focus:border-cyan-500 transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-cyan-400" : "bg-slate-50 border-slate-200 text-cyan-700")}
                     />
                   </div>
@@ -1209,7 +1219,7 @@ export default function AdminPlansPage() {
                       onClick={handleAutoCalculateHourly}
                       className={cn("text-[10px] font-bold text-cyan-400 hover:underline cursor-pointer flex items-center gap-1")}
                     >
-                      <Sparkles className="w-3 h-3" /> Auto (~Price/720)
+                      <Sparkles className="w-3 h-3" /> Auto (~Price/730)
                     </button>
                   </div>
                   <div className="relative">
