@@ -1635,56 +1635,81 @@ aider --model openai/glm-5.3`,
               <textarea
                 rows={3}
                 value={pgSystemPrompt}
+                spellCheck={false}
+                autoComplete="off"
+                data-ms-editor="false"
                 onChange={(e) => setPgSystemPrompt(e.target.value)}
                 placeholder="You are a helpful AI assistant..."
-                className={cn('w-full px-3.5 py-2.5 rounded-xl text-xs border outline-none focus:border-cyan-500 resize-none', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
+                className={cn('w-full px-3.5 py-2.5 rounded-xl text-xs border outline-none focus:border-cyan-500 resize-none caret-cyan-400', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
               />
             </div>
 
             <button
               type="button"
               onClick={() => setPgShowAdvanced(!pgShowAdvanced)}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-400 cursor-pointer"
+              className={cn(
+                'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-colors',
+                pgShowAdvanced
+                  ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-400'
+                  : isDark
+                  ? 'bg-white/[0.03] border-white/[0.08] text-zinc-300 hover:border-cyan-500/40'
+                  : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-cyan-500'
+              )}
             >
-              <Sliders className="w-3.5 h-3.5" />
-              <span>Advanced parameters</span>
+              <Sliders className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Advanced</span>
               {pgShowAdvanced ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
             </button>
 
             {pgShowAdvanced && (
-              <div className="grid grid-cols-2 gap-3 pt-1">
+              <div className="space-y-3.5 pt-1">
                 <div>
-                  <label className="text-[11px] text-zinc-400 block mb-1">Max Tokens</label>
+                  <div className="flex items-center justify-between text-xs mb-1.5">
+                    <span className={cn('font-semibold', isDark ? 'text-zinc-200' : 'text-slate-700')}>Temperature</span>
+                    <span className="font-mono text-zinc-400">{pgTemp.toFixed(1)}</span>
+                  </div>
                   <input
-                    type="number"
-                    min={64}
-                    max={16384}
-                    value={pgMaxTokens}
-                    onChange={(e) => setPgMaxTokens(Number(e.target.value) || 2048)}
-                    className={cn('w-full px-3 py-2 rounded-xl text-xs font-mono border outline-none', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
-                  />
-                </div>
-                <div>
-                  <label className="text-[11px] text-zinc-400 block mb-1">Temperature</label>
-                  <input
-                    type="number"
+                    type="range"
                     min={0}
                     max={2}
                     step={0.1}
                     value={pgTemp}
                     onChange={(e) => setPgTemp(Number(e.target.value))}
-                    className={cn('w-full px-3 py-2 rounded-xl text-xs font-mono border outline-none', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
+                    className="w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-cyan-400 bg-zinc-700"
                   />
+                </div>
+                <div>
+                  <label className={cn('text-xs font-semibold block mb-1.5', isDark ? 'text-zinc-200' : 'text-slate-700')}>
+                    Max output tokens
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={pgMaxTokens}
+                    onChange={(e) => {
+                      const val = Number(e.target.value.replace(/\D/g, ''));
+                      setPgMaxTokens(val > 0 ? Math.min(16384, val) : 1024);
+                    }}
+                    className={cn('w-full px-3.5 py-2 rounded-xl text-xs font-mono border outline-none focus:border-cyan-500', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
+                  />
+                  <p className="text-[11px] text-zinc-500 mt-1.5">
+                    Reasoning models spend part of this on thinking.
+                  </p>
                 </div>
               </div>
             )}
 
-            <div className={cn('pt-3 border-t text-[11px] space-y-1.5', isDark ? 'border-white/[0.06] text-zinc-400' : 'border-slate-100 text-slate-500')}>
+            <div className={cn('pt-3 border-t text-[11px] space-y-1.5 leading-relaxed', isDark ? 'border-white/[0.06] text-zinc-400' : 'border-slate-100 text-slate-500')}>
               <p>
-                Every message is a real, billed request from your <strong>AI Balance ({formatRupiah(aiBalance)})</strong>.
+                Every message is a real, billed request from your <strong>AI Balance ({formatRupiah(aiBalance)})</strong>. This chat so far:{' '}
+                <strong className={isDark ? 'text-white font-mono' : 'text-slate-900 font-mono'}>
+                  ≈ {formatRupiah(pgMessages.reduce((sum, m) => sum + (m.costRp || 0), 0))}
+                </strong>.
               </p>
-              <p>
-                Chats are not saved on Masdika. Only token counts and charges are recorded in Usage.
+              <p>Exact charges appear in Usage.</p>
+              <p className="flex items-start gap-1.5 text-zinc-500 pt-0.5">
+                <ShieldCheck className="w-3.5 h-3.5 shrink-0 mt-0.5 text-cyan-400" />
+                <span>Chats are not saved on Masdika. Messages go from this browser to the model and are gone.</span>
               </p>
             </div>
           </div>
@@ -1832,6 +1857,7 @@ aider --model openai/glm-5.3`,
                 value={pgInput}
                 spellCheck={false}
                 autoComplete="off"
+                data-ms-editor="false"
                 onChange={(e) => setPgInput(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
