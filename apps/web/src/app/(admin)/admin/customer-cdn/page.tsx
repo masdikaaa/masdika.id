@@ -389,12 +389,12 @@ export default function AdminCustomerCdnPage() {
       </div>
 
       {/* ── MASDIKA CYAN TABS (SERVICES vs FILES) ─────────────────────────────── */}
-      <div className={cn("flex items-center gap-2 border-b pb-1", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+      <div className={cn("grid grid-cols-2 sm:flex items-center gap-2 border-b pb-1", isDark ? "border-white/[0.08]" : "border-slate-200")}>
         <button
           type="button"
           onClick={() => setActiveTab("services")}
           className={cn(
-            "inline-flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-bold border-b-2 transition-all cursor-pointer",
+            "inline-flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 rounded-t-xl text-[11px] sm:text-xs font-bold border-b-2 whitespace-nowrap transition-all cursor-pointer",
             activeTab === "services"
               ? "border-cyan-400 text-cyan-400 bg-cyan-500/10"
               : isDark
@@ -402,14 +402,14 @@ export default function AdminCustomerCdnPage() {
               : "border-transparent text-slate-600 hover:text-slate-900"
           )}
         >
-          <HardDrive className="w-3.5 h-3.5" />
+          <HardDrive className="w-3.5 h-3.5 shrink-0" />
           <span>File CDN Services ({subscriptions.length})</span>
         </button>
         <button
           type="button"
           onClick={() => setActiveTab("files")}
           className={cn(
-            "inline-flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-bold border-b-2 transition-all cursor-pointer",
+            "inline-flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 rounded-t-xl text-[11px] sm:text-xs font-bold border-b-2 whitespace-nowrap transition-all cursor-pointer",
             activeTab === "files"
               ? "border-cyan-400 text-cyan-400 bg-cyan-500/10"
               : isDark
@@ -417,15 +417,83 @@ export default function AdminCustomerCdnPage() {
               : "border-transparent text-slate-600 hover:text-slate-900"
           )}
         >
-          <UploadCloud className="w-3.5 h-3.5" />
+          <UploadCloud className="w-3.5 h-3.5 shrink-0" />
           <span>Customer Files ({files.length})</span>
         </button>
       </div>
 
       {activeTab === "services" && (
         <div className={cn("w-full rounded-2xl border overflow-hidden", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
+          {/* Mobile Stacked Cards */}
+          <div className={cn("md:hidden divide-y", isDark ? "divide-white/[0.06]" : "divide-slate-100")}>
+            {subscriptions.length === 0 ? (
+              <div className="py-10 px-4 text-center text-xs text-zinc-500">
+                No customer File CDN subscriptions found.
+              </div>
+            ) : (
+              subscriptions.map((sub) => (
+                <div key={`mob-sub-${sub.id}`} className="p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <Link href={`/admin/customers/${sub.userId}`} className="font-bold text-sm text-cyan-400 hover:underline block truncate">
+                        {sub.user?.name || `User #${sub.userId}`}
+                      </Link>
+                      <div className="text-[11px] text-zinc-500 truncate">{sub.user?.email || "-"}</div>
+                    </div>
+                    <span
+                      className={cn(
+                        "inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border shrink-0",
+                        sub.status === "ACTIVE" || sub.status === "RUNNING"
+                          ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                          : sub.status === "SUSPENDED"
+                          ? "bg-amber-500/10 border-amber-500/30 text-amber-400"
+                          : "bg-rose-500/10 border-rose-500/30 text-rose-400"
+                      )}
+                    >
+                      {sub.status}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs">
+                    <div>
+                      <div className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>{sub.plan?.name || "File CDN"}</div>
+                      <div className="text-[11px] font-mono text-cyan-400">
+                        Rp {Number(sub.plan?.price || 0).toLocaleString("id-ID")} / mo
+                      </div>
+                    </div>
+                    <div className="text-[11px] text-zinc-500 whitespace-nowrap">
+                      {formatDate(sub.createdAt)}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-1">
+                    {sub.status !== "TERMINATED" && (
+                      <button
+                        type="button"
+                        disabled={updatingSubId === sub.id}
+                        onClick={() => handleToggleSubStatus(sub)}
+                        className="px-3 py-1.5 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-400 font-bold text-[11px] cursor-pointer disabled:opacity-50"
+                      >
+                        {sub.status === "SUSPENDED" ? "Unsuspend" : "Suspend"}
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      disabled={updatingSubId === sub.id}
+                      onClick={() => handleDeleteSub(sub, sub.status === "TERMINATED")}
+                      className="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 font-bold text-[11px] cursor-pointer disabled:opacity-50"
+                    >
+                      {sub.status === "TERMINATED" ? "Delete" : "Terminate"}
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Desktop Table */}
+          <div className="hidden md:block overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            <table className="w-full min-w-[680px] text-left border-collapse text-xs">
               <thead>
                 <tr className={cn("border-b text-[11px] font-bold uppercase tracking-wider", isDark ? "border-white/[0.08] bg-white/[0.02] text-zinc-400" : "border-slate-200 bg-slate-50 text-slate-500")}>
                   <th className="py-3.5 px-4">Customer</th>
