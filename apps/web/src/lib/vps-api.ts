@@ -154,12 +154,9 @@ export async function executeVpsPowerAction(
       );
     }
 
-    const server = await prisma.proxmoxServer.findFirst({ where: { isActive: true } });
-    if (!server) {
-      return vpsApiError("Hypervisor is currently unavailable", 503);
-    }
-
-    const proxmox = new ProxmoxClient(server.host, server.tokenId, server.tokenSecret);
+    const pveRes = await getActiveProxmoxClient();
+    if (pveRes.error) return pveRes.error;
+    const { proxmox } = pveRes;
     const handler = POWER_HANDLERS[action];
 
     try {
@@ -235,4 +232,82 @@ export async function getActiveProxmoxClient() {
   }
   const secret = decryptDeterministic(server.tokenSecret) || server.tokenSecret;
   return { proxmox: new ProxmoxClient(server.host, server.tokenId, secret) };
+}
+
+const FIREWALL_ALLOWED_FIELDS = [
+  "action",
+  "type",
+  "dport",
+  "sport",
+  "proto",
+  "source",
+  "dest",
+  "comment",
+  "enable",
+] as const;
+const FIREWALL_VALID_ACTIONS = ["ACCEPT", "DROP", "REJECT"] as const;
+const FIREWALL_VALID_PROTOS = ["tcp", "udp", "icmp", "any", "igmp"] as const;
+const FIREWALL_VALID_TYPES = ["in", "out"] as const;
+const FIREWALL_PORT_REGEX = /^[\d,:*-]{1,64}$/;
+const FIREWALL_ADDR_REGEX = /^[a-zA-Z0-9.:\/,-]{1,64}$/;
+
+/**
+ * Validates and sanitizes a Proxmox firewall rule payload for POST (full) or PUT (partial).
+ */
+export function validateFirewallRulePayload(
+  rawBody: unknown,
+  { partial = false }: { partial?: boolean } = {}
+): { data: Record<string, any> } | { error: NextResponse } {
+  if (!rawBody || typeof rawBody !== "object" || Array.isArray(rawBody)) {
+    return { error: vpsApiError("Invalid JSON payload", 400) };
+  }
+
+  const input = rawBody as Record<string, unknown>;
+  const data: Record<string, any> = {};
+
+  for (const field of FIREWALL_ALLOWED_FIELDS) {
+    if (input[field] !== undefined) data[field] = input[field];
+  }
+
+  if (partial && Object.keys(data).length === 0) {
+    return { error: vpsApiError("At least one valid firewall field must be provided", 400) };
+  }
+
+  if ((!partial || data.action !== undefined) && !FIREWALL_VALID_ACTIONS.includes(data.action)) {
+    return { error: vpsApiError("Invalid action. Must be ACCEPT, DROP, or REJECT.", 400) };
+  }
+  if ((!partial || data.type !== undefined) && !FIREWALL_VALID_TYPES.includes(data.type)) {
+    return { error: vpsApiError("Invalid type. Must be 'in' or 'out'.", 400) };
+  }
+  if (data.proto !== undefined && !FIREWALL_VALID_PROTOS.includes(data.proto)) {
+    return { error: vpsApiError("Invalid protocol.", 400) };
+  }
+  if (data.dport !== undefined && !FIREWALL_PORT_REGEX.test(String(data.dport))) {
+    return { error: vpsApiError("Invalid destination port format.", 400) };
+  }
+  if (data.sport !== undefined && !FIREWALL_PORT_REGEX.test(String(data.sport))) {
+    return { error: vpsApiError("Invalid source port format.", 400) };
+  }
+  if (data.source !== undefined && !FIREWALL_ADDR_REGEX.test(String(data.source))) {
+    return { error: vpsApiError("Invalid source IP/CIDR format.", 400) };
+  }
+  if (data.dest !== undefined && !FIREWALL_ADDR_REGEX.test(String(data.dest))) {
+    return { error: vpsApiError("Invalid destination IP/CIDR format.", 400) };
+  }
+  if (data.comment !== undefined) {
+    const comment = String(data.comment);
+    if (comment.length > 255 || /[\r\n]/.test(comment)) {
+      return { error: vpsApiError("Invalid comment (max 255 chars, no newlines).", 400) };
+    }
+    data.comment = comment;
+  }
+  if (data.enable !== undefined) {
+    if (data.enable === 0 || data.enable === 1 || typeof data.enable === "boolean") {
+      data.enable = data.enable ? 1 : 0;
+    } else {
+      return { error: vpsApiError("Invalid enable flag. Must be 0, 1, or boolean.", 400) };
+    }
+  }
+
+  return { data };
 }

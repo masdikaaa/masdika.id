@@ -3,6 +3,7 @@ import {
   authenticateVpsApiKey,
   getActiveProxmoxClient,
   getOwnedProvisionedVps,
+  validateFirewallRulePayload,
   vpsApiError,
 } from "@/lib/vps-api";
 
@@ -39,15 +40,9 @@ export async function PUT(
     if (vpsRes.error) return vpsRes.error;
 
     const rawBody = await req.json().catch(() => null);
-    if (!rawBody || typeof rawBody !== "object") {
-      return vpsApiError("Invalid JSON payload", 400);
-    }
-
-    const ALLOWED = ["action", "type", "dport", "sport", "proto", "source", "dest", "comment", "enable"] as const;
-    const body: Record<string, any> = {};
-    for (const f of ALLOWED) {
-      if (rawBody[f] !== undefined) body[f] = rawBody[f];
-    }
+    const validated = validateFirewallRulePayload(rawBody, { partial: true });
+    if ("error" in validated) return validated.error;
+    const body = validated.data;
 
     const pveRes = await getActiveProxmoxClient();
     if (pveRes.error) return pveRes.error;

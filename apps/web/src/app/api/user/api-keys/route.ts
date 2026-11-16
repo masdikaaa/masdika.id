@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth-middleware";
 import { prisma } from "@/lib/prisma";
+import { LIVE_VPS_STATUSES } from "@/lib/vps-api";
 import crypto from "crypto";
 
 export async function GET(req: NextRequest) {
@@ -11,14 +12,23 @@ export async function GET(req: NextRequest) {
     }
     const user = auth.user!;
 
-    const apiKeys = await prisma.apiKey.findMany({
-      where: { userId: user.id },
-      orderBy: { createdAt: 'desc' }
-    });
+    const [apiKeys, vpsCount] = await Promise.all([
+      prisma.apiKey.findMany({
+        where: { userId: user.id },
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.vpsService.count({
+        where: {
+          userId: user.id,
+          status: { in: LIVE_VPS_STATUSES },
+        },
+      }),
+    ]);
 
     return NextResponse.json({ 
       success: true, 
       apiKeys,
+      hasVps: vpsCount > 0,
       balance: user.balance,
       isReseller: user.isReseller
     });
@@ -53,6 +63,16 @@ export async function POST(req: NextRequest) {
     const key = `masdika_${crypto.randomBytes(24).toString('hex')}`;
 
     const newKey = await prisma.$transaction(async (tx) => {
+      const vpsCount = await tx.vpsService.count({
+        where: {
+          userId: user.id,
+          status: { in: LIVE_VPS_STATUSES },
+        },
+      });
+      if (vpsCount === 0) {
+        throw new Error("NO_VPS_ORDERED");
+      }
+
       const existingCount = await tx.apiKey.count({
         where: { userId: user.id }
       });
@@ -72,6 +92,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, apiKey: newKey });
   } catch (error: any) {
+    if (error?.message === "NO_VPS_ORDERED") {
+      return NextResponse.json({
+        error: "You must order at least one Cloud VPS instance before generating an API key."
+      }, { status: 403 });
+    }
     if (error?.message === "KEY_LIMIT_REACHED") {
       return NextResponse.json({ 
         error: "Maximum limit of 5 API keys reached. Please revoke an existing key before generating a new one." 

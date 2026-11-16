@@ -5,6 +5,8 @@ const mockPrisma = vi.hoisted(() => {
   const prismaObj: any = {
     user: {
       findUnique: vi.fn(),
+      update: vi.fn(),
+      updateMany: vi.fn(),
     },
     apiKey: {
       count: vi.fn(),
@@ -13,6 +15,7 @@ const mockPrisma = vi.hoisted(() => {
       update: vi.fn(),
     },
     vpsService: {
+      count: vi.fn(),
       findMany: vi.fn(),
       findFirst: vi.fn(),
       update: vi.fn(),
@@ -47,10 +50,14 @@ const mockProxmoxMethods = vi.hoisted(() => ({
   deleteVMSnapshot: vi.fn(),
   getFirewallRules: vi.fn(),
   createFirewallRule: vi.fn(),
+  updateFirewallRule: vi.fn(),
   deleteFirewallRule: vi.fn(),
   getVmConfig: vi.fn(),
   configVm: vi.fn(),
   resizeVmDisk: vi.fn(),
+  getStorages: vi.fn(),
+  getBackups: vi.fn(),
+  deleteBackup: vi.fn(),
 }));
 
 const mockRequireAuth = vi.hoisted(() => vi.fn());
@@ -78,6 +85,8 @@ import { POST as rebootVps } from "@/app/api/v1/vps/[id]/reboot/route";
 import { GET as getVpsMetrics } from "@/app/api/v1/vps/[id]/metrics/route";
 import { GET as listSnapshots, POST as createSnapshot } from "@/app/api/v1/vps/[id]/snapshots/route";
 import { GET as listFirewall, POST as createFirewall } from "@/app/api/v1/vps/[id]/firewall/route";
+import { PUT as updateFirewall } from "@/app/api/v1/vps/[id]/firewall/[pos]/route";
+import { DELETE as deleteBackup } from "@/app/api/v1/vps/[id]/backups/route";
 import { GET as listIps } from "@/app/api/v1/vps/ips/route";
 import { GET as getPricing } from "@/app/api/v1/vps/pricing/route";
 import { POST as upgradeVps } from "@/app/api/v1/vps/[id]/upgrade/route";
@@ -105,12 +114,32 @@ describe("Free API VPS & Key Management", () => {
       host: "https://pve.example.com:8006",
       tokenId: "root@pam!api",
       tokenSecret: "secret",
+      backupStorage: "local",
       isActive: true,
     });
     mockProxmoxMethods.startVm.mockResolvedValue("UPID:start");
     mockProxmoxMethods.stopVm.mockResolvedValue("UPID:stop");
     mockProxmoxMethods.rebootVm.mockResolvedValue("UPID:reboot");
+    mockPrisma.vpsService.count.mockResolvedValue(1);
     mockPrisma.vpsService.updateMany.mockResolvedValue({ count: 1 });
+    mockPrisma.user.updateMany.mockResolvedValue({ count: 1 });
+    mockProxmoxMethods.getStorages.mockResolvedValue([]);
+  });
+
+  it("blocks creating an API key when user has no VPS ordered", async () => {
+    mockRequireAuth.mockResolvedValue({ user: { id: 42, balance: 500000, isSuspended: false } });
+    mockPrisma.vpsService.count.mockResolvedValue(0);
+
+    const res = await createApiKey(
+      makeReq("http://localhost/api/user/api-keys", {
+        method: "POST",
+        body: { name: "No VPS Key" },
+      })
+    );
+    const json = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(json.error).toContain("order at least one Cloud VPS");
   });
 
   it("allows creating a free VPS API key even when user balance is Rp 0", async () => {
@@ -494,5 +523,93 @@ describe("Free API VPS & Key Management", () => {
     expect(upgradeRes.status).toBe(200);
     expect(mockProxmoxMethods.resizeVmDisk).toHaveBeenCalledWith("pve1", 107, "scsi0", "+20G");
     expect(mockProxmoxMethods.configVm).toHaveBeenCalledWith("pve1", 107, { cores: 2, memory: 4096 });
+  });
+
+  it("blocks upgrade manipulation: insufficient 1-month commitment balance, concurrent lock, and invalid inputs", async () => {
+    mockPrisma.apiKey.findUnique.mockResolvedValue({
+      id: 10,
+      userId: 42,
+      service: "VPS",
+      status: "ACTIVE",
+      user: { id: 42, isSuspended: false },
+    });
+    mockPrisma.vpsService.findFirst.mockResolvedValue({
+      id: 7,
+      userId: 42,
+      vmid: 107,
+      node: "pve1",
+      hostname: "web-01",
+      status: "RUNNING",
+      cpuCores: 1,
+      ramGb: 1,
+      diskGb: 20,
+      diskType: "SSD",
+      storageId: "local-lvm",
+      hourlyRate: 50,
+      bandwidthMbps: 100,
+      isReseller: false,
+      createdAt: new Date(),
+    });
+    mockPrisma.vpsPricing.findMany.mockResolvedValue([]);
+
+    // Invalid fractional CPU
+    const badCpuRes = await upgradeVps(
+      makeReq("http://localhost/api/v1/vps/7/upgrade", {
+        method: "POST",
+        headers: { authorization: `Bearer ${validKey}` },
+        body: { cpuCores: 2.5 },
+      }),
+      { params: Promise.resolve({ id: "7" }) }
+    );
+    expect(badCpuRes.status).toBe(400);
+
+    // Insufficient 1-month commitment balance
+    mockPrisma.user.updateMany.mockResolvedValueOnce({ count: 0 });
+    const lowBalRes = await upgradeVps(
+      makeReq("http://localhost/api/v1/vps/7/upgrade", {
+        method: "POST",
+        headers: { authorization: `Bearer ${validKey}` },
+        body: { cpuCores: 2 },
+      }),
+      { params: Promise.resolve({ id: "7" }) }
+    );
+    expect(lowBalRes.status).toBe(402);
+
+    // Concurrent lock conflict
+    mockPrisma.vpsService.updateMany.mockResolvedValueOnce({ count: 0 });
+    const lockRes = await upgradeVps(
+      makeReq("http://localhost/api/v1/vps/7/upgrade", {
+        method: "POST",
+        headers: { authorization: `Bearer ${validKey}` },
+        body: { cpuCores: 2 },
+      }),
+      { params: Promise.resolve({ id: "7" }) }
+    );
+    expect(lockRes.status).toBe(409);
+
+    // Invalid firewall PUT payload
+    const badFwRes = await updateFirewall(
+      makeReq("http://localhost/api/v1/vps/7/firewall/0", {
+        method: "PUT",
+        headers: { authorization: `Bearer ${validKey}` },
+        body: { action: "HACK", source: "0.0.0.0/0\nrm -rf" },
+      }),
+      { params: Promise.resolve({ id: "7", pos: "0" }) }
+    );
+    expect(badFwRes.status).toBe(400);
+
+    // Backup DELETE verifies actual Proxmox backup list
+    mockProxmoxMethods.getBackups.mockResolvedValue([
+      { volid: "local:backup/vzdump-qemu-107-2026_11_16.vma.zst", ctime: Math.floor(Date.now() / 1000) },
+    ]);
+    const spoofedDelRes = await deleteBackup(
+      makeReq("http://localhost/api/v1/vps/7/backups?volume=local:backup/vzdump-qemu-999-107-fake.vma.zst", {
+        method: "DELETE",
+        headers: { authorization: `Bearer ${validKey}` },
+      }),
+      { params: Promise.resolve({ id: "7" }) }
+    );
+    expect(spoofedDelRes.status).toBe(404);
+    expect(mockProxmoxMethods.deleteBackup).not.toHaveBeenCalled();
   });
 });

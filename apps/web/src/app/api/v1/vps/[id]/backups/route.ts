@@ -38,7 +38,7 @@ export async function GET(
 
     const { id } = await params;
     const ctx = await getBackupContext(auth.apiKey.userId, id);
-    if ("error" in ctx) return ctx.error;
+    if ("error" in ctx && ctx.error) return ctx.error;
 
     const { vps, backupStorage, proxmox } = ctx;
     const rawList = await proxmox.getBackups(vps.node, backupStorage, vps.vmid!);
@@ -87,7 +87,7 @@ export async function POST(
 
     const { id } = await params;
     const ctx = await getBackupContext(auth.apiKey.userId, id);
-    if ("error" in ctx) return ctx.error;
+    if ("error" in ctx && ctx.error) return ctx.error;
 
     const { vps, backupStorage, proxmox } = ctx;
     if (vps.backupGb <= 0) {
@@ -144,11 +144,16 @@ export async function DELETE(
 
     const { id } = await params;
     const ctx = await getBackupContext(auth.apiKey.userId, id);
-    if ("error" in ctx) return ctx.error;
+    if ("error" in ctx && ctx.error) return ctx.error;
 
     const { vps, backupStorage, proxmox } = ctx;
-    if (!volume.includes(`-${vps.vmid}-`)) {
-      return vpsApiError("Backup volume does not belong to this VPS", 403);
+    const rawList = await proxmox.getBackups(vps.node, backupStorage, vps.vmid!);
+    const minCtime = Math.floor(vps.createdAt.getTime() / 1000) - 60;
+    const ownedBackup = (rawList || []).find(
+      (b: any) => b.volid === volume && (!b.ctime || b.ctime >= minCtime)
+    );
+    if (!ownedBackup) {
+      return vpsApiError("Backup volume not found for this VPS", 404);
     }
 
     await proxmox.deleteBackup(vps.node, backupStorage, volume);

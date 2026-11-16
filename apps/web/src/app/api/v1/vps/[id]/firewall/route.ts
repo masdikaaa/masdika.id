@@ -3,25 +3,11 @@ import {
   authenticateVpsApiKey,
   getActiveProxmoxClient,
   getOwnedProvisionedVps,
+  validateFirewallRulePayload,
   vpsApiError,
 } from "@/lib/vps-api";
 
 export const dynamic = "force-dynamic";
-
-const ALLOWED_FIELDS = [
-  "action",
-  "type",
-  "dport",
-  "sport",
-  "proto",
-  "source",
-  "dest",
-  "comment",
-  "enable",
-] as const;
-const VALID_ACTIONS = ["ACCEPT", "DROP", "REJECT"] as const;
-const VALID_PROTOS = ["tcp", "udp", "icmp", "any", "igmp"] as const;
-const VALID_TYPES = ["in", "out"] as const;
 
 export async function GET(
   req: NextRequest,
@@ -70,33 +56,9 @@ export async function POST(
     if (vpsRes.error) return vpsRes.error;
 
     const rawBody = await req.json().catch(() => null);
-    if (!rawBody || typeof rawBody !== "object") {
-      return vpsApiError("Invalid JSON payload", 400);
-    }
-
-    const body: Record<string, any> = {};
-    for (const field of ALLOWED_FIELDS) {
-      if (rawBody[field] !== undefined) body[field] = rawBody[field];
-    }
-
-    if (!body.action || !VALID_ACTIONS.includes(body.action)) {
-      return vpsApiError("Invalid action. Must be ACCEPT, DROP, or REJECT.", 400);
-    }
-    if (!body.type || !VALID_TYPES.includes(body.type)) {
-      return vpsApiError("Invalid type. Must be 'in' or 'out'.", 400);
-    }
-    if (body.proto && !VALID_PROTOS.includes(body.proto)) {
-      return vpsApiError("Invalid protocol.", 400);
-    }
-    if (body.dport && !/^[\d,:*-]+$/.test(String(body.dport))) {
-      return vpsApiError("Invalid destination port format.", 400);
-    }
-    if (body.sport && !/^[\d,:*-]+$/.test(String(body.sport))) {
-      return vpsApiError("Invalid source port format.", 400);
-    }
-    if (body.comment && String(body.comment).length > 255) {
-      return vpsApiError("Comment exceeds 255 characters.", 400);
-    }
+    const validated = validateFirewallRulePayload(rawBody, { partial: false });
+    if ("error" in validated) return validated.error;
+    const body = validated.data;
 
     const pveRes = await getActiveProxmoxClient();
     if (pveRes.error) return pveRes.error;

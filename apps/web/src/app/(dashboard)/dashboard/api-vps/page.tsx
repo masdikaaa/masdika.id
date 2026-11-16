@@ -154,6 +154,7 @@ export default function ApiVpsPage() {
 
   const quotaReached = apiKeys.length >= MAX_API_KEYS;
   const activeVpsCount = vpsList.filter((v) => v.status !== 'TERMINATED').length;
+  const canGenerateKey = !quotaReached && activeVpsCount > 0;
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://masdika.id';
   const sampleKey = apiKeys[0]?.key || 'masdika_your_api_key';
 
@@ -205,10 +206,11 @@ export default function ApiVpsPage() {
 
           <button
             onClick={() => setIsGenerateOpen(true)}
-            disabled={quotaReached}
+            disabled={!canGenerateKey}
+            title={activeVpsCount === 0 ? 'Order a Cloud VPS first to generate an API key' : undefined}
             className={cn(
               'inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg',
-              quotaReached
+              !canGenerateKey
                 ? 'bg-zinc-700 text-zinc-400 cursor-not-allowed shadow-none'
                 : 'bg-cyan-400 hover:bg-cyan-300 text-zinc-950 shadow-cyan-500/20'
             )}
@@ -467,14 +469,25 @@ export default function ApiVpsPage() {
               No Active API Keys
             </h3>
             <p className={cn('text-xs max-w-md mx-auto', isDark ? 'text-zinc-400' : 'text-slate-600')}>
-              Generate a free API key to start controlling your Cloud VPS instances programmatically.
+              {activeVpsCount === 0
+                ? 'Order at least one Cloud VPS instance first to unlock free API key generation.'
+                : 'Generate a free API key to start controlling your Cloud VPS instances programmatically.'}
             </p>
-            <button
-              onClick={() => setIsGenerateOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-zinc-950 font-semibold text-xs transition-colors"
-            >
-              <Plus className="w-3.5 h-3.5" /> Generate Key Now
-            </button>
+            {activeVpsCount === 0 ? (
+              <Link
+                href="/dashboard/vps/order"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-zinc-950 font-semibold text-xs transition-colors"
+              >
+                <Server className="w-3.5 h-3.5" /> Order Cloud VPS
+              </Link>
+            ) : (
+              <button
+                onClick={() => setIsGenerateOpen(true)}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-zinc-950 font-semibold text-xs transition-colors"
+              >
+                <Plus className="w-3.5 h-3.5" /> Generate Key Now
+              </button>
+            )}
           </div>
         ) : (
           <div className={cn('divide-y', isDark ? 'divide-white/[0.06]' : 'divide-slate-100')}>
