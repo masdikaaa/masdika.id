@@ -88,6 +88,9 @@ export default function AdminCustomerCdnPage() {
   const isDark = theme === "dark";
 
   const [files, setFiles] = useState<CustomerMediaFile[]>([]);
+  const [subscriptions, setSubscriptions] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<"services" | "files">("services");
+  const [updatingSubId, setUpdatingSubId] = useState<number | null>(null);
   const [customersList, setCustomersList] = useState<CustomerInfo[]>([]);
   const [stats, setStats] = useState<StatsData>({
     totalFiles: 0,
@@ -130,6 +133,7 @@ export default function AdminCustomerCdnPage() {
       if (!res.ok) throw new Error(data.error || "Failed to load customer files");
 
       setFiles(data.files || []);
+      setSubscriptions(data.subscriptions || []);
       setStats(data.stats || {
         totalFiles: 0,
         totalStorageBytes: 0,
@@ -142,6 +146,46 @@ export default function AdminCustomerCdnPage() {
       toast.error(err.message || "Failed to fetch customer CDN data");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleToggleSubStatus = async (sub: any) => {
+    const nextStatus = sub.status === "SUSPENDED" ? "ACTIVE" : "SUSPENDED";
+    setUpdatingSubId(sub.id);
+    try {
+      const res = await fetch(`/api/admin/services/subscriptions/${sub.id}/status`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: nextStatus,
+          reason: nextStatus === "SUSPENDED" ? "Suspended by Administrator" : undefined,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Failed to update File CDN status");
+      toast.success(`File CDN subscription ${nextStatus === "SUSPENDED" ? "suspended" : "reactivated"}`);
+      fetchFiles();
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to update status");
+    } finally {
+      setUpdatingSubId(null);
+    }
+  };
+
+  const handleDeleteSub = async (sub: any, hardDelete = false) => {
+    setUpdatingSubId(sub.id);
+    try {
+      const res = await fetch(`/api/admin/services/subscriptions/${sub.id}${hardDelete ? "?hard=true" : ""}`, {
+        method: "DELETE",
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Failed to terminate File CDN service");
+      toast.success(hardDelete ? "File CDN record deleted" : "File CDN service terminated");
+      fetchFiles();
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to terminate service");
+    } finally {
+      setUpdatingSubId(null);
     }
   };
 
@@ -210,13 +254,13 @@ export default function AdminCustomerCdnPage() {
   return (
     <div className="w-full space-y-6 md:space-y-8 pb-10 relative z-10">
       {/* ── HEADER ───────────────────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row md:items-end justify-between gap-6 mb-6 w-full">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 w-full">
         <div>
-          <h1 className={cn("text-xl sm:text-2xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-            Customer File CDN
+          <h1 className={cn("text-xl sm:text-2xl font-bold mb-1 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            File CDN Management
           </h1>
-          <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-            Manage folders, inspect customer uploads, and supervise secure links.
+          <p className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
+            Manage customer File CDN subscriptions, uploaded files, and secure links.
           </p>
         </div>
 
@@ -344,6 +388,125 @@ export default function AdminCustomerCdnPage() {
         </div>
       </div>
 
+      {/* ── MASDIKA CYAN TABS (SERVICES vs FILES) ─────────────────────────────── */}
+      <div className={cn("flex items-center gap-2 border-b pb-1", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+        <button
+          type="button"
+          onClick={() => setActiveTab("services")}
+          className={cn(
+            "inline-flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-bold border-b-2 transition-all cursor-pointer",
+            activeTab === "services"
+              ? "border-cyan-400 text-cyan-400 bg-cyan-500/10"
+              : isDark
+              ? "border-transparent text-zinc-400 hover:text-white"
+              : "border-transparent text-slate-600 hover:text-slate-900"
+          )}
+        >
+          <HardDrive className="w-3.5 h-3.5" />
+          <span>File CDN Services ({subscriptions.length})</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("files")}
+          className={cn(
+            "inline-flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-bold border-b-2 transition-all cursor-pointer",
+            activeTab === "files"
+              ? "border-cyan-400 text-cyan-400 bg-cyan-500/10"
+              : isDark
+              ? "border-transparent text-zinc-400 hover:text-white"
+              : "border-transparent text-slate-600 hover:text-slate-900"
+          )}
+        >
+          <UploadCloud className="w-3.5 h-3.5" />
+          <span>Customer Files ({files.length})</span>
+        </button>
+      </div>
+
+      {activeTab === "services" && (
+        <div className={cn("w-full rounded-2xl border overflow-hidden", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className={cn("border-b text-[11px] font-bold uppercase tracking-wider", isDark ? "border-white/[0.08] bg-white/[0.02] text-zinc-400" : "border-slate-200 bg-slate-50 text-slate-500")}>
+                  <th className="py-3.5 px-4">Customer</th>
+                  <th className="py-3.5 px-4">Plan &amp; Price</th>
+                  <th className="py-3.5 px-4">Status</th>
+                  <th className="py-3.5 px-4">Created</th>
+                  <th className="py-3.5 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className={cn("divide-y", isDark ? "divide-white/[0.06]" : "divide-slate-100")}>
+                {subscriptions.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-10 text-center text-zinc-500">
+                      No customer File CDN subscriptions found.
+                    </td>
+                  </tr>
+                ) : (
+                  subscriptions.map((sub) => (
+                    <tr key={sub.id} className={isDark ? "hover:bg-white/[0.02]" : "hover:bg-slate-50"}>
+                      <td className="py-3.5 px-4">
+                        <Link href={`/admin/customers/${sub.userId}`} className="font-bold text-cyan-400 hover:underline">
+                          {sub.user?.name || `User #${sub.userId}`}
+                        </Link>
+                        <div className="text-[11px] text-zinc-500">{sub.user?.email || "-"}</div>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <div className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>{sub.plan?.name || "File CDN"}</div>
+                        <div className="text-[11px] font-mono text-cyan-400">
+                          Rp {Number(sub.plan?.price || 0).toLocaleString("id-ID")} / mo
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <span
+                          className={cn(
+                            "inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border",
+                            sub.status === "ACTIVE" || sub.status === "RUNNING"
+                              ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                              : sub.status === "SUSPENDED"
+                              ? "bg-amber-500/10 border-amber-500/30 text-amber-400"
+                              : "bg-rose-500/10 border-rose-500/30 text-rose-400"
+                          )}
+                        >
+                          {sub.status}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 text-zinc-400 whitespace-nowrap">
+                        {formatDate(sub.createdAt)}
+                      </td>
+                      <td className="py-3.5 px-4 text-right">
+                        <div className="inline-flex items-center gap-2">
+                          {sub.status !== "TERMINATED" && (
+                            <button
+                              type="button"
+                              disabled={updatingSubId === sub.id}
+                              onClick={() => handleToggleSubStatus(sub)}
+                              className="px-3 py-1.5 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-400 font-bold text-[11px] cursor-pointer disabled:opacity-50"
+                            >
+                              {sub.status === "SUSPENDED" ? "Unsuspend" : "Suspend"}
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            disabled={updatingSubId === sub.id}
+                            onClick={() => handleDeleteSub(sub, sub.status === "TERMINATED")}
+                            className="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 font-bold text-[11px] cursor-pointer disabled:opacity-50"
+                          >
+                            {sub.status === "TERMINATED" ? "Delete" : "Terminate"}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "files" && (
+      <>
       {/* ── CONTROLS & FILTER BAR ────────────────────────────────────────────── */}
       <div className={cn(
         "flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 border p-4 rounded-2xl transition-colors w-full",
@@ -757,6 +920,8 @@ export default function AdminCustomerCdnPage() {
             onPageChange={setCurrentPage}
           />
         </div>
+      )}
+      </>
       )}
 
       {/* ── PREVIEW MODAL ────────────────────────────────────────────────────── */}

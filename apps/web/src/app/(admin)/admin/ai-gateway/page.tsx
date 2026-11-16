@@ -350,21 +350,17 @@ export default function AdminAiGatewayPage() {
   return (
     <div className="w-full space-y-6 pb-16">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-[#111115] border border-white/[0.07] rounded-2xl p-5 sm:p-6">
-        <div className="space-y-1.5">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[11px] font-bold uppercase tracking-wider">
-            <Cpu className="w-3.5 h-3.5" />
-            Masdika AI Gateway Control Center
-          </div>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
-            AI Gateway & Customer AI Balance Management
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold mb-1 tracking-tight text-white">
+            AI Gateway Management
           </h1>
-          <p className="text-xs sm:text-sm text-zinc-400">
-            Manage upstream routing, profit markup, Chat & Image models, customer AI credit balances, and real-time token usage.
+          <p className="text-sm font-medium text-zinc-400">
+            Manage upstream routing, profit markup, Chat &amp; Image models, customer AI credit balances, and real-time token usage.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
           <button
             type="button"
             onClick={handleSyncUpstream}

@@ -139,8 +139,37 @@ export async function GET(req: NextRequest) {
 
     const customersList = Array.from(customerMap.values()).sort((a, b) => b.fileCount - a.fileCount);
 
+    const rawSubscriptions = await prisma.subscription.findMany({
+      where: {
+        plan: {
+          service: { in: ["CDN", "FILE_CDN"] },
+        },
+      },
+      include: {
+        user: { select: { id: true, name: true, email: true } },
+        plan: { select: { id: true, name: true, service: true, price: true, limits: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const subscriptions = rawSubscriptions.map((sub) => {
+      let name = sub.user?.name || "Unnamed User";
+      let email = sub.user?.email || "";
+      try {
+        name = decryptDeterministic(name) || name;
+      } catch {}
+      try {
+        email = decryptDeterministic(email) || email;
+      } catch {}
+      return {
+        ...sub,
+        user: sub.user ? { ...sub.user, name, email } : sub.user,
+      };
+    });
+
     return NextResponse.json({
       files: filtered,
+      subscriptions,
       stats: {
         totalFiles: customerFiles.length,
         totalStorageBytes,
