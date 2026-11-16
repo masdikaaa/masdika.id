@@ -1638,6 +1638,9 @@ aider --model openai/glm-5.3`,
                 spellCheck={false}
                 autoComplete="off"
                 data-ms-editor="false"
+                data-gramm="false"
+                data-gramm_editor="false"
+                data-enable-grammarly="false"
                 onChange={(e) => setPgSystemPrompt(e.target.value)}
                 placeholder="You are a helpful AI assistant..."
                 className={cn('w-full px-3.5 py-2.5 rounded-xl text-xs border outline-none focus:border-cyan-500 resize-none caret-cyan-400', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
@@ -1858,6 +1861,9 @@ aider --model openai/glm-5.3`,
                 spellCheck={false}
                 autoComplete="off"
                 data-ms-editor="false"
+                data-gramm="false"
+                data-gramm_editor="false"
+                data-enable-grammarly="false"
                 onChange={(e) => setPgInput(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
@@ -1892,9 +1898,15 @@ aider --model openai/glm-5.3`,
             <textarea
               rows={3}
               value={imgPrompt}
+              spellCheck={false}
+              autoComplete="off"
+              data-ms-editor="false"
+              data-gramm="false"
+              data-gramm_editor="false"
+              data-enable-grammarly="false"
               onChange={(e) => setImgPrompt(e.target.value)}
               placeholder="Describe the image you want..."
-              className={cn('w-full px-4 py-3 rounded-xl text-sm border outline-none focus:border-cyan-500 resize-none', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
+              className={cn('w-full px-4 py-3 rounded-xl text-sm border outline-none focus:border-cyan-500 resize-none caret-cyan-400', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
             />
 
             <div className="flex flex-wrap items-center justify-between gap-3">
