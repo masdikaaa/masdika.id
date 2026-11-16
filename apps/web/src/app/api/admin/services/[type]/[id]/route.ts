@@ -4,6 +4,48 @@ import { prisma } from '@/lib/prisma';
 import { cleanupUserCloudflareResourcesIfNoActiveVps } from '@/lib/cloudflare-cleanup';
 import { ProxmoxClient } from '@/lib/proxmox';
 import { sendTerminationEmail } from '@/lib/email';
+import { settleServicePaygInvoices } from '@/lib/payg-invoice';
+
+async function settleAdminTerminatedInvoice(type: string, id: number, record: any) {
+  const userId = record?.userId;
+  if (!userId) return;
+  switch (type) {
+    case 'subscriptions':
+      await settleServicePaygInvoices(prisma, { userId, subscriptionId: id });
+      break;
+    case 'vps':
+      await settleServicePaygInvoices(prisma, { userId, vpsServiceId: id });
+      break;
+    case 'database':
+      await settleServicePaygInvoices(prisma, {
+        userId,
+        serviceIdField: 'databaseServiceId',
+        serviceId: id,
+        serviceName: record?.name,
+        type: 'MANAGED_DATABASE',
+      });
+      break;
+    case 'apps':
+    case 'app':
+      await settleServicePaygInvoices(prisma, {
+        userId,
+        serviceIdField: 'appServiceId',
+        serviceId: id,
+        serviceName: record?.name,
+        type: 'MANAGED_APP',
+      });
+      break;
+    case 'object-storage':
+      await settleServicePaygInvoices(prisma, {
+        userId,
+        serviceIdField: 'objectStorageServiceId',
+        serviceId: id,
+        serviceName: record?.name,
+        type: 'OBJECT_STORAGE',
+      });
+      break;
+  }
+}
 
 export async function DELETE(req: Request, props: { params: Promise<{ type: string; id: string }> }) {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
@@ -109,6 +151,7 @@ export async function DELETE(req: Request, props: { params: Promise<{ type: stri
         default: 
           return NextResponse.json({ error: 'Unknown service type' }, { status: 400 });
       }
+      await settleAdminTerminatedInvoice(type, id, result);
       return NextResponse.json({ success: true, message: 'Service deleted permanently' });
     }
 
@@ -320,6 +363,7 @@ export async function DELETE(req: Request, props: { params: Promise<{ type: stri
         return NextResponse.json({ error: 'Unknown service type' }, { status: 400 });
     }
 
+    await settleAdminTerminatedInvoice(type, id, result);
     return NextResponse.json({ success: true, message: 'Service terminated successfully', data: result });
   } catch (error: any) {
     console.error('Service termination error:', error);

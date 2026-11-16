@@ -76,8 +76,16 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       where: user.role === "ADMIN" ? { id: dbId } : { id: dbId, userId: user.id },
     });
 
-    if (!db || db.status === "TERMINATED") {
+    if (!db || db.status === "TERMINATED" || db.status === "TERMINATING") {
       return NextResponse.json({ error: "Database instance not found" }, { status: 404 });
+    }
+
+    const lock = await prisma.databaseService.updateMany({
+      where: { id: db.id, status: { notIn: ["TERMINATED", "TERMINATING"] } },
+      data: { status: "TERMINATING" },
+    });
+    if (lock.count === 0) {
+      return NextResponse.json({ error: "Database instance is already being terminated" }, { status: 409 });
     }
 
     // Clean up Kubernetes resources

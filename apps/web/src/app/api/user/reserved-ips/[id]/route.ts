@@ -35,6 +35,13 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       return NextResponse.json({ error: "Cannot release an IP that was concurrently attached to a service." }, { status: 409 });
     }
 
+    const { settleServicePaygInvoices } = await import("@/lib/payg-invoice");
+    await settleServicePaygInvoices(prisma, {
+      userId: user.id,
+      reservedIpId: reservedIp.id,
+      type: "IP_RESERVATION",
+    });
+
     return NextResponse.json({ success: true, message: "Reserved IP deleted successfully" });
   } catch (error: any) {
     console.error("Release Reserved IP Error:", error);

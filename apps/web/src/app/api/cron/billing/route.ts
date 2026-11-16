@@ -649,6 +649,12 @@ export async function GET(req: Request) {
             where: { vpsId: vps.id }
           });
 
+          const { settleServicePaygInvoices } = await import('@/lib/payg-invoice');
+          await settleServicePaygInvoices(tx, {
+            userId: vps.userId,
+            vpsServiceId: vps.id,
+          });
+
           // Detach reserved IPs so they remain owned and billed to the user
           await tx.reservedIp.updateMany({
             where: { vpsId: vps.id },
@@ -772,6 +778,14 @@ export async function GET(req: Request) {
           where: { id: app.id },
           data: { status: 'TERMINATED' }
         });
+        const { settleServicePaygInvoices } = await import('@/lib/payg-invoice');
+        await settleServicePaygInvoices(prisma, {
+          userId: app.userId,
+          serviceIdField: 'appServiceId',
+          serviceId: app.id,
+          serviceName: app.name,
+          type: 'MANAGED_APP',
+        });
 
         // Send termination email notification
         try {
@@ -813,6 +827,14 @@ export async function GET(req: Request) {
         await prisma.databaseService.update({
           where: { id: db.id },
           data: { status: 'TERMINATED' }
+        });
+        const { settleServicePaygInvoices } = await import('@/lib/payg-invoice');
+        await settleServicePaygInvoices(prisma, {
+          userId: db.userId,
+          serviceIdField: 'databaseServiceId',
+          serviceId: db.id,
+          serviceName: db.name,
+          type: 'MANAGED_DATABASE',
         });
 
         // Send termination email notification

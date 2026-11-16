@@ -89,8 +89,16 @@ export async function DELETE(
       where: user.role === "ADMIN" ? { id } : { id, userId: user.id },
     });
 
-    if (!app || app.status === "TERMINATED") {
+    if (!app || app.status === "TERMINATED" || app.status === "TERMINATING") {
       return NextResponse.json({ error: "Application not found or already terminated" }, { status: 404 });
+    }
+
+    const lock = await prisma.appService.updateMany({
+      where: { id: app.id, status: { notIn: ["TERMINATED", "TERMINATING"] } },
+      data: { status: "TERMINATING" },
+    });
+    if (lock.count === 0) {
+      return NextResponse.json({ error: "Application is already being terminated" }, { status: 409 });
     }
 
     // Cleanup Kubernetes cluster resources
