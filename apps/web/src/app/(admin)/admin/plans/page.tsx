@@ -48,12 +48,6 @@ const SERVICE_LABELS: Record<string, string> = {
   APP: "Managed Apps",
   OBJECT_STORAGE: "Object Storage (S3)",
   CDN: "File CDN",
-  TIKTOK: "TikTok API",
-  SPOTIFY: "Spotify API",
-  YOUTUBE: "YouTube API",
-  BLOG: "Blog API",
-  BMKG_WEATHER: "BMKG Weather",
-  BMKG_EARTHQUAKE: "BMKG Earthquake",
 };
 
 interface DatabaseLimitsState {
@@ -1169,12 +1163,6 @@ export default function AdminPlansPage() {
                       { value: "APP", label: "Managed Apps (Kubernetes)" },
                       { value: "OBJECT_STORAGE", label: "Object Storage (S3)" },
                       { value: "CDN", label: "File CDN" },
-                      { value: "TIKTOK", label: "TikTok API" },
-                      { value: "SPOTIFY", label: "Spotify API" },
-                      { value: "YOUTUBE", label: "YouTube API" },
-                      { value: "BLOG", label: "Blog API" },
-                      { value: "BMKG_WEATHER", label: "BMKG Weather API" },
-                      { value: "BMKG_EARTHQUAKE", label: "BMKG Earthquake API" }
                     ]}
                     placeholder="Select Service..."
                     className={cn("w-full rounded-xl px-3.5 py-2 text-sm", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900")}
