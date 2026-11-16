@@ -10,12 +10,6 @@ export const VALID_SERVICES = [
   'APP',
   'OBJECT_STORAGE',
   'CDN',
-  'TIKTOK',
-  'SPOTIFY',
-  'YOUTUBE',
-  'BLOG',
-  'BMKG_WEATHER',
-  'BMKG_EARTHQUAKE',
 ] as const;
 
 export async function GET(req: NextRequest) {
@@ -30,9 +24,12 @@ export async function GET(req: NextRequest) {
       ensureObjectStoragePlansExist(),
     ]);
 
-    // Auto-purge any lingering obsolete plans outside the official active services
-    prisma.plan.deleteMany({
-      where: { service: { notIn: VALID_SERVICES as unknown as string[] } }
+    // Auto-purge any lingering obsolete plans outside the official active services (safe against FK constraints)
+    await prisma.plan.deleteMany({
+      where: {
+        service: { notIn: VALID_SERVICES as unknown as string[] },
+        subscriptions: { none: {} },
+      },
     }).catch(console.error);
 
     const plans = await prisma.plan.findMany({

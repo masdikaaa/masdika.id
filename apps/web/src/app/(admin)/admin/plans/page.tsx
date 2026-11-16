@@ -34,12 +34,6 @@ const VALID_SERVICES = [
   "APP",
   "OBJECT_STORAGE",
   "CDN",
-  "TIKTOK",
-  "SPOTIFY",
-  "YOUTUBE",
-  "BLOG",
-  "BMKG_WEATHER",
-  "BMKG_EARTHQUAKE"
 ] as const;
 
 const SERVICE_LABELS: Record<string, string> = {
