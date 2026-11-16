@@ -110,19 +110,19 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
   };
 
   return (
-    <div className="flex flex-col min-h-screen pt-28 pb-10 sm:pb-14 overflow-x-hidden">
+    <div className="flex flex-col min-h-screen pt-28 sm:pt-36 md:pt-40 pb-10 sm:pb-14 overflow-x-hidden">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
 
         {/* ── 0. HERO SECTION (Identik dengan Vacancies, Blog & design.md) ── */}
         <section className="relative pt-0 pb-8 sm:pb-12 flex items-center">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-start w-full">
             
             {/* Left – Text & Actions */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.7, ease: "easeOut" }}
-              className="max-w-2xl relative z-30"
+              className="max-w-2xl relative z-30 lg:pt-20"
             >
               {/* Status pill using shared Badge */}
               <div className="mb-8">
@@ -170,7 +170,7 @@ export default function SeriesClient({ initialSeries = [] }: { initialSeries?: S
               initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.15, ease: "easeOut" }}
-              className="relative flex items-center justify-center mt-6 lg:mt-0"
+              className="relative flex items-center justify-center mt-6 lg:mt-0 lg:self-center"
             >
               <HeroAvatarFrame
                 imageSrc="/images/mascots/series.webp"

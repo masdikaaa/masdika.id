@@ -23,11 +23,20 @@ import {
   AlertTriangle,
   ChevronDown,
   ChevronUp,
+  MessageSquare,
+  Image as ImageIcon,
+  ImagePlus,
+  Send,
+  Download,
+  Sliders,
+  Zap,
+  ArrowUpRight,
 } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { cn } from '@/lib/utils';
 import { formatRupiah } from '@/lib/billing';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { Select } from '@/components/ui/Select';
 
 interface AiModelItem {
   id: number;
@@ -46,6 +55,19 @@ interface AiModelItem {
   hasPeakPricing: boolean;
 }
 
+interface AiImageModelItem {
+  modelId: string;
+  name: string;
+  description?: string;
+  sizes: string[];
+  sizePrices?: Record<string, number>;
+  tokensPerImage: number;
+  basePriceRp: number;
+  priceRp: number;
+  maxN: number;
+  maxRefImages: number;
+}
+
 interface AiKeyItem {
   id: number;
   name: string;
@@ -59,6 +81,7 @@ interface AiKeyItem {
 
 interface AiUsageItem {
   id: number;
+  apiKeyId: number;
   requestId: string;
   modelId: string;
   endpoint: string;
@@ -69,11 +92,64 @@ interface AiUsageItem {
   latencyMs: number;
   statusCode: number;
   createdAt: string;
-  apiKey?: { name: string; keyPrefix: string } | null;
+  apiKey?: { id?: number; name: string; keyPrefix: string } | null;
 }
 
-type TabId = 'keys' | 'models' | 'usage' | 'docs';
-type DocLang = 'curl' | 'node' | 'python' | 'anthropic' | 'claudecode';
+interface MonthModelSummary {
+  modelId: string;
+  requests: number;
+  costRp: number;
+  inputTokens: number;
+  cachedTokens: number;
+  outputTokens: number;
+}
+
+interface ChatMessageItem {
+  role: 'user' | 'assistant';
+  content: string;
+  images?: string[];
+  reasoning?: string;
+  requestId?: string;
+  latencyMs?: number;
+  costRp?: number;
+  tokens?: number;
+  isError?: boolean;
+}
+
+interface GeneratedImageRecord {
+  id: string;
+  prompt: string;
+  modelId: string;
+  size: string;
+  url: string;
+  costRp: number;
+  createdAt: string;
+}
+
+type TabId = 'overview' | 'keys' | 'playground' | 'images' | 'usage' | 'models' | 'docs';
+type DocLang =
+  | 'curl'
+  | 'node'
+  | 'python'
+  | 'go'
+  | 'php'
+  | 'responses'
+  | 'anthropic'
+  | 'images'
+  | 'claudecode'
+  | 'codex'
+  | 'opencode'
+  | 'cline'
+  | 'cursor'
+  | 'continue'
+  | 'aider';
+
+const SAMPLE_IMAGE_PROMPTS = [
+  'A cat flying a helicopter over rice fields, photo',
+  'Minimalist logo of a hummingbird, flat vector',
+  'Cozy coffee shop in Bandung at night, rain, watercolor',
+  'Product shot of a ceramic mug on a wooden table',
+];
 
 export default function CustomerAiGatewayPage() {
   const { theme } = useTheme();
@@ -82,13 +158,28 @@ export default function CustomerAiGatewayPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [enabled, setEnabled] = useState(true);
-  const [balance, setBalance] = useState(0);
+  const [walletBalance, setWalletBalance] = useState(0);
+  const [aiBalance, setAiBalance] = useState(0);
+  const [isPeakNow, setIsPeakNow] = useState(false);
   const [models, setModels] = useState<AiModelItem[]>([]);
+  const [imageModels, setImageModels] = useState<AiImageModelItem[]>([]);
   const [keys, setKeys] = useState<AiKeyItem[]>([]);
   const [usageLogs, setUsageLogs] = useState<AiUsageItem[]>([]);
-  const [stats, setStats] = useState({ totalRequests: 0, totalSpentRp: 0, totalTokens: 0 });
+  const [thisMonthByModel, setThisMonthByModel] = useState<MonthModelSummary[]>([]);
+  const [stats, setStats] = useState({
+    totalRequests: 0,
+    totalSpentRp: 0,
+    spentThisMonthRp: 0,
+    avgLatencyMs: 0,
+    inputTokens: 0,
+    cachedTokens: 0,
+    outputTokens: 0,
+    totalTokens: 0,
+  });
 
-  const [activeTab, setActiveTab] = useState<TabId>('keys');
+  // Navigation & Filters
+  const [activeTab, setActiveTab] = useState<TabId>('overview');
+  const [modelTypeTab, setModelTypeTab] = useState<'chat' | 'image'>('chat');
   const [modelSearch, setModelSearch] = useState('');
   const [providerFilter, setProviderFilter] = useState('ALL');
   const [expandedModelId, setExpandedModelId] = useState<number | null>(null);
@@ -96,16 +187,52 @@ export default function CustomerAiGatewayPage() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [origin, setOrigin] = useState('https://www.masdika.id');
 
-  // Create Key Modal
+  // Overview: Manual Top-up Modal & Auto Top-up State
+  const [isTopupModalOpen, setIsTopupModalOpen] = useState(false);
+  const [customTopupAmount, setCustomTopupAmount] = useState('100000');
+  const [pendingTopupAmount, setPendingTopupAmount] = useState<number | null>(null);
+  const [toppingUp, setToppingUp] = useState(false);
+  const [autoTopupEnabled, setAutoTopupEnabled] = useState(false);
+  const [autoTopupThreshold, setAutoTopupThreshold] = useState('20000');
+  const [autoTopupAmount, setAutoTopupAmount] = useState('100000');
+  const [savingAutoTopup, setSavingAutoTopup] = useState(false);
+
+  // Create & Revoke Key Modal State
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newKeyName, setNewKeyName] = useState('');
   const [newMonthlyLimit, setNewMonthlyLimit] = useState('');
   const [creating, setCreating] = useState(false);
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
-
-  // Revoke Modal
   const [deletingKey, setDeletingKey] = useState<AiKeyItem | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Playground State
+  const [pgKeyId, setPgKeyId] = useState<number>(0);
+  const [pgModelId, setPgModelId] = useState<string>('deepseek-v4.1-flash');
+  const [pgFormat, setPgFormat] = useState<'openai' | 'anthropic'>('openai');
+  const [pgSystemPrompt, setPgSystemPrompt] = useState('');
+  const [pgMaxTokens, setPgMaxTokens] = useState(2048);
+  const [pgTemp, setPgTemp] = useState(0.7);
+  const [pgShowAdvanced, setPgShowAdvanced] = useState(false);
+  const [pgInput, setPgInput] = useState('');
+  const [pgImages, setPgImages] = useState<string[]>([]);
+  const [pgMessages, setPgMessages] = useState<ChatMessageItem[]>([]);
+  const [pgSending, setPgSending] = useState(false);
+
+  // Image Generation State
+  const [imgKeyId, setImgKeyId] = useState<number>(0);
+  const [imgModelId, setImgModelId] = useState<string>('seedream-image-v5.0-flash');
+  const [imgSize, setImgSize] = useState<string>('2048x2048');
+  const [imgPrompt, setImgPrompt] = useState<string>('');
+  const [imgRefUrl, setImgRefUrl] = useState<string>('');
+  const [imgShowRef, setImgShowRef] = useState<boolean>(false);
+  const [imgGenerating, setImgGenerating] = useState<boolean>(false);
+  const [generatedImages, setGeneratedImages] = useState<GeneratedImageRecord[]>([]);
+
+  // Usage Filters State
+  const [usageKeyFilter, setUsageKeyFilter] = useState<string>('ALL');
+  const [usageModelFilter, setUsageModelFilter] = useState<string>('ALL');
+  const [usageRange, setUsageRange] = useState<'24h' | '7d' | '30d'>('7d');
 
   const fetchData = async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
@@ -115,11 +242,38 @@ export default function CustomerAiGatewayPage() {
       if (!res.ok) throw new Error(json.error || 'Failed to load AI Gateway');
       const d = json.data;
       setEnabled(Boolean(d.enabled));
-      setBalance(d.balance || 0);
-      setModels(d.models || []);
-      setKeys(d.keys || []);
+      setWalletBalance(d.walletBalance ?? 0);
+      setAiBalance(d.aiBalance ?? d.balance ?? 0);
+      setIsPeakNow(Boolean(d.isPeakNow));
+      if (d.autoTopup) {
+        setAutoTopupEnabled(Boolean(d.autoTopup.enabled));
+        setAutoTopupThreshold(String(d.autoTopup.threshold ?? 20000));
+        setAutoTopupAmount(String(d.autoTopup.amount ?? 100000));
+      }
+      const loadedModels: AiModelItem[] = d.models || [];
+      setModels(loadedModels);
+      setImageModels(d.imageModels || []);
+      const loadedKeys: AiKeyItem[] = d.keys || [];
+      setKeys(loadedKeys);
+      const firstActiveKey = loadedKeys.find((k) => k.isActive);
+      if (firstActiveKey) {
+        setPgKeyId((prev) => (prev > 0 ? prev : firstActiveKey.id));
+        setImgKeyId((prev) => (prev > 0 ? prev : firstActiveKey.id));
+      }
       setUsageLogs(d.usageLogs || []);
-      setStats(d.stats || { totalRequests: 0, totalSpentRp: 0, totalTokens: 0 });
+      setThisMonthByModel(d.thisMonthByModel || []);
+      setStats(
+        d.stats || {
+          totalRequests: 0,
+          totalSpentRp: 0,
+          spentThisMonthRp: 0,
+          avgLatencyMs: 0,
+          inputTokens: 0,
+          cachedTokens: 0,
+          outputTokens: 0,
+          totalTokens: 0,
+        }
+      );
     } catch (err: any) {
       toast.error(err?.message || 'Failed to load AI Gateway');
     } finally {
@@ -140,6 +294,81 @@ export default function CustomerAiGatewayPage() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  // Open Confirmation Modal before Top-up
+  const requestTopupConfirmation = (amount: number) => {
+    if (!Number.isSafeInteger(amount) || amount < 5000) {
+      toast.error('Minimum AI balance top-up is Rp 5.000');
+      return;
+    }
+    setPendingTopupAmount(amount);
+  };
+
+  // Manual Top-up AI Balance from Masdika Wallet (Confirmed inside Top-Up Modal)
+  const handleConfirmTopupAiBalance = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const amount = pendingTopupAmount ?? Number(customTopupAmount);
+    if (!Number.isSafeInteger(amount) || amount < 5000) {
+      toast.error('Minimum AI balance top-up is Rp 5.000');
+      return;
+    }
+    setToppingUp(true);
+    try {
+      const res = await fetch('/api/user/ai-gateway', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'topup_ai_balance', amount }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to top up AI balance');
+      setWalletBalance(json.walletBalance);
+      setAiBalance(json.aiBalance);
+      setPendingTopupAmount(null);
+      setIsTopupModalOpen(false);
+      toast.success(`Added ${formatRupiah(amount)} to your AI Balance`);
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to top up AI balance');
+    } finally {
+      setToppingUp(false);
+    }
+  };
+
+  // Save Auto Top-up Settings
+  const handleSaveAutoTopup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const threshold = Number(autoTopupThreshold);
+    const amount = Number(autoTopupAmount);
+    if (!Number.isSafeInteger(threshold) || threshold < 5000) {
+      toast.error('Trigger balance threshold must be at least Rp 5.000');
+      return;
+    }
+    if (!Number.isSafeInteger(amount) || amount < 5000) {
+      toast.error('Auto top-up amount must be at least Rp 5.000');
+      return;
+    }
+    setSavingAutoTopup(true);
+    try {
+      const res = await fetch('/api/user/ai-gateway', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update_auto_topup',
+          enabled: autoTopupEnabled,
+          threshold,
+          amount,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to update auto top-up');
+      setWalletBalance(json.walletBalance);
+      setAiBalance(json.aiBalance);
+      toast.success(autoTopupEnabled ? 'Auto top-up enabled and saved' : 'Auto top-up settings saved');
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to update auto top-up');
+    } finally {
+      setSavingAutoTopup(false);
+    }
+  };
+
   const handleCreateKey = async (e: React.FormEvent) => {
     e.preventDefault();
     setCreating(true);
@@ -149,22 +378,19 @@ export default function CustomerAiGatewayPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: newKeyName.trim() || 'AI Gateway Key',
-          monthlyLimit: newMonthlyLimit.trim() ? Number(newMonthlyLimit.trim()) : null,
+          monthlyLimit: newMonthlyLimit ? Number(newMonthlyLimit) : null,
         }),
       });
       const json = await res.json();
-      if (!res.ok) {
-        toast.error(json.error || 'Failed to create API key');
-        return;
-      }
+      if (!res.ok) throw new Error(json.error || 'Failed to create API key');
       setRevealedKey(json.rawKey);
       setNewKeyName('');
       setNewMonthlyLimit('');
       setIsCreateOpen(false);
-      toast.success('AI Gateway key created');
+      toast.success('AI Gateway API Key created');
       await fetchData();
-    } catch {
-      toast.error('Network error while creating key');
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to create API key');
     } finally {
       setCreating(false);
     }
@@ -178,10 +404,10 @@ export default function CustomerAiGatewayPage() {
         body: JSON.stringify({ id: k.id, isActive: !k.isActive }),
       });
       if (!res.ok) throw new Error('Failed to update key');
-      toast.success(k.isActive ? 'Key paused' : 'Key activated');
-      await fetchData();
+      setKeys((prev) => prev.map((x) => (x.id === k.id ? { ...x, isActive: !x.isActive } : x)));
+      toast.success(`API Key ${k.isActive ? 'paused' : 'activated'}`);
     } catch {
-      toast.error('Failed to update key status');
+      toast.error('Failed to update API key status');
     }
   };
 
@@ -205,15 +431,176 @@ export default function CustomerAiGatewayPage() {
     }
   };
 
+  // Playground Image Upload (converts to in-memory Data URL, never stored on Masdika disk)
+  const handlePlaygroundImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    for (const file of files.slice(0, 4)) {
+      if (!file.type.startsWith('image/')) continue;
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image must be under 5 MB');
+        continue;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          setPgImages((prev) => [...prev.slice(0, 3), reader.result as string]);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+    e.target.value = '';
+  };
+
+  // Playground Chat Submit
+  const handleSendPlayground = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const prompt = pgInput.trim();
+    if ((!prompt && pgImages.length === 0) || pgSending) return;
+
+    const attachedImages = [...pgImages];
+    const nextHistory: ChatMessageItem[] = [
+      ...pgMessages,
+      { role: 'user', content: prompt, ...(attachedImages.length > 0 ? { images: attachedImages } : {}) },
+    ];
+    setPgMessages(nextHistory);
+    setPgInput('');
+    setPgImages([]);
+    setPgSending(true);
+
+    try {
+      const res = await fetch('/api/user/ai-gateway', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'playground_chat',
+          apiKeyId: pgKeyId,
+          model: pgModelId,
+          format: pgFormat,
+          systemPrompt: pgSystemPrompt,
+          maxTokens: pgMaxTokens,
+          temperature: pgTemp,
+          messages: nextHistory
+            .filter((m) => !m.isError)
+            .map((m) => ({
+              role: m.role,
+              content: m.content,
+              ...(m.images && m.images.length > 0 ? { images: m.images } : {}),
+            })),
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setPgMessages((prev) => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: json.error || 'Request failed',
+            requestId: json.requestId,
+            isError: true,
+          },
+        ]);
+        return;
+      }
+
+      setAiBalance(json.aiBalance);
+      setWalletBalance(json.walletBalance);
+      setPgMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: json.content || '(Empty response)',
+          reasoning: json.reasoning || undefined,
+          requestId: json.requestId,
+          latencyMs: json.latencyMs,
+          costRp: json.usage?.costRp ?? 0,
+          tokens:
+            (json.usage?.inputTokens || 0) +
+            (json.usage?.cachedTokens || 0) +
+            (json.usage?.outputTokens || 0),
+        },
+      ]);
+      fetchData();
+    } catch (err: any) {
+      setPgMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: err?.message || 'Network error while calling Playground',
+          isError: true,
+        },
+      ]);
+    } finally {
+      setPgSending(false);
+    }
+  };
+
+  // Image Generation Submit
+  const handleGenerateImage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const prompt = imgPrompt.trim();
+    if (!prompt || imgGenerating) return;
+
+    setImgGenerating(true);
+    try {
+      const res = await fetch('/api/user/ai-gateway', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'generate_image',
+          apiKeyId: imgKeyId,
+          model: imgModelId,
+          size: imgSize,
+          prompt,
+          referenceImage: imgShowRef ? imgRefUrl.trim() : undefined,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Image generation failed');
+
+      setAiBalance(json.aiBalance);
+      setWalletBalance(json.walletBalance);
+      const url = json.result?.data?.[0]?.url || '';
+      if (url) {
+        setGeneratedImages((prev) => [
+          {
+            id: json.result?.id || `img_${Date.now()}`,
+            prompt,
+            modelId: imgModelId,
+            size: imgSize,
+            url,
+            costRp: json.costRp || 0,
+            createdAt: new Date().toISOString(),
+          },
+          ...prev,
+        ]);
+        toast.success('Image generated');
+      } else {
+        toast.info(`Image job status: ${json.result?.status || 'processing'}`);
+      }
+      fetchData();
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to generate image');
+    } finally {
+      setImgGenerating(false);
+    }
+  };
+
   const providers = useMemo(() => {
     const set = new Set(models.map((m) => m.provider));
-    return ['ALL', ...Array.from(set)];
+    return ['ALL', 'ON_PROMO', ...Array.from(set)];
   }, [models]);
 
   const filteredModels = useMemo(() => {
     const q = modelSearch.trim().toLowerCase();
     return models.filter((m) => {
-      if (providerFilter !== 'ALL' && m.provider !== providerFilter) return false;
+      if (providerFilter === 'ON_PROMO') {
+        if (!m.discountBadge && !(m.originalOutputPricePer1M && m.originalOutputPricePer1M > m.outputPricePer1M)) {
+          return false;
+        }
+      } else if (providerFilter !== 'ALL' && m.provider !== providerFilter) {
+        return false;
+      }
       if (!q) return true;
       return (
         m.name.toLowerCase().includes(q) ||
@@ -223,23 +610,105 @@ export default function CustomerAiGatewayPage() {
     });
   }, [models, modelSearch, providerFilter]);
 
-  const openaiBase = `${origin}/api/ai/v1`;
-  const anthropicBase = `${origin}/api/ai`;
+  const filteredUsageLogs = useMemo(() => {
+    const nowMs = Date.now();
+    const cutoffMs =
+      usageRange === '24h'
+        ? nowMs - 24 * 3600 * 1000
+        : usageRange === '7d'
+        ? nowMs - 7 * 24 * 3600 * 1000
+        : nowMs - 30 * 24 * 3600 * 1000;
+
+    return usageLogs.filter((u) => {
+      if (new Date(u.createdAt).getTime() < cutoffMs) return false;
+      if (usageKeyFilter !== 'ALL' && String(u.apiKeyId) !== usageKeyFilter) return false;
+      if (usageModelFilter !== 'ALL' && u.modelId !== usageModelFilter) return false;
+      return true;
+    });
+  }, [usageLogs, usageRange, usageKeyFilter, usageModelFilter]);
+
+  const usageMetrics = useMemo(() => {
+    const reqCount = filteredUsageLogs.length;
+    const spend = filteredUsageLogs.reduce((acc, r) => acc + r.costRp, 0);
+    const okCount = filteredUsageLogs.filter((r) => r.statusCode >= 200 && r.statusCode < 300).length;
+    const inTok = filteredUsageLogs.reduce((acc, r) => acc + r.inputTokens, 0);
+    const cacheTok = filteredUsageLogs.reduce((acc, r) => acc + r.cachedTokens, 0);
+    const outTok = filteredUsageLogs.reduce((acc, r) => acc + r.outputTokens, 0);
+    const avgLat =
+      reqCount > 0
+        ? Math.round(filteredUsageLogs.reduce((acc, r) => acc + r.latencyMs, 0) / reqCount)
+        : 0;
+    const totalPrompt = inTok + cacheTok;
+    const cacheHitPct = totalPrompt > 0 ? Math.round((cacheTok / totalPrompt) * 100) : null;
+    const successPct = reqCount > 0 ? Math.round((okCount / reqCount) * 100) : null;
+
+    return {
+      reqCount,
+      spend,
+      okCount,
+      errCount: reqCount - okCount,
+      inTok,
+      cacheTok,
+      outTok,
+      totalTok: inTok + cacheTok + outTok,
+      avgLat,
+      cacheHitPct,
+      successPct,
+    };
+  }, [filteredUsageLogs]);
+
+  const currentImageModel = useMemo(
+    () => imageModels.find((m) => m.modelId === imgModelId) || imageModels[0],
+    [imageModels, imgModelId]
+  );
+
+  const openaiBase = `${origin}/api/ai/openai/v1`;
+  const anthropicBase = `${origin}/api/ai/anthropic`;
   const sampleModel = models[0]?.modelId || 'deepseek-v4.1-flash';
 
   const codeSnippets: Record<DocLang, { title: string; code: string }> = {
     curl: {
-      title: 'curl (OpenAI Format)',
-      code: `curl ${openaiBase}/chat/completions \\
+      title: 'cURL - Chat Completions, Streaming SSE & Vision (/v1/chat/completions)',
+      code: `# 1. Standard Chat Completion
+curl ${openaiBase}/chat/completions \\
   -H "Authorization: Bearer masdika_ai_YOUR_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
     "model": "${sampleModel}",
-    "messages": [{ "role": "user", "content": "Hello Masdika AI!" }]
+    "max_completion_tokens": 2000,
+    "messages": [
+      { "role": "system", "content": "You are a concise assistant." },
+      { "role": "user", "content": "Explain what a Cloud VPS is in two sentences." }
+    ]
+  }'
+
+# 2. Streaming Response (SSE)
+curl -N ${openaiBase}/chat/completions \\
+  -H "Authorization: Bearer masdika_ai_YOUR_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "${sampleModel}",
+    "stream": true,
+    "messages": [{ "role": "user", "content": "Write a haiku about Kubernetes." }]
+  }'
+
+# 3. Vision / Multimodal (Image URL or Base64 Data URL)
+curl ${openaiBase}/chat/completions \\
+  -H "Authorization: Bearer masdika_ai_YOUR_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "qwen3-vl-plus",
+    "messages": [{
+      "role": "user",
+      "content": [
+        { "type": "text", "text": "Describe what is in this image." },
+        { "type": "image_url", "image_url": { "url": "https://example.com/photo.jpg" } }
+      ]
+    }]
   }'`,
     },
     node: {
-      title: 'OpenAI SDK (Node.js)',
+      title: 'Node.js / TypeScript - OpenAI SDK (npm install openai)',
       code: `import OpenAI from "openai";
 
 const client = new OpenAI({
@@ -247,14 +716,44 @@ const client = new OpenAI({
   apiKey: process.env.MASDIKA_AI_KEY,
 });
 
+// 1. Standard Completion
 const res = await client.chat.completions.create({
   model: "${sampleModel}",
-  messages: [{ role: "user", content: "Hello!" }],
+  messages: [{ role: "user", content: "Hello from Masdika AI Gateway!" }],
 });
-console.log(res.choices[0].message.content);`,
+console.log(res.choices[0].message.content);
+
+// 2. Streaming Completion
+const stream = await client.chat.completions.create({
+  model: "${sampleModel}",
+  stream: true,
+  messages: [{ role: "user", content: "Count 1 to 5 slowly." }],
+});
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content || "");
+}
+
+// 3. Tool / Function Calling
+const toolRes = await client.chat.completions.create({
+  model: "glm-5.3",
+  messages: [{ role: "user", content: "What is the weather in Jakarta?" }],
+  tools: [{
+    type: "function",
+    function: {
+      name: "get_weather",
+      description: "Get current weather by city name",
+      parameters: {
+        type: "object",
+        properties: { city: { type: "string" } },
+        required: ["city"],
+      },
+    },
+  }],
+});
+console.log(toolRes.choices[0].message.tool_calls);`,
     },
     python: {
-      title: 'OpenAI SDK (Python)',
+      title: 'Python - OpenAI SDK (pip install openai)',
       code: `import os
 from openai import OpenAI
 
@@ -262,15 +761,110 @@ client = OpenAI(
     base_url="${openaiBase}",
     api_key=os.environ["MASDIKA_AI_KEY"],
 )
+
+# 1. Standard Chat Completion
 res = client.chat.completions.create(
     model="${sampleModel}",
-    messages=[{"role": "user", "content": "Hello!"}],
+    messages=[{"role": "user", "content": "Hello from Masdika AI Gateway!"}],
 )
-print(res.choices[0].message.content)`,
+print(res.choices[0].message.content)
+
+# 2. Streaming Response
+stream = client.chat.completions.create(
+    model="${sampleModel}",
+    stream=True,
+    messages=[{"role": "user", "content": "Explain Docker in 3 bullets."}],
+)
+for chunk in stream:
+    delta = chunk.choices[0].delta.content
+    if delta:
+        print(delta, end="", flush=True)
+
+# 3. Vision (Base64 or HTTPS URL)
+vision = client.chat.completions.create(
+    model="qwen3-vl-plus",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "Extract all text from this image."},
+            {"type": "image_url", "image_url": {"url": "https://example.com/receipt.png"}},
+        ],
+    }],
+)
+print(vision.choices[0].message.content)`,
+    },
+    go: {
+      title: 'Go - net/http & Official OpenAI Go Compatible',
+      code: `package main
+
+import (
+	"bytes"
+	"fmt"
+	"io"
+	"net/http"
+	"os"
+)
+
+func main() {
+	payload := []byte(\`{
+		"model": "${sampleModel}",
+		"messages": [{"role": "user", "content": "Hello from Go!"}]
+	}\`)
+
+	req, _ := http.NewRequest("POST", "${openaiBase}/chat/completions", bytes.NewBuffer(payload))
+	req.Header.Set("Authorization", "Bearer "+os.Getenv("MASDIKA_AI_KEY"))
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	fmt.Println(string(body))
+}`,
+    },
+    php: {
+      title: 'PHP - cURL / Laravel HTTP Client',
+      code: `<?php
+$ch = curl_init("${openaiBase}/chat/completions");
+curl_setopt_array($ch, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_POST => true,
+    CURLOPT_HTTPHEADER => [
+        "Authorization: Bearer " . getenv("MASDIKA_AI_KEY"),
+        "Content-Type: application/json",
+    ],
+    CURLOPT_POSTFIELDS => json_encode([
+        "model" => "${sampleModel}",
+        "messages" => [
+            ["role" => "user", "content" => "Hello from PHP!"]
+        ],
+    ]),
+]);
+
+$response = curl_exec($ch);
+curl_close($ch);
+$data = json_decode($response, true);
+echo $data["choices"][0]["message"]["content"] ?? $response;`,
+    },
+    responses: {
+      title: 'OpenAI Responses API (/v1/responses - Codex & Newer Clients)',
+      code: `curl ${openaiBase}/responses \\
+  -H "Authorization: Bearer masdika_ai_YOUR_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "glm-5.3",
+    "instructions": "You are a concise assistant.",
+    "input": "Explain what a VPS is in two sentences.",
+    "max_output_tokens": 2000
+  }'`,
     },
     anthropic: {
-      title: 'Anthropic SDK (Node.js)',
-      code: `import Anthropic from "@anthropic-ai/sdk";
+      title: 'Anthropic SDK - Node.js & Python (/v1/messages)',
+      code: `// Node.js (npm install @anthropic-ai/sdk)
+import Anthropic from "@anthropic-ai/sdk";
 
 const client = new Anthropic({
   baseURL: "${anthropicBase}",
@@ -279,17 +873,118 @@ const client = new Anthropic({
 
 const msg = await client.messages.create({
   model: "claude-sonnet-4-6",
-  max_tokens: 1024,
-  messages: [{ role: "user", content: "Hello!" }],
-});`,
+  max_tokens: 2000,
+  system: "You are a concise assistant.",
+  messages: [{ role: "user", content: "Hello from Masdika AI Gateway!" }],
+});
+console.log(msg.content);
+
+# Python (pip install anthropic)
+# from anthropic import Anthropic
+# client = Anthropic(base_url="${anthropicBase}", api_key=os.environ["MASDIKA_AI_KEY"])
+# msg = client.messages.create(
+#     model="claude-sonnet-4-6",
+#     max_tokens=2000,
+#     messages=[{"role": "user", "content": "Hello!"}],
+# )`,
+    },
+    images: {
+      title: 'Image Generation API (/v1/images/generations)',
+      code: `# 1. cURL
+curl ${openaiBase}/images/generations \\
+  -H "Authorization: Bearer masdika_ai_YOUR_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "seedream-image-v5.0-flash",
+    "prompt": "A modern cloud data center in Jakarta at night, cyberpunk",
+    "size": "2048x2048",
+    "n": 1
+  }'
+
+# 2. Node.js (OpenAI SDK)
+import OpenAI from "openai";
+const client = new OpenAI({ baseURL: "${openaiBase}", apiKey: process.env.MASDIKA_AI_KEY });
+const img = await client.images.generate({
+  model: "seedream-image-v5.0-flash",
+  prompt: "Minimalist logo of a hummingbird, flat vector",
+  size: "2048x2048",
+});
+console.log(img.data[0].url);`,
     },
     claudecode: {
       title: 'Claude Code CLI',
       code: `export ANTHROPIC_BASE_URL=${anthropicBase}
 export ANTHROPIC_AUTH_TOKEN=masdika_ai_YOUR_KEY
-export ANTHROPIC_MODEL=claude-sonnet-4-6
-export ANTHROPIC_DEFAULT_HAIKU_MODEL=claude-haiku-4-5
+export ANTHROPIC_MODEL=glm-5.3
+export ANTHROPIC_DEFAULT_HAIKU_MODEL=deepseek-v4.1-flash  # background tasks
 claude`,
+    },
+    codex: {
+      title: 'OpenAI Codex CLI (~/.codex/config.toml)',
+      code: `model = "glm-5.3"
+model_provider = "masdika"
+
+[model_providers.masdika]
+name = "Masdika AI Gateway"
+base_url = "${openaiBase}"
+env_key = "MASDIKA_AI_KEY"
+wire_api = "responses"
+
+# Or run on demand:
+# export MASDIKA_AI_KEY=masdika_ai_YOUR_KEY
+# codex -c model_provider=masdika -m glm-5.3`,
+    },
+    opencode: {
+      title: 'opencode (~/.config/opencode/opencode.json)',
+      code: `{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "masdika": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Masdika AI Gateway",
+      "options": {
+        "baseURL": "${openaiBase}",
+        "apiKey": "{env:MASDIKA_AI_KEY}"
+      },
+      "models": {
+        "glm-5.3": { "name": "GLM-5.3" },
+        "kimi-k3": { "name": "Kimi K3" },
+        "deepseek-v4.1-flash": { "name": "DeepSeek V4.1 Flash" }
+      }
+    }
+  }
+}`,
+    },
+    cline: {
+      title: 'Cline / Roo Code / Kilo Code (VS Code Extension)',
+      code: `API Provider : OpenAI Compatible
+Base URL     : ${openaiBase}
+API Key      : masdika_ai_YOUR_KEY
+Model ID     : glm-5.3 (or deepseek-v4-pro, kimi-k3, claude-sonnet-4-6)`,
+    },
+    cursor: {
+      title: 'Cursor IDE (Settings → Models)',
+      code: `1. Open Cursor Settings → Models
+2. Enter your masdika_ai_... key in OpenAI API Key
+3. Enable "Override OpenAI Base URL":
+   ${openaiBase}
+4. Add custom model IDs: glm-5.3, deepseek-v4-pro, kimi-k3, claude-sonnet-4-6`,
+    },
+    continue: {
+      title: 'Continue (~/.continue/config.yaml)',
+      code: `models:
+  - name: GLM-5.3 (Masdika)
+    provider: openai
+    model: glm-5.3
+    apiBase: ${openaiBase}
+    apiKey: \${{ secrets.MASDIKA_AI_KEY }}
+    roles: [chat, edit, apply]`,
+    },
+    aider: {
+      title: 'Aider CLI',
+      code: `export OPENAI_API_BASE=${openaiBase}
+export OPENAI_API_KEY=masdika_ai_YOUR_KEY
+aider --model openai/glm-5.3`,
     },
   };
 
@@ -309,11 +1004,11 @@ claude`,
               )}
             >
               <Sparkles className="w-3 h-3 shrink-0" />
-              OpenAI &amp; Anthropic Compatible
+              OpenAI, Responses &amp; Anthropic Compatible
             </span>
           </div>
           <p className={cn('text-xs sm:text-sm font-medium mt-1.5 max-w-2xl leading-relaxed', isDark ? 'text-zinc-400' : 'text-slate-500')}>
-            Access {models.length || 73}+ AI models using your Masdika wallet balance via a unified OpenAI, Anthropic, and Claude Code API endpoint.
+            One API key for {models.length || 73}+ chat models and {imageModels.length || 13} image models - billed per token in Rupiah from your dedicated AI Balance.
           </p>
         </div>
 
@@ -333,7 +1028,7 @@ claude`,
           <button
             type="button"
             onClick={() => setIsCreateOpen(true)}
-            disabled={keys.length >= 10}
+            disabled={keys.length >= 25}
             className="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 flex items-center justify-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:scale-95 disabled:opacity-50 text-slate-950 shadow-md cursor-pointer"
           >
             <Plus className="w-4 h-4" />
@@ -342,93 +1037,139 @@ claude`,
         </div>
       </div>
 
-      {!loading && !enabled && (
-        <div
-          className={cn(
-            'p-4 rounded-2xl border flex items-center gap-3 text-xs',
-            isDark ? 'bg-amber-500/10 border-amber-500/30 text-amber-300' : 'bg-amber-50 border-amber-200 text-amber-800'
-          )}
-        >
-          <AlertTriangle className="w-4 h-4 shrink-0" />
-          <span>AI Gateway is currently offline or awaiting upstream configuration by the administrator.</span>
+      {!enabled && (
+        <div className={cn('rounded-2xl border p-4 flex items-center gap-3', isDark ? 'bg-amber-500/10 border-amber-500/30 text-amber-300' : 'bg-amber-50 border-amber-200 text-amber-800')}>
+          <AlertTriangle className="w-5 h-5 shrink-0" />
+          <p className="text-xs sm:text-sm font-medium">
+            AI Gateway is currently undergoing maintenance by the administrator. Requests will resume shortly.
+          </p>
         </div>
       )}
 
-      {/* 4 Summary Stat Cards */}
+      {/* One-time Key Reveal Banner */}
+      {revealedKey && (
+        <div className={cn('rounded-2xl border p-5 space-y-3', isDark ? 'bg-cyan-950/30 border-cyan-500/40' : 'bg-cyan-50 border-cyan-300')}>
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-cyan-400 shrink-0" />
+              <h3 className={cn('text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>
+                Save Your New AI Gateway Secret Key Now
+              </h3>
+            </div>
+            <button
+              type="button"
+              onClick={() => setRevealedKey(null)}
+              className="text-zinc-400 hover:text-white cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <p className={cn('text-xs', isDark ? 'text-zinc-300' : 'text-slate-600')}>
+            For security reasons, this full secret key is shown only once. Copy and store it in your environment variables.
+          </p>
+          <div className="flex items-center gap-2">
+            <code className={cn('flex-1 px-3.5 py-2.5 rounded-xl font-mono text-xs sm:text-sm break-all border', isDark ? 'bg-[#0a0a0c] border-cyan-500/30 text-cyan-300' : 'bg-white border-cyan-200 text-slate-900')}>
+              {revealedKey}
+            </code>
+            <button
+              type="button"
+              onClick={() => handleCopy(revealedKey, 'new-key', 'Secret key copied!')}
+              className="px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-xs flex items-center gap-1.5 shrink-0 cursor-pointer"
+            >
+              {copiedId === 'new-key' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              Copy Key
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Masdika Signature 4-KPI Grid (Top Position - Consistent with Managed Apps) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className={cn('rounded-2xl border p-5 transition-all shadow-2xs', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90')}>
+        <div className={cn('rounded-2xl border p-5 transition-all shadow-2xs flex flex-col justify-between', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200')}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn('text-[11px] font-bold uppercase tracking-wider', isDark ? 'text-zinc-400' : 'text-slate-500')}>
-              API KEYS
+              AI CREDIT BALANCE
             </span>
             <div className={cn('w-9 h-9 rounded-xl border flex items-center justify-center', isDark ? 'bg-cyan-500/15 border-cyan-500/25 text-cyan-400' : 'bg-cyan-50 border-cyan-200 text-cyan-700')}>
-              <Key className="w-4 h-4" />
+              <Zap className="w-4 h-4" />
             </div>
           </div>
-          <div className="flex items-baseline gap-2">
-            <span className={cn('text-2xl font-black tracking-tight', isDark ? 'text-white' : 'text-slate-900')}>
-              {keys.filter((k) => k.isActive).length}
+          <div className="flex items-baseline justify-between gap-2">
+            <span className={cn('text-2xl font-black tracking-tight font-mono', isDark ? 'text-white' : 'text-slate-900')}>
+              {formatRupiah(aiBalance)}
             </span>
-            <span className={cn('text-xs font-semibold', isDark ? 'text-cyan-400' : 'text-cyan-600')}>
-              / 10 Active
-            </span>
+            <button
+              type="button"
+              onClick={() => setIsTopupModalOpen(true)}
+              className="px-2.5 py-1 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-[11px] inline-flex items-center gap-1 cursor-pointer shrink-0"
+            >
+              <Plus className="w-3 h-3" />
+              Top Up AI
+            </button>
           </div>
         </div>
 
-        <div className={cn('rounded-2xl border p-5 transition-all shadow-2xs', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90')}>
+        <div className={cn('rounded-2xl border p-5 transition-all shadow-2xs flex flex-col justify-between', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200')}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn('text-[11px] font-bold uppercase tracking-wider', isDark ? 'text-zinc-400' : 'text-slate-500')}>
-              TOTAL REQUESTS
+              MASDIKA WALLET
+            </span>
+            <div className={cn('w-9 h-9 rounded-xl border flex items-center justify-center', isDark ? 'bg-cyan-500/15 border-cyan-500/25 text-cyan-400' : 'bg-cyan-50 border-cyan-200 text-cyan-700')}>
+              <Wallet className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="flex items-baseline justify-between gap-2">
+            <span className={cn('text-2xl font-black tracking-tight font-mono', isDark ? 'text-white' : 'text-slate-900')}>
+              {formatRupiah(walletBalance)}
+            </span>
+            <Link
+              href="/dashboard/topup"
+              className="text-xs font-semibold text-cyan-400 hover:underline shrink-0"
+            >
+              Deposit -&gt;
+            </Link>
+          </div>
+        </div>
+
+        <div className={cn('rounded-2xl border p-5 transition-all shadow-2xs flex flex-col justify-between', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200')}>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn('text-[11px] font-bold uppercase tracking-wider', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+              MONTHLY AI SPEND
             </span>
             <div className={cn('w-9 h-9 rounded-xl border flex items-center justify-center', isDark ? 'bg-cyan-500/15 border-cyan-500/25 text-cyan-400' : 'bg-cyan-50 border-cyan-200 text-cyan-700')}>
               <Activity className="w-4 h-4" />
             </div>
           </div>
-          <div className="flex items-baseline gap-2">
-            <span className={cn('text-2xl font-black tracking-tight', isDark ? 'text-white' : 'text-slate-900')}>
-              {stats.totalRequests.toLocaleString('id-ID')}
+          <div className="flex items-baseline justify-between gap-2">
+            <span className={cn('text-2xl font-black tracking-tight font-mono', isDark ? 'text-white' : 'text-slate-900')}>
+              {formatRupiah(stats.spentThisMonthRp)}
             </span>
-            <span className={cn('text-xs font-semibold', isDark ? 'text-cyan-400' : 'text-cyan-600')}>
-              Calls
-            </span>
+            <button
+              type="button"
+              onClick={() => setActiveTab('usage')}
+              className="text-xs font-semibold text-cyan-400 hover:underline cursor-pointer shrink-0"
+            >
+              {stats.totalRequests.toLocaleString('id-ID')} Calls -&gt;
+            </button>
           </div>
         </div>
 
-        <div className={cn('rounded-2xl border p-5 transition-all shadow-2xs', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90')}>
+        <div className={cn('rounded-2xl border p-5 transition-all shadow-2xs flex flex-col justify-between', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200')}>
           <div className="flex items-center justify-between mb-3">
             <span className={cn('text-[11px] font-bold uppercase tracking-wider', isDark ? 'text-zinc-400' : 'text-slate-500')}>
-              TOKENS PROCESSED
+              ACTIVE API KEYS
             </span>
             <div className={cn('w-9 h-9 rounded-xl border flex items-center justify-center', isDark ? 'bg-cyan-500/15 border-cyan-500/25 text-cyan-400' : 'bg-cyan-50 border-cyan-200 text-cyan-700')}>
-              <Cpu className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span className={cn('text-2xl font-black tracking-tight', isDark ? 'text-white' : 'text-slate-900')}>
-              {stats.totalTokens.toLocaleString('id-ID')}
-            </span>
-            <span className={cn('text-xs font-semibold', isDark ? 'text-cyan-400' : 'text-cyan-600')}>
-              Tokens
-            </span>
-          </div>
-        </div>
-
-        <div className={cn('rounded-2xl border p-5 transition-all shadow-2xs', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200/90')}>
-          <div className="flex items-center justify-between mb-3">
-            <span className={cn('text-[11px] font-bold uppercase tracking-wider', isDark ? 'text-zinc-400' : 'text-slate-500')}>
-              WALLET BALANCE
-            </span>
-            <div className={cn('w-9 h-9 rounded-xl border flex items-center justify-center', isDark ? 'bg-cyan-500/10 border-cyan-500/20 text-cyan-400' : 'bg-cyan-50 border-cyan-200 text-cyan-700')}>
-              <Wallet className="w-4 h-4" />
+              <Key className="w-4 h-4" />
             </div>
           </div>
           <div className="flex items-baseline justify-between gap-2">
-            <span className={cn('text-2xl font-black tracking-tight', isDark ? 'text-white' : 'text-slate-900')}>
-              {formatRupiah(balance)}
+            <span className={cn('text-2xl font-black tracking-tight font-mono', isDark ? 'text-white' : 'text-slate-900')}>
+              {keys.filter((k) => k.isActive).length}
             </span>
-            <Link href="/dashboard/topup" className="text-xs font-semibold text-cyan-400 hover:underline">
-              Top Up →
-            </Link>
+            <span className="text-xs font-semibold text-cyan-400">
+              / 25 Active
+            </span>
           </div>
         </div>
       </div>
@@ -437,7 +1178,7 @@ claude`,
       <div className={cn('rounded-2xl border p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 gap-4', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}>
         <div>
           <span className={cn('text-[10px] font-bold uppercase tracking-wider block mb-1.5', isDark ? 'text-zinc-400' : 'text-slate-500')}>
-            OpenAI Base URL
+            OpenAI &amp; Responses Base URL
           </span>
           <div className="flex items-center gap-2">
             <code className={cn('flex-1 px-3 py-2 rounded-xl border font-mono text-xs truncate', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-cyan-400' : 'bg-slate-50 border-slate-200 text-cyan-700')}>
@@ -446,7 +1187,7 @@ claude`,
             <button
               type="button"
               onClick={() => handleCopy(openaiBase, 'openai-url', 'OpenAI Base URL copied')}
-              className={cn('p-2 rounded-xl border transition-colors', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-zinc-300 hover:text-white' : 'bg-white border-slate-200 text-slate-700')}
+              className={cn('p-2 rounded-xl border transition-colors cursor-pointer', isDark ? 'bg-white/5 border-white/10 hover:bg-white/10 text-zinc-300' : 'bg-slate-100 border-slate-200 hover:bg-slate-200 text-slate-700')}
             >
               {copiedId === 'openai-url' ? <Check className="w-4 h-4 text-cyan-400" /> : <Copy className="w-4 h-4" />}
             </button>
@@ -464,7 +1205,7 @@ claude`,
             <button
               type="button"
               onClick={() => handleCopy(anthropicBase, 'anthropic-url', 'Anthropic Base URL copied')}
-              className={cn('p-2 rounded-xl border transition-colors', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-zinc-300 hover:text-white' : 'bg-white border-slate-200 text-slate-700')}
+              className={cn('p-2 rounded-xl border transition-colors cursor-pointer', isDark ? 'bg-white/5 border-white/10 hover:bg-white/10 text-zinc-300' : 'bg-slate-100 border-slate-200 hover:bg-slate-200 text-slate-700')}
             >
               {copiedId === 'anthropic-url' ? <Check className="w-4 h-4 text-cyan-400" /> : <Copy className="w-4 h-4" />}
             </button>
@@ -472,14 +1213,17 @@ claude`,
         </div>
       </div>
 
-      {/* Masdika Navigation Tabs */}
+      {/* Masdika 7-Tab Navigation Bar */}
       <div className={cn('w-fit max-w-full rounded-2xl border p-1.5', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}>
         <div className={cn('flex items-center gap-1.5 p-1.5 rounded-xl border overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-slate-100 border-slate-200')}>
           {([
+            { id: 'overview', label: 'Overview', icon: Wallet },
             { id: 'keys', label: 'API Keys', icon: Key, count: keys.length },
+            { id: 'playground', label: 'Playground', icon: MessageSquare },
+            { id: 'images', label: 'Image Generation', icon: ImageIcon },
+            { id: 'usage', label: 'Usage', icon: Activity, count: usageLogs.length },
             { id: 'models', label: 'Models & Pricing', icon: Cpu, count: models.length },
-            { id: 'usage', label: 'Usage Logs', icon: Activity, count: usageLogs.length },
-            { id: 'docs', label: 'Quickstart Docs', icon: BookOpen },
+            { id: 'docs', label: 'Quickstart', icon: BookOpen },
           ] as const).map((t) => {
             const active = activeTab === t.id;
             return (
@@ -509,347 +1253,247 @@ claude`,
         </div>
       </div>
 
-      {/* TAB 1: API KEYS */}
+      {/* ==================================================================== */}
+      {/* TAB 1: OVERVIEW (Masdika Native 4-KPI + Auto Top-Up & Spend Summary) */}
+      {/* ==================================================================== */}
+      {activeTab === 'overview' && (
+        <div className="space-y-6">
+
+          {/* 2-Column Masdika Control Panel: Left = AI Balance & Auto Top-Up, Right = Quick Actions & Monthly Breakdown */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+            {/* Left (7 cols): Auto Top-up & Balance Management */}
+            <form
+              onSubmit={handleSaveAutoTopup}
+              className={cn('lg:col-span-7 rounded-2xl border p-5 sm:p-6 space-y-5', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/[0.06]">
+                <div>
+                  <h2 className={cn('text-sm sm:text-base font-bold flex items-center gap-2', isDark ? 'text-white' : 'text-slate-900')}>
+                    <RefreshCw className="w-4 h-4 text-cyan-400" />
+                    AI Credit &amp; Auto Top-Up Configuration
+                  </h2>
+                  <p className={cn('text-xs mt-1', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+                    Fund your AI Credit Balance manually from your Masdika Wallet or enable automatic refill when balance drops low.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsTopupModalOpen(true)}
+                  className="px-4 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-xs inline-flex items-center gap-1.5 shrink-0 cursor-pointer self-start sm:self-auto"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Top Up AI Balance
+                </button>
+              </div>
+
+              <div className={cn('rounded-xl border p-4 flex items-center justify-between gap-3', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-slate-50 border-slate-200')}>
+                <div>
+                  <div className={cn('text-xs font-bold', isDark ? 'text-white' : 'text-slate-900')}>
+                    Automatic Wallet Refill (Auto Top-Up)
+                  </div>
+                  <div className="text-[11px] text-zinc-400 mt-0.5">
+                    Automatically transfer funds from your Masdika Wallet ({formatRupiah(walletBalance)}) when AI Balance falls below threshold.
+                  </div>
+                </div>
+                <label className="inline-flex items-center gap-2.5 cursor-pointer select-none shrink-0">
+                  <input
+                    type="checkbox"
+                    checked={autoTopupEnabled}
+                    onChange={(e) => setAutoTopupEnabled(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-zinc-700 rounded-full peer peer-checked:bg-cyan-400 relative transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5" />
+                </label>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className={cn('text-xs font-bold block mb-1.5', isDark ? 'text-zinc-300' : 'text-slate-700')}>
+                    When AI Balance Falls Below (Rp)
+                  </label>
+                  <input
+                    type="number"
+                    min={5000}
+                    step={1000}
+                    value={autoTopupThreshold}
+                    onChange={(e) => setAutoTopupThreshold(e.target.value)}
+                    className={cn(
+                      'w-full px-3.5 py-2.5 rounded-xl text-sm font-mono border outline-none focus:border-cyan-500',
+                      isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+                    )}
+                  />
+                </div>
+                <div>
+                  <label className={cn('text-xs font-bold block mb-1.5', isDark ? 'text-zinc-300' : 'text-slate-700')}>
+                    Auto Top-Up Amount (Rp)
+                  </label>
+                  <input
+                    type="number"
+                    min={5000}
+                    step={1000}
+                    value={autoTopupAmount}
+                    onChange={(e) => setAutoTopupAmount(e.target.value)}
+                    className={cn(
+                      'w-full px-3.5 py-2.5 rounded-xl text-sm font-mono border outline-none focus:border-cyan-500',
+                      isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+                    )}
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-1">
+                <span className="text-[11px] text-zinc-500">
+                  Minimum top-up &amp; threshold: Rp 5.000
+                </span>
+                <button
+                  type="submit"
+                  disabled={savingAutoTopup}
+                  className="px-5 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-xs cursor-pointer disabled:opacity-50"
+                >
+                  {savingAutoTopup ? 'Saving...' : 'Save Auto Top-Up'}
+                </button>
+              </div>
+            </form>
+
+            {/* Right (5 cols): This Month Usage by Model Summary */}
+            <div className={cn('lg:col-span-5 rounded-2xl border p-5 sm:p-6 space-y-4', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}>
+              <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+                <h3 className={cn('text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>
+                  This Month Model Consumption
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('usage')}
+                  className="text-xs font-semibold text-cyan-400 hover:underline cursor-pointer"
+                >
+                  Full logs →
+                </button>
+              </div>
+
+              {thisMonthByModel.length === 0 ? (
+                <div className="py-10 text-center space-y-2">
+                  <Cpu className="w-7 h-7 text-cyan-400/60 mx-auto" />
+                  <p className={cn('text-xs font-semibold', isDark ? 'text-zinc-300' : 'text-slate-700')}>
+                    No model requests recorded this month
+                  </p>
+                  <p className="text-[11px] text-zinc-500">
+                    Test any model in the Playground tab or connect Claude Code / OpenAI SDK.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2.5">
+                  {thisMonthByModel.slice(0, 6).map((row) => (
+                    <div
+                      key={row.modelId}
+                      className={cn('rounded-xl border px-3.5 py-2.5 flex items-center justify-between text-xs font-mono', isDark ? 'bg-[#0a0a0c] border-white/[0.06]' : 'bg-slate-50 border-slate-200')}
+                    >
+                      <div>
+                        <div className="font-bold text-cyan-400">{row.modelId}</div>
+                        <div className="text-[10px] text-zinc-500">
+                          {row.requests} reqs · {(row.inputTokens + row.cachedTokens + row.outputTokens).toLocaleString('id-ID')} tokens
+                        </div>
+                      </div>
+                      <div className={cn('font-bold', isDark ? 'text-white' : 'text-slate-900')}>
+                        {formatRupiah(row.costRp)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ==================================================================== */}
+      {/* TAB 2: API KEYS                                                      */}
+      {/* ==================================================================== */}
       {activeTab === 'keys' && (
         <div className={cn('rounded-2xl border overflow-hidden', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}>
           {keys.length === 0 ? (
             <div className="p-12 text-center space-y-3">
-              <div className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center bg-cyan-500/15 border border-cyan-500/25 text-cyan-400">
+              <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center mx-auto">
                 <Key className="w-6 h-6" />
               </div>
               <h3 className={cn('text-base font-bold', isDark ? 'text-white' : 'text-slate-900')}>
                 No AI Gateway Keys Yet
               </h3>
-              <p className={cn('text-xs max-w-md mx-auto', isDark ? 'text-zinc-400' : 'text-slate-600')}>
-                Create an API key to start calling {models.length}+ models using OpenAI SDK, Anthropic SDK, or Claude Code.
+              <p className={cn('text-xs max-w-md mx-auto', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+                Create an API key to start calling {models.length}+ models using OpenAI SDK, Anthropic SDK, Claude Code, or the in-browser Playground.
               </p>
               <button
                 type="button"
                 onClick={() => setIsCreateOpen(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-xs cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-xs inline-flex items-center gap-1.5 cursor-pointer"
               >
-                <Plus className="w-3.5 h-3.5" /> Create API Key
+                <Plus className="w-4 h-4" />
+                Create API Key
               </button>
             </div>
           ) : (
-            <div className={cn('divide-y', isDark ? 'divide-white/[0.06]' : 'divide-slate-100')}>
-              {keys.map((k) => (
-                <div key={k.id} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="space-y-1.5 min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className={cn('font-bold text-sm', isDark ? 'text-white' : 'text-slate-900')}>{k.name}</span>
-                      <span
-                        className={cn(
-                          'px-2 py-0.5 rounded-full text-[10px] font-bold border',
-                          k.isActive
-                            ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
-                            : 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'
-                        )}
-                      >
-                        {k.isActive ? 'ACTIVE' : 'PAUSED'}
-                      </span>
-                    </div>
-                    <div className={cn('text-xs font-mono flex flex-wrap items-center gap-x-3 gap-y-1', isDark ? 'text-zinc-400' : 'text-slate-600')}>
-                      <span>{k.keyPrefix}••••••••</span>
-                      <span>• Spent this month: {formatRupiah(k.monthlySpent)}</span>
-                      <span>• Limit: {k.monthlyLimit ? formatRupiah(k.monthlyLimit) : 'Unlimited'}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => handleToggleKey(k)}
-                      className={cn(
-                        'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors cursor-pointer',
-                        isDark ? 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border-white/[0.08]' : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
-                      )}
-                    >
-                      <Power className="w-3.5 h-3.5 text-cyan-400" />
-                      {k.isActive ? 'Pause' : 'Enable'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setDeletingKey(k)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border border-red-500/25 bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors cursor-pointer"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      Revoke
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* TAB 2: MODELS & PRICING */}
-      {activeTab === 'models' && (
-        <div className={cn('rounded-2xl border overflow-hidden', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}>
-          <div className={cn('p-4 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3', isDark ? 'border-white/[0.08]' : 'border-slate-200')}>
-            <div className="relative flex-1 max-w-md">
-              <Search className={cn('w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2', isDark ? 'text-zinc-500' : 'text-slate-400')} />
-              <input
-                type="text"
-                value={modelSearch}
-                onChange={(e) => setModelSearch(e.target.value)}
-                placeholder="Search model name, ID, or provider..."
-                className={cn(
-                  'w-full pl-10 pr-4 py-2 rounded-xl text-xs sm:text-sm border outline-none transition-colors',
-                  isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500 focus:border-cyan-500/50' : 'bg-slate-50 border-slate-200 text-slate-900'
-                )}
-              />
-            </div>
-
-            <div className="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-              {providers.map((prov) => (
-                <button
-                  key={prov}
-                  type="button"
-                  onClick={() => setProviderFilter(prov)}
-                  className={cn(
-                    'px-2.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer',
-                    providerFilter === prov
-                      ? 'bg-cyan-400 text-slate-950'
-                      : isDark
-                      ? 'bg-zinc-900 text-zinc-400 hover:text-white border border-white/[0.06]'
-                      : 'bg-slate-100 text-slate-600 hover:text-slate-900'
-                  )}
-                >
-                  {prov}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className={cn('text-[11px] font-bold uppercase tracking-wider border-b', isDark ? 'text-zinc-400 border-white/[0.08] bg-[#0a0a0c]' : 'text-slate-500 border-slate-200 bg-slate-50')}>
-                  <th className="px-5 py-3.5">Model</th>
-                  <th className="px-4 py-3.5">Context</th>
-                  <th className="px-4 py-3.5 text-right">Input / 1M</th>
-                  <th className="px-4 py-3.5 text-right">Cache / 1M</th>
-                  <th className="px-5 py-3.5 text-right">Output / 1M</th>
-                  <th className="w-10 px-3 py-3.5"></th>
-                </tr>
-              </thead>
-              <tbody className={cn('divide-y text-xs sm:text-sm', isDark ? 'divide-white/[0.06]' : 'divide-slate-100')}>
-                {filteredModels.map((m) => {
-                  const discountPct =
-                    m.originalOutputPricePer1M && m.originalOutputPricePer1M > m.outputPricePer1M
-                      ? Math.round(((m.originalOutputPricePer1M - m.outputPricePer1M) / m.originalOutputPricePer1M) * 100)
-                      : m.originalInputPricePer1M && m.originalInputPricePer1M > m.inputPricePer1M
-                      ? Math.round(((m.originalInputPricePer1M - m.inputPricePer1M) / m.originalInputPricePer1M) * 100)
-                      : 0;
-                  const badgeText = m.discountBadge || (discountPct > 0 ? `-${discountPct}%` : null);
-                  const isExpanded = expandedModelId === m.id;
-
-                  // Example: 1,000 input + 1,000 cached + 500 output
-                  const sampleInputCost = (1000 * m.inputPricePer1M) / 1_000_000;
-                  const sampleCacheCost = (1000 * m.cachePricePer1M) / 1_000_000;
-                  const sampleOutputCost = (500 * m.outputPricePer1M) / 1_000_000;
-                  const sampleTotal = sampleInputCost + sampleCacheCost + sampleOutputCost;
-                  const requestsPer5000 = sampleTotal > 0 ? Math.floor(5000 / sampleTotal) : 0;
-                  const fmtDec = (val: number) => `Rp ${val.toFixed(2).replace('.', ',')}`;
-
-                  return (
-                  <Fragment key={m.id}>
-                  <tr
-                    onClick={() => setExpandedModelId(isExpanded ? null : m.id)}
-                    className={cn(
-                      'cursor-pointer transition-colors',
-                      isExpanded
-                        ? isDark ? 'bg-cyan-500/[0.05]' : 'bg-cyan-50/70'
-                        : isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-slate-50'
-                    )}
-                  >
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className={cn('font-bold', isDark ? 'text-white' : 'text-slate-900')}>{m.name}</span>
-                        <span className={cn('px-2 py-0.5 rounded-full text-[10px] font-semibold border', isDark ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' : 'bg-cyan-50 text-cyan-700 border-cyan-200')}>
-                          {m.provider}
-                        </span>
-                        {badgeText && (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-400/15 text-cyan-400 border border-cyan-400/30">
-                            {badgeText}
-                          </span>
-                        )}
-                        {m.hasPeakPricing && (
-                          <span className={cn('px-2 py-0.5 rounded-full text-[10px] font-semibold border', isDark ? 'bg-zinc-800 text-zinc-300 border-white/10' : 'bg-slate-100 text-slate-600 border-slate-200')}>
-                            Peak Pricing
-                          </span>
-                        )}
-                      </div>
-                      <div className={cn('font-mono text-xs mt-0.5 flex items-center gap-2', isDark ? 'text-zinc-500' : 'text-slate-500')}>
-                        <span>{m.modelId}</span>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleCopy(m.modelId, `model-${m.id}`, `Copied ${m.modelId}`);
-                          }}
-                          className="hover:text-cyan-400 transition-colors cursor-pointer"
-                        >
-                          {copiedId === `model-${m.id}` ? <Check className="w-3 h-3 text-cyan-400" /> : <Copy className="w-3 h-3" />}
-                        </button>
-                      </div>
-                    </td>
-                    <td className={cn('px-4 py-3.5 font-mono text-xs', isDark ? 'text-zinc-300' : 'text-slate-700')}>
-                      {m.contextWindow}
-                    </td>
-                    <td className={cn('px-4 py-3.5 font-mono font-bold text-right', isDark ? 'text-cyan-400' : 'text-cyan-700')}>
-                      {m.originalInputPricePer1M && m.originalInputPricePer1M > m.inputPricePer1M && (
-                        <span className="text-[11px] font-normal line-through text-zinc-500 block">
-                          {formatRupiah(m.originalInputPricePer1M)}
-                        </span>
-                      )}
-                      {formatRupiah(m.inputPricePer1M)}
-                    </td>
-                    <td className={cn('px-4 py-3.5 font-mono text-right', isDark ? 'text-zinc-300' : 'text-slate-600')}>
-                      {m.originalCachePricePer1M && m.originalCachePricePer1M > m.cachePricePer1M && (
-                        <span className="text-[11px] font-normal line-through text-zinc-500 block">
-                          {formatRupiah(m.originalCachePricePer1M)}
-                        </span>
-                      )}
-                      {formatRupiah(m.cachePricePer1M)}
-                    </td>
-                    <td className={cn('px-5 py-3.5 font-mono font-bold text-right', isDark ? 'text-white' : 'text-slate-900')}>
-                      {m.originalOutputPricePer1M && m.originalOutputPricePer1M > m.outputPricePer1M && (
-                        <span className="text-[11px] font-normal line-through text-zinc-500 block">
-                          {formatRupiah(m.originalOutputPricePer1M)}
-                        </span>
-                      )}
-                      {formatRupiah(m.outputPricePer1M)}
-                    </td>
-                    <td className="px-3 py-3.5 text-center text-zinc-500">
-                      {isExpanded ? <ChevronUp className="w-4 h-4 text-cyan-400 mx-auto" /> : <ChevronDown className="w-4 h-4 mx-auto" />}
-                    </td>
-                  </tr>
-                  {isExpanded && (
-                    <tr className={isDark ? 'bg-[#0a0a0c]' : 'bg-slate-50/80'}>
-                      <td colSpan={6} className="px-5 py-4">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-                          <div className="space-y-2.5 text-xs">
-                            <div className="flex items-center gap-3">
-                              <span className={cn('w-24 shrink-0', isDark ? 'text-zinc-500' : 'text-slate-500')}>Model ID</span>
-                              <button
-                                type="button"
-                                onClick={() => handleCopy(m.modelId, `exp-${m.id}`, `Copied ${m.modelId}`)}
-                                className={cn('inline-flex items-center gap-2 px-2.5 py-1 rounded-lg border font-mono text-xs cursor-pointer transition-colors', isDark ? 'bg-[#111115] border-white/10 text-zinc-200 hover:border-cyan-500/40' : 'bg-white border-slate-200 text-slate-800 hover:border-cyan-500')}
-                              >
-                                {m.modelId}
-                                {copiedId === `exp-${m.id}` ? <Check className="w-3 h-3 text-cyan-400" /> : <Copy className="w-3 h-3 text-zinc-400" />}
-                              </button>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <span className={cn('w-24 shrink-0', isDark ? 'text-zinc-500' : 'text-slate-500')}>Context</span>
-                              <span className={isDark ? 'text-zinc-200 font-medium' : 'text-slate-800 font-medium'}>{m.contextWindow} tokens</span>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <span className={cn('w-24 shrink-0', isDark ? 'text-zinc-500' : 'text-slate-500')}>API Format</span>
-                              <span className={isDark ? 'text-zinc-200' : 'text-slate-800'}>
-                                {m.openaiOnly ? 'OpenAI Chat Completions only' : 'OpenAI Chat Completions · Anthropic Messages'}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className={cn('rounded-2xl overflow-hidden border shadow-xl text-xs', isDark ? 'bg-[#0b0d12] border-white/[0.1]' : 'bg-white border-slate-200')}>
-                            <div className={cn('px-4 py-2.5 border-b flex items-center justify-between', isDark ? 'bg-[#12151e] border-white/[0.07]' : 'bg-slate-100 border-slate-200')}>
-                              <div className="flex items-center gap-2">
-                                <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]" />
-                                <span className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
-                                <span className="w-2.5 h-2.5 rounded-full bg-[#27c93f]" />
-                                <span className={cn('ml-1.5 font-mono text-[11px] font-semibold', isDark ? 'text-zinc-300' : 'text-slate-700')}>
-                                  Example: one chat request
-                                </span>
-                              </div>
-                              <span className={cn('font-mono text-[10px]', isDark ? 'text-zinc-500' : 'text-slate-500')}>
-                                {m.modelId}
-                              </span>
-                            </div>
-                            <div className="p-4 space-y-1.5">
-                              <div className="flex items-center justify-between gap-2">
-                                <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>New input</span>
-                                <span className="font-mono tabular-nums">
-                                  <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>1,000 × {formatRupiah(m.inputPricePer1M)}/1M </span>
-                                  <span className={isDark ? 'text-zinc-200 font-semibold ml-2' : 'text-slate-800 font-semibold ml-2'}>{fmtDec(sampleInputCost)}</span>
-                                </span>
-                              </div>
-                              <div className="flex items-center justify-between gap-2">
-                                <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>Cached input</span>
-                                <span className="font-mono tabular-nums">
-                                  <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>1,000 × {formatRupiah(m.cachePricePer1M)}/1M </span>
-                                  <span className={isDark ? 'text-zinc-200 font-semibold ml-2' : 'text-slate-800 font-semibold ml-2'}>{fmtDec(sampleCacheCost)}</span>
-                                </span>
-                              </div>
-                              <div className="flex items-center justify-between gap-2">
-                                <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>Output</span>
-                                <span className="font-mono tabular-nums">
-                                  <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>500 × {formatRupiah(m.outputPricePer1M)}/1M </span>
-                                  <span className={isDark ? 'text-zinc-200 font-semibold ml-2' : 'text-slate-800 font-semibold ml-2'}>{fmtDec(sampleOutputCost)}</span>
-                                </span>
-                              </div>
-                              <div className={cn('flex items-center justify-between pt-2 mt-2 border-t font-bold', isDark ? 'border-white/[0.08] text-white' : 'border-slate-200 text-slate-900')}>
-                                <span>Total</span>
-                                <span className="font-mono tabular-nums text-cyan-400">{fmtDec(sampleTotal)}</span>
-                              </div>
-                              <p className={cn('text-[11px] pt-1', isDark ? 'text-zinc-400' : 'text-slate-500')}>
-                                ≈ {requestsPer5000.toLocaleString('id-ID')} requests like this with Rp 5.000.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                  </Fragment>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* TAB 3: USAGE LOGS */}
-      {activeTab === 'usage' && (
-        <div className={cn('rounded-2xl border overflow-hidden', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}>
-          {usageLogs.length === 0 ? (
-            <div className="p-12 text-center space-y-2">
-              <Activity className="w-8 h-8 text-cyan-400 mx-auto opacity-60" />
-              <p className={cn('text-sm font-semibold', isDark ? 'text-white' : 'text-slate-900')}>No Usage Recorded Yet</p>
-              <p className={cn('text-xs', isDark ? 'text-zinc-400' : 'text-slate-500')}>
-                Prompts and answers are never stored — only token counts, charges, and latency appear here.
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+            <div className="overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              <table className="w-full min-w-[640px] text-left border-collapse">
                 <thead>
                   <tr className={cn('text-[11px] font-bold uppercase tracking-wider border-b', isDark ? 'text-zinc-400 border-white/[0.08] bg-[#0a0a0c]' : 'text-slate-500 border-slate-200 bg-slate-50')}>
-                    <th className="px-5 py-3.5">Model / Key</th>
-                    <th className="px-4 py-3.5 text-right">Input</th>
-                    <th className="px-4 py-3.5 text-right">Cache</th>
-                    <th className="px-4 py-3.5 text-right">Output</th>
-                    <th className="px-4 py-3.5 text-right">Charge</th>
-                    <th className="px-5 py-3.5 text-right">Time</th>
+                    <th className="px-5 py-3.5">Name</th>
+                    <th className="px-4 py-3.5">Key Prefix</th>
+                    <th className="px-4 py-3.5">Monthly Spend / Limit</th>
+                    <th className="px-4 py-3.5">Last Used</th>
+                    <th className="px-4 py-3.5">Status</th>
+                    <th className="px-5 py-3.5 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className={cn('divide-y text-xs', isDark ? 'divide-white/[0.06]' : 'divide-slate-100')}>
-                  {usageLogs.map((u) => (
-                    <tr key={u.id}>
-                      <td className="px-5 py-3">
-                        <div className={cn('font-mono font-bold', isDark ? 'text-white' : 'text-slate-900')}>{u.modelId}</div>
-                        <div className={cn('text-[11px]', isDark ? 'text-zinc-500' : 'text-slate-500')}>
-                          {u.apiKey?.name || 'Key'} • {u.latencyMs}ms
-                        </div>
+                <tbody className={cn('divide-y text-xs sm:text-sm', isDark ? 'divide-white/[0.06]' : 'divide-slate-100')}>
+                  {keys.map((k) => (
+                    <tr key={k.id} className={cn(isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-slate-50')}>
+                      <td className={cn('px-5 py-4 font-bold', isDark ? 'text-white' : 'text-slate-900')}>
+                        {k.name}
                       </td>
-                      <td className="px-4 py-3 text-right font-mono">{u.inputTokens.toLocaleString()}</td>
-                      <td className="px-4 py-3 text-right font-mono text-zinc-400">{u.cachedTokens.toLocaleString()}</td>
-                      <td className="px-4 py-3 text-right font-mono">{u.outputTokens.toLocaleString()}</td>
-                      <td className="px-4 py-3 text-right font-mono font-bold text-cyan-400">{formatRupiah(u.costRp)}</td>
-                      <td className="px-5 py-3 text-right text-zinc-400">{new Date(u.createdAt).toLocaleString('id-ID')}</td>
+                      <td className="px-4 py-4 font-mono text-xs text-cyan-400">
+                        {k.keyPrefix}••••••••
+                      </td>
+                      <td className="px-4 py-4 font-mono text-xs">
+                        <span className={isDark ? 'text-white font-bold' : 'text-slate-900 font-bold'}>
+                          {formatRupiah(k.monthlySpent)}
+                        </span>{' '}
+                        <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>
+                          / {k.monthlyLimit ? formatRupiah(k.monthlyLimit) : 'Unlimited'}
+                        </span>
+                      </td>
+                      <td className={cn('px-4 py-4 text-xs', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+                        {k.lastUsedAt ? new Date(k.lastUsedAt).toLocaleString('id-ID') : 'Never'}
+                      </td>
+                      <td className="px-4 py-4">
+                        <span
+                          className={cn(
+                            'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold border',
+                            k.isActive
+                              ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
+                              : 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'
+                          )}
+                        >
+                          <span className={cn('w-1.5 h-1.5 rounded-full', k.isActive ? 'bg-cyan-400' : 'bg-zinc-400')} />
+                          {k.isActive ? 'ACTIVE' : 'PAUSED'}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 text-right space-x-2">
+                        <button
+                          type="button"
+                          onClick={() => handleToggleKey(k)}
+                          title={k.isActive ? 'Pause Key' : 'Activate Key'}
+                          className={cn('p-2 rounded-lg border transition-colors cursor-pointer', isDark ? 'border-white/10 hover:bg-white/10 text-zinc-300' : 'border-slate-200 hover:bg-slate-100 text-slate-700')}
+                        >
+                          <Power className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDeletingKey(k)}
+                          title="Revoke Key"
+                          className="p-2 rounded-lg border border-red-500/20 bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -859,62 +1503,1658 @@ claude`,
         </div>
       )}
 
-      {/* TAB 4: QUICKSTART DOCS (macOS terminal style) */}
-      {activeTab === 'docs' && (
-        <div className={cn('rounded-2xl border p-5 sm:p-6 space-y-5', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}>
-          <div className="flex flex-wrap items-center justify-between gap-3">
+      {/* ==================================================================== */}
+      {/* TAB 3: PLAYGROUND (Interactive Chat with Any Model)                  */}
+      {/* ==================================================================== */}
+      {activeTab === 'playground' && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+          {/* Left Settings Column */}
+          <div className={cn('lg:col-span-4 rounded-2xl border p-5 space-y-4', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}>
             <div>
-              <h2 className={cn('text-base font-bold flex items-center gap-2', isDark ? 'text-white' : 'text-slate-900')}>
-                <Terminal className="w-4 h-4 text-cyan-400" />
-                SDK &amp; CLI Integration
-              </h2>
-              <p className={cn('text-xs mt-1', isDark ? 'text-zinc-400' : 'text-slate-600')}>
-                Works with OpenAI SDK, Anthropic SDK, cURL, and Claude Code. Failed upstream calls are never charged.
+              <label className={cn('text-xs font-bold uppercase tracking-wider block mb-1.5', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+                API Key
+              </label>
+              {keys.filter((k) => k.isActive).length === 0 ? (
+                <button
+                  type="button"
+                  onClick={() => setIsCreateOpen(true)}
+                  className="w-full py-2.5 px-3 rounded-xl border border-dashed border-cyan-500/40 text-cyan-400 text-xs font-bold cursor-pointer hover:bg-cyan-500/10"
+                >
+                  + Create an API Key first
+                </button>
+              ) : (
+                <Select
+                  value={pgKeyId}
+                  onChange={(val) => setPgKeyId(Number(val))}
+                  options={keys
+                    .filter((k) => k.isActive)
+                    .map((k) => ({
+                      value: k.id,
+                      label: `${k.name} · ${k.keyPrefix}...`,
+                    }))}
+                  placeholder="Select API Key..."
+                  className="py-2.5 text-xs font-mono"
+                />
+              )}
+            </div>
+
+            <div>
+              <label className={cn('text-xs font-bold uppercase tracking-wider block mb-1.5', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+                Model
+              </label>
+              <Select
+                value={pgModelId}
+                onChange={(val) => setPgModelId(String(val))}
+                options={models.map((m) => ({
+                  value: m.modelId,
+                  label: `${m.name} (${m.modelId}) - ${formatRupiah(m.inputPricePer1M)}/1M`,
+                }))}
+                placeholder="Select Model..."
+                className="py-2.5 text-xs font-semibold"
+              />
+            </div>
+
+            <div>
+              <label className={cn('text-xs font-bold uppercase tracking-wider block mb-1.5', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+                Wire Format
+              </label>
+              <div className={cn('grid grid-cols-2 gap-1.5 p-1 rounded-xl border', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-slate-100 border-slate-200')}>
+                {(['openai', 'anthropic'] as const).map((fmt) => (
+                  <button
+                    key={fmt}
+                    type="button"
+                    onClick={() => setPgFormat(fmt)}
+                    className={cn(
+                      'py-2 rounded-lg text-xs font-bold capitalize transition-all cursor-pointer',
+                      pgFormat === fmt
+                        ? 'bg-cyan-400 text-slate-950'
+                        : isDark
+                        ? 'text-zinc-400 hover:text-white'
+                        : 'text-slate-600'
+                    )}
+                  >
+                    {fmt === 'openai' ? 'OpenAI' : 'Anthropic'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className={cn('text-xs font-bold uppercase tracking-wider block mb-1.5', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+                System Prompt
+              </label>
+              <textarea
+                rows={3}
+                value={pgSystemPrompt}
+                onChange={(e) => setPgSystemPrompt(e.target.value)}
+                placeholder="You are a helpful AI assistant..."
+                className={cn('w-full px-3.5 py-2.5 rounded-xl text-xs border outline-none focus:border-cyan-500 resize-none', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setPgShowAdvanced(!pgShowAdvanced)}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-400 cursor-pointer"
+            >
+              <Sliders className="w-3.5 h-3.5" />
+              <span>Advanced parameters</span>
+              {pgShowAdvanced ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            </button>
+
+            {pgShowAdvanced && (
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <div>
+                  <label className="text-[11px] text-zinc-400 block mb-1">Max Tokens</label>
+                  <input
+                    type="number"
+                    min={64}
+                    max={16384}
+                    value={pgMaxTokens}
+                    onChange={(e) => setPgMaxTokens(Number(e.target.value) || 2048)}
+                    className={cn('w-full px-3 py-2 rounded-xl text-xs font-mono border outline-none', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] text-zinc-400 block mb-1">Temperature</label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={2}
+                    step={0.1}
+                    value={pgTemp}
+                    onChange={(e) => setPgTemp(Number(e.target.value))}
+                    className={cn('w-full px-3 py-2 rounded-xl text-xs font-mono border outline-none', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className={cn('pt-3 border-t text-[11px] space-y-1.5', isDark ? 'border-white/[0.06] text-zinc-400' : 'border-slate-100 text-slate-500')}>
+              <p>
+                Every message is a real, billed request from your <strong>AI Balance ({formatRupiah(aiBalance)})</strong>.
+              </p>
+              <p>
+                Chats are not saved on Masdika. Only token counts and charges are recorded in Usage.
               </p>
             </div>
-            <div className={cn('inline-flex items-center gap-1 p-1 rounded-xl border max-w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-slate-100 border-slate-200')}>
-              {([
-                { id: 'curl', label: 'cURL' },
-                { id: 'node', label: 'OpenAI Node' },
-                { id: 'python', label: 'OpenAI Python' },
-                { id: 'anthropic', label: 'Anthropic SDK' },
-                { id: 'claudecode', label: 'Claude Code' },
-              ] as const).map((l) => (
+          </div>
+
+          {/* Right macOS Chat Window */}
+          <div className={cn('lg:col-span-8 rounded-2xl overflow-hidden border flex flex-col h-[580px] shadow-xl', isDark ? 'bg-[#0b0d12] border-white/[0.1]' : 'bg-white border-slate-200')}>
+            <div className={cn('px-4 py-3 border-b flex items-center justify-between', isDark ? 'bg-[#12151e] border-white/[0.07]' : 'bg-slate-100 border-slate-200')}>
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-[#ff5f56]" />
+                <span className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
+                <span className="w-3 h-3 rounded-full bg-[#27c93f]" />
+                <span className={cn('ml-2 text-xs font-bold', isDark ? 'text-white' : 'text-slate-900')}>
+                  {models.find((m) => m.modelId === pgModelId)?.name || pgModelId}
+                </span>
+                <span className="text-[11px] font-mono text-cyan-400">· {pgFormat}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPgMessages([])}
+                className="text-xs font-semibold text-zinc-400 hover:text-cyan-400 flex items-center gap-1 cursor-pointer"
+              >
+                <RefreshCw className="w-3 h-3" />
+                New chat
+              </button>
+            </div>
+
+            {/* Messages Area */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
+              {pgMessages.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-center space-y-2 opacity-70">
+                  <MessageSquare className="w-8 h-8 text-cyan-400" />
+                  <p className={cn('text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>
+                    Test any model in real time
+                  </p>
+                  <p className="text-xs text-zinc-400 max-w-sm">
+                    Send a message below to test responses, reasoning blocks, latency, and exact token charges.
+                  </p>
+                </div>
+              ) : (
+                pgMessages.map((m, idx) => (
+                  <div
+                    key={idx}
+                    className={cn('flex flex-col', m.role === 'user' ? 'items-end' : 'items-start')}
+                  >
+                    <div
+                      className={cn(
+                        'max-w-[85%] rounded-2xl px-4 py-3 text-xs sm:text-sm whitespace-pre-wrap leading-relaxed',
+                        m.role === 'user'
+                          ? 'bg-cyan-400 text-slate-950 font-semibold'
+                          : m.isError
+                          ? 'bg-red-500/10 border border-red-500/30 text-red-300'
+                          : isDark
+                          ? 'bg-[#141824] border border-white/[0.08] text-zinc-100'
+                          : 'bg-slate-100 border border-slate-200 text-slate-900'
+                      )}
+                    >
+                      {m.images && m.images.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          {m.images.map((imgSrc, iIdx) => (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              key={iIdx}
+                              src={imgSrc}
+                              alt="Attachment"
+                              className="w-20 h-20 object-cover rounded-lg border border-black/20"
+                            />
+                          ))}
+                        </div>
+                      )}
+                      {m.reasoning && (
+                        <details className="mb-2.5 pb-2 border-b border-white/10 text-xs text-zinc-400">
+                          <summary className="cursor-pointer font-mono text-cyan-400">
+                            Reasoning / Thinking
+                          </summary>
+                          <p className="mt-1.5 whitespace-pre-wrap font-mono text-[11px]">{m.reasoning}</p>
+                        </details>
+                      )}
+                      {m.content}
+                    </div>
+                    {m.role === 'assistant' && (m.requestId || m.latencyMs) && (
+                      <div className="mt-1 text-[10px] font-mono text-zinc-500 flex items-center gap-2">
+                        {m.latencyMs && <span>{(m.latencyMs / 1000).toFixed(1)}s</span>}
+                        {m.tokens !== undefined && <span>· {m.tokens} tokens</span>}
+                        {m.costRp !== undefined && <span className="text-cyan-400">· {formatRupiah(m.costRp)}</span>}
+                        {m.requestId && <span>· {m.requestId}</span>}
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+              {pgSending && (
+                <div className="text-xs font-mono text-cyan-400 animate-pulse">
+                  Waiting for model response...
+                </div>
+              )}
+            </div>
+
+            {/* Attached Image Thumbnails Preview */}
+            {pgImages.length > 0 && (
+              <div className={cn('px-3 pt-2.5 flex items-center gap-2 border-t', isDark ? 'bg-[#12151e] border-white/[0.07]' : 'bg-slate-50 border-slate-200')}>
+                {pgImages.map((src, idx) => (
+                  <div key={idx} className="relative group">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={src} alt="Preview" className="w-12 h-12 rounded-lg object-cover border border-cyan-500/40" />
+                    <button
+                      type="button"
+                      onClick={() => setPgImages((prev) => prev.filter((_, i) => i !== idx))}
+                      className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-red-500 text-white flex items-center justify-center text-[10px] cursor-pointer"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+                <span className="text-[11px] text-zinc-400 ml-1">
+                  Sent directly to vision model in memory (not stored on Masdika disk)
+                </span>
+              </div>
+            )}
+
+            {/* Input Bar with Image Upload + Shift+Enter Textarea */}
+            <form
+              onSubmit={handleSendPlayground}
+              className={cn('p-3 border-t flex items-end gap-2', isDark ? 'bg-[#12151e] border-white/[0.07]' : 'bg-slate-50 border-slate-200')}
+            >
+              <label
+                title="Attach image for vision models"
+                className={cn(
+                  'p-2.5 rounded-xl border transition-colors cursor-pointer shrink-0',
+                  isDark
+                    ? 'bg-[#0a0a0c] border-white/[0.1] hover:border-cyan-500/50 text-cyan-400'
+                    : 'bg-white border-slate-200 hover:border-cyan-500 text-cyan-700'
+                )}
+              >
+                <ImagePlus className="w-4 h-4" />
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handlePlaygroundImageSelect}
+                  className="hidden"
+                />
+              </label>
+              <textarea
+                rows={1}
+                value={pgInput}
+                onChange={(e) => setPgInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendPlayground();
+                  }
+                }}
+                placeholder="Message... (Enter to send, Shift+Enter for new line)"
+                className={cn('flex-1 px-4 py-2.5 rounded-xl text-xs sm:text-sm border outline-none focus:border-cyan-500 resize-none max-h-32', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-white border-slate-200 text-slate-900')}
+              />
+              <button
+                type="submit"
+                disabled={pgSending || (!pgInput.trim() && pgImages.length === 0)}
+                className="p-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold disabled:opacity-50 cursor-pointer shrink-0"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ==================================================================== */}
+      {/* TAB 4: IMAGE GENERATION                                              */}
+      {/* ==================================================================== */}
+      {activeTab === 'images' && (
+        <div className="space-y-6">
+          <form
+            onSubmit={handleGenerateImage}
+            className={cn('rounded-2xl border p-5 sm:p-6 space-y-4', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}
+          >
+            <textarea
+              rows={3}
+              value={imgPrompt}
+              onChange={(e) => setImgPrompt(e.target.value)}
+              placeholder="Describe the image you want..."
+              className={cn('w-full px-4 py-3 rounded-xl text-sm border outline-none focus:border-cyan-500 resize-none', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
+            />
+
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-2 flex-1">
+                {/* Model Picker */}
+                <div className="w-full sm:w-64">
+                  <Select
+                    value={imgModelId}
+                    onChange={(val) => {
+                      const next = imageModels.find((m) => m.modelId === String(val));
+                      setImgModelId(String(val));
+                      if (next && next.sizes[0]) setImgSize(next.sizes[0]);
+                    }}
+                    options={imageModels.map((im) => ({
+                      value: im.modelId,
+                      label: (
+                        <span className="inline-flex items-center gap-2 whitespace-nowrap">
+                          <Sparkles className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                          <span className="truncate">{im.name}</span>
+                          <span className="text-[11px] font-mono text-zinc-400">({formatRupiah(im.priceRp)})</span>
+                        </span>
+                      ),
+                    }))}
+                    className="h-10 py-0 text-xs font-bold"
+                  />
+                </div>
+
+                {/* Size Picker (uniform h-10 trigger; rich 2-line items inside dropdown) */}
+                <div className="w-full sm:w-64">
+                  <Select
+                    value={`${imgModelId}::${imgSize}`}
+                    onChange={(val) => {
+                      const [mId, sz] = String(val).split('::');
+                      if (mId && sz) {
+                        setImgModelId(mId);
+                        setImgSize(sz);
+                      }
+                    }}
+                    options={(() => {
+                      const getSizeInfo = (sz: string) => {
+                        const [w, h] = sz.split('x').map(Number);
+                        const orient = w > h ? 'Landscape' : h > w ? 'Portrait' : 'Square';
+                        const boxCls =
+                          w > h ? 'w-3.5 h-2.5' : h > w ? 'w-2.5 h-3.5' : 'w-3 h-3';
+                        return { orient, display: sz.replace('x', ' × '), boxCls };
+                      };
+                      const cur = currentImageModel;
+                      const opts: { value: string; label: React.ReactNode; disabled?: boolean }[] = [];
+                      if (cur) {
+                        opts.push({
+                          value: `__hdr_${cur.modelId}`,
+                          disabled: true,
+                          label: (
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                              {cur.name}
+                            </span>
+                          ),
+                        });
+                        for (const sz of cur.sizes) {
+                          const info = getSizeInfo(sz);
+                          const szPrice =
+                            cur.sizePrices?.[sz] ??
+                            (cur.modelId === 'seedream-image-v5.0-pro' && sz === '2048x2048'
+                              ? cur.priceRp * 2
+                              : cur.priceRp);
+                          opts.push({
+                            value: `${cur.modelId}::${sz}`,
+                            label: (
+                              <span className="flex items-center justify-between gap-2 w-full whitespace-nowrap">
+                                <span className="inline-flex items-center gap-2 min-w-0">
+                                  <span className={cn('border border-zinc-400 rounded-[2px] shrink-0 inline-block', info.boxCls)} />
+                                  <span className="text-xs font-bold truncate">{info.orient}</span>
+                                  <span className="text-[11px] font-mono text-zinc-400">{info.display}</span>
+                                </span>
+                                <span className="text-xs font-mono font-bold text-cyan-400 shrink-0">
+                                  {formatRupiah(szPrice)}
+                                </span>
+                              </span>
+                            ),
+                          });
+                        }
+                      }
+
+                      const otherModels = imageModels.filter((m) => m.modelId !== cur?.modelId);
+                      if (otherModels.length > 0) {
+                        opts.push({
+                          value: '__hdr_other',
+                          disabled: true,
+                          label: (
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                              Other Models
+                            </span>
+                          ),
+                        });
+                        for (const om of otherModels) {
+                          for (const sz of om.sizes) {
+                            const info = getSizeInfo(sz);
+                            const szPrice =
+                              om.sizePrices?.[sz] ??
+                              (om.modelId === 'seedream-image-v5.0-pro' && sz === '2048x2048'
+                                ? om.priceRp * 2
+                                : om.priceRp);
+                            opts.push({
+                              value: `${om.modelId}::${sz}`,
+                              label: (
+                                <span className="flex items-center justify-between gap-2 w-full whitespace-nowrap">
+                                  <span className="inline-flex items-center gap-2 min-w-0">
+                                    <span className={cn('border border-zinc-500 rounded-[2px] shrink-0 inline-block', info.boxCls)} />
+                                    <span className="text-xs font-semibold truncate">{info.orient}</span>
+                                    <span className="text-[10px] font-mono text-zinc-500">{info.display}</span>
+                                  </span>
+                                  <span className="text-[11px] text-zinc-400 shrink-0 font-mono">
+                                    {om.name} - <strong className="text-white">{formatRupiah(szPrice)}</strong>
+                                  </span>
+                                </span>
+                              ),
+                            });
+                          }
+                        }
+                      }
+                      return opts;
+                    })()}
+                    className="h-10 py-0 text-xs font-mono"
+                  />
+                </div>
+
+                {/* Reference Image Toggle */}
+                {(currentImageModel?.maxRefImages ?? 0) > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setImgShowRef(!imgShowRef)}
+                    className={cn(
+                      'h-10 px-3.5 rounded-xl text-xs font-semibold border cursor-pointer inline-flex items-center gap-1.5 whitespace-nowrap',
+                      imgShowRef
+                        ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-400'
+                        : isDark
+                        ? 'bg-[#0a0a0c] border-white/[0.1] text-zinc-300'
+                        : 'bg-slate-50 border-slate-200 text-slate-700'
+                    )}
+                  >
+                    <ImageIcon className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>Reference</span>
+                  </button>
+                )}
+
+                {/* Key Selector (no emoji, uses Lucide Key icon) */}
+                {keys.filter((k) => k.isActive).length > 0 && (
+                  <div className="w-full sm:w-48">
+                    <Select
+                      value={imgKeyId}
+                      onChange={(val) => setImgKeyId(Number(val))}
+                      options={keys
+                        .filter((k) => k.isActive)
+                        .map((k) => ({
+                          value: k.id,
+                          label: (
+                            <span className="inline-flex items-center gap-2 whitespace-nowrap">
+                              <Key className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                              <span className="truncate">{k.name}</span>
+                            </span>
+                          ),
+                        }))}
+                      className="h-10 py-0 text-xs font-mono"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-mono font-bold text-cyan-400">
+                  {formatRupiah(currentImageModel?.priceRp || 320)}
+                </span>
                 <button
-                  key={l.id}
+                  type="submit"
+                  disabled={imgGenerating || !imgPrompt.trim()}
+                  className="px-4 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>{imgGenerating ? 'Generating...' : 'Generate'}</span>
+                </button>
+              </div>
+            </div>
+
+            {imgShowRef && (
+              <input
+                type="url"
+                value={imgRefUrl}
+                onChange={(e) => setImgRefUrl(e.target.value)}
+                placeholder="https://example.com/reference-image.jpg"
+                className={cn('w-full px-3.5 py-2 rounded-xl text-xs font-mono border outline-none focus:border-cyan-500', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
+              />
+            )}
+
+            <p className="text-[11px] text-center text-zinc-500">
+              Images are kept for 7 days, then deleted. Download the ones you want to keep. Failed images are free.
+            </p>
+          </form>
+
+          {/* Generated Images Gallery or Sample Prompts */}
+          <div className={cn('rounded-2xl border p-6', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}>
+            <h3 className={cn('text-xs font-bold uppercase tracking-wider mb-4', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+              Your images · last 7 days
+            </h3>
+
+            {generatedImages.length === 0 ? (
+              <div className="py-10 text-center space-y-4">
+                <div className="w-11 h-11 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center mx-auto">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div className="space-y-1">
+                  <p className={cn('text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>
+                    What do you want to create?
+                  </p>
+                  <p className="text-xs text-zinc-500">
+                    Images made in this session appear here. Try one of these prompts:
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center justify-center gap-2 max-w-2xl mx-auto">
+                  {SAMPLE_IMAGE_PROMPTS.map((sp) => (
+                    <button
+                      key={sp}
+                      type="button"
+                      onClick={() => setImgPrompt(sp)}
+                      className={cn(
+                        'px-3.5 py-1.5 rounded-full text-xs border transition-colors cursor-pointer',
+                        isDark
+                          ? 'bg-[#0a0a0c] border-white/[0.08] text-zinc-300 hover:border-cyan-500/40 hover:text-cyan-400'
+                          : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-cyan-500'
+                      )}
+                    >
+                      {sp}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {generatedImages.map((img) => (
+                  <div
+                    key={img.id}
+                    className={cn('rounded-xl border overflow-hidden flex flex-col', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-slate-50 border-slate-200')}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={img.url} alt={img.prompt} className="w-full aspect-square object-cover" />
+                    <div className="p-3 space-y-2">
+                      <p className={cn('text-xs line-clamp-2', isDark ? 'text-zinc-200' : 'text-slate-800')}>
+                        {img.prompt}
+                      </p>
+                      <div className="flex items-center justify-between text-[11px] font-mono text-zinc-500">
+                        <span>{img.modelId} · {formatRupiah(img.costRp)}</span>
+                        <a
+                          href={img.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-cyan-400 hover:underline inline-flex items-center gap-1"
+                        >
+                          <Download className="w-3 h-3" /> Save
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ==================================================================== */}
+      {/* TAB 5: USAGE (Filters, 6 Metric Cards, This Month & Recent Requests) */}
+      {/* ==================================================================== */}
+      {activeTab === 'usage' && (
+        <div className="space-y-6">
+          {/* Filter Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+              <div className="w-full sm:w-56">
+                <Select
+                  value={usageKeyFilter}
+                  onChange={(val) => setUsageKeyFilter(String(val))}
+                  options={[
+                    { value: 'ALL', label: 'All keys in account' },
+                    ...keys.map((k) => ({
+                      value: String(k.id),
+                      label: `${k.name} (${k.keyPrefix}...)`,
+                    })),
+                  ]}
+                  className="py-2 text-xs font-semibold"
+                />
+              </div>
+
+              <div className="w-full sm:w-56">
+                <Select
+                  value={usageModelFilter}
+                  onChange={(val) => setUsageModelFilter(String(val))}
+                  options={[
+                    { value: 'ALL', label: 'All models' },
+                    ...models.map((m) => ({
+                      value: m.modelId,
+                      label: m.name,
+                    })),
+                  ]}
+                  className="py-2 text-xs font-semibold"
+                />
+              </div>
+            </div>
+
+            <div className={cn('inline-flex items-center gap-1 p-1 rounded-xl border', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200')}>
+              {([
+                { id: '24h', label: '24 hours' },
+                { id: '7d', label: '7 days' },
+                { id: '30d', label: '30 days' },
+              ] as const).map((r) => (
+                <button
+                  key={r.id}
                   type="button"
-                  onClick={() => setDocLang(l.id)}
+                  onClick={() => setUsageRange(r.id)}
                   className={cn(
-                    'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap cursor-pointer',
-                    docLang === l.id ? 'bg-cyan-400 text-slate-950' : isDark ? 'text-zinc-400 hover:text-white' : 'text-slate-600'
+                    'px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer',
+                    usageRange === r.id
+                      ? 'bg-cyan-400 text-slate-950'
+                      : isDark
+                      ? 'text-zinc-400 hover:text-white'
+                      : 'text-slate-600'
                   )}
                 >
-                  {l.label}
+                  {r.label}
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="rounded-2xl overflow-hidden border border-white/[0.1] bg-[#0b0d12] shadow-xl">
-            <div className="px-4 py-2.5 bg-[#12151e] border-b border-white/[0.07] flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-[#ff5f56]" />
-                <span className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
-                <span className="w-3 h-3 rounded-full bg-[#27c93f]" />
-                <span className="ml-2 text-xs font-mono text-zinc-400">{codeSnippets[docLang].title}</span>
+          {/* 6 Metric Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
+            <div className={cn('rounded-2xl border p-4', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200')}>
+              <span className="text-[11px] font-bold text-zinc-400 block mb-1">Requests</span>
+              <span className={cn('text-xl font-black font-mono', isDark ? 'text-white' : 'text-slate-900')}>
+                {usageMetrics.reqCount.toLocaleString('id-ID')}
+              </span>
+            </div>
+            <div className={cn('rounded-2xl border p-4', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200')}>
+              <span className="text-[11px] font-bold text-zinc-400 block mb-1">Spend</span>
+              <span className="text-xl font-black font-mono text-cyan-400">
+                {formatRupiah(usageMetrics.spend)}
+              </span>
+            </div>
+            <div className={cn('rounded-2xl border p-4', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200')}>
+              <span className="text-[11px] font-bold text-zinc-400 block mb-1">Success rate</span>
+              <span className={cn('text-xl font-black font-mono', isDark ? 'text-white' : 'text-slate-900')}>
+                {usageMetrics.successPct !== null ? `${usageMetrics.successPct}%` : '-'}
+              </span>
+              <span className="text-[10px] text-zinc-500 block mt-0.5">
+                {usageMetrics.errCount} errors
+              </span>
+            </div>
+            <div className={cn('rounded-2xl border p-4', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200')}>
+              <span className="text-[11px] font-bold text-zinc-400 block mb-1">Tokens</span>
+              <span className={cn('text-xl font-black font-mono', isDark ? 'text-white' : 'text-slate-900')}>
+                {usageMetrics.totalTok.toLocaleString('id-ID')}
+              </span>
+              <span className="text-[10px] text-zinc-500 block mt-0.5">
+                {usageMetrics.inTok.toLocaleString('id-ID')} in · {usageMetrics.outTok.toLocaleString('id-ID')} out
+              </span>
+            </div>
+            <div className={cn('rounded-2xl border p-4', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200')}>
+              <span className="text-[11px] font-bold text-zinc-400 block mb-1">Cache hit rate</span>
+              <span className={cn('text-xl font-black font-mono', isDark ? 'text-white' : 'text-slate-900')}>
+                {usageMetrics.cacheHitPct !== null ? `${usageMetrics.cacheHitPct}%` : '-'}
+              </span>
+              <span className="text-[10px] text-zinc-500 block mt-0.5">
+                share of input from cache
+              </span>
+            </div>
+            <div className={cn('rounded-2xl border p-4', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200')}>
+              <span className="text-[11px] font-bold text-zinc-400 block mb-1">Latency</span>
+              <span className={cn('text-xl font-black font-mono', isDark ? 'text-white' : 'text-slate-900')}>
+                {usageMetrics.avgLat} ms
+              </span>
+              <span className="text-[10px] text-zinc-500 block mt-0.5">avg response time</span>
+            </div>
+          </div>
+
+          {/* This Month Breakdown by Model */}
+          <div className={cn('rounded-2xl border overflow-hidden', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200')}>
+            <div className="px-5 py-3.5 border-b border-white/[0.06] flex items-center justify-between">
+              <h3 className={cn('text-xs sm:text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>
+                This month by model
+              </h3>
+              <span className="text-xs font-mono text-cyan-400 font-bold">
+                {formatRupiah(stats.spentThisMonthRp)}
+              </span>
+            </div>
+            {thisMonthByModel.length === 0 ? (
+              <div className="p-6 text-xs text-zinc-500">No requests this month yet.</div>
+            ) : (
+              <div className="overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                <table className="w-full min-w-[540px] text-left text-xs border-collapse">
+                  <thead>
+                    <tr className={cn('border-b text-[10px] uppercase', isDark ? 'border-white/[0.06] text-zinc-400 bg-[#0a0a0c]' : 'border-slate-100 text-slate-500 bg-slate-50')}>
+                      <th className="px-5 py-2.5">Model</th>
+                      <th className="px-4 py-2.5 text-right">Requests</th>
+                      <th className="px-4 py-2.5 text-right">Input / Cache / Output</th>
+                      <th className="px-5 py-2.5 text-right">Charge</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/[0.05] font-mono">
+                    {thisMonthByModel.map((row) => (
+                      <tr key={row.modelId}>
+                        <td className="px-5 py-3 text-cyan-400 font-bold">{row.modelId}</td>
+                        <td className="px-4 py-3 text-right">{row.requests.toLocaleString('id-ID')}</td>
+                        <td className="px-4 py-3 text-right text-zinc-400">
+                          {row.inputTokens.toLocaleString('id-ID')} / {row.cachedTokens.toLocaleString('id-ID')} / {row.outputTokens.toLocaleString('id-ID')}
+                        </td>
+                        <td className="px-5 py-3 text-right font-bold text-white">{formatRupiah(row.costRp)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* Recent Requests Table */}
+          <div className={cn('rounded-2xl border overflow-hidden', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}>
+            <div className="px-5 py-3.5 border-b border-white/[0.06]">
+              <h3 className={cn('text-xs sm:text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>
+                Recent requests
+              </h3>
+            </div>
+            {filteredUsageLogs.length === 0 ? (
+              <div className="p-8 text-xs text-zinc-500">
+                No requests recorded in this period yet. Prompts and answers are never stored - only token counts, charges, and latency.
+              </div>
+            ) : (
+              <div className="overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                <table className="w-full min-w-[660px] text-left border-collapse">
+                  <thead>
+                    <tr className={cn('text-[11px] font-bold uppercase tracking-wider border-b', isDark ? 'text-zinc-400 border-white/[0.08] bg-[#0a0a0c]' : 'text-slate-500 border-slate-200 bg-slate-50')}>
+                      <th className="px-5 py-3.5">Request ID</th>
+                      <th className="px-4 py-3.5">Model &amp; Key</th>
+                      <th className="px-4 py-3.5 text-right">Input</th>
+                      <th className="px-4 py-3.5 text-right">Cached</th>
+                      <th className="px-4 py-3.5 text-right">Output</th>
+                      <th className="px-4 py-3.5 text-right">Charge</th>
+                      <th className="px-5 py-3.5 text-right">Time</th>
+                    </tr>
+                  </thead>
+                  <tbody className={cn('divide-y text-xs', isDark ? 'divide-white/[0.06]' : 'divide-slate-100')}>
+                    {filteredUsageLogs.map((u) => (
+                      <tr key={u.id} className={cn(isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-slate-50')}>
+                        <td className="px-5 py-3 font-mono text-zinc-400">{u.requestId}</td>
+                        <td className="px-4 py-3">
+                          <div className={cn('font-bold font-mono', isDark ? 'text-white' : 'text-slate-900')}>{u.modelId}</div>
+                          <div className={cn('text-[11px]', isDark ? 'text-zinc-500' : 'text-slate-500')}>
+                            {u.apiKey?.name || 'Key'} • {u.latencyMs}ms
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-right font-mono">{u.inputTokens.toLocaleString()}</td>
+                        <td className="px-4 py-3 text-right font-mono text-zinc-400">{u.cachedTokens.toLocaleString()}</td>
+                        <td className="px-4 py-3 text-right font-mono">{u.outputTokens.toLocaleString()}</td>
+                        <td className="px-4 py-3 text-right font-mono font-bold text-cyan-400">{formatRupiah(u.costRp)}</td>
+                        <td className="px-5 py-3 text-right text-zinc-400">{new Date(u.createdAt).toLocaleString('id-ID')}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ==================================================================== */}
+      {/* TAB 6: MODELS & PRICING (Chat Models + Image Models)                 */}
+      {/* ==================================================================== */}
+      {activeTab === 'models' && (
+        <div className="space-y-5">
+          {/* Sub-Tabs: Chat Models vs Image Models */}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className={cn('inline-flex items-center gap-1.5 p-1.5 rounded-xl border', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200')}>
+              <button
+                type="button"
+                onClick={() => setModelTypeTab('chat')}
+                className={cn(
+                  'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer',
+                  modelTypeTab === 'chat'
+                    ? 'bg-cyan-400 text-slate-950 shadow-xs'
+                    : isDark
+                    ? 'text-zinc-400 hover:text-white'
+                    : 'text-slate-600 hover:text-slate-900'
+                )}
+              >
+                <MessageSquare className="w-3.5 h-3.5" />
+                <span>Chat models</span>
+                <span className={cn('px-1.5 py-0.5 rounded-full text-[10px] font-mono', modelTypeTab === 'chat' ? 'bg-slate-950/15 text-slate-950' : isDark ? 'bg-white/[0.08] text-zinc-300' : 'bg-slate-200 text-slate-700')}>
+                  {models.length}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setModelTypeTab('image')}
+                className={cn(
+                  'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer',
+                  modelTypeTab === 'image'
+                    ? 'bg-cyan-400 text-slate-950 shadow-xs'
+                    : isDark
+                    ? 'text-zinc-400 hover:text-white'
+                    : 'text-slate-600 hover:text-slate-900'
+                )}
+              >
+                <ImageIcon className="w-3.5 h-3.5" />
+                <span>Image models</span>
+                <span className={cn('px-1.5 py-0.5 rounded-full text-[10px] font-mono', modelTypeTab === 'image' ? 'bg-slate-950/15 text-slate-950' : isDark ? 'bg-white/[0.08] text-zinc-300' : 'bg-slate-200 text-slate-700')}>
+                  {imageModels.length}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {modelTypeTab === 'chat' && (
+          <div className={cn('rounded-2xl border overflow-hidden', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}>
+            <div className={cn('p-4 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3', isDark ? 'border-white/[0.08]' : 'border-slate-200')}>
+              <div className="relative flex-1 max-w-md">
+                <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={modelSearch}
+                  onChange={(e) => setModelSearch(e.target.value)}
+                  placeholder="Search model name, ID, or provider..."
+                  className={cn('w-full pl-10 pr-4 py-2 rounded-xl text-xs sm:text-sm border outline-none transition-colors', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white focus:border-cyan-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-cyan-500')}
+                />
+              </div>
+              <div className="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                {providers.map((prov) => (
+                  <button
+                    key={prov}
+                    type="button"
+                    onClick={() => setProviderFilter(prov)}
+                    className={cn(
+                      'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap cursor-pointer',
+                      providerFilter === prov
+                        ? 'bg-cyan-400 text-slate-950 font-bold'
+                        : isDark
+                        ? 'bg-white/5 text-zinc-400 hover:text-white'
+                        : 'bg-slate-100 text-slate-600 hover:text-slate-900'
+                    )}
+                  >
+                    {prov === 'ON_PROMO' ? 'On Promo' : prov}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              <table className="w-full min-w-[640px] text-left border-collapse">
+                <thead>
+                  <tr className={cn('text-[11px] font-bold uppercase tracking-wider border-b', isDark ? 'text-zinc-400 border-white/[0.08] bg-[#0a0a0c]' : 'text-slate-500 border-slate-200 bg-slate-50')}>
+                    <th className="px-5 py-3.5">Model</th>
+                    <th className="px-4 py-3.5">Context</th>
+                    <th className="px-4 py-3.5 text-right">Input / 1M</th>
+                    <th className="px-4 py-3.5 text-right">Cache / 1M</th>
+                    <th className="px-5 py-3.5 text-right">Output / 1M</th>
+                    <th className="w-10 px-3 py-3.5"></th>
+                  </tr>
+                </thead>
+                <tbody className={cn('divide-y text-xs sm:text-sm', isDark ? 'divide-white/[0.06]' : 'divide-slate-100')}>
+                  {filteredModels.map((m) => {
+                    const discountPct =
+                      m.originalOutputPricePer1M && m.originalOutputPricePer1M > m.outputPricePer1M
+                        ? Math.round(((m.originalOutputPricePer1M - m.outputPricePer1M) / m.originalOutputPricePer1M) * 100)
+                        : m.originalInputPricePer1M && m.originalInputPricePer1M > m.inputPricePer1M
+                        ? Math.round(((m.originalInputPricePer1M - m.inputPricePer1M) / m.originalInputPricePer1M) * 100)
+                        : 0;
+                    const badgeText = m.discountBadge || (discountPct > 0 ? `-${discountPct}%` : null);
+                    const isExpanded = expandedModelId === m.id;
+
+                    const sampleInputCost = (1000 * m.inputPricePer1M) / 1_000_000;
+                    const sampleCacheCost = (1000 * m.cachePricePer1M) / 1_000_000;
+                    const sampleOutputCost = (500 * m.outputPricePer1M) / 1_000_000;
+                    const sampleTotal = sampleInputCost + sampleCacheCost + sampleOutputCost;
+                    const requestsPer5000 = sampleTotal > 0 ? Math.floor(5000 / sampleTotal) : 0;
+                    const fmtDec = (val: number) => `Rp ${val.toFixed(2).replace('.', ',')}`;
+
+                    return (
+                      <Fragment key={m.id}>
+                        <tr
+                          onClick={() => setExpandedModelId(isExpanded ? null : m.id)}
+                          className={cn(
+                            'cursor-pointer transition-colors',
+                            isExpanded
+                              ? isDark
+                                ? 'bg-cyan-500/[0.05]'
+                                : 'bg-cyan-50/70'
+                              : isDark
+                              ? 'hover:bg-white/[0.02]'
+                              : 'hover:bg-slate-50'
+                          )}
+                        >
+                          <td className="px-5 py-3.5">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className={cn('font-bold', isDark ? 'text-white' : 'text-slate-900')}>{m.name}</span>
+                              <span className={cn('px-2 py-0.5 rounded-full text-[10px] font-semibold border', isDark ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' : 'bg-cyan-50 text-cyan-700 border-cyan-200')}>
+                                {m.provider}
+                              </span>
+                              {badgeText && (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-400/15 text-cyan-400 border border-cyan-400/30">
+                                  {badgeText}
+                                </span>
+                              )}
+                              {m.hasPeakPricing && (
+                                <span className={cn('px-2 py-0.5 rounded-full text-[10px] font-semibold border', isDark ? 'bg-zinc-800 text-zinc-300 border-white/10' : 'bg-slate-100 text-slate-600 border-slate-200')}>
+                                  {isPeakNow ? 'Peak (now)' : 'Off-Peak Price'}
+                                </span>
+                              )}
+                            </div>
+                            <div className={cn('font-mono text-xs mt-0.5 flex items-center gap-2', isDark ? 'text-zinc-500' : 'text-slate-500')}>
+                              <span>{m.modelId}</span>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCopy(m.modelId, `model-${m.id}`, `Copied ${m.modelId}`);
+                                }}
+                                className="hover:text-cyan-400 transition-colors cursor-pointer"
+                              >
+                                {copiedId === `model-${m.id}` ? <Check className="w-3 h-3 text-cyan-400" /> : <Copy className="w-3 h-3" />}
+                              </button>
+                            </div>
+                          </td>
+                          <td className={cn('px-4 py-3.5 font-mono text-xs', isDark ? 'text-zinc-300' : 'text-slate-700')}>
+                            {m.contextWindow}
+                          </td>
+                          <td className={cn('px-4 py-3.5 font-mono font-bold text-right', isDark ? 'text-cyan-400' : 'text-cyan-700')}>
+                            {m.originalInputPricePer1M && m.originalInputPricePer1M > m.inputPricePer1M && (
+                              <span className="text-[11px] font-normal line-through text-zinc-500 block">
+                                {formatRupiah(m.originalInputPricePer1M)}
+                              </span>
+                            )}
+                            {formatRupiah(m.inputPricePer1M)}
+                          </td>
+                          <td className={cn('px-4 py-3.5 font-mono text-right', isDark ? 'text-zinc-300' : 'text-slate-600')}>
+                            {m.originalCachePricePer1M && m.originalCachePricePer1M > m.cachePricePer1M && (
+                              <span className="text-[11px] font-normal line-through text-zinc-500 block">
+                                {formatRupiah(m.originalCachePricePer1M)}
+                              </span>
+                            )}
+                            {formatRupiah(m.cachePricePer1M)}
+                          </td>
+                          <td className={cn('px-5 py-3.5 font-mono font-bold text-right', isDark ? 'text-white' : 'text-slate-900')}>
+                            {m.originalOutputPricePer1M && m.originalOutputPricePer1M > m.outputPricePer1M && (
+                              <span className="text-[11px] font-normal line-through text-zinc-500 block">
+                                {formatRupiah(m.originalOutputPricePer1M)}
+                              </span>
+                            )}
+                            {formatRupiah(m.outputPricePer1M)}
+                          </td>
+                          <td className="px-3 py-3.5 text-center text-zinc-500">
+                            {isExpanded ? <ChevronUp className="w-4 h-4 text-cyan-400 mx-auto" /> : <ChevronDown className="w-4 h-4 mx-auto" />}
+                          </td>
+                        </tr>
+                        {isExpanded && (
+                          <tr className={isDark ? 'bg-[#0a0a0c]' : 'bg-slate-50/80'}>
+                            <td colSpan={6} className="px-5 py-4">
+                              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+                                <div className="space-y-2.5 text-xs">
+                                  <div className="flex items-center gap-3">
+                                    <span className={cn('w-24 shrink-0', isDark ? 'text-zinc-500' : 'text-slate-500')}>Model ID</span>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleCopy(m.modelId, `exp-${m.id}`, `Copied ${m.modelId}`)}
+                                      className={cn('inline-flex items-center gap-2 px-2.5 py-1 rounded-lg border font-mono text-xs cursor-pointer transition-colors', isDark ? 'bg-[#111115] border-white/10 text-zinc-200 hover:border-cyan-500/40' : 'bg-white border-slate-200 text-slate-800 hover:border-cyan-500')}
+                                    >
+                                      {m.modelId}
+                                      {copiedId === `exp-${m.id}` ? <Check className="w-3 h-3 text-cyan-400" /> : <Copy className="w-3 h-3 text-zinc-400" />}
+                                    </button>
+                                  </div>
+                                  <div className="flex items-center gap-3">
+                                    <span className={cn('w-24 shrink-0', isDark ? 'text-zinc-500' : 'text-slate-500')}>Context</span>
+                                    <span className={isDark ? 'text-zinc-200 font-medium' : 'text-slate-800 font-medium'}>{m.contextWindow} tokens</span>
+                                  </div>
+                                  <div className="flex items-center gap-3">
+                                    <span className={cn('w-24 shrink-0', isDark ? 'text-zinc-500' : 'text-slate-500')}>API Format</span>
+                                    <span className={isDark ? 'text-zinc-200' : 'text-slate-800'}>
+                                      {m.openaiOnly ? 'OpenAI Chat Completions · Responses API' : 'OpenAI Chat Completions · Responses API · Anthropic Messages'}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className={cn('rounded-2xl overflow-hidden border shadow-xl text-xs', isDark ? 'bg-[#0b0d12] border-white/[0.1]' : 'bg-white border-slate-200')}>
+                                  <div className={cn('px-4 py-2.5 border-b flex items-center justify-between', isDark ? 'bg-[#12151e] border-white/[0.07]' : 'bg-slate-100 border-slate-200')}>
+                                    <div className="flex items-center gap-2">
+                                      <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]" />
+                                      <span className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
+                                      <span className="w-2.5 h-2.5 rounded-full bg-[#27c93f]" />
+                                      <span className={cn('ml-1.5 font-mono text-[11px] font-semibold', isDark ? 'text-zinc-300' : 'text-slate-700')}>
+                                        Example: one chat request
+                                      </span>
+                                    </div>
+                                    <span className={cn('font-mono text-[10px]', isDark ? 'text-zinc-500' : 'text-slate-500')}>
+                                      {m.modelId}
+                                    </span>
+                                  </div>
+                                  <div className="p-4 space-y-1.5">
+                                    <div className="flex items-center justify-between gap-2">
+                                      <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>New input</span>
+                                      <span className="font-mono tabular-nums">
+                                        <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>1,000 × {formatRupiah(m.inputPricePer1M)}/1M </span>
+                                        <span className={isDark ? 'text-zinc-200 font-semibold ml-2' : 'text-slate-800 font-semibold ml-2'}>{fmtDec(sampleInputCost)}</span>
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center justify-between gap-2">
+                                      <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>Cached input</span>
+                                      <span className="font-mono tabular-nums">
+                                        <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>1,000 × {formatRupiah(m.cachePricePer1M)}/1M </span>
+                                        <span className={isDark ? 'text-zinc-200 font-semibold ml-2' : 'text-slate-800 font-semibold ml-2'}>{fmtDec(sampleCacheCost)}</span>
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center justify-between gap-2">
+                                      <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>Output</span>
+                                      <span className="font-mono tabular-nums">
+                                        <span className={isDark ? 'text-zinc-500' : 'text-slate-400'}>500 × {formatRupiah(m.outputPricePer1M)}/1M </span>
+                                        <span className={isDark ? 'text-zinc-200 font-semibold ml-2' : 'text-slate-800 font-semibold ml-2'}>{fmtDec(sampleOutputCost)}</span>
+                                      </span>
+                                    </div>
+                                    <div className={cn('flex items-center justify-between pt-2 mt-2 border-t font-bold', isDark ? 'border-white/[0.08] text-white' : 'border-slate-200 text-slate-900')}>
+                                      <span>Total</span>
+                                      <span className="font-mono tabular-nums text-cyan-400">{fmtDec(sampleTotal)}</span>
+                                    </div>
+                                    <p className={cn('text-[11px] pt-1', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+                                      ≈ {requestsPer5000.toLocaleString('id-ID')} requests like this with Rp 5.000.
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </Fragment>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          )}
+
+          {/* Image Generation Models Pricing Table */}
+          {modelTypeTab === 'image' && (
+          <div className={cn('rounded-2xl border overflow-hidden', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}>
+            <div className="px-5 py-4 border-b border-white/[0.08]">
+              <h3 className={cn('text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>
+                Image Generation Models (POST /api/ai/v1/images/generations)
+              </h3>
+              <p className="text-xs text-zinc-400 mt-1">
+                Prices are per image, in Rupiah. Each image is billed by the provider&apos;s token count for its size; failed or refused images cost Rp 0. Images are kept for 7 days on upstream storage.
+              </p>
+            </div>
+            <div className="overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              <table className="w-full min-w-[700px] text-left text-xs border-collapse">
+                <thead>
+                  <tr className={cn('text-[11px] font-bold uppercase tracking-wider border-b', isDark ? 'text-zinc-400 border-white/[0.08] bg-[#0a0a0c]' : 'text-slate-500 border-slate-200 bg-slate-50')}>
+                    <th className="px-5 py-3.5">Model</th>
+                    <th className="px-4 py-3.5">Sizes &amp; Price / Image</th>
+                    <th className="px-4 py-3.5">Options</th>
+                    <th className="px-5 py-3.5 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/[0.06]">
+                  {imageModels.map((im) => (
+                    <tr key={im.modelId} className={isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-slate-50'}>
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-2">
+                          <span className={cn('font-bold text-sm', isDark ? 'text-white' : 'text-slate-900')}>{im.name}</span>
+                          {im.modelId === 'seedream-image-v5.0-flash' && (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                              Cheapest
+                            </span>
+                          )}
+                        </div>
+                        <div className="font-mono text-[11px] text-zinc-500 flex items-center gap-1.5 mt-0.5">
+                          <span>{im.modelId}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleCopy(im.modelId, `img-m-${im.modelId}`, `Copied ${im.modelId}`)}
+                            className="hover:text-cyan-400 cursor-pointer"
+                          >
+                            {copiedId === `img-m-${im.modelId}` ? <Check className="w-3 h-3 text-cyan-400" /> : <Copy className="w-3 h-3" />}
+                          </button>
+                        </div>
+                        {im.description && (
+                          <div className="text-[11px] text-zinc-400 mt-1">{im.description}</div>
+                        )}
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <div className="flex flex-wrap gap-1.5">
+                          {im.sizes.map((sz) => {
+                            const szPrice =
+                              im.sizePrices?.[sz] ??
+                              (im.modelId === 'seedream-image-v5.0-pro' && sz === '2048x2048'
+                                ? im.priceRp * 2
+                                : im.priceRp);
+                            return (
+                              <span
+                                key={sz}
+                                className={cn(
+                                  'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono text-[11px]',
+                                  isDark ? 'bg-[#0a0a0c] border-white/[0.1] text-zinc-200' : 'bg-slate-50 border-slate-200 text-slate-800'
+                                )}
+                              >
+                                <span>{sz.replace('x', '×')}</span>
+                                <span className="text-cyan-400 font-bold">{formatRupiah(szPrice)}</span>
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3.5 text-[11px] text-zinc-400">
+                        {im.maxN > 1 ? `up to ${im.maxN} per request` : '1 per request'}
+                        {im.maxRefImages > 0 && ` - ${im.maxRefImages} reference ${im.maxRefImages === 1 ? 'image' : 'images'}`}
+                      </td>
+                      <td className="px-5 py-3.5 text-right">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setImgModelId(im.modelId);
+                            if (im.sizes[0]) setImgSize(im.sizes[0]);
+                            setActiveTab('images');
+                          }}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-400/15 hover:bg-cyan-400/25 border border-cyan-400/30 text-cyan-400 font-bold text-xs cursor-pointer transition-all"
+                        >
+                          Try -&gt;
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          )}
+        </div>
+      )}
+
+      {/* ==================================================================== */}
+      {/* TAB 7: QUICKSTART & FULL DOCUMENTATION                               */}
+      {/* ==================================================================== */}
+      {activeTab === 'docs' && (
+        <div className="space-y-6 min-w-0">
+          <div className={cn('rounded-2xl border p-4 sm:p-6 space-y-5 min-w-0', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}>
+            <div className="flex flex-col gap-3 min-w-0">
+              <div>
+                <h2 className={cn('text-base font-bold flex items-center gap-2', isDark ? 'text-white' : 'text-slate-900')}>
+                  <Terminal className="w-4 h-4 text-cyan-400 shrink-0" />
+                  <span>Quickstart, SDKs &amp; AI Coding Tools</span>
+                </h2>
+                <p className={cn('text-xs mt-1 leading-relaxed', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+                  One API key works across OpenAI Chat Completions, OpenAI Responses API (Codex), Anthropic Messages, Claude Code, Cursor, Cline, opencode, Continue, and Aider.
+                </p>
+              </div>
+              <div className={cn('flex items-center gap-1 p-1.5 rounded-xl border w-full max-w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-slate-100 border-slate-200')}>
+                {([
+                  { id: 'curl', label: 'cURL' },
+                  { id: 'node', label: 'OpenAI Node' },
+                  { id: 'python', label: 'OpenAI Python' },
+                  { id: 'go', label: 'Go' },
+                  { id: 'php', label: 'PHP' },
+                  { id: 'responses', label: 'Responses API' },
+                  { id: 'anthropic', label: 'Anthropic SDK' },
+                  { id: 'images', label: 'Images API' },
+                  { id: 'claudecode', label: 'Claude Code' },
+                  { id: 'codex', label: 'Codex' },
+                  { id: 'opencode', label: 'opencode' },
+                  { id: 'cline', label: 'Cline / Roo / Kilo' },
+                  { id: 'cursor', label: 'Cursor' },
+                  { id: 'continue', label: 'Continue' },
+                  { id: 'aider', label: 'Aider' },
+                ] as const).map((l) => (
+                  <button
+                    key={l.id}
+                    type="button"
+                    onClick={() => setDocLang(l.id)}
+                    className={cn(
+                      'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap shrink-0 cursor-pointer',
+                      docLang === l.id ? 'bg-cyan-400 text-slate-950 shadow-xs' : isDark ? 'text-zinc-400 hover:text-white' : 'text-slate-600'
+                    )}
+                  >
+                    {l.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className={cn('rounded-2xl overflow-hidden border shadow-xl min-w-0', isDark ? 'border-white/[0.1] bg-[#0b0d12]' : 'border-slate-200 bg-white')}>
+              <div className={cn('px-3.5 sm:px-4 py-2.5 border-b flex items-center justify-between gap-3', isDark ? 'bg-[#12151e] border-white/[0.07]' : 'bg-slate-100 border-slate-200')}>
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#ff5f56] shrink-0" />
+                    <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#ffbd2e] shrink-0" />
+                    <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#27c93f] shrink-0" />
+                  </div>
+                  <span className={cn('ml-1 text-[11px] sm:text-xs font-mono font-semibold truncate', isDark ? 'text-zinc-400' : 'text-slate-700')}>{codeSnippets[docLang].title}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCopy(codeSnippets[docLang].code, `doc-${docLang}`, 'Snippet copied')}
+                  className={cn('inline-flex items-center gap-1.5 text-xs font-semibold shrink-0 cursor-pointer', isDark ? 'text-cyan-400 hover:text-cyan-300' : 'text-cyan-700 hover:text-cyan-800')}
+                >
+                  {copiedId === `doc-${docLang}` ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  Copy
+                </button>
+              </div>
+              <pre className={cn('p-3.5 sm:p-5 text-[11px] sm:text-xs font-mono overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden leading-relaxed', isDark ? 'text-zinc-200 bg-[#0b0d12]' : 'text-slate-800 bg-slate-50/50')}>
+                <code>{codeSnippets[docLang].code}</code>
+              </pre>
+            </div>
+          </div>
+
+          <div className={cn('rounded-2xl border p-4 sm:p-6 space-y-4', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-cyan-400">
+              1. Endpoints &amp; Base URLs
+            </h3>
+            <p className={cn('text-xs leading-relaxed break-words', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+              The OpenAI SDKs expect the base URL to end in <code className="text-cyan-400 font-mono">/v1</code> (<code className="font-mono break-all">{openaiBase}</code>). The Anthropic SDKs and Claude Code append <code className="text-cyan-400 font-mono">/v1/messages</code> automatically, so their base URL is <code className="font-mono break-all">{anthropicBase}</code>. Every model works in both formats - when a model natively speaks only the other format, the gateway converts the request and answer automatically.
+            </p>
+
+            {/* Mobile Stacked Cards */}
+            <div className="grid grid-cols-1 gap-2.5 md:hidden">
+              {[
+                {
+                  route: 'POST /api/ai/openai/v1/chat/completions',
+                  proto: 'OpenAI Chat Completions',
+                  desc: 'Standard chat completions, streaming SSE, tool calling, JSON mode, vision, and reasoning.',
+                },
+                {
+                  route: 'POST /api/ai/openai/v1/responses',
+                  proto: 'OpenAI Responses API',
+                  desc: 'Stateless Responses API for OpenAI Codex and newer OpenAI SDK clients.',
+                },
+                {
+                  route: 'POST /api/ai/anthropic/v1/messages',
+                  proto: 'Anthropic Messages',
+                  desc: 'Official Anthropic SDKs and Claude Code CLI (supports extended thinking & tools).',
+                },
+                {
+                  route: 'POST /api/ai/anthropic/v1/messages/count_tokens',
+                  proto: 'Anthropic Token Estimate',
+                  desc: 'Estimates input tokens for an Anthropic request. Free - never charged.',
+                },
+                {
+                  route: 'POST /api/ai/openai/v1/images/generations',
+                  proto: 'OpenAI Images API',
+                  desc: 'Generate images with Seedream, Kling, Vega, Vidu, and HY Image models.',
+                },
+                {
+                  route: 'GET /api/ai/openai/v1/models',
+                  proto: 'OpenAI & Anthropic',
+                  desc: 'Lists all active models and live Rupiah prices per 1M tokens.',
+                },
+                {
+                  route: 'GET /api/ai/health',
+                  proto: 'Public Health Check',
+                  desc: 'No key required. Returns {"status":"ok"} when the gateway is online.',
+                },
+              ].map((ep) => (
+                <div
+                  key={ep.route}
+                  className={cn(
+                    'rounded-xl border p-3.5 space-y-1',
+                    isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-slate-50 border-slate-200'
+                  )}
+                >
+                  <div className="font-mono text-xs font-bold text-cyan-400 break-all">{ep.route}</div>
+                  <div className={cn('text-xs font-semibold', isDark ? 'text-white' : 'text-slate-900')}>
+                    {ep.proto}
+                  </div>
+                  <p className="text-[11px] text-zinc-400 leading-relaxed">{ep.desc}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="hidden md:block overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              <table className="w-full min-w-[620px] text-left text-xs border-collapse">
+                <thead>
+                  <tr className={cn('border-b text-[11px] uppercase', isDark ? 'border-white/[0.08] text-zinc-400' : 'border-slate-200 text-slate-500')}>
+                    <th className="py-2.5 pr-4 whitespace-nowrap">Method &amp; Route</th>
+                    <th className="py-2.5 px-4 whitespace-nowrap">Protocol Format</th>
+                    <th className="py-2.5 pl-4">Description</th>
+                  </tr>
+                </thead>
+                <tbody className={cn('divide-y font-mono', isDark ? 'divide-white/[0.06] text-zinc-300' : 'divide-slate-100 text-slate-700')}>
+                  <tr>
+                    <td className="py-2.5 pr-4 text-cyan-400 font-semibold whitespace-nowrap">POST /api/ai/openai/v1/chat/completions</td>
+                    <td className="py-2.5 px-4 font-sans whitespace-nowrap">OpenAI Chat Completions</td>
+                    <td className="py-2.5 pl-4 font-sans text-zinc-400">Standard chat completions, streaming SSE, tool calling, JSON mode, vision, and reasoning.</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2.5 pr-4 text-cyan-400 font-semibold whitespace-nowrap">POST /api/ai/openai/v1/responses</td>
+                    <td className="py-2.5 px-4 font-sans whitespace-nowrap">OpenAI Responses API</td>
+                    <td className="py-2.5 pl-4 font-sans text-zinc-400">Stateless Responses API for OpenAI Codex and newer OpenAI SDK clients.</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2.5 pr-4 text-cyan-400 font-semibold whitespace-nowrap">POST /api/ai/anthropic/v1/messages</td>
+                    <td className="py-2.5 px-4 font-sans whitespace-nowrap">Anthropic Messages</td>
+                    <td className="py-2.5 pl-4 font-sans text-zinc-400">Official Anthropic SDKs and Claude Code CLI (supports extended thinking &amp; tools).</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2.5 pr-4 text-cyan-400 font-semibold whitespace-nowrap">POST /api/ai/anthropic/v1/messages/count_tokens</td>
+                    <td className="py-2.5 px-4 font-sans whitespace-nowrap">Anthropic Token Estimate</td>
+                    <td className="py-2.5 pl-4 font-sans text-zinc-400">Estimates input tokens for an Anthropic request. Free - never charged.</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2.5 pr-4 text-cyan-400 font-semibold whitespace-nowrap">POST /api/ai/openai/v1/images/generations</td>
+                    <td className="py-2.5 px-4 font-sans whitespace-nowrap">OpenAI Images API</td>
+                    <td className="py-2.5 pl-4 font-sans text-zinc-400">Generate images with Seedream, Kling, Vega, Vidu, and HY Image models.</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2.5 pr-4 text-cyan-400 font-semibold whitespace-nowrap">GET /api/ai/openai/v1/models</td>
+                    <td className="py-2.5 px-4 font-sans whitespace-nowrap">OpenAI &amp; Anthropic</td>
+                    <td className="py-2.5 pl-4 font-sans text-zinc-400">Lists all active models and live Rupiah prices per 1M tokens.</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2.5 pr-4 text-cyan-400 font-semibold whitespace-nowrap">GET /api/ai/health</td>
+                    <td className="py-2.5 px-4 font-sans whitespace-nowrap">Public Health Check</td>
+                    <td className="py-2.5 pl-4 font-sans text-zinc-400">No key required. Returns <code className="text-cyan-400">{`{"status":"ok"}`}</code> when the gateway is online.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className={cn('rounded-2xl border p-5 sm:p-6 space-y-3', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-cyan-400">
+                2. Authentication &amp; Key Security
+              </h3>
+              <ul className={cn('text-xs space-y-2 leading-relaxed list-disc pl-4', isDark ? 'text-zinc-300' : 'text-slate-700')}>
+                <li>
+                  <strong>Key Format:</strong> Keys start with <code className="text-cyan-400 font-mono">masdika_ai_</code>. Up to <strong>25 active keys</strong> per account.
+                </li>
+                <li>
+                  <strong>Headers:</strong> Send your key as <code className="text-cyan-400 font-mono">Authorization: Bearer masdika_ai_...</code> or <code className="text-cyan-400 font-mono">x-api-key: masdika_ai_...</code> on any route.
+                </li>
+                <li>
+                  <strong>Monthly Spend Limit:</strong> Optionally cap how much Rupiah a key can spend per calendar month (UTC).
+                </li>
+                <li>
+                  <strong>Keep Keys Secret:</strong> Always call the gateway from your server or CLI environment variables - never ship a key in browser client code.
+                </li>
+              </ul>
+            </div>
+
+            <div className={cn('rounded-2xl border p-5 sm:p-6 space-y-3', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-cyan-400">
+                3. AI Balance, Top-Up, Prompt Caching &amp; Peak Hours
+              </h3>
+              <ul className={cn('text-xs space-y-2 leading-relaxed list-disc pl-4', isDark ? 'text-zinc-300' : 'text-slate-700')}>
+                <li>
+                  <strong>Dedicated AI Balance:</strong> Top up your AI Balance manually or enable <strong>Auto Top-Up</strong> in Overview to automatically refill from your Masdika Wallet.
+                </li>
+                <li>
+                  <strong>Token Formula:</strong> <code className="text-cyan-400 font-mono">(input × inputPrice + cached × cachePrice + output × outputPrice) / 1,000,000</code> in Rupiah.
+                </li>
+                <li>
+                  <strong>Peak Hours (WIB, UTC+7):</strong> Models marked with <strong>Peak Pricing</strong> (<code className="font-mono text-cyan-400">deepseek-v4.1-flash</code>) apply peak rates on <strong>Monday-Friday, 08:00-11:00 and 13:00-17:00 WIB</strong>.
+                </li>
+                <li>
+                  <strong>Zero Charge on Failures:</strong> Failed upstream requests (<code className="font-mono">4xx</code>/<code className="font-mono">5xx</code>) are never charged.
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className={cn('rounded-2xl border p-4 sm:p-6 space-y-4', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-cyan-400">
+              4. Rate Limits, Error Codes &amp; Retry Rules
+            </h3>
+            <p className={cn('text-xs leading-relaxed', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+              Account rate limit is <strong>600 requests/minute</strong>, max request body is <strong>8 MB</strong>, and default output cap is <strong>16,384 tokens</strong>. Every response includes an <code className="text-cyan-400 font-mono">x-request-id</code> and <code className="text-cyan-400 font-mono">x-masdika-model</code> header.
+            </p>
+
+            {/* Mobile Stacked Cards */}
+            <div className="grid grid-cols-1 gap-2.5 md:hidden">
+              {[
+                {
+                  http: '400',
+                  code: 'invalid_request / unsupported_format',
+                  meaning: 'Invalid JSON, missing model, or format mismatch.',
+                  action: 'Fix request parameters. Do not retry unchanged.',
+                },
+                {
+                  http: '401',
+                  code: 'missing_api_key / invalid_api_key',
+                  meaning: 'Missing, unknown, or revoked key.',
+                  action: 'Send a valid masdika_ai_... key.',
+                },
+                {
+                  http: '402',
+                  code: 'insufficient_balance',
+                  meaning: 'AI balance cannot cover the request hold.',
+                  action: 'Top up your AI balance or turn on Auto Top-Up.',
+                },
+                {
+                  http: '403',
+                  code: 'key_spend_limit_reached',
+                  meaning: 'Key reached its monthly Rupiah spend limit.',
+                  action: 'Create/use another key or wait for next month (UTC).',
+                },
+                {
+                  http: '404 / 410',
+                  code: 'model_not_found / model_retired',
+                  meaning: 'Unknown, disabled, or retired model ID.',
+                  action: 'Pick an active model ID from GET /v1/models.',
+                },
+                {
+                  http: '413',
+                  code: 'request_too_large',
+                  meaning: 'Request body exceeds 8 MB.',
+                  action: 'Shorten prompt or pass image URLs instead of large base64.',
+                },
+                {
+                  http: '429',
+                  code: 'rate_limited',
+                  meaning: 'Exceeded per-minute rate limit or upstream busy.',
+                  action: 'Retry with exponential backoff (1s, 2s, 4s).',
+                },
+                {
+                  http: '502 / 503',
+                  code: 'upstream_error / upstream_unavailable',
+                  meaning: 'Model provider failed or temporarily unavailable (Rp 0 charged).',
+                  action: 'Retry with backoff or fall back to another model.',
+                },
+              ].map((err) => (
+                <div
+                  key={err.http}
+                  className={cn(
+                    'rounded-xl border p-3.5 space-y-1.5',
+                    isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-slate-50 border-slate-200'
+                  )}
+                >
+                  <div className="flex flex-col items-start gap-1.5">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 font-mono text-[11px] font-bold text-cyan-400 whitespace-nowrap shrink-0">
+                      HTTP {err.http}
+                    </span>
+                    <span className={cn('font-mono text-xs font-semibold break-words leading-snug', isDark ? 'text-zinc-200' : 'text-slate-800')}>
+                      {err.code}
+                    </span>
+                  </div>
+                  <p className={cn('text-xs', isDark ? 'text-zinc-300' : 'text-slate-700')}>{err.meaning}</p>
+                  <p className="text-[11px] text-zinc-500">{err.action}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="hidden md:block overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              <table className="w-full min-w-[620px] text-left text-xs border-collapse">
+                <thead>
+                  <tr className={cn('border-b text-[11px] uppercase', isDark ? 'border-white/[0.08] text-zinc-400' : 'border-slate-200 text-slate-500')}>
+                    <th className="py-2.5 pr-4 whitespace-nowrap">HTTP</th>
+                    <th className="py-2.5 px-4 whitespace-nowrap">Error Code</th>
+                    <th className="py-2.5 px-4">Meaning</th>
+                    <th className="py-2.5 pl-4">Action / Retry</th>
+                  </tr>
+                </thead>
+                <tbody className={cn('divide-y font-mono', isDark ? 'divide-white/[0.06] text-zinc-300' : 'divide-slate-100 text-slate-700')}>
+                  <tr>
+                    <td className="py-2 pr-4 text-cyan-400 whitespace-nowrap">400</td>
+                    <td className="py-2 px-4 whitespace-nowrap">invalid_request / unsupported_format</td>
+                    <td className="py-2 px-4 font-sans text-zinc-400">Invalid JSON, missing model, or format mismatch.</td>
+                    <td className="py-2 pl-4 font-sans text-zinc-400">Fix request parameters. Do not retry unchanged.</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4 text-cyan-400 whitespace-nowrap">401</td>
+                    <td className="py-2 px-4 whitespace-nowrap">missing_api_key / invalid_api_key</td>
+                    <td className="py-2 px-4 font-sans text-zinc-400">Missing, unknown, or revoked key.</td>
+                    <td className="py-2 pl-4 font-sans text-zinc-400">Send a valid <code className="font-mono">masdika_ai_...</code> key.</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4 text-cyan-400 whitespace-nowrap">402</td>
+                    <td className="py-2 px-4 whitespace-nowrap">insufficient_balance</td>
+                    <td className="py-2 px-4 font-sans text-zinc-400">AI balance cannot cover the request hold.</td>
+                    <td className="py-2 pl-4 font-sans text-zinc-400">Top up your AI balance or turn on Auto Top-Up.</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4 text-cyan-400 whitespace-nowrap">403</td>
+                    <td className="py-2 px-4 whitespace-nowrap">key_spend_limit_reached</td>
+                    <td className="py-2 px-4 font-sans text-zinc-400">Key reached its monthly Rupiah spend limit.</td>
+                    <td className="py-2 pl-4 font-sans text-zinc-400">Create/use another key or wait for next month (UTC).</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4 text-cyan-400 whitespace-nowrap">404 / 410</td>
+                    <td className="py-2 px-4 whitespace-nowrap">model_not_found / model_retired</td>
+                    <td className="py-2 px-4 font-sans text-zinc-400">Unknown, disabled, or retired model ID.</td>
+                    <td className="py-2 pl-4 font-sans text-zinc-400">Pick an active model ID from <code className="font-mono">GET /v1/models</code>.</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4 text-cyan-400 whitespace-nowrap">413</td>
+                    <td className="py-2 px-4 whitespace-nowrap">request_too_large</td>
+                    <td className="py-2 px-4 font-sans text-zinc-400">Request body exceeds 8 MB.</td>
+                    <td className="py-2 pl-4 font-sans text-zinc-400">Shorten prompt or pass image URLs instead of large base64.</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4 text-cyan-400 whitespace-nowrap">429</td>
+                    <td className="py-2 px-4 whitespace-nowrap">rate_limited</td>
+                    <td className="py-2 px-4 font-sans text-zinc-400">Exceeded per-minute rate limit or upstream busy.</td>
+                    <td className="py-2 pl-4 font-sans text-zinc-400">Retry with exponential backoff (1s, 2s, 4s).</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4 text-cyan-400 whitespace-nowrap">502 / 503</td>
+                    <td className="py-2 px-4 whitespace-nowrap">upstream_error / upstream_unavailable</td>
+                    <td className="py-2 px-4 font-sans text-zinc-400">Model provider failed or temporarily unavailable (Rp 0 charged).</td>
+                    <td className="py-2 pl-4 font-sans text-zinc-400">Retry with backoff or fall back to another model.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Top Up AI Balance Modal */}
+      {isTopupModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className={cn('w-full max-w-md rounded-2xl border p-6 space-y-5 shadow-2xl', isDark ? 'bg-[#0c0c0e] border-white/[0.1]' : 'bg-white border-slate-200')}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-cyan-500/15 border border-cyan-500/25 text-cyan-400 flex items-center justify-center">
+                  <Zap className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className={cn('text-base font-bold', isDark ? 'text-white' : 'text-slate-900')}>
+                    Top Up AI Credit Balance
+                  </h3>
+                  <p className="text-[11px] text-zinc-400">
+                    Transfer funds from your Masdika Wallet
+                  </p>
+                </div>
               </div>
               <button
                 type="button"
-                onClick={() => handleCopy(codeSnippets[docLang].code, `doc-${docLang}`, 'Snippet copied')}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-400 hover:text-cyan-300 cursor-pointer"
+                onClick={() => !toppingUp && setIsTopupModalOpen(false)}
+                className="text-zinc-400 hover:text-white cursor-pointer"
               >
-                {copiedId === `doc-${docLang}` ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                Copy
+                <X className="w-5 h-5" />
               </button>
             </div>
-            <pre className="p-4 sm:p-5 text-xs font-mono text-zinc-200 overflow-x-auto leading-relaxed">
-              <code>{codeSnippets[docLang].code}</code>
-            </pre>
+
+            <form onSubmit={handleConfirmTopupAiBalance} className="space-y-4">
+              <div>
+                <label className={cn('text-xs font-bold uppercase tracking-wider block mb-2', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+                  Select Preset Amount
+                </label>
+                <div className="grid grid-cols-2 gap-2.5">
+                  {[50000, 100000, 250000, 500000].map((pack) => {
+                    const selected = Number(customTopupAmount) === pack;
+                    return (
+                      <button
+                        key={pack}
+                        type="button"
+                        onClick={() => setCustomTopupAmount(String(pack))}
+                        className={cn(
+                          'px-3.5 py-2.5 rounded-xl border text-left font-mono text-xs font-bold transition-all cursor-pointer',
+                          selected
+                            ? 'bg-cyan-500/15 border-cyan-400 text-cyan-400 ring-1 ring-cyan-400/30'
+                            : isDark
+                            ? 'bg-[#141418] border-white/[0.08] text-zinc-200 hover:border-white/20'
+                            : 'bg-slate-50 border-slate-200 text-slate-800 hover:border-slate-300'
+                        )}
+                      >
+                        {formatRupiah(pack)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <label className={cn('text-xs font-bold uppercase tracking-wider block mb-1.5', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+                  Custom Amount (Min Rp 5.000)
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-mono text-zinc-500">
+                    Rp
+                  </span>
+                  <input
+                    type="number"
+                    required
+                    min={5000}
+                    step={1000}
+                    value={customTopupAmount}
+                    onChange={(e) => setCustomTopupAmount(e.target.value)}
+                    placeholder="50000"
+                    className={cn('w-full pl-9 pr-4 py-2.5 rounded-xl text-sm font-mono border outline-none focus:border-cyan-500', isDark ? 'bg-[#141418] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
+                  />
+                </div>
+              </div>
+
+              <div className={cn('rounded-xl border p-3.5 space-y-1.5 text-xs', isDark ? 'bg-[#141418] border-white/[0.08]' : 'bg-slate-50 border-slate-200')}>
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-400">Masdika Wallet Available</span>
+                  <span className={cn('font-mono font-semibold', isDark ? 'text-white' : 'text-slate-900')}>
+                    {formatRupiah(walletBalance)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-400">Current AI Balance</span>
+                  <span className="font-mono text-zinc-300">{formatRupiah(aiBalance)}</span>
+                </div>
+                <div className="flex items-center justify-between pt-1.5 border-t border-white/[0.06] font-bold">
+                  <span className={isDark ? 'text-white' : 'text-slate-900'}>AI Balance After Top-Up</span>
+                  <span className="font-mono text-cyan-400">
+                    {formatRupiah(aiBalance + (Number(customTopupAmount) || 0))}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-1">
+                <button
+                  type="button"
+                  disabled={toppingUp}
+                  onClick={() => setIsTopupModalOpen(false)}
+                  className={cn('px-4 py-2 rounded-xl text-xs font-semibold border cursor-pointer', isDark ? 'border-white/10 text-zinc-300 hover:bg-white/5' : 'border-slate-200 text-slate-600 hover:bg-slate-100')}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={toppingUp || Number(customTopupAmount) < 5000 || Number(customTopupAmount) > walletBalance}
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 cursor-pointer disabled:opacity-50"
+                >
+                  {toppingUp
+                    ? 'Processing...'
+                    : Number(customTopupAmount) > walletBalance
+                    ? 'Insufficient Wallet Balance'
+                    : `Confirm Top-Up (${formatRupiah(Number(customTopupAmount) || 0)})`}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
@@ -936,31 +3176,42 @@ claude`,
                 </label>
                 <input
                   type="text"
+                  required
+                  maxLength={64}
                   value={newKeyName}
                   onChange={(e) => setNewKeyName(e.target.value)}
-                  placeholder="e.g. Claude Code Laptop"
-                  className={cn('w-full px-3.5 py-2.5 rounded-xl text-sm border outline-none', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
+                  placeholder="e.g. Production Backend / Claude Code"
+                  className={cn('w-full px-3.5 py-2.5 rounded-xl text-sm border outline-none focus:border-cyan-500', isDark ? 'bg-[#141418] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
                 />
               </div>
               <div>
                 <label className={cn('text-xs font-bold uppercase tracking-wider block mb-1.5', isDark ? 'text-zinc-400' : 'text-slate-600')}>
-                  Monthly Spend Limit (Rp, optional)
+                  Monthly Spend Limit (Rp) - Optional
                 </label>
                 <input
                   type="number"
                   min={1000}
+                  step={1000}
                   value={newMonthlyLimit}
                   onChange={(e) => setNewMonthlyLimit(e.target.value)}
-                  placeholder="Leave empty for unlimited (uses wallet balance)"
-                  className={cn('w-full px-3.5 py-2.5 rounded-xl text-sm border outline-none', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
+                  placeholder="Leave empty for unlimited"
+                  className={cn('w-full px-3.5 py-2.5 rounded-xl text-sm border outline-none focus:border-cyan-500', isDark ? 'bg-[#141418] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
                 />
               </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={() => setIsCreateOpen(false)} className={cn('px-4 py-2 rounded-xl text-xs font-semibold border cursor-pointer', isDark ? 'border-white/[0.08] text-zinc-300' : 'border-slate-200 text-slate-700')}>
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsCreateOpen(false)}
+                  className={cn('px-4 py-2 rounded-xl text-xs font-semibold border cursor-pointer', isDark ? 'border-white/10 text-zinc-300 hover:bg-white/5' : 'border-slate-200 text-slate-600 hover:bg-slate-100')}
+                >
                   Cancel
                 </button>
-                <button type="submit" disabled={creating} className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 cursor-pointer disabled:opacity-50">
-                  {creating ? 'Creating...' : 'Generate Key'}
+                <button
+                  type="submit"
+                  disabled={creating}
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 cursor-pointer disabled:opacity-50"
+                >
+                  {creating ? 'Creating...' : 'Create Key'}
                 </button>
               </div>
             </form>
@@ -968,47 +3219,35 @@ claude`,
         </div>
       )}
 
-      {/* One-time Key Reveal Modal */}
-      {revealedKey && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className={cn('w-full max-w-lg rounded-2xl border p-6 space-y-4 shadow-2xl', isDark ? 'bg-[#0c0c0e] border-white/[0.1]' : 'bg-white border-slate-200')}>
-            <div className="flex items-center gap-2.5 text-cyan-400">
-              <ShieldCheck className="w-5 h-5" />
-              <h3 className={cn('text-lg font-bold', isDark ? 'text-white' : 'text-slate-900')}>Save Your AI API Key</h3>
-            </div>
-            <p className={cn('text-xs leading-relaxed', isDark ? 'text-zinc-400' : 'text-slate-600')}>
-              This secret key will only be shown once. Copy and store it securely in your environment variables.
-            </p>
-            <div className="flex items-center gap-2">
-              <code className={cn('flex-1 px-3.5 py-2.5 rounded-xl border font-mono text-xs break-all', isDark ? 'bg-[#0a0a0c] border-cyan-500/30 text-cyan-400' : 'bg-slate-50 border-slate-200 text-cyan-700')}>
-                {revealedKey}
-              </code>
-              <button
-                type="button"
-                onClick={() => handleCopy(revealedKey, 'new-key', 'API Key copied')}
-                className="px-3.5 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-xs cursor-pointer"
-              >
-                {copiedId === 'new-key' ? 'Copied' : 'Copy'}
-              </button>
-            </div>
-            <div className="flex justify-end pt-2">
-              <button type="button" onClick={() => setRevealedKey(null)} className="px-4 py-2 rounded-xl text-xs font-bold bg-zinc-800 hover:bg-zinc-700 text-white cursor-pointer">
-                Done
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        isOpen={pendingTopupAmount !== null}
+        onClose={() => !toppingUp && setPendingTopupAmount(null)}
+        onConfirm={handleConfirmTopupAiBalance}
+        title="Confirm AI Balance Top-Up"
+        description={
+          pendingTopupAmount
+            ? `Are you sure you want to transfer ${formatRupiah(pendingTopupAmount)} from your Masdika Wallet (${formatRupiah(walletBalance)} available) to your AI Balance? Your remaining Masdika Wallet balance will be ${formatRupiah(Math.max(0, walletBalance - pendingTopupAmount))}.`
+            : ''
+        }
+        confirmText={
+          toppingUp
+            ? 'Processing...'
+            : pendingTopupAmount
+            ? `Top Up ${formatRupiah(pendingTopupAmount)}`
+            : 'Confirm Top-Up'
+        }
+        variant="success"
+        isLoading={toppingUp}
+      />
 
       <ConfirmModal
         isOpen={Boolean(deletingKey)}
         onClose={() => setDeletingKey(null)}
         onConfirm={handleDeleteKey}
-        title="Revoke AI Gateway Key"
-        description={`Are you sure you want to permanently revoke "${deletingKey?.name}"? Any applications using this key will immediately stop working.`}
-        confirmText="Revoke Key"
+        title="Revoke AI Gateway Key?"
+        description={`Are you sure you want to permanently revoke "${deletingKey?.name}" (${deletingKey?.keyPrefix}••••)? Any applications using this key will immediately receive 401 invalid_api_key.`}
+        confirmText={deleting ? 'Revoking...' : 'Revoke Key'}
         variant="danger"
-        isLoading={deleting}
       />
     </div>
   );

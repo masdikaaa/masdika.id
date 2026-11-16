@@ -434,17 +434,17 @@ export function HomeClient({
     <div className="flex flex-col min-h-screen overflow-x-hidden">
 
       {/* ── 1. HERO ──────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden pt-28 pb-12 sm:pb-16 lg:pb-24 flex items-center">
+      <section className="relative overflow-hidden pt-28 sm:pt-36 md:pt-40 pb-12 sm:pb-16 lg:pb-24 flex items-center">
         <SectionOrnaments variant="hero" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-start">
 
             {/* Left – text */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.7, ease: "easeOut" }}
-              className="max-w-2xl relative z-30 order-1"
+              className="max-w-2xl relative z-30 order-1 lg:pt-20"
             >
               {/* Status pill using shared Badge */}
               <div className="mb-8">
@@ -516,7 +516,7 @@ export function HomeClient({
               initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.15, ease: "easeOut" }}
-              className="relative flex items-center justify-center mt-4 lg:mt-0 order-2"
+              className="relative flex items-center justify-center mt-6 lg:mt-0 lg:self-center order-2"
             >
               <HeroAvatarFrame
                 imageSrc="/images/mascots/masdika-hero.webp"

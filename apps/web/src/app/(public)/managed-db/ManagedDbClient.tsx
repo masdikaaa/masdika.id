@@ -442,15 +442,15 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
   };
 
   return (
-    <div className="flex flex-col min-h-screen pt-28 pb-10 sm:pb-14 overflow-x-hidden">
+    <div className="flex flex-col min-h-screen pt-28 sm:pt-36 md:pt-40 pb-10 sm:pb-14 overflow-x-hidden">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
 
         {/* ── 0. HERO (Identical to VPS & Home Page Pattern) ──────────────────── */}
         <section className="relative pt-0 pb-8 sm:pb-12 flex items-center">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-start w-full">
             
             {/* Left – Text & Actions */}
-            <div className="max-w-2xl relative z-30">
+            <div className="max-w-2xl relative z-30 lg:pt-20">
               <div className="mb-8">
                 <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase whitespace-nowrap">
                   ENTERPRISE KUBERNETES CLUSTER
@@ -489,7 +489,7 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
             </div>
 
             {/* Right – Hero Avatar (managed-db.webp) with 4 Floating Badges */}
-            <div className="relative flex items-center justify-center mt-6 lg:mt-0">
+            <div className="relative flex items-center justify-center mt-6 lg:mt-0 lg:self-center">
               <HeroAvatarFrame
                 imageSrc="/images/mascots/managed-db.webp"
                 imageAlt="Masdika – Managed Database & Kubernetes Storage"

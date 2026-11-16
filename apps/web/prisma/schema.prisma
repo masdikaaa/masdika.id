@@ -22,6 +22,10 @@ model User {
   isSuspended        Boolean               @default(false)
   suspendReason      String?
   balance            Int                   @default(0)
+  aiBalance          Int                   @default(0)
+  aiAutoTopupEnabled Boolean               @default(false)
+  aiAutoTopupThreshold Int                 @default(20000)
+  aiAutoTopupAmount  Int                   @default(100000)
   affiliateBalance   Int                   @default(0)
   referralCode       String?               @unique
   referredById       Int?

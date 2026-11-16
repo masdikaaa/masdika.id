@@ -2,15 +2,22 @@ import * as crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from './prisma';
 import {
+  AI_CORS_HEADERS,
   aiGatewayError,
   authenticateAiGatewayKey,
   calculateTokenCostRp,
   ensureAiModelsExist,
+  estimatePromptTokensFromBody,
   getAiGatewayConfig,
+  parseContextWindowTokens,
   recordAiUsageAndCharge,
+  releaseAiBalanceHold,
+  reserveAiBalanceHold,
 } from './ai-gateway';
 
-export type AiProtocolFormat = 'openai' | 'anthropic';
+export type AiProtocolFormat = 'openai' | 'responses' | 'anthropic';
+
+const MAX_BODY_BYTES = 8 * 1024 * 1024; // 8 MB per docs
 
 interface ParsedUsage {
   inputTokens: number;
@@ -19,7 +26,7 @@ interface ParsedUsage {
 }
 
 function extractOpenAiUsage(obj: any): ParsedUsage | null {
-  const u = obj?.usage;
+  const u = obj?.usage ?? obj?.response?.usage;
   if (!u || typeof u !== 'object') return null;
   const prompt = Number(u.prompt_tokens ?? u.input_tokens ?? 0);
   const cached = Number(
@@ -42,7 +49,9 @@ function mergeAnthropicUsage(acc: ParsedUsage, eventObj: any) {
   const topUsage = eventObj?.usage;
   if (msgUsage) {
     if (msgUsage.input_tokens !== undefined || msgUsage.cache_creation_input_tokens !== undefined) {
-      const inp = (Number(msgUsage.input_tokens) || 0) + (Number(msgUsage.cache_creation_input_tokens) || 0);
+      const inp =
+        (Number(msgUsage.input_tokens) || 0) +
+        (Number(msgUsage.cache_creation_input_tokens) || 0);
       acc.inputTokens = Math.max(acc.inputTokens, inp);
     }
     if (msgUsage.cache_read_input_tokens !== undefined) {
@@ -54,7 +63,9 @@ function mergeAnthropicUsage(acc: ParsedUsage, eventObj: any) {
   }
   if (topUsage) {
     if (topUsage.input_tokens !== undefined || topUsage.cache_creation_input_tokens !== undefined) {
-      const inp = (Number(topUsage.input_tokens) || 0) + (Number(topUsage.cache_creation_input_tokens) || 0);
+      const inp =
+        (Number(topUsage.input_tokens) || 0) +
+        (Number(topUsage.cache_creation_input_tokens) || 0);
       acc.inputTokens = Math.max(acc.inputTokens, inp);
     }
     if (topUsage.cache_read_input_tokens !== undefined) {
@@ -66,39 +77,148 @@ function mergeAnthropicUsage(acc: ParsedUsage, eventObj: any) {
   }
 }
 
+function extractStreamDeltaChars(parsed: any): number {
+  let chars = 0;
+  // OpenAI Chat Completions delta
+  if (Array.isArray(parsed?.choices)) {
+    for (const c of parsed.choices) {
+      const d = c?.delta;
+      if (typeof d?.content === 'string') chars += d.content.length;
+      if (typeof d?.reasoning_content === 'string') chars += d.reasoning_content.length;
+      if (Array.isArray(d?.tool_calls)) {
+        for (const tc of d.tool_calls) {
+          if (typeof tc?.function?.arguments === 'string') chars += tc.function.arguments.length;
+        }
+      }
+    }
+  }
+  // OpenAI Responses API delta
+  if (typeof parsed?.delta === 'string') {
+    chars += parsed.delta.length;
+  } else if (parsed?.delta && typeof parsed.delta === 'object') {
+    if (typeof parsed.delta.text === 'string') chars += parsed.delta.text.length;
+    if (typeof parsed.delta.thinking === 'string') chars += parsed.delta.thinking.length;
+    if (typeof parsed.delta.partial_json === 'string') chars += parsed.delta.partial_json.length;
+  }
+  return chars;
+}
+
+function buildGatewayResponseHeaders(
+  upstreamRes: Response,
+  requestId: string,
+  fallbackModelId: string
+): Record<string, string> {
+  const out: Record<string, string> = {
+    ...AI_CORS_HEADERS,
+    'x-request-id': requestId,
+    'x-masdika-model': upstreamRes.headers.get('x-helipod-model') || fallbackModelId,
+  };
+  const sunset = upstreamRes.headers.get('x-helipod-model-sunset');
+  if (sunset) out['x-masdika-model-sunset'] = sunset;
+  const replacement = upstreamRes.headers.get('x-helipod-model-replacement');
+  if (replacement) out['x-masdika-model-replacement'] = replacement;
+  const retryAfter = upstreamRes.headers.get('retry-after');
+  if (retryAfter) out['retry-after'] = retryAfter;
+  return out;
+}
+
 export async function handleAiProxyRequest(
   req: NextRequest,
   format: AiProtocolFormat
 ): Promise<NextResponse> {
   const requestId = `req_${crypto.randomBytes(10).toString('hex')}`;
   const startedAt = Date.now();
-  const endpoint = format === 'openai' ? '/v1/chat/completions' : '/v1/messages';
+  const errorFormat: 'openai' | 'anthropic' = format === 'anthropic' ? 'anthropic' : 'openai';
+  const endpoint =
+    format === 'openai'
+      ? '/v1/chat/completions'
+      : format === 'responses'
+      ? '/v1/responses'
+      : '/v1/messages';
 
-  const auth = await authenticateAiGatewayKey(req, requestId);
+  // Enforce 8 MB body size limit per docs
+  const contentLength = Number(req.headers.get('content-length') || '0');
+  if (contentLength > MAX_BODY_BYTES) {
+    return aiGatewayError(
+      'Request body exceeds the 8 MB limit.',
+      'request_too_large',
+      413,
+      requestId,
+      errorFormat
+    );
+  }
+
+  const auth = await authenticateAiGatewayKey(req, requestId, errorFormat);
   if ('error' in auth && auth.error) return auth.error;
 
   const config = await getAiGatewayConfig();
   if (!config.enabled) {
-    return aiGatewayError('AI Gateway is currently disabled by administrator.', 'upstream_unavailable', 503, requestId);
+    return aiGatewayError(
+      'AI Gateway is currently disabled by administrator.',
+      'upstream_unavailable',
+      503,
+      requestId,
+      errorFormat
+    );
   }
   if (!config.upstreamKey) {
-    return aiGatewayError('AI Gateway upstream key is not configured.', 'upstream_unavailable', 503, requestId);
+    return aiGatewayError(
+      'AI Gateway upstream key is not configured.',
+      'upstream_unavailable',
+      503,
+      requestId,
+      errorFormat
+    );
   }
 
-  const body = await req.json().catch(() => null);
+  const rawBodyText = await req.text().catch(() => '');
+  if (Buffer.byteLength(rawBodyText, 'utf8') > MAX_BODY_BYTES) {
+    return aiGatewayError(
+      'Request body exceeds the 8 MB limit.',
+      'request_too_large',
+      413,
+      requestId,
+      errorFormat
+    );
+  }
+
+  let body: any = null;
+  try {
+    body = JSON.parse(rawBodyText);
+  } catch {
+    body = null;
+  }
   if (!body || typeof body !== 'object' || Array.isArray(body)) {
-    return aiGatewayError('Invalid JSON request body.', 'invalid_request_error', 400, requestId);
+    return aiGatewayError(
+      'Invalid JSON request body.',
+      'invalid_request',
+      400,
+      requestId,
+      errorFormat
+    );
   }
 
   const modelId = typeof body.model === 'string' ? body.model.trim() : '';
   if (!modelId) {
-    return aiGatewayError('Field "model" is required.', 'invalid_request_error', 400, requestId);
+    return aiGatewayError(
+      'Field "model" is required.',
+      'invalid_request',
+      400,
+      requestId,
+      errorFormat
+    );
   }
 
   await ensureAiModelsExist();
   const model = await prisma.aiModel.findUnique({ where: { modelId } });
   if (!model || !model.isActive) {
-    return aiGatewayError(`Model '${modelId}' not found or disabled.`, 'model_not_found', 404, requestId);
+    return aiGatewayError(
+      `Model '${modelId}' not found or disabled.`,
+      'model_not_found',
+      404,
+      requestId,
+      errorFormat
+    );
   }
 
   if (format === 'anthropic' && model.openaiOnly) {
@@ -106,7 +226,59 @@ export async function handleAiProxyRequest(
       'This model accepts only the OpenAI format — send it to /api/ai/v1/chat/completions.',
       'unsupported_format',
       400,
-      requestId
+      requestId,
+      errorFormat
+    );
+  }
+
+  // Enforce model contextWindow & max output limits before forwarding to Helipod
+  const estimatedPromptTokens = estimatePromptTokensFromBody(body);
+  const maxContextTokens = parseContextWindowTokens(model.contextWindow);
+  if (estimatedPromptTokens > maxContextTokens) {
+    return aiGatewayError(
+      `Estimated prompt (~${estimatedPromptTokens.toLocaleString()} tokens) exceeds ${model.modelId} context window (${model.contextWindow}).`,
+      'context_length_exceeded',
+      400,
+      requestId,
+      errorFormat
+    );
+  }
+
+  const rawCap = Number(
+    body.max_completion_tokens ?? body.max_tokens ?? body.max_output_tokens ?? 4096
+  );
+  const requestedCap = Number.isFinite(rawCap) && rawCap > 0 ? Math.min(rawCap, maxContextTokens) : 4096;
+  const holdOutputTokens = Math.min(Math.max(256, requestedCap), 16384);
+
+  const { costRp: estimatedHoldRp } = calculateTokenCostRp(
+    { inputTokens: estimatedPromptTokens, cachedTokens: 0, outputTokens: holdOutputTokens },
+    model,
+    config.markupPercent
+  );
+
+  // Enforce API Key monthly spend limit against estimated hold
+  if (
+    auth.keyRecord.monthlyLimit !== null &&
+    auth.keyRecord.monthlySpent + estimatedHoldRp > auth.keyRecord.monthlyLimit
+  ) {
+    return aiGatewayError(
+      'This API key does not have enough remaining monthly spend limit for this request.',
+      'key_spend_limit_reached',
+      403,
+      requestId,
+      errorFormat
+    );
+  }
+
+  // Atomic Balance Hold (prevents concurrent double-spend & negative balance)
+  const reserved = await reserveAiBalanceHold(auth.user.id, estimatedHoldRp);
+  if (!reserved) {
+    return aiGatewayError(
+      'Insufficient balance. Top up your AI balance to continue.',
+      'insufficient_balance',
+      402,
+      requestId,
+      errorFormat
     );
   }
 
@@ -122,8 +294,14 @@ export async function handleAiProxyRequest(
     authorization: `Bearer ${config.upstreamKey}`,
     'x-api-key': config.upstreamKey,
   };
-  const anthropicVersion = req.headers.get('anthropic-version');
-  if (anthropicVersion) headers['anthropic-version'] = anthropicVersion;
+  if (format === 'anthropic') {
+    headers['anthropic-version'] = req.headers.get('anthropic-version') || '2023-06-01';
+    const anthropicBeta = req.headers.get('anthropic-beta');
+    if (anthropicBeta) headers['anthropic-beta'] = anthropicBeta;
+  } else {
+    const anthropicVersion = req.headers.get('anthropic-version');
+    if (anthropicVersion) headers['anthropic-version'] = anthropicVersion;
+  }
 
   let upstreamRes: Response;
   try {
@@ -134,33 +312,60 @@ export async function handleAiProxyRequest(
     });
   } catch (err) {
     console.error('[AI_GATEWAY_UPSTREAM]', err);
-    return aiGatewayError('Upstream AI provider is unreachable.', 'upstream_unavailable', 503, requestId);
+    await releaseAiBalanceHold(auth.user.id, estimatedHoldRp).catch(() => {});
+    return aiGatewayError(
+      'Upstream AI provider is unreachable.',
+      'upstream_unreachable',
+      502,
+      requestId,
+      errorFormat
+    );
   }
 
   if (!upstreamRes.ok) {
+    await releaseAiBalanceHold(auth.user.id, estimatedHoldRp).catch(() => {});
     const errText = await upstreamRes.text().catch(() => '');
     const status = upstreamRes.status >= 500 ? 502 : upstreamRes.status;
-    return new NextResponse(errText || JSON.stringify({ error: { message: 'Upstream provider error', type: 'upstream_error' } }), {
-      status,
-      headers: {
-        'content-type': upstreamRes.headers.get('content-type') || 'application/json',
-        'x-request-id': requestId,
-      },
-    });
+    return new NextResponse(
+      errText ||
+        JSON.stringify({
+          error: { message: 'Upstream provider error', type: 'api_error', code: 'upstream_error' },
+        }),
+      {
+        status,
+        headers: {
+          ...buildGatewayResponseHeaders(upstreamRes, requestId, model.modelId),
+          'content-type': upstreamRes.headers.get('content-type') || 'application/json',
+        },
+      }
+    );
   }
 
   if (!isStream || !upstreamRes.body) {
     const jsonData = await upstreamRes.json().catch(() => null);
     if (!jsonData) {
-      return aiGatewayError('Invalid response from upstream AI provider.', 'upstream_error', 502, requestId);
+      await releaseAiBalanceHold(auth.user.id, estimatedHoldRp).catch(() => {});
+      return aiGatewayError(
+        'Invalid response from upstream AI provider.',
+        'upstream_error',
+        502,
+        requestId,
+        errorFormat
+      );
     }
 
     const usage: ParsedUsage = { inputTokens: 0, cachedTokens: 0, outputTokens: 0 };
-    if (format === 'openai') {
+    if (format === 'openai' || format === 'responses') {
       const parsed = extractOpenAiUsage(jsonData);
       if (parsed) Object.assign(usage, parsed);
     } else {
       mergeAnthropicUsage(usage, { usage: jsonData.usage });
+    }
+
+    // Fallback estimate if upstream omitted token counts
+    if (usage.inputTokens === 0 && usage.cachedTokens === 0 && usage.outputTokens === 0) {
+      usage.inputTokens = estimatedPromptTokens;
+      usage.outputTokens = Math.max(16, Math.ceil(JSON.stringify(jsonData).length / 6));
     }
 
     const { costRp, upstreamCostRp } = calculateTokenCostRp(usage, model, config.markupPercent);
@@ -177,18 +382,20 @@ export async function handleAiProxyRequest(
       upstreamCostRp,
       latencyMs: Date.now() - startedAt,
       statusCode: 200,
+      heldRp: estimatedHoldRp,
     }).catch((err) => console.error('[AI_GATEWAY_CHARGE]', err));
 
     return NextResponse.json(jsonData, {
       status: 200,
-      headers: { 'x-request-id': requestId },
+      headers: buildGatewayResponseHeaders(upstreamRes, requestId, model.modelId),
     });
   }
 
-  // Streaming SSE pass-through with usage capture
+  // Streaming SSE pass-through with usage capture & mid-stream cancellation estimation
   const reader = upstreamRes.body.getReader();
   const decoder = new TextDecoder();
   const usage: ParsedUsage = { inputTokens: 0, cachedTokens: 0, outputTokens: 0 };
+  let streamedOutputChars = 0;
   let sseBuffer = '';
   let charged = false;
 
@@ -200,7 +407,8 @@ export async function handleAiProxyRequest(
       if (!payload || payload === '[DONE]') continue;
       try {
         const parsed = JSON.parse(payload);
-        if (format === 'openai') {
+        streamedOutputChars += extractStreamDeltaChars(parsed);
+        if (format === 'openai' || format === 'responses') {
           const u = extractOpenAiUsage(parsed);
           if (u) {
             usage.inputTokens = Math.max(usage.inputTokens, u.inputTokens);
@@ -223,6 +431,14 @@ export async function handleAiProxyRequest(
       parseSseLines(sseBuffer.split('\n'));
       sseBuffer = '';
     }
+    // Per docs: If client closes connection mid-stream before final usage event, estimate from text received
+    if (usage.outputTokens === 0 && streamedOutputChars > 0) {
+      if (usage.inputTokens === 0 && usage.cachedTokens === 0) {
+        usage.inputTokens = estimatedPromptTokens;
+      }
+      usage.outputTokens = Math.max(1, Math.floor(streamedOutputChars / 4));
+    }
+
     const { costRp, upstreamCostRp } = calculateTokenCostRp(usage, model, config.markupPercent);
     await recordAiUsageAndCharge({
       userId: auth.user.id,
@@ -237,6 +453,7 @@ export async function handleAiProxyRequest(
       upstreamCostRp,
       latencyMs: Date.now() - startedAt,
       statusCode: 200,
+      heldRp: estimatedHoldRp,
     }).catch((err) => console.error('[AI_GATEWAY_STREAM_CHARGE]', err));
   };
 
@@ -264,10 +481,10 @@ export async function handleAiProxyRequest(
   return new NextResponse(stream, {
     status: 200,
     headers: {
+      ...buildGatewayResponseHeaders(upstreamRes, requestId, model.modelId),
       'content-type': upstreamRes.headers.get('content-type') || 'text/event-stream; charset=utf-8',
       'cache-control': 'no-cache, no-transform',
       connection: 'keep-alive',
-      'x-request-id': requestId,
     },
   });
 }
