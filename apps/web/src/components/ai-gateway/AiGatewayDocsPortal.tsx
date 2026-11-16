@@ -6,7 +6,9 @@ import {
   BookOpen,
   Check,
   ChevronDown,
+  ChevronLeft,
   ChevronRight,
+  ChevronUp,
   Copy,
   Cpu,
   FileText,
@@ -567,63 +569,109 @@ aider --model openai/glm-5.3`,
   };
 
   const meta = pageMeta[page];
+  const pageOrder: DocPageId[] = [
+    'overview',
+    'authentication',
+    'coding-tools',
+    'openai',
+    'responses',
+    'images',
+    'anthropic',
+    'models',
+    'pricing',
+    'limits',
+    'management',
+  ];
+  const currentIdx = pageOrder.indexOf(page);
+  const prevPageId = currentIdx > 0 ? pageOrder[currentIdx - 1] : null;
+  const nextPageId = currentIdx < pageOrder.length - 1 ? pageOrder[currentIdx + 1] : null;
+
+  const selectDocPage = (nextId: DocPageId) => {
+    setPage(nextId);
+    setMobileNavOpen(false);
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   return (
     <div className={cn('rounded-2xl border', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}>
-      {/* Mobile / Small Screen Docs Page Switcher */}
-      <div className={cn('md:hidden border-b p-3 rounded-t-2xl', isDark ? 'bg-[#0b0d12] border-white/[0.08]' : 'bg-slate-50 border-slate-200')}>
+      {/* Sticky Mobile / Tablet TOC & Page Switcher */}
+      <div className={cn('md:hidden sticky top-2 z-20 border-b px-3.5 py-2.5 rounded-t-2xl backdrop-blur-md', isDark ? 'bg-[#0b0d12]/95 border-white/[0.08]' : 'bg-slate-50/95 border-slate-200')}>
         <button
           type="button"
           onClick={() => setMobileNavOpen(!mobileNavOpen)}
           className={cn(
-            'w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border text-xs font-semibold cursor-pointer outline-none focus:outline-none',
-            isDark ? 'bg-[#111115] border-white/[0.08] text-white' : 'bg-white border-slate-200 text-slate-900',
+            'w-full flex items-center justify-between py-1 text-xs font-semibold cursor-pointer outline-none focus:outline-none',
+            isDark ? 'text-white' : 'text-slate-900',
           )}
         >
-          <span className="flex items-center gap-2">
+          <span className="flex items-center gap-2.5">
+            <span className="w-3.5 h-3.5 rounded-full border-2 border-cyan-400/80 border-t-cyan-400 shrink-0" />
             <DocPageIcon id={page} active={false} isDark={isDark} />
-            <span>Docs: {meta.title}</span>
+            <span>{meta.title}</span>
           </span>
-          {mobileNavOpen ? <ChevronDown className="w-4 h-4 text-cyan-400" /> : <ChevronRight className="w-4 h-4 text-zinc-400" />}
+          {mobileNavOpen ? <ChevronUp className="w-4 h-4 text-zinc-400" /> : <ChevronDown className="w-4 h-4 text-zinc-400" />}
         </button>
 
         {mobileNavOpen && (
-          <div className="mt-2.5 space-y-3 pt-2 border-t border-white/[0.06]">
-            {SIDEBAR_GROUPS.map((grp, gi) => (
-              <div key={gi} className="space-y-1">
-                {grp.title && (
-                  <div className={cn('px-2 text-[10px] font-bold uppercase tracking-wider', isDark ? 'text-zinc-500' : 'text-slate-500')}>
-                    {grp.title}
+          <div className="mt-3 space-y-4 pt-3 border-t border-white/[0.06] max-h-[70vh] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {/* On this page tree (Helipod style) */}
+            <div className="space-y-1.5 pl-1">
+              <ul className="border-l border-white/[0.1] space-y-2">
+                {meta.anchors.map((a, idx) => (
+                  <li
+                    key={a}
+                    className={cn(
+                      'pl-3 text-xs leading-snug -ml-px border-l-2',
+                      idx === 0
+                        ? 'border-cyan-400 text-cyan-400 font-semibold'
+                        : isDark
+                        ? 'border-transparent text-zinc-400'
+                        : 'border-transparent text-slate-600',
+                    )}
+                  >
+                    {a}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* All Docs Pages */}
+            <div className="space-y-3 pt-2 border-t border-white/[0.06]">
+              {SIDEBAR_GROUPS.map((grp, gi) => (
+                <div key={gi} className="space-y-1.5">
+                  {grp.title && (
+                    <div className={cn('px-1 text-[10px] font-bold uppercase tracking-wider', isDark ? 'text-zinc-500' : 'text-slate-500')}>
+                      {grp.title}
+                    </div>
+                  )}
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {grp.items.map((item) => {
+                      const active = page === item.id;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => selectDocPage(item.id)}
+                          className={cn(
+                            'inline-flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-[11px] font-semibold transition-all cursor-pointer outline-none focus:outline-none',
+                            active
+                              ? 'bg-cyan-400 text-slate-950 font-bold shadow-2xs'
+                              : isDark
+                              ? 'bg-[#111115] border border-white/[0.08] text-zinc-300 hover:text-white'
+                              : 'bg-white border border-slate-200 text-slate-700 hover:text-slate-900',
+                          )}
+                        >
+                          <DocPageIcon id={item.id} active={active} isDark={isDark} />
+                          <span className="truncate">{item.label}</span>
+                        </button>
+                      );
+                    })}
                   </div>
-                )}
-                <div className="flex flex-wrap gap-1.5">
-                  {grp.items.map((item) => {
-                    const active = page === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => {
-                          setPage(item.id);
-                          setMobileNavOpen(false);
-                        }}
-                        className={cn(
-                          'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer outline-none focus:outline-none',
-                          active
-                            ? 'bg-cyan-400 text-slate-950 font-bold shadow-2xs'
-                            : isDark
-                            ? 'bg-[#111115] border border-white/[0.08] text-zinc-300 hover:text-white'
-                            : 'bg-white border border-slate-200 text-slate-700 hover:text-slate-900',
-                        )}
-                      >
-                        <DocPageIcon id={item.id} active={active} isDark={isDark} />
-                        <span>{item.label}</span>
-                      </button>
-                    );
-                  })}
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -1133,6 +1181,45 @@ aider --model openai/glm-5.3`,
               </div>
             </div>
           )}
+
+          {/* Previous / Next Page Navigation Cards (Helipod style) */}
+          <div className={cn('grid grid-cols-1 sm:grid-cols-2 gap-3 pt-6 border-t', isDark ? 'border-white/[0.08]' : 'border-slate-200')}>
+            {prevPageId ? (
+              <button
+                type="button"
+                onClick={() => selectDocPage(prevPageId)}
+                className={cn(
+                  'rounded-xl border p-4 text-left transition-all cursor-pointer outline-none focus:outline-none space-y-1.5',
+                  isDark ? 'bg-[#0b0d12] border-white/[0.08] hover:border-cyan-500/40' : 'bg-slate-50 border-slate-200 hover:border-cyan-500/50',
+                )}
+              >
+                <div className={cn('inline-flex items-center gap-1.5 text-xs font-bold', isDark ? 'text-white' : 'text-slate-900')}>
+                  <ChevronLeft className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>{pageMeta[prevPageId].title}</span>
+                </div>
+                <p className="text-xs text-zinc-400 line-clamp-2 leading-relaxed">{pageMeta[prevPageId].subtitle}</p>
+              </button>
+            ) : (
+              <div className="hidden sm:block" />
+            )}
+
+            {nextPageId && (
+              <button
+                type="button"
+                onClick={() => selectDocPage(nextPageId)}
+                className={cn(
+                  'rounded-xl border p-4 text-right transition-all cursor-pointer outline-none focus:outline-none space-y-1.5 sm:col-start-2',
+                  isDark ? 'bg-[#0b0d12] border-white/[0.08] hover:border-cyan-500/40' : 'bg-slate-50 border-slate-200 hover:border-cyan-500/50',
+                )}
+              >
+                <div className={cn('inline-flex items-center justify-end gap-1.5 text-xs font-bold w-full', isDark ? 'text-white' : 'text-slate-900')}>
+                  <span>{pageMeta[nextPageId].title}</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-cyan-400" />
+                </div>
+                <p className="text-xs text-zinc-400 line-clamp-2 leading-relaxed">{pageMeta[nextPageId].subtitle}</p>
+              </button>
+            )}
+          </div>
         </main>
 
         {/* Right "On this page" Anchor Rail */}
