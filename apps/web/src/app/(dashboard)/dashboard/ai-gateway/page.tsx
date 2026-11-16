@@ -38,6 +38,7 @@ import { formatRupiah } from '@/lib/billing';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Select } from '@/components/ui/Select';
 import { AdminCheckbox } from '@/components/ui/AdminCheckbox';
+import { PlainTextArea } from '@/components/ui/PlainTextArea';
 
 interface AiModelItem {
   id: number;
@@ -1632,18 +1633,14 @@ aider --model openai/glm-5.3`,
               <label className={cn('text-xs font-bold uppercase tracking-wider block mb-1.5', isDark ? 'text-zinc-400' : 'text-slate-600')}>
                 System Prompt
               </label>
-              <textarea
-                rows={3}
+              <PlainTextArea
                 value={pgSystemPrompt}
-                spellCheck={false}
-                autoComplete="off"
-                data-ms-editor="false"
-                data-gramm="false"
-                data-gramm_editor="false"
-                data-enable-grammarly="false"
-                onChange={(e) => setPgSystemPrompt(e.target.value)}
+                onChange={setPgSystemPrompt}
+                isDark={isDark}
+                ariaLabel="System Prompt"
                 placeholder="You are a helpful AI assistant..."
-                className={cn('w-full px-3.5 py-2.5 rounded-xl text-xs border outline-none focus:border-cyan-500 resize-none caret-cyan-400', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
+                minHeightClass="min-h-[82px] max-h-[160px]"
+                className={cn('w-full px-3.5 py-2.5 rounded-xl text-xs', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
               />
             </div>
 
@@ -1855,16 +1852,11 @@ aider --model openai/glm-5.3`,
                   className="hidden"
                 />
               </label>
-              <textarea
-                rows={1}
+              <PlainTextArea
                 value={pgInput}
-                spellCheck={false}
-                autoComplete="off"
-                data-ms-editor="false"
-                data-gramm="false"
-                data-gramm_editor="false"
-                data-enable-grammarly="false"
-                onChange={(e) => setPgInput(e.target.value)}
+                onChange={setPgInput}
+                isDark={isDark}
+                ariaLabel="Playground Message"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -1872,7 +1864,8 @@ aider --model openai/glm-5.3`,
                   }
                 }}
                 placeholder="Message... (Enter to send, Shift+Enter for new line)"
-                className={cn('flex-1 min-h-[44px] h-11 px-4 py-2.5 rounded-xl text-xs sm:text-sm border outline-none focus:border-cyan-500 resize-none max-h-32 leading-5 caret-cyan-400', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-white border-slate-200 text-slate-900')}
+                minHeightClass="min-h-[44px] max-h-32"
+                className={cn('flex-1 px-4 py-2.5 rounded-xl text-xs sm:text-sm leading-5', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-white border-slate-200 text-slate-900')}
               />
               <button
                 type="submit"
@@ -1895,18 +1888,14 @@ aider --model openai/glm-5.3`,
             onSubmit={handleGenerateImage}
             className={cn('rounded-2xl border p-5 sm:p-6 space-y-4', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}
           >
-            <textarea
-              rows={3}
+            <PlainTextArea
               value={imgPrompt}
-              spellCheck={false}
-              autoComplete="off"
-              data-ms-editor="false"
-              data-gramm="false"
-              data-gramm_editor="false"
-              data-enable-grammarly="false"
-              onChange={(e) => setImgPrompt(e.target.value)}
+              onChange={setImgPrompt}
+              isDark={isDark}
+              ariaLabel="Image Prompt"
               placeholder="Describe the image you want..."
-              className={cn('w-full px-4 py-3 rounded-xl text-sm border outline-none focus:border-cyan-500 resize-none caret-cyan-400', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
+              minHeightClass="min-h-[90px] max-h-[180px]"
+              className={cn('w-full px-4 py-3 rounded-xl text-sm', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
             />
 
             <div className="flex flex-wrap items-center justify-between gap-3">
