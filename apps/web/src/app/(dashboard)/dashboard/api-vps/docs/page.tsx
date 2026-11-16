@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
   ChevronLeft,
@@ -15,6 +15,7 @@ import {
   Shield,
   Network,
   Layers,
+  HardDrive,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -27,13 +28,14 @@ type Category =
   | "UPGRADE"
   | "METRICS"
   | "SNAPSHOTS"
+  | "BACKUPS"
   | "FIREWALL"
   | "IPS";
 
-interface EndpointSpec {
+export interface EndpointSpec {
   id: string;
   category: Exclude<Category, "ALL">;
-  method: "GET" | "POST" | "DELETE";
+  method: "GET" | "POST" | "PUT" | "DELETE";
   path: string;
   title: string;
   description: string;
@@ -154,7 +156,7 @@ const ENDPOINTS: EndpointSpec[] = [
     path: "/api/v1/vps/pricing",
     title: "Get Upgrade Pricing & Bandwidth Tiers",
     description:
-      "Retrieves current hourly PAYG resource rates (CPU, RAM, Disk, IPs) and allowed bandwidth tiers in Mbps.",
+      "Retrieves current hourly PAYG resource rates (CPU, RAM, Disk, IPs) and allowed bandwidth tiers starting from 100 Mbps.",
     responseStatus: "200 OK",
     response: {
       success: true,
@@ -167,7 +169,7 @@ const ENDPOINTS: EndpointSpec[] = [
           ipv4: 20,
           ipv6: 20,
         },
-        bandwidthOptionsMbps: [100, 250, 500, 1000],
+        bandwidthOptionsMbps: [100, 150, 200, 250, 300],
       },
     },
   },
@@ -178,12 +180,12 @@ const ENDPOINTS: EndpointSpec[] = [
     path: "/api/v1/vps/113/upgrade",
     title: "Upgrade VPS Hardware & Bandwidth",
     description:
-      "Scales up CPU cores, RAM, Disk GB, or Bandwidth Mbps on your VPS. Downgrades are blocked and balance is validated server-side.",
+      "Scales up CPU cores, RAM, Disk GB, or Bandwidth Mbps (e.g. 100 → 150 Mbps) on your VPS. Downgrades are blocked and balance is validated server-side.",
     body: {
       cpuCores: 2,
       ramGb: 4,
       diskGb: 40,
-      bandwidthMbps: 250,
+      bandwidthMbps: 150,
     },
     responseStatus: "200 OK",
     response: {
@@ -194,7 +196,7 @@ const ENDPOINTS: EndpointSpec[] = [
         cpuCores: 2,
         ramGb: 4,
         diskGb: 40,
-        bandwidthMbps: 250,
+        bandwidthMbps: 150,
         hourlyRate: 147,
         status: "RUNNING",
       },
@@ -303,6 +305,57 @@ const ENDPOINTS: EndpointSpec[] = [
     },
   },
   {
+    id: "list-backups",
+    category: "BACKUPS",
+    method: "GET",
+    path: "/api/v1/vps/113/backups",
+    title: "List VPS Backups",
+    description: "Lists all backups stored for this VPS along with quota usage.",
+    responseStatus: "200 OK",
+    response: {
+      success: true,
+      data: {
+        quotaGb: 20,
+        usedBytes: 1073741824,
+        backups: [
+          {
+            volume: "local:backup/vzdump-qemu-113-2026_11_16.vma.zst",
+            size: 1073741824,
+            format: "vma.zst",
+            ctime: 1794784000,
+          },
+        ],
+      },
+    },
+  },
+  {
+    id: "create-backup",
+    category: "BACKUPS",
+    method: "POST",
+    path: "/api/v1/vps/113/backups",
+    title: "Create VPS Backup",
+    description: "Initiates a full vzdump backup on the Proxmox backup storage (requires backup addon quota).",
+    responseStatus: "201 Created",
+    response: {
+      success: true,
+      data: { vpsId: 113, task: "UPID:proxmox:..." },
+      message: "Backup job initiated",
+    },
+  },
+  {
+    id: "delete-backup",
+    category: "BACKUPS",
+    method: "DELETE",
+    path: "/api/v1/vps/113/backups?volume=local:backup/vzdump-qemu-113.vma.zst",
+    title: "Delete VPS Backup",
+    description: "Deletes a specific backup archive volume belonging to this VPS.",
+    responseStatus: "200 OK",
+    response: {
+      success: true,
+      message: "Backup 'local:backup/vzdump-qemu-113.vma.zst' deleted",
+    },
+  },
+  {
     id: "list-firewall",
     category: "FIREWALL",
     method: "GET",
@@ -346,6 +399,23 @@ const ENDPOINTS: EndpointSpec[] = [
       success: true,
       data: null,
       message: "Firewall rule created successfully",
+    },
+  },
+  {
+    id: "update-firewall",
+    category: "FIREWALL",
+    method: "PUT",
+    path: "/api/v1/vps/113/firewall/0",
+    title: "Update Firewall Rule",
+    description: "Updates an existing custom firewall rule (e.g., enable/disable or change port/action) at position index.",
+    body: {
+      enable: 0,
+      comment: "Temporarily disabled",
+    },
+    responseStatus: "200 OK",
+    response: {
+      success: true,
+      message: "Firewall rule #0 updated",
     },
   },
   {
@@ -394,6 +464,7 @@ const CATEGORIES: { key: Category; label: string; icon: any }[] = [
   { key: "UPGRADE", label: "Upgrade & Pricing", icon: Cpu },
   { key: "METRICS", label: "Metrics", icon: Activity },
   { key: "SNAPSHOTS", label: "Snapshots", icon: Camera },
+  { key: "BACKUPS", label: "Backups", icon: HardDrive },
   { key: "FIREWALL", label: "Firewall", icon: Shield },
   { key: "IPS", label: "Elastic IPs", icon: Network },
 ];
@@ -487,6 +558,28 @@ export default function ApiVpsDocsPage() {
   const [lang, setLang] = useState<Lang>("curl");
   const [category, setCategory] = useState<Category>("ALL");
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [livePricing, setLivePricing] = useState<Record<string, number> | null>(null);
+  const [liveBandwidthOptions, setLiveBandwidthOptions] = useState<number[] | null>(null);
+  const [liveVps, setLiveVps] = useState<{ id: number; hostname: string } | null>(null);
+
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/user/vps/order-data").then((r) => (r.ok ? r.json() : null)),
+      fetch("/api/user/vps").then((r) => (r.ok ? r.json() : null)),
+    ])
+      .then(([orderData, vpsData]) => {
+        if (orderData?.pricing && typeof orderData.pricing === "object") {
+          setLivePricing(orderData.pricing);
+        }
+        if (Array.isArray(orderData?.bandwidthOptions) && orderData.bandwidthOptions.length > 0) {
+          setLiveBandwidthOptions(orderData.bandwidthOptions);
+        }
+        if (Array.isArray(vpsData) && vpsData.length > 0) {
+          setLiveVps({ id: vpsData[0].id, hostname: vpsData[0].hostname });
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const baseUrl =
     typeof window !== "undefined" ? window.location.origin : "https://masdika.id";
@@ -498,10 +591,48 @@ export default function ApiVpsDocsPage() {
     setTimeout(() => setCopiedId(null), 1800);
   };
 
+  const hydratedEndpoints = useMemo(() => {
+    const sampleId = liveVps?.id ?? 113;
+    const sampleHost = liveVps?.hostname ?? "andika.com";
+    const bwOptions = liveBandwidthOptions ?? [100, 150, 200, 250, 300];
+    const nextBw = bwOptions.find((b) => b > 100) ?? 150;
+
+    return ENDPOINTS.map((ep) => {
+      const path = ep.path.replace("/vps/113", `/vps/${sampleId}`);
+      if (ep.id === "vps-pricing") {
+        return {
+          ...ep,
+          path,
+          response: {
+            success: true,
+            data: {
+              currency: "IDR",
+              hourlyRates: livePricing ?? ep.response.data.hourlyRates,
+              bandwidthOptionsMbps: bwOptions,
+            },
+          },
+        };
+      }
+      if (ep.id === "upgrade-vps") {
+        return {
+          ...ep,
+          path,
+          body: { ...(ep.body || {}), bandwidthMbps: nextBw },
+          response: {
+            ...ep.response,
+            data: { ...ep.response.data, id: sampleId, hostname: sampleHost, bandwidthMbps: nextBw },
+            message: `VPS '${sampleHost}' upgraded successfully`,
+          },
+        };
+      }
+      return { ...ep, path };
+    });
+  }, [liveVps, livePricing, liveBandwidthOptions]);
+
   const filteredEndpoints =
     category === "ALL"
-      ? ENDPOINTS
-      : ENDPOINTS.filter((ep) => ep.category === category);
+      ? hydratedEndpoints
+      : hydratedEndpoints.filter((ep) => ep.category === category);
 
   const fileLabel = lang === "curl" ? "request.sh" : lang === "node" ? "client.mjs" : "client.py";
 
@@ -636,6 +767,8 @@ export default function ApiVpsDocsPage() {
               ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-400"
               : ep.method === "POST"
               ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+              : ep.method === "PUT"
+              ? "bg-amber-500/10 border-amber-500/30 text-amber-400"
               : "bg-rose-500/10 border-rose-500/30 text-rose-400";
 
           return (
