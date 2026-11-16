@@ -4,7 +4,7 @@ import { useUrlNumber } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
-import { Users, ArrowUpRight, Copy, Check, Gift, Landmark, Clock, Activity, AlertCircle } from "lucide-react";
+import { Users, ArrowUpRight, Copy, Check, Gift, Landmark, Clock, Activity, AlertCircle, RefreshCw } from "lucide-react";
 import { formatRupiah } from "@/lib/billing";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -15,6 +15,7 @@ export default function AffiliatePage() {
   const isDark = theme === "dark";
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [copied, setCopied] = useState(false);
   
   // Pagination State
@@ -29,7 +30,8 @@ export default function AffiliatePage() {
   const [accountName, setAccountName] = useState("");
   const [withdrawing, setWithdrawing] = useState(false);
 
-  const fetchAffiliateData = async (ePage = earningsPage, wPage = withdrawalsPage) => {
+  const fetchAffiliateData = async (ePage = earningsPage, wPage = withdrawalsPage, isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
     try {
       const res = await fetch(`/api/user/affiliate?earningsPage=${ePage}&withdrawalsPage=${wPage}`);
       const json = await res.json();
@@ -42,6 +44,7 @@ export default function AffiliatePage() {
       toast.error("Error loading affiliate data");
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -123,18 +126,44 @@ export default function AffiliatePage() {
 
   return (
     <motion.div className="space-y-6 pb-10" variants={containerVariants} initial="hidden" animate="visible">
-      {/* Compact Unboxed Page Header */}
+      {/* Top Header */}
       <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2.5 flex-wrap">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
               Affiliate Program
             </h1>
-            <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-500/10 border-cyan-500/20 text-cyan-700")}>
-              <Gift className="w-3 h-3" /> Partner System
+            <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-semibold border whitespace-nowrap shrink-0", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+              <Gift className="w-3 h-3 shrink-0" />
+              Partner System
             </span>
           </div>
-          <p className={cn("text-xs sm:text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Share your referral link and earn Rp 5.000 for every new VPS purchase made by your invited friends.</p>
+          <p className={cn("text-xs sm:text-sm font-medium mt-1.5 max-w-2xl leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
+            Share your referral link and earn Rp 5.000 for every new VPS purchase made by your invited friends.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <button
+            onClick={() => fetchAffiliateData(earningsPage, withdrawalsPage, true)}
+            disabled={refreshing || loading}
+            className={cn(
+              "px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 border cursor-pointer",
+              isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-2xs"
+            )}
+          >
+            <RefreshCw className={cn("w-3.5 h-3.5", (refreshing || loading) && (isDark ? "animate-spin text-cyan-400" : "animate-spin text-cyan-600"))} />
+            <span>Refresh</span>
+          </button>
+          <button
+            onClick={() => setShowWithdraw(true)}
+            disabled={(data?.affiliateBalance || 0) < 50000}
+            title={(data?.affiliateBalance || 0) < 50000 ? "Minimum withdrawal balance is Rp 50.000" : "Withdraw affiliate earnings"}
+            className="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 flex items-center justify-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:scale-95 disabled:opacity-50 disabled:pointer-events-none text-slate-950 shadow-md cursor-pointer"
+          >
+            <ArrowUpRight className="w-4 h-4" />
+            <span>Withdraw Funds</span>
+          </button>
         </div>
       </motion.div>
 
@@ -168,67 +197,70 @@ export default function AffiliatePage() {
       </motion.div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <motion.div 
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <motion.div
           variants={itemVariants}
-          className={cn("p-5 sm:p-6 rounded-2xl relative overflow-hidden group border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}
+          className={cn("rounded-2xl border p-5 transition-all shadow-2xs", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}
         >
-          <div className="relative z-10">
-            <div className="flex items-center gap-3.5 mb-4">
-              <div className={cn("p-2.5 rounded-xl border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-slate-50/80 text-cyan-700 border-slate-200/90")}>
-                <Landmark className="w-5 h-5" />
-              </div>
-              <h3 className={cn("text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-300" : "text-slate-500")}>Affiliate Balance</h3>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-[11px] font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+              AFFILIATE BALANCE
+            </span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+              <Landmark className="w-4 h-4" />
             </div>
-            <div className={cn("text-2xl sm:text-3xl font-bold mb-4 tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-2xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>
               {formatRupiah(data?.affiliateBalance || 0)}
-            </div>
-            <button
-              onClick={() => setShowWithdraw(true)}
-              disabled={data?.affiliateBalance < 50000}
-              className="w-full px-3.5 py-2 font-bold text-xs sm:text-xs rounded-xl transition-all flex items-center justify-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 disabled:opacity-50 disabled:pointer-events-none text-slate-950 shadow-2xs"
-            >
-              Withdraw Funds <ArrowUpRight className="w-4 h-4" />
-            </button>
-            {data?.affiliateBalance < 50000 && (
-              <p className={cn("text-xs mt-2 text-center", isDark ? "text-zinc-500" : "text-slate-400")}>Min. Rp 50.000</p>
-            )}
+            </span>
+            <span className={cn("text-xs font-semibold", isDark ? "text-cyan-400" : "text-cyan-600")}>
+              Min. Rp 50.000
+            </span>
           </div>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           variants={itemVariants}
-          className={cn("p-5 sm:p-6 rounded-2xl relative overflow-hidden group border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}
+          className={cn("rounded-2xl border p-5 transition-all shadow-2xs", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}
         >
-          <div className="relative z-10">
-            <div className="flex items-center gap-3.5 mb-4">
-              <div className={cn("p-2.5 rounded-xl border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-slate-50/80 text-cyan-700 border-slate-200/90")}>
-                <Gift className="w-5 h-5" />
-              </div>
-              <h3 className={cn("text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-300" : "text-slate-500")}>Total Earned</h3>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-[11px] font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+              TOTAL EARNED
+            </span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-emerald-500/15 border-emerald-500/25 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700")}>
+              <Gift className="w-4 h-4" />
             </div>
-            <div className={cn("text-2xl sm:text-3xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-2xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>
               {formatRupiah(data?.totalEarned || 0)}
-            </div>
-            <p className={cn("text-xs sm:text-sm mt-2", isDark ? "text-zinc-500" : "text-slate-400")}>Since joined</p>
+            </span>
+            <span className={cn("text-xs font-semibold", isDark ? "text-emerald-400" : "text-emerald-600")}>
+              Since joined
+            </span>
           </div>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           variants={itemVariants}
-          className={cn("p-5 sm:p-6 rounded-2xl relative overflow-hidden group border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}
+          className={cn("rounded-2xl border p-5 transition-all shadow-2xs", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}
         >
-          <div className="relative z-10">
-            <div className="flex items-center gap-3.5 mb-4">
-              <div className={cn("p-2.5 rounded-xl border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-slate-50/80 text-cyan-700 border-slate-200/90")}>
-                <Users className="w-5 h-5" />
-              </div>
-              <h3 className={cn("text-xs font-bold uppercase tracking-widest", isDark ? "text-zinc-300" : "text-slate-500")}>Total Referrals</h3>
+          <div className="flex items-center justify-between mb-3">
+            <span className={cn("text-[11px] font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
+              TOTAL REFERRALS
+            </span>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
+              <Users className="w-4 h-4" />
             </div>
-            <div className={cn("text-2xl sm:text-3xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className={cn("text-2xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>
               {data?.totalReferrals || 0}
-            </div>
-            <p className={cn("text-xs sm:text-sm mt-2", isDark ? "text-zinc-500" : "text-slate-400")}>Registered users</p>
+            </span>
+            <span className={cn("text-xs font-semibold", isDark ? "text-cyan-400" : "text-cyan-600")}>
+              Registered users
+            </span>
           </div>
         </motion.div>
       </div>
