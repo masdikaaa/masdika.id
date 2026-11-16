@@ -17,6 +17,9 @@ import {
   Terminal,
   ShieldCheck,
   Activity,
+  Search,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { cn } from '@/lib/utils';
@@ -45,6 +48,7 @@ interface VpsItem {
 }
 
 const MAX_API_KEYS = 5;
+const VPS_PER_PAGE = 5;
 
 export default function ApiVpsPage() {
   const { theme } = useTheme();
@@ -54,6 +58,8 @@ export default function ApiVpsPage() {
   const [vpsList, setVpsList] = useState<VpsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [vpsSearch, setVpsSearch] = useState('');
+  const [vpsPage, setVpsPage] = useState(1);
 
   // Generate Key Modal
   const [isGenerateOpen, setIsGenerateOpen] = useState(false);
@@ -155,6 +161,28 @@ export default function ApiVpsPage() {
   const quotaReached = apiKeys.length >= MAX_API_KEYS;
   const activeVpsCount = vpsList.filter((v) => v.status !== 'TERMINATED').length;
   const canGenerateKey = !quotaReached && activeVpsCount > 0;
+  const normalizedSearch = vpsSearch.trim().toLowerCase();
+  const filteredVpsList = normalizedSearch
+    ? vpsList.filter((v) => {
+        const ipMatches = v.assignedIps?.some(
+          (ip) =>
+            ip.ipAddress?.toLowerCase().includes(normalizedSearch) ||
+            ip.publicIp?.toLowerCase().includes(normalizedSearch)
+        );
+        return (
+          String(v.id).includes(normalizedSearch) ||
+          v.hostname?.toLowerCase().includes(normalizedSearch) ||
+          v.status?.toLowerCase().includes(normalizedSearch) ||
+          Boolean(ipMatches)
+        );
+      })
+    : vpsList;
+  const totalVpsPages = Math.max(1, Math.ceil(filteredVpsList.length / VPS_PER_PAGE));
+  const safeVpsPage = Math.min(vpsPage, totalVpsPages);
+  const paginatedVpsList = filteredVpsList.slice(
+    (safeVpsPage - 1) * VPS_PER_PAGE,
+    safeVpsPage * VPS_PER_PAGE
+  );
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://masdika.id';
   const sampleKey = apiKeys[0]?.key || 'masdika_your_api_key';
 
@@ -316,7 +344,7 @@ export default function ApiVpsPage() {
       >
         <div
           className={cn(
-            'px-5 py-4 border-b flex items-center justify-between',
+            'px-5 py-4 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3',
             isDark ? 'border-white/[0.08]' : 'border-slate-200'
           )}
         >
@@ -325,17 +353,79 @@ export default function ApiVpsPage() {
             <h2 className={cn('text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>
               Your Cloud VPS Instances
             </h2>
+            <span
+              className={cn(
+                'text-xs px-2.5 py-0.5 rounded-full border font-medium',
+                isDark
+                  ? 'bg-zinc-900 border-white/[0.08] text-zinc-400'
+                  : 'bg-slate-100 border-slate-200 text-slate-600'
+              )}
+            >
+              {activeVpsCount} Instances
+            </span>
           </div>
-          <span
-            className={cn(
-              'text-xs px-2.5 py-0.5 rounded-full border font-medium',
-              isDark
-                ? 'bg-zinc-900 border-white/[0.08] text-zinc-400'
-                : 'bg-slate-100 border-slate-200 text-slate-600'
-            )}
-          >
-            {activeVpsCount} Instances
-          </span>
+
+          {vpsList.length > 0 && (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                setVpsPage(1);
+              }}
+              className="flex items-center gap-2 w-full sm:w-auto"
+            >
+              <div className="relative flex-1 sm:w-64">
+                <Search
+                  className={cn(
+                    'w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none',
+                    isDark ? 'text-zinc-500' : 'text-slate-400'
+                  )}
+                />
+                <input
+                  type="text"
+                  value={vpsSearch}
+                  onChange={(e) => {
+                    setVpsSearch(e.target.value);
+                    setVpsPage(1);
+                  }}
+                  placeholder="Search ID, hostname, or IP..."
+                  className={cn(
+                    'w-full pl-8 pr-8 py-1.5 rounded-xl text-xs border focus:outline-none focus:ring-2 transition-all',
+                    isDark
+                      ? 'bg-zinc-900/80 border-white/[0.08] text-zinc-200 placeholder:text-zinc-500 focus:border-cyan-500/50 focus:ring-cyan-500/20'
+                      : 'bg-slate-50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus:border-cyan-500 focus:ring-cyan-500/20'
+                  )}
+                />
+                {vpsSearch && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setVpsSearch('');
+                      setVpsPage(1);
+                    }}
+                    aria-label="Clear search"
+                    className={cn(
+                      'absolute right-2.5 top-1/2 -translate-y-1/2',
+                      isDark ? 'text-zinc-500 hover:text-zinc-300' : 'text-slate-400 hover:text-slate-600'
+                    )}
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+              <button
+                type="submit"
+                className={cn(
+                  'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors shrink-0',
+                  isDark
+                    ? 'bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border-white/[0.08]'
+                    : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200 shadow-2xs'
+                )}
+              >
+                <Search className="w-3.5 h-3.5 text-cyan-400" />
+                Search
+              </button>
+            </form>
+          )}
         </div>
 
         {loading ? (
@@ -360,68 +450,145 @@ export default function ApiVpsPage() {
               <Plus className="w-3.5 h-3.5" /> Deploy Cloud VPS
             </Link>
           </div>
+        ) : filteredVpsList.length === 0 ? (
+          <div className="p-10 text-center space-y-3">
+            <div className="w-12 h-12 rounded-2xl mx-auto flex items-center justify-center bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
+              <Search className="w-5 h-5" />
+            </div>
+            <h3 className={cn('text-sm font-semibold', isDark ? 'text-white' : 'text-slate-900')}>
+              No Matching Cloud VPS Instances
+            </h3>
+            <p className={cn('text-xs max-w-md mx-auto', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+              No instances matched &ldquo;{vpsSearch}&rdquo;. Try a different ID, hostname, or IP address.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setVpsSearch('');
+                setVpsPage(1);
+              }}
+              className={cn(
+                'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold border transition-colors',
+                isDark
+                  ? 'bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border-white/[0.08]'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
+              )}
+            >
+              Clear Search
+            </button>
+          </div>
         ) : (
-          <div className={cn('divide-y', isDark ? 'divide-white/[0.06]' : 'divide-slate-100')}>
-            {vpsList.map((vps) => {
-              const primaryIp =
-                vps.assignedIps?.find((i) => i.isPrimary)?.publicIp ||
-                vps.assignedIps?.find((i) => i.isPrimary)?.ipAddress ||
-                vps.assignedIps?.[0]?.publicIp ||
-                vps.assignedIps?.[0]?.ipAddress ||
-                'Pending IP';
-              const rebootCurl = `curl -X POST "${baseUrl}/api/v1/vps/${vps.id}/reboot" -H "Authorization: Bearer ${sampleKey}"`;
+          <>
+            <div className={cn('divide-y', isDark ? 'divide-white/[0.06]' : 'divide-slate-100')}>
+              {paginatedVpsList.map((vps) => {
+                const primaryIp =
+                  vps.assignedIps?.find((i) => i.isPrimary)?.publicIp ||
+                  vps.assignedIps?.find((i) => i.isPrimary)?.ipAddress ||
+                  vps.assignedIps?.[0]?.publicIp ||
+                  vps.assignedIps?.[0]?.ipAddress ||
+                  'Pending IP';
+                const rebootCurl = `curl -X POST "${baseUrl}/api/v1/vps/${vps.id}/reboot" -H "Authorization: Bearer ${sampleKey}"`;
 
-              return (
-                <div
-                  key={vps.id}
-                  className="p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4"
-                >
-                  <div className="space-y-1">
-                    <div className="flex flex-wrap items-center gap-2.5">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                        ID: {vps.id}
-                      </span>
-                      <span className={cn('font-semibold text-sm', isDark ? 'text-white' : 'text-slate-900')}>
-                        {vps.hostname}
-                      </span>
-                      <span
+                return (
+                  <div
+                    key={vps.id}
+                    className="p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex flex-wrap items-center gap-2.5">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                          ID: {vps.id}
+                        </span>
+                        <span className={cn('font-semibold text-sm', isDark ? 'text-white' : 'text-slate-900')}>
+                          {vps.hostname}
+                        </span>
+                        <span
+                          className={cn(
+                            'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold border',
+                            vps.status === 'RUNNING'
+                              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                              : 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'
+                          )}
+                        >
+                          {vps.status}
+                        </span>
+                      </div>
+                      <p className={cn('text-xs font-mono', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+                        {primaryIp} • {vps.cpuCores} vCPU • {vps.ramGb} GB RAM • {vps.diskGb} GB Disk
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        onClick={() => handleCopy(rebootCurl, `curl-${vps.id}`, 'Reboot cURL copied')}
                         className={cn(
-                          'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold border',
-                          vps.status === 'RUNNING'
-                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                            : 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'
+                          'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-colors',
+                          isDark
+                            ? 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border-white/[0.08]'
+                            : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
                         )}
                       >
-                        {vps.status}
-                      </span>
+                        {copiedId === `curl-${vps.id}` ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        ) : (
+                          <Terminal className="w-3.5 h-3.5 text-cyan-400" />
+                        )}
+                        Copy Reboot cURL
+                      </button>
                     </div>
-                    <p className={cn('text-xs font-mono', isDark ? 'text-zinc-400' : 'text-slate-600')}>
-                      {primaryIp} • {vps.cpuCores} vCPU • {vps.ramGb} GB RAM • {vps.diskGb} GB Disk
-                    </p>
                   </div>
+                );
+              })}
+            </div>
 
-                  <div className="flex flex-wrap items-center gap-2">
-                    <button
-                      onClick={() => handleCopy(rebootCurl, `curl-${vps.id}`, 'Reboot cURL copied')}
-                      className={cn(
-                        'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-colors',
-                        isDark
-                          ? 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border-white/[0.08]'
-                          : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
-                      )}
-                    >
-                      {copiedId === `curl-${vps.id}` ? (
-                        <Check className="w-3.5 h-3.5 text-emerald-400" />
-                      ) : (
-                        <Terminal className="w-3.5 h-3.5 text-cyan-400" />
-                      )}
-                      Copy Reboot cURL
-                    </button>
-                  </div>
+            {totalVpsPages > 1 && (
+              <div
+                className={cn(
+                  'px-5 py-3.5 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-3',
+                  isDark ? 'border-white/[0.08]' : 'border-slate-200'
+                )}
+              >
+                <span className={cn('text-xs', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+                  Showing {(safeVpsPage - 1) * VPS_PER_PAGE + 1}–
+                  {Math.min(safeVpsPage * VPS_PER_PAGE, filteredVpsList.length)} of{' '}
+                  {filteredVpsList.length} instances
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setVpsPage((p) => Math.max(1, p - 1))}
+                    disabled={safeVpsPage <= 1}
+                    className={cn(
+                      'inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors disabled:opacity-40 disabled:pointer-events-none',
+                      isDark
+                        ? 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border-white/[0.08]'
+                        : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+                    )}
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                    Prev
+                  </button>
+                  <span className={cn('text-xs font-medium px-2', isDark ? 'text-zinc-300' : 'text-slate-700')}>
+                    Page {safeVpsPage} / {totalVpsPages}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setVpsPage((p) => Math.min(totalVpsPages, p + 1))}
+                    disabled={safeVpsPage >= totalVpsPages}
+                    className={cn(
+                      'inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors disabled:opacity-40 disabled:pointer-events-none',
+                      isDark
+                        ? 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border-white/[0.08]'
+                        : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+                    )}
+                  >
+                    Next
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
