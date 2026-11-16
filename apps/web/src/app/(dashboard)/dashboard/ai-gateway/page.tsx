@@ -1499,11 +1499,11 @@ aider --model openai/glm-5.3
                     When AI Balance Falls Below (Rp)
                   </label>
                   <input
-                    type="number"
-                    min={5000}
-                    step={1000}
-                    value={autoTopupThreshold}
-                    onChange={(e) => setAutoTopupThreshold(e.target.value)}
+                    type="text"
+                    inputMode="numeric"
+                    value={autoTopupThreshold ? Number(autoTopupThreshold).toLocaleString('id-ID') : ''}
+                    onChange={(e) => setAutoTopupThreshold(e.target.value.replace(/\D/g, '').slice(0, 9))}
+                    placeholder="20.000"
                     className={cn(
                       'w-full px-3.5 py-2.5 rounded-xl text-sm font-mono border outline-none focus:border-cyan-500',
                       isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
@@ -1515,11 +1515,11 @@ aider --model openai/glm-5.3
                     Auto Top-Up Amount (Rp)
                   </label>
                   <input
-                    type="number"
-                    min={5000}
-                    step={1000}
-                    value={autoTopupAmount}
-                    onChange={(e) => setAutoTopupAmount(e.target.value)}
+                    type="text"
+                    inputMode="numeric"
+                    value={autoTopupAmount ? Number(autoTopupAmount).toLocaleString('id-ID') : ''}
+                    onChange={(e) => setAutoTopupAmount(e.target.value.replace(/\D/g, '').slice(0, 9))}
+                    placeholder="100.000"
                     className={cn(
                       'w-full px-3.5 py-2.5 rounded-xl text-sm font-mono border outline-none focus:border-cyan-500',
                       isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
@@ -2973,13 +2973,12 @@ aider --model openai/glm-5.3
                     Rp
                   </span>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     required
-                    min={5000}
-                    step={1000}
-                    value={customTopupAmount}
-                    onChange={(e) => setCustomTopupAmount(e.target.value)}
-                    placeholder="50000"
+                    value={customTopupAmount ? Number(customTopupAmount).toLocaleString('id-ID') : ''}
+                    onChange={(e) => setCustomTopupAmount(e.target.value.replace(/\D/g, '').slice(0, 9))}
+                    placeholder="50.000"
                     className={cn('w-full pl-9 pr-4 py-2.5 rounded-xl text-sm font-mono border outline-none focus:border-cyan-500', isDark ? 'bg-[#141418] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
                   />
                 </div>
@@ -3084,9 +3083,9 @@ aider --model openai/glm-5.3
                   <input
                     type="text"
                     inputMode="numeric"
-                    value={newMonthlyLimit}
+                    value={newMonthlyLimit ? Number(newMonthlyLimit).toLocaleString('id-ID') : ''}
                     onChange={(e) => setNewMonthlyLimit(e.target.value.replace(/\D/g, '').slice(0, 9))}
-                    placeholder="e.g. 100000 (blank = unlimited)"
+                    placeholder="e.g. 100.000 (blank = unlimited)"
                     className={cn(
                       'w-full px-3.5 py-2.5 rounded-xl text-sm border outline-none focus:border-cyan-500 font-mono',
                       newMonthlyLimit && (Number(newMonthlyLimit) < 1000 || Number(newMonthlyLimit) > 100000000)
