@@ -29,6 +29,8 @@ import {
 } from 'lucide-react';
 import { Select } from '@/components/ui/Select';
 import { AdminCheckbox } from '@/components/ui/AdminCheckbox';
+import { useTheme } from '@/components/ThemeProvider';
+import { cn } from '@/lib/utils';
 
 interface AiModelItem {
   id: number;
@@ -76,6 +78,8 @@ interface CustomerAiItem {
 }
 
 export default function AdminAiGatewayPage() {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const [loading, setLoading] = useState(true);
   const [savingConfig, setSavingConfig] = useState(false);
   const [syncing, setSyncing] = useState(false);
@@ -352,10 +356,10 @@ export default function AdminAiGatewayPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold mb-1 tracking-tight text-white">
+          <h1 className={cn(isDark ? 'text-xl sm:text-2xl font-bold mb-1 tracking-tight text-white' : 'text-xl sm:text-2xl font-bold mb-1 tracking-tight text-slate-900')}>
             AI Gateway Management
           </h1>
-          <p className="text-sm font-medium text-zinc-400">
+          <p className={cn(isDark ? 'text-sm font-medium text-zinc-400' : 'text-sm font-medium text-slate-600')}>
             Manage upstream routing, profit markup, Chat &amp; Image models, customer AI credit balances, and real-time token usage.
           </p>
         </div>
@@ -393,11 +397,11 @@ export default function AdminAiGatewayPage() {
       {/* 5 KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-[#111115] border border-white/[0.07] rounded-2xl p-5">
-          <div className="flex items-center justify-between text-zinc-400 text-[11px] font-bold uppercase tracking-wider mb-2">
+          <div className={cn(isDark ? 'flex items-center justify-between text-zinc-400 text-[11px] font-bold uppercase tracking-wider mb-2' : 'flex items-center justify-between text-slate-600 text-[11px] font-bold uppercase tracking-wider mb-2')}>
             <span>Customer Revenue</span>
             <DollarSign className="w-4 h-4 text-cyan-400" />
           </div>
-          <div className="text-xl font-black text-white">
+          <div className={cn(isDark ? 'text-xl font-black text-white' : 'text-xl font-black text-slate-900')}>
             Rp {stats.totalRevenueIdr.toLocaleString('id-ID')}
           </div>
           <div className="text-[11px] text-zinc-500 mt-1">
@@ -406,7 +410,7 @@ export default function AdminAiGatewayPage() {
         </div>
 
         <div className="bg-[#111115] border border-white/[0.07] rounded-2xl p-5">
-          <div className="flex items-center justify-between text-zinc-400 text-[11px] font-bold uppercase tracking-wider mb-2">
+          <div className={cn(isDark ? 'flex items-center justify-between text-zinc-400 text-[11px] font-bold uppercase tracking-wider mb-2' : 'flex items-center justify-between text-slate-600 text-[11px] font-bold uppercase tracking-wider mb-2')}>
             <span>Net Margin Profit</span>
             <TrendingUp className="w-4 h-4 text-emerald-400" />
           </div>
@@ -419,7 +423,7 @@ export default function AdminAiGatewayPage() {
         </div>
 
         <div className="bg-[#111115] border border-white/[0.07] rounded-2xl p-5">
-          <div className="flex items-center justify-between text-zinc-400 text-[11px] font-bold uppercase tracking-wider mb-2">
+          <div className={cn(isDark ? 'flex items-center justify-between text-zinc-400 text-[11px] font-bold uppercase tracking-wider mb-2' : 'flex items-center justify-between text-slate-600 text-[11px] font-bold uppercase tracking-wider mb-2')}>
             <span>Total AI Balances</span>
             <Wallet className="w-4 h-4 text-cyan-400" />
           </div>
@@ -432,11 +436,11 @@ export default function AdminAiGatewayPage() {
         </div>
 
         <div className="bg-[#111115] border border-white/[0.07] rounded-2xl p-5">
-          <div className="flex items-center justify-between text-zinc-400 text-[11px] font-bold uppercase tracking-wider mb-2">
+          <div className={cn(isDark ? 'flex items-center justify-between text-zinc-400 text-[11px] font-bold uppercase tracking-wider mb-2' : 'flex items-center justify-between text-slate-600 text-[11px] font-bold uppercase tracking-wider mb-2')}>
             <span>Total Requests</span>
             <Activity className="w-4 h-4 text-cyan-400" />
           </div>
-          <div className="text-xl font-black text-white">
+          <div className={cn(isDark ? 'text-xl font-black text-white' : 'text-xl font-black text-slate-900')}>
             {stats.totalRequests.toLocaleString('id-ID')}
           </div>
           <div className="text-[11px] text-zinc-500 mt-1">
@@ -445,11 +449,11 @@ export default function AdminAiGatewayPage() {
         </div>
 
         <div className="bg-[#111115] border border-white/[0.07] rounded-2xl p-5">
-          <div className="flex items-center justify-between text-zinc-400 text-[11px] font-bold uppercase tracking-wider mb-2">
+          <div className={cn(isDark ? 'flex items-center justify-between text-zinc-400 text-[11px] font-bold uppercase tracking-wider mb-2' : 'flex items-center justify-between text-slate-600 text-[11px] font-bold uppercase tracking-wider mb-2')}>
             <span>Active Customer Keys</span>
             <Key className="w-4 h-4 text-amber-400" />
           </div>
-          <div className="text-xl font-black text-white">{stats.activeKeys}</div>
+          <div className={cn(isDark ? 'text-xl font-black text-white' : 'text-xl font-black text-slate-900')}>{stats.activeKeys}</div>
           <div className="text-[11px] text-zinc-500 mt-1">
             Status: {config.enabled ? 'Gateway Online' : 'Maintenance'}
           </div>
@@ -474,7 +478,7 @@ export default function AdminAiGatewayPage() {
               className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-bold whitespace-nowrap border-b-2 transition-all cursor-pointer ${
                 active
                   ? 'border-cyan-400 text-cyan-400 bg-cyan-500/10'
-                  : 'border-transparent text-zinc-400 hover:text-white hover:bg-white/[0.03]'
+                  : isDark ? 'border-transparent text-zinc-400 hover:text-white hover:bg-white/[0.03]' : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
@@ -493,7 +497,7 @@ export default function AdminAiGatewayPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.06] pb-4">
             <div className="flex items-center gap-2.5">
               <Sliders className="w-4 h-4 text-cyan-400" />
-              <h2 className="text-sm font-bold text-white uppercase tracking-wider">
+              <h2 className={cn(isDark ? 'text-sm font-bold text-white uppercase tracking-wider' : 'text-sm font-bold text-slate-900 uppercase tracking-wider')}>
                 Upstream Provider & Auto-Markup Configuration
               </h2>
             </div>
@@ -506,7 +510,7 @@ export default function AdminAiGatewayPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-zinc-400 mb-1.5">
+              <label className={cn(isDark ? 'block text-xs font-semibold text-zinc-400 mb-1.5' : 'block text-xs font-semibold text-slate-600 mb-1.5')}>
                 Upstream Provider Base URL
               </label>
               <input
@@ -514,7 +518,7 @@ export default function AdminAiGatewayPage() {
                 value={config.upstreamUrl}
                 onChange={(e) => setConfig({ ...config, upstreamUrl: e.target.value })}
                 placeholder="https://ai.helipod.io"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/10 text-sm text-white focus:border-cyan-400 focus:outline-none"
+                className={cn(isDark ? 'w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/10 text-sm text-white focus:border-cyan-400 focus:outline-none' : 'w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:border-cyan-400 focus:outline-none')}
                 required
               />
               <p className="text-[11px] text-zinc-500 mt-1">
@@ -523,7 +527,7 @@ export default function AdminAiGatewayPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-zinc-400 mb-1.5">
+              <label className={cn(isDark ? 'block text-xs font-semibold text-zinc-400 mb-1.5' : 'block text-xs font-semibold text-slate-600 mb-1.5')}>
                 Master Upstream AI Key (hel_ai_...)
               </label>
               <div className="relative">
@@ -536,12 +540,12 @@ export default function AdminAiGatewayPage() {
                       ? `Current: ${config.upstreamKeyMasked} (leave empty to keep)`
                       : 'Enter master upstream key (hel_ai_...)'
                   }
-                  className="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-black/50 border border-white/10 text-sm text-white focus:border-cyan-400 focus:outline-none"
+                  className={cn(isDark ? 'w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-black/50 border border-white/10 text-sm text-white focus:border-cyan-400 focus:outline-none' : 'w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:border-cyan-400 focus:outline-none')}
                 />
                 <button
                   type="button"
                   onClick={() => setShowApiKeyInput(!showApiKeyInput)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+                  className={cn(isDark ? 'absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300' : 'absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-slate-700')}
                 >
                   {showApiKeyInput ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -554,7 +558,7 @@ export default function AdminAiGatewayPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-zinc-400 mb-1.5">
+              <label className={cn(isDark ? 'block text-xs font-semibold text-zinc-400 mb-1.5' : 'block text-xs font-semibold text-slate-600 mb-1.5')}>
                 Management API Key (Optional - for Price Sync)
               </label>
               <div className="relative">
@@ -567,12 +571,12 @@ export default function AdminAiGatewayPage() {
                       ? `Current: ${config.managementKeyMasked} (leave empty to keep)`
                       : 'Optional Helipod API key for /api/ai/models'
                   }
-                  className="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-black/50 border border-white/10 text-sm text-white focus:border-cyan-400 focus:outline-none"
+                  className={cn(isDark ? 'w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-black/50 border border-white/10 text-sm text-white focus:border-cyan-400 focus:outline-none' : 'w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:border-cyan-400 focus:outline-none')}
                 />
                 <button
                   type="button"
                   onClick={() => setShowMgmtKeyInput(!showMgmtKeyInput)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+                  className={cn(isDark ? 'absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300' : 'absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-slate-700')}
                 >
                   {showMgmtKeyInput ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -584,7 +588,7 @@ export default function AdminAiGatewayPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-zinc-400 mb-1.5">
+                <label className={cn(isDark ? 'block text-xs font-semibold text-zinc-400 mb-1.5' : 'block text-xs font-semibold text-slate-600 mb-1.5')}>
                   Markup (%)
                 </label>
                 <input
@@ -594,11 +598,11 @@ export default function AdminAiGatewayPage() {
                   step={1}
                   value={config.markupPercent}
                   onChange={(e) => setConfig({ ...config, markupPercent: Number(e.target.value) })}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/10 text-sm text-white font-mono focus:border-cyan-400 focus:outline-none"
+                  className={cn(isDark ? 'w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/10 text-sm text-white font-mono focus:border-cyan-400 focus:outline-none' : 'w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 font-mono focus:border-cyan-400 focus:outline-none')}
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-zinc-400 mb-1.5">
+                <label className={cn(isDark ? 'block text-xs font-semibold text-zinc-400 mb-1.5' : 'block text-xs font-semibold text-slate-600 mb-1.5')}>
                   Top-Up Fee (Rp)
                 </label>
                 <input
@@ -608,7 +612,7 @@ export default function AdminAiGatewayPage() {
                   step={500}
                   value={config.topupFeeRp}
                   onChange={(e) => setConfig({ ...config, topupFeeRp: Number(e.target.value) })}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/10 text-sm text-white font-mono focus:border-cyan-400 focus:outline-none"
+                  className={cn(isDark ? 'w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/10 text-sm text-white font-mono focus:border-cyan-400 focus:outline-none' : 'w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 font-mono focus:border-cyan-400 focus:outline-none')}
                 />
               </div>
               <p className="col-span-2 text-[11px] text-zinc-500">
@@ -641,11 +645,11 @@ export default function AdminAiGatewayPage() {
         <div className="bg-[#111115] border border-white/[0.07] rounded-2xl p-5 sm:p-6 space-y-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h2 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+              <h2 className={cn(isDark ? 'text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2' : 'text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2')}>
                 <Sparkles className="w-4 h-4 text-cyan-400" />
                 AI Models, IDR Token Rates & Promo Override
               </h2>
-              <p className="text-xs text-zinc-400 mt-0.5">
+              <p className={cn(isDark ? 'text-xs text-zinc-400 mt-0.5' : 'text-xs text-slate-600 mt-0.5')}>
                 Configure base IDR per 1M tokens, promo discount badges, and view Image Generation model pricing (+{config.markupPercent}% markup).
               </p>
             </div>
@@ -670,7 +674,7 @@ export default function AdminAiGatewayPage() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search model ID or provider..."
-                  className="w-full pl-9 pr-3.5 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white focus:border-cyan-400 focus:outline-none"
+                  className={cn(isDark ? 'w-full pl-9 pr-3.5 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white focus:border-cyan-400 focus:outline-none' : 'w-full pl-9 pr-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:border-cyan-400 focus:outline-none')}
                 />
               </div>
             </div>
@@ -680,7 +684,7 @@ export default function AdminAiGatewayPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-white/[0.07] text-[11px] font-bold uppercase tracking-wider text-zinc-400">
+                  <tr className={cn(isDark ? 'border-b border-white/[0.07] text-[11px] font-bold uppercase tracking-wider text-zinc-400' : 'border-b border-white/[0.07] text-[11px] font-bold uppercase tracking-wider text-slate-600')}>
                     <th className="py-3 px-3">Active</th>
                     <th className="py-3 px-3">Model / Provider</th>
                     <th className="py-3 px-3">Base Price / 1M (Rp)</th>
@@ -703,7 +707,7 @@ export default function AdminAiGatewayPage() {
                           />
                         </td>
                         <td className="py-3 px-3">
-                          <div className="flex items-center gap-1.5 font-bold text-white">
+                          <div className={cn(isDark ? 'flex items-center gap-1.5 font-bold text-white' : 'flex items-center gap-1.5 font-bold text-slate-900')}>
                             <MessageSquare className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
                             <span>{m.name}</span>
                           </div>
@@ -721,7 +725,7 @@ export default function AdminAiGatewayPage() {
                                 onChange={(e) =>
                                   handleModelChange(m.id, 'inputPricePer1M', Number(e.target.value))
                                 }
-                                className="w-24 px-2 py-1 rounded bg-black/60 border border-white/10 text-white font-mono text-xs"
+                                className={cn(isDark ? 'w-24 px-2 py-1 rounded bg-black/60 border border-white/10 text-white font-mono text-xs' : 'w-24 px-2 py-1 rounded bg-white border border-slate-200 text-slate-900 font-mono text-xs')}
                               />
                             </div>
                             <div className="flex items-center gap-1.5">
@@ -732,7 +736,7 @@ export default function AdminAiGatewayPage() {
                                 onChange={(e) =>
                                   handleModelChange(m.id, 'cachePricePer1M', Number(e.target.value))
                                 }
-                                className="w-24 px-2 py-1 rounded bg-black/60 border border-white/10 text-white font-mono text-xs"
+                                className={cn(isDark ? 'w-24 px-2 py-1 rounded bg-black/60 border border-white/10 text-white font-mono text-xs' : 'w-24 px-2 py-1 rounded bg-white border border-slate-200 text-slate-900 font-mono text-xs')}
                               />
                             </div>
                             <div className="flex items-center gap-1.5">
@@ -743,7 +747,7 @@ export default function AdminAiGatewayPage() {
                                 onChange={(e) =>
                                   handleModelChange(m.id, 'outputPricePer1M', Number(e.target.value))
                                 }
-                                className="w-24 px-2 py-1 rounded bg-black/60 border border-white/10 text-white font-mono text-xs"
+                                className={cn(isDark ? 'w-24 px-2 py-1 rounded bg-black/60 border border-white/10 text-white font-mono text-xs' : 'w-24 px-2 py-1 rounded bg-white border border-slate-200 text-slate-900 font-mono text-xs')}
                               />
                             </div>
                           </div>
@@ -761,13 +765,13 @@ export default function AdminAiGatewayPage() {
                                 placeholder="e.g. -20%"
                                 value={m.discountBadge || ''}
                                 onChange={(e) => handleModelChange(m.id, 'discountBadge', e.target.value)}
-                                className="w-28 px-2 py-1 rounded bg-black/60 border border-white/10 text-amber-300 text-xs font-mono"
+                                className={cn(isDark ? 'w-28 px-2 py-1 rounded bg-black/60 border border-white/10 text-amber-300 text-xs font-mono' : 'w-28 px-2 py-1 rounded bg-white border border-slate-200 text-amber-300 text-xs font-mono')}
                               />
                             </div>
                             <AdminCheckbox
                               checked={m.hasPeakPricing}
                               onChange={(checked) => handleModelChange(m.id, 'hasPeakPricing', checked)}
-                              label={<span className="text-[11px] text-zinc-400">Peak 2x Rate</span>}
+                              label={<span className={cn(isDark ? 'text-[11px] text-zinc-400' : 'text-[11px] text-slate-600')}>Peak 2x Rate</span>}
                             />
                           </div>
                         </td>
@@ -786,7 +790,7 @@ export default function AdminAiGatewayPage() {
                                     e.target.value === '' ? null : Number(e.target.value),
                                   )
                                 }
-                                className="w-24 px-2 py-1 rounded bg-black/60 border border-white/10 text-zinc-300 font-mono text-xs"
+                                className={cn(isDark ? 'w-24 px-2 py-1 rounded bg-black/60 border border-white/10 text-zinc-300 font-mono text-xs' : 'w-24 px-2 py-1 rounded bg-white border border-slate-200 text-slate-700 font-mono text-xs')}
                               />
                             </div>
                             <div className="flex items-center gap-1.5">
@@ -802,7 +806,7 @@ export default function AdminAiGatewayPage() {
                                     e.target.value === '' ? null : Number(e.target.value),
                                   )
                                 }
-                                className="w-24 px-2 py-1 rounded bg-black/60 border border-white/10 text-zinc-300 font-mono text-xs"
+                                className={cn(isDark ? 'w-24 px-2 py-1 rounded bg-black/60 border border-white/10 text-zinc-300 font-mono text-xs' : 'w-24 px-2 py-1 rounded bg-white border border-slate-200 text-slate-700 font-mono text-xs')}
                               />
                             </div>
                           </div>
@@ -840,12 +844,12 @@ export default function AdminAiGatewayPage() {
                 {filteredImageModels.map((img) => (
                   <div
                     key={img.modelId}
-                    className="p-3.5 rounded-xl bg-black/40 border border-white/[0.07] flex items-center justify-between gap-3"
+                    className={cn(isDark ? 'p-3.5 rounded-xl bg-black/40 border border-white/[0.07] flex items-center justify-between gap-3' : 'p-3.5 rounded-xl bg-slate-50 border border-white/[0.07] flex items-center justify-between gap-3')}
                   >
                     <div>
-                      <div className="font-bold text-white text-xs">{img.name}</div>
+                      <div className={cn(isDark ? 'font-bold text-white text-xs' : 'font-bold text-slate-900 text-xs')}>{img.name}</div>
                       <div className="text-[11px] text-zinc-500 font-mono">{img.modelId}</div>
-                      <div className="text-[10px] text-zinc-400 mt-1">
+                      <div className={cn(isDark ? 'text-[10px] text-zinc-400 mt-1' : 'text-[10px] text-slate-600 mt-1')}>
                         Sizes: {img.sizes.join(', ')} • Max {img.maxN} img
                       </div>
                     </div>
@@ -870,11 +874,11 @@ export default function AdminAiGatewayPage() {
         <div className="bg-[#111115] border border-white/[0.07] rounded-2xl p-5 sm:p-6 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h2 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+              <h2 className={cn(isDark ? 'text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2' : 'text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2')}>
                 <Users className="w-4 h-4 text-cyan-400" />
                 Customer AI Credit Balances & Auto Top-Up Status
               </h2>
-              <p className="text-xs text-zinc-400 mt-0.5">
+              <p className={cn(isDark ? 'text-xs text-zinc-400 mt-0.5' : 'text-xs text-slate-600 mt-0.5')}>
                 View and manage dedicated AI Gateway balances (`aiBalance`) and auto top-up settings for each customer.
               </p>
             </div>
@@ -886,7 +890,7 @@ export default function AdminAiGatewayPage() {
                 value={customerSearch}
                 onChange={(e) => setCustomerSearch(e.target.value)}
                 placeholder="Search customer name or email..."
-                className="w-full pl-9 pr-3.5 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white focus:border-cyan-400 focus:outline-none"
+                className={cn(isDark ? 'w-full pl-9 pr-3.5 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white focus:border-cyan-400 focus:outline-none' : 'w-full pl-9 pr-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:border-cyan-400 focus:outline-none')}
               />
             </div>
           </div>
@@ -894,7 +898,7 @@ export default function AdminAiGatewayPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-white/[0.07] text-[11px] font-bold uppercase tracking-wider text-zinc-400">
+                <tr className={cn(isDark ? 'border-b border-white/[0.07] text-[11px] font-bold uppercase tracking-wider text-zinc-400' : 'border-b border-white/[0.07] text-[11px] font-bold uppercase tracking-wider text-slate-600')}>
                   <th className="py-3 px-3">Customer</th>
                   <th className="py-3 px-3">AI Credit Balance</th>
                   <th className="py-3 px-3">Masdika Main Wallet</th>
@@ -914,7 +918,7 @@ export default function AdminAiGatewayPage() {
                   filteredCustomers.map((c) => (
                     <tr key={c.id} className="hover:bg-white/[0.02]">
                       <td className="py-3 px-3">
-                        <div className="font-bold text-white">{c.name || 'Unnamed User'}</div>
+                        <div className={cn(isDark ? 'font-bold text-white' : 'font-bold text-slate-900')}>{c.name || 'Unnamed User'}</div>
                         <div className="text-[11px] text-zinc-500">{c.email} (ID #{c.id})</div>
                       </td>
                       <td className="py-3 px-3">
@@ -922,7 +926,7 @@ export default function AdminAiGatewayPage() {
                           Rp {(c.aiBalance || 0).toLocaleString('id-ID')}
                         </span>
                       </td>
-                      <td className="py-3 px-3 font-mono text-zinc-300">
+                      <td className={cn(isDark ? 'py-3 px-3 font-mono text-zinc-300' : 'py-3 px-3 font-mono text-slate-700')}>
                         Rp {(c.balance || 0).toLocaleString('id-ID')}
                       </td>
                       <td className="py-3 px-3">
@@ -932,14 +936,14 @@ export default function AdminAiGatewayPage() {
                             {(c.aiAutoTopupAmount || 0).toLocaleString('id-ID')})
                           </span>
                         ) : (
-                          <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-zinc-400 text-[11px]">
+                          <span className={cn(isDark ? 'inline-flex items-center px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-zinc-400 text-[11px]' : 'inline-flex items-center px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-slate-600 text-[11px]')}>
                             Disabled
                           </span>
                         )}
                       </td>
-                      <td className="py-3 px-3 text-zinc-300">
-                        <span className="font-semibold text-white">{c._count?.aiGatewayKeys || 0}</span> keys •{' '}
-                        <span className="font-semibold text-white">{c._count?.aiUsageLogs || 0}</span> requests
+                      <td className={cn(isDark ? 'py-3 px-3 text-zinc-300' : 'py-3 px-3 text-slate-700')}>
+                        <span className={cn(isDark ? 'font-semibold text-white' : 'font-semibold text-slate-900')}>{c._count?.aiGatewayKeys || 0}</span> keys •{' '}
+                        <span className={cn(isDark ? 'font-semibold text-white' : 'font-semibold text-slate-900')}>{c._count?.aiUsageLogs || 0}</span> requests
                       </td>
                       <td className="py-3 px-3 text-right">
                         <button
@@ -964,7 +968,7 @@ export default function AdminAiGatewayPage() {
       {activeTab === 'logs' && (
         <div className="bg-[#111115] border border-white/[0.07] rounded-2xl p-5 sm:p-6 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <h2 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <h2 className={cn(isDark ? 'text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2' : 'text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2')}>
               <ShieldCheck className="w-4 h-4 text-cyan-400" />
               Recent AI Gateway Requests & Profit Breakdown
             </h2>
@@ -976,7 +980,7 @@ export default function AdminAiGatewayPage() {
                 value={logSearch}
                 onChange={(e) => setLogSearch(e.target.value)}
                 placeholder="Filter by customer, key, or model..."
-                className="w-full pl-9 pr-3.5 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white focus:border-cyan-400 focus:outline-none"
+                className={cn(isDark ? 'w-full pl-9 pr-3.5 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white focus:border-cyan-400 focus:outline-none' : 'w-full pl-9 pr-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:border-cyan-400 focus:outline-none')}
               />
             </div>
           </div>
@@ -984,7 +988,7 @@ export default function AdminAiGatewayPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-white/[0.07] text-[11px] font-bold uppercase tracking-wider text-zinc-400">
+                <tr className={cn(isDark ? 'border-b border-white/[0.07] text-[11px] font-bold uppercase tracking-wider text-zinc-400' : 'border-b border-white/[0.07] text-[11px] font-bold uppercase tracking-wider text-slate-600')}>
                   <th className="py-2.5 px-3">Time</th>
                   <th className="py-2.5 px-3">Customer</th>
                   <th className="py-2.5 px-3">Key</th>
@@ -1008,31 +1012,31 @@ export default function AdminAiGatewayPage() {
                     const upstreamRp = Number(log.upstreamCostRp ?? 0);
                     return (
                       <tr key={log.id} className="hover:bg-white/[0.02]">
-                        <td className="py-2.5 px-3 text-zinc-400 whitespace-nowrap">
+                        <td className={cn(isDark ? 'py-2.5 px-3 text-zinc-400 whitespace-nowrap' : 'py-2.5 px-3 text-slate-600 whitespace-nowrap')}>
                           {new Date(log.createdAt).toLocaleString('id-ID')}
                         </td>
                         <td className="py-2.5 px-3">
-                          <div className="text-white font-medium">{log.user?.name || 'User'}</div>
+                          <div className={cn(isDark ? 'text-white font-medium' : 'text-slate-900 font-medium')}>{log.user?.name || 'User'}</div>
                           <div className="text-[11px] text-zinc-500">{log.user?.email || '-'}</div>
                         </td>
-                        <td className="py-2.5 px-3 font-mono text-zinc-400">
+                        <td className={cn(isDark ? 'py-2.5 px-3 font-mono text-zinc-400' : 'py-2.5 px-3 font-mono text-slate-600')}>
                           {log.apiKey ? `${log.apiKey.name} (${log.apiKey.keyPrefix}...)` : 'Playground'}
                         </td>
                         <td className="py-2.5 px-3">
                           <div className="font-mono text-cyan-400">{log.modelId}</div>
                           <div className="text-[10px] text-zinc-500 font-mono">{log.endpoint}</div>
                         </td>
-                        <td className="py-2.5 px-3 font-mono text-zinc-300">
+                        <td className={cn(isDark ? 'py-2.5 px-3 font-mono text-zinc-300' : 'py-2.5 px-3 font-mono text-slate-700')}>
                           {Number(log.inputTokens || 0).toLocaleString('id-ID')} /{' '}
                           {Number(log.outputTokens || 0).toLocaleString('id-ID')}
                         </td>
-                        <td className="py-2.5 px-3 font-mono font-bold text-white">
+                        <td className={cn(isDark ? 'py-2.5 px-3 font-mono font-bold text-white' : 'py-2.5 px-3 font-mono font-bold text-slate-900')}>
                           Rp {costRp.toLocaleString('id-ID')}
                         </td>
                         <td className="py-2.5 px-3 font-mono text-emerald-400">
                           +Rp {(costRp - upstreamRp).toLocaleString('id-ID')}
                         </td>
-                        <td className="py-2.5 px-3 font-mono text-zinc-400">{log.latencyMs ?? 0} ms</td>
+                        <td className={cn(isDark ? 'py-2.5 px-3 font-mono text-zinc-400' : 'py-2.5 px-3 font-mono text-slate-600')}>{log.latencyMs ?? 0} ms</td>
                       </tr>
                     );
                   })
@@ -1046,15 +1050,15 @@ export default function AdminAiGatewayPage() {
       {/* MODAL: ADJUST CUSTOMER AI BALANCE */}
       {adjustModalCustomer && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md bg-[#111115] border border-white/10 rounded-2xl p-6 shadow-2xl space-y-5">
+          <div className={cn(isDark ? 'w-full max-w-md bg-[#111115] border border-white/10 rounded-2xl p-6 shadow-2xl space-y-5' : 'w-full max-w-md bg-[#111115] border border-slate-200 rounded-2xl p-6 shadow-2xl space-y-5')}>
             <div className="flex items-center justify-between border-b border-white/[0.07] pb-3.5">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
                   <Wallet className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white">Adjust Customer AI Balance</h3>
-                  <p className="text-[11px] text-zinc-400">
+                  <h3 className={cn(isDark ? 'text-sm font-bold text-white' : 'text-sm font-bold text-slate-900')}>Adjust Customer AI Balance</h3>
+                  <p className={cn(isDark ? 'text-[11px] text-zinc-400' : 'text-[11px] text-slate-600')}>
                     {adjustModalCustomer.name || 'Customer'} ({adjustModalCustomer.email})
                   </p>
                 </div>
@@ -1062,14 +1066,14 @@ export default function AdminAiGatewayPage() {
               <button
                 type="button"
                 onClick={() => setAdjustModalCustomer(null)}
-                className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/5"
+                className={cn(isDark ? 'p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/5' : 'p-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100')}
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <form onSubmit={handleConfirmAdjustBalance} className="space-y-4">
-              <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-black/40 border border-white/[0.06]">
+              <div className={cn(isDark ? 'grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-black/40 border border-white/[0.06]' : 'grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-slate-50 border border-white/[0.06]')}>
                 <div>
                   <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
                     Current AI Credit
@@ -1082,14 +1086,14 @@ export default function AdminAiGatewayPage() {
                   <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
                     Main Wallet Balance
                   </div>
-                  <div className="text-base font-bold text-white font-mono mt-0.5">
+                  <div className={cn(isDark ? 'text-base font-bold text-white font-mono mt-0.5' : 'text-base font-bold text-slate-900 font-mono mt-0.5')}>
                     Rp {(adjustModalCustomer.balance || 0).toLocaleString('id-ID')}
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
+                <label className={cn(isDark ? 'block text-xs font-semibold text-zinc-300 mb-1.5' : 'block text-xs font-semibold text-slate-700 mb-1.5')}>
                   Adjustment Action
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -1108,7 +1112,7 @@ export default function AdminAiGatewayPage() {
                         className={`flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                           active
                             ? 'bg-cyan-500/15 border-cyan-400 text-cyan-300'
-                            : 'bg-black/40 border-white/10 text-zinc-400 hover:text-white'
+                            : isDark ? 'bg-black/40 border-white/10 text-zinc-400 hover:text-white' : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900'
                         }`}
                       >
                         <Icon className="w-3.5 h-3.5" />
@@ -1120,7 +1124,7 @@ export default function AdminAiGatewayPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
+                <label className={cn(isDark ? 'block text-xs font-semibold text-zinc-300 mb-1.5' : 'block text-xs font-semibold text-slate-700 mb-1.5')}>
                   Amount (IDR)
                 </label>
                 <input
@@ -1129,7 +1133,7 @@ export default function AdminAiGatewayPage() {
                   step={1000}
                   value={adjustAmount}
                   onChange={(e) => setAdjustAmount(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/10 text-sm text-white font-mono focus:border-cyan-400 focus:outline-none"
+                  className={cn(isDark ? 'w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/10 text-sm text-white font-mono focus:border-cyan-400 focus:outline-none' : 'w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 font-mono focus:border-cyan-400 focus:outline-none')}
                   required
                 />
                 <div className="flex flex-wrap gap-1.5 mt-2">
@@ -1138,7 +1142,7 @@ export default function AdminAiGatewayPage() {
                       key={preset}
                       type="button"
                       onClick={() => setAdjustAmount(String(preset))}
-                      className="px-2.5 py-1 rounded-lg bg-white/[0.04] hover:bg-cyan-500/15 border border-white/[0.08] hover:border-cyan-500/30 text-[11px] font-mono text-zinc-300 hover:text-cyan-300 transition-all cursor-pointer"
+                      className={cn(isDark ? 'px-2.5 py-1 rounded-lg bg-white/[0.04] hover:bg-cyan-500/15 border border-white/[0.08] hover:border-cyan-500/30 text-[11px] font-mono text-zinc-300 hover:text-cyan-300 transition-all cursor-pointer' : 'px-2.5 py-1 rounded-lg bg-white/[0.04] hover:bg-cyan-500/15 border border-white/[0.08] hover:border-cyan-500/30 text-[11px] font-mono text-slate-700 hover:text-cyan-300 transition-all cursor-pointer')}
                     >
                       Rp {preset.toLocaleString('id-ID')}
                     </button>
@@ -1158,7 +1162,7 @@ export default function AdminAiGatewayPage() {
                 <button
                   type="button"
                   onClick={() => setAdjustModalCustomer(null)}
-                  className="px-4 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-xs font-semibold text-zinc-300 cursor-pointer"
+                  className={cn(isDark ? 'px-4 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-xs font-semibold text-zinc-300 cursor-pointer' : 'px-4 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-xs font-semibold text-slate-700 cursor-pointer')}
                 >
                   Cancel
                 </button>
