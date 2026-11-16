@@ -109,6 +109,15 @@ export async function DELETE(
       },
     });
 
+    const { settleServicePaygInvoices } = await import("@/lib/payg-invoice");
+    await settleServicePaygInvoices(prisma, {
+      userId: app.userId,
+      serviceIdField: "appServiceId",
+      serviceId: app.id,
+      serviceName: app.name,
+      type: "MANAGED_APP",
+    });
+
     const clientIp = getClientIp(req);
     await logClientActivity({
       userId: user.id,

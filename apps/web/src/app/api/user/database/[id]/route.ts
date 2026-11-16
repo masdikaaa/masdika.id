@@ -92,6 +92,15 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       },
     });
 
+    const { settleServicePaygInvoices } = await import("@/lib/payg-invoice");
+    await settleServicePaygInvoices(prisma, {
+      userId: db.userId,
+      serviceIdField: "databaseServiceId",
+      serviceId: db.id,
+      serviceName: db.name,
+      type: "MANAGED_DATABASE",
+    });
+
     return NextResponse.json({ success: true, message: "Database instance terminated" });
   } catch (error: any) {
     console.error("Error terminating database:", error);

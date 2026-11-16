@@ -6,6 +6,7 @@ import { ProxmoxClient } from "@/lib/proxmox";
 import { logger } from "@/lib/logger";
 import { getEffectiveHourlyRate } from "@/lib/vps-billing-rate";
 import { verifyCronSecret } from "@/lib/cron-auth";
+import { settleServicePaygInvoices } from "@/lib/payg-invoice";
 
 export async function GET(req: Request) {
   try {
@@ -216,6 +217,10 @@ export async function GET(req: Request) {
           where: { id: expSub.id },
           data: { status: 'TERMINATED', autoRenew: false },
         });
+        await settleServicePaygInvoices(prisma, {
+          userId: expSub.userId,
+          subscriptionId: expSub.id,
+        });
         subTerminated++;
 
         try {
@@ -309,6 +314,10 @@ export async function GET(req: Request) {
                  await prisma.vpsService.update({
                    where: { id: vps.id },
                    data: { status: "TERMINATED", vmid: null, vpcIp: null, vpcId: null }
+                 });
+                 await settleServicePaygInvoices(prisma, {
+                   userId: vps.userId,
+                   vpsServiceId: vps.id,
                  });
                  
                  // Free IP Addresses and Detach Reserved IPs
@@ -722,6 +731,13 @@ export async function GET(req: Request) {
           where: { id: expDb.id },
           data: { status: 'TERMINATED' }
         });
+        await settleServicePaygInvoices(prisma, {
+          userId: expDb.userId,
+          serviceIdField: 'databaseServiceId',
+          serviceId: expDb.id,
+          serviceName: expDb.name,
+          type: 'MANAGED_DATABASE',
+        });
         dbTerminated++;
 
         // Send termination notification email
@@ -847,6 +863,13 @@ export async function GET(req: Request) {
           where: { id: expApp.id },
           data: { status: 'TERMINATED' }
         });
+        await settleServicePaygInvoices(prisma, {
+          userId: expApp.userId,
+          serviceIdField: 'appServiceId',
+          serviceId: expApp.id,
+          serviceName: expApp.name,
+          type: 'MANAGED_APP',
+        });
         appTerminated++;
 
         // Send termination notification email
@@ -960,6 +983,13 @@ export async function GET(req: Request) {
         await prisma.objectStorageService.update({
           where: { id: expObj.id },
           data: { status: 'TERMINATED' },
+        });
+        await settleServicePaygInvoices(prisma, {
+          userId: expObj.userId,
+          serviceIdField: 'objectStorageServiceId',
+          serviceId: expObj.id,
+          serviceName: expObj.name,
+          type: 'OBJECT_STORAGE',
         });
         objTerminated++;
 

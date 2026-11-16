@@ -186,6 +186,101 @@ export async function upsertPaygRunningInvoice(
 }
 
 /**
+ * Finalizes any active PAYG_RUNNING invoice(s) for a terminated/deleted service
+ * so Billing History immediately switches from "PAYG RUNNING" to "Paid".
+ */
+export async function settleServicePaygInvoices(
+  tx: any,
+  params: {
+    userId: number;
+    serviceIdField?: ServiceIdField;
+    serviceId?: number;
+    serviceName?: string;
+    vpsServiceId?: number;
+    subscriptionId?: number;
+    reservedIpId?: number;
+    type?: string;
+  }
+): Promise<void> {
+  if (!tx?.invoice?.findMany || !tx?.invoice?.updateMany) return;
+
+  if (params.vpsServiceId) {
+    await tx.invoice.updateMany({
+      where: {
+        userId: params.userId,
+        vpsServiceId: params.vpsServiceId,
+        OR: [{ reference: 'PAYG_RUNNING' }, { status: 'PAYG_RUNNING' }],
+      },
+      data: {
+        status: 'PAID',
+        reference: 'PAYG_COMPLETED',
+        paymentMethod: 'Account Balance',
+      },
+    });
+    return;
+  }
+
+  if (params.subscriptionId) {
+    await tx.invoice.updateMany({
+      where: {
+        userId: params.userId,
+        subscriptionId: params.subscriptionId,
+        OR: [{ reference: 'PAYG_RUNNING' }, { status: 'PAYG_RUNNING' }],
+      },
+      data: {
+        status: 'PAID',
+        reference: 'PAYG_COMPLETED',
+        paymentMethod: 'Account Balance',
+      },
+    });
+    return;
+  }
+
+  const runningInvoices = await tx.invoice.findMany({
+    where: {
+      userId: params.userId,
+      OR: [{ reference: 'PAYG_RUNNING' }, { status: 'PAYG_RUNNING' }],
+      ...(params.type ? { type: params.type } : {}),
+    },
+  });
+
+  const matchedIds: number[] = [];
+  for (const inv of runningInvoices) {
+    if (params.reservedIpId && inv.details) {
+      try {
+        if (Number(JSON.parse(inv.details)?.reservedIpId) === params.reservedIpId) {
+          matchedIds.push(inv.id);
+          continue;
+        }
+      } catch {
+        if (inv.details.includes(`"reservedIpId":${params.reservedIpId}`)) {
+          matchedIds.push(inv.id);
+          continue;
+        }
+      }
+    }
+    if (
+      params.serviceIdField &&
+      params.serviceId !== undefined &&
+      matchesServiceInvoice(inv, params.serviceIdField, params.serviceId, params.serviceName)
+    ) {
+      matchedIds.push(inv.id);
+    }
+  }
+
+  if (matchedIds.length > 0) {
+    await tx.invoice.updateMany({
+      where: { id: { in: matchedIds }, userId: params.userId },
+      data: {
+        status: 'PAID',
+        reference: 'PAYG_COMPLETED',
+        paymentMethod: 'Account Balance',
+      },
+    });
+  }
+}
+
+/**
  * Idempotent reconciliation for a user's active PAYG services:
  * - Backfills missing INV-PAYG-... invoices for services created before unified billing.
  * - Normalizes legacy INV-S3-... / status=PAYG_RUNNING invoices to INV-PAYG-... & PAID.
@@ -196,7 +291,7 @@ export async function reconcileUserPaygInvoices(userId: number): Promise<void> {
 
   const activeStatuses = ['PROVISIONING', 'RUNNING', 'STOPPED', 'SUSPENDED', 'ACTIVE'];
 
-  const [apps, dbs, s3s, reservedIps, existingInvoices] = await Promise.all([
+  const [apps, dbs, s3s, reservedIps, vpsServices, subscriptions, existingInvoices] = await Promise.all([
     prisma.appService.findMany({
       where: { userId, billingMode: 'PAYG', status: { in: activeStatuses } },
     }),
@@ -209,12 +304,25 @@ export async function reconcileUserPaygInvoices(userId: number): Promise<void> {
     prisma.reservedIp.findMany({
       where: { userId, hourlyRate: { gt: 0 } },
     }),
+    prisma.vpsService?.findMany
+      ? prisma.vpsService.findMany({
+          where: { userId, status: { in: activeStatuses } },
+          select: { id: true },
+        })
+      : Promise.resolve([]),
+    prisma.subscription?.findMany
+      ? prisma.subscription.findMany({
+          where: { userId, status: { in: activeStatuses } },
+          select: { id: true },
+        })
+      : Promise.resolve([]),
     prisma.invoice.findMany({
       where: {
         userId,
         OR: [
           { type: { in: ['MANAGED_APP', 'MANAGED_DATABASE', 'OBJECT_STORAGE', 'IP_RESERVATION'] } },
           { invoiceNumber: { startsWith: 'INV-S3-' } },
+          { reference: 'PAYG_RUNNING' },
           { status: 'PAYG_RUNNING' },
         ],
       },
@@ -445,5 +553,53 @@ export async function reconcileUserPaygInvoices(userId: number): Promise<void> {
         });
       }
     }
+  }
+
+  // Finalize any PAYG_RUNNING invoices whose underlying service is no longer active (terminated/deleted)
+  const activeVpsIds = new Set(vpsServices.map((v: { id: number }) => v.id));
+  const activeSubIds = new Set(subscriptions.map((s: { id: number }) => s.id));
+  const activeIpIds = new Set(reservedIps.map((ip) => ip.id));
+
+  const staleRunningIds: number[] = [];
+  for (const inv of existingInvoices) {
+    if (inv.reference !== 'PAYG_RUNNING' && inv.status !== 'PAYG_RUNNING') continue;
+
+    let isStillActive = false;
+    if (inv.type === 'MANAGED_APP') {
+      isStillActive = apps.some((a) => matchesServiceInvoice(inv, 'appServiceId', a.id, a.name));
+    } else if (inv.type === 'MANAGED_DATABASE') {
+      isStillActive = dbs.some((d) => matchesServiceInvoice(inv, 'databaseServiceId', d.id, d.name));
+    } else if (inv.type === 'OBJECT_STORAGE') {
+      isStillActive = s3s.some((s) => matchesServiceInvoice(inv, 'objectStorageServiceId', s.id, s.name));
+    } else if (inv.type === 'IP_RESERVATION') {
+      try {
+        const ipId = Number(inv.details ? JSON.parse(inv.details)?.reservedIpId : NaN);
+        isStillActive = activeIpIds.has(ipId);
+      } catch {
+        isStillActive = false;
+      }
+    } else if (inv.vpsServiceId || inv.type === 'VPS') {
+      isStillActive = inv.vpsServiceId ? activeVpsIds.has(inv.vpsServiceId) : false;
+    } else if (inv.subscriptionId) {
+      isStillActive = activeSubIds.has(inv.subscriptionId);
+    } else {
+      // Other PAYG_RUNNING invoice without a matching active service
+      isStillActive = false;
+    }
+
+    if (!isStillActive) {
+      staleRunningIds.push(inv.id);
+    }
+  }
+
+  if (staleRunningIds.length > 0 && prisma?.invoice?.updateMany) {
+    await prisma.invoice.updateMany({
+      where: { id: { in: staleRunningIds }, userId },
+      data: {
+        status: 'PAID',
+        reference: 'PAYG_COMPLETED',
+        paymentMethod: 'Account Balance',
+      },
+    });
   }
 }

@@ -266,6 +266,14 @@ export async function DELETE(
         terminationDate: new Date(),
       },
     });
+    const { settleServicePaygInvoices } = await import('@/lib/payg-invoice');
+    await settleServicePaygInvoices(tx, {
+      userId: service.userId,
+      serviceIdField: 'objectStorageServiceId',
+      serviceId: service.id,
+      serviceName: service.name,
+      type: 'OBJECT_STORAGE',
+    });
   });
 
   if (service.user?.email) {

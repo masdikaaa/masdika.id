@@ -293,5 +293,11 @@ export async function DELETE(
     },
   });
 
+  const { settleServicePaygInvoices } = await import('@/lib/payg-invoice');
+  await settleServicePaygInvoices(prisma, {
+    userId,
+    subscriptionId: sub.id,
+  });
+
   return NextResponse.json({ success: true });
 }
