@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from './prisma';
 import { decryptDeterministic } from './encryption';
 import { checkRateLimit } from './rate-limit';
+import { getUserServicesCommitment } from './billing-commitment';
 
 export interface AiModelSeed {
   modelId: string;
@@ -818,10 +819,14 @@ export async function tryAutoTopupAiBalance(userId: number): Promise<number> {
   }
 
   const updated = await prisma.$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT id FROM "User" WHERE id = ${userId} FOR UPDATE`;
+    const commitment = await getUserServicesCommitment(userId, tx);
+    const requiredWallet = commitment.totalMonthly + totalWalletDeduction;
+
     const res = await tx.user.updateMany({
       where: {
         id: userId,
-        balance: { gte: totalWalletDeduction },
+        balance: { gte: requiredWallet },
         aiBalance: { lt: u.aiAutoTopupThreshold },
       },
       data: {

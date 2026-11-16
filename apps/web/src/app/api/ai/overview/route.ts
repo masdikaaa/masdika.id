@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getAiGatewayConfig } from '@/lib/ai-gateway';
+import { getUserServicesCommitment } from '@/lib/billing-commitment';
 import {
   AI_MGMT_MIN_TOPUP,
   AI_TOPUP_PACKS,
@@ -19,8 +20,13 @@ export async function GET(req: NextRequest) {
   if ('error' in auth) return auth.error;
 
   const { user } = auth.ctx;
-  const config = await getAiGatewayConfig();
+  const [config, commitment] = await Promise.all([
+    getAiGatewayConfig(),
+    getUserServicesCommitment(user.id),
+  ]);
   const held = 0;
+  const lockedCommitment = commitment.totalMonthly;
+  const availableWalletBalance = Math.max(0, user.balance - lockedCommitment);
 
   return aiMgmtSuccess({
     balance: user.aiBalance,
@@ -28,6 +34,8 @@ export async function GET(req: NextRequest) {
     freeCredit: 0,
     available: Math.max(0, user.aiBalance - held),
     walletBalance: user.balance,
+    lockedCommitment,
+    availableWalletBalance,
     limitedCredit: [],
     autoTopup: {
       enabled: user.aiAutoTopupEnabled,

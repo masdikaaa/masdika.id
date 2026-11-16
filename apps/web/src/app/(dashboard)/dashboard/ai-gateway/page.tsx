@@ -165,6 +165,8 @@ export default function CustomerAiGatewayPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [enabled, setEnabled] = useState(true);
   const [walletBalance, setWalletBalance] = useState(0);
+  const [lockedCommitment, setLockedCommitment] = useState(0);
+  const [availableWalletBalance, setAvailableWalletBalance] = useState(0);
   const [aiBalance, setAiBalance] = useState(0);
   const [topupFeeRp, setTopupFeeRp] = useState(5000);
   const [isPeakNow, setIsPeakNow] = useState(false);
@@ -254,6 +256,8 @@ export default function CustomerAiGatewayPage() {
       const d = json.data;
       setEnabled(Boolean(d.enabled));
       setWalletBalance(d.walletBalance ?? 0);
+      setLockedCommitment(d.lockedCommitment ?? 0);
+      setAvailableWalletBalance(d.availableWalletBalance ?? d.walletBalance ?? 0);
       setAiBalance(d.aiBalance ?? d.balance ?? 0);
       setTopupFeeRp(Number(d.topupFeeRp ?? 5000));
       setIsPeakNow(Boolean(d.isPeakNow));
@@ -3055,10 +3059,20 @@ aider --model openai/glm-5.3
 
               <div className={cn('rounded-xl border p-3.5 space-y-1.5 text-xs', isDark ? 'bg-[#141418] border-white/[0.08]' : 'bg-slate-50 border-slate-200')}>
                 <div className="flex items-center justify-between">
-                  <span className="text-zinc-400">Masdika Wallet Available</span>
+                  <span className="text-zinc-400">Masdika Wallet Balance</span>
                   <span className={cn('font-mono font-semibold', isDark ? 'text-white' : 'text-slate-900')}>
                     {formatRupiah(walletBalance)}
                   </span>
+                </div>
+                {lockedCommitment > 0 && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-zinc-400">Locked for Active Services</span>
+                    <span className="font-mono text-amber-400">-{formatRupiah(lockedCommitment)}</span>
+                  </div>
+                )}
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-400">Available to Top Up AI</span>
+                  <span className="font-mono font-bold text-cyan-400">{formatRupiah(availableWalletBalance)}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-zinc-400">AI Credit Received</span>
@@ -3095,13 +3109,13 @@ aider --model openai/glm-5.3
                 </button>
                 <button
                   type="submit"
-                  disabled={toppingUp || Number(customTopupAmount) < 5000 || (Number(customTopupAmount) + topupFeeRp) > walletBalance}
+                  disabled={toppingUp || Number(customTopupAmount) < 5000 || (Number(customTopupAmount) + topupFeeRp) > availableWalletBalance}
                   className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 cursor-pointer disabled:opacity-50"
                 >
                   {toppingUp
                     ? 'Processing...'
-                    : (Number(customTopupAmount) + topupFeeRp) > walletBalance
-                    ? 'Insufficient Wallet Balance'
+                    : (Number(customTopupAmount) + topupFeeRp) > availableWalletBalance
+                    ? 'Exceeds Available Balance'
                     : `Confirm Top-Up (${formatRupiah((Number(customTopupAmount) || 0) + topupFeeRp)})`}
                 </button>
               </div>

@@ -2,6 +2,7 @@ import * as crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getAiGatewayConfig } from '@/lib/ai-gateway';
+import { getUserServicesCommitment } from '@/lib/billing-commitment';
 import {
   AI_MGMT_CORS_HEADERS,
   AI_MGMT_MIN_TOPUP,
@@ -74,7 +75,9 @@ export async function POST(req: NextRequest) {
   const totalWalletDeduction = amount + topupFeeRp;
 
   if (dryRun) {
-    const enoughBalance = user.balance >= totalWalletDeduction;
+    const commitment = await getUserServicesCommitment(user.id);
+    const availableWalletBalance = Math.max(0, user.balance - commitment.totalMonthly);
+    const enoughBalance = availableWalletBalance >= totalWalletDeduction;
     return aiMgmtSuccess({
       dryRun: true,
       currency: 'IDR',
@@ -86,6 +89,8 @@ export async function POST(req: NextRequest) {
       packBonus,
       campaignBonus: 0,
       walletBalance: user.balance,
+      lockedCommitment: commitment.totalMonthly,
+      availableWalletBalance,
       walletBalanceAfter: user.balance - totalWalletDeduction,
       enoughBalance,
       aiBalance: user.aiBalance,
@@ -110,15 +115,26 @@ export async function POST(req: NextRequest) {
 
   try {
     const result = await prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT id FROM "User" WHERE id = ${user.id} FOR UPDATE`;
+      const commitment = await getUserServicesCommitment(user.id, tx);
+      const requiredWallet = commitment.totalMonthly + totalWalletDeduction;
+
       const res = await tx.user.updateMany({
-        where: { id: user.id, balance: { gte: totalWalletDeduction } },
+        where: { id: user.id, balance: { gte: requiredWallet } },
         data: {
           balance: { decrement: totalWalletDeduction },
           aiBalance: { increment: amount + packBonus },
         },
       });
 
-      if (res.count === 0) return null;
+      if (res.count === 0) {
+        const fresh = await tx.user.findUnique({ where: { id: user.id }, select: { balance: true } });
+        return {
+          insufficient: true as const,
+          lockedCommitment: commitment.totalMonthly,
+          available: Math.max(0, (fresh?.balance ?? 0) - commitment.totalMonthly),
+        };
+      }
 
       const invoiceNumber = `INV-AI-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(2).toString('hex').toUpperCase()}`;
       const invoice = await tx.invoice.create({
@@ -148,15 +164,19 @@ export async function POST(req: NextRequest) {
         select: { balance: true, aiBalance: true },
       });
 
-      return { updatedUser, invoice };
+      return { insufficient: false as const, updatedUser, invoice };
     });
 
-    if (!result) {
+    if (result.insufficient) {
+      const lockNote =
+        result.lockedCommitment > 0
+          ? ` Rp ${result.lockedCommitment.toLocaleString('id-ID')} is locked for active service commitments; available balance: Rp ${result.available.toLocaleString('id-ID')}.`
+          : '';
       const errBody = {
         success: false,
         error: {
           code: 'INSUFFICIENT_WALLET',
-          message: `Insufficient Masdika wallet balance. Required Rp ${totalWalletDeduction.toLocaleString('id-ID')} (incl. Rp ${topupFeeRp.toLocaleString('id-ID')} platform fee).`,
+          message: `Insufficient uncommitted Masdika wallet balance. Required Rp ${totalWalletDeduction.toLocaleString('id-ID')} (incl. Rp ${topupFeeRp.toLocaleString('id-ID')} platform fee).${lockNote}`,
         },
       };
       await idem.complete(402, errBody);

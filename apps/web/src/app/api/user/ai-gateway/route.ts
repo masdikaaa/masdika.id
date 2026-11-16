@@ -2,6 +2,7 @@ import * as crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth-middleware';
+import { getUserServicesCommitment } from '@/lib/billing-commitment';
 import {
   DEFAULT_AI_IMAGE_MODELS,
   applyMarkupPrice,
@@ -28,7 +29,7 @@ export async function GET() {
     const now = new Date();
     const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
 
-    const [dbUser, config, models, keys, usageLogs, aggregate, monthAggregate, monthByModel] =
+    const [dbUser, config, commitment, models, keys, usageLogs, aggregate, monthAggregate, monthByModel] =
       await Promise.all([
         prisma.user.findUnique({
           where: { id: user.id },
@@ -41,6 +42,7 @@ export async function GET() {
           },
         }),
         getAiGatewayConfig(),
+        getUserServicesCommitment(user.id),
         prisma.aiModel.findMany({
           where: { isActive: true },
           orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
@@ -99,11 +101,17 @@ export async function GET() {
         }),
       ]);
 
+    const walletBalance = dbUser?.balance ?? user.balance;
+    const lockedCommitment = commitment.totalMonthly;
+    const availableWalletBalance = Math.max(0, walletBalance - lockedCommitment);
+
     return NextResponse.json({
       success: true,
       data: {
         enabled: config.enabled && Boolean(config.upstreamKey),
-        walletBalance: dbUser?.balance ?? user.balance,
+        walletBalance,
+        lockedCommitment,
+        availableWalletBalance,
         aiBalance: dbUser?.aiBalance ?? 0,
         balance: dbUser?.aiBalance ?? 0,
         autoTopup: {
@@ -204,15 +212,26 @@ export async function POST(req: NextRequest) {
       const totalWalletDeduction = amount + topupFeeRp;
 
       const result = await prisma.$transaction(async (tx) => {
+        await tx.$executeRaw`SELECT id FROM "User" WHERE id = ${user.id} FOR UPDATE`;
+        const commitment = await getUserServicesCommitment(user.id, tx);
+        const requiredWallet = commitment.totalMonthly + totalWalletDeduction;
+
         const res = await tx.user.updateMany({
-          where: { id: user.id, balance: { gte: totalWalletDeduction } },
+          where: { id: user.id, balance: { gte: requiredWallet } },
           data: {
             balance: { decrement: totalWalletDeduction },
             aiBalance: { increment: amount },
           },
         });
 
-        if (res.count === 0) return null;
+        if (res.count === 0) {
+          const fresh = await tx.user.findUnique({
+            where: { id: user.id },
+            select: { balance: true },
+          });
+          const available = Math.max(0, (fresh?.balance ?? 0) - commitment.totalMonthly);
+          return { insufficient: true as const, lockedCommitment: commitment.totalMonthly, available };
+        }
 
         const invoiceNumber = `INV-AI-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(2).toString('hex').toUpperCase()}`;
         const invoice = await tx.invoice.create({
@@ -242,13 +261,17 @@ export async function POST(req: NextRequest) {
           select: { balance: true, aiBalance: true },
         });
 
-        return { updatedUser, invoice };
+        return { insufficient: false as const, updatedUser, invoice };
       });
 
-      if (!result) {
+      if (result.insufficient) {
+        const lockNote =
+          result.lockedCommitment > 0
+            ? ` Rp ${result.lockedCommitment.toLocaleString('id-ID')} is locked for active service commitments; available wallet balance: Rp ${result.available.toLocaleString('id-ID')}.`
+            : '';
         return NextResponse.json(
           {
-            error: `Insufficient Masdika wallet balance. Required Rp ${totalWalletDeduction.toLocaleString('id-ID')} (incl. Rp ${topupFeeRp.toLocaleString('id-ID')} platform fee).`,
+            error: `Insufficient uncommitted Masdika wallet balance. Required Rp ${totalWalletDeduction.toLocaleString('id-ID')} (incl. Rp ${topupFeeRp.toLocaleString('id-ID')} platform fee).${lockNote}`,
           },
           { status: 402 }
         );
