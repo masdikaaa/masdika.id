@@ -51,26 +51,38 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     const { name, service = "VPS" } = body;
+    const normalizedService = typeof service === "string" ? service.trim().toUpperCase() : "VPS";
 
-    if (service !== "VPS" && service !== "RESELLER") {
+    if (
+      normalizedService !== "VPS" &&
+      normalizedService !== "RESELLER" &&
+      normalizedService !== "AI" &&
+      normalizedService !== "ALL"
+    ) {
       return NextResponse.json({ error: "Unsupported API key service type" }, { status: 400 });
     }
 
     const safeName = typeof name === "string" && name.trim().length > 0
       ? name.trim().slice(0, 64)
+      : normalizedService === "AI"
+      ? "AI Management Key"
+      : normalizedService === "ALL"
+      ? "Account Master Key"
       : "VPS API Key";
 
     const key = `masdika_${crypto.randomBytes(24).toString('hex')}`;
 
     const newKey = await prisma.$transaction(async (tx) => {
-      const vpsCount = await tx.vpsService.count({
-        where: {
-          userId: user.id,
-          status: { in: LIVE_VPS_STATUSES },
-        },
-      });
-      if (vpsCount === 0) {
-        throw new Error("NO_VPS_ORDERED");
+      if (normalizedService === "VPS" || normalizedService === "RESELLER") {
+        const vpsCount = await tx.vpsService.count({
+          where: {
+            userId: user.id,
+            status: { in: LIVE_VPS_STATUSES },
+          },
+        });
+        if (vpsCount === 0) {
+          throw new Error("NO_VPS_ORDERED");
+        }
       }
 
       const existingCount = await tx.apiKey.count({
@@ -85,7 +97,7 @@ export async function POST(req: NextRequest) {
           name: safeName,
           key,
           userId: user.id,
-          service: "VPS"
+          service: normalizedService
         }
       });
     });

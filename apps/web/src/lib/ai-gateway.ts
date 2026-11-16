@@ -1047,7 +1047,7 @@ export async function releaseAiBalanceHold(userId: number, holdRp: number): Prom
 
 export async function recordAiUsageAndCharge(params: {
   userId: number;
-  apiKeyId: number;
+  apiKeyId: number | null;
   requestId: string;
   modelId: string;
   endpoint: string;
@@ -1080,19 +1080,21 @@ export async function recordAiUsageAndCharge(params: {
       });
     }
 
-    if (params.costRp > 0) {
-      await tx.aiGatewayKey.update({
-        where: { id: params.apiKeyId },
-        data: {
-          monthlySpent: { increment: params.costRp },
-          lastUsedAt: new Date(),
-        },
-      });
-    } else {
-      await tx.aiGatewayKey.update({
-        where: { id: params.apiKeyId },
-        data: { lastUsedAt: new Date() },
-      });
+    if (params.apiKeyId !== null && params.apiKeyId !== undefined) {
+      if (params.costRp > 0) {
+        await tx.aiGatewayKey.update({
+          where: { id: params.apiKeyId },
+          data: {
+            monthlySpent: { increment: params.costRp },
+            lastUsedAt: new Date(),
+          },
+        });
+      } else {
+        await tx.aiGatewayKey.update({
+          where: { id: params.apiKeyId },
+          data: { lastUsedAt: new Date() },
+        });
+      }
     }
 
     await tx.aiUsageLog.create({

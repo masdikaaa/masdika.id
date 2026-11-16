@@ -3343,6 +3343,135 @@ aider --model openai/glm-5.3
               </table>
             </div>
           </div>
+
+          <div className={cn('rounded-2xl border p-4 sm:p-6 space-y-4', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="text-sm font-bold uppercase tracking-wider text-cyan-400">
+                  5. Management API ({`${origin}/api/ai`})
+                </h3>
+                <p className={cn('text-xs mt-1 leading-relaxed', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+                  Read prices, AI balance, usage &amp; metrics, revoke AI keys, top up AI balance from your wallet, configure auto top-up, generate images, and send non-streaming chat replies programmatically using a Masdika API Key (<code className="text-cyan-400 font-mono">masdika_...</code> with <code className="font-mono">AI</code> or <code className="font-mono">ALL</code> scope). Gateway keys (<code className="font-mono">masdika_ai_...</code>) are rejected on management routes.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleCopy(`${origin}/api/ai`, 'mgmt-base', 'Management Base URL copied')}
+                className={cn(
+                  'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-mono shrink-0 cursor-pointer',
+                  isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-cyan-400 hover:border-cyan-500/40' : 'bg-slate-50 border-slate-200 text-cyan-700 hover:border-cyan-500/50'
+                )}
+              >
+                <span>{origin}/api/ai</span>
+                {copiedId === 'mgmt-base' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+
+            <div className="overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              <table className="w-full min-w-[620px] text-left text-xs border-collapse">
+                <thead>
+                  <tr className={cn('border-b text-[11px] uppercase', isDark ? 'border-white/[0.08] text-zinc-400' : 'border-slate-200 text-slate-500')}>
+                    <th className="py-2.5 pr-4 whitespace-nowrap">Method &amp; Path</th>
+                    <th className="py-2.5 px-4 whitespace-nowrap">Key Scope</th>
+                    <th className="py-2.5 pl-4">Purpose</th>
+                  </tr>
+                </thead>
+                <tbody className={cn('divide-y font-mono', isDark ? 'divide-white/[0.06] text-zinc-300' : 'divide-slate-100 text-slate-700')}>
+                  <tr>
+                    <td className="py-2 pr-4 text-cyan-400 whitespace-nowrap">GET /api/ai/models</td>
+                    <td className="py-2 px-4 font-sans whitespace-nowrap">AI / ALL</td>
+                    <td className="py-2 pl-4 font-sans text-zinc-400">List all active chat models &amp; imageModels with live IDR pricing.</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4 text-cyan-400 whitespace-nowrap">GET /api/ai/overview</td>
+                    <td className="py-2 px-4 font-sans whitespace-nowrap">Account / AI</td>
+                    <td className="py-2 pl-4 font-sans text-zinc-400">AI balance, wallet balance, auto top-up settings, and top-up packs.</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4 text-cyan-400 whitespace-nowrap">GET /api/ai/usage</td>
+                    <td className="py-2 px-4 font-sans whitespace-nowrap">AI / ALL</td>
+                    <td className="py-2 pl-4 font-sans text-zinc-400">Recent requests (max 100) and monthly per-model breakdown (?keyId, ?model, ?limit, ?page).</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4 text-cyan-400 whitespace-nowrap">GET /api/ai/metrics</td>
+                    <td className="py-2 px-4 font-sans whitespace-nowrap">AI / ALL</td>
+                    <td className="py-2 pl-4 font-sans text-zinc-400">Hourly (24h) or daily (7d/30d) WIB series, p95 latency, cache hit rate &amp; comparison.</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4 text-cyan-400 whitespace-nowrap">GET /api/ai/keys · DELETE /api/ai/keys/{'{keyId}'}</td>
+                    <td className="py-2 px-4 font-sans whitespace-nowrap">AI / ALL</td>
+                    <td className="py-2 pl-4 font-sans text-zinc-400">List active/revoked AI Gateway keys (no secrets) and revoke keys immediately.</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4 text-cyan-400 whitespace-nowrap">POST /api/ai/topup</td>
+                    <td className="py-2 px-4 font-sans whitespace-nowrap">Account / AI</td>
+                    <td className="py-2 pl-4 font-sans text-zinc-400">Move funds from Masdika Wallet to AI Balance. Supports ?dryRun=true and requires Idempotency-Key.</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4 text-cyan-400 whitespace-nowrap">PUT /api/ai/auto-topup</td>
+                    <td className="py-2 px-4 font-sans whitespace-nowrap">Account / AI</td>
+                    <td className="py-2 pl-4 font-sans text-zinc-400">Configure automatic wallet-to-AI refill (?dryRun=true supported).</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4 text-cyan-400 whitespace-nowrap">POST /api/ai/images · GET /api/ai/images · GET /api/ai/images/{'{requestId}'}</td>
+                    <td className="py-2 px-4 font-sans whitespace-nowrap">AI / ALL</td>
+                    <td className="py-2 pl-4 font-sans text-zinc-400">Generate &amp; poll images (supports ?dryRun=true &amp; Idempotency-Key).</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4 text-cyan-400 whitespace-nowrap">POST /api/ai/chat</td>
+                    <td className="py-2 px-4 font-sans whitespace-nowrap">AI / ALL</td>
+                    <td className="py-2 pl-4 font-sans text-zinc-400">Non-streaming single chat completion billed to AI balance (95s timeout).</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className={cn('rounded-xl border overflow-hidden', isDark ? 'border-white/[0.08] bg-[#0b0d12]' : 'border-slate-200 bg-slate-50')}>
+              <div className={cn('px-3.5 py-2 border-b flex items-center justify-between', isDark ? 'border-white/[0.06] bg-[#12151e]' : 'border-slate-200 bg-slate-100')}>
+                <span className={cn('text-[11px] font-mono font-semibold', isDark ? 'text-zinc-300' : 'text-slate-700')}>
+                  Management API Examples (cURL - dryRun &amp; Idempotency-Key)
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleCopy(
+                      `# 1. Check AI Balance & Wallet Overview\ncurl ${origin}/api/ai/overview \\\n  -H "Authorization: Bearer masdika_YOUR_API_KEY"\n\n# 2. Preview Top-Up (dryRun=true, Rp 0 charged)\ncurl -X POST "${origin}/api/ai/topup?dryRun=true" \\\n  -H "Authorization: Bearer masdika_YOUR_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{ "amount": 100000 }'\n\n# 3. Execute Top-Up (requires Idempotency-Key)\ncurl -X POST ${origin}/api/ai/topup \\\n  -H "Authorization: Bearer masdika_YOUR_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -H "Idempotency-Key: ai-topup-2026-11-16-0001" \\\n  -d '{ "amount": 100000 }'\n\n# 4. Non-streaming Chat via Management Key\ncurl -X POST ${origin}/api/ai/chat \\\n  -H "Authorization: Bearer masdika_YOUR_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{ "model": "glm-5.3", "messages": [{ "role": "user", "content": "Hello!" }], "maxTokens": 200 }'`,
+                      'mgmt-curl',
+                      'Management API examples copied'
+                    )
+                  }
+                  className={cn('inline-flex items-center gap-1 text-xs font-semibold cursor-pointer', isDark ? 'text-cyan-400 hover:text-cyan-300' : 'text-cyan-700 hover:text-cyan-800')}
+                >
+                  {copiedId === 'mgmt-curl' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  Copy
+                </button>
+              </div>
+              <pre className={cn('p-3.5 text-[11px] font-mono overflow-x-auto leading-relaxed', isDark ? 'text-zinc-200' : 'text-slate-800')}>
+                <code>{`# 1. Check AI Balance & Wallet Overview
+curl ${origin}/api/ai/overview \\
+  -H "Authorization: Bearer masdika_YOUR_API_KEY"
+
+# 2. Preview Top-Up (dryRun=true, Rp 0 charged)
+curl -X POST "${origin}/api/ai/topup?dryRun=true" \\
+  -H "Authorization: Bearer masdika_YOUR_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{ "amount": 100000 }'
+
+# 3. Execute Top-Up (requires Idempotency-Key)
+curl -X POST ${origin}/api/ai/topup \\
+  -H "Authorization: Bearer masdika_YOUR_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -H "Idempotency-Key: ai-topup-2026-11-16-0001" \\
+  -d '{ "amount": 100000 }'
+
+# 4. Non-streaming Chat via Management Key
+curl -X POST ${origin}/api/ai/chat \\
+  -H "Authorization: Bearer masdika_YOUR_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{ "model": "glm-5.3", "messages": [{ "role": "user", "content": "Hello!" }], "maxTokens": 200 }'`}</code>
+              </pre>
+            </div>
+          </div>
         </div>
       )}
 
