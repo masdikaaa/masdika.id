@@ -10,6 +10,7 @@ import {
   estimatePromptTokensFromBody,
   generateAiGatewayKey,
   getAiGatewayConfig,
+  isModelAllowedForKey,
   isPeakHourWib,
   recordAiUsageAndCharge,
   tryAutoTopupAiBalance,
@@ -53,6 +54,8 @@ export async function GET() {
             keyPrefix: true,
             monthlyLimit: true,
             monthlySpent: true,
+            allowedModels: true,
+            expiresAt: true,
             isActive: true,
             lastUsedAt: true,
             createdAt: true,
@@ -295,9 +298,23 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      if (keyRecord.expiresAt && keyRecord.expiresAt <= new Date()) {
+        return NextResponse.json(
+          { error: 'Selected AI API key has expired. Choose or create another key.' },
+          { status: 401 }
+        );
+      }
+
       const model = await prisma.aiModel.findUnique({ where: { modelId } });
       if (!model || !model.isActive) {
         return NextResponse.json({ error: `Model '${modelId}' not found.` }, { status: 404 });
+      }
+
+      if (!isModelAllowedForKey(keyRecord, model.modelId)) {
+        return NextResponse.json(
+          { error: `Selected API key is not permitted to use model '${model.modelId}'.` },
+          { status: 403 }
+        );
       }
 
       let currentAiBalance = await tryAutoTopupAiBalance(user.id);
@@ -498,6 +515,20 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      if (keyRecord.expiresAt && keyRecord.expiresAt <= new Date()) {
+        return NextResponse.json(
+          { error: 'Selected AI API key has expired. Choose or create another key.' },
+          { status: 401 }
+        );
+      }
+
+      if (!isModelAllowedForKey(keyRecord, modelId)) {
+        return NextResponse.json(
+          { error: `Selected API key is not permitted to use image model '${modelId}'.` },
+          { status: 403 }
+        );
+      }
+
       const config = await getAiGatewayConfig();
       if (!config.enabled || !config.upstreamKey) {
         return NextResponse.json({ error: 'AI Gateway is currently unavailable.' }, { status: 503 });
@@ -600,6 +631,36 @@ export async function POST(req: NextRequest) {
       monthlyLimit = parsedLimit;
     }
 
+    let expiresAt: Date | null = null;
+    if (body?.expiresInDays !== undefined && body.expiresInDays !== null && body.expiresInDays !== '') {
+      const days = Number(body.expiresInDays);
+      if (!Number.isSafeInteger(days) || days < 1 || days > 3650) {
+        return NextResponse.json(
+          { error: 'Expiration must be between 1 and 3650 days (or empty for no expiry).' },
+          { status: 400 }
+        );
+      }
+      expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+    }
+
+    let allowedModels: string[] = [];
+    if (Array.isArray(body?.allowedModels) && body.allowedModels.length > 0) {
+      const cleaned = Array.from(
+        new Set(
+          body.allowedModels
+            .filter((x: unknown): x is string => typeof x === 'string' && x.trim().length > 0)
+            .map((x: string) => x.trim()),
+        ),
+      ).slice(0, 200);
+      if (cleaned.length === 0) {
+        return NextResponse.json(
+          { error: 'Please select at least one allowed model or disable model restriction.' },
+          { status: 400 }
+        );
+      }
+      allowedModels = cleaned as string[];
+    }
+
     const { rawKey, keyHash, keyPrefix } = generateAiGatewayKey();
 
     const created = await prisma.$transaction(async (tx) => {
@@ -613,6 +674,8 @@ export async function POST(req: NextRequest) {
           keyHash,
           keyPrefix,
           monthlyLimit,
+          allowedModels,
+          expiresAt,
         },
         select: {
           id: true,
@@ -620,6 +683,8 @@ export async function POST(req: NextRequest) {
           keyPrefix: true,
           monthlyLimit: true,
           monthlySpent: true,
+          allowedModels: true,
+          expiresAt: true,
           isActive: true,
           createdAt: true,
         },

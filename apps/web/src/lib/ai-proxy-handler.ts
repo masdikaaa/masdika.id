@@ -9,6 +9,7 @@ import {
   ensureAiModelsExist,
   estimatePromptTokensFromBody,
   getAiGatewayConfig,
+  isModelAllowedForKey,
   parseContextWindowTokens,
   recordAiUsageAndCharge,
   releaseAiBalanceHold,
@@ -216,6 +217,16 @@ export async function handleAiProxyRequest(
       `Model '${modelId}' not found or disabled.`,
       'model_not_found',
       404,
+      requestId,
+      errorFormat
+    );
+  }
+
+  if (!isModelAllowedForKey(auth.keyRecord, model.modelId)) {
+    return aiGatewayError(
+      `This API key is not permitted to use model '${model.modelId}'.`,
+      'model_not_allowed',
+      403,
       requestId,
       errorFormat
     );

@@ -37,6 +37,7 @@ import { cn } from '@/lib/utils';
 import { formatRupiah } from '@/lib/billing';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Select } from '@/components/ui/Select';
+import { AdminCheckbox } from '@/components/ui/AdminCheckbox';
 
 interface AiModelItem {
   id: number;
@@ -74,6 +75,8 @@ interface AiKeyItem {
   keyPrefix: string;
   monthlyLimit: number | null;
   monthlySpent: number;
+  allowedModels?: string[];
+  expiresAt?: string | null;
   isActive: boolean;
   lastUsedAt: string | null;
   createdAt: string;
@@ -201,6 +204,10 @@ export default function CustomerAiGatewayPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newKeyName, setNewKeyName] = useState('');
   const [newMonthlyLimit, setNewMonthlyLimit] = useState('');
+  const [newKeyExpiresDays, setNewKeyExpiresDays] = useState('');
+  const [restrictModels, setRestrictModels] = useState(false);
+  const [selectedAllowedModels, setSelectedAllowedModels] = useState<string[]>([]);
+  const [keyModelSearch, setKeyModelSearch] = useState('');
   const [creating, setCreating] = useState(false);
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
   const [deletingKey, setDeletingKey] = useState<AiKeyItem | null>(null);
@@ -371,6 +378,10 @@ export default function CustomerAiGatewayPage() {
 
   const handleCreateKey = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (restrictModels && selectedAllowedModels.length === 0) {
+      toast.error('Please select at least 1 allowed model or disable model restriction.');
+      return;
+    }
     setCreating(true);
     try {
       const res = await fetch('/api/user/ai-gateway', {
@@ -379,6 +390,8 @@ export default function CustomerAiGatewayPage() {
         body: JSON.stringify({
           name: newKeyName.trim() || 'AI Gateway Key',
           monthlyLimit: newMonthlyLimit ? Number(newMonthlyLimit) : null,
+          expiresInDays: newKeyExpiresDays ? Number(newKeyExpiresDays) : null,
+          allowedModels: restrictModels ? selectedAllowedModels : [],
         }),
       });
       const json = await res.json();
@@ -386,6 +399,10 @@ export default function CustomerAiGatewayPage() {
       setRevealedKey(json.rawKey);
       setNewKeyName('');
       setNewMonthlyLimit('');
+      setNewKeyExpiresDays('');
+      setRestrictModels(false);
+      setSelectedAllowedModels([]);
+      setKeyModelSearch('');
       setIsCreateOpen(false);
       toast.success('AI Gateway API Key created');
       await fetchData();
@@ -1447,7 +1464,23 @@ aider --model openai/glm-5.3`,
                   {keys.map((k) => (
                     <tr key={k.id} className={cn(isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-slate-50')}>
                       <td className={cn('px-5 py-4 font-bold', isDark ? 'text-white' : 'text-slate-900')}>
-                        {k.name}
+                        <div>{k.name}</div>
+                        <div className="flex flex-wrap items-center gap-1.5 mt-1 font-normal">
+                          {k.allowedModels && k.allowedModels.length > 0 ? (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
+                              {k.allowedModels.length} {k.allowedModels.length === 1 ? 'model' : 'models'} only
+                            </span>
+                          ) : (
+                            <span className={cn('inline-flex items-center px-2 py-0.5 rounded-md text-[10px] border', isDark ? 'bg-white/[0.04] border-white/[0.08] text-zinc-400' : 'bg-slate-100 border-slate-200 text-slate-600')}>
+                              All models
+                            </span>
+                          )}
+                          {k.expiresAt && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-mono bg-amber-500/10 border border-amber-500/20 text-amber-400">
+                              Exp: {new Date(k.expiresAt).toLocaleDateString('id-ID')}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-4 py-4 font-mono text-xs text-cyan-400">
                         {k.keyPrefix}••••••••
@@ -3162,9 +3195,17 @@ aider --model openai/glm-5.3`,
       {/* Create Key Modal */}
       {isCreateOpen && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className={cn('w-full max-w-md rounded-2xl border p-6 space-y-5 shadow-2xl', isDark ? 'bg-[#0c0c0e] border-white/[0.1]' : 'bg-white border-slate-200')}>
+          <div className={cn('w-full max-w-xl rounded-2xl border p-5 sm:p-6 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto', isDark ? 'bg-[#0c0c0e] border-white/[0.1]' : 'bg-white border-slate-200')}>
             <div className="flex items-center justify-between">
-              <h3 className={cn('text-lg font-bold', isDark ? 'text-white' : 'text-slate-900')}>Create AI Gateway Key</h3>
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/25 text-cyan-400 flex items-center justify-center">
+                  <Key className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className={cn('text-base font-bold', isDark ? 'text-white' : 'text-slate-900')}>Create AI Gateway Key</h3>
+                  <p className="text-[11px] text-zinc-400">Configure label, spend cap, expiry, and model access scope.</p>
+                </div>
+              </div>
               <button type="button" onClick={() => setIsCreateOpen(false)} className="text-zinc-400 hover:text-white cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
@@ -3184,20 +3225,148 @@ aider --model openai/glm-5.3`,
                   className={cn('w-full px-3.5 py-2.5 rounded-xl text-sm border outline-none focus:border-cyan-500', isDark ? 'bg-[#141418] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
                 />
               </div>
-              <div>
-                <label className={cn('text-xs font-bold uppercase tracking-wider block mb-1.5', isDark ? 'text-zinc-400' : 'text-slate-600')}>
-                  Monthly Spend Limit (Rp) - Optional
-                </label>
-                <input
-                  type="number"
-                  min={1000}
-                  step={1000}
-                  value={newMonthlyLimit}
-                  onChange={(e) => setNewMonthlyLimit(e.target.value)}
-                  placeholder="Leave empty for unlimited"
-                  className={cn('w-full px-3.5 py-2.5 rounded-xl text-sm border outline-none focus:border-cyan-500', isDark ? 'bg-[#141418] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
-                />
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className={cn('text-xs font-bold uppercase tracking-wider block mb-1.5', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+                    Monthly Limit (Rp) - Optional
+                  </label>
+                  <input
+                    type="number"
+                    min={1000}
+                    step={1000}
+                    value={newMonthlyLimit}
+                    onChange={(e) => setNewMonthlyLimit(e.target.value)}
+                    placeholder="Unlimited"
+                    className={cn('w-full px-3.5 py-2.5 rounded-xl text-sm border outline-none focus:border-cyan-500 font-mono', isDark ? 'bg-[#141418] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
+                  />
+                </div>
+                <div>
+                  <label className={cn('text-xs font-bold uppercase tracking-wider block mb-1.5', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+                    Expires In (Days) - Optional
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={3650}
+                    value={newKeyExpiresDays}
+                    onChange={(e) => setNewKeyExpiresDays(e.target.value)}
+                    placeholder="Never expires"
+                    className={cn('w-full px-3.5 py-2.5 rounded-xl text-sm border outline-none focus:border-cyan-500 font-mono', isDark ? 'bg-[#141418] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
+                  />
+                </div>
               </div>
+
+              {/* Masdika Cyan Model Access Scope */}
+              <div className={cn('rounded-xl border p-3.5 space-y-3', isDark ? 'bg-[#141418] border-white/[0.08]' : 'bg-slate-50 border-slate-200')}>
+                <div className="flex items-center justify-between gap-2">
+                  <AdminCheckbox
+                    checked={restrictModels}
+                    onChange={(checked) => setRestrictModels(checked)}
+                    label={
+                      <span className={cn('text-xs font-bold', isDark ? 'text-white' : 'text-slate-900')}>
+                        Only allow selected models
+                      </span>
+                    }
+                  />
+                  {restrictModels && (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
+                      {selectedAllowedModels.length} selected
+                    </span>
+                  )}
+                </div>
+
+                {restrictModels && (
+                  <div className="space-y-2.5 pt-1">
+                    <div className="flex items-center gap-2">
+                      <div className="relative flex-1">
+                        <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                        <input
+                          type="text"
+                          value={keyModelSearch}
+                          onChange={(e) => setKeyModelSearch(e.target.value)}
+                          placeholder="Filter chat or image models..."
+                          className={cn('w-full pl-8 pr-3 py-1.5 rounded-lg text-xs border outline-none focus:border-cyan-500', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-white border-slate-200 text-slate-900')}
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSelectedAllowedModels([
+                            ...models.map((m) => m.modelId),
+                            ...imageModels.map((im) => im.modelId),
+                          ])
+                        }
+                        className="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/25 cursor-pointer"
+                      >
+                        All
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedAllowedModels([])}
+                        className={cn('px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border cursor-pointer', isDark ? 'border-white/10 text-zinc-400 hover:text-white' : 'border-slate-200 text-slate-600')}
+                      >
+                        Clear
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-52 overflow-y-auto pr-1">
+                      {[
+                        ...models.map((m) => ({ modelId: m.modelId, name: m.name, kind: 'Chat' as const })),
+                        ...imageModels.map((im) => ({ modelId: im.modelId, name: im.name, kind: 'Image' as const })),
+                      ]
+                        .filter(
+                          (item) =>
+                            !keyModelSearch.trim() ||
+                            item.name.toLowerCase().includes(keyModelSearch.toLowerCase()) ||
+                            item.modelId.toLowerCase().includes(keyModelSearch.toLowerCase()),
+                        )
+                        .map((item) => {
+                          const isSelected = selectedAllowedModels.includes(item.modelId);
+                          return (
+                            <button
+                              key={item.modelId}
+                              type="button"
+                              onClick={() =>
+                                setSelectedAllowedModels((prev) =>
+                                  prev.includes(item.modelId)
+                                    ? prev.filter((id) => id !== item.modelId)
+                                    : [...prev, item.modelId],
+                                )
+                              }
+                              className={cn(
+                                'flex items-center justify-between gap-2 px-3 py-2 rounded-xl border text-left transition-all cursor-pointer',
+                                isSelected
+                                  ? 'bg-cyan-500/15 border-cyan-400 text-cyan-300 shadow-2xs shadow-cyan-500/10'
+                                  : isDark
+                                  ? 'bg-[#0a0a0c] border-white/[0.08] text-zinc-300 hover:border-cyan-500/40'
+                                  : 'bg-white border-slate-200 text-slate-700 hover:border-cyan-400',
+                              )}
+                            >
+                              <div className="min-w-0">
+                                <div className="text-xs font-bold truncate">{item.name}</div>
+                                <div className="text-[10px] font-mono text-zinc-500 truncate">{item.modelId}</div>
+                              </div>
+                              <span
+                                className={cn(
+                                  'px-1.5 py-0.5 rounded text-[9px] font-bold uppercase shrink-0',
+                                  isSelected
+                                    ? 'bg-cyan-400 text-slate-950'
+                                    : isDark
+                                    ? 'bg-white/[0.06] text-zinc-400'
+                                    : 'bg-slate-100 text-slate-500',
+                                )}
+                              >
+                                {item.kind}
+                              </span>
+                            </button>
+                          );
+                        })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="flex items-center justify-end gap-2 pt-2">
                 <button
                   type="button"
@@ -3208,7 +3377,7 @@ aider --model openai/glm-5.3`,
                 </button>
                 <button
                   type="submit"
-                  disabled={creating}
+                  disabled={creating || (restrictModels && selectedAllowedModels.length === 0)}
                   className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 cursor-pointer disabled:opacity-50"
                 >
                   {creating ? 'Creating...' : 'Create Key'}

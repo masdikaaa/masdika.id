@@ -8,6 +8,7 @@ import {
   authenticateAiGatewayKey,
   ensureAiModelsExist,
   getAiGatewayConfig,
+  isModelAllowedForKey,
 } from '@/lib/ai-gateway';
 
 export const dynamic = 'force-dynamic';
@@ -30,7 +31,8 @@ export async function GET(req: NextRequest) {
     }),
   ]);
 
-  const data = models.map((m) => ({
+  const allowedModels = models.filter((m) => isModelAllowedForKey(auth.keyRecord, m.modelId));
+  const data = allowedModels.map((m) => ({
     id: m.modelId,
     object: 'model',
     type: 'model',

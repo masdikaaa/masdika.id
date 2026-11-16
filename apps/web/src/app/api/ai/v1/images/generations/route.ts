@@ -8,6 +8,7 @@ import {
   applyMarkupPrice,
   authenticateAiGatewayKey,
   getAiGatewayConfig,
+  isModelAllowedForKey,
   recordAiUsageAndCharge,
 } from '@/lib/ai-gateway';
 
@@ -70,6 +71,15 @@ export async function POST(req: NextRequest) {
   const prompt = typeof body.prompt === 'string' ? body.prompt.trim() : '';
   if (!modelId || !prompt) {
     return aiGatewayError('Fields "model" and "prompt" are required.', 'invalid_request', 400, requestId);
+  }
+
+  if (!isModelAllowedForKey(auth.keyRecord, modelId)) {
+    return aiGatewayError(
+      `This API key is not permitted to use image model '${modelId}'.`,
+      'model_not_allowed',
+      403,
+      requestId
+    );
   }
 
   const imgSpec = DEFAULT_AI_IMAGE_MODELS.find((m) => m.modelId === modelId);

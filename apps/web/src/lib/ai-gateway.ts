@@ -883,6 +883,10 @@ export async function authenticateAiGatewayKey(
     return { error: aiGatewayError('Invalid or revoked AI API key.', 'invalid_api_key', 401, requestId, format) };
   }
 
+  if (keyRecord.expiresAt && keyRecord.expiresAt <= new Date()) {
+    return { error: aiGatewayError('This AI API key has expired.', 'expired_api_key', 401, requestId, format) };
+  }
+
   if (keyRecord.user.isSuspended) {
     return { error: aiGatewayError('Your account is suspended.', 'account_suspended', 403, requestId, format) };
   }
@@ -950,6 +954,16 @@ export async function authenticateAiGatewayKey(
   }
 
   return { keyRecord, user: keyRecord.user };
+}
+
+export function isModelAllowedForKey(
+  keyRecord: { allowedModels?: string[] | null } | null | undefined,
+  modelId: string
+): boolean {
+  if (!keyRecord || !Array.isArray(keyRecord.allowedModels) || keyRecord.allowedModels.length === 0) {
+    return true;
+  }
+  return keyRecord.allowedModels.includes(modelId);
 }
 
 export function parseContextWindowTokens(ctx: string | null | undefined): number {

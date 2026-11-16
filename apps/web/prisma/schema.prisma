@@ -1381,20 +1381,22 @@ model AiModel {
 }
 
 model AiGatewayKey {
-  id           Int          @id @default(autoincrement())
-  userId       Int
-  name         String
-  keyHash      String       @unique
-  keyPrefix    String
-  monthlyLimit Int?
-  monthlySpent Int          @default(0)
-  spentResetAt DateTime     @default(now())
-  isActive     Boolean      @default(true)
-  lastUsedAt   DateTime?
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  usageLogs    AiUsageLog[]
+  id            Int          @id @default(autoincrement())
+  userId        Int
+  name          String
+  keyHash       String       @unique
+  keyPrefix     String
+  monthlyLimit  Int?
+  monthlySpent  Int          @default(0)
+  spentResetAt  DateTime     @default(now())
+  allowedModels String[]     @default([])
+  expiresAt     DateTime?
+  isActive      Boolean      @default(true)
+  lastUsedAt    DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  usageLogs     AiUsageLog[]
 
   @@index([userId])
 }
