@@ -65,6 +65,8 @@ model User {
   objectStorageServices ObjectStorageService[]
   objectStorageBuckets  ObjectStorageBucket[]
   objectStorageKeys     ObjectStorageKey[]
+  aiGatewayKeys         AiGatewayKey[]
+  aiUsageLogs           AiUsageLog[]
 
   @@index([createdAt])
 }
@@ -1348,5 +1350,71 @@ model ObjectStorageKey {
 
   @@index([serviceId])
   @@index([userId])
+}
+
+model AiModel {
+  id              Int      @id @default(autoincrement())
+  modelId         String   @unique
+  name            String
+  provider        String
+  contextWindow   String
+  inputPricePer1M         Int
+  cachePricePer1M         Int
+  outputPricePer1M        Int
+  originalInputPricePer1M Int?
+  originalCachePricePer1M Int?
+  originalOutputPricePer1M Int?
+  discountBadge           String?
+  openaiOnly              Boolean  @default(false)
+  hasPeakPricing  Boolean  @default(false)
+  isActive        Boolean  @default(true)
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([provider])
+  @@index([isActive])
+}
+
+model AiGatewayKey {
+  id           Int          @id @default(autoincrement())
+  userId       Int
+  name         String
+  keyHash      String       @unique
+  keyPrefix    String
+  monthlyLimit Int?
+  monthlySpent Int          @default(0)
+  spentResetAt DateTime     @default(now())
+  isActive     Boolean      @default(true)
+  lastUsedAt   DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  usageLogs    AiUsageLog[]
+
+  @@index([userId])
+}
+
+model AiUsageLog {
+  id             Int           @id @default(autoincrement())
+  userId         Int
+  apiKeyId       Int?
+  requestId      String
+  modelId        String
+  endpoint       String
+  inputTokens    Int           @default(0)
+  cachedTokens   Int           @default(0)
+  outputTokens   Int           @default(0)
+  costRp         Int           @default(0)
+  upstreamCostRp Int           @default(0)
+  latencyMs      Int           @default(0)
+  statusCode     Int           @default(200)
+  createdAt      DateTime      @default(now())
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  apiKey         AiGatewayKey? @relation(fields: [apiKeyId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([apiKeyId])
+  @@index([modelId])
 }
 

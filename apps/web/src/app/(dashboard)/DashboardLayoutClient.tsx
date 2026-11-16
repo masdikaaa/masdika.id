@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Key, Settings, LogOut, Bell, Menu, LayoutDashboard, BarChart3, Database, Receipt, HardDrive, Server, Layers, MessageSquare, Wallet, Ticket, Network, Terminal, UploadCloud, MapPin, Flame, Activity, Gift, Clock, Code2, Sun, Moon, ShieldAlert, Loader2, Plus, ChevronDown, Search, Rocket, Boxes } from "lucide-react";
+import { Key, Settings, LogOut, Bell, Menu, LayoutDashboard, BarChart3, Database, Receipt, HardDrive, Server, Layers, MessageSquare, Wallet, Ticket, Network, Terminal, UploadCloud, MapPin, Flame, Activity, Gift, Clock, Code2, Sun, Moon, ShieldAlert, Loader2, Plus, ChevronDown, Search, Rocket, Boxes, Sparkles } from "lucide-react";
 import { SiKubernetes, SiCloudflare } from "react-icons/si";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -89,6 +89,7 @@ const SIDEBAR_LINKS = [
   { name: "Object Storage", href: "/dashboard/object-storage", icon: HardDrive, color: "text-cyan-400", group: "Storage & Data", badge: "New" },
   { name: "File CDN", href: "/dashboard/cdn", icon: UploadCloud, color: "text-cyan-400", group: "Storage & Data" },
   { name: "API VPS", href: "/dashboard/api-vps", icon: Code2, color: "text-cyan-400", group: "Tools" },
+  { name: "AI Gateway", href: "/dashboard/ai-gateway", icon: Sparkles, color: "text-cyan-400", group: "Tools", badge: "New" },
   { name: "Support Tickets", href: "/dashboard/tickets", icon: MessageSquare, color: "text-cyan-400", group: "Support" },
   { name: "Affiliate Program", href: "/dashboard/affiliate", icon: Gift, color: "text-cyan-400", group: "Affiliate" },
   { name: "Promo & Rewards", href: "/dashboard/promos", icon: Ticket, color: "text-cyan-400", group: "Promotions" },
