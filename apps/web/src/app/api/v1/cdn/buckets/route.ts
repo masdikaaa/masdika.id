@@ -58,6 +58,9 @@ export async function DELETE(req: NextRequest) {
   if (auth.permission === 'READ_ONLY') {
     return NextResponse.json({ error: 'API key is READ_ONLY' }, { status: 403 });
   }
+  if (auth.isSuspended) {
+    return NextResponse.json({ error: 'File CDN service is suspended' }, { status: 403 });
+  }
 
   const { searchParams } = new URL(req.url);
   const name = searchParams.get('name') || '';

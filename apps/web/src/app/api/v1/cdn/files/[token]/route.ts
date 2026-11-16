@@ -19,10 +19,18 @@ export async function GET(
   if ('error' in auth) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
+  if (auth.isSuspended) {
+    return NextResponse.json({ error: 'File CDN service is suspended' }, { status: 403 });
+  }
 
   const { token } = await context.params;
   const media = await prisma.secureMedia.findUnique({ where: { token } });
-  if (!media || media.userId !== auth.userId || media.isFolder) {
+  if (
+    !media ||
+    media.userId !== auth.userId ||
+    media.isFolder ||
+    (auth.subscriptionId && media.subscriptionId && media.subscriptionId !== auth.subscriptionId)
+  ) {
     return NextResponse.json({ error: 'File not found' }, { status: 404 });
   }
 
@@ -93,10 +101,18 @@ export async function DELETE(
   if (auth.permission === 'READ_ONLY') {
     return NextResponse.json({ error: 'API key is READ_ONLY' }, { status: 403 });
   }
+  if (auth.isSuspended) {
+    return NextResponse.json({ error: 'File CDN service is suspended' }, { status: 403 });
+  }
 
   const { token } = await context.params;
   const media = await prisma.secureMedia.findUnique({ where: { token } });
-  if (!media || media.userId !== auth.userId || media.isFolder) {
+  if (
+    !media ||
+    media.userId !== auth.userId ||
+    media.isFolder ||
+    (auth.subscriptionId && media.subscriptionId && media.subscriptionId !== auth.subscriptionId)
+  ) {
     return NextResponse.json({ error: 'File not found' }, { status: 404 });
   }
 

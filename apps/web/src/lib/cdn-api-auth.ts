@@ -2,6 +2,16 @@ import * as crypto from 'crypto';
 import { NextRequest } from 'next/server';
 import { prisma } from './prisma';
 import { getSubscriptionInfo } from './subscription';
+import { checkRateLimit } from './rate-limit';
+
+function getClientIp(req: NextRequest): string {
+  return (
+    req.headers.get('cf-connecting-ip')?.trim() ||
+    req.headers.get('x-real-ip')?.trim() ||
+    req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+    'unknown'
+  );
+}
 
 export function hashCdnApiKey(rawKey: string): string {
   return crypto.createHash('sha256').update(rawKey).digest('hex');
@@ -29,8 +39,13 @@ export function extractBearerOrApiKey(req: NextRequest): string | null {
 }
 
 export async function authenticateCdnApiKey(req: NextRequest) {
+  const ip = getClientIp(req);
   const rawKey = extractBearerOrApiKey(req);
   if (!rawKey) {
+    const allowed = await checkRateLimit('CDN_API_BAD_AUTH', ip, 30, 60);
+    if (!allowed) {
+      return { error: 'Too many failed authentication attempts. Please try again later.', status: 429 as const };
+    }
     return { error: 'Missing API key. Provide Authorization: Bearer <key> or x-api-key header.', status: 401 as const };
   }
 
@@ -45,7 +60,16 @@ export async function authenticateCdnApiKey(req: NextRequest) {
   });
 
   if (!record || !record.isActive) {
+    const allowed = await checkRateLimit('CDN_API_BAD_AUTH', ip, 30, 60);
+    if (!allowed) {
+      return { error: 'Too many failed authentication attempts. Please try again later.', status: 429 as const };
+    }
     return { error: 'Invalid or revoked File CDN API key.', status: 401 as const };
+  }
+
+  const reqAllowed = await checkRateLimit('CDN_API_REQ', String(record.userId), 120, 60);
+  if (!reqAllowed) {
+    return { error: 'Rate limit exceeded. Please try again later.', status: 429 as const };
   }
 
   if (record.user.isSuspended) {
