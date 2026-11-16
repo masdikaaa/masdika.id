@@ -151,6 +151,7 @@ export default function AppCheckoutFlow() {
   };
 
   const currentCost = selectedPlan.monthlyPrice;
+  const currentHourlyRate = selectedPlan.hourlyPrice || Math.max(1, Math.ceil(currentCost / 730));
   const totalRequiredBalance = activeCommitment + currentCost;
   const isBalanceInsufficient = !loadingBalance && userBalance < totalRequiredBalance;
   const shortfall = Math.max(0, totalRequiredBalance - userBalance);
@@ -608,22 +609,18 @@ export default function AppCheckoutFlow() {
               </p>
             </div>
 
-            <div>
-              <p className={cn("text-[11px] font-semibold uppercase tracking-wider mb-1", isDark ? "text-zinc-500" : "text-slate-400")}>
-                Billing Cycle
-              </p>
-              <p className={cn("font-bold text-sm", isDark ? "text-white" : "text-slate-900")}>
-                Monthly
-              </p>
-            </div>
-
-            <div className={cn("pt-4 border-t flex items-baseline justify-between", isDark ? "border-white/[0.08]" : "border-slate-200")}>
-              <span className={cn("font-semibold text-xs", isDark ? "text-zinc-400" : "text-slate-600")}>
-                Cost
-              </span>
-              <span className={cn("text-base font-black tracking-tight", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                {formatRupiah(currentCost)}/month
-              </span>
+            <div className={cn("pt-4 border-t space-y-2", isDark ? "border-white/[0.08]" : "border-slate-100")}>
+              <div className="flex items-center justify-between">
+                <span className={cn("text-sm font-bold", isDark ? "text-zinc-400" : "text-slate-500")}>
+                  Estimated Cost
+                </span>
+                <span className="text-xl sm:text-2xl font-black text-cyan-400 font-mono tracking-tight">
+                  {formatRupiah(currentCost)}/month
+                </span>
+              </div>
+              <div className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-400")}>
+                Billed hourly · ~{formatRupiah(currentHourlyRate)}/hr (PAYG)
+              </div>
             </div>
 
             {/* Balance check & Commitment Breakdown (Exact match of DatabaseCheckoutFlow) */}

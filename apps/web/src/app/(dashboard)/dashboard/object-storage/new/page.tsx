@@ -132,6 +132,9 @@ export default function NewObjectStoragePage() {
 
   const selectedPlan = plans.find((p) => p.storageGb === selectedPlanGb) || plans[0];
   const monthlyEstimate = selectedPlan ? selectedPlan.monthlyPrice : 0;
+  const hourlyEstimate = selectedPlan
+    ? selectedPlan.hourlyRate || Math.max(1, Math.ceil(monthlyEstimate / 730))
+    : 0;
   const selectedPlanHasCapacity = capacity
     ? capacity.available && capacity.freeGb >= (selectedPlan?.storageGb || 0)
     : true;
@@ -453,22 +456,18 @@ export default function NewObjectStoragePage() {
                 </div>
               </div>
 
-              <div>
-                <div className={cn('text-[10px] font-bold uppercase tracking-wider mb-1', isDark ? 'text-zinc-500' : 'text-slate-400')}>
-                  BILLING CYCLE
+              <div className={cn('pt-4 border-t space-y-2', isDark ? 'border-white/[0.08]' : 'border-slate-100')}>
+                <div className="flex items-center justify-between">
+                  <span className={cn('text-sm font-bold', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+                    Estimated Cost
+                  </span>
+                  <span className="text-xl sm:text-2xl font-black text-cyan-400 font-mono tracking-tight">
+                    {formatRupiah(monthlyEstimate)}/month
+                  </span>
                 </div>
-                <div className={cn('font-semibold', isDark ? 'text-zinc-200' : 'text-slate-800')}>
-                  Monthly
+                <div className={cn('text-[11px]', isDark ? 'text-zinc-500' : 'text-slate-400')}>
+                  Billed hourly · ~{formatRupiah(hourlyEstimate)}/hr (PAYG)
                 </div>
-              </div>
-
-              <div className={cn('pt-3 border-t flex items-center justify-between', isDark ? 'border-white/[0.08]' : 'border-slate-100')}>
-                <span className={cn('font-semibold', isDark ? 'text-zinc-400' : 'text-slate-600')}>
-                  Cost
-                </span>
-                <span className={cn('text-base font-extrabold font-mono', isDark ? 'text-cyan-400' : 'text-cyan-600')}>
-                  {formatRupiah(monthlyEstimate)}/month
-                </span>
               </div>
 
               {/* Account Balance & Commitment */}
