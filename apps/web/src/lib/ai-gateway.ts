@@ -817,21 +817,50 @@ export async function tryAutoTopupAiBalance(userId: number): Promise<number> {
     return u.aiBalance;
   }
 
-  const res = await prisma.user.updateMany({
-    where: {
-      id: userId,
-      balance: { gte: totalWalletDeduction },
-      aiBalance: { lt: u.aiAutoTopupThreshold },
-    },
-    data: {
-      balance: { decrement: totalWalletDeduction },
-      aiBalance: { increment: u.aiAutoTopupAmount },
-    },
+  const updated = await prisma.$transaction(async (tx) => {
+    const res = await tx.user.updateMany({
+      where: {
+        id: userId,
+        balance: { gte: totalWalletDeduction },
+        aiBalance: { lt: u.aiAutoTopupThreshold },
+      },
+      data: {
+        balance: { decrement: totalWalletDeduction },
+        aiBalance: { increment: u.aiAutoTopupAmount },
+      },
+    });
+    if (res.count === 0) return null;
+
+    const invNum = `INV-AI-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(2).toString('hex').toUpperCase()}`;
+    await tx.invoice.create({
+      data: {
+        invoiceNumber: invNum,
+        merchantOrderId: invNum,
+        userId,
+        amount: totalWalletDeduction,
+        status: 'PAID',
+        type: 'AI_CREDIT',
+        paymentMethod: 'Account Balance',
+        reference: 'AI_CREDIT_AUTO_TOPUP',
+        paidAt: new Date(),
+        details: JSON.stringify({
+          service: 'AI_GATEWAY',
+          aiCreditAmount: u.aiAutoTopupAmount,
+          adminFeeRp: config.topupFeeRp,
+          totalPaidRp: totalWalletDeduction,
+          mode: 'AUTO_TOPUP',
+        }),
+      },
+    });
+
+    const latest = await tx.user.findUnique({
+      where: { id: userId },
+      select: { aiBalance: true },
+    });
+    return latest?.aiBalance ?? u.aiBalance + u.aiAutoTopupAmount;
   });
 
-  if (res.count > 0) {
-    return u.aiBalance + u.aiAutoTopupAmount;
-  }
+  if (updated !== null) return updated;
   const latest = await prisma.user.findUnique({
     where: { id: userId },
     select: { aiBalance: true },

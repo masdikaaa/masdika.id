@@ -1,5 +1,6 @@
 export type InvoiceDisplayCategory =
   | 'TOP_UP'
+  | 'AI_GATEWAY'
   | 'REWARD'
   | 'ADMIN'
   | 'VPS'
@@ -81,6 +82,28 @@ export function getInvoiceDisplayInfo(invoice: any): InvoiceDisplayInfo {
   const invNum = (invoice?.invoiceNumber || '').toUpperCase();
   const paymentMethod = (invoice?.paymentMethod || '').toUpperCase();
   const payg = isPaygInvoice(invoice, details);
+
+  if (type === 'AI_CREDIT' || invNum.startsWith('INV-AI-')) {
+    const aiCredit = Number(details?.aiCreditAmount || invoice?.amount || 0);
+    const fee = Number(details?.adminFeeRp || 0);
+    const isAuto = details?.mode === 'AUTO_TOPUP' || ref === 'AI_CREDIT_AUTO_TOPUP';
+    const fmt = (n: number) => `Rp ${n.toLocaleString('id-ID')}`;
+    const specs: InvoiceSpecBadge[] = [
+      { kind: 'plan', label: `AI Credit: ${fmt(aiCredit)}` },
+    ];
+    if (fee > 0) {
+      specs.push({ kind: 'ip', label: `Platform Fee: ${fmt(fee)}` });
+    }
+    return {
+      category: 'AI_GATEWAY',
+      title: 'AI Gateway Credit',
+      subtitle: isAuto ? 'Auto Top-Up from Masdika Wallet' : 'Manual AI Credit Purchase',
+      description: `Dedicated AI Gateway credit (${fmt(aiCredit)}${fee > 0 ? ` + ${fmt(fee)} platform fee` : ''}) for OpenAI, Responses & Anthropic API usage.`,
+      billingTypeLabel: 'One-Time Credit',
+      specs,
+      parsedDetails: details,
+    };
+  }
 
   if (type === 'TOP_UP') {
     return {

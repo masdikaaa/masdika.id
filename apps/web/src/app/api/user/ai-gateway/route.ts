@@ -203,15 +203,49 @@ export async function POST(req: NextRequest) {
       const topupFeeRp = config.topupFeeRp;
       const totalWalletDeduction = amount + topupFeeRp;
 
-      const res = await prisma.user.updateMany({
-        where: { id: user.id, balance: { gte: totalWalletDeduction } },
-        data: {
-          balance: { decrement: totalWalletDeduction },
-          aiBalance: { increment: amount },
-        },
+      const result = await prisma.$transaction(async (tx) => {
+        const res = await tx.user.updateMany({
+          where: { id: user.id, balance: { gte: totalWalletDeduction } },
+          data: {
+            balance: { decrement: totalWalletDeduction },
+            aiBalance: { increment: amount },
+          },
+        });
+
+        if (res.count === 0) return null;
+
+        const invoiceNumber = `INV-AI-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(2).toString('hex').toUpperCase()}`;
+        const invoice = await tx.invoice.create({
+          data: {
+            invoiceNumber,
+            merchantOrderId: invoiceNumber,
+            userId: user.id,
+            amount: totalWalletDeduction,
+            status: 'PAID',
+            type: 'AI_CREDIT',
+            paymentMethod: 'Account Balance',
+            reference: 'AI_CREDIT_TOPUP',
+            paidAt: new Date(),
+            details: JSON.stringify({
+              service: 'AI_GATEWAY',
+              aiCreditAmount: amount,
+              adminFeeRp: topupFeeRp,
+              totalPaidRp: totalWalletDeduction,
+              mode: 'MANUAL',
+            }),
+          },
+          select: { id: true, invoiceNumber: true },
+        });
+
+        const updatedUser = await tx.user.findUnique({
+          where: { id: user.id },
+          select: { balance: true, aiBalance: true },
+        });
+
+        return { updatedUser, invoice };
       });
 
-      if (res.count === 0) {
+      if (!result) {
         return NextResponse.json(
           {
             error: `Insufficient Masdika wallet balance. Required Rp ${totalWalletDeduction.toLocaleString('id-ID')} (incl. Rp ${topupFeeRp.toLocaleString('id-ID')} platform fee).`,
@@ -220,16 +254,12 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const updatedUser = await prisma.user.findUnique({
-        where: { id: user.id },
-        select: { balance: true, aiBalance: true },
-      });
-
       return NextResponse.json({
         success: true,
-        walletBalance: updatedUser?.balance ?? 0,
-        aiBalance: updatedUser?.aiBalance ?? 0,
+        walletBalance: result.updatedUser?.balance ?? 0,
+        aiBalance: result.updatedUser?.aiBalance ?? 0,
         topupFeeRp,
+        invoiceNumber: result.invoice.invoiceNumber,
       });
     }
 

@@ -17,6 +17,7 @@ import {
   HardDrive,
   Gift,
   Box,
+  Sparkles,
 } from 'lucide-react';
 import { SiKubernetes } from 'react-icons/si';
 import { cn } from '@/lib/utils';
@@ -31,6 +32,9 @@ export function getInvoiceServiceIcon(serviceOrInvoice?: any, className = "w-4 h
     const invNum = (inv.invoiceNumber || '').toUpperCase();
     const pm = (inv.paymentMethod || '').toUpperCase();
 
+    if (t === 'AI_CREDIT' || invNum.startsWith('INV-AI-')) {
+      return <Sparkles className={cn(className, "text-cyan-400")} />;
+    }
     if (t === 'TOP_UP') {
       return <Wallet className={cn(className, "text-emerald-400")} />;
     }
