@@ -2726,8 +2726,8 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
         </div>
 
         {/* Order Summary Sidebar */}
-        <motion.div variants={itemVariants} className="xl:col-span-1 w-full max-w-full min-w-0">
-          <div className={cn("rounded-2xl p-5 sm:p-6 border sticky top-6 relative overflow-hidden w-full max-w-full min-w-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
+        <motion.div variants={itemVariants} className="xl:col-span-1 xl:sticky xl:top-6 xl:self-start w-full max-w-full min-w-0">
+          <div className={cn("rounded-2xl p-5 sm:p-6 border relative overflow-hidden xl:max-h-[calc(100dvh-6.5rem)] xl:overflow-y-auto custom-scrollbar w-full max-w-full min-w-0", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-xs")}>
             <h2 className={cn("text-base sm:text-lg font-bold mb-5 pb-3.5 border-b flex items-center gap-2 relative z-10", isDark ? "text-white border-white/[0.07]" : "text-slate-900 border-slate-100")}>
               <ListChecks className="w-4 h-4 text-cyan-400" />
               {serviceType === "KUBERNETES" ? (isAddWorkerNode ? "Worker Summary" : "Cluster Summary") : "Instance Summary"}
