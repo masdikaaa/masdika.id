@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth-middleware';
+import { invalidateCache } from '@/lib/cache';
 
 const ORDER_KEY  = 'mega_menu_order';
 const BADGES_KEY = 'mega_menu_badges';
@@ -8,7 +9,7 @@ const VALID_KEYS = ['events', 'vacancies', 'community', 'blog', 'series'];
 
 const DEV_ORDER_KEY = 'dev_menu_order';
 const DEV_BADGES_KEY = 'dev_menu_badges';
-const DEV_VALID_KEYS = ['object-storage', 'upload', 'vps', 'app-catalog', 'managed-db', 'managed-apps', 'k3s'];
+const DEV_VALID_KEYS = ['object-storage', 'upload', 'vps', 'app-catalog', 'managed-db', 'managed-apps'];
 
 const COMPANY_ORDER_KEY = 'company_menu_order';
 const COMPANY_BADGES_KEY = 'company_menu_badges';
@@ -196,6 +197,7 @@ export async function PUT(req: Request) {
 
     if (updates.length > 0) {
       await prisma.$transaction(updates);
+      await invalidateCache('settings:menu_order');
     }
 
     return NextResponse.json({ success: true });
