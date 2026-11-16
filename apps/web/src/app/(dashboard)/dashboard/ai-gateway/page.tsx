@@ -3057,68 +3057,106 @@ aider --model openai/glm-5.3
                 </div>
               </div>
 
-              <div className={cn('rounded-xl border p-3.5 space-y-1.5 text-xs', isDark ? 'bg-[#141418] border-white/[0.08]' : 'bg-slate-50 border-slate-200')}>
-                <div className="flex items-center justify-between">
-                  <span className="text-zinc-400">Masdika Wallet Balance</span>
-                  <span className={cn('font-mono font-semibold', isDark ? 'text-white' : 'text-slate-900')}>
-                    {formatRupiah(walletBalance)}
-                  </span>
-                </div>
-                {lockedCommitment > 0 && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-zinc-400">Locked for Active Services</span>
-                    <span className="font-mono text-amber-400">-{formatRupiah(lockedCommitment)}</span>
-                  </div>
-                )}
-                <div className="flex items-center justify-between">
-                  <span className="text-zinc-400">Available to Top Up AI</span>
-                  <span className="font-mono font-bold text-cyan-400">{formatRupiah(availableWalletBalance)}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-zinc-400">AI Credit Received</span>
-                  <span className="font-mono text-zinc-300">{formatRupiah(Number(customTopupAmount) || 0)}</span>
-                </div>
-                {topupFeeRp > 0 && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-zinc-400">Platform Admin Fee</span>
-                    <span className="font-mono text-amber-400">+{formatRupiah(topupFeeRp)}</span>
-                  </div>
-                )}
-                <div className="flex items-center justify-between pt-1.5 border-t border-white/[0.06] font-bold">
-                  <span className={isDark ? 'text-white' : 'text-slate-900'}>Total Wallet Deducted</span>
-                  <span className="font-mono text-cyan-400">
-                    {formatRupiah((Number(customTopupAmount) || 0) + topupFeeRp)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-[11px] text-zinc-400">
-                  <span>AI Balance After Top-Up</span>
-                  <span className="font-mono text-emerald-400">
-                    {formatRupiah(aiBalance + (Number(customTopupAmount) || 0))}
-                  </span>
-                </div>
-              </div>
+              {(() => {
+                const topupCredit = Number(customTopupAmount) || 0;
+                const walletDeducted = topupCredit + topupFeeRp;
+                const totalRequiredBalance = lockedCommitment + walletDeducted;
+                const shortfall = Math.max(0, totalRequiredBalance - walletBalance);
+                const isInsufficient = shortfall > 0;
 
-              <div className="flex items-center justify-end gap-2 pt-1">
-                <button
-                  type="button"
-                  disabled={toppingUp}
-                  onClick={() => setIsTopupModalOpen(false)}
-                  className={cn('px-4 py-2 rounded-xl text-xs font-semibold border cursor-pointer', isDark ? 'border-white/10 text-zinc-300 hover:bg-white/5' : 'border-slate-200 text-slate-600 hover:bg-slate-100')}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={toppingUp || Number(customTopupAmount) < 5000 || (Number(customTopupAmount) + topupFeeRp) > availableWalletBalance}
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 cursor-pointer disabled:opacity-50"
-                >
-                  {toppingUp
-                    ? 'Processing...'
-                    : (Number(customTopupAmount) + topupFeeRp) > availableWalletBalance
-                    ? 'Exceeds Available Balance'
-                    : `Confirm Top-Up (${formatRupiah((Number(customTopupAmount) || 0) + topupFeeRp)})`}
-                </button>
-              </div>
+                return (
+                  <>
+                    <div className={cn('rounded-xl border p-3.5 space-y-2 text-xs', isDark ? 'bg-[#141418] border-white/[0.08]' : 'bg-slate-50 border-slate-200')}>
+                      <div className="flex items-center justify-between">
+                        <span className="text-zinc-400">Account Balance:</span>
+                        <span className={cn('font-mono font-bold', isInsufficient ? 'text-red-400' : isDark ? 'text-white' : 'text-slate-900')}>
+                          {formatRupiah(walletBalance)}
+                        </span>
+                      </div>
+                      {lockedCommitment > 0 && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-zinc-400">Active Services Commitment:</span>
+                          <span className={cn('font-mono font-semibold', isDark ? 'text-zinc-200' : 'text-slate-800')}>
+                            {formatRupiah(lockedCommitment)}/mo
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <span className="text-zinc-400">AI Credit Top-Up:</span>
+                        <span className={cn('font-mono', isDark ? 'text-zinc-200' : 'text-slate-800')}>{formatRupiah(topupCredit)}</span>
+                      </div>
+                      {topupFeeRp > 0 && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-zinc-400">Platform Admin Fee:</span>
+                          <span className="font-mono text-amber-400">+{formatRupiah(topupFeeRp)}</span>
+                        </div>
+                      )}
+                      <div className={cn('flex items-center justify-between pt-2 border-t font-bold', isDark ? 'border-white/[0.08]' : 'border-slate-200')}>
+                        <span className={isDark ? 'text-white' : 'text-slate-900'}>Total Required Balance:</span>
+                        <span className={cn('font-mono', isInsufficient ? 'text-red-400' : 'text-cyan-400')}>
+                          {formatRupiah(totalRequiredBalance)}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-[11px] text-zinc-400">
+                        <span>AI Balance After Top-Up</span>
+                        <span className="font-mono text-emerald-400">
+                          {formatRupiah(aiBalance + topupCredit)}
+                        </span>
+                      </div>
+                    </div>
+
+                    {isInsufficient && (
+                      <div className={cn('rounded-xl border p-3.5 space-y-2.5 text-xs', isDark ? 'bg-red-500/10 border-red-500/30 text-red-200' : 'bg-red-50 border-red-200 text-red-900')}>
+                        <div className="flex items-start gap-2.5">
+                          <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                          <div className="space-y-1">
+                            <div className="font-bold text-red-400">Insufficient Account Balance</div>
+                            <p className={cn('text-[11px] leading-relaxed', isDark ? 'text-red-200/80' : 'text-red-700')}>
+                              {lockedCommitment > 0
+                                ? 'AI top-ups require sufficient balance to cover the accumulated monthly commitment of your active services plus this top-up.'
+                                : 'Your Masdika Wallet balance is not enough to cover this AI credit top-up and platform fee.'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className={cn('flex items-center justify-between pt-2 border-t text-xs font-bold', isDark ? 'border-red-500/20' : 'border-red-200')}>
+                          <span className="text-red-400 font-mono">
+                            Shortfall: {formatRupiah(shortfall)}
+                          </span>
+                          <Link
+                            href="/dashboard/billing"
+                            onClick={() => setIsTopupModalOpen(false)}
+                            className="text-red-400 hover:text-red-300 underline underline-offset-4 whitespace-nowrap"
+                          >
+                            Top Up Balance -&gt;
+                          </Link>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-end gap-2 pt-1">
+                      <button
+                        type="button"
+                        disabled={toppingUp}
+                        onClick={() => setIsTopupModalOpen(false)}
+                        className={cn('px-4 py-2 rounded-xl text-xs font-semibold border cursor-pointer', isDark ? 'border-white/10 text-zinc-300 hover:bg-white/5' : 'border-slate-200 text-slate-600 hover:bg-slate-100')}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={toppingUp || topupCredit < 5000 || isInsufficient}
+                        className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 cursor-pointer disabled:opacity-50"
+                      >
+                        {toppingUp
+                          ? 'Processing...'
+                          : isInsufficient
+                          ? 'Insufficient Balance'
+                          : `Confirm Top-Up (${formatRupiah(walletDeducted)})`}
+                      </button>
+                    </div>
+                  </>
+                );
+              })()}
             </form>
           </div>
         </div>
