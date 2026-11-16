@@ -247,6 +247,7 @@ export const AI_GATEWAY_SETTING_KEYS = {
   UPSTREAM_KEY: 'ai_gateway_upstream_key',
   MANAGEMENT_KEY: 'ai_gateway_management_key',
   MARKUP_PERCENT: 'ai_gateway_markup_percent',
+  TOPUP_FEE_RP: 'ai_gateway_topup_fee_rp',
   LAST_SYNC_AT: 'ai_gateway_last_sync_at',
   LAST_SYNC_STATUS: 'ai_gateway_last_sync_status',
 } as const;
@@ -482,6 +483,7 @@ export async function getAiGatewayConfig() {
           AI_GATEWAY_SETTING_KEYS.UPSTREAM_KEY,
           AI_GATEWAY_SETTING_KEYS.MANAGEMENT_KEY,
           AI_GATEWAY_SETTING_KEYS.MARKUP_PERCENT,
+          AI_GATEWAY_SETTING_KEYS.TOPUP_FEE_RP,
           AI_GATEWAY_SETTING_KEYS.LAST_SYNC_AT,
           AI_GATEWAY_SETTING_KEYS.LAST_SYNC_STATUS,
         ],
@@ -500,6 +502,8 @@ export async function getAiGatewayConfig() {
   const managementKey = rawMgmtKey ? decryptDeterministic(rawMgmtKey) || rawMgmtKey : '';
   const markupRaw = Number(map.get(AI_GATEWAY_SETTING_KEYS.MARKUP_PERCENT) ?? '0');
   const markupPercent = Number.isFinite(markupRaw) && markupRaw >= 0 ? markupRaw : 0;
+  const topupFeeRaw = Number(map.get(AI_GATEWAY_SETTING_KEYS.TOPUP_FEE_RP) ?? '5000');
+  const topupFeeRp = Number.isFinite(topupFeeRaw) && topupFeeRaw >= 0 ? Math.round(topupFeeRaw) : 5000;
   const lastSyncAt = map.get(AI_GATEWAY_SETTING_KEYS.LAST_SYNC_AT) || null;
   const lastSyncStatus = map.get(AI_GATEWAY_SETTING_KEYS.LAST_SYNC_STATUS) || null;
 
@@ -509,6 +513,7 @@ export async function getAiGatewayConfig() {
     upstreamKey,
     managementKey,
     markupPercent,
+    topupFeeRp,
     lastSyncAt,
     lastSyncStatus,
   };
@@ -801,11 +806,13 @@ export async function tryAutoTopupAiBalance(userId: number): Promise<number> {
     },
   });
   if (!u) return 0;
+  const config = await getAiGatewayConfig();
+  const totalWalletDeduction = u.aiAutoTopupAmount + config.topupFeeRp;
   if (
     !u.aiAutoTopupEnabled ||
     u.aiBalance >= u.aiAutoTopupThreshold ||
     u.aiAutoTopupAmount < 5000 ||
-    u.balance < u.aiAutoTopupAmount
+    u.balance < totalWalletDeduction
   ) {
     return u.aiBalance;
   }
@@ -813,11 +820,11 @@ export async function tryAutoTopupAiBalance(userId: number): Promise<number> {
   const res = await prisma.user.updateMany({
     where: {
       id: userId,
-      balance: { gte: u.aiAutoTopupAmount },
+      balance: { gte: totalWalletDeduction },
       aiBalance: { lt: u.aiAutoTopupThreshold },
     },
     data: {
-      balance: { decrement: u.aiAutoTopupAmount },
+      balance: { decrement: totalWalletDeduction },
       aiBalance: { increment: u.aiAutoTopupAmount },
     },
   });

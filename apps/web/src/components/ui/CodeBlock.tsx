@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Copy, Check, Code } from "lucide-react";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { vscDarkPlus, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { useTheme } from "@/components/ThemeProvider";
 
 interface CodeBlockProps {
   code: string;
@@ -210,12 +211,14 @@ export function CodeBlock({
     return <Code className="w-4 h-4 sm:w-5 sm:h-5 text-zinc-400 shrink-0" />;
   };
 
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const displayTitle = title || language;
 
   return (
-    <div className="rounded-xl overflow-hidden shadow-2xl my-8 bg-[#0c1017] border border-slate-700/60 dark:border-white/10 transition-colors">
-      {/* Tab Style Header - Dedicated high-contrast dark terminal header */}
-      <div className="flex items-end justify-between px-3 sm:px-4 pt-2.5 sm:pt-3 bg-[#080c14] border-b border-slate-800/80">
+    <div className={`rounded-xl overflow-hidden shadow-xl my-8 border transition-colors ${isDark ? "bg-[#0c1017] border-white/10" : "bg-white border-slate-200"}`}>
+      {/* Tab Style Header - Adapts to Light/Dark Mode */}
+      <div className={`flex items-end justify-between px-3 sm:px-4 pt-2.5 sm:pt-3 border-b ${isDark ? "bg-[#080c14] border-slate-800/80" : "bg-slate-100 border-slate-200"}`}>
         <div className="flex items-center min-w-0 flex-1 mr-4">
           {/* macOS traffic light buttons */}
           <div className="flex gap-1.5 sm:gap-2 pb-2.5 sm:pb-3 mr-4 sm:mr-6 shrink-0">
@@ -225,9 +228,9 @@ export function CodeBlock({
           </div>
           
           {/* The Tab */}
-          <div className="flex items-center gap-2 bg-[#0c1017] px-3 sm:px-4 py-2 sm:py-2.5 rounded-t-lg border-x border-t border-slate-800/90 shadow-[0_-2px_10px_rgba(0,0,0,0.3)] min-w-0">
+          <div className={`flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-t-lg border-x border-t min-w-0 ${isDark ? "bg-[#0c1017] border-slate-800/90 shadow-[0_-2px_10px_rgba(0,0,0,0.3)]" : "bg-white border-slate-200 shadow-2xs"}`}>
             <div className="shrink-0">{getLanguageIcon()}</div>
-            <span className="text-xs sm:text-sm font-semibold text-slate-200 tracking-wide font-mono truncate">
+            <span className={`text-xs sm:text-sm font-semibold tracking-wide font-mono truncate ${isDark ? "text-slate-200" : "text-slate-800"}`}>
               {displayTitle}
             </span>
           </div>
@@ -235,11 +238,11 @@ export function CodeBlock({
 
         <button
           onClick={copyToClipboard}
-          className="text-zinc-400 hover:text-white transition-colors pb-2.5 sm:pb-3 px-2 flex items-center justify-center shrink-0"
+          className={`transition-colors pb-2.5 sm:pb-3 px-2 flex items-center justify-center shrink-0 cursor-pointer ${isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-900"}`}
           aria-label="Copy code"
         >
           {copied ? (
-            <Check className="w-4 h-4 text-cyan-400" />
+            <Check className="w-4 h-4 text-cyan-500" />
           ) : (
             <Copy className="w-4 h-4" />
           )}
@@ -247,18 +250,17 @@ export function CodeBlock({
       </div>
 
       {/* Code Content */}
-      <div className="bg-[#0c1017] overflow-x-auto hide-scrollbar">
+      <div className={`overflow-x-auto hide-scrollbar ${isDark ? "bg-[#0c1017]" : "bg-slate-50/60"}`}>
         <SyntaxHighlighter
           language={normLang}
-          style={vscDarkPlus}
+          style={isDark ? vscDarkPlus : oneLight}
           showLineNumbers={showLineNumbers}
           wrapLines={false}
           wrapLongLines={false}
           customStyle={{
             margin: 0,
             padding: '1.25rem',
-            backgroundColor: '#0c1017',
-            color: '#fde047',
+            backgroundColor: isDark ? '#0c1017' : '#f8fafc',
             fontSize: '13.5px',
             lineHeight: '1.65',
             whiteSpace: 'pre',
@@ -266,13 +268,13 @@ export function CodeBlock({
             overflowWrap: 'normal',
           }}
           codeTagProps={{
-            className: "font-mono !text-[#fde047]",
+            className: isDark ? "font-mono !text-[#fde047]" : "font-mono",
             style: { 
               fontFamily: 'var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
               whiteSpace: 'pre', 
               wordBreak: 'normal', 
               overflowWrap: 'normal',
-              color: '#fde047'
+              ...(isDark ? { color: '#fde047' } : {}),
             }
           }}
         >

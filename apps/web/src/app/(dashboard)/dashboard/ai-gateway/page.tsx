@@ -163,6 +163,7 @@ export default function CustomerAiGatewayPage() {
   const [enabled, setEnabled] = useState(true);
   const [walletBalance, setWalletBalance] = useState(0);
   const [aiBalance, setAiBalance] = useState(0);
+  const [topupFeeRp, setTopupFeeRp] = useState(5000);
   const [isPeakNow, setIsPeakNow] = useState(false);
   const [models, setModels] = useState<AiModelItem[]>([]);
   const [imageModels, setImageModels] = useState<AiImageModelItem[]>([]);
@@ -251,6 +252,7 @@ export default function CustomerAiGatewayPage() {
       setEnabled(Boolean(d.enabled));
       setWalletBalance(d.walletBalance ?? 0);
       setAiBalance(d.aiBalance ?? d.balance ?? 0);
+      setTopupFeeRp(Number(d.topupFeeRp ?? 5000));
       setIsPeakNow(Boolean(d.isPeakNow));
       if (d.autoTopup) {
         setAutoTopupEnabled(Boolean(d.autoTopup.enabled));
@@ -1796,7 +1798,7 @@ aider --model openai/glm-5.3`,
               <label
                 title="Attach image for vision models"
                 className={cn(
-                  'p-2.5 rounded-xl border transition-colors cursor-pointer shrink-0',
+                  'w-11 h-11 rounded-xl border transition-colors cursor-pointer shrink-0 flex items-center justify-center',
                   isDark
                     ? 'bg-[#0a0a0c] border-white/[0.1] hover:border-cyan-500/50 text-cyan-400'
                     : 'bg-white border-slate-200 hover:border-cyan-500 text-cyan-700'
@@ -1822,12 +1824,12 @@ aider --model openai/glm-5.3`,
                   }
                 }}
                 placeholder="Message... (Enter to send, Shift+Enter for new line)"
-                className={cn('flex-1 px-4 py-2.5 rounded-xl text-xs sm:text-sm border outline-none focus:border-cyan-500 resize-none max-h-32', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-white border-slate-200 text-slate-900')}
+                className={cn('flex-1 min-h-[44px] h-11 px-4 py-2.5 rounded-xl text-xs sm:text-sm border outline-none focus:border-cyan-500 resize-none max-h-32 leading-5', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-white border-slate-200 text-slate-900')}
               />
               <button
                 type="submit"
                 disabled={pgSending || (!pgInput.trim() && pgImages.length === 0)}
-                className="p-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold disabled:opacity-50 cursor-pointer shrink-0"
+                className="w-11 h-11 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold disabled:opacity-50 cursor-pointer shrink-0 flex items-center justify-center"
               >
                 <Send className="w-4 h-4" />
               </button>
@@ -3155,12 +3157,24 @@ aider --model openai/glm-5.3`,
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-zinc-400">Current AI Balance</span>
-                  <span className="font-mono text-zinc-300">{formatRupiah(aiBalance)}</span>
+                  <span className="text-zinc-400">AI Credit Received</span>
+                  <span className="font-mono text-zinc-300">{formatRupiah(Number(customTopupAmount) || 0)}</span>
                 </div>
+                {topupFeeRp > 0 && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-zinc-400">Platform Admin Fee</span>
+                    <span className="font-mono text-amber-400">+{formatRupiah(topupFeeRp)}</span>
+                  </div>
+                )}
                 <div className="flex items-center justify-between pt-1.5 border-t border-white/[0.06] font-bold">
-                  <span className={isDark ? 'text-white' : 'text-slate-900'}>AI Balance After Top-Up</span>
+                  <span className={isDark ? 'text-white' : 'text-slate-900'}>Total Wallet Deducted</span>
                   <span className="font-mono text-cyan-400">
+                    {formatRupiah((Number(customTopupAmount) || 0) + topupFeeRp)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-[11px] text-zinc-400">
+                  <span>AI Balance After Top-Up</span>
+                  <span className="font-mono text-emerald-400">
                     {formatRupiah(aiBalance + (Number(customTopupAmount) || 0))}
                   </span>
                 </div>
@@ -3177,14 +3191,14 @@ aider --model openai/glm-5.3`,
                 </button>
                 <button
                   type="submit"
-                  disabled={toppingUp || Number(customTopupAmount) < 5000 || Number(customTopupAmount) > walletBalance}
+                  disabled={toppingUp || Number(customTopupAmount) < 5000 || (Number(customTopupAmount) + topupFeeRp) > walletBalance}
                   className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 cursor-pointer disabled:opacity-50"
                 >
                   {toppingUp
                     ? 'Processing...'
-                    : Number(customTopupAmount) > walletBalance
+                    : (Number(customTopupAmount) + topupFeeRp) > walletBalance
                     ? 'Insufficient Wallet Balance'
-                    : `Confirm Top-Up (${formatRupiah(Number(customTopupAmount) || 0)})`}
+                    : `Confirm Top-Up (${formatRupiah((Number(customTopupAmount) || 0) + topupFeeRp)})`}
                 </button>
               </div>
             </form>
@@ -3395,7 +3409,7 @@ aider --model openai/glm-5.3`,
         title="Confirm AI Balance Top-Up"
         description={
           pendingTopupAmount
-            ? `Are you sure you want to transfer ${formatRupiah(pendingTopupAmount)} from your Masdika Wallet (${formatRupiah(walletBalance)} available) to your AI Balance? Your remaining Masdika Wallet balance will be ${formatRupiah(Math.max(0, walletBalance - pendingTopupAmount))}.`
+            ? `Are you sure you want to add ${formatRupiah(pendingTopupAmount)} AI Credit${topupFeeRp > 0 ? ` (+ ${formatRupiah(topupFeeRp)} platform fee = ${formatRupiah(pendingTopupAmount + topupFeeRp)} total deducted)` : ''} from your Masdika Wallet (${formatRupiah(walletBalance)} available)? Your remaining Masdika Wallet balance will be ${formatRupiah(Math.max(0, walletBalance - pendingTopupAmount - topupFeeRp))}.`
             : ''
         }
         confirmText={

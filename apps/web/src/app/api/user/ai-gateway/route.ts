@@ -112,6 +112,7 @@ export async function GET() {
           amount: dbUser?.aiAutoTopupAmount ?? 100000,
         },
         markupPercent: config.markupPercent,
+        topupFeeRp: config.topupFeeRp,
         isPeakNow: isPeakHourWib(),
         models: models.map((m) => ({
           id: m.id,
@@ -198,10 +199,14 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      const config = await getAiGatewayConfig();
+      const topupFeeRp = config.topupFeeRp;
+      const totalWalletDeduction = amount + topupFeeRp;
+
       const res = await prisma.user.updateMany({
-        where: { id: user.id, balance: { gte: amount } },
+        where: { id: user.id, balance: { gte: totalWalletDeduction } },
         data: {
-          balance: { decrement: amount },
+          balance: { decrement: totalWalletDeduction },
           aiBalance: { increment: amount },
         },
       });
@@ -209,8 +214,7 @@ export async function POST(req: NextRequest) {
       if (res.count === 0) {
         return NextResponse.json(
           {
-            error:
-              'Insufficient Masdika wallet balance. Please add funds to your Masdika wallet first.',
+            error: `Insufficient Masdika wallet balance. Required Rp ${totalWalletDeduction.toLocaleString('id-ID')} (incl. Rp ${topupFeeRp.toLocaleString('id-ID')} platform fee).`,
           },
           { status: 402 }
         );
@@ -225,6 +229,7 @@ export async function POST(req: NextRequest) {
         success: true,
         walletBalance: updatedUser?.balance ?? 0,
         aiBalance: updatedUser?.aiBalance ?? 0,
+        topupFeeRp,
       });
     }
 

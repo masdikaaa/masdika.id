@@ -515,28 +515,28 @@ function MacTerminalWindow({
         "rounded-xl border overflow-hidden shadow-lg",
         isDark
           ? "bg-[#09090b] border-white/[0.08]"
-          : "bg-slate-950 border-slate-800"
+          : "bg-white border-slate-200"
       )}
     >
       {/* macOS Title Bar */}
-      <div className="flex items-center justify-between px-3.5 py-2 bg-[#16161b] border-b border-white/[0.07]">
-        <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]" />
-          <span className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
-          <span className="w-2.5 h-2.5 rounded-full bg-[#27c93f]" />
-          <span className="ml-2 text-[11px] font-mono text-zinc-400">{title}</span>
+      <div className={cn("flex items-center justify-between px-3.5 py-2 border-b", isDark ? "bg-[#16161b] border-white/[0.07]" : "bg-slate-100 border-slate-200")}>
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f56] shrink-0" />
+          <span className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e] shrink-0" />
+          <span className="w-2.5 h-2.5 rounded-full bg-[#27c93f] shrink-0" />
+          <span className={cn("ml-2 text-[11px] font-mono font-semibold truncate", isDark ? "text-zinc-400" : "text-slate-700")}>{title}</span>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 shrink-0">
           {badge && (
-            <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <span className={cn("text-[10px] font-mono font-semibold px-2 py-0.5 rounded border", isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200")}>
               {badge}
             </span>
           )}
           <button
             type="button"
             onClick={onCopy}
-            className="inline-flex items-center gap-1 text-[11px] font-semibold text-cyan-400 hover:text-cyan-300 transition-colors"
+            className={cn("inline-flex items-center gap-1 text-[11px] font-semibold transition-colors cursor-pointer", isDark ? "text-cyan-400 hover:text-cyan-300" : "text-cyan-700 hover:text-cyan-800")}
           >
             {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
             {copied ? "Copied" : "Copy"}
@@ -545,7 +545,7 @@ function MacTerminalWindow({
       </div>
 
       {/* Code Body */}
-      <pre className="p-3.5 text-xs font-mono text-zinc-200 overflow-x-auto leading-relaxed">
+      <pre className={cn("p-3.5 text-xs font-mono overflow-x-auto leading-relaxed", isDark ? "text-zinc-200 bg-[#09090b]" : "text-slate-800 bg-slate-50/50")}>
         {code}
       </pre>
     </div>

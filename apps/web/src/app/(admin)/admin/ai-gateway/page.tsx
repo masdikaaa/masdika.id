@@ -94,6 +94,7 @@ export default function AdminAiGatewayPage() {
     managementKeyMasked: '',
     hasManagementKey: false,
     markupPercent: 10,
+    topupFeeRp: 5000,
     lastSyncAt: null as string | null,
     lastSyncStatus: null as string | null,
   });
@@ -187,6 +188,7 @@ export default function AdminAiGatewayPage() {
           upstreamKey: config.upstreamKey,
           managementKey: config.managementKey,
           markupPercent: config.markupPercent,
+          topupFeeRp: config.topupFeeRp,
         }),
       });
       const data = await res.json();
@@ -584,21 +586,37 @@ export default function AdminAiGatewayPage() {
               </p>
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-zinc-400 mb-1.5">
-                Customer Profit Markup (%)
-              </label>
-              <input
-                type="number"
-                min={0}
-                max={500}
-                step={1}
-                value={config.markupPercent}
-                onChange={(e) => setConfig({ ...config, markupPercent: Number(e.target.value) })}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/10 text-sm text-white focus:border-cyan-400 focus:outline-none"
-              />
-              <p className="text-[11px] text-zinc-500 mt-1">
-                Added automatically on top of base IDR token & image prices.
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-zinc-400 mb-1.5">
+                  Markup (%)
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  max={500}
+                  step={1}
+                  value={config.markupPercent}
+                  onChange={(e) => setConfig({ ...config, markupPercent: Number(e.target.value) })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/10 text-sm text-white font-mono focus:border-cyan-400 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-zinc-400 mb-1.5">
+                  Top-Up Fee (Rp)
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  max={1000000}
+                  step={500}
+                  value={config.topupFeeRp}
+                  onChange={(e) => setConfig({ ...config, topupFeeRp: Number(e.target.value) })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/10 text-sm text-white font-mono focus:border-cyan-400 focus:outline-none"
+                />
+              </div>
+              <p className="col-span-2 text-[11px] text-zinc-500">
+                Token/image markup (%) + flat profit fee (Rp) per AI Balance top-up.
               </p>
             </div>
           </div>

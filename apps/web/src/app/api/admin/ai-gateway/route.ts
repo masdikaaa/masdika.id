@@ -129,6 +129,7 @@ export async function GET() {
           ? `${config.managementKey.slice(0, 8)}...${config.managementKey.slice(-4)}`
           : '',
         markupPercent: config.markupPercent,
+        topupFeeRp: config.topupFeeRp,
         lastSyncAt: config.lastSyncAt,
         lastSyncStatus: config.lastSyncStatus,
       },
@@ -279,7 +280,7 @@ export async function PUT(req: NextRequest) {
     }
 
     // 4. Update gateway settings in prisma.setting
-    const { enabled, upstreamUrl, upstreamKey, managementKey, markupPercent } = body;
+    const { enabled, upstreamUrl, upstreamKey, managementKey, markupPercent, topupFeeRp } = body;
     const ops: Promise<any>[] = [];
 
     if (typeof enabled === 'boolean') {
@@ -333,6 +334,17 @@ export async function PUT(req: NextRequest) {
           where: { key: AI_GATEWAY_SETTING_KEYS.MARKUP_PERCENT },
           update: { value: String(safeMarkup) },
           create: { key: AI_GATEWAY_SETTING_KEYS.MARKUP_PERCENT, value: String(safeMarkup) },
+        }),
+      );
+    }
+
+    if (topupFeeRp !== undefined) {
+      const safeFee = Math.max(0, Math.min(1000000, Math.round(Number(topupFeeRp) || 0)));
+      ops.push(
+        prisma.setting.upsert({
+          where: { key: AI_GATEWAY_SETTING_KEYS.TOPUP_FEE_RP },
+          update: { value: String(safeFee) },
+          create: { key: AI_GATEWAY_SETTING_KEYS.TOPUP_FEE_RP, value: String(safeFee) },
         }),
       );
     }
