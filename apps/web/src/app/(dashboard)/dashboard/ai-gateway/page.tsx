@@ -1816,6 +1816,8 @@ aider --model openai/glm-5.3`,
               <textarea
                 rows={1}
                 value={pgInput}
+                spellCheck={false}
+                autoComplete="off"
                 onChange={(e) => setPgInput(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
@@ -1824,7 +1826,7 @@ aider --model openai/glm-5.3`,
                   }
                 }}
                 placeholder="Message... (Enter to send, Shift+Enter for new line)"
-                className={cn('flex-1 min-h-[44px] h-11 px-4 py-2.5 rounded-xl text-xs sm:text-sm border outline-none focus:border-cyan-500 resize-none max-h-32 leading-5', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-white border-slate-200 text-slate-900')}
+                className={cn('flex-1 min-h-[44px] h-11 px-4 py-2.5 rounded-xl text-xs sm:text-sm border outline-none focus:border-cyan-500 resize-none max-h-32 leading-5 caret-cyan-400', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-white border-slate-200 text-slate-900')}
               />
               <button
                 type="submit"
@@ -3252,7 +3254,7 @@ aider --model openai/glm-5.3`,
                     value={newMonthlyLimit}
                     onChange={(e) => setNewMonthlyLimit(e.target.value)}
                     placeholder="Unlimited"
-                    className={cn('w-full px-3.5 py-2.5 rounded-xl text-sm border outline-none focus:border-cyan-500 font-mono', isDark ? 'bg-[#141418] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
+                    className={cn('w-full px-3.5 py-2.5 rounded-xl text-sm border outline-none focus:border-cyan-500 font-mono [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none', isDark ? 'bg-[#141418] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
                   />
                 </div>
                 <div>
@@ -3266,7 +3268,7 @@ aider --model openai/glm-5.3`,
                     value={newKeyExpiresDays}
                     onChange={(e) => setNewKeyExpiresDays(e.target.value)}
                     placeholder="Never expires"
-                    className={cn('w-full px-3.5 py-2.5 rounded-xl text-sm border outline-none focus:border-cyan-500 font-mono', isDark ? 'bg-[#141418] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
+                    className={cn('w-full px-3.5 py-2.5 rounded-xl text-sm border outline-none focus:border-cyan-500 font-mono [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none', isDark ? 'bg-[#141418] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
                   />
                 </div>
               </div>
