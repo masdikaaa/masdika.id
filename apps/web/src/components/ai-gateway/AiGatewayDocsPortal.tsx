@@ -218,43 +218,73 @@ function CodeBox({
   return (
     <div
       className={cn(
-        'rounded-xl border overflow-hidden',
-        isDark ? 'bg-[#090b10] border-white/[0.08]' : 'bg-slate-950 border-slate-800',
+        'rounded-2xl border overflow-hidden shadow-lg',
+        isDark ? 'border-white/[0.1] bg-[#0b0d12]' : 'border-slate-200 bg-white',
       )}
     >
-      <div className="flex items-center justify-between gap-2 px-3.5 py-2 border-b border-white/[0.07] bg-white/[0.02]">
-        {tabs && tabs.length > 0 ? (
-          <div className="flex items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {tabs.map((t) => {
-              const active = t.id === (currentTab?.id || activeTabId);
-              return (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => setActiveTabId(t.id)}
-                  className={cn(
-                    'px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors whitespace-nowrap cursor-pointer',
-                    active ? 'bg-cyan-500/15 text-cyan-400' : 'text-zinc-400 hover:text-white',
-                  )}
-                >
-                  {t.label}
-                </button>
-              );
-            })}
-          </div>
-        ) : (
-          <span className="text-[11px] font-mono text-zinc-400">Example</span>
+      <div
+        className={cn(
+          'flex items-center justify-between gap-3 px-3.5 sm:px-4 py-2.5 border-b',
+          isDark ? 'bg-[#12151e] border-white/[0.07]' : 'bg-slate-100 border-slate-200',
         )}
+      >
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          {/* macOS traffic lights */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#ff5f56] shrink-0" />
+            <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#ffbd2e] shrink-0" />
+            <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#27c93f] shrink-0" />
+          </div>
+
+          {tabs && tabs.length > 0 ? (
+            <div className="flex items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {tabs.map((t) => {
+                const active = t.id === (currentTab?.id || activeTabId);
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => setActiveTabId(t.id)}
+                    className={cn(
+                      'px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors whitespace-nowrap cursor-pointer outline-none focus:outline-none',
+                      active
+                        ? 'bg-cyan-400 text-slate-950 font-bold shadow-2xs'
+                        : isDark
+                        ? 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/70',
+                    )}
+                  >
+                    {t.label}
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <span className={cn('text-[11px] font-mono font-semibold truncate', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+              terminal
+            </span>
+          )}
+        </div>
+
         <button
           type="button"
           onClick={() => onCopy(displayCode, copyId)}
-          className="inline-flex items-center gap-1 text-[11px] font-medium text-zinc-400 hover:text-cyan-400 cursor-pointer shrink-0"
+          className={cn(
+            'inline-flex items-center gap-1.5 text-xs font-semibold cursor-pointer shrink-0 outline-none focus:outline-none',
+            isDark ? 'text-cyan-400 hover:text-cyan-300' : 'text-cyan-700 hover:text-cyan-800',
+          )}
           title="Copy snippet"
         >
           {copiedKey === copyId ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+          <span>{copiedKey === copyId ? 'Copied' : 'Copy'}</span>
         </button>
       </div>
-      <pre className="p-4 text-[11px] sm:text-xs font-mono text-zinc-200 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden leading-relaxed">
+      <pre
+        className={cn(
+          'p-4 text-[11px] sm:text-xs font-mono overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden leading-relaxed',
+          isDark ? 'text-zinc-200 bg-[#0b0d12]' : 'text-slate-800 bg-slate-50/60',
+        )}
+      >
         <code>{displayCode}</code>
       </pre>
     </div>
@@ -312,6 +342,7 @@ export function AiGatewayDocsPortal({
   const [page, setPage] = useState<DocPageId>('overview');
   const [codingTool, setCodingTool] = useState<QuickstartDocId>('claudecode');
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const handleCopy = async (text: string, id: string, label = 'Copied to clipboard') => {
     try {
@@ -494,17 +525,74 @@ aider --model openai/glm-5.3`,
 
   return (
     <div className={cn('rounded-2xl border overflow-hidden', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}>
-      <div className="grid grid-cols-1 lg:grid-cols-12">
-        {/* Left Navigation Sidebar */}
-        <aside className={cn('lg:col-span-3 border-b lg:border-b-0 lg:border-r p-4 space-y-5', isDark ? 'bg-[#0b0d12] border-white/[0.08]' : 'bg-slate-50/70 border-slate-200')}>
+      {/* Mobile / Small Screen Docs Page Switcher */}
+      <div className={cn('md:hidden border-b p-3', isDark ? 'bg-[#0b0d12] border-white/[0.08]' : 'bg-slate-50 border-slate-200')}>
+        <button
+          type="button"
+          onClick={() => setMobileNavOpen(!mobileNavOpen)}
+          className={cn(
+            'w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border text-xs font-semibold cursor-pointer outline-none focus:outline-none',
+            isDark ? 'bg-[#111115] border-white/[0.08] text-white' : 'bg-white border-slate-200 text-slate-900',
+          )}
+        >
+          <span className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-cyan-400" />
+            <span>Docs: {meta.title}</span>
+          </span>
+          {mobileNavOpen ? <ChevronDown className="w-4 h-4 text-cyan-400" /> : <ChevronRight className="w-4 h-4 text-zinc-400" />}
+        </button>
+
+        {mobileNavOpen && (
+          <div className="mt-2.5 space-y-3 pt-2 border-t border-white/[0.06]">
+            {SIDEBAR_GROUPS.map((grp, gi) => (
+              <div key={gi} className="space-y-1">
+                {grp.title && (
+                  <div className={cn('px-2 text-[10px] font-bold uppercase tracking-wider', isDark ? 'text-zinc-500' : 'text-slate-500')}>
+                    {grp.title}
+                  </div>
+                )}
+                <div className="flex flex-wrap gap-1.5">
+                  {grp.items.map((item) => {
+                    const active = page === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => {
+                          setPage(item.id);
+                          setMobileNavOpen(false);
+                        }}
+                        className={cn(
+                          'px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer outline-none focus:outline-none',
+                          active
+                            ? 'bg-cyan-400 text-slate-950 font-bold shadow-2xs'
+                            : isDark
+                            ? 'bg-[#111115] border border-white/[0.08] text-zinc-300 hover:text-white'
+                            : 'bg-white border border-slate-200 text-slate-700 hover:text-slate-900',
+                        )}
+                      >
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-12">
+        {/* Left Navigation Sidebar (Desktop & Tablet) */}
+        <aside className={cn('hidden md:block md:col-span-3 border-r p-4 space-y-5', isDark ? 'bg-[#0b0d12] border-white/[0.08]' : 'bg-slate-50/70 border-slate-200')}>
           {SIDEBAR_GROUPS.map((grp, gi) => (
             <div key={gi} className="space-y-1">
               {grp.title && (
-                <div className={cn('px-3 pb-1 text-[11px] font-bold uppercase tracking-wider', isDark ? 'text-zinc-500' : 'text-slate-500')}>
+                <div className={cn('px-3 pb-1 text-[10px] font-bold uppercase tracking-widest', isDark ? 'text-zinc-500' : 'text-slate-500')}>
                   {grp.title}
                 </div>
               )}
-              <div className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="flex flex-col gap-1">
                 {grp.items.map((item) => {
                   const active = page === item.id;
                   return (
@@ -513,14 +601,12 @@ aider --model openai/glm-5.3`,
                       type="button"
                       onClick={() => setPage(item.id)}
                       className={cn(
-                        'w-auto lg:w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer',
+                        'w-full text-left px-3 py-2 rounded-xl text-xs transition-all cursor-pointer outline-none focus:outline-none',
                         active
-                          ? isDark
-                            ? 'bg-cyan-500/15 text-cyan-400 font-semibold'
-                            : 'bg-cyan-50 text-cyan-700 font-semibold'
+                          ? 'bg-cyan-400 text-slate-950 font-bold shadow-xs'
                           : isDark
-                          ? 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
-                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
+                          ? 'text-zinc-400 font-medium hover:text-white hover:bg-white/[0.04]'
+                          : 'text-slate-600 font-medium hover:text-slate-900 hover:bg-slate-200/60',
                       )}
                     >
                       {item.label}
@@ -533,7 +619,7 @@ aider --model openai/glm-5.3`,
         </aside>
 
         {/* Main Content */}
-        <main className="lg:col-span-7 p-5 sm:p-7 space-y-6 min-w-0">
+        <main className="md:col-span-9 xl:col-span-7 p-5 sm:p-7 space-y-6 min-w-0">
           {/* Page Header */}
           <div className={cn('space-y-3 pb-5 border-b', isDark ? 'border-white/[0.08]' : 'border-slate-200')}>
             <h2 className={cn('text-2xl font-bold tracking-tight', isDark ? 'text-white' : 'text-slate-900')}>
@@ -976,7 +1062,7 @@ aider --model openai/glm-5.3`,
         </main>
 
         {/* Right "On this page" Anchor Rail */}
-        <aside className={cn('hidden lg:block lg:col-span-2 border-l p-5 space-y-3', isDark ? 'border-white/[0.08]' : 'border-slate-200')}>
+        <aside className={cn('hidden xl:block xl:col-span-2 border-l p-5 space-y-3', isDark ? 'border-white/[0.08]' : 'border-slate-200')}>
           <div className={cn('flex items-center gap-1.5 text-[11px] font-semibold', isDark ? 'text-zinc-400' : 'text-slate-600')}>
             <List className="w-3.5 h-3.5" />
             <span>On this page</span>
