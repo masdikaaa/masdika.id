@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   title: {
     absolute: 'S3-Compatible Object Storage - Masdika',
   },
-  description: 'Scalable S3-compatible object storage backed by enterprise NVMe arrays in Indonesia. Isolated buckets, IAM access keys, presigned URLs, and zero-downtime upgrades.',
+  description: 'Scalable S3-compatible object storage backed by enterprise SSD arrays in Indonesia. Isolated buckets, IAM access keys, presigned URLs, and zero-downtime upgrades.',
   keywords: [
     'Object Storage Indonesia',
     'S3 Compatible Storage',
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'S3-Compatible Object Storage - Masdika',
-    description: 'Scalable S3-compatible object storage backed by enterprise NVMe arrays in Indonesia. Isolated buckets, IAM access keys, presigned URLs, and zero-downtime upgrades.',
+    description: 'Scalable S3-compatible object storage backed by enterprise SSD arrays in Indonesia. Isolated buckets, IAM access keys, presigned URLs, and zero-downtime upgrades.',
     url: 'https://www.masdika.id/object-storage',
     siteName: 'Masdika',
     images: [
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'S3-Compatible Object Storage - Masdika',
-    description: 'Scalable S3-compatible object storage backed by enterprise NVMe arrays in Indonesia. Isolated buckets, IAM access keys, presigned URLs, and zero-downtime upgrades.',
+    description: 'Scalable S3-compatible object storage backed by enterprise SSD arrays in Indonesia. Isolated buckets, IAM access keys, presigned URLs, and zero-downtime upgrades.',
     images: [OG_IMAGE_PATH],
   },
   robots: {

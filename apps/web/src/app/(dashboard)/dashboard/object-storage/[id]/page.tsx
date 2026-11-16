@@ -1109,7 +1109,7 @@ s3 = boto3.client(
 
               <div className={cn('flex items-center justify-between pb-2 border-b', isDark ? 'border-white/[0.06]' : 'border-slate-200')}>
                 <span className={isDark ? 'text-zinc-400' : 'text-slate-500'}>Allocated Quota:</span>
-                <span className={cn('font-mono font-semibold', isDark ? 'text-white' : 'text-slate-900')}>{service.storageGb} GB NVMe S3</span>
+                <span className={cn('font-mono font-semibold', isDark ? 'text-white' : 'text-slate-900')}>{service.storageGb} GB SSD S3</span>
               </div>
 
               <div className={cn('flex items-center justify-between pb-2 border-b', isDark ? 'border-white/[0.06]' : 'border-slate-200')}>

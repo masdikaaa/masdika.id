@@ -65,7 +65,7 @@ const S3_FAQS = [
   },
   {
     q: "Where is the data physically stored?",
-    a: "All buckets and objects are stored on enterprise SSD/NVMe arrays inside our Sidoarjo Data Center in Indonesia with direct IIX and OpenIX peering for sub-15ms local throughput."
+    a: "All buckets and objects are stored on enterprise SSD arrays inside our Sidoarjo Data Center in Indonesia with direct IIX and OpenIX peering for sub-15ms local throughput."
   }
 ];
 
@@ -183,7 +183,7 @@ export default function ObjectStorageClient({
               </h1>
 
               <p className="text-lg md:text-xl mb-10 max-w-xl leading-relaxed text-[var(--text-secondary)] font-normal">
-                Store application assets, database backups, and unstructured data in isolated S3-compatible buckets. Powered by enterprise NVMe storage in Indonesia with IAM access keys, presigned URLs, and instant zero-downtime upgrades.
+                Store application assets, database backups, and unstructured data in isolated S3-compatible buckets. Powered by enterprise SSD storage in Indonesia with IAM access keys, presigned URLs, and instant zero-downtime upgrades.
               </p>
 
               <div className="flex flex-wrap items-center gap-4">
@@ -714,7 +714,7 @@ export default function ObjectStorageClient({
           stats={S3_STATS}
           iconType="file-cdn"
           terminalTitle="S3 CLUSTER"
-          targetServer="S3 NVMe Cluster • Sidoarjo DC"
+          targetServer="S3 SSD Cluster • Sidoarjo DC"
           provisionEstimate="Backend: S3-Compatible Object Engine (< 5 Sec)"
         />
 
