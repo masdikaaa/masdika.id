@@ -91,9 +91,12 @@ jobs:
   sast-security:
     name: 4. SAST - Semgrep OWASP Scan
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - name: Run Semgrep SAST Security Scanner
         run: |
