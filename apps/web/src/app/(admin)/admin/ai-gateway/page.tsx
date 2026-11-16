@@ -28,6 +28,7 @@ import {
   MessageSquare,
 } from 'lucide-react';
 import { Select } from '@/components/ui/Select';
+import { AdminCheckbox } from '@/components/ui/AdminCheckbox';
 
 interface AiModelItem {
   id: number;
@@ -603,15 +604,11 @@ export default function AdminAiGatewayPage() {
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-white/[0.06]">
-            <label className="inline-flex items-center gap-2.5 text-xs text-zinc-300 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={config.enabled}
-                onChange={(e) => setConfig({ ...config, enabled: e.target.checked })}
-                className="rounded border-white/20 bg-black text-cyan-400 focus:ring-cyan-400"
-              />
-              <span>Enable AI Gateway Service Globally</span>
-            </label>
+            <AdminCheckbox
+              checked={config.enabled}
+              onChange={(checked) => setConfig({ ...config, enabled: checked })}
+              label="Enable AI Gateway Service Globally"
+            />
 
             <button
               type="submit"
@@ -686,11 +683,9 @@ export default function AdminAiGatewayPage() {
                     return (
                       <tr key={m.id} className="hover:bg-white/[0.02]">
                         <td className="py-3 px-3">
-                          <input
-                            type="checkbox"
+                          <AdminCheckbox
                             checked={m.isActive}
-                            onChange={(e) => handleModelChange(m.id, 'isActive', e.target.checked)}
-                            className="rounded border-white/20 bg-black text-cyan-400 focus:ring-cyan-400"
+                            onChange={(checked) => handleModelChange(m.id, 'isActive', checked)}
                           />
                         </td>
                         <td className="py-3 px-3">
@@ -755,15 +750,11 @@ export default function AdminAiGatewayPage() {
                                 className="w-28 px-2 py-1 rounded bg-black/60 border border-white/10 text-amber-300 text-xs font-mono"
                               />
                             </div>
-                            <label className="inline-flex items-center gap-1.5 text-[11px] text-zinc-400 cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={m.hasPeakPricing}
-                                onChange={(e) => handleModelChange(m.id, 'hasPeakPricing', e.target.checked)}
-                                className="rounded border-white/20 bg-black text-cyan-400"
-                              />
-                              <span>Peak 2x Rate</span>
-                            </label>
+                            <AdminCheckbox
+                              checked={m.hasPeakPricing}
+                              onChange={(checked) => handleModelChange(m.id, 'hasPeakPricing', checked)}
+                              label={<span className="text-[11px] text-zinc-400">Peak 2x Rate</span>}
+                            />
                           </div>
                         </td>
                         <td className="py-3 px-3">
@@ -1141,15 +1132,13 @@ export default function AdminAiGatewayPage() {
                 </div>
               </div>
 
-              <label className="flex items-center gap-2.5 text-xs text-zinc-300 cursor-pointer pt-1">
-                <input
-                  type="checkbox"
+              <div className="pt-1">
+                <AdminCheckbox
                   checked={adjustAutoTopup}
-                  onChange={(e) => setAdjustAutoTopup(e.target.checked)}
-                  className="rounded border-white/20 bg-black text-cyan-400 focus:ring-cyan-400"
+                  onChange={(checked) => setAdjustAutoTopup(checked)}
+                  label="Customer Auto Top-Up Enabled"
                 />
-                <span>Customer Auto Top-Up Enabled</span>
-              </label>
+              </div>
 
               <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-white/[0.07]">
                 <button

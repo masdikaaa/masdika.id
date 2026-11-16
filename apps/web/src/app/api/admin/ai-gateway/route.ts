@@ -72,27 +72,40 @@ export async function GET() {
 
     const customers = rawCustomers.map((u) => {
       let email = u.email;
+      let name = u.name;
       try {
         email = decryptDeterministic(u.email) || u.email;
       } catch {
         // fallback
       }
+      try {
+        if (name) name = decryptDeterministic(name) || name;
+      } catch {
+        // fallback
+      }
       return {
         ...u,
+        name,
         email,
       };
     });
 
     const formattedLogs = recentLogs.map((log) => {
       let userEmail = log.user?.email || '';
+      let userName = log.user?.name || null;
       try {
         if (userEmail) userEmail = decryptDeterministic(userEmail) || userEmail;
       } catch {
         // fallback
       }
+      try {
+        if (userName) userName = decryptDeterministic(userName) || userName;
+      } catch {
+        // fallback
+      }
       return {
         ...log,
-        user: log.user ? { ...log.user, email: userEmail } : log.user,
+        user: log.user ? { ...log.user, name: userName, email: userEmail } : log.user,
       };
     });
 
