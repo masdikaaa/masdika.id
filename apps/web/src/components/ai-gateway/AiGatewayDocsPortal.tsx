@@ -3,14 +3,23 @@
 import React, { useState } from 'react';
 import {
   AlertTriangle,
+  BookOpen,
   Check,
   ChevronDown,
   ChevronRight,
   Copy,
+  Cpu,
   FileText,
+  Image as ImageIcon,
   Info,
+  KeyRound,
   List,
+  ShieldAlert,
   ShieldCheck,
+  Sliders,
+  Terminal,
+  Wallet,
+  Zap,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -87,6 +96,42 @@ const SIDEBAR_GROUPS: {
     items: [{ id: 'management', label: 'Management API' }],
   },
 ];
+
+function DocPageIcon({
+  id,
+  active,
+  isDark,
+}: {
+  id: DocPageId;
+  active: boolean;
+  isDark: boolean;
+}) {
+  const cls = cn('w-3.5 h-3.5 shrink-0', active ? 'text-slate-950' : isDark ? 'text-cyan-400' : 'text-cyan-600');
+  switch (id) {
+    case 'overview':
+      return <BookOpen className={cls} />;
+    case 'authentication':
+      return <KeyRound className={cls} />;
+    case 'coding-tools':
+      return <Terminal className={cls} />;
+    case 'openai':
+      return <AiToolIcon id="responses" active={active} isDark={isDark} className="w-3.5 h-3.5 shrink-0" />;
+    case 'responses':
+      return <Zap className={cls} />;
+    case 'images':
+      return <ImageIcon className={cls} />;
+    case 'anthropic':
+      return <AiToolIcon id="anthropic" active={active} isDark={isDark} className="w-3.5 h-3.5 shrink-0" />;
+    case 'models':
+      return <Cpu className={cls} />;
+    case 'pricing':
+      return <Wallet className={cls} />;
+    case 'limits':
+      return <ShieldAlert className={cls} />;
+    case 'management':
+      return <Sliders className={cls} />;
+  }
+}
 
 function MethodBadge({ method }: { method: EndpointCardItem['method'] }) {
   const styles =
@@ -524,9 +569,9 @@ aider --model openai/glm-5.3`,
   const meta = pageMeta[page];
 
   return (
-    <div className={cn('rounded-2xl border overflow-hidden', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}>
+    <div className={cn('rounded-2xl border', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}>
       {/* Mobile / Small Screen Docs Page Switcher */}
-      <div className={cn('md:hidden border-b p-3', isDark ? 'bg-[#0b0d12] border-white/[0.08]' : 'bg-slate-50 border-slate-200')}>
+      <div className={cn('md:hidden border-b p-3 rounded-t-2xl', isDark ? 'bg-[#0b0d12] border-white/[0.08]' : 'bg-slate-50 border-slate-200')}>
         <button
           type="button"
           onClick={() => setMobileNavOpen(!mobileNavOpen)}
@@ -536,7 +581,7 @@ aider --model openai/glm-5.3`,
           )}
         >
           <span className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-cyan-400" />
+            <DocPageIcon id={page} active={false} isDark={isDark} />
             <span>Docs: {meta.title}</span>
           </span>
           {mobileNavOpen ? <ChevronDown className="w-4 h-4 text-cyan-400" /> : <ChevronRight className="w-4 h-4 text-zinc-400" />}
@@ -563,7 +608,7 @@ aider --model openai/glm-5.3`,
                           setMobileNavOpen(false);
                         }}
                         className={cn(
-                          'px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer outline-none focus:outline-none',
+                          'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer outline-none focus:outline-none',
                           active
                             ? 'bg-cyan-400 text-slate-950 font-bold shadow-2xs'
                             : isDark
@@ -571,7 +616,8 @@ aider --model openai/glm-5.3`,
                             : 'bg-white border border-slate-200 text-slate-700 hover:text-slate-900',
                         )}
                       >
-                        {item.label}
+                        <DocPageIcon id={item.id} active={active} isDark={isDark} />
+                        <span>{item.label}</span>
                       </button>
                     );
                   })}
@@ -582,9 +628,9 @@ aider --model openai/glm-5.3`,
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-12">
-        {/* Left Navigation Sidebar (Desktop & Tablet) */}
-        <aside className={cn('hidden md:block md:col-span-3 border-r p-4 space-y-5', isDark ? 'bg-[#0b0d12] border-white/[0.08]' : 'bg-slate-50/70 border-slate-200')}>
+      <div className="grid grid-cols-1 md:grid-cols-12 items-start">
+        {/* Left Navigation Sidebar (Desktop & Tablet - Sticky on Scroll) */}
+        <aside className={cn('hidden md:block md:col-span-3 md:sticky md:top-6 md:self-start md:max-h-[calc(100vh-3rem)] md:overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:rounded-l-2xl border-r p-4 space-y-5', isDark ? 'bg-[#0b0d12] border-white/[0.08]' : 'bg-slate-50/70 border-slate-200')}>
           {SIDEBAR_GROUPS.map((grp, gi) => (
             <div key={gi} className="space-y-1">
               {grp.title && (
@@ -601,7 +647,7 @@ aider --model openai/glm-5.3`,
                       type="button"
                       onClick={() => setPage(item.id)}
                       className={cn(
-                        'w-full text-left px-3 py-2 rounded-xl text-xs transition-all cursor-pointer outline-none focus:outline-none',
+                        'w-full flex items-center gap-2.5 text-left px-3 py-2 rounded-xl text-xs transition-all cursor-pointer outline-none focus:outline-none',
                         active
                           ? 'bg-cyan-400 text-slate-950 font-bold shadow-xs'
                           : isDark
@@ -609,7 +655,8 @@ aider --model openai/glm-5.3`,
                           : 'text-slate-600 font-medium hover:text-slate-900 hover:bg-slate-200/60',
                       )}
                     >
-                      {item.label}
+                      <DocPageIcon id={item.id} active={active} isDark={isDark} />
+                      <span className="truncate">{item.label}</span>
                     </button>
                   );
                 })}
@@ -1089,7 +1136,7 @@ aider --model openai/glm-5.3`,
         </main>
 
         {/* Right "On this page" Anchor Rail */}
-        <aside className={cn('hidden xl:block xl:col-span-2 border-l p-5 space-y-3', isDark ? 'border-white/[0.08]' : 'border-slate-200')}>
+        <aside className={cn('hidden xl:block xl:col-span-2 xl:sticky xl:top-6 xl:self-start border-l p-5 space-y-3', isDark ? 'border-white/[0.08]' : 'border-slate-200')}>
           <div className={cn('flex items-center gap-1.5 text-[11px] font-semibold', isDark ? 'text-zinc-400' : 'text-slate-600')}>
             <List className="w-3.5 h-3.5" />
             <span>On this page</span>
