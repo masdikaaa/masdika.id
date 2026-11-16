@@ -172,7 +172,7 @@ export default function UnifiedAlertsClient({
             </span>
           </div>
           <p className={cn("text-sm mt-1", isDark ? "text-zinc-400" : "text-slate-600")}>
-            Centralized monitoring, alert rules, and live resource metrics for your Cloud VPS instances and Kubernetes clusters.
+            Centralized monitoring, alert rules, and live resource metrics for your Cloud VPS instances.
           </p>
         </div>
       </div>
@@ -193,7 +193,7 @@ export default function UnifiedAlertsClient({
             <span className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>nodes</span>
           </div>
           <p className={cn("text-xs mt-2.5", isDark ? "text-zinc-500" : "text-slate-500")}>
-            Cloud VPS &amp; Managed Kubernetes clusters.
+            Active Cloud VPS instances.
           </p>
         </div>
 
@@ -264,7 +264,6 @@ export default function UnifiedAlertsClient({
           {([
             { id: "ALL", label: "All" },
             { id: "vps", label: "Cloud VPS" },
-            { id: "k3s", label: "Kubernetes" },
           ] as const).map((tab) => {
             const active = typeFilter === tab.id;
             return (
@@ -309,11 +308,11 @@ export default function UnifiedAlertsClient({
             No Active VPS Resources Found
           </h3>
           <p className={cn("text-xs sm:text-sm max-w-md mx-auto mb-6", isDark ? "text-zinc-400" : "text-slate-500")}>
-            You don&apos;t have any active Cloud VPS or Kubernetes VPS cluster running. Deploy a VPS to start monitoring metrics and alert rules.
+            You don&apos;t have any active Cloud VPS running. Deploy a VPS to start monitoring metrics and alert rules.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Link
-              href="/dashboard/checkout?service=vps"
+              href="/dashboard/vps/new"
               className="px-3.5 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-xs transition-all shadow-sm inline-flex items-center gap-2"
             >
               Deploy VPS
