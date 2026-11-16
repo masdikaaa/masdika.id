@@ -12,6 +12,7 @@ import { SiKubernetes } from "react-icons/si";
 import Link from "next/link";
 import { toast } from "sonner";
 import { formatRupiah } from "@/lib/billing";
+import { AdminCheckbox } from "@/components/ui/AdminCheckbox";
 import { cn } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -987,32 +988,23 @@ function CheckoutContent() {
 
                 {/* Legal Checkbox */}
                 <div className="mb-5">
-                  <label className="flex items-start gap-2.5 cursor-pointer group select-none">
-                    <div className="relative flex items-center justify-center shrink-0 mt-0.5">
-                      <input
-                        type="checkbox"
-                        checked={isTermsAccepted}
-                        onChange={e => setIsTermsAccepted(e.target.checked)}
-                        className={cn(
-                          "w-4 h-4 rounded border cursor-pointer appearance-none transition-all",
-                          isTermsAccepted
-                            ? "bg-cyan-400 border-cyan-400"
-                            : isDark ? "border-white/[0.2] bg-white/[0.02]" : "border-slate-300 bg-white"
-                        )}
-                      />
-                      <Check className={cn("absolute w-3 h-3 text-slate-950 stroke-[3] pointer-events-none transition-opacity", isTermsAccepted ? "opacity-100" : "opacity-0")} />
-                    </div>
-                    <span className={cn("text-xs leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
-                      I agree to the{" "}
-                      <a href="/terms" target="_blank" className="text-cyan-500 hover:underline font-medium">
-                        Terms of Service
-                      </a>{" "}
-                      and{" "}
-                      <a href="/privacy" target="_blank" className="text-cyan-500 hover:underline font-medium">
-                        Privacy Policy
-                      </a>.
-                    </span>
-                  </label>
+                  <AdminCheckbox
+                    checked={isTermsAccepted}
+                    onChange={(checked) => setIsTermsAccepted(checked)}
+                    className="items-start"
+                    label={
+                      <span className={cn("text-xs leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
+                        I agree to the{" "}
+                        <a href="/terms" target="_blank" className="text-cyan-500 hover:underline font-medium">
+                          Terms of Service
+                        </a>{" "}
+                        and{" "}
+                        <a href="/privacy" target="_blank" className="text-cyan-500 hover:underline font-medium">
+                          Privacy Policy
+                        </a>.
+                      </span>
+                    }
+                  />
                 </div>
 
                 <button

@@ -4563,14 +4563,21 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                     type="checkbox"
                     checked={snapshotIncludeRam}
                     onChange={(e) => setSnapshotIncludeRam(e.target.checked)}
-                    className={cn("w-5 h-5 rounded-lg border cursor-pointer appearance-none transition-all", 
-                      isDark 
-                        ? "border-white/20 bg-white/5 focus:ring-cyan-500/30 checked:bg-cyan-500 checked:border-cyan-500" 
-                        : "border-slate-300 bg-white focus:ring-cyan-500/30 checked:bg-cyan-600 checked:border-cyan-600"
-                    )}
+                    className="sr-only"
                     disabled={isSnapshotting}
                   />
-                  <CheckCircle className={cn("absolute w-3.5 h-3.5 text-white pointer-events-none transition-transform duration-200", snapshotIncludeRam ? "scale-100 opacity-100" : "scale-50 opacity-0")} />
+                  <div
+                    className={cn(
+                      "w-5 h-5 rounded-md border transition-all flex items-center justify-center",
+                      snapshotIncludeRam
+                        ? "bg-cyan-400 border-cyan-400 text-slate-950"
+                        : isDark
+                        ? "border-slate-700 bg-slate-900 hover:border-cyan-500"
+                        : "border-slate-300 bg-white hover:border-cyan-500"
+                    )}
+                  >
+                    {snapshotIncludeRam && <CheckCircle className="w-3.5 h-3.5 text-slate-950" strokeWidth={3} />}
+                  </div>
                 </div>
                 <div className="flex flex-col">
                   <span className={cn("text-sm font-bold", isDark ? "text-zinc-200" : "text-slate-950")}>Include RAM</span>
