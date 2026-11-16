@@ -220,7 +220,7 @@ export default async function EpisodePage({
         <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(item) }} />
       ))}
       <div className="w-full max-w-full overflow-x-hidden min-w-0">
-        <div className="pt-28 md:pt-32 pb-16 sm:pb-24 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="pt-28 pb-16 sm:pb-24 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <Link
             href={`/series/${slug}`}
             className="inline-flex items-center text-sm font-medium mb-6 sm:mb-8 transition-colors gap-2 group text-[var(--text-secondary)] hover:text-cyan-600 dark:hover:text-cyan-400"

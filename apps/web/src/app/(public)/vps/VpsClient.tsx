@@ -262,11 +262,11 @@ export default function VpsClient({ safePricing, isVpsEnabled }: { safePricing: 
   };
 
   return (
-    <div className="flex flex-col min-h-screen pt-28 sm:pt-36 md:pt-40 pb-10 sm:pb-14 overflow-x-hidden">
+    <div className="flex flex-col min-h-screen pt-28 pb-10 sm:pb-14 overflow-x-hidden">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
 
         {/* ── 0. HERO (Identik Patokan Home Page, Vacancies & design.md) ────────── */}
-        <section className="relative pt-6 sm:pt-10 pb-8 sm:pb-12 flex items-center">
+        <section className="relative pt-0 pb-8 sm:pb-12 flex items-center">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center w-full">
             
             {/* Left – Text & Actions */}

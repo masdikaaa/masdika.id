@@ -434,7 +434,7 @@ export function HomeClient({
     <div className="flex flex-col min-h-screen overflow-x-hidden">
 
       {/* ── 1. HERO ──────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden pt-28 sm:pt-36 md:pt-40 pb-12 sm:pb-16 lg:pb-24 flex items-center">
+      <section className="relative overflow-hidden pt-28 pb-12 sm:pb-16 lg:pb-24 flex items-center">
         <SectionOrnaments variant="hero" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">

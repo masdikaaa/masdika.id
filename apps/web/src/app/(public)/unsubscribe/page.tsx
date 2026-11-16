@@ -75,8 +75,8 @@ function UnsubscribeForm() {
 
 export default function UnsubscribePage() {
   return (
-    <div className="pt-28 sm:pt-36 md:pt-40 pb-10 sm:pb-14 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 min-h-[75vh]">
-      <AnimatedSection className="text-center max-w-4xl mx-auto mb-8 sm:mb-10 pt-4 sm:pt-6">
+    <div className="pt-28 pb-10 sm:pb-14 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 min-h-[75vh]">
+      <AnimatedSection className="text-center max-w-4xl mx-auto mb-8 sm:mb-10">
         <span className="text-cyan-400 font-black tracking-[0.2em] text-xs mb-4 inline-block uppercase bg-cyan-500/10 border border-cyan-500/20 px-4 py-2 rounded-full shadow-[0_0_15px_rgba(34,211,238,0.15)]">
           Newsletter
         </span>

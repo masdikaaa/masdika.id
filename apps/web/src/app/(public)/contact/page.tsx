@@ -127,7 +127,7 @@ export default function ContactPage() {
   );
 
   return (
-    <div className="flex flex-col min-h-screen pt-28 sm:pt-36 md:pt-40 pb-10 sm:pb-14 overflow-x-hidden text-[var(--text-primary)] transition-colors">
+    <div className="flex flex-col min-h-screen pt-28 pb-10 sm:pb-14 overflow-x-hidden text-[var(--text-primary)] transition-colors">
       {/* ── 1. HERO SECTION (2-Kolom Sesuai design.md) ───────────────── */}
       <section className="relative pt-4 sm:pt-6 pb-6 sm:pb-10 flex items-center">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
