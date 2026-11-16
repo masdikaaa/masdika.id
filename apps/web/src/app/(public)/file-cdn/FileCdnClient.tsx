@@ -35,84 +35,78 @@ import { formatRupiah } from "@/lib/billing";
 import { cn } from "@/lib/utils";
 
 const CDN_LOGS = [
-  { time: "00:01", module: "INGEST", message: "Receiving multipart payload via edge gateway..." },
+  { time: "00:01", module: "INGEST", message: "Receiving multipart file payload via File CDN gateway..." },
   { time: "00:02", module: "ENCRYPT", message: "Applying AES-256 at-rest encryption & TLS 1.3 session..." },
-  { time: "00:03", module: "TOKEN", message: "Generating cryptographic HMAC token with 24h TTL..." },
-  { time: "00:04", module: "EDGE", message: "Propagating cache headers to Sidoarjo & Jakarta nodes..." },
-  { time: "00:05", module: "READY", message: "curl -I https://cdn.masdika.id/dl/b8f9e0a2", isCommand: true },
+  { time: "00:03", module: "BUCKET", message: "Provisioning isolated CDN space & generating REST API key..." },
+  { time: "00:04", module: "EDGE", message: "Propagating edge delivery routes on Sidoarjo & IIX nodes..." },
+  { time: "00:05", module: "READY", message: "curl -I https://www.masdika.id/api/v1/cdn/files/b8f9e0a2", isCommand: true },
 ];
 
 const CDN_STATS = [
-  { value: "<12ms", label: "MEDIAN TTFB" },
+  { value: "<15ms", label: "MEDIAN TTFB" },
   { value: "AES-256", label: "AT-REST CIPHER" },
-  { value: "Auto", label: "TTL SCRUBBING" },
-  { value: "100MB", label: "MAX FILE SIZE" },
+  { value: "PAYG", label: "HOURLY BILLING" },
+  { value: "REST API", label: "BUCKET & KEYS" },
 ];
 
 const CDN_FAQS = [
   {
-    q: "How does temporary file expiration and auto-scrubbing work?",
-    a: "You can configure a specific time-to-live (TTL) when generating the download link. Once the expiration window lapses, the file token is instantly revoked, and the encrypted payload is securely scrubbed across our storage arrays with zero recovery trace."
+    q: "How does Masdika File CDN work?",
+    a: "Deploy an isolated File CDN space in seconds, upload static assets or files via dashboard or REST API, and distribute instant delivery links backed by enterprise SSD storage and low-latency Indonesian peering."
   },
   {
     q: "What encryption standards protect my uploaded assets?",
-    a: "Every asset is protected in-transit using TLS 1.3 with forward secrecy, and encrypted at-rest using AES-256 bit keys. No unauthenticated third-party or unauthorized process can inspect your stored payloads."
+    a: "Every asset is protected in-transit using TLS 1.3 with forward secrecy, and encrypted at-rest using AES-256 bit keys inside your isolated CDN space."
   },
   {
-    q: "Can I use Masdika CDN as an image & static asset CDN for my web app?",
-    a: "Yes! Our CDN plans include full support for persistent static asset hosting with high cache hit ratios, global Anycast routing, and direct IIX peering for sub-15ms delivery across Indonesia."
+    q: "Can I use Masdika File CDN as an image & static asset CDN for my web app?",
+    a: "Yes! Our File CDN plans support persistent static asset hosting, instant delivery links, and direct IIX/OpenIX peering for sub-15ms delivery across Indonesia."
   },
   {
     q: "Is there a REST API for automated uploads?",
-    a: "Absolutely. You can upload files programmatically via standard multipart HTTP requests (using cURL, fetch, Python, or Go), attach expiration metadata, and receive instant JSON responses with direct download links."
+    a: "Absolutely. You can generate scoped File CDN API keys in your dashboard and upload files programmatically via standard multipart HTTP requests (cURL, fetch, Python, or Go) to /api/v1/cdn/upload."
   },
   {
-    q: "What is the maximum file size supported?",
-    a: "The standard temporary storage ingestion allows up to 100MB per file. For persistent storage and higher media workloads, you can easily upgrade to our Pro CDN tiers."
+    q: "How does Pay-As-You-Go (PAYG) billing work for File CDN?",
+    a: "Your wallet is billed hourly based on your selected File CDN storage tier starting from Rp 15.000/month. You only pay for active hours and can scale or terminate anytime."
   },
   {
     q: "Why is local Indonesian peering beneficial for media delivery?",
-    a: "Direct peering with the Indonesia Internet Exchange (IIX) and OpenIX guarantees ultra-low ping (<15ms) and unmetered local throughput for users across Java, Sumatra, Bali, and eastern Indonesia."
+    a: "Direct peering with the Indonesia Internet Exchange (IIX) and OpenIX guarantees ultra-low ping (<15ms) and fast local throughput for users across Java, Sumatra, Bali, and eastern Indonesia."
   }
 ];
 
 const RAW_CODE = {
-  curl: `curl -X POST https://cdn.masdika.id/api/v1/upload \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
-  -F "file=@asset.png" \\
-  -F "expires_in=24h"`,
+  curl: `curl -X POST https://www.masdika.id/api/v1/cdn/upload \\
+  -H "x-api-key: YOUR_CDN_API_KEY" \\
+  -F "file=@asset.png"`,
   javascript: `const formData = new FormData();
 formData.append('file', fileInput.files[0]);
-formData.append('expires_in', '24h');
 
-const response = await fetch('https://cdn.masdika.id/api/v1/upload', {
+const response = await fetch('https://www.masdika.id/api/v1/cdn/upload', {
   method: 'POST',
-  headers: { 'Authorization': 'Bearer YOUR_API_KEY' },
+  headers: { 'x-api-key': 'YOUR_CDN_API_KEY' },
   body: formData
 });
 
-const { downloadUrl, expiresAt } = await response.json();
-console.log('CDN Link:', downloadUrl);`,
+const { url, token } = await response.json();
+console.log('CDN Link:', url);`,
   python: `import requests
 
-url = "https://cdn.masdika.id/api/v1/upload"
-headers = {"Authorization": "Bearer YOUR_API_KEY"}
-data = {"expires_in": "24h"}
+url = "https://www.masdika.id/api/v1/cdn/upload"
+headers = {"x-api-key": "YOUR_CDN_API_KEY"}
 
 with open("asset.png", "rb") as f:
-    response = requests.post(url, headers=headers, files={"file": f}, data=data)
+    response = requests.post(url, headers=headers, files={"file": f})
 
-print("CDN Link:", response.json()["downloadUrl"])`,
+print("CDN Link:", response.json()["url"])`,
   go: `package main
 
-import (
-    "fmt"
-    "net/http"
-)
+import "fmt"
 
 func main() {
-    // Stream multipart payload directly to Sidoarjo edge
-    fmt.Println("Upload completed -> https://cdn.masdika.id/dl/b8f9e0a2")
+    // Stream multipart payload directly to Masdika File CDN
+    fmt.Println("Upload completed -> https://www.masdika.id/api/v1/cdn/files/b8f9e0a2")
 }`
 };
 
@@ -175,21 +169,21 @@ export default function FileCdnClient({
               {/* Status pill using shared Badge */}
               <div className="mb-8">
                 <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase">
-                  GLOBAL EDGE CDN &amp; TEMPORARY STORAGE
+                  GLOBAL EDGE FILE CDN &amp; ASSET DELIVERY
                 </Badge>
               </div>
 
               {/* Headline H1 (Ukuran sama persis Home Page & design.md) */}
               <h1 className="text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-4 text-[var(--text-primary)]">
-                Edge File Delivery <br />
+                Fast File Delivery <br />
                 <span className="bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent">
-                  &amp; Cloud CDN.
+                  &amp; Edge File CDN.
                 </span>
               </h1>
 
               {/* Subtitle / Lead (Ukuran sama persis Home Page) */}
               <p className="text-lg md:text-xl mb-10 max-w-xl leading-relaxed text-[var(--text-secondary)] font-normal">
-                Distribute digital media, assets, and temporary files across Indonesia with sub-15ms edge latency. Powered by local IIX peering, automated TLS encryption, and zero-trace auto-destruct links.
+                Deploy isolated File CDN spaces with AES-256 encrypted edge storage, instant delivery links, and scoped REST API keys across Indonesia with sub-15ms IIX peering.
               </p>
 
               {/* Action Buttons (size="lg" sama persis Home Page) */}
@@ -197,10 +191,10 @@ export default function FileCdnClient({
                 <Button
                   variant="primary"
                   size="lg"
-                  href={isEnabled ? "/dashboard" : "#pricing"}
+                  href={isEnabled ? "/dashboard/cdn/new" : "#pricing"}
                   rightIcon={<ArrowRight className="w-4 h-4" />}
                 >
-                  {isEnabled ? "Start Sharing Files" : "View CDN Plans"}
+                  {isEnabled ? "Deploy File CDN" : "View CDN Plans"}
                 </Button>
                 <Button
                   variant="secondary"
@@ -751,13 +745,16 @@ export default function FileCdnClient({
 
         {/* ── 6. PROVISIONING TERMINAL & FAQ ────────── */}
         <ProvisioningSection
-          title="Instant File Distribution"
-          description="Upload files and instantly get a shareable, secure download link. Powered by our global edge network for lightning-fast delivery."
-          buttonText="Start Sharing Files"
-          buttonHref="/dashboard"
+          title="Instant File CDN Distribution"
+          description="Deploy isolated File CDN spaces and instantly distribute assets with encrypted edge storage, delivery links, and REST API keys."
+          buttonText="Deploy File CDN"
+          buttonHref="/dashboard/cdn/new"
           logs={CDN_LOGS}
           stats={CDN_STATS}
           iconType="file-cdn"
+          terminalTitle="FILE CDN CLUSTER"
+          targetServer="Edge CDN Cluster • Sidoarjo DC"
+          provisionEstimate="Backend: Encrypted SSD Edge Storage (< 5 Sec)"
         />
 
         <FaqSection faqs={CDN_FAQS} />
