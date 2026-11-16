@@ -657,9 +657,9 @@ export async function POST(req: NextRequest) {
     let monthlyLimit: number | null = null;
     if (body?.monthlyLimit !== undefined && body.monthlyLimit !== null && body.monthlyLimit !== '') {
       const parsedLimit = Number(body.monthlyLimit);
-      if (!Number.isSafeInteger(parsedLimit) || parsedLimit < 1000) {
+      if (!Number.isSafeInteger(parsedLimit) || parsedLimit < 1000 || parsedLimit > 100_000_000) {
         return NextResponse.json(
-          { error: 'Monthly spend limit must be at least Rp 1.000 or empty for unlimited' },
+          { error: 'Monthly spend limit must be between Rp 1.000 and Rp 100.000.000 (or empty for unlimited)' },
           { status: 400 }
         );
       }

@@ -384,6 +384,20 @@ export default function CustomerAiGatewayPage() {
       toast.error('Please select at least 1 allowed model or disable model restriction.');
       return;
     }
+    if (newMonthlyLimit) {
+      const lim = Number(newMonthlyLimit);
+      if (!Number.isSafeInteger(lim) || lim < 1000 || lim > 100000000) {
+        toast.error('Monthly spend limit must be between Rp 1.000 and Rp 100.000.000.');
+        return;
+      }
+    }
+    if (newKeyExpiresDays) {
+      const days = Number(newKeyExpiresDays);
+      if (!Number.isSafeInteger(days) || days < 1 || days > 3650) {
+        toast.error('Expiration must be between 1 and 3650 days.');
+        return;
+      }
+    }
     setCreating(true);
     try {
       const res = await fetch('/api/user/ai-gateway', {
@@ -3248,28 +3262,52 @@ aider --model openai/glm-5.3`,
                     Monthly Limit (Rp) - Optional
                   </label>
                   <input
-                    type="number"
-                    min={1000}
-                    step={1000}
+                    type="text"
+                    inputMode="numeric"
                     value={newMonthlyLimit}
-                    onChange={(e) => setNewMonthlyLimit(e.target.value)}
-                    placeholder="Unlimited"
-                    className={cn('w-full px-3.5 py-2.5 rounded-xl text-sm border outline-none focus:border-cyan-500 font-mono [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none', isDark ? 'bg-[#141418] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
+                    onChange={(e) => setNewMonthlyLimit(e.target.value.replace(/\D/g, '').slice(0, 9))}
+                    placeholder="e.g. 100000 (blank = unlimited)"
+                    className={cn(
+                      'w-full px-3.5 py-2.5 rounded-xl text-sm border outline-none focus:border-cyan-500 font-mono',
+                      newMonthlyLimit && (Number(newMonthlyLimit) < 1000 || Number(newMonthlyLimit) > 100000000)
+                        ? 'border-rose-500/60 focus:border-rose-500'
+                        : isDark
+                        ? 'bg-[#141418] border-white/[0.08] text-white'
+                        : 'bg-slate-50 border-slate-200 text-slate-900',
+                      isDark ? 'bg-[#141418] text-white' : 'bg-slate-50 text-slate-900',
+                    )}
                   />
+                  <p className={cn('text-[11px] mt-1', newMonthlyLimit && (Number(newMonthlyLimit) < 1000 || Number(newMonthlyLimit) > 100000000) ? 'text-rose-400' : 'text-zinc-500')}>
+                    {newMonthlyLimit && (Number(newMonthlyLimit) < 1000 || Number(newMonthlyLimit) > 100000000)
+                      ? 'Must be between Rp 1.000 and Rp 100.000.000'
+                      : 'Min Rp 1.000 - leave blank for unlimited'}
+                  </p>
                 </div>
                 <div>
                   <label className={cn('text-xs font-bold uppercase tracking-wider block mb-1.5', isDark ? 'text-zinc-400' : 'text-slate-600')}>
                     Expires In (Days) - Optional
                   </label>
                   <input
-                    type="number"
-                    min={1}
-                    max={3650}
+                    type="text"
+                    inputMode="numeric"
                     value={newKeyExpiresDays}
-                    onChange={(e) => setNewKeyExpiresDays(e.target.value)}
-                    placeholder="Never expires"
-                    className={cn('w-full px-3.5 py-2.5 rounded-xl text-sm border outline-none focus:border-cyan-500 font-mono [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none', isDark ? 'bg-[#141418] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
+                    onChange={(e) => setNewKeyExpiresDays(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    placeholder="e.g. 30 (blank = never)"
+                    className={cn(
+                      'w-full px-3.5 py-2.5 rounded-xl text-sm border outline-none focus:border-cyan-500 font-mono',
+                      newKeyExpiresDays && (Number(newKeyExpiresDays) < 1 || Number(newKeyExpiresDays) > 3650)
+                        ? 'border-rose-500/60 focus:border-rose-500'
+                        : isDark
+                        ? 'bg-[#141418] border-white/[0.08] text-white'
+                        : 'bg-slate-50 border-slate-200 text-slate-900',
+                      isDark ? 'bg-[#141418] text-white' : 'bg-slate-50 text-slate-900',
+                    )}
                   />
+                  <p className={cn('text-[11px] mt-1', newKeyExpiresDays && (Number(newKeyExpiresDays) < 1 || Number(newKeyExpiresDays) > 3650) ? 'text-rose-400' : 'text-zinc-500')}>
+                    {newKeyExpiresDays && (Number(newKeyExpiresDays) < 1 || Number(newKeyExpiresDays) > 3650)
+                      ? 'Must be between 1 and 3650 days'
+                      : '1 - 3650 days - leave blank for no expiry'}
+                  </p>
                 </div>
               </div>
 
