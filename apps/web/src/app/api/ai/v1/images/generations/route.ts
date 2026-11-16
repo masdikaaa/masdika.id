@@ -10,6 +10,8 @@ import {
   getAiGatewayConfig,
   isModelAllowedForKey,
   recordAiUsageAndCharge,
+  releaseAiBalanceHold,
+  reserveAiBalanceHold,
 } from '@/lib/ai-gateway';
 
 export const dynamic = 'force-dynamic';
@@ -92,7 +94,8 @@ export async function POST(req: NextRequest) {
   const costRp = applyMarkupPrice(upstreamCostRp, config.markupPercent);
   const holdRp = Math.ceil(costRp * 1.25);
 
-  if (auth.user.aiBalance < holdRp) {
+  const reserved = await reserveAiBalanceHold(auth.user.id, holdRp);
+  if (!reserved) {
     return aiGatewayError(
       'Insufficient balance. Your AI balance cannot cover the image generation hold.',
       'insufficient_balance',
@@ -135,7 +138,10 @@ export async function POST(req: NextRequest) {
         upstreamCostRp,
         latencyMs: Date.now() - startedAt,
         statusCode: 200,
+        heldRp: holdRp,
       }).catch((err) => console.error('[AI_GATEWAY_IMG_CHARGE]', err));
+    } else {
+      await releaseAiBalanceHold(auth.user.id, holdRp).catch(() => {});
     }
 
     return new NextResponse(text, {
@@ -147,6 +153,7 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch {
+    await releaseAiBalanceHold(auth.user.id, holdRp).catch(() => {});
     return aiGatewayError('Upstream AI provider is unreachable.', 'upstream_unreachable', 502, requestId);
   }
 }
