@@ -39,6 +39,7 @@ import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Select } from '@/components/ui/Select';
 import { AdminCheckbox } from '@/components/ui/AdminCheckbox';
 import { PlainTextArea } from '@/components/ui/PlainTextArea';
+import { AiToolIcon, type QuickstartDocId } from '@/components/ai-gateway/AiToolIcons';
 
 interface AiModelItem {
   id: number;
@@ -700,9 +701,21 @@ export default function CustomerAiGatewayPage() {
   const anthropicBase = `${origin}/api/ai/anthropic`;
   const sampleModel = models[0]?.modelId || 'deepseek-v4.1-flash';
 
-  const codeSnippets: Record<DocLang, { title: string; code: string }> = {
+  const codeSnippets: Record<
+    QuickstartDocId,
+    {
+      title: string;
+      summary: string;
+      baseUrl: string;
+      installCmd?: string;
+      configPath?: string;
+      code: string;
+    }
+  > = {
     curl: {
-      title: 'cURL - Chat Completions, Streaming SSE & Vision (/v1/chat/completions)',
+      title: 'cURL - Chat Completions, Streaming SSE, Vision & Models',
+      summary: 'Test any model directly from your terminal using standard OpenAI-compatible REST endpoints.',
+      baseUrl: openaiBase,
       code: `# 1. Standard Chat Completion
 curl ${openaiBase}/chat/completions \\
   -H "Authorization: Bearer masdika_ai_YOUR_KEY" \\
@@ -739,10 +752,17 @@ curl ${openaiBase}/chat/completions \\
         { "type": "image_url", "image_url": { "url": "https://example.com/photo.jpg" } }
       ]
     }]
-  }'`,
+  }'
+
+# 4. List All Active Models & Live Rupiah Pricing
+curl ${openaiBase}/models \\
+  -H "Authorization: Bearer masdika_ai_YOUR_KEY"`,
     },
     node: {
-      title: 'Node.js / TypeScript - OpenAI SDK (npm install openai)',
+      title: 'Node.js / TypeScript - Official OpenAI SDK',
+      summary: 'Drop-in replacement for the official openai npm package. Supports streaming, tools, JSON mode, and vision.',
+      baseUrl: openaiBase,
+      installCmd: 'npm install openai',
       code: `import OpenAI from "openai";
 
 const client = new OpenAI({
@@ -757,7 +777,7 @@ const res = await client.chat.completions.create({
 });
 console.log(res.choices[0].message.content);
 
-// 2. Streaming Completion
+// 2. Streaming Completion (SSE)
 const stream = await client.chat.completions.create({
   model: "${sampleModel}",
   stream: true,
@@ -767,7 +787,7 @@ for await (const chunk of stream) {
   process.stdout.write(chunk.choices[0]?.delta?.content || "");
 }
 
-// 3. Tool / Function Calling
+// 3. Tool / Function Calling & JSON Mode
 const toolRes = await client.chat.completions.create({
   model: "glm-5.3",
   messages: [{ role: "user", content: "What is the weather in Jakarta?" }],
@@ -787,7 +807,10 @@ const toolRes = await client.chat.completions.create({
 console.log(toolRes.choices[0].message.tool_calls);`,
     },
     python: {
-      title: 'Python - OpenAI SDK (pip install openai)',
+      title: 'Python - Official OpenAI SDK (Sync & Async)',
+      summary: 'Use the official Python openai library by setting base_url to the Masdika OpenAI endpoint.',
+      baseUrl: openaiBase,
+      installCmd: 'pip install openai',
       code: `import os
 from openai import OpenAI
 
@@ -828,40 +851,49 @@ vision = client.chat.completions.create(
 print(vision.choices[0].message.content)`,
     },
     go: {
-      title: 'Go - net/http & Official OpenAI Go Compatible',
-      code: `package main
+      title: 'Go - Official openai-go SDK & Standard net/http',
+      summary: 'Connect Go services using either the official openai-go SDK or zero-dependency net/http.',
+      baseUrl: openaiBase,
+      installCmd: 'go get github.com/openai/openai-go',
+      code: `// Option A: Official OpenAI Go SDK
+package main
 
 import (
-	"bytes"
+	"context"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
+
+	"github.com/openai/openai-go"
+	"github.com/openai/openai-go/option"
 )
 
 func main() {
-	payload := []byte(\`{
-		"model": "${sampleModel}",
-		"messages": [{"role": "user", "content": "Hello from Go!"}]
-	}\`)
+	client := openai.NewClient(
+		option.WithBaseURL("${openaiBase}"),
+		option.WithAPIKey(os.Getenv("MASDIKA_AI_KEY")),
+	)
 
-	req, _ := http.NewRequest("POST", "${openaiBase}/chat/completions", bytes.NewBuffer(payload))
-	req.Header.Set("Authorization", "Bearer "+os.Getenv("MASDIKA_AI_KEY"))
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := http.DefaultClient.Do(req)
+	res, err := client.Chat.Completions.New(context.Background(), openai.ChatCompletionNewParams{
+		Model: "${sampleModel}",
+		Messages: []openai.ChatCompletionMessageParamUnion{
+			openai.UserMessage("Hello from Go!"),
+		},
+	})
 	if err != nil {
 		panic(err)
 	}
-	defer resp.Body.Close()
+	fmt.Println(res.Choices[0].Message.Content)
+}
 
-	body, _ := io.ReadAll(resp.Body)
-	fmt.Println(string(body))
-}`,
+// Option B: Zero-dependency net/http POST to ${openaiBase}/chat/completions
+// Headers: Authorization: Bearer $MASDIKA_AI_KEY, Content-Type: application/json`,
     },
     php: {
-      title: 'PHP - cURL / Laravel HTTP Client',
+      title: 'PHP - Native cURL & Laravel HTTP Client',
+      summary: 'Integrate with Laravel, Symfony, or plain PHP using standard HTTP POST requests.',
+      baseUrl: openaiBase,
       code: `<?php
+// Option A: Native PHP cURL
 $ch = curl_init("${openaiBase}/chat/completions");
 curl_setopt_array($ch, [
     CURLOPT_RETURNTRANSFER => true,
@@ -873,6 +905,7 @@ curl_setopt_array($ch, [
     CURLOPT_POSTFIELDS => json_encode([
         "model" => "${sampleModel}",
         "messages" => [
+            ["role" => "system", "content" => "You are a helpful assistant."],
             ["role" => "user", "content" => "Hello from PHP!"]
         ],
     ]),
@@ -881,11 +914,22 @@ curl_setopt_array($ch, [
 $response = curl_exec($ch);
 curl_close($ch);
 $data = json_decode($response, true);
-echo $data["choices"][0]["message"]["content"] ?? $response;`,
+echo $data["choices"][0]["message"]["content"] ?? $response;
+
+// Option B: Laravel HTTP Client
+// $res = Http::withToken(env('MASDIKA_AI_KEY'))
+//     ->post('${openaiBase}/chat/completions', [
+//         'model' => '${sampleModel}',
+//         'messages' => [['role' => 'user', 'content' => 'Hello from Laravel!']],
+//     ])->json();`,
     },
     responses: {
-      title: 'OpenAI Responses API (/v1/responses - Codex & Newer Clients)',
-      code: `curl ${openaiBase}/responses \\
+      title: 'OpenAI Responses API (/v1/responses)',
+      summary: 'Stateless Responses API for OpenAI Codex CLI and newer OpenAI SDK clients.',
+      baseUrl: openaiBase,
+      installCmd: 'npm install openai',
+      code: `# 1. cURL
+curl ${openaiBase}/responses \\
   -H "Authorization: Bearer masdika_ai_YOUR_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -893,13 +937,27 @@ echo $data["choices"][0]["message"]["content"] ?? $response;`,
     "instructions": "You are a concise assistant.",
     "input": "Explain what a VPS is in two sentences.",
     "max_output_tokens": 2000
-  }'`,
+  }'
+
+# 2. Node.js (OpenAI SDK >= 4.87)
+import OpenAI from "openai";
+const client = new OpenAI({ baseURL: "${openaiBase}", apiKey: process.env.MASDIKA_AI_KEY });
+const response = await client.responses.create({
+  model: "glm-5.3",
+  instructions: "You are a concise assistant.",
+  input: "Write a 3-line Nginx reverse proxy snippet.",
+});
+console.log(response.output_text);`,
     },
     anthropic: {
       title: 'Anthropic SDK - Node.js & Python (/v1/messages)',
+      summary: 'Use official Anthropic SDKs (supports extended thinking, system prompts, streaming, and tool use).',
+      baseUrl: anthropicBase,
+      installCmd: 'npm install @anthropic-ai/sdk',
       code: `// Node.js (npm install @anthropic-ai/sdk)
 import Anthropic from "@anthropic-ai/sdk";
 
+// Note: Do NOT include /v1 here - Anthropic SDK appends /v1/messages automatically
 const client = new Anthropic({
   baseURL: "${anthropicBase}",
   apiKey: process.env.MASDIKA_AI_KEY,
@@ -914,16 +972,21 @@ const msg = await client.messages.create({
 console.log(msg.content);
 
 # Python (pip install anthropic)
+# import os
 # from anthropic import Anthropic
 # client = Anthropic(base_url="${anthropicBase}", api_key=os.environ["MASDIKA_AI_KEY"])
 # msg = client.messages.create(
 #     model="claude-sonnet-4-6",
 #     max_tokens=2000,
 #     messages=[{"role": "user", "content": "Hello!"}],
-# )`,
+# )
+# print(msg.content[0].text)`,
     },
     images: {
       title: 'Image Generation API (/v1/images/generations)',
+      summary: 'Generate high-resolution images with Seedream, Kling, Vega, Vidu, and HY Image models.',
+      baseUrl: openaiBase,
+      installCmd: 'npm install openai',
       code: `# 1. cURL
 curl ${openaiBase}/images/generations \\
   -H "Authorization: Bearer masdika_ai_YOUR_KEY" \\
@@ -943,19 +1006,49 @@ const img = await client.images.generate({
   prompt: "Minimalist logo of a hummingbird, flat vector",
   size: "2048x2048",
 });
-console.log(img.data[0].url);`,
+console.log(img.data[0].url);
+
+# Supported Image Models:
+# seedream-image-v5.0-flash, seedream-image-v5.0-lite, kling-image-v3, vega-image, vidu-image-q2, hy-image-3.0`,
     },
     claudecode: {
-      title: 'Claude Code CLI',
-      code: `export ANTHROPIC_BASE_URL=${anthropicBase}
-export ANTHROPIC_AUTH_TOKEN=masdika_ai_YOUR_KEY
-export ANTHROPIC_MODEL=glm-5.3
-export ANTHROPIC_DEFAULT_HAIKU_MODEL=deepseek-v4.1-flash  # background tasks
-claude`,
+      title: 'Claude Code CLI - Bash, PowerShell & Persistent Settings',
+      summary: 'Run Claude Code against any Masdika model using the Anthropic Messages gateway.',
+      baseUrl: anthropicBase,
+      installCmd: 'npm install -g @anthropic-ai/claude-code',
+      configPath: '~/.claude/settings.json',
+      code: `# macOS / Linux (Bash / Zsh)
+export ANTHROPIC_BASE_URL="${anthropicBase}"
+export ANTHROPIC_AUTH_TOKEN="masdika_ai_YOUR_KEY"
+export ANTHROPIC_MODEL="glm-5.3"
+export ANTHROPIC_DEFAULT_HAIKU_MODEL="deepseek-v4.1-flash"
+claude
+
+# Windows PowerShell
+$env:ANTHROPIC_BASE_URL="${anthropicBase}"
+$env:ANTHROPIC_AUTH_TOKEN="masdika_ai_YOUR_KEY"
+$env:ANTHROPIC_MODEL="glm-5.3"
+$env:ANTHROPIC_DEFAULT_HAIKU_MODEL="deepseek-v4.1-flash"
+claude
+
+# Or persist permanently in ~/.claude/settings.json:
+# {
+#   "env": {
+#     "ANTHROPIC_BASE_URL": "${anthropicBase}",
+#     "ANTHROPIC_AUTH_TOKEN": "masdika_ai_YOUR_KEY",
+#     "ANTHROPIC_MODEL": "glm-5.3",
+#     "ANTHROPIC_DEFAULT_HAIKU_MODEL": "deepseek-v4.1-flash"
+#   }
+# }`,
     },
     codex: {
       title: 'OpenAI Codex CLI (~/.codex/config.toml)',
-      code: `model = "glm-5.3"
+      summary: 'Configure OpenAI Codex CLI to route Responses API traffic through Masdika AI Gateway.',
+      baseUrl: openaiBase,
+      installCmd: 'npm install -g @openai/codex',
+      configPath: '~/.codex/config.toml',
+      code: `# 1. Save to ~/.codex/config.toml
+model = "glm-5.3"
 model_provider = "masdika"
 
 [model_providers.masdika]
@@ -964,12 +1057,21 @@ base_url = "${openaiBase}"
 env_key = "MASDIKA_AI_KEY"
 wire_api = "responses"
 
-# Or run on demand:
-# export MASDIKA_AI_KEY=masdika_ai_YOUR_KEY
-# codex -c model_provider=masdika -m glm-5.3`,
+# 2. Set your key & launch Codex:
+# macOS / Linux:
+export MASDIKA_AI_KEY="masdika_ai_YOUR_KEY"
+codex
+
+# Windows PowerShell:
+$env:MASDIKA_AI_KEY="masdika_ai_YOUR_KEY"
+codex`,
     },
     opencode: {
       title: 'opencode (~/.config/opencode/opencode.json)',
+      summary: 'Add Masdika AI Gateway as an OpenAI-compatible provider inside opencode.',
+      baseUrl: openaiBase,
+      installCmd: 'npm install -g opencode-ai',
+      configPath: '~/.config/opencode/opencode.json',
       code: `{
   "$schema": "https://opencode.ai/config.json",
   "provider": {
@@ -983,42 +1085,92 @@ wire_api = "responses"
       "models": {
         "glm-5.3": { "name": "GLM-5.3" },
         "kimi-k3": { "name": "Kimi K3" },
-        "deepseek-v4.1-flash": { "name": "DeepSeek V4.1 Flash" }
+        "deepseek-v4-pro": { "name": "DeepSeek V4 Pro" },
+        "deepseek-v4.1-flash": { "name": "DeepSeek V4.1 Flash" },
+        "claude-sonnet-4-6": { "name": "Claude Sonnet 4.6" }
       }
     }
   }
-}`,
+}
+
+# Run in terminal after setting MASDIKA_AI_KEY:
+# export MASDIKA_AI_KEY="masdika_ai_YOUR_KEY" && opencode`,
     },
     cline: {
       title: 'Cline / Roo Code / Kilo Code (VS Code Extension)',
-      code: `API Provider : OpenAI Compatible
-Base URL     : ${openaiBase}
-API Key      : masdika_ai_YOUR_KEY
-Model ID     : glm-5.3 (or deepseek-v4-pro, kimi-k3, claude-sonnet-4-6)`,
+      summary: 'Connect VS Code autonomous coding extensions using OpenAI Compatible mode.',
+      baseUrl: openaiBase,
+      code: `1. Open Cline / Roo Code / Kilo Code extension settings (gear icon)
+2. Set the following fields:
+   - API Provider : OpenAI Compatible
+   - Base URL     : ${openaiBase}
+   - API Key      : masdika_ai_YOUR_KEY
+   - Model ID     : glm-5.3 (or deepseek-v4-pro, kimi-k3, claude-sonnet-4-6)
+
+3. Optional advanced settings:
+   - Supports streaming & tool calling automatically
+   - Recommended coding models: glm-5.3, kimi-k3, deepseek-v4-pro, claude-sonnet-4-6`,
     },
     cursor: {
-      title: 'Cursor IDE (Settings → Models)',
-      code: `1. Open Cursor Settings → Models
-2. Enter your masdika_ai_... key in OpenAI API Key
-3. Enable "Override OpenAI Base URL":
+      title: 'Cursor IDE (Settings -> Models)',
+      summary: 'Use your Masdika API key and custom model IDs inside Cursor IDE.',
+      baseUrl: openaiBase,
+      code: `1. Open Cursor Settings -> Models
+2. Under "API Keys", paste your key in "OpenAI API Key":
+   masdika_ai_YOUR_KEY
+3. Toggle ON "Override OpenAI Base URL" and enter:
    ${openaiBase}
-4. Add custom model IDs: glm-5.3, deepseek-v4-pro, kimi-k3, claude-sonnet-4-6`,
+4. Scroll to "Model Names" -> "+ Add Model" and add any active model ID:
+   - glm-5.3
+   - deepseek-v4-pro
+   - kimi-k3
+   - claude-sonnet-4-6
+5. Click "Verify" and select the model in Cursor Chat / Composer.`,
     },
     continue: {
       title: 'Continue (~/.continue/config.yaml)',
-      code: `models:
+      summary: 'Configure Continue in VS Code or JetBrains with Masdika models for chat, edit, and apply.',
+      baseUrl: openaiBase,
+      configPath: '~/.continue/config.yaml',
+      code: `name: Masdika AI Gateway
+version: 1.0.0
+schema: v1
+
+models:
   - name: GLM-5.3 (Masdika)
     provider: openai
     model: glm-5.3
     apiBase: ${openaiBase}
     apiKey: \${{ secrets.MASDIKA_AI_KEY }}
-    roles: [chat, edit, apply]`,
+    roles: [chat, edit, apply]
+
+  - name: DeepSeek V4.1 Flash (Fast)
+    provider: openai
+    model: deepseek-v4.1-flash
+    apiBase: ${openaiBase}
+    apiKey: \${{ secrets.MASDIKA_AI_KEY }}
+    roles: [chat, autocomplete]`,
     },
     aider: {
-      title: 'Aider CLI',
-      code: `export OPENAI_API_BASE=${openaiBase}
-export OPENAI_API_KEY=masdika_ai_YOUR_KEY
-aider --model openai/glm-5.3`,
+      title: 'Aider CLI (Bash, PowerShell & .aider.conf.yml)',
+      summary: 'Pair-program in your terminal with Aider using Masdika OpenAI-compatible endpoints.',
+      baseUrl: openaiBase,
+      installCmd: 'pip install aider-chat',
+      configPath: '~/.aider.conf.yml',
+      code: `# macOS / Linux (Bash / Zsh)
+export OPENAI_API_BASE="${openaiBase}"
+export OPENAI_API_KEY="masdika_ai_YOUR_KEY"
+aider --model openai/glm-5.3
+
+# Windows PowerShell
+$env:OPENAI_API_BASE="${openaiBase}"
+$env:OPENAI_API_KEY="masdika_ai_YOUR_KEY"
+aider --model openai/glm-5.3
+
+# Or save in ~/.aider.conf.yml:
+# openai-api-base: ${openaiBase}
+# openai-api-key: masdika_ai_YOUR_KEY
+# model: openai/glm-5.3`,
     },
   };
 
@@ -2745,7 +2897,7 @@ aider --model openai/glm-5.3`,
       {activeTab === 'docs' && (
         <div className="space-y-6 min-w-0">
           <div className={cn('rounded-2xl border p-4 sm:p-6 space-y-5 min-w-0', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}>
-            <div className="flex flex-col gap-3 min-w-0">
+            <div className="flex flex-col gap-4 min-w-0">
               <div>
                 <h2 className={cn('text-base font-bold flex items-center gap-2', isDark ? 'text-white' : 'text-slate-900')}>
                   <Terminal className="w-4 h-4 text-cyan-400 shrink-0" />
@@ -2755,36 +2907,114 @@ aider --model openai/glm-5.3`,
                   One API key works across OpenAI Chat Completions, OpenAI Responses API (Codex), Anthropic Messages, Claude Code, Cursor, Cline, opencode, Continue, and Aider.
                 </p>
               </div>
-              <div className={cn('flex items-center gap-1 p-1.5 rounded-xl border w-full max-w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-slate-100 border-slate-200')}>
-                {([
-                  { id: 'curl', label: 'cURL' },
-                  { id: 'node', label: 'OpenAI Node' },
-                  { id: 'python', label: 'OpenAI Python' },
-                  { id: 'go', label: 'Go' },
-                  { id: 'php', label: 'PHP' },
-                  { id: 'responses', label: 'Responses API' },
-                  { id: 'anthropic', label: 'Anthropic SDK' },
-                  { id: 'images', label: 'Images API' },
-                  { id: 'claudecode', label: 'Claude Code' },
-                  { id: 'codex', label: 'Codex' },
-                  { id: 'opencode', label: 'opencode' },
-                  { id: 'cline', label: 'Cline / Roo / Kilo' },
-                  { id: 'cursor', label: 'Cursor' },
-                  { id: 'continue', label: 'Continue' },
-                  { id: 'aider', label: 'Aider' },
-                ] as const).map((l) => (
+
+              <div className="space-y-3">
+                {(
+                  [
+                    {
+                      group: 'SDKs & REST APIs',
+                      items: [
+                        { id: 'curl', label: 'cURL' },
+                        { id: 'node', label: 'OpenAI Node' },
+                        { id: 'python', label: 'OpenAI Python' },
+                        { id: 'go', label: 'Go' },
+                        { id: 'php', label: 'PHP' },
+                        { id: 'responses', label: 'Responses API' },
+                        { id: 'anthropic', label: 'Anthropic SDK' },
+                        { id: 'images', label: 'Images API' },
+                      ] as const,
+                    },
+                    {
+                      group: 'AI Coding Tools & IDEs',
+                      items: [
+                        { id: 'claudecode', label: 'Claude Code' },
+                        { id: 'codex', label: 'Codex' },
+                        { id: 'opencode', label: 'opencode' },
+                        { id: 'cline', label: 'Cline / Roo / Kilo' },
+                        { id: 'cursor', label: 'Cursor' },
+                        { id: 'continue', label: 'Continue' },
+                        { id: 'aider', label: 'Aider' },
+                      ] as const,
+                    },
+                  ] as const
+                ).map((section) => (
+                  <div key={section.group} className="space-y-1.5">
+                    <div className={cn('text-[10px] font-bold uppercase tracking-widest', isDark ? 'text-zinc-500' : 'text-slate-500')}>
+                      {section.group}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {section.items.map((l) => {
+                        const active = docLang === l.id;
+                        return (
+                          <button
+                            key={l.id}
+                            type="button"
+                            onClick={() => setDocLang(l.id)}
+                            className={cn(
+                              'inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all whitespace-nowrap cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50',
+                              active
+                                ? 'bg-cyan-400 border-cyan-400 text-slate-950 font-bold shadow-xs'
+                                : isDark
+                                ? 'bg-[#0a0a0c] border-white/[0.08] text-zinc-300 hover:border-cyan-500/40 hover:text-white'
+                                : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-cyan-500/50 hover:text-slate-950'
+                            )}
+                          >
+                            <AiToolIcon id={l.id as QuickstartDocId} active={active} isDark={isDark} />
+                            <span>{l.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Quick Config Strip for the selected tool */}
+              <div className={cn('rounded-xl border p-3 sm:p-3.5 flex flex-col gap-2.5', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-slate-50 border-slate-200')}>
+                <p className={cn('text-xs leading-relaxed', isDark ? 'text-zinc-300' : 'text-slate-700')}>
+                  {codeSnippets[docLang].summary}
+                </p>
+                <div className="flex flex-wrap items-center gap-2">
                   <button
-                    key={l.id}
                     type="button"
-                    onClick={() => setDocLang(l.id)}
+                    onClick={() => handleCopy(codeSnippets[docLang].baseUrl, `base-${docLang}`, 'Base URL copied')}
                     className={cn(
-                      'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap shrink-0 cursor-pointer',
-                      docLang === l.id ? 'bg-cyan-400 text-slate-950 shadow-xs' : isDark ? 'text-zinc-400 hover:text-white' : 'text-slate-600'
+                      'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-mono transition-colors cursor-pointer max-w-full',
+                      isDark ? 'bg-[#111115] border-white/[0.08] text-cyan-400 hover:border-cyan-500/40' : 'bg-white border-slate-200 text-cyan-700 hover:border-cyan-500/50'
                     )}
                   >
-                    {l.label}
+                    <span className={cn('font-sans font-semibold', isDark ? 'text-zinc-400' : 'text-slate-500')}>Base URL:</span>
+                    <span className="truncate">{codeSnippets[docLang].baseUrl}</span>
+                    {copiedId === `base-${docLang}` ? <Check className="w-3 h-3 shrink-0" /> : <Copy className="w-3 h-3 shrink-0" />}
                   </button>
-                ))}
+
+                  {codeSnippets[docLang].installCmd && (
+                    <button
+                      type="button"
+                      onClick={() => handleCopy(codeSnippets[docLang].installCmd!, `inst-${docLang}`, 'Install command copied')}
+                      className={cn(
+                        'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-mono transition-colors cursor-pointer max-w-full',
+                        isDark ? 'bg-[#111115] border-white/[0.08] text-emerald-400 hover:border-emerald-500/40' : 'bg-white border-slate-200 text-emerald-700 hover:border-emerald-500/50'
+                      )}
+                    >
+                      <span className={cn('font-sans font-semibold', isDark ? 'text-zinc-400' : 'text-slate-500')}>Install:</span>
+                      <span className="truncate">{codeSnippets[docLang].installCmd}</span>
+                      {copiedId === `inst-${docLang}` ? <Check className="w-3 h-3 shrink-0" /> : <Copy className="w-3 h-3 shrink-0" />}
+                    </button>
+                  )}
+
+                  {codeSnippets[docLang].configPath && (
+                    <span
+                      className={cn(
+                        'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-mono',
+                        isDark ? 'bg-[#111115] border-white/[0.08] text-zinc-300' : 'bg-white border-slate-200 text-slate-700'
+                      )}
+                    >
+                      <span className={cn('font-sans font-semibold', isDark ? 'text-zinc-400' : 'text-slate-500')}>Config:</span>
+                      <span>{codeSnippets[docLang].configPath}</span>
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -2796,7 +3026,8 @@ aider --model openai/glm-5.3`,
                     <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#ffbd2e] shrink-0" />
                     <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#27c93f] shrink-0" />
                   </div>
-                  <span className={cn('ml-1 text-[11px] sm:text-xs font-mono font-semibold truncate', isDark ? 'text-zinc-400' : 'text-slate-700')}>{codeSnippets[docLang].title}</span>
+                  <AiToolIcon id={docLang} isDark={isDark} className="w-3.5 h-3.5 shrink-0 ml-1" />
+                  <span className={cn('text-[11px] sm:text-xs font-mono font-semibold truncate', isDark ? 'text-zinc-300' : 'text-slate-700')}>{codeSnippets[docLang].title}</span>
                 </div>
                 <button
                   type="button"
