@@ -40,8 +40,6 @@ import { FadeIn } from "@/components/animations/FadeIn";
 import { AnimatedBeam, OrbitalRings } from "@/components/animations/DeploymentAnimations";
 import { ProvisioningSection } from "@/components/ui/ProvisioningSection";
 import { FaqSection } from "@/components/ui/FaqSection";
-import { EnterpriseInfraSection } from "@/components/infra/EnterpriseInfraSection";
-import { AntiDdosWorkflowSection } from "@/components/infra/AntiDdosWorkflowSection";
 import { cn } from "@/lib/utils";
 
 const DB_TERMINAL_LOGS = [
@@ -627,27 +625,27 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
           </div>
         </section>
 
-        {/* ── 3. HARDWARE & K8S ARCHITECTURE SHOWCASE ───────────────────── */}
+        {/* ── 3. DATABASE ENGINE TOOLING & WEB GUI SHOWCASE ───────────────────── */}
         <section id="features" className="scroll-mt-24 py-10 sm:py-14 relative z-10">
           <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-8 sm:p-12 shadow-xl overflow-hidden">
             <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
               <div className="lg:col-span-7">
                 <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
-                  KUBERNETES CLUSTER ARCHITECTURE
+                  ENGINE TOOLING &amp; WEB ADMIN GUI
                 </span>
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
-                  Built on Cloud-Native Kubernetes
+                  Built-In Web GUI &amp; Instant SQL Export/Import
                 </h2>
                 <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed mb-8 max-w-xl">
-                  Unlike traditional shared web hosting, each Masdika database instance runs in an isolated StatefulSet Pod with dedicated memory buffers, persistent block volumes, and automated self-healing.
+                  Manage schemas, run queries, and inspect live keys directly from your browser. Every dedicated database includes an isolated web admin panel protected by Let&apos;s Encrypt HTTPS alongside direct TCP access.
                 </p>
 
                 <div className="space-y-3.5">
                   {[
-                    "Isolated Kubernetes StatefulSet Pod with Dedicated Resource Limits",
-                    "Persistent SATA SSD Block Storage mounted via StorageClass PVC",
-                    "Direct Public TCP NodePort (e.g. 30500 - 30600) for Remote GUI & App Access",
-                    "Automated Let's Encrypt TLS/SSL Ingress for Web Management Panels",
+                    "Zero-setup Web Admin Panels (phpMyAdmin, pgAdmin, Mongo Express, Redis Commander)",
+                    "One-click Database Export & SQL/Archive Import from the dashboard",
+                    "Dedicated Persistent SSD Volumes (PVC) with instant zero-downtime scaling",
+                    "Direct TCP Endpoint & Connection URI ready for Prisma, Laravel, and Node.js",
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
                       <div className="w-6 h-6 rounded-md bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
@@ -659,67 +657,36 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
                 </div>
               </div>
 
-              {/* Cluster Stats Grid */}
-              <div className="lg:col-span-5 grid grid-cols-2 gap-4">
-                <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-center flex flex-col items-center justify-center">
-                  <span className="text-4xl sm:text-5xl font-black text-cyan-600 dark:text-cyan-400 mb-1">
-                    &lt;1s
-                  </span>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-                    Failover Detection
-                  </span>
-                </div>
-
-                <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-center flex flex-col items-center justify-center">
-                  <span className="text-4xl sm:text-5xl font-black text-cyan-600 dark:text-cyan-400 mb-1">
-                    100%
-                  </span>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-                    Data Persistence
-                  </span>
-                </div>
-
-                <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-center flex flex-col items-center justify-center">
-                  <div className="w-10 h-10 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-2">
-                    <HardDrive className="w-5 h-5" />
-                  </div>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)]">
-                    SATA SSD PVC
-                  </span>
-                </div>
-
-                <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-center flex flex-col items-center justify-center">
-                  <div className="w-10 h-10 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-2">
-                    <MapPin className="w-5 h-5" />
-                  </div>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)]">
-                    Sidoarjo DC
-                  </span>
-                </div>
-
-                <div className="col-span-2 p-5 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] flex items-center gap-4">
-                  <div className="w-11 h-11 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
-                    <Activity className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold text-[var(--text-primary)]">
-                      98.99% Database Availability
+              {/* Engine & Web GUI Matrix */}
+              <div className="lg:col-span-5 grid grid-cols-1 gap-3">
+                {[
+                  { engine: "MySQL 8.0 / MariaDB 11", tool: "phpMyAdmin / Adminer", badge: "SQL" },
+                  { engine: "PostgreSQL 16", tool: "pgAdmin 4 Web Console", badge: "PGSQL" },
+                  { engine: "MongoDB 7.0", tool: "Mongo Express UI", badge: "NoSQL" },
+                  { engine: "Redis 7.2", tool: "Redis Commander", badge: "Cache" },
+                ].map((row) => (
+                  <div
+                    key={row.engine}
+                    className="p-4 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] flex items-center justify-between gap-4"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
+                        <Database className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-sm font-bold text-[var(--text-primary)] truncate">{row.engine}</div>
+                        <div className="text-xs text-[var(--text-muted)] truncate">Web GUI: {row.tool}</div>
+                      </div>
                     </div>
-                    <div className="text-xs text-[var(--text-muted)] mt-0.5">
-                      Orchestrated auto-restart and zero-touch node health reconciliation
-                    </div>
+                    <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 shrink-0">
+                      {row.badge}
+                    </span>
                   </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
         </section>
-
-        {/* ── 3.5. SUPPORT INFRA & CARRIER-GRADE NETWORK (K3s Mode) ─────── */}
-        <EnterpriseInfraSection mode="k3s" />
-
-        {/* ── 3.6. ANTI-DDOS WORKFLOW (K3s Mode) ────────────────────────── */}
-        <AntiDdosWorkflowSection mode="k3s" />
 
         {/* ── 4. INTERACTIVE PRICING & SPEC CONFIGURATOR ────────────────── */}
         <section id="pricing" className="scroll-mt-24 py-10 sm:py-14 relative z-10">

@@ -42,8 +42,6 @@ import { FadeIn } from "@/components/animations/FadeIn";
 import { AnimatedBeam, OrbitalRings } from "@/components/animations/DeploymentAnimations";
 import { ProvisioningSection } from "@/components/ui/ProvisioningSection";
 import { FaqSection } from "@/components/ui/FaqSection";
-import { EnterpriseInfraSection } from "@/components/infra/EnterpriseInfraSection";
-import { AntiDdosWorkflowSection } from "@/components/infra/AntiDdosWorkflowSection";
 import { cn } from "@/lib/utils";
 import { 
   ManagedAppDefinition, 
@@ -474,27 +472,27 @@ export default function ManagedAppsClient({
           </div>
         </section>
 
-        {/* ── 3. HARDWARE & K8S ARCHITECTURE SHOWCASE ───────────────────── */}
+        {/* ── 3. APPLICATION RUNTIME & AUTOMATED INGRESS SHOWCASE ───────────────────── */}
         <section id="features" className="scroll-mt-24 py-10 sm:py-14 relative z-10">
           <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-8 sm:p-12 shadow-xl overflow-hidden">
             <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
               <div className="lg:col-span-7">
                 <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
-                  KUBERNETES CLUSTER ARCHITECTURE
+                  APPLICATION RUNTIME &amp; INGRESS
                 </span>
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
-                  Built on Cloud-Native Kubernetes
+                  Zero-Config HTTPS &amp; Dual-Protocol Access
                 </h2>
                 <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed mb-8 max-w-xl">
-                  Unlike conventional shared hosting, each Masdika Managed Application runs in an isolated StatefulSet Pod with dedicated memory buffers, guaranteed CPU limits, and automated self-healing.
+                  Every Managed App ships with an isolated StatefulSet container, automated Let&apos;s Encrypt TLS certificate on a custom subdomain, and live telemetry from your dashboard.
                 </p>
 
                 <div className="space-y-3.5">
                   {[
-                    "Isolated Kubernetes StatefulSet Pod with Dedicated Resource Limits",
-                    "Automated Self-Healing Pods with Zero-Downtime Rolling Restarts",
-                    "Isolated Production SSH & Dedicated Secure Port for CLI Tools",
-                    "Automated Let's Encrypt TLS/SSL Ingress for Web Interfaces",
+                    "Instant Let's Encrypt SSL/TLS on your custom *.app.masdika.id subdomain",
+                    "Dual Access Support: HTTPS Web Dashboard + Dedicated SSH/CLI Port",
+                    "Live Environment Variable Editor, Container Logs & Power Controls",
+                    "Dedicated Persistent SSD Volume preserved across rolling restarts",
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
                       <div className="w-6 h-6 rounded-md bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
@@ -506,54 +504,50 @@ export default function ManagedAppsClient({
                 </div>
               </div>
 
-              {/* Cluster Stats Grid */}
+              {/* App Runtime Highlights Grid */}
               <div className="lg:col-span-5 grid grid-cols-2 gap-4">
                 <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-center flex flex-col items-center justify-center">
-                  <span className="text-4xl sm:text-5xl font-black text-cyan-600 dark:text-cyan-400 mb-1">
-                    &lt;1s
-                  </span>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-                    Failover Detection
-                  </span>
-                </div>
-
-                <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-center flex flex-col items-center justify-center">
-                  <span className="text-4xl sm:text-5xl font-black text-cyan-600 dark:text-cyan-400 mb-1">
-                    100%
-                  </span>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-                    Uptime SLA
-                  </span>
+                  <div className="w-10 h-10 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-2">
+                    <Lock className="w-5 h-5" />
+                  </div>
+                  <span className="text-sm font-bold text-[var(--text-primary)]">Auto SSL/TLS</span>
+                  <span className="text-xs text-[var(--text-muted)] mt-0.5">Let&apos;s Encrypt Ingress</span>
                 </div>
 
                 <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-center flex flex-col items-center justify-center">
                   <div className="w-10 h-10 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-2">
-                    <Cpu className="w-5 h-5" />
+                    <Terminal className="w-5 h-5" />
                   </div>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)]">
-                    Guaranteed vCPU
-                  </span>
+                  <span className="text-sm font-bold text-[var(--text-primary)]">Dual Access</span>
+                  <span className="text-xs text-[var(--text-muted)] mt-0.5">Web UI + SSH CLI</span>
                 </div>
 
                 <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-center flex flex-col items-center justify-center">
                   <div className="w-10 h-10 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-2">
-                    <MapPin className="w-5 h-5" />
+                    <Workflow className="w-5 h-5" />
                   </div>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)]">
-                    Sidoarjo DC
-                  </span>
+                  <span className="text-sm font-bold text-[var(--text-primary)]">1-Click Catalog</span>
+                  <span className="text-xs text-[var(--text-muted)] mt-0.5">Ready Templates</span>
+                </div>
+
+                <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-center flex flex-col items-center justify-center">
+                  <div className="w-10 h-10 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-2">
+                    <HardDrive className="w-5 h-5" />
+                  </div>
+                  <span className="text-sm font-bold text-[var(--text-primary)]">Persistent SSD</span>
+                  <span className="text-xs text-[var(--text-muted)] mt-0.5">Isolated PVC Storage</span>
                 </div>
 
                 <div className="col-span-2 p-5 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] flex items-center gap-4">
                   <div className="w-11 h-11 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
-                    <Activity className="w-5 h-5" />
+                    <Globe className="w-5 h-5" />
                   </div>
                   <div>
                     <div className="text-sm font-bold text-[var(--text-primary)]">
-                      98.99% Application Availability
+                      Instant Subdomain &amp; Domain Routing
                     </div>
                     <div className="text-xs text-[var(--text-muted)] mt-0.5">
-                      Orchestrated auto-restart and zero-touch pod health reconciliation
+                      Live HTTPS endpoint provisioned automatically in Sidoarjo DC
                     </div>
                   </div>
                 </div>
@@ -561,12 +555,6 @@ export default function ManagedAppsClient({
             </div>
           </div>
         </section>
-
-        {/* ── 3.5. SUPPORT INFRA & CARRIER-GRADE NETWORK (K3s Mode) ─────── */}
-        <EnterpriseInfraSection mode="k3s" />
-
-        {/* ── 3.6. ANTI-DDOS WORKFLOW (K3s Mode) ────────────────────────── */}
-        <AntiDdosWorkflowSection mode="k3s" />
 
         {/* ── 4. INTERACTIVE PRICING & SPEC CONFIGURATOR ────────────────── */}
         <section id="pricing" className="scroll-mt-24 py-10 sm:py-14 relative z-10">
