@@ -7,6 +7,7 @@ import {
   DEFAULT_AI_IMAGE_MODELS,
   applyMarkupPrice,
   calculateTokenCostRp,
+  clearAiInsufficientBalanceNotice,
   ensureAiModelsExist,
   estimatePromptTokensFromBody,
   generateAiGatewayKey,
@@ -276,6 +277,8 @@ export async function POST(req: NextRequest) {
           { status: 402 }
         );
       }
+
+      await clearAiInsufficientBalanceNotice(user.id).catch(() => {});
 
       return NextResponse.json({
         success: true,

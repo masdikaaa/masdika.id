@@ -2427,3 +2427,58 @@ export const sendAdminMediaNotificationEmail = async ({
   }
 };
 
+/**
+ * Send one-time notification when customer AI Gateway balance is insufficient.
+ */
+export async function sendAiInsufficientBalanceEmail(details: {
+  toEmail: string;
+  customerName: string;
+  currentAiBalance: number;
+  requiredRp?: number;
+}) {
+  if (!process.env.SMTP_HOST) return;
+
+  const transporter = getTransporter();
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://masdika.id';
+  const location = await getLocationSetting();
+  const currentStr = `Rp ${Math.max(0, details.currentAiBalance).toLocaleString('id-ID')}`;
+  const reqNote =
+    details.requiredRp && details.requiredRp > 0
+      ? `<tr><td style="padding: 4px 0; color: #9ca3af; font-size: 13px;">Minimum Estimated Hold</td><td style="padding: 4px 0; color: #f59e0b; font-size: 13px; text-align: right; font-weight: bold;">Rp ${details.requiredRp.toLocaleString('id-ID')}</td></tr>`
+      : '';
+
+  const content = `
+    <h2 style="color: #f59e0b; margin-top: 0; font-size: 22px;">⚠️ AI Gateway Balance Insufficient</h2>
+    <p>Hello <strong>${details.customerName || 'Customer'}</strong>,</p>
+    <p>An AI Gateway API request was rejected because your <strong>AI Balance</strong> is insufficient to cover the request.</p>
+
+    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin: 22px 0;">
+      <tr>
+        <td style="background-color: #020617; padding: 18px; border-radius: 10px; border-left: 4px solid #f59e0b;">
+          <table width="100%" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="padding: 4px 0; color: #9ca3af; font-size: 13px;">Current AI Balance</td>
+              <td style="padding: 4px 0; color: #ef4444; font-size: 14px; text-align: right; font-weight: bold;">${currentStr}</td>
+            </tr>
+            ${reqNote}
+          </table>
+        </td>
+      </tr>
+    </table>
+
+    <p style="font-size: 13px; color: #9ca3af;">Top up your AI Balance from your Masdika Wallet (or enable <strong>Auto Top-Up</strong>) to resume AI API calls immediately. You will not receive another alert for this depletion until you top up again.</p>
+    ${getButtonHtml("Top Up AI Balance", `${baseUrl}/dashboard/ai-gateway`)}
+  `;
+
+  try {
+    await transporter.sendMail({
+      from: `"${FROM_NAME} Alerts" <${FROM_EMAIL}>`,
+      to: details.toEmail,
+      subject: `[Action Required] AI Gateway Balance Insufficient (${currentStr})`,
+      html: getBaseHtml(content, location),
+    });
+  } catch (error) {
+    console.error("Error sending AI insufficient balance email:", error);
+  }
+}
+

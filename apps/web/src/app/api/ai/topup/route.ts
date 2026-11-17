@@ -1,7 +1,7 @@
 import * as crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getAiGatewayConfig } from '@/lib/ai-gateway';
+import { clearAiInsufficientBalanceNotice, getAiGatewayConfig } from '@/lib/ai-gateway';
 import { getUserServicesCommitment } from '@/lib/billing-commitment';
 import {
   AI_MGMT_CORS_HEADERS,
@@ -197,6 +197,7 @@ export async function POST(req: NextRequest) {
         invoiceNumber: result.invoice.invoiceNumber,
       },
     };
+    await clearAiInsufficientBalanceNotice(user.id).catch(() => {});
     await idem.complete(200, okBody);
     return NextResponse.json(okBody, { status: 200, headers: AI_MGMT_CORS_HEADERS });
   } catch (err) {

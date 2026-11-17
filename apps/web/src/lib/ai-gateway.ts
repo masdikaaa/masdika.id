@@ -4,6 +4,8 @@ import { prisma } from './prisma';
 import { decryptDeterministic } from './encryption';
 import { checkRateLimit } from './rate-limit';
 import { getUserServicesCommitment } from './billing-commitment';
+import { redis } from './redis';
+import { sendAiInsufficientBalanceEmail } from './email';
 
 export interface AiModelSeed {
   modelId: string;
@@ -865,12 +867,63 @@ export async function tryAutoTopupAiBalance(userId: number): Promise<number> {
     return latest?.aiBalance ?? u.aiBalance + u.aiAutoTopupAmount;
   });
 
-  if (updated !== null) return updated;
+  if (updated !== null) {
+    await clearAiInsufficientBalanceNotice(userId).catch(() => {});
+    return updated;
+  }
   const latest = await prisma.user.findUnique({
     where: { id: userId },
     select: { aiBalance: true },
   });
   return latest?.aiBalance ?? u.aiBalance;
+}
+
+const memInsufficientNotified = new Set<number>();
+
+/**
+ * Sends a one-time email when a user hits insufficient AI balance.
+ * Suppressed on repeated retries until the user tops up AI balance again.
+ */
+export async function notifyAiInsufficientBalanceOnce(userId: number, requiredRp?: number): Promise<void> {
+  const redisKey = `ai_insufficient_notified:${userId}`;
+  let shouldSend = false;
+
+  if (redis) {
+    try {
+      const setRes = await redis.set(redisKey, '1', 'EX', 30 * 24 * 60 * 60, 'NX');
+      shouldSend = setRes === 'OK';
+    } catch {
+      if (!memInsufficientNotified.has(userId)) {
+        memInsufficientNotified.add(userId);
+        shouldSend = true;
+      }
+    }
+  } else if (!memInsufficientNotified.has(userId)) {
+    memInsufficientNotified.add(userId);
+    shouldSend = true;
+  }
+
+  if (!shouldSend) return;
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { email: true, name: true, aiBalance: true },
+  });
+  if (!user?.email) return;
+
+  await sendAiInsufficientBalanceEmail({
+    toEmail: user.email,
+    customerName: user.name || 'Customer',
+    currentAiBalance: user.aiBalance ?? 0,
+    requiredRp,
+  });
+}
+
+export async function clearAiInsufficientBalanceNotice(userId: number): Promise<void> {
+  memInsufficientNotified.delete(userId);
+  if (redis) {
+    await redis.del(`ai_insufficient_notified:${userId}`).catch(() => {});
+  }
 }
 
 export async function authenticateAiGatewayKey(
@@ -983,6 +1036,7 @@ export async function authenticateAiGatewayKey(
   }
 
   if (effectiveAiBalance <= 0) {
+    notifyAiInsufficientBalanceOnce(keyRecord.user.id).catch(() => {});
     return {
       error: aiGatewayError(
         'Insufficient balance. Top up your AI balance to continue.',
@@ -1035,7 +1089,11 @@ export async function reserveAiBalanceHold(userId: number, holdRp: number): Prom
     where: { id: userId, aiBalance: { gte: safeHold } },
     data: { aiBalance: { decrement: safeHold } },
   });
-  return res.count === 1;
+  if (res.count !== 1) {
+    notifyAiInsufficientBalanceOnce(userId, safeHold).catch(() => {});
+    return false;
+  }
+  return true;
 }
 
 /**
