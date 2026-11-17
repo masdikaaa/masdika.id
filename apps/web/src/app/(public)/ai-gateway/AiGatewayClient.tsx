@@ -452,37 +452,70 @@ export default function AiGatewayClient({
                 </div>
               </div>
 
-              {/* Right: Code Snippet Card */}
+              {/* Right: macOS-style Code Snippet Window */}
               <div className="lg:col-span-7">
-                <div className="w-full rounded-2xl border border-[var(--border-primary)] bg-slate-950 text-slate-100 shadow-2xl overflow-hidden">
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08] bg-black/40">
-                    <div className="flex items-center gap-2 overflow-x-auto [scrollbar-width:none]">
+                <div className="w-full rounded-2xl border border-white/10 dark:border-[var(--border-primary)] bg-[#0d0e15] text-slate-100 shadow-2xl overflow-hidden ring-1 ring-white/5">
+                  {/* macOS Window Titlebar */}
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08] bg-[#14151f] gap-3 select-none">
+                    {/* macOS Traffic Light Buttons (Close, Minimize, Expand) */}
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e]/80 shadow-xs inline-block" />
+                      <span className="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123]/80 shadow-xs inline-block" />
+                      <span className="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29]/80 shadow-xs inline-block" />
+                    </div>
+
+                    {/* Tabs / Switcher */}
+                    <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto [scrollbar-width:none] flex-1 px-1 sm:px-2">
                       {CODE_EXAMPLES.map((c) => (
                         <button
                           key={c.id}
                           onClick={() => setActiveCodeTab(c.id)}
                           className={cn(
-                            "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap",
+                            "px-2.5 sm:px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap",
                             activeCodeTab === c.id
-                              ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40"
-                              : "text-zinc-400 hover:text-zinc-200"
+                              ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-xs"
+                              : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5"
                           )}
                         >
                           {c.label}
                         </button>
                       ))}
                     </div>
+
+                    {/* Copy Button */}
                     <button
                       onClick={() => handleCopyCode(currentCode.code)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-300 hover:text-cyan-300 bg-white/5 hover:bg-white/10 transition-colors cursor-pointer shrink-0"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-300 hover:text-cyan-300 bg-white/5 hover:bg-white/10 border border-white/10 transition-colors cursor-pointer shrink-0"
+                      title="Copy code to clipboard"
                     >
                       {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                       <span>{copiedCode ? "Copied!" : "Copy"}</span>
                     </button>
                   </div>
-                  <pre className="p-5 text-xs font-mono text-zinc-200 overflow-x-auto leading-relaxed max-h-80">
-                    <code>{currentCode.code}</code>
-                  </pre>
+
+                  {/* Code Area with Line Numbers (macOS Editor Style) */}
+                  <div className="p-4 sm:p-5 flex text-xs font-mono overflow-x-auto leading-relaxed bg-[#0a0b10] max-h-80">
+                    <div className="select-none pr-4 text-right text-zinc-600 font-mono text-xs border-r border-white/[0.08] space-y-0.5 min-w-[2.2rem] shrink-0">
+                      {currentCode.code.split("\n").map((_, i) => (
+                        <div key={i}>{i + 1}</div>
+                      ))}
+                    </div>
+                    <pre className="pl-4 font-mono text-xs text-zinc-200 overflow-x-auto leading-relaxed flex-1">
+                      <code>{currentCode.code}</code>
+                    </pre>
+                  </div>
+
+                  {/* macOS Editor Status Bar */}
+                  <div className="flex items-center justify-between px-4 py-2 border-t border-white/[0.06] bg-[#12131b] text-[11px] font-mono text-zinc-400 select-none">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="text-zinc-400">OpenAI v1 Compatible • Edge Inference</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-zinc-500 hidden sm:inline">UTF-8</span>
+                      <span className="text-cyan-400 font-semibold uppercase">{currentCode.language}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
