@@ -106,13 +106,13 @@ export const getTransporter = () => {
         const to = Array.isArray(mailOptions.to) ? mailOptions.to.join(', ') : (mailOptions.to || '');
         const subject = mailOptions.subject || '';
         const html = (mailOptions.html || mailOptions.text || '').toString();
-        logEmailRecord({ to, subject, html, status: 'SENT' }).catch(() => {});
+        logEmailRecord({ to, subject, html, status: 'SENT', userId: mailOptions.userId }).catch(() => {});
         return result;
       } catch (err: any) {
         const to = Array.isArray(mailOptions.to) ? mailOptions.to.join(', ') : (mailOptions.to || '');
         const subject = mailOptions.subject || '';
         const html = (mailOptions.html || mailOptions.text || '').toString();
-        logEmailRecord({ to, subject, html, status: 'FAILED', error: err?.message || String(err) }).catch(() => {});
+        logEmailRecord({ to, subject, html, status: 'FAILED', error: err?.message || String(err), userId: mailOptions.userId }).catch(() => {});
         throw err;
       }
     };
@@ -2431,6 +2431,7 @@ export const sendAdminMediaNotificationEmail = async ({
  * Send one-time notification when customer AI Gateway balance is insufficient.
  */
 export async function sendAiInsufficientBalanceEmail(details: {
+  userId?: number;
   toEmail: string;
   customerName: string;
   currentAiBalance: number;
@@ -2441,6 +2442,8 @@ export async function sendAiInsufficientBalanceEmail(details: {
   const transporter = getTransporter();
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://masdika.id';
   const location = await getLocationSetting();
+  const decEmail = decryptDeterministic(details.toEmail) || details.toEmail;
+  const decName = decryptDeterministic(details.customerName) || details.customerName || 'Customer';
   const currentStr = `Rp ${Math.max(0, details.currentAiBalance).toLocaleString('id-ID')}`;
   const reqNote =
     details.requiredRp && details.requiredRp > 0
@@ -2449,7 +2452,7 @@ export async function sendAiInsufficientBalanceEmail(details: {
 
   const content = `
     <h2 style="color: #f59e0b; margin-top: 0; font-size: 22px;">⚠️ AI Gateway Balance Insufficient</h2>
-    <p>Hello <strong>${details.customerName || 'Customer'}</strong>,</p>
+    <p>Hello <strong>${decName}</strong>,</p>
     <p>An AI Gateway API request was rejected because your <strong>AI Balance</strong> is insufficient to cover the request.</p>
 
     <table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin: 22px 0;">
@@ -2473,12 +2476,103 @@ export async function sendAiInsufficientBalanceEmail(details: {
   try {
     await transporter.sendMail({
       from: `"${FROM_NAME} Alerts" <${FROM_EMAIL}>`,
-      to: details.toEmail,
+      to: decEmail,
       subject: `[Action Required] AI Gateway Balance Insufficient (${currentStr})`,
       html: getBaseHtml(content, location),
-    });
+      userId: details.userId,
+    } as any);
   } catch (error) {
     console.error("Error sending AI insufficient balance email:", error);
+  }
+}
+
+/**
+ * Send payment confirmation email when customer tops up AI Gateway balance.
+ */
+export async function sendAiBalanceTopupEmail(details: {
+  userId?: number;
+  toEmail: string;
+  customerName: string;
+  amount: number;
+  topupFeeRp?: number;
+  totalPaidRp: number;
+  newBalance: number;
+  invoiceNumber: string;
+  mode?: 'MANUAL' | 'AUTO_TOPUP';
+}) {
+  if (!process.env.SMTP_HOST) return;
+
+  const transporter = getTransporter();
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://masdika.id';
+  const location = await getLocationSetting();
+
+  const decEmail = decryptDeterministic(details.toEmail) || details.toEmail;
+  const decName = decryptDeterministic(details.customerName) || details.customerName || 'Customer';
+
+  const amountStr = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(details.amount);
+  const totalPaidStr = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(details.totalPaidRp);
+  const newBalanceStr = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(details.newBalance);
+  const feeStr = details.topupFeeRp && details.topupFeeRp > 0
+    ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(details.topupFeeRp)
+    : 'Rp 0';
+
+  const isAuto = details.mode === 'AUTO_TOPUP';
+  const title = isAuto ? '⚡ Auto Top-Up AI Balance Successful' : '✅ Payment Successful!';
+
+  const content = `
+    <h2 style="color: #06b6d4; margin-top: 0; font-size: 24px;">${title}</h2>
+    <p>Hello <strong>${decName}</strong>,</p>
+    <p>We have successfully processed your AI Gateway credit top-up. Your AI balance is ready for API inference calls across 70+ frontier AI models.</p>
+
+    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin: 25px 0;">
+      <tr>
+        <td style="background-color: #020617; padding: 20px; border-radius: 8px; border-left: 4px solid #06b6d4;">
+          <h3 style="margin: 0 0 12px 0; color: #06b6d4; font-size: 16px;">💳 Top-Up Summary</h3>
+          <table width="100%" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="padding: 5px 0; color: #9ca3af; font-size: 13px;">Invoice Number</td>
+              <td style="padding: 5px 0; color: #ffffff; font-size: 13px; text-align: right; font-weight: bold;">${details.invoiceNumber}</td>
+            </tr>
+            <tr>
+              <td style="padding: 5px 0; color: #9ca3af; font-size: 13px;">AI Credit Added</td>
+              <td style="padding: 5px 0; color: #10b981; font-size: 13px; text-align: right; font-weight: bold;">+${amountStr}</td>
+            </tr>
+            ${details.topupFeeRp && details.topupFeeRp > 0 ? `<tr><td style="padding: 5px 0; color: #9ca3af; font-size: 13px;">Platform Fee</td><td style="padding: 5px 0; color: #f59e0b; font-size: 13px; text-align: right;">${feeStr}</td></tr>` : ''}
+            <tr>
+              <td style="padding: 5px 0; color: #9ca3af; font-size: 13px;">Payment Method</td>
+              <td style="padding: 5px 0; color: #ffffff; font-size: 13px; text-align: right;">Masdika Wallet Balance</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 0; color: #9ca3af; font-size: 13px; border-top: 1px solid #1e293b;">Total Deducted</td>
+              <td style="padding: 6px 0; color: #ffffff; font-size: 13px; text-align: right; font-weight: bold; border-top: 1px solid #1e293b;">${totalPaidStr}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0 0 0; color: #06b6d4; font-size: 14px; font-weight: bold; border-top: 1px solid #1e293b;">Current AI Balance</td>
+              <td style="padding: 8px 0 0 0; color: #06b6d4; font-size: 15px; font-weight: bold; text-align: right; border-top: 1px solid #1e293b;">${newBalanceStr}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+
+    <p style="font-size: 13px; color: #9ca3af; line-height: 1.6;">
+      You can manage your API keys, inspect token usage logs, and test queries in the interactive Playground anytime.
+    </p>
+
+    ${getButtonHtml("Open AI Gateway Dashboard", `${baseUrl}/dashboard/ai-gateway`)}
+    <p style="margin-top: 30px; font-size: 14px; color: #9ca3af;">Thank you for using Masdika Cloud!</p>
+  `;
+
+  try {
+    await transporter.sendMail({
+      from: `"${FROM_NAME} Billing" <${FROM_EMAIL}>`,
+      to: decEmail,
+      subject: `Payment Confirmed - ${details.invoiceNumber}`,
+      html: getBaseHtml(content, location),
+      userId: details.userId,
+    } as any);
+  } catch (error) {
+    console.error("Error sending AI balance top-up email:", error);
   }
 }
 

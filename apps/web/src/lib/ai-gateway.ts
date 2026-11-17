@@ -5,7 +5,7 @@ import { decryptDeterministic } from './encryption';
 import { checkRateLimit } from './rate-limit';
 import { getUserServicesCommitment } from './billing-commitment';
 import { redis } from './redis';
-import { sendAiInsufficientBalanceEmail } from './email';
+import { sendAiInsufficientBalanceEmail, sendAiBalanceTopupEmail } from './email';
 
 export interface AiModelSeed {
   modelId: string;
@@ -801,6 +801,8 @@ export async function tryAutoTopupAiBalance(userId: number): Promise<number> {
   const u = await prisma.user.findUnique({
     where: { id: userId },
     select: {
+      email: true,
+      name: true,
       balance: true,
       aiBalance: true,
       aiAutoTopupEnabled: true,
@@ -820,6 +822,7 @@ export async function tryAutoTopupAiBalance(userId: number): Promise<number> {
     return u.aiBalance;
   }
 
+  let createdInvNum: string | null = null;
   const updated = await prisma.$transaction(async (tx) => {
     await tx.$executeRaw`SELECT id FROM "User" WHERE id = ${userId} FOR UPDATE`;
     const commitment = await getUserServicesCommitment(userId, tx);
@@ -839,6 +842,7 @@ export async function tryAutoTopupAiBalance(userId: number): Promise<number> {
     if (res.count === 0) return null;
 
     const invNum = `INV-AI-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(2).toString('hex').toUpperCase()}`;
+    createdInvNum = invNum;
     await tx.invoice.create({
       data: {
         invoiceNumber: invNum,
@@ -869,6 +873,19 @@ export async function tryAutoTopupAiBalance(userId: number): Promise<number> {
 
   if (updated !== null) {
     await clearAiInsufficientBalanceNotice(userId).catch(() => {});
+    if (createdInvNum && u.email) {
+      sendAiBalanceTopupEmail({
+        userId,
+        toEmail: u.email,
+        customerName: u.name,
+        amount: u.aiAutoTopupAmount,
+        topupFeeRp: config.topupFeeRp,
+        totalPaidRp: totalWalletDeduction,
+        newBalance: updated,
+        invoiceNumber: createdInvNum,
+        mode: 'AUTO_TOPUP',
+      }).catch((err) => console.error('Error sending AI auto top-up email:', err));
+    }
     return updated;
   }
   const latest = await prisma.user.findUnique({
@@ -907,11 +924,12 @@ export async function notifyAiInsufficientBalanceOnce(userId: number, requiredRp
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { email: true, name: true, aiBalance: true },
+    select: { id: true, email: true, name: true, aiBalance: true },
   });
   if (!user?.email) return;
 
   await sendAiInsufficientBalanceEmail({
+    userId: user.id,
     toEmail: user.email,
     customerName: user.name || 'Customer',
     currentAiBalance: user.aiBalance ?? 0,

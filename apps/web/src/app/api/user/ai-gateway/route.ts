@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth-middleware';
 import { getUserServicesCommitment } from '@/lib/billing-commitment';
+import { sendAiBalanceTopupEmail } from '@/lib/email';
 import {
   DEFAULT_AI_IMAGE_MODELS,
   applyMarkupPrice,
@@ -279,6 +280,18 @@ export async function POST(req: NextRequest) {
       }
 
       await clearAiInsufficientBalanceNotice(user.id).catch(() => {});
+
+      sendAiBalanceTopupEmail({
+        userId: user.id,
+        toEmail: user.email,
+        customerName: user.name,
+        amount,
+        topupFeeRp,
+        totalPaidRp: totalWalletDeduction,
+        newBalance: result.updatedUser?.aiBalance ?? 0,
+        invoiceNumber: result.invoice.invoiceNumber,
+        mode: 'MANUAL',
+      }).catch((err) => console.error('Error sending AI balance top-up email:', err));
 
       return NextResponse.json({
         success: true,
