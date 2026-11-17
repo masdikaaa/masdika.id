@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     siteName: "Masdika",
     images: [
       {
-        url: "/images/mascots/ai-gateway.webp",
+        url: "/images/mascots/ai-token-gateway.webp",
         width: 1240,
         height: 1268,
         alt: "Masdika AI Gateway - Unified OpenAI-Compatible API",
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "AI Gateway - Unified OpenAI-Compatible API with 70+ Frontier AI Models",
     description: "Access 70+ frontier LLMs and image models with a single OpenAI-compatible API key. Pay-as-you-go per token in Rupiah, sub-millisecond edge routing, and zero training data retention.",
-    images: ["/images/mascots/ai-gateway.webp"],
+    images: ["/images/mascots/ai-token-gateway.webp"],
   },
 };
 
@@ -94,7 +94,7 @@ export default async function AiGatewayLandingPage() {
         "mpn": "AIGW-01",
         "description": "High-Performance Unified AI Gateway providing drop-in OpenAI compatible routing across 70+ frontier models (Claude 3.7, GPT-4o, Gemini 2.5, DeepSeek R1, Qwen 3.7) with transparent Rupiah Pay-As-You-Go per token pricing.",
         "category": "Cloud Computing > Artificial Intelligence > AI Gateway",
-        "image": "https://www.masdika.id/images/mascots/ai-gateway.webp",
+        "image": "https://www.masdika.id/images/mascots/ai-token-gateway.webp",
         "brand": {
           "@type": "Brand",
           "name": "Masdika",

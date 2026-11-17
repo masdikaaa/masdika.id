@@ -406,10 +406,10 @@ export default function AiGatewayClient({
               </div>
             </div>
 
-            {/* Right – Hero Avatar (ai-gateway.webp) with 4 Floating Badges */}
+            {/* Right – Hero Avatar (ai-token-gateway.webp) with 4 Floating Badges */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0 lg:self-center">
               <HeroAvatarFrame
-                imageSrc="/images/mascots/ai-gateway.webp"
+                imageSrc="/images/mascots/ai-token-gateway.webp"
                 imageAlt="Masdika AI Gateway – Unified OpenAI-Compatible Router"
                 imageWidth={1536}
                 imageHeight={1024}
