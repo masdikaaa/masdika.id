@@ -46,7 +46,14 @@ import { AdminCheckbox } from '@/components/ui/AdminCheckbox';
 import { PlainTextArea } from '@/components/ui/PlainTextArea';
 import { AiToolIcon, type QuickstartDocId } from '@/components/ai-gateway/AiToolIcons';
 import { AiGatewayDocsPortal } from '@/components/ai-gateway/AiGatewayDocsPortal';
-import { sortModelsWithPromoFirst, isModelPromo } from '@/lib/ai-gateway-constants';
+import {
+  sortModelsWithPromoFirst,
+  sortAiModels,
+  isModelPromo,
+  getModelCapabilities,
+  modelHasCapability,
+  type AiModelCapability,
+} from '@/lib/ai-gateway-constants';
 
 interface AiModelItem {
   id: number;
@@ -197,6 +204,8 @@ export default function CustomerAiGatewayPage() {
   const [modelTypeTab, setModelTypeTab] = useState<'chat' | 'image'>('chat');
   const [modelSearch, setModelSearch] = useState('');
   const [providerFilter, setProviderFilter] = useState('ALL');
+  const [selectedCapability, setSelectedCapability] = useState<AiModelCapability | null>(null);
+  const [modelSortBy, setModelSortBy] = useState<string>('recommended');
   const [expandedModelId, setExpandedModelId] = useState<number | null>(null);
   const [docLang, setDocLang] = useState<DocLang>('curl');
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -768,6 +777,9 @@ export default function CustomerAiGatewayPage() {
       } else if (providerFilter !== 'ALL' && m.provider !== providerFilter) {
         return false;
       }
+      if (selectedCapability && !modelHasCapability(m.modelId, selectedCapability)) {
+        return false;
+      }
       if (!q) return true;
       return (
         m.name.toLowerCase().includes(q) ||
@@ -775,8 +787,8 @@ export default function CustomerAiGatewayPage() {
         m.provider.toLowerCase().includes(q)
       );
     });
-    return sortModelsWithPromoFirst(filtered);
-  }, [models, modelSearch, providerFilter]);
+    return sortAiModels(filtered, modelSortBy);
+  }, [models, modelSearch, providerFilter, selectedCapability, modelSortBy]);
 
   const filteredUsageLogs = useMemo(() => {
     const nowMs = Date.now();
@@ -3224,6 +3236,70 @@ aider --model openai/glm-5.3
               </div>
             </div>
 
+            {/* Capability Filter Bar & Sorter matching media_1794902772036_da127c35.jpg */}
+            <div className={cn('px-5 py-3 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3', isDark ? 'border-white/[0.08] bg-[#0c0d12]' : 'border-slate-200 bg-slate-50/60')}>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className={cn('text-xs font-semibold mr-1', isDark ? 'text-zinc-400' : 'text-slate-600')}>Bisa:</span>
+                {(['Vision', 'Reasoning', 'Tools', 'JSON'] as const).map((cap) => {
+                  const isSelected = selectedCapability === cap;
+                  return (
+                    <button
+                      key={cap}
+                      type="button"
+                      onClick={() => {
+                        setSelectedCapability(isSelected ? null : cap);
+                        setModelCatalogPage(1);
+                      }}
+                      className={cn(
+                        'px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer border',
+                        isSelected
+                          ? 'border-emerald-500 bg-emerald-500/15 text-emerald-400 font-semibold shadow-xs shadow-emerald-500/20'
+                          : isDark
+                          ? 'border-white/10 bg-white/[0.03] text-zinc-400 hover:text-white hover:border-white/20'
+                          : 'border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:border-slate-300'
+                      )}
+                    >
+                      {cap}
+                    </button>
+                  );
+                })}
+                {selectedCapability && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedCapability(null);
+                      setModelCatalogPage(1);
+                    }}
+                    className="text-[11px] text-zinc-500 hover:text-zinc-300 underline cursor-pointer ml-1"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <span className={cn('text-xs font-medium', isDark ? 'text-zinc-400' : 'text-slate-600')}>Urutkan</span>
+                <select
+                  value={modelSortBy}
+                  onChange={(e) => {
+                    setModelSortBy(e.target.value);
+                    setModelCatalogPage(1);
+                  }}
+                  className={cn(
+                    'px-3 py-1 rounded-lg text-xs font-medium border outline-none cursor-pointer transition-colors',
+                    isDark
+                      ? 'bg-[#18181b] border-white/10 text-white focus:border-cyan-500'
+                      : 'bg-white border-slate-200 text-slate-900 focus:border-cyan-500'
+                  )}
+                >
+                  <option value="recommended">Rekomendasi</option>
+                  <option value="price_asc">Harga: Rendah ke Tinggi</option>
+                  <option value="price_desc">Harga: Tinggi ke Rendah</option>
+                  <option value="context_desc">Context Window</option>
+                </select>
+              </div>
+            </div>
+
             <div className="overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
               <table className="w-full min-w-[640px] text-left border-collapse">
                 <thead>
@@ -3250,12 +3326,22 @@ aider --model openai/glm-5.3
                               </span>
                             </span>
                           )}
+                          {selectedCapability && (
+                            <span>
+                              {' '}with capability{' '}
+                              <span className="text-emerald-400 font-semibold">
+                                {selectedCapability}
+                              </span>
+                            </span>
+                          )}
                         </div>
                         <button
                           type="button"
                           onClick={() => {
                             setModelSearch('');
                             setProviderFilter('ALL');
+                            setSelectedCapability(null);
+                            setModelSortBy('recommended');
                             setModelCatalogPage(1);
                           }}
                           className="px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-400 text-slate-950 hover:bg-cyan-300 transition-colors cursor-pointer"
@@ -3314,7 +3400,7 @@ aider --model openai/glm-5.3
                                 </span>
                               )}
                             </div>
-                            <div className={cn('font-mono text-xs mt-0.5 flex items-center gap-2', isDark ? 'text-zinc-500' : 'text-slate-500')}>
+                            <div className={cn('font-mono text-xs mt-1 flex items-center gap-1.5 flex-wrap', isDark ? 'text-zinc-500' : 'text-slate-500')}>
                               <span>{m.modelId}</span>
                               <button
                                 type="button"
@@ -3322,10 +3408,24 @@ aider --model openai/glm-5.3
                                   e.stopPropagation();
                                   handleCopy(m.modelId, `model-${m.id}`, `Copied ${m.modelId}`);
                                 }}
-                                className="hover:text-cyan-400 transition-colors cursor-pointer"
+                                className="hover:text-cyan-400 transition-colors cursor-pointer mr-0.5"
+                                title={`Copy ${m.modelId}`}
                               >
                                 {copiedId === `model-${m.id}` ? <Check className="w-3 h-3 text-cyan-400" /> : <Copy className="w-3 h-3" />}
                               </button>
+                              {getModelCapabilities(m.modelId).map((cap) => (
+                                <span
+                                  key={cap}
+                                  className={cn(
+                                    'px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors font-sans',
+                                    isDark
+                                      ? 'bg-zinc-800/80 text-zinc-400 border border-zinc-700/50'
+                                      : 'bg-slate-100 text-slate-600 border border-slate-200'
+                                  )}
+                                >
+                                  {cap}
+                                </span>
+                              ))}
                             </div>
                           </td>
                           <td className={cn('px-4 py-3.5 font-mono text-xs', isDark ? 'text-zinc-300' : 'text-slate-700')}>

@@ -38,7 +38,16 @@ import { ProvisioningSection } from "@/components/ui/ProvisioningSection";
 import { FaqSection } from "@/components/ui/FaqSection";
 import { cn } from "@/lib/utils";
 import { formatRupiah } from "@/lib/billing";
-import { DEFAULT_AI_MODELS, DEFAULT_AI_IMAGE_MODELS, sortModelsWithPromoFirst, isModelPromo } from "@/lib/ai-gateway-constants";
+import {
+  DEFAULT_AI_MODELS,
+  DEFAULT_AI_IMAGE_MODELS,
+  sortModelsWithPromoFirst,
+  sortAiModels,
+  isModelPromo,
+  getModelCapabilities,
+  modelHasCapability,
+  type AiModelCapability,
+} from "@/lib/ai-gateway-constants";
 
 interface AiModelItem {
   id?: number;
@@ -225,6 +234,8 @@ export default function AiGatewayClient({
   // Model explorer state
   const [modelTypeTab, setModelTypeTab] = useState<"chat" | "image">("chat");
   const [selectedProvider, setSelectedProvider] = useState("all");
+  const [selectedCapability, setSelectedCapability] = useState<AiModelCapability | null>(null);
+  const [modelSortBy, setModelSortBy] = useState<string>("recommended");
   const [modelSearch, setModelSearch] = useState("");
   const [copiedModelId, setCopiedModelId] = useState<string | null>(null);
 
@@ -267,6 +278,9 @@ export default function AiGatewayClient({
         (selectedProvider === "on promo"
           ? isModelPromo(m)
           : m.provider.toLowerCase() === selectedProvider.toLowerCase());
+      if (selectedCapability && !modelHasCapability(m.modelId, selectedCapability)) {
+        return false;
+      }
       const q = modelSearch.toLowerCase().trim();
       const matchSearch =
         !q ||
@@ -275,8 +289,8 @@ export default function AiGatewayClient({
         m.provider.toLowerCase().includes(q);
       return matchProvider && matchSearch;
     });
-    return sortModelsWithPromoFirst(filtered);
-  }, [allChatModels, selectedProvider, modelSearch]);
+    return sortAiModels(filtered, modelSortBy);
+  }, [allChatModels, selectedProvider, modelSearch, selectedCapability, modelSortBy]);
 
   const filteredImageModels = useMemo(() => {
     const q = modelSearch.toLowerCase().trim();
@@ -685,6 +699,65 @@ export default function AiGatewayClient({
               </div>
             </div>
 
+            {/* Capability Filter Bar & Sorter matching media_1794902772036_da127c35.jpg */}
+            {modelTypeTab === "chat" && (
+              <div className="px-4 sm:px-6 py-2.5 sm:py-3 border-b border-[var(--border-primary)] dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[var(--surface-secondary)]/50 dark:bg-[#0c0d12]">
+                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                  <span className="text-xs font-semibold mr-1 text-[var(--text-muted)] dark:text-zinc-400">Bisa:</span>
+                  {(['Vision', 'Reasoning', 'Tools', 'JSON'] as const).map((cap) => {
+                    const isSelected = selectedCapability === cap;
+                    return (
+                      <button
+                        key={cap}
+                        type="button"
+                        onClick={() => {
+                          setSelectedCapability(isSelected ? null : cap);
+                          setCurrentPage(1);
+                        }}
+                        className={cn(
+                          'px-2.5 sm:px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer border',
+                          isSelected
+                            ? 'border-emerald-500 bg-emerald-500/15 text-emerald-400 font-semibold shadow-xs shadow-emerald-500/20'
+                            : 'border-[var(--border-primary)] dark:border-white/10 bg-[var(--surface)] dark:bg-white/[0.03] text-[var(--text-secondary)] dark:text-zinc-400 hover:text-[var(--text-primary)] dark:hover:text-white'
+                        )}
+                      >
+                        {cap}
+                      </button>
+                    );
+                  })}
+                  {selectedCapability && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedCapability(null);
+                        setCurrentPage(1);
+                      }}
+                      className="text-[11px] text-zinc-500 hover:text-zinc-300 underline cursor-pointer ml-1"
+                    >
+                      Reset
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-xs font-medium text-[var(--text-muted)] dark:text-zinc-400">Urutkan</span>
+                  <select
+                    value={modelSortBy}
+                    onChange={(e) => {
+                      setModelSortBy(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="px-3 py-1 rounded-lg text-xs font-medium border outline-none cursor-pointer transition-colors border-[var(--border-primary)] dark:border-white/10 bg-[var(--surface)] dark:bg-[#18181b] text-[var(--text-primary)] dark:text-white focus:border-cyan-500"
+                  >
+                    <option value="recommended">Rekomendasi</option>
+                    <option value="price_asc">Harga: Rendah ke Tinggi</option>
+                    <option value="price_desc">Harga: Tinggi ke Rendah</option>
+                    <option value="context_desc">Context Window</option>
+                  </select>
+                </div>
+              </div>
+            )}
+
             {/* Models Table & Mobile Cards */}
             {modelTypeTab === "chat" ? (
               <>
@@ -735,6 +808,16 @@ export default function AiGatewayClient({
                             </td>
                             <td className="px-4 py-4 whitespace-nowrap">
                               <code className="font-mono text-cyan-600 dark:text-cyan-400 text-xs font-semibold">{m.modelId}</code>
+                              <div className="flex items-center gap-1 flex-wrap mt-1">
+                                {getModelCapabilities(m.modelId).map((cap) => (
+                                  <span
+                                    key={cap}
+                                    className="px-1.5 py-0.2 rounded text-[10px] font-medium bg-zinc-800/80 text-zinc-400 border border-zinc-700/50"
+                                  >
+                                    {cap}
+                                  </span>
+                                ))}
+                              </div>
                             </td>
                             <td className="px-4 py-4 whitespace-nowrap font-mono text-[var(--text-secondary)]">
                               {m.contextWindow || "128K"}
@@ -835,6 +918,16 @@ export default function AiGatewayClient({
                           <span className="font-mono text-[11px] text-[var(--text-muted)] shrink-0">
                             Context: {m.contextWindow || "128K"}
                           </span>
+                        </div>
+                        <div className="flex items-center gap-1 flex-wrap pt-0.5">
+                          {getModelCapabilities(m.modelId).map((cap) => (
+                            <span
+                              key={cap}
+                              className="px-1.5 py-0.2 rounded text-[10px] font-medium bg-zinc-800/80 text-zinc-400 border border-zinc-700/50"
+                            >
+                              {cap}
+                            </span>
+                          ))}
                         </div>
 
                         <div className="grid grid-cols-3 gap-2 pt-1 text-center font-mono text-xs">

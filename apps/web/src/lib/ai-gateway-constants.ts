@@ -280,6 +280,8 @@ export interface AiModelLike {
   originalCachePricePer1M?: number | null;
   cachePricePer1M?: number;
   discountBadge?: string | null;
+  contextWindow?: string;
+  [key: string]: any;
 }
 
 export function isModelPromo(m: AiModelLike): boolean {
@@ -316,4 +318,356 @@ export function sortModelsWithPromoFirst<T extends AiModelLike>(list: T[]): T[] 
     }
     return 0;
   });
+}
+
+export type AiModelCapability = 'Reasoning' | 'Tools' | 'JSON' | 'Vision' | 'Video';
+
+export const VISION_MODEL_IDS = new Set<string>([
+  'deepseek-v4.1-flash',
+  'deepseek-v4.1-flash-1017',
+  'deepseek/deepseek-v4.1-flash:fast',
+  'glm-5.3-flashx',
+  'glm-5.3-flash',
+  'gpt-5-nano',
+  'gemma-3-12b',
+  'gpt-5-6-luna',
+  'gpt-5-4-nano',
+  'gemini-3-1-flash-lite',
+  'llama-4-maverick',
+  'gpt-5-mini',
+  'gemini-3-5-flash-lite',
+  'gemini-3-flash',
+  'gpt-5-4-mini',
+  'claude-haiku-4-5',
+  'grok-4-6',
+  'gemini-3-6-flash',
+  'gemini-3-5-flash',
+  'claude-sonnet-5',
+  'gpt-5',
+  'gpt-5-1',
+  'gemini-3-1-pro',
+  'gpt-5-6-terra',
+  'gpt-5-2',
+  'claude-sonnet-4-6',
+  'claude-sonnet-4-5',
+  'gpt-5-4',
+  'claude-opus-5-5',
+  'claude-opus-4-8',
+  'claude-opus-4-7',
+  'claude-opus-4-6',
+  'claude-opus-4-5',
+  'claude-opus-5',
+  'gpt-5-5',
+  'gpt-5-6-sol',
+  'claude-fable-5',
+  'claude-fable-5-1',
+  'gpt-6-astra',
+  'claude-opus-4-1',
+  'claude-haiku-5-5',
+  'gpt-6-luna',
+  'gemini-3-7-flash',
+  'gemini-3-8-flash',
+  'claude-sonnet-5-5',
+  'gpt-6-sol',
+  'gpt-6-1-sol',
+  'gemini-4-argon',
+  'qwen3.8-max',
+  'qwen3.8-flash',
+  'qwen3.8-27b',
+  'qwen3.7-max',
+  'qwen3.7-plus',
+  'qwen3.7-flash',
+  'qwen3.6-plus',
+  'qwen3.6-flash',
+  'qwen3.6-27b',
+  'qwen3.5-flash',
+  'qwen3-vl-plus',
+  'qwen-vl-ocr',
+]);
+
+export const REASONING_MODEL_IDS = new Set<string>([
+  'hy3',
+  'deepseek-v4.1-flash',
+  'deepseek-v4.1-flash-1017',
+  'deepseek-v4-pro',
+  'deepseek/deepseek-v4.1-flash:fast',
+  'glm-5.3',
+  'glm-5.2',
+  'glm-5.1',
+  'glm-5.3-flashx',
+  'glm-5.3-flash',
+  'kimi-k3',
+  'minimax-m3',
+  'gpt-oss-20b',
+  'gpt-5-nano',
+  'gpt-oss-120b',
+  'gpt-5-6-luna',
+  'gpt-5-4-nano',
+  'gemini-3-1-flash-lite',
+  'gpt-5-mini',
+  'qwen35-122b-a10b',
+  'gemini-3-5-flash-lite',
+  'gemini-3-flash',
+  'gpt-5-4-mini',
+  'claude-haiku-4-5',
+  'grok-4-6',
+  'gemini-3-6-flash',
+  'gemini-3-5-flash',
+  'claude-sonnet-5',
+  'gpt-5',
+  'gpt-5-1',
+  'gemini-3-1-pro',
+  'gpt-5-6-terra',
+  'gpt-5-2',
+  'claude-sonnet-4-6',
+  'claude-sonnet-4-5',
+  'gpt-5-4',
+  'claude-opus-5-5',
+  'claude-opus-4-8',
+  'claude-opus-4-7',
+  'claude-opus-4-6',
+  'claude-opus-4-5',
+  'claude-opus-5',
+  'gpt-5-5',
+  'gpt-5-6-sol',
+  'claude-fable-5',
+  'claude-fable-5-1',
+  'gpt-6-astra',
+  'claude-opus-4-1',
+  'claude-haiku-5-5',
+  'gpt-6-luna',
+  'gemini-3-7-flash',
+  'gemini-3-8-flash',
+  'grok-4-7',
+  'claude-sonnet-5-5',
+  'gpt-6-sol',
+  'gpt-6-1-sol',
+  'gemini-4-argon',
+  'qwen3.8-max',
+  'qwen3.8-flash',
+  'qwen3.8-27b',
+  'qwen3.7-max',
+  'qwen3.7-plus',
+  'qwen3.7-flash',
+  'qwen3.6-plus',
+  'qwen3.6-flash',
+  'qwen3.6-27b',
+  'qwen3.5-flash',
+  'qwen3-vl-plus',
+]);
+
+export const TOOLS_MODEL_IDS = new Set<string>([
+  'hy3',
+  'deepseek-v4.1-flash',
+  'deepseek-v4.1-flash-1017',
+  'deepseek-v4-pro',
+  'deepseek/deepseek-v4.1-flash:fast',
+  'glm-5.3',
+  'glm-5.2',
+  'glm-5.1',
+  'glm-5.3-flashx',
+  'glm-5.3-flash',
+  'kimi-k3',
+  'minimax-m3',
+  'gpt-oss-20b',
+  'gpt-5-nano',
+  'meta-llama-3-1-8b-instruct',
+  'gemma-3-12b',
+  'gpt-oss-120b',
+  'gpt-5-6-luna',
+  'qwen3-next-80b-a3b-instruct',
+  'gpt-5-4-nano',
+  'gemini-3-1-flash-lite',
+  'llama-4-maverick',
+  'meta-llama-3-3-70b-instruct',
+  'gpt-5-mini',
+  'qwen35-122b-a10b',
+  'gemini-3-5-flash-lite',
+  'gemini-3-flash',
+  'gpt-5-4-mini',
+  'claude-haiku-4-5',
+  'grok-4-6',
+  'gemini-3-6-flash',
+  'gemini-3-5-flash',
+  'claude-sonnet-5',
+  'gpt-5',
+  'gpt-5-1',
+  'gemini-3-1-pro',
+  'gpt-5-6-terra',
+  'gpt-5-2',
+  'claude-sonnet-4-6',
+  'claude-sonnet-4-5',
+  'gpt-5-4',
+  'claude-opus-5-5',
+  'claude-opus-4-8',
+  'claude-opus-4-7',
+  'claude-opus-4-6',
+  'claude-opus-4-5',
+  'claude-opus-5',
+  'gpt-5-5',
+  'gpt-5-6-sol',
+  'claude-fable-5',
+  'claude-fable-5-1',
+  'gpt-6-astra',
+  'claude-opus-4-1',
+  'claude-haiku-5-5',
+  'gpt-6-luna',
+  'gemini-3-7-flash',
+  'gemini-3-8-flash',
+  'grok-4-7',
+  'claude-sonnet-5-5',
+  'gpt-6-sol',
+  'gpt-6-1-sol',
+  'gemini-4-argon',
+  'qwen3.8-max',
+  'qwen3.8-flash',
+  'qwen3.8-27b',
+  'qwen3.7-max',
+  'qwen3.7-plus',
+  'qwen3.7-flash',
+  'qwen3.6-plus',
+  'qwen3.6-flash',
+  'qwen3.6-27b',
+  'qwen3.5-flash',
+  'qwen3-vl-plus',
+]);
+
+export const JSON_MODEL_IDS = new Set<string>([
+  'hy3',
+  'deepseek-v4.1-flash',
+  'deepseek-v4.1-flash-1017',
+  'deepseek-v4-pro',
+  'deepseek/deepseek-v4.1-flash:fast',
+  'glm-5.3',
+  'glm-5.2',
+  'glm-5.1',
+  'glm-5.3-flashx',
+  'glm-5.3-flash',
+  'kimi-k3',
+  'gpt-oss-20b',
+  'gpt-5-nano',
+  'meta-llama-3-1-8b-instruct',
+  'gemma-3-12b',
+  'gpt-oss-120b',
+  'gpt-5-6-luna',
+  'qwen3-next-80b-a3b-instruct',
+  'gpt-5-4-nano',
+  'gemini-3-1-flash-lite',
+  'llama-4-maverick',
+  'meta-llama-3-3-70b-instruct',
+  'gpt-5-mini',
+  'qwen35-122b-a10b',
+  'gemini-3-5-flash-lite',
+  'gemini-3-flash',
+  'gpt-5-4-mini',
+  'claude-haiku-4-5',
+  'grok-4-6',
+  'gemini-3-6-flash',
+  'gemini-3-5-flash',
+  'claude-sonnet-5',
+  'gpt-5',
+  'gpt-5-1',
+  'gemini-3-1-pro',
+  'gpt-5-6-terra',
+  'gpt-5-2',
+  'claude-sonnet-4-6',
+  'claude-sonnet-4-5',
+  'gpt-5-4',
+  'claude-opus-4-8',
+  'claude-opus-4-7',
+  'claude-opus-4-6',
+  'claude-opus-4-5',
+  'claude-opus-5',
+  'gpt-5-5',
+  'gpt-5-6-sol',
+  'claude-fable-5',
+  'gpt-6-astra',
+  'claude-opus-4-1',
+  'claude-haiku-5-5',
+  'gpt-6-luna',
+  'gemini-3-7-flash',
+  'gemini-3-8-flash',
+  'grok-4-7',
+  'claude-sonnet-5-5',
+  'gpt-6-sol',
+  'gpt-6-1-sol',
+  'gemini-4-argon',
+  'qwen3.8-max',
+  'qwen3.8-flash',
+  'qwen3.8-27b',
+  'qwen3.7-max',
+  'qwen3.7-plus',
+  'qwen3.7-flash',
+  'qwen3.6-plus',
+  'qwen3.6-flash',
+  'qwen3.6-27b',
+  'qwen3.5-flash',
+]);
+
+export const VIDEO_MODEL_IDS = new Set<string>([
+  'glm-5.3-flashx',
+  'glm-5.3-flash',
+]);
+
+export function parseContextWindowTokens(ctx?: string): number {
+  if (!ctx) return 0;
+  const s = ctx.toUpperCase().trim();
+  if (s.endsWith('M')) {
+    const val = parseFloat(s.slice(0, -1));
+    return isNaN(val) ? 0 : Math.round(val * 1_000_000);
+  }
+  if (s.endsWith('K')) {
+    const val = parseFloat(s.slice(0, -1));
+    return isNaN(val) ? 0 : Math.round(val * 1_000);
+  }
+  const num = parseInt(s.replace(/[^0-9]/g, ''), 10);
+  return isNaN(num) ? 0 : num;
+}
+
+export function sortAiModels<T extends AiModelLike>(list: T[], sortBy: string = 'recommended'): T[] {
+  if (sortBy === 'price_asc') {
+    return [...list].sort((a, b) => {
+      const pA = a.outputPricePer1M ?? a.inputPricePer1M ?? 0;
+      const pB = b.outputPricePer1M ?? b.inputPricePer1M ?? 0;
+      return pA - pB;
+    });
+  }
+  if (sortBy === 'price_desc') {
+    return [...list].sort((a, b) => {
+      const pA = a.outputPricePer1M ?? a.inputPricePer1M ?? 0;
+      const pB = b.outputPricePer1M ?? b.inputPricePer1M ?? 0;
+      return pB - pA;
+    });
+  }
+  if (sortBy === 'context_desc') {
+    return [...list].sort((a, b) => {
+      const cA = parseContextWindowTokens(a.contextWindow);
+      const cB = parseContextWindowTokens(b.contextWindow);
+      return cB - cA;
+    });
+  }
+  return sortModelsWithPromoFirst(list);
+}
+
+export function getModelCapabilities(modelId: string): AiModelCapability[] {
+  const caps: AiModelCapability[] = [];
+  const id = modelId.toLowerCase().trim();
+  const cleanId = id.includes('/') ? id.split('/').pop()! : id;
+  if (REASONING_MODEL_IDS.has(id) || REASONING_MODEL_IDS.has(cleanId)) caps.push('Reasoning');
+  if (TOOLS_MODEL_IDS.has(id) || TOOLS_MODEL_IDS.has(cleanId)) caps.push('Tools');
+  if (JSON_MODEL_IDS.has(id) || JSON_MODEL_IDS.has(cleanId)) caps.push('JSON');
+  if (VISION_MODEL_IDS.has(id) || VISION_MODEL_IDS.has(cleanId)) caps.push('Vision');
+  if (VIDEO_MODEL_IDS.has(id) || VIDEO_MODEL_IDS.has(cleanId)) caps.push('Video');
+  return caps;
+}
+
+export function modelHasCapability(modelId: string, cap: 'Vision' | 'Reasoning' | 'Tools' | 'JSON' | 'Video'): boolean {
+  const id = modelId.toLowerCase().trim();
+  const cleanId = id.includes('/') ? id.split('/').pop()! : id;
+  if (cap === 'Vision') return VISION_MODEL_IDS.has(id) || VISION_MODEL_IDS.has(cleanId);
+  if (cap === 'Reasoning') return REASONING_MODEL_IDS.has(id) || REASONING_MODEL_IDS.has(cleanId);
+  if (cap === 'Tools') return TOOLS_MODEL_IDS.has(id) || TOOLS_MODEL_IDS.has(cleanId);
+  if (cap === 'JSON') return JSON_MODEL_IDS.has(id) || JSON_MODEL_IDS.has(cleanId);
+  if (cap === 'Video') return VIDEO_MODEL_IDS.has(id) || VIDEO_MODEL_IDS.has(cleanId);
+  return false;
 }
