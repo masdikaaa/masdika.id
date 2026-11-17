@@ -25,7 +25,7 @@ export async function GET() {
     const config = await getAiGatewayConfig();
 
     const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
-    const [models, totalKeys, usageStats, recentLogs, rawCustomers, timelineLogs] = await Promise.all([
+    const [models, totalKeys, usageStats, recentLogs, rawCustomers, timelineLogs, modelRankingsRaw] = await Promise.all([
       prisma.aiModel.findMany({
         orderBy: [{ sortOrder: 'asc' }, { inputPricePer1M: 'asc' }],
       }),
@@ -78,6 +78,25 @@ export async function GET() {
           costRp: true,
         },
         orderBy: { createdAt: 'asc' },
+      }),
+      prisma.aiUsageLog.groupBy({
+        by: ['modelId'],
+        _count: { id: true },
+        _sum: {
+          inputTokens: true,
+          cachedTokens: true,
+          outputTokens: true,
+          costRp: true,
+          upstreamCostRp: true,
+        },
+        _avg: {
+          latencyMs: true,
+        },
+        orderBy: {
+          _count: {
+            id: 'desc',
+          },
+        },
       }),
     ]);
 
@@ -179,6 +198,47 @@ export async function GET() {
 
     const tokenUsageTimeline = Array.from(timelineMap.values());
 
+    const totalRequestsCount = usageStats._count.id || 1;
+    const modelLookup = new Map(models.map((m) => [m.modelId, m]));
+    const imageModelLookup = new Map(DEFAULT_AI_IMAGE_MODELS.map((m) => [m.modelId, m]));
+
+    const topModelRankings = modelRankingsRaw.map((item, index) => {
+      const dbModel = modelLookup.get(item.modelId);
+      const imgModel = imageModelLookup.get(item.modelId);
+
+      const requests = item._count.id || 0;
+      const inputTokens = item._sum.inputTokens || 0;
+      const cachedTokens = item._sum.cachedTokens || 0;
+      const outputTokens = item._sum.outputTokens || 0;
+      const totalTokens = inputTokens + cachedTokens + outputTokens;
+      const revenueRp = item._sum.costRp || 0;
+      const upstreamCostRp = item._sum.upstreamCostRp || 0;
+      const profitRp = revenueRp - upstreamCostRp;
+      const marginPercent = revenueRp > 0 ? Math.round(((revenueRp - upstreamCostRp) / revenueRp) * 100) : 0;
+      const avgLatencyMs = Math.round(item._avg.latencyMs || 0);
+      const requestSharePct = Number(((requests / totalRequestsCount) * 100).toFixed(1));
+
+      return {
+        rank: index + 1,
+        modelId: item.modelId,
+        name: dbModel?.name || imgModel?.name || item.modelId,
+        provider: dbModel?.provider || (imgModel ? 'Image / Diffusion' : 'Custom'),
+        contextWindow: dbModel?.contextWindow || (imgModel ? `${imgModel.tokensPerImage.toLocaleString('id-ID')} tok/img` : '-'),
+        isImageModel: Boolean(imgModel),
+        requests,
+        requestSharePct,
+        totalTokens,
+        inputTokens,
+        cachedTokens,
+        outputTokens,
+        revenueRp,
+        upstreamCostRp,
+        profitRp,
+        marginPercent,
+        avgLatencyMs,
+      };
+    });
+
     return NextResponse.json({
       config: {
         enabled: config.enabled,
@@ -211,6 +271,7 @@ export async function GET() {
         totalCustomerAiBalance,
       },
       tokenUsageTimeline,
+      topModelRankings,
       recentLogs: formattedLogs,
     });
   } catch (err: any) {

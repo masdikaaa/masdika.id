@@ -28,12 +28,14 @@ import {
   MessageSquare,
   ChevronLeft,
   ChevronRight,
+  Trophy,
 } from 'lucide-react';
 import { Select } from '@/components/ui/Select';
 import { AdminCheckbox } from '@/components/ui/AdminCheckbox';
 import { useTheme } from '@/components/ThemeProvider';
 import { cn } from '@/lib/utils';
 import { AiTokenUsageChart, TokenTimelineEntry } from '@/components/admin/AiTokenUsageChart';
+import { AiTopModelsRanking, type TopModelRankingItem } from '@/components/admin/AiTopModelsRanking';
 
 interface AiModelItem {
   id: number;
@@ -89,7 +91,7 @@ export default function AdminAiGatewayPage() {
   const [savingModelId, setSavingModelId] = useState<number | null>(null);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
-  const [activeTab, setActiveTab] = useState<'settings' | 'models' | 'customers' | 'logs'>('settings');
+  const [activeTab, setActiveTab] = useState<'settings' | 'rankings' | 'models' | 'customers' | 'logs'>('settings');
 
   const [config, setConfig] = useState({
     enabled: true,
@@ -123,6 +125,7 @@ export default function AdminAiGatewayPage() {
     totalCustomerAiBalance: 0,
   });
   const [tokenUsageTimeline, setTokenUsageTimeline] = useState<TokenTimelineEntry[]>([]);
+  const [topModelRankings, setTopModelRankings] = useState<TopModelRankingItem[]>([]);
   const [recentLogs, setRecentLogs] = useState<any[]>([]);
 
   // Filters
@@ -174,6 +177,7 @@ export default function AdminAiGatewayPage() {
         },
       );
       setTokenUsageTimeline(data.tokenUsageTimeline || []);
+      setTopModelRankings(data.topModelRankings || []);
       setRecentLogs(data.recentLogs || []);
     } catch (err: any) {
       showToast('error', err.message);
@@ -498,6 +502,7 @@ export default function AdminAiGatewayPage() {
       <div className={cn("flex items-center gap-2 overflow-x-auto pb-1 border-b", isDark ? "border-white/[0.07]" : "border-slate-200")}>
         {[
           { id: 'settings', label: 'Gateway Settings & Upstream', icon: Sliders },
+          { id: 'rankings', label: `Top Models Ranking (${topModelRankings.length})`, icon: Trophy },
           { id: 'models', label: `Models & Pricing (${models.length + imageModels.length})`, icon: Sparkles },
           { id: 'customers', label: `Customer AI Balances (${customers.length})`, icon: Users },
           { id: 'logs', label: `Usage & Profit Logs (${recentLogs.length})`, icon: Activity },
@@ -674,7 +679,19 @@ export default function AdminAiGatewayPage() {
         </form>
       )}
 
-      {/* TAB 2: MODELS & PRICING */}
+      {/* TAB 2: TOP MODELS RANKING */}
+      {activeTab === 'rankings' && (
+        <AiTopModelsRanking
+          rankings={topModelRankings}
+          totalGatewayRequests={stats.totalRequests}
+          onSelectModel={(modelId) => {
+            setSearchQuery(modelId);
+            setActiveTab('models');
+          }}
+        />
+      )}
+
+      {/* TAB 3: MODELS & PRICING */}
       {activeTab === 'models' && (
         <div className={cn("rounded-2xl p-5 sm:p-6 space-y-5 border transition-all", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -732,6 +749,7 @@ export default function AdminAiGatewayPage() {
                   {filteredModels.map((m) => {
                     const sellIn = Math.round(m.inputPricePer1M * (1 + config.markupPercent / 100));
                     const sellOut = Math.round(m.outputPricePer1M * (1 + config.markupPercent / 100));
+                    const rankItem = topModelRankings.find((r) => r.modelId === m.modelId);
                     return (
                       <tr key={m.id} className={cn("transition-colors", isDark ? "hover:bg-white/[0.02]" : "hover:bg-slate-50/80")}>
                         <td className="py-3 px-3">
@@ -744,9 +762,28 @@ export default function AdminAiGatewayPage() {
                           <div className={cn(isDark ? 'flex items-center gap-1.5 font-bold text-white' : 'flex items-center gap-1.5 font-bold text-slate-900')}>
                             <MessageSquare className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
                             <span>{m.name}</span>
+                            {rankItem && rankItem.rank <= 3 && (
+                              <span
+                                className={cn(
+                                  'px-1.5 py-0.5 rounded text-[10px] font-black',
+                                  rankItem.rank === 1
+                                    ? 'bg-amber-400 text-slate-950'
+                                    : rankItem.rank === 2
+                                    ? 'bg-slate-300 text-slate-950'
+                                    : 'bg-amber-700 text-white',
+                                )}
+                              >
+                                #{rankItem.rank} Top
+                              </span>
+                            )}
                           </div>
                           <div className="text-[11px] text-zinc-500 font-mono">
                             {m.modelId} • <span className="text-cyan-400">{m.provider}</span> • {m.contextWindow}
+                            {rankItem && (
+                              <span className="text-cyan-400 font-bold ml-1.5">
+                                • {rankItem.requests.toLocaleString('id-ID')} reqs
+                              </span>
+                            )}
                           </div>
                         </td>
                         <td className="py-3 px-3">
