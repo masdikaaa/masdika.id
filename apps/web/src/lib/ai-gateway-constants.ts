@@ -610,9 +610,9 @@ export const VIDEO_MODEL_IDS = new Set<string>([
 ]);
 
 export const MODEL_SORT_OPTIONS = [
-  { value: 'recommended', label: 'Rekomendasi' },
-  { value: 'price_asc', label: 'Harga: Rendah ke Tinggi' },
-  { value: 'price_desc', label: 'Harga: Tinggi ke Rendah' },
+  { value: 'recommended', label: 'Recommended' },
+  { value: 'price_asc', label: 'Price: Low to High' },
+  { value: 'price_desc', label: 'Price: High to Low' },
   { value: 'context_desc', label: 'Context Window' },
 ];
 

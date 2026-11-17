@@ -3240,7 +3240,7 @@ aider --model openai/glm-5.3
             {/* Capability Filter Bar & Sorter matching media_1794902772036_da127c35.jpg */}
             <div className={cn('px-5 py-3 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3', isDark ? 'border-white/[0.08] bg-[#0c0d12]' : 'border-slate-200 bg-slate-50/60')}>
               <div className="flex items-center gap-2 flex-wrap">
-                <span className={cn('text-xs font-semibold mr-1', isDark ? 'text-zinc-400' : 'text-slate-600')}>Bisa:</span>
+                <span className={cn('text-xs font-semibold mr-1', isDark ? 'text-zinc-400' : 'text-slate-600')}>Capabilities:</span>
                 {(['Vision', 'Reasoning', 'Tools', 'JSON'] as const).map((cap) => {
                   const isSelected = selectedCapability === cap;
                   return (
@@ -3279,7 +3279,7 @@ aider --model openai/glm-5.3
               </div>
 
               <div className="flex items-center gap-2 shrink-0">
-                <span className={cn('text-xs font-medium', isDark ? 'text-zinc-400' : 'text-slate-600')}>Urutkan</span>
+                <span className={cn('text-xs font-medium', isDark ? 'text-zinc-400' : 'text-slate-600')}>Sort by</span>
                 <div className="w-44 sm:w-52">
                   <Select
                     value={modelSortBy}

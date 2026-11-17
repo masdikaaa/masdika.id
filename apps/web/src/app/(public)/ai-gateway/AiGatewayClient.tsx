@@ -705,7 +705,7 @@ export default function AiGatewayClient({
             {modelTypeTab === "chat" && (
               <div className="px-4 sm:px-6 py-2.5 sm:py-3 border-b border-[var(--border-primary)] dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[var(--surface-secondary)]/50 dark:bg-[#0c0d12]">
                 <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                  <span className="text-xs font-semibold mr-1 text-[var(--text-muted)] dark:text-zinc-400">Bisa:</span>
+                  <span className="text-xs font-semibold mr-1 text-[var(--text-muted)] dark:text-zinc-400">Capabilities:</span>
                   {(['Vision', 'Reasoning', 'Tools', 'JSON'] as const).map((cap) => {
                     const isSelected = selectedCapability === cap;
                     return (
@@ -742,7 +742,7 @@ export default function AiGatewayClient({
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-xs font-medium text-[var(--text-muted)] dark:text-zinc-400">Urutkan</span>
+                  <span className="text-xs font-medium text-[var(--text-muted)] dark:text-zinc-400">Sort by</span>
                   <div className="w-44 sm:w-52">
                     <Select
                       value={modelSortBy}
