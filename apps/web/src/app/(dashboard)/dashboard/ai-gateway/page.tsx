@@ -39,6 +39,7 @@ import { cn } from '@/lib/utils';
 import { formatRupiah } from '@/lib/billing';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Select } from '@/components/ui/Select';
+import { Pagination } from '@/components/ui/Pagination';
 import { AdminCheckbox } from '@/components/ui/AdminCheckbox';
 import { PlainTextArea } from '@/components/ui/PlainTextArea';
 import { AiToolIcon, type QuickstartDocId } from '@/components/ai-gateway/AiToolIcons';
@@ -342,6 +343,17 @@ export default function CustomerAiGatewayPage() {
   const [usageKeyFilter, setUsageKeyFilter] = useState<string>('ALL');
   const [usageModelFilter, setUsageModelFilter] = useState<string>('ALL');
   const [usageRange, setUsageRange] = useState<'24h' | '7d' | '30d'>('7d');
+  const [usageRequestSearch, setUsageRequestSearch] = useState<string>('');
+  const [usageRequestsPage, setUsageRequestsPage] = useState<number>(1);
+  const [usageRequestsPageSize, setUsageRequestsPageSize] = useState<number>(10);
+  const [copiedReqId, setCopiedReqId] = useState<string | null>(null);
+
+  const handleCopyReqId = (id: string) => {
+    navigator.clipboard.writeText(id);
+    setCopiedReqId(id);
+    toast.success('Request ID copied');
+    setTimeout(() => setCopiedReqId(null), 2000);
+  };
 
   const fetchData = async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
@@ -762,6 +774,33 @@ export default function CustomerAiGatewayPage() {
       return true;
     });
   }, [usageLogs, usageRange, usageKeyFilter, usageModelFilter]);
+
+  const searchedUsageLogs = useMemo(() => {
+    const q = usageRequestSearch.trim().toLowerCase();
+    if (!q) return filteredUsageLogs;
+    return filteredUsageLogs.filter((u) => {
+      return (
+        u.requestId?.toLowerCase().includes(q) ||
+        u.modelId?.toLowerCase().includes(q) ||
+        (u.apiKey?.name && u.apiKey.name.toLowerCase().includes(q))
+      );
+    });
+  }, [filteredUsageLogs, usageRequestSearch]);
+
+  const totalUsageRequestPages = Math.max(
+    1,
+    Math.ceil(
+      searchedUsageLogs.length /
+        (usageRequestsPageSize === -1 ? searchedUsageLogs.length || 1 : usageRequestsPageSize)
+    )
+  );
+  const safeUsageRequestsPage = Math.min(Math.max(1, usageRequestsPage), totalUsageRequestPages);
+
+  const paginatedUsageLogs = useMemo(() => {
+    if (usageRequestsPageSize === -1) return searchedUsageLogs;
+    const start = (safeUsageRequestsPage - 1) * usageRequestsPageSize;
+    return searchedUsageLogs.slice(start, start + usageRequestsPageSize);
+  }, [searchedUsageLogs, safeUsageRequestsPage, usageRequestsPageSize]);
 
   const usageMetrics = useMemo(() => {
     const reqCount = filteredUsageLogs.length;
@@ -2444,7 +2483,10 @@ aider --model openai/glm-5.3
               <div className="w-full sm:w-56">
                 <Select
                   value={usageKeyFilter}
-                  onChange={(val) => setUsageKeyFilter(String(val))}
+                  onChange={(val) => {
+                    setUsageKeyFilter(String(val));
+                    setUsageRequestsPage(1);
+                  }}
                   options={[
                     { value: 'ALL', label: 'All keys in account' },
                     ...keys.map((k) => ({
@@ -2459,7 +2501,10 @@ aider --model openai/glm-5.3
               <div className="w-full sm:w-56">
                 <Select
                   value={usageModelFilter}
-                  onChange={(val) => setUsageModelFilter(String(val))}
+                  onChange={(val) => {
+                    setUsageModelFilter(String(val));
+                    setUsageRequestsPage(1);
+                  }}
                   options={[
                     { value: 'ALL', label: 'All models' },
                     ...models.map((m) => ({
@@ -2481,7 +2526,10 @@ aider --model openai/glm-5.3
                 <button
                   key={r.id}
                   type="button"
-                  onClick={() => setUsageRange(r.id)}
+                  onClick={() => {
+                    setUsageRange(r.id);
+                    setUsageRequestsPage(1);
+                  }}
                   className={cn(
                     'px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer',
                     usageRange === r.id
@@ -2587,51 +2635,174 @@ aider --model openai/glm-5.3
             )}
           </div>
 
-          {/* Recent Requests Table */}
-          <div className={cn('rounded-2xl border overflow-hidden', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}>
-            <div className="px-5 py-3.5 border-b border-white/[0.06]">
-              <h3 className={cn('text-xs sm:text-sm font-bold', isDark ? 'text-white' : 'text-slate-900')}>
-                Recent requests
-              </h3>
+          {/* Recent Requests Table with Search & Pagination */}
+          <div className={cn('rounded-2xl border overflow-hidden shadow-2xs', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200')}>
+            {/* Header with Title, Count Badge, and Search Input */}
+            <div className={cn('px-4 sm:px-5 py-3 sm:py-3.5 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3', isDark ? 'border-white/[0.06] bg-[#0c0d12]' : 'border-slate-100 bg-slate-50/70')}>
+              <div className="flex items-center gap-2">
+                <h3 className={cn('text-xs sm:text-sm font-bold flex items-center gap-2', isDark ? 'text-white' : 'text-slate-900')}>
+                  <span>Recent requests</span>
+                  <span className={cn('px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-mono font-bold border', isDark ? 'bg-white/[0.04] text-zinc-400 border-white/10' : 'bg-white text-slate-600 border-slate-200')}>
+                    {searchedUsageLogs.length}
+                  </span>
+                </h3>
+              </div>
+
+              {/* Search Bar */}
+              <div className="relative w-full sm:w-72">
+                <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  value={usageRequestSearch}
+                  onChange={(e) => {
+                    setUsageRequestSearch(e.target.value);
+                    setUsageRequestsPage(1);
+                  }}
+                  placeholder="Search by Request ID, Model, or Key..."
+                  className={cn(
+                    'w-full pl-8 pr-7 py-1.5 rounded-xl text-xs border outline-none transition-colors focus:border-cyan-500',
+                    isDark
+                      ? 'bg-[#111115] border-white/10 text-white placeholder:text-zinc-500'
+                      : 'bg-white border-slate-200 text-slate-900 placeholder:text-slate-400'
+                  )}
+                />
+                {usageRequestSearch && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUsageRequestSearch('');
+                      setUsageRequestsPage(1);
+                    }}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-zinc-400 hover:text-white cursor-pointer"
+                    title="Clear search"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
             </div>
+
             {filteredUsageLogs.length === 0 ? (
               <div className="p-8 text-xs text-zinc-500">
                 No requests recorded in this period yet. Prompts and answers are never stored - only token counts, charges, and latency.
               </div>
-            ) : (
-              <div className="overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                <table className="w-full min-w-[660px] text-left border-collapse">
-                  <thead>
-                    <tr className={cn('text-[11px] font-bold uppercase tracking-wider border-b', isDark ? 'text-zinc-400 border-white/[0.08] bg-[#0a0a0c]' : 'text-slate-500 border-slate-200 bg-slate-50')}>
-                      <th className="px-5 py-3.5">Request ID</th>
-                      <th className="px-4 py-3.5">Model &amp; Key</th>
-                      <th className="px-4 py-3.5 text-right">Input</th>
-                      <th className="px-4 py-3.5 text-right">Cached</th>
-                      <th className="px-4 py-3.5 text-right">Output</th>
-                      <th className="px-4 py-3.5 text-right">Charge</th>
-                      <th className="px-5 py-3.5 text-right">Time</th>
-                    </tr>
-                  </thead>
-                  <tbody className={cn('divide-y text-xs', isDark ? 'divide-white/[0.06]' : 'divide-slate-100')}>
-                    {filteredUsageLogs.map((u) => (
-                      <tr key={u.id} className={cn(isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-slate-50')}>
-                        <td className="px-5 py-3 font-mono text-zinc-400">{u.requestId}</td>
-                        <td className="px-4 py-3">
-                          <div className={cn('font-bold font-mono', isDark ? 'text-white' : 'text-slate-900')}>{u.modelId}</div>
-                          <div className={cn('text-[11px]', isDark ? 'text-zinc-500' : 'text-slate-500')}>
-                            {u.apiKey?.name || 'Key'} • {u.latencyMs}ms
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono">{u.inputTokens.toLocaleString()}</td>
-                        <td className="px-4 py-3 text-right font-mono text-zinc-400">{u.cachedTokens.toLocaleString()}</td>
-                        <td className="px-4 py-3 text-right font-mono">{u.outputTokens.toLocaleString()}</td>
-                        <td className="px-4 py-3 text-right font-mono font-bold text-cyan-400">{formatRupiah(u.costRp)}</td>
-                        <td className="px-5 py-3 text-right text-zinc-400">{new Date(u.createdAt).toLocaleString('id-ID')}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            ) : searchedUsageLogs.length === 0 ? (
+              <div className="p-8 text-center text-xs space-y-3">
+                <div className="text-zinc-400">
+                  No requests found matching &quot;<span className="text-cyan-400 font-semibold">{usageRequestSearch}</span>&quot;
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUsageRequestSearch('');
+                    setUsageRequestsPage(1);
+                  }}
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-400 text-slate-950 hover:bg-cyan-300 transition-colors cursor-pointer"
+                >
+                  Clear Search
+                </button>
               </div>
+            ) : (
+              <>
+                <div className="overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                  <table className="w-full min-w-[660px] text-left border-collapse">
+                    <thead>
+                      <tr className={cn('text-[11px] font-bold uppercase tracking-wider border-b', isDark ? 'text-zinc-400 border-white/[0.08] bg-[#0a0a0c]' : 'text-slate-500 border-slate-200 bg-slate-50')}>
+                        <th className="px-5 py-3.5">Request ID</th>
+                        <th className="px-4 py-3.5">Model &amp; Key</th>
+                        <th className="px-4 py-3.5 text-right">Input</th>
+                        <th className="px-4 py-3.5 text-right">Cached</th>
+                        <th className="px-4 py-3.5 text-right">Output</th>
+                        <th className="px-4 py-3.5 text-right">Charge</th>
+                        <th className="px-5 py-3.5 text-right">Time</th>
+                      </tr>
+                    </thead>
+                    <tbody className={cn('divide-y text-xs', isDark ? 'divide-white/[0.06]' : 'divide-slate-100')}>
+                      {paginatedUsageLogs.map((u) => (
+                        <tr key={u.id} className={cn(isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-slate-50')}>
+                          <td className="px-5 py-3 font-mono text-zinc-400">
+                            <div className="flex items-center gap-1.5">
+                              <span className="truncate max-w-[140px] sm:max-w-none">{u.requestId}</span>
+                              <button
+                                type="button"
+                                onClick={() => handleCopyReqId(u.requestId)}
+                                className="p-1 rounded hover:bg-white/10 text-zinc-500 hover:text-white transition-colors cursor-pointer"
+                                title="Copy Request ID"
+                              >
+                                {copiedReqId === u.requestId ? (
+                                  <Check className="w-3 h-3 text-emerald-400" />
+                                ) : (
+                                  <Copy className="w-3 h-3" />
+                                )}
+                              </button>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className={cn('font-bold font-mono', isDark ? 'text-white' : 'text-slate-900')}>{u.modelId}</div>
+                            <div className={cn('text-[11px]', isDark ? 'text-zinc-500' : 'text-slate-500')}>
+                              {u.apiKey?.name || 'Key'} • {u.latencyMs}ms
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-right font-mono">{u.inputTokens.toLocaleString()}</td>
+                          <td className="px-4 py-3 text-right font-mono text-zinc-400">{u.cachedTokens.toLocaleString()}</td>
+                          <td className="px-4 py-3 text-right font-mono">{u.outputTokens.toLocaleString()}</td>
+                          <td className="px-4 py-3 text-right font-mono font-bold text-cyan-400">{formatRupiah(u.costRp)}</td>
+                          <td className="px-5 py-3 text-right text-zinc-400">{new Date(u.createdAt).toLocaleString('id-ID')}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination Controls */}
+                <div className={cn(
+                  'px-4 sm:px-5 py-3 border-t flex flex-col sm:flex-row items-center justify-between gap-3 text-xs',
+                  isDark ? 'border-white/[0.06] bg-[#0c0d12]' : 'border-slate-100 bg-slate-50/70'
+                )}>
+                  {/* Left: Range Info */}
+                  <div className={cn('text-center sm:text-left', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+                    Showing <span className={cn('font-bold font-mono', isDark ? 'text-white' : 'text-slate-900')}>
+                      {searchedUsageLogs.length === 0 ? 0 : (safeUsageRequestsPage - 1) * (usageRequestsPageSize === -1 ? searchedUsageLogs.length : usageRequestsPageSize) + 1}
+                    </span> to <span className={cn('font-bold font-mono', isDark ? 'text-white' : 'text-slate-900')}>
+                      {usageRequestsPageSize === -1 ? searchedUsageLogs.length : Math.min(safeUsageRequestsPage * usageRequestsPageSize, searchedUsageLogs.length)}
+                    </span> of <span className={cn('font-bold font-mono', isDark ? 'text-white' : 'text-slate-900')}>
+                      {searchedUsageLogs.length}
+                    </span> requests
+                  </div>
+
+                  {/* Right: Page Size & Pagination */}
+                  <div className="flex items-center gap-3 flex-wrap justify-center">
+                    <div className="flex items-center gap-1.5 text-zinc-400">
+                      <span className="hidden xs:inline">Show:</span>
+                      <div className="w-24">
+                        <Select
+                          value={usageRequestsPageSize}
+                          onChange={(val) => {
+                            setUsageRequestsPageSize(Number(val));
+                            setUsageRequestsPage(1);
+                          }}
+                          options={[
+                            { value: 10, label: '10' },
+                            { value: 25, label: '25' },
+                            { value: 50, label: '50' },
+                            { value: -1, label: `All (${searchedUsageLogs.length})` },
+                          ]}
+                          direction="up"
+                          className="py-1 px-2.5 text-xs font-semibold rounded-lg"
+                        />
+                      </div>
+                    </div>
+
+                    {totalUsageRequestPages > 1 && (
+                      <Pagination
+                        currentPage={safeUsageRequestsPage}
+                        totalPages={totalUsageRequestPages}
+                        onPageChange={setUsageRequestsPage}
+                      />
+                    )}
+                  </div>
+                </div>
+              </>
             )}
           </div>
         </div>
