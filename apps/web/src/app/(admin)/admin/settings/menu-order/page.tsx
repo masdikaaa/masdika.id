@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from "react";
 import { Reorder } from "framer-motion";
-import { GripVertical, Calendar, Briefcase, Users, FileText, BookOpen, Save, RotateCcw, UploadCloud, Code, Compass, User, Server, LayoutDashboard, Star, Database, Cloud, Box , RefreshCw , Settings, Terminal, CodeXml, Rocket, Boxes } from "lucide-react";
+import { GripVertical, Calendar, Briefcase, Users, FileText, BookOpen, Save, RotateCcw, UploadCloud, Code, Compass, User, Server, LayoutDashboard, Star, Database, Cloud, Box , RefreshCw , Settings, Terminal, CodeXml, Rocket, Boxes, Sparkles } from "lucide-react";
 import { SiKubernetes } from "react-icons/si";
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
@@ -14,6 +14,7 @@ const MENU_META: Record<string, { label: string; description: string; icon: Reac
   community: { label: "Community",           description: "Connect and discuss with other developers in the community.",   icon: Users,     color: "text-cyan-400", bg: "bg-cyan-500/10" },
   blog:      { label: "Blog & Articles",     description: "Read our latest technical insights and tutorials.",            icon: FileText,  color: "text-cyan-400", bg: "bg-cyan-500/10" },
   series:    { label: "Series",              description: "Structured learning paths covering networking, cloud, DevOps.", icon: BookOpen,  color: "text-cyan-400",   bg: "bg-cyan-500/10"   },
+  "ai-gateway": { label: "AI Gateway", description: "Unified OpenAI-compatible API gateway with 70+ AI models & Rupiah Pay-As-You-Go.", icon: Sparkles, color: "text-cyan-400", bg: "bg-cyan-500/10" },
   upload:    { label: "File CDN",       description: "Securely upload temporary files up to 100MB.",                 icon: UploadCloud, color: "text-cyan-400", bg: "bg-cyan-500/10" },
   "object-storage": { label: "Object Storage", description: "S3-compatible buckets with IAM keys and presigned URLs.", icon: Database, color: "text-cyan-400", bg: "bg-cyan-500/10" },
   vps:       { label: "Cloud VPS",           description: "High-performance virtual private servers.",                    icon: Terminal,     color: "text-cyan-400", bg: "bg-cyan-500/10" },
@@ -29,8 +30,8 @@ const MENU_META: Record<string, { label: string; description: string; icon: Reac
 const DEFAULT_ORDER  = ['events', 'vacancies', 'community', 'blog', 'series'];
 const DEFAULT_BADGES = { events: 'New', vacancies: 'New', series: 'New' } as Record<string, string | false>;
 
-const DEFAULT_DEV_ORDER  = ['object-storage', 'upload', 'vps', 'app-catalog', 'managed-db', 'managed-apps'];
-const DEFAULT_DEV_BADGES = { 'object-storage': 'New', upload: 'New', vps: 'Premium', 'app-catalog': '1-Click', 'managed-db': 'New', 'managed-apps': 'New' } as Record<string, string | false>;
+const DEFAULT_DEV_ORDER  = ['ai-gateway', 'object-storage', 'upload', 'vps', 'app-catalog', 'managed-db', 'managed-apps'];
+const DEFAULT_DEV_BADGES = { 'ai-gateway': 'New', 'object-storage': 'New', upload: 'New', vps: 'Premium', 'app-catalog': '1-Click', 'managed-db': 'New', 'managed-apps': 'New' } as Record<string, string | false>;
 
 const DEFAULT_COMPANY_ORDER  = ['about', 'services', 'portfolio', 'skills'];
 const DEFAULT_COMPANY_BADGES = {} as Record<string, string | false>;

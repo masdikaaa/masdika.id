@@ -72,7 +72,7 @@ const nextConfig: NextConfig = {
         destination: "/images/auth/forgot-password.webp",
       },
       {
-        source: "/:mascot(about|api-hub|blog|community|contact|event-webinar|file-cdn|herocard1|job-vacancies|kube|list-episodes|looking-glass|masdika|portofolio|privacy-policy|reseller-api|series|services|skills|sla|term-condition|vps).webp",
+        source: "/:mascot(about|ai-gateway|api-hub|blog|community|contact|event-webinar|file-cdn|herocard1|job-vacancies|kube|list-episodes|looking-glass|managed-apps|managed-db|masdika|object-storage|portofolio|privacy-policy|reseller-api|series|services|skills|sla|term-condition|vps).webp",
         destination: "/images/mascots/:mascot.webp",
       },
     ];

@@ -28,6 +28,7 @@ import {
   Database,
   Boxes,
   HardDrive,
+  Sparkles,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
@@ -113,6 +114,13 @@ const COMPANY_MENU_ITEMS: MenuItem[] = [
 ];
 
 const DEV_MENU_ITEMS: MenuItem[] = [
+  {
+    title: "AI Gateway",
+    description: "Universal OpenAI-compatible API gateway with 70+ AI models & Rupiah Pay-As-You-Go.",
+    href: "/ai-gateway",
+    icon: Sparkles,
+    badge: "New",
+  },
   {
     title: "Object Storage",
     description: "S3-compatible buckets with IAM keys and presigned URLs.",
