@@ -1038,8 +1038,9 @@ export default function AiGatewayClient({
             <div className="lg:col-span-7 space-y-5 sm:space-y-6">
               {/* Model Picker */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-2">
-                  Select AI Model
+                <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-2">
+                  <Cpu className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
+                  <span>Select AI Model</span>
                 </label>
                 <Select
                   value={calcModelId}
@@ -1053,9 +1054,14 @@ export default function AiGatewayClient({
               {/* Sliders */}
               <div className="space-y-4 sm:space-y-5">
                 <div>
-                  <div className="flex justify-between text-xs font-semibold mb-1.5">
-                    <span className="text-[var(--text-secondary)]">Avg. Prompt Tokens per Request</span>
-                    <span className="font-mono text-cyan-600 dark:text-cyan-400 font-bold">{promptTokens.toLocaleString()} tokens</span>
+                  <div className="flex items-center justify-between text-xs font-semibold mb-1.5">
+                    <span className="flex items-center gap-2 text-[var(--text-secondary)]">
+                      <Terminal className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
+                      <span>Avg. Prompt Tokens per Request</span>
+                    </span>
+                    <span className="font-mono text-cyan-600 dark:text-cyan-400 font-bold px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 text-[11px] sm:text-xs">
+                      {promptTokens.toLocaleString()} tokens
+                    </span>
                   </div>
                   <input
                     type="range"
@@ -1069,9 +1075,14 @@ export default function AiGatewayClient({
                 </div>
 
                 <div>
-                  <div className="flex justify-between text-xs font-semibold mb-1.5">
-                    <span className="text-[var(--text-secondary)]">Avg. Completion Tokens per Request</span>
-                    <span className="font-mono text-cyan-600 dark:text-cyan-400 font-bold">{completionTokens.toLocaleString()} tokens</span>
+                  <div className="flex items-center justify-between text-xs font-semibold mb-1.5">
+                    <span className="flex items-center gap-2 text-[var(--text-secondary)]">
+                      <Sparkles className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
+                      <span>Avg. Completion Tokens per Request</span>
+                    </span>
+                    <span className="font-mono text-cyan-600 dark:text-cyan-400 font-bold px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 text-[11px] sm:text-xs">
+                      {completionTokens.toLocaleString()} tokens
+                    </span>
                   </div>
                   <input
                     type="range"
@@ -1085,9 +1096,14 @@ export default function AiGatewayClient({
                 </div>
 
                 <div>
-                  <div className="flex justify-between text-xs font-semibold mb-1.5">
-                    <span className="text-[var(--text-secondary)]">Estimated Requests per Month</span>
-                    <span className="font-mono text-cyan-600 dark:text-cyan-400 font-bold">{monthlyRequests.toLocaleString()} calls</span>
+                  <div className="flex items-center justify-between text-xs font-semibold mb-1.5">
+                    <span className="flex items-center gap-2 text-[var(--text-secondary)]">
+                      <Activity className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
+                      <span>Estimated Requests per Month</span>
+                    </span>
+                    <span className="font-mono text-cyan-600 dark:text-cyan-400 font-bold px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 text-[11px] sm:text-xs">
+                      {monthlyRequests.toLocaleString()} calls
+                    </span>
                   </div>
                   <input
                     type="range"
