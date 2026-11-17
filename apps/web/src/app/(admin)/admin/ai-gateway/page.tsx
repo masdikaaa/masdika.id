@@ -26,6 +26,8 @@ import {
   X,
   Image as ImageIcon,
   MessageSquare,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { Select } from '@/components/ui/Select';
 import { AdminCheckbox } from '@/components/ui/AdminCheckbox';
@@ -126,6 +128,8 @@ export default function AdminAiGatewayPage() {
   const [modelTypeFilter, setModelTypeFilter] = useState<string>('ALL');
   const [customerSearch, setCustomerSearch] = useState('');
   const [logSearch, setLogSearch] = useState('');
+  const [logsPage, setLogsPage] = useState<number>(1);
+  const [logsPerPage, setLogsPerPage] = useState<number>(10);
 
   // Customer AI Balance Adjustment Modal
   const [adjustModalCustomer, setAdjustModalCustomer] = useState<CustomerAiItem | null>(null);
@@ -342,6 +346,30 @@ export default function AdminAiGatewayPage() {
         (l.apiKey?.name || '').toLowerCase().includes(q),
     );
   }, [recentLogs, logSearch]);
+
+  const totalLogPages = Math.max(1, Math.ceil(filteredLogs.length / (logsPerPage > 0 ? logsPerPage : 10)));
+  const safeLogsPage = Math.min(logsPage, totalLogPages);
+  const paginatedLogs = useMemo(() => {
+    if (logsPerPage === -1) return filteredLogs;
+    const start = (safeLogsPage - 1) * logsPerPage;
+    return filteredLogs.slice(start, start + logsPerPage);
+  }, [filteredLogs, safeLogsPage, logsPerPage]);
+
+  const logPageNumbers = useMemo(() => {
+    if (totalLogPages <= 7) {
+      return Array.from({ length: totalLogPages }, (_, i) => i + 1);
+    }
+    if (safeLogsPage <= 4) {
+      return [1, 2, 3, 4, 5, '...', totalLogPages];
+    }
+    if (safeLogsPage >= totalLogPages - 3) {
+      return [1, '...', totalLogPages - 4, totalLogPages - 3, totalLogPages - 2, totalLogPages - 1, totalLogPages];
+    }
+    return [1, '...', safeLogsPage - 1, safeLogsPage, safeLogsPage + 1, '...', totalLogPages];
+  }, [safeLogsPage, totalLogPages]);
+
+  const startLogItem = filteredLogs.length > 0 ? (logsPerPage === -1 ? 1 : (safeLogsPage - 1) * logsPerPage + 1) : 0;
+  const endLogItem = logsPerPage === -1 ? filteredLogs.length : Math.min(safeLogsPage * logsPerPage, filteredLogs.length);
 
   if (loading) {
     return (
@@ -978,7 +1006,10 @@ export default function AdminAiGatewayPage() {
               <input
                 type="text"
                 value={logSearch}
-                onChange={(e) => setLogSearch(e.target.value)}
+                onChange={(e) => {
+                  setLogSearch(e.target.value);
+                  setLogsPage(1);
+                }}
                 placeholder="Filter by customer, key, or model..."
                 className={cn(isDark ? 'w-full pl-9 pr-3.5 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white focus:border-cyan-400 focus:outline-none' : 'w-full pl-9 pr-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:border-cyan-400 focus:outline-none')}
               />
@@ -1000,14 +1031,14 @@ export default function AdminAiGatewayPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/[0.05] text-xs">
-                {filteredLogs.length === 0 ? (
+                {paginatedLogs.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="py-8 text-center text-zinc-500">
-                      No AI Gateway requests recorded yet.
+                      {filteredLogs.length === 0 ? 'No AI Gateway requests recorded yet.' : 'No matching requests on this page.'}
                     </td>
                   </tr>
                 ) : (
-                  filteredLogs.map((log) => {
+                  paginatedLogs.map((log) => {
                     const costRp = Number(log.costRp ?? 0);
                     const upstreamRp = Number(log.upstreamCostRp ?? 0);
                     return (
@@ -1044,6 +1075,112 @@ export default function AdminAiGatewayPage() {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination Controls */}
+          {filteredLogs.length > 0 && (
+            <div className={cn(
+              "pt-3 sm:pt-4 border-t flex flex-col sm:flex-row items-center justify-between gap-3 text-xs",
+              isDark ? "border-white/[0.07]" : "border-slate-200"
+            )}>
+              {/* Left: Range Info */}
+              <div className={cn(isDark ? "text-zinc-400" : "text-slate-600", "text-center sm:text-left")}>
+                Showing <span className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>{startLogItem}</span> to{" "}
+                <span className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>{endLogItem}</span> of{" "}
+                <span className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>{filteredLogs.length}</span> requests
+              </div>
+
+              {/* Right: Page Size & Nav */}
+              <div className="flex items-center gap-3 flex-wrap justify-center">
+                <div className={cn("flex items-center gap-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
+                  <span className="hidden xs:inline">Show:</span>
+                  <div className="w-24">
+                    <Select
+                      value={logsPerPage}
+                      onChange={(val) => {
+                        setLogsPerPage(Number(val));
+                        setLogsPage(1);
+                      }}
+                      options={[
+                        { value: 10, label: "10" },
+                        { value: 25, label: "25" },
+                        { value: 50, label: "50" },
+                        { value: -1, label: `All (${filteredLogs.length})` },
+                      ]}
+                      direction="up"
+                      className="py-1 px-2.5 text-xs font-semibold rounded-lg"
+                    />
+                  </div>
+                </div>
+
+                {totalLogPages > 1 && (
+                  <div className="flex items-center gap-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-w-full py-0.5">
+                    <button
+                      type="button"
+                      onClick={() => setLogsPage((p) => Math.max(1, p - 1))}
+                      disabled={safeLogsPage === 1}
+                      className={cn(
+                        "p-1.5 rounded-lg border transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none",
+                        isDark 
+                          ? "border-white/10 bg-[#14151f] text-zinc-400 hover:text-white hover:border-cyan-500" 
+                          : "border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:border-cyan-500"
+                      )}
+                      title="Previous page"
+                      aria-label="Previous page"
+                    >
+                      <ChevronLeft className="w-3.5 h-3.5" />
+                    </button>
+
+                    <div className="flex items-center gap-1">
+                      {logPageNumbers.map((p, idx) => {
+                        if (p === '...') {
+                          return (
+                            <span key={`ellipsis-${idx}`} className={cn("px-1 font-mono", isDark ? "text-zinc-600" : "text-slate-400")}>
+                              ...
+                            </span>
+                          );
+                        }
+                        const pageNum = Number(p);
+                        const isActive = pageNum === safeLogsPage;
+                        return (
+                          <button
+                            key={`log-page-${pageNum}`}
+                            type="button"
+                            onClick={() => setLogsPage(pageNum)}
+                            className={cn(
+                              "min-w-[28px] h-7 px-2 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer border",
+                              isActive
+                                ? "bg-cyan-400 border-cyan-400 text-slate-950 font-black shadow-xs ring-1 ring-cyan-300/40"
+                                : isDark
+                                ? "border-white/10 bg-[#14151f] text-zinc-400 hover:border-cyan-500 hover:text-white"
+                                : "border-slate-200 bg-white text-slate-600 hover:border-cyan-500 hover:text-slate-900"
+                            )}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setLogsPage((p) => Math.min(totalLogPages, p + 1))}
+                      disabled={safeLogsPage === totalLogPages}
+                      className={cn(
+                        "p-1.5 rounded-lg border transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none",
+                        isDark 
+                          ? "border-white/10 bg-[#14151f] text-zinc-400 hover:text-white hover:border-cyan-500" 
+                          : "border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:border-cyan-500"
+                      )}
+                      title="Next page"
+                      aria-label="Next page"
+                    >
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )}
 

@@ -474,20 +474,34 @@ export async function syncAiModelsFromUpstream() {
           await prisma.aiModel.update({ where: { id: existing.id }, data: updateData });
           updatedCount++;
         }
-      } else if (Number.isFinite(input) && Number.isFinite(output)) {
+      } else {
+        // Model is new in upstream: resolve prices from DEFAULT_AI_MODELS or prefix match
+        const defaultDef = DEFAULT_AI_MODELS.find(
+          (m) => m.modelId === modelId || modelId.startsWith(m.modelId) || m.modelId.startsWith(modelId)
+        );
+        const resolvedInput = Number.isFinite(input) && input >= 0 ? Math.round(input) : (defaultDef?.inputPricePer1M ?? 2000);
+        const resolvedCache = Number.isFinite(cache) && cache >= 0 ? Math.round(cache) : (defaultDef?.cachePricePer1M ?? 500);
+        const resolvedOutput = Number.isFinite(output) && output >= 0 ? Math.round(output) : (defaultDef?.outputPricePer1M ?? 8000);
+        const resolvedOrigInput = Number.isFinite(origInput) && origInput > 0 ? Math.round(origInput) : (defaultDef?.originalInputPricePer1M ?? null);
+        const resolvedOrigCache = Number.isFinite(origCache) && origCache > 0 ? Math.round(origCache) : (defaultDef?.originalCachePricePer1M ?? null);
+        const resolvedOrigOutput = Number.isFinite(origOutput) && origOutput > 0 ? Math.round(origOutput) : (defaultDef?.originalOutputPricePer1M ?? null);
+        const resolvedBadge = discountBadge || defaultDef?.discountBadge || null;
+        const resolvedCtx = (typeof item.context_window === 'string' && item.context_window) || defaultDef?.contextWindow || '1M';
+        const modelName = (typeof item.display_name === 'string' && item.display_name.trim()) || (typeof item.name === 'string' && item.name.trim()) || modelId;
+
         await prisma.aiModel.create({
           data: {
             modelId,
-            name: (typeof item.name === 'string' && item.name.trim()) || modelId,
+            name: modelName,
             provider: inferProviderFromModelId(modelId),
-            contextWindow: (typeof item.context_window === 'string' && item.context_window) || '128K',
-            inputPricePer1M: Math.round(input),
-            cachePricePer1M: Number.isFinite(cache) ? Math.round(cache) : Math.round(input),
-            outputPricePer1M: Math.round(output),
-            originalInputPricePer1M: Number.isFinite(origInput) ? Math.round(origInput) : null,
-            originalCachePricePer1M: Number.isFinite(origCache) ? Math.round(origCache) : null,
-            originalOutputPricePer1M: Number.isFinite(origOutput) ? Math.round(origOutput) : null,
-            discountBadge: discountBadge || null,
+            contextWindow: resolvedCtx,
+            inputPricePer1M: resolvedInput,
+            cachePricePer1M: resolvedCache,
+            outputPricePer1M: resolvedOutput,
+            originalInputPricePer1M: resolvedOrigInput,
+            originalCachePricePer1M: resolvedOrigCache,
+            originalOutputPricePer1M: resolvedOrigOutput,
+            discountBadge: resolvedBadge,
             isActive: true,
           },
         });

@@ -38,7 +38,7 @@ export async function GET() {
       }),
       prisma.aiUsageLog.findMany({
         orderBy: { createdAt: 'desc' },
-        take: 50,
+        take: 200,
         include: {
           user: { select: { id: true, name: true, email: true } },
           apiKey: { select: { name: true, keyPrefix: true } },

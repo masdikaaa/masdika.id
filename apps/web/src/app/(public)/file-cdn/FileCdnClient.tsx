@@ -78,35 +78,38 @@ const CDN_FAQS = [
 
 const RAW_CODE = {
   curl: `curl -X POST https://www.masdika.id/api/v1/cdn/upload \\
-  -H "x-api-key: YOUR_CDN_API_KEY" \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
   -F "file=@asset.png"`,
   javascript: `const formData = new FormData();
 formData.append('file', fileInput.files[0]);
 
 const response = await fetch('https://www.masdika.id/api/v1/cdn/upload', {
   method: 'POST',
-  headers: { 'x-api-key': 'YOUR_CDN_API_KEY' },
+  headers: { 'Authorization': 'Bearer YOUR_API_KEY' },
   body: formData
 });
 
-const { url, token } = await response.json();
-console.log('CDN Link:', url);`,
+const { file } = await response.json();
+console.log('CDN Link:', file.url);`,
   python: `import requests
 
 url = "https://www.masdika.id/api/v1/cdn/upload"
-headers = {"x-api-key": "YOUR_CDN_API_KEY"}
+headers = {"Authorization": "Bearer YOUR_API_KEY"}
 
 with open("asset.png", "rb") as f:
     response = requests.post(url, headers=headers, files={"file": f})
 
-print("CDN Link:", response.json()["url"])`,
+print("CDN Link:", response.json()["file"]["url"])`,
   go: `package main
 
-import "fmt"
+import (
+  "fmt"
+  "net/http"
+)
 
 func main() {
-    // Stream multipart payload directly to Masdika File CDN
-    fmt.Println("Upload completed -> https://www.masdika.id/api/v1/cdn/files/b8f9e0a2")
+  // Stream multipart payload to Masdika File CDN
+  fmt.Println("Upload completed -> https://www.masdika.id/api/media/b8f9e0a2")
 }`
 };
 
@@ -339,7 +342,7 @@ export default function FileCdnClient({
                     </div>
 
                     <span className="text-[11px] font-mono text-slate-400 hidden sm:inline">
-                      POST /api/v1/upload
+                      POST /api/v1/cdn/upload
                     </span>
                   </div>
 
@@ -353,7 +356,6 @@ export default function FileCdnClient({
                             <div>1</div>
                             <div>2</div>
                             <div>3</div>
-                            <div>4</div>
                           </>
                         )}
                         {activeCodeTab === "javascript" && (
@@ -394,6 +396,9 @@ export default function FileCdnClient({
                             <div>6</div>
                             <div>7</div>
                             <div>8</div>
+                            <div>9</div>
+                            <div>10</div>
+                            <div>11</div>
                           </>
                         )}
                       </div>
@@ -402,40 +407,37 @@ export default function FileCdnClient({
                       <div className="flex-1 min-w-0 font-mono text-slate-100 selection:bg-cyan-500/30 whitespace-pre">
                         {activeCodeTab === "curl" && (
                           <div>
-                            <div><span className="text-cyan-400 font-bold">curl</span> <span className="text-amber-300 font-bold">-X</span> <span className="text-emerald-400 font-black">POST</span> <span className="text-sky-300 font-semibold underline underline-offset-4 decoration-cyan-500/40">https://cdn.masdika.id/api/v1/upload</span> <span className="text-slate-400 font-bold">\</span></div>
+                            <div><span className="text-cyan-400 font-bold">curl</span> <span className="text-amber-300 font-bold">-X</span> <span className="text-emerald-400 font-black">POST</span> <span className="text-sky-300 font-semibold underline underline-offset-4 decoration-cyan-500/40">https://www.masdika.id/api/v1/cdn/upload</span> <span className="text-slate-400 font-bold">\</span></div>
                             <div>{"  "}<span className="text-amber-300 font-bold">-H</span> <span className="text-emerald-300 font-semibold">&quot;Authorization: Bearer YOUR_API_KEY&quot;</span> <span className="text-slate-400 font-bold">\</span></div>
-                            <div>{"  "}<span className="text-amber-300 font-bold">-F</span> <span className="text-emerald-300 font-semibold">&quot;file=@asset.png&quot;</span> <span className="text-slate-400 font-bold">\</span></div>
-                            <div>{"  "}<span className="text-amber-300 font-bold">-F</span> <span className="text-emerald-300 font-semibold">&quot;expires_in=24h&quot;</span></div>
+                            <div>{"  "}<span className="text-amber-300 font-bold">-F</span> <span className="text-emerald-300 font-semibold">&quot;file=@asset.png&quot;</span></div>
                           </div>
                         )}
                         {activeCodeTab === "javascript" && (
                           <div>
                             <div><span className="text-purple-400 font-bold">const</span> <span className="text-slate-100 font-semibold">formData</span> = <span className="text-purple-400 font-bold">new</span> <span className="text-sky-300 font-bold">FormData</span>();</div>
                             <div><span className="text-slate-100">formData</span>.<span className="text-blue-300 font-semibold">append</span>(<span className="text-emerald-300 font-medium">&apos;file&apos;</span>, fileInput.files[<span className="text-amber-300 font-bold">0</span>]);</div>
-                            <div><span className="text-slate-100">formData</span>.<span className="text-blue-300 font-semibold">append</span>(<span className="text-emerald-300 font-medium">&apos;expires_in&apos;</span>, <span className="text-emerald-300 font-medium">&apos;24h&apos;</span>);</div>
                             <div>&nbsp;</div>
-                            <div><span className="text-purple-400 font-bold">const</span> <span className="text-slate-100 font-semibold">res</span> = <span className="text-purple-400 font-bold">await</span> <span className="text-blue-300 font-semibold">fetch</span>(<span className="text-emerald-300 font-medium">&apos;https://cdn.masdika.id/api/v1/upload&apos;</span>, &#123;</div>
+                            <div><span className="text-purple-400 font-bold">const</span> <span className="text-slate-100 font-semibold">res</span> = <span className="text-purple-400 font-bold">await</span> <span className="text-blue-300 font-semibold">fetch</span>(<span className="text-emerald-300 font-medium">&apos;https://www.masdika.id/api/v1/cdn/upload&apos;</span>, &#123;</div>
                             <div>{"  "}method: <span className="text-emerald-400 font-bold">&apos;POST&apos;</span>,</div>
                             <div>{"  "}headers: &#123; <span className="text-emerald-300 font-medium">&apos;Authorization&apos;</span>: <span className="text-emerald-300 font-medium">&apos;Bearer YOUR_API_KEY&apos;</span> &#125;,</div>
                             <div>{"  "}body: <span className="text-slate-100">formData</span></div>
                             <div>&#125;);</div>
                             <div>&nbsp;</div>
-                            <div><span className="text-purple-400 font-bold">const</span> &#123; <span className="text-cyan-300 font-semibold">downloadUrl</span> &#125; = <span className="text-purple-400 font-bold">await</span> <span className="text-slate-100">res</span>.<span className="text-blue-300 font-semibold">json</span>();</div>
-                            <div>console.<span className="text-blue-300 font-semibold">log</span>(<span className="text-emerald-300 font-medium">&apos;CDN Link:&apos;</span>, <span className="text-cyan-300 font-semibold">downloadUrl</span>);</div>
+                            <div><span className="text-purple-400 font-bold">const</span> &#123; <span className="text-cyan-300 font-semibold">file</span> &#125; = <span className="text-purple-400 font-bold">await</span> <span className="text-slate-100">res</span>.<span className="text-blue-300 font-semibold">json</span>();</div>
+                            <div>console.<span className="text-blue-300 font-semibold">log</span>(<span className="text-emerald-300 font-medium">&apos;CDN Link:&apos;</span>, <span className="text-cyan-300 font-semibold">file.url</span>);</div>
                           </div>
                         )}
                         {activeCodeTab === "python" && (
                           <div>
                             <div><span className="text-purple-400 font-bold">import</span> <span className="text-sky-300 font-bold">requests</span></div>
                             <div>&nbsp;</div>
-                            <div><span className="text-slate-100 font-semibold">url</span> = <span className="text-emerald-300 font-medium">&quot;https://cdn.masdika.id/api/v1/upload&quot;</span></div>
+                            <div><span className="text-slate-100 font-semibold">url</span> = <span className="text-emerald-300 font-medium">&quot;https://www.masdika.id/api/v1/cdn/upload&quot;</span></div>
                             <div><span className="text-slate-100 font-semibold">headers</span> = &#123;<span className="text-emerald-300 font-medium">&quot;Authorization&quot;</span>: <span className="text-emerald-300 font-medium">&quot;Bearer YOUR_API_KEY&quot;</span>&#125;</div>
-                            <div><span className="text-slate-100 font-semibold">data</span> = &#123;<span className="text-emerald-300 font-medium">&quot;expires_in&quot;</span>: <span className="text-emerald-300 font-medium">&quot;24h&quot;</span>&#125;</div>
                             <div>&nbsp;</div>
                             <div><span className="text-purple-400 font-bold">with</span> <span className="text-blue-300 font-semibold">open</span>(<span className="text-emerald-300 font-medium">&quot;asset.png&quot;</span>, <span className="text-emerald-300 font-medium">&quot;rb&quot;</span>) <span className="text-purple-400 font-bold">as</span> <span className="text-slate-100">f</span>:</div>
-                            <div>{"  "}<span className="text-slate-100 font-semibold">res</span> = requests.<span className="text-blue-300 font-semibold">post</span>(url, headers=headers, files=&#123;<span className="text-emerald-300 font-medium">&quot;file&quot;</span>: f&#125;, data=data)</div>
+                            <div>{"  "}<span className="text-slate-100 font-semibold">res</span> = requests.<span className="text-blue-300 font-semibold">post</span>(url, headers=headers, files=&#123;<span className="text-emerald-300 font-medium">&quot;file&quot;</span>: f&#125;)</div>
                             <div>&nbsp;</div>
-                            <div><span className="text-blue-300 font-semibold">print</span>(<span className="text-emerald-300 font-medium">&quot;CDN Link:&quot;</span>, res.<span className="text-blue-300 font-semibold">json</span>()[<span className="text-emerald-300 font-medium">&quot;downloadUrl&quot;</span>])</div>
+                            <div><span className="text-blue-300 font-semibold">print</span>(<span className="text-emerald-300 font-medium">&quot;CDN Link:&quot;</span>, res.<span className="text-blue-300 font-semibold">json</span>()[<span className="text-emerald-300 font-medium">&quot;file&quot;</span>][<span className="text-emerald-300 font-medium">&quot;url&quot;</span>])</div>
                           </div>
                         )}
                         {activeCodeTab === "go" && (
@@ -448,8 +450,8 @@ export default function FileCdnClient({
                             <div>)</div>
                             <div>&nbsp;</div>
                             <div><span className="text-purple-400 font-bold">func</span> <span className="text-blue-300 font-semibold">main</span>() &#123;</div>
-                            <div>{"  "}<span className="text-slate-400 italic">// Stream multipart payload directly to Sidoarjo edge</span></div>
-                            <div>{"  "}fmt.<span className="text-blue-300 font-semibold">Println</span>(<span className="text-emerald-300 font-medium">&quot;Upload completed -&gt; https://cdn.masdika.id/dl/b8f9e0a2&quot;</span>)</div>
+                            <div>{"  "}<span className="text-slate-400 italic">// Stream multipart payload to Masdika File CDN</span></div>
+                            <div>{"  "}fmt.<span className="text-blue-300 font-semibold">Println</span>(<span className="text-emerald-300 font-medium">&quot;Upload completed -&gt; https://www.masdika.id/api/media/b8f9e0a2&quot;</span>)</div>
                             <div>&#125;</div>
                           </div>
                         )}
@@ -474,8 +476,8 @@ export default function FileCdnClient({
 
                     <div className="text-slate-200 font-medium flex items-center gap-1.5 overflow-x-auto text-[11px] sm:text-xs">
                       <span className="text-slate-400 shrink-0">Payload:</span>
-                      <span className="text-cyan-300 font-bold bg-[#060d19] px-2 py-0.5 rounded border border-cyan-800/60 truncate max-w-[260px] sm:max-w-none">
-                        &#123;&quot;status&quot;: 200, &quot;link&quot;: &quot;cdn.masdika.id/dl/...&quot;&#125;
+                      <span className="text-cyan-300 font-bold bg-[#060d19] px-2 py-0.5 rounded border border-cyan-800/60 truncate max-w-[280px] sm:max-w-none">
+                        &#123;&quot;success&quot;: true, &quot;file&quot;: &#123;&quot;url&quot;: &quot;https://www.masdika.id/api/media/b8f9e0a2&quot;&#125;&#125;
                       </span>
                     </div>
                   </div>
@@ -630,6 +632,9 @@ export default function FileCdnClient({
                             <span className="text-sm font-medium text-[var(--text-secondary)]">
                               /month
                             </span>
+                          </div>
+                          <div className="text-xs font-mono text-cyan-600 dark:text-cyan-400 mt-1">
+                            {formatRupiah(plan.hourlyPrice)}/hour PAYG <span className="text-[11px] text-[var(--text-muted)] font-normal">(~720 hrs/month)</span>
                           </div>
                         </div>
 

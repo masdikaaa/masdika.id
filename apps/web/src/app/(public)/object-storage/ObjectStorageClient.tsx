@@ -591,7 +591,7 @@ export default function ObjectStorageClient({
                             </span>
                           </div>
                           <div className="text-xs font-mono text-cyan-600 dark:text-cyan-400 mt-1">
-                            {formatRupiah(plan.hourlyPrice)}/hour PAYG
+                            {formatRupiah(plan.hourlyPrice)}/hour PAYG <span className="text-[11px] text-[var(--text-muted)] font-normal">(~720 hrs/month)</span>
                           </div>
                         </div>
 
