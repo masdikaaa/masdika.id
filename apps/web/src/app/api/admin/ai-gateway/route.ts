@@ -21,7 +21,8 @@ export async function GET() {
     await ensureAiModelsExist();
     const config = await getAiGatewayConfig();
 
-    const [models, totalKeys, usageStats, recentLogs, rawCustomers] = await Promise.all([
+    const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
+    const [models, totalKeys, usageStats, recentLogs, rawCustomers, timelineLogs] = await Promise.all([
       prisma.aiModel.findMany({
         orderBy: [{ sortOrder: 'asc' }, { inputPricePer1M: 'asc' }],
       }),
@@ -63,6 +64,17 @@ export async function GET() {
             },
           },
         },
+      }),
+      prisma.aiUsageLog.findMany({
+        where: { createdAt: { gte: fourteenDaysAgo } },
+        select: {
+          createdAt: true,
+          inputTokens: true,
+          cachedTokens: true,
+          outputTokens: true,
+          costRp: true,
+        },
+        orderBy: { createdAt: 'asc' },
       }),
     ]);
 
@@ -116,6 +128,54 @@ export async function GET() {
       sellPriceRp: applyMarkupPrice(m.basePriceRp, config.markupPercent),
     }));
 
+    const timelineMap = new Map<string, { date: string; fullDate: string; inputTokens: number; cachedTokens: number; outputTokens: number; totalTokens: number; requests: number; costRp: number }>();
+
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+      const key = d.toISOString().slice(0, 10);
+      const dateLabel = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      timelineMap.set(key, {
+        date: dateLabel,
+        fullDate: key,
+        inputTokens: 0,
+        cachedTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+        requests: 0,
+        costRp: 0,
+      });
+    }
+
+    for (const log of timelineLogs) {
+      const key = log.createdAt.toISOString().slice(0, 10);
+      let entry = timelineMap.get(key);
+      if (!entry) {
+        const dateLabel = log.createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        entry = {
+          date: dateLabel,
+          fullDate: key,
+          inputTokens: 0,
+          cachedTokens: 0,
+          outputTokens: 0,
+          totalTokens: 0,
+          requests: 0,
+          costRp: 0,
+        };
+        timelineMap.set(key, entry);
+      }
+      const inT = log.inputTokens || 0;
+      const outT = log.outputTokens || 0;
+      const cacheT = log.cachedTokens || 0;
+      entry.inputTokens += inT;
+      entry.outputTokens += outT;
+      entry.cachedTokens += cacheT;
+      entry.totalTokens += inT + outT + cacheT;
+      entry.requests += 1;
+      entry.costRp += log.costRp || 0;
+    }
+
+    const tokenUsageTimeline = Array.from(timelineMap.values());
+
     return NextResponse.json({
       config: {
         enabled: config.enabled,
@@ -147,6 +207,7 @@ export async function GET() {
         totalProfitIdr,
         totalCustomerAiBalance,
       },
+      tokenUsageTimeline,
       recentLogs: formattedLogs,
     });
   } catch (err: any) {
