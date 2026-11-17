@@ -210,6 +210,48 @@ export async function handleAiProxyRequest(
     );
   }
 
+  // Handle 9Router / client connection-probe placeholder "model-id" after key & balance auth succeeds
+  if (modelId === 'model-id') {
+    const probeBody =
+      format === 'anthropic'
+        ? {
+            id: requestId,
+            type: 'message',
+            role: 'assistant',
+            model: 'model-id',
+            content: [{ type: 'text', text: 'ok' }],
+            stop_reason: 'end_turn',
+            usage: { input_tokens: 0, output_tokens: 0 },
+          }
+        : format === 'responses'
+        ? {
+            id: requestId,
+            object: 'response',
+            status: 'completed',
+            model: 'model-id',
+            output_text: 'ok',
+            usage: { input_tokens: 0, output_tokens: 0, total_tokens: 0 },
+          }
+        : {
+            id: requestId,
+            object: 'chat.completion',
+            created: Math.floor(Date.now() / 1000),
+            model: 'model-id',
+            choices: [
+              {
+                index: 0,
+                message: { role: 'assistant', content: 'ok' },
+                finish_reason: 'stop',
+              },
+            ],
+            usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+          };
+    return NextResponse.json(probeBody, {
+      status: 200,
+      headers: { ...AI_CORS_HEADERS, 'x-request-id': requestId },
+    });
+  }
+
   await ensureAiModelsExist();
   const model = await prisma.aiModel.findUnique({ where: { modelId } });
   if (!model || !model.isActive) {
