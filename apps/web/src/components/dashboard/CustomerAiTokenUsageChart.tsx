@@ -90,13 +90,13 @@ export function CustomerAiTokenUsageChart({ data }: CustomerAiTokenUsageChartPro
           </p>
         </div>
 
-        {/* View Toggle - Strictly Cyan */}
-        <div className="flex items-center gap-1 self-start sm:self-auto bg-slate-100 dark:bg-white/[0.04] p-1 rounded-xl border border-slate-200 dark:border-white/[0.08]">
+        {/* View Toggle - Strictly Cyan & Smooth horizontal swipe with hidden scrollbar */}
+        <div className="flex items-center gap-1 w-full sm:w-auto bg-slate-100 dark:bg-white/[0.04] p-1 rounded-xl border border-slate-200 dark:border-white/[0.08] overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           <button
             type="button"
             onClick={() => setMetric('total')}
             className={cn(
-              'px-2.5 sm:px-3 py-1 rounded-lg text-[11px] sm:text-xs font-semibold transition-all cursor-pointer',
+              'flex-1 sm:flex-initial text-center justify-center px-2.5 sm:px-3 py-1.5 sm:py-1 rounded-lg text-[11px] sm:text-xs font-semibold transition-all cursor-pointer whitespace-nowrap',
               metric === 'total'
                 ? 'bg-cyan-400 text-slate-950 font-bold shadow-xs'
                 : isDark
@@ -110,7 +110,7 @@ export function CustomerAiTokenUsageChart({ data }: CustomerAiTokenUsageChartPro
             type="button"
             onClick={() => setMetric('breakdown')}
             className={cn(
-              'px-2.5 sm:px-3 py-1 rounded-lg text-[11px] sm:text-xs font-semibold transition-all cursor-pointer',
+              'flex-1 sm:flex-initial text-center justify-center px-2.5 sm:px-3 py-1.5 sm:py-1 rounded-lg text-[11px] sm:text-xs font-semibold transition-all cursor-pointer whitespace-nowrap',
               metric === 'breakdown'
                 ? 'bg-cyan-400 text-slate-950 font-bold shadow-xs'
                 : isDark

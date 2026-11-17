@@ -498,8 +498,8 @@ export default function AdminAiGatewayPage() {
       {/* Aggregate Customer Token Usage Graph */}
       <AiTokenUsageChart data={tokenUsageTimeline} />
 
-      {/* Navigation Tabs */}
-      <div className={cn("flex items-center gap-2 overflow-x-auto pb-1 border-b", isDark ? "border-white/[0.07]" : "border-slate-200")}>
+      {/* Navigation Tabs - Smooth horizontal swipe with hidden scrollbar */}
+      <div className={cn("flex items-center gap-1.5 overflow-x-auto pb-1 border-b [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden", isDark ? "border-white/[0.07]" : "border-slate-200")}>
         {[
           { id: 'settings', label: 'Gateway Settings & Upstream', icon: Sliders },
           { id: 'rankings', label: `Top Models Ranking (${topModelRankings.length})`, icon: Trophy },

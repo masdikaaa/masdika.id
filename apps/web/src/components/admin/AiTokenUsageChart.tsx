@@ -92,12 +92,12 @@ export function AiTokenUsageChart({ data }: AiTokenUsageChartProps) {
         </div>
 
         {/* View Toggle */}
-        <div className="flex items-center gap-1.5 self-start sm:self-auto bg-slate-100 dark:bg-white/[0.04] p-1 rounded-xl border border-slate-200 dark:border-white/[0.08]">
+        <div className="flex items-center gap-1 w-full sm:w-auto bg-slate-100 dark:bg-white/[0.04] p-1 rounded-xl border border-slate-200 dark:border-white/[0.08] overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           <button
             type="button"
             onClick={() => setMetric('all')}
             className={cn(
-              'px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer',
+              'flex-1 sm:flex-initial text-center justify-center px-2.5 sm:px-3 py-1.5 sm:py-1 rounded-lg text-[11px] sm:text-xs font-semibold transition-all cursor-pointer whitespace-nowrap',
               metric === 'all'
                 ? 'bg-cyan-400 text-slate-950 font-bold shadow-xs'
                 : isDark
@@ -111,7 +111,7 @@ export function AiTokenUsageChart({ data }: AiTokenUsageChartProps) {
             type="button"
             onClick={() => setMetric('total')}
             className={cn(
-              'px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer',
+              'flex-1 sm:flex-initial text-center justify-center px-2.5 sm:px-3 py-1.5 sm:py-1 rounded-lg text-[11px] sm:text-xs font-semibold transition-all cursor-pointer whitespace-nowrap',
               metric === 'total'
                 ? 'bg-cyan-400 text-slate-950 font-bold shadow-xs'
                 : isDark
@@ -125,95 +125,95 @@ export function AiTokenUsageChart({ data }: AiTokenUsageChartProps) {
       </div>
 
       {/* Quick Summary Badges */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
         <div
           className={cn(
-            'p-3 rounded-xl border',
+            'p-2.5 sm:p-3 rounded-xl border',
             isDark ? 'bg-black/30 border-white/[0.06]' : 'bg-slate-50 border-slate-200',
           )}
         >
-          <div className="flex items-center gap-1.5 text-[11px] font-medium text-cyan-500">
-            <Zap className="w-3.5 h-3.5" />
-            <span>Total 14-Day Tokens</span>
+          <div className="flex items-center gap-1.5 text-[11px] font-medium text-cyan-500 truncate">
+            <Zap className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">Total 14-Day Tokens</span>
           </div>
           <div
             className={cn(
-              'text-lg font-black font-mono mt-1',
+              'text-base sm:text-lg font-black font-mono mt-1 truncate',
               isDark ? 'text-white' : 'text-slate-900',
             )}
           >
             {formatTokenNumber(totals.totalTokens)}
           </div>
-          <div className="text-[10px] text-zinc-500">
+          <div className="text-[10px] text-zinc-500 truncate">
             {totals.totalTokens.toLocaleString('id-ID')} tokens
           </div>
         </div>
 
         <div
           className={cn(
-            'p-3 rounded-xl border',
+            'p-2.5 sm:p-3 rounded-xl border',
             isDark ? 'bg-black/30 border-white/[0.06]' : 'bg-slate-50 border-slate-200',
           )}
         >
-          <div className="flex items-center gap-1.5 text-[11px] font-medium text-cyan-400">
-            <ArrowDownLeft className="w-3.5 h-3.5" />
-            <span>Input Tokens</span>
+          <div className="flex items-center gap-1.5 text-[11px] font-medium text-cyan-400 truncate">
+            <ArrowDownLeft className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">Input Tokens</span>
           </div>
           <div
             className={cn(
-              'text-lg font-black font-mono mt-1',
+              'text-base sm:text-lg font-black font-mono mt-1 truncate',
               isDark ? 'text-white' : 'text-slate-900',
             )}
           >
             {formatTokenNumber(totals.inputTokens)}
           </div>
-          <div className="text-[10px] text-zinc-500">
+          <div className="text-[10px] text-zinc-500 truncate">
             {totals.inputTokens.toLocaleString('id-ID')} tokens
           </div>
         </div>
 
         <div
           className={cn(
-            'p-3 rounded-xl border',
+            'p-2.5 sm:p-3 rounded-xl border',
             isDark ? 'bg-black/30 border-white/[0.06]' : 'bg-slate-50 border-slate-200',
           )}
         >
-          <div className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-500">
-            <ArrowUpRight className="w-3.5 h-3.5" />
-            <span>Output Tokens</span>
+          <div className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-500 truncate">
+            <ArrowUpRight className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">Output Tokens</span>
           </div>
           <div
             className={cn(
-              'text-lg font-black font-mono mt-1',
+              'text-base sm:text-lg font-black font-mono mt-1 truncate',
               isDark ? 'text-white' : 'text-slate-900',
             )}
           >
             {formatTokenNumber(totals.outputTokens)}
           </div>
-          <div className="text-[10px] text-zinc-500">
+          <div className="text-[10px] text-zinc-500 truncate">
             {totals.outputTokens.toLocaleString('id-ID')} tokens
           </div>
         </div>
 
         <div
           className={cn(
-            'p-3 rounded-xl border',
+            'p-2.5 sm:p-3 rounded-xl border',
             isDark ? 'bg-black/30 border-white/[0.06]' : 'bg-slate-50 border-slate-200',
           )}
         >
-          <div className="flex items-center gap-1.5 text-[11px] font-medium text-purple-400">
-            <Database className="w-3.5 h-3.5" />
-            <span>Cached Tokens</span>
+          <div className="flex items-center gap-1.5 text-[11px] font-medium text-purple-400 truncate">
+            <Database className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">Cached Tokens</span>
           </div>
           <div
             className={cn(
-              'text-lg font-black font-mono mt-1',
+              'text-base sm:text-lg font-black font-mono mt-1 truncate',
               isDark ? 'text-white' : 'text-slate-900',
             )}
           >
             {formatTokenNumber(totals.cachedTokens)}
           </div>
-          <div className="text-[10px] text-zinc-500">
+          <div className="text-[10px] text-zinc-500 truncate">
             {totals.cachedTokens.toLocaleString('id-ID')} tokens
           </div>
         </div>

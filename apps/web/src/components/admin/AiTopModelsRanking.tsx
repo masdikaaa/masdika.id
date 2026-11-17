@@ -378,7 +378,7 @@ export function AiTopModelsRanking({
           </div>
 
           {/* Search & Sort Controls */}
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full lg:w-auto">
             {/* Search Input */}
             <div className="relative w-full sm:w-56">
               <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -396,8 +396,8 @@ export function AiTopModelsRanking({
               />
             </div>
 
-            {/* Sort Toggle */}
-            <div className="flex items-center gap-1 bg-slate-100 dark:bg-white/[0.04] p-1 rounded-xl border border-slate-200 dark:border-white/[0.08] overflow-x-auto">
+            {/* Sort Toggle - Smooth horizontal scroll with hidden scrollbar */}
+            <div className="flex items-center gap-1 bg-slate-100 dark:bg-white/[0.04] p-1 rounded-xl border border-slate-200 dark:border-white/[0.08] overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden w-full sm:w-auto">
               {(
                 [
                   { id: 'requests', label: 'Requests', icon: Flame },
@@ -414,7 +414,7 @@ export function AiTopModelsRanking({
                     type="button"
                     onClick={() => setSortBy(tab.id)}
                     className={cn(
-                      'px-2.5 py-1 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap',
+                      'flex-1 sm:flex-initial text-center justify-center px-2.5 py-1 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap',
                       active
                         ? 'bg-cyan-400 text-slate-950 font-bold shadow-xs'
                         : isDark
@@ -446,8 +446,8 @@ export function AiTopModelsRanking({
           </div>
         ) : (
           <>
-            {/* Desktop Table View */}
-            <div className="hidden lg:block overflow-x-auto">
+            {/* Desktop Table View - Hidden scrollbar */}
+            <div className="hidden lg:block overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr
@@ -475,19 +475,19 @@ export function AiTopModelsRanking({
                           isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-slate-50/80',
                         )}
                       >
-                        {/* Rank Badge */}
+                        {/* Rank Badge - Typography only, no emojis */}
                         <td className="py-3.5 px-3">
                           {rankNum === 1 ? (
-                            <span className="w-7 h-7 rounded-lg bg-amber-400 text-slate-950 font-black flex items-center justify-center text-xs shadow-sm">
-                              🥇
+                            <span className="w-7 h-7 rounded-lg bg-amber-400 text-slate-950 font-black flex items-center justify-center text-xs font-mono shadow-xs">
+                              #1
                             </span>
                           ) : rankNum === 2 ? (
-                            <span className="w-7 h-7 rounded-lg bg-slate-300 text-slate-950 font-black flex items-center justify-center text-xs shadow-sm">
-                              🥈
+                            <span className="w-7 h-7 rounded-lg bg-slate-300 text-slate-950 font-black flex items-center justify-center text-xs font-mono shadow-xs">
+                              #2
                             </span>
                           ) : rankNum === 3 ? (
-                            <span className="w-7 h-7 rounded-lg bg-amber-700 text-white font-black flex items-center justify-center text-xs shadow-sm">
-                              🥉
+                            <span className="w-7 h-7 rounded-lg bg-amber-700 text-amber-100 font-black flex items-center justify-center text-xs font-mono shadow-xs">
+                              #3
                             </span>
                           ) : (
                             <span
