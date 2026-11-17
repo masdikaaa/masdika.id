@@ -773,6 +773,9 @@ export async function PATCH(req: NextRequest) {
   try {
     const auth = await requireAuth({ allowedRoles: ['USER', 'ADMIN'] });
     if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
+    if (auth.impersonatedBy) {
+      return NextResponse.json({ error: 'Disabled during impersonation' }, { status: 403 });
+    }
     const user = auth.user!;
 
     const body = await req.json().catch(() => ({}));
@@ -781,18 +784,79 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: 'Valid Key ID required' }, { status: 400 });
     }
 
-    const updates: { isActive?: boolean; name?: string } = {};
+    const existing = await prisma.aiGatewayKey.findFirst({
+      where: { id: keyId, userId: user.id },
+      select: { id: true },
+    });
+    if (!existing) {
+      return NextResponse.json({ error: 'API key not found' }, { status: 404 });
+    }
+
+    const updates: {
+      isActive?: boolean;
+      name?: string;
+      monthlyLimit?: number | null;
+      allowedModels?: string[];
+      keyHash?: string;
+      keyPrefix?: string;
+    } = {};
+
     if (typeof body.isActive === 'boolean') updates.isActive = body.isActive;
     if (typeof body.name === 'string' && body.name.trim()) {
       updates.name = body.name.trim().slice(0, 64);
     }
 
-    await prisma.aiGatewayKey.updateMany({
-      where: { id: keyId, userId: user.id },
+    if (body.monthlyLimit !== undefined) {
+      if (body.monthlyLimit === null || body.monthlyLimit === '') {
+        updates.monthlyLimit = null;
+      } else {
+        const parsedLimit = Number(body.monthlyLimit);
+        if (!Number.isSafeInteger(parsedLimit) || parsedLimit < 1000 || parsedLimit > 100_000_000) {
+          return NextResponse.json(
+            { error: 'Monthly spend limit must be between Rp 1.000 and Rp 100.000.000' },
+            { status: 400 }
+          );
+        }
+        updates.monthlyLimit = parsedLimit;
+      }
+    }
+
+    if (Array.isArray(body.allowedModels)) {
+      updates.allowedModels = body.allowedModels
+        .filter((m: unknown): m is string => typeof m === 'string' && m.trim().length > 0)
+        .map((m: string) => m.trim());
+    }
+
+    let rawKey: string | undefined;
+    if (body.regenerateKey === true) {
+      const generated = generateAiGatewayKey();
+      updates.keyHash = generated.keyHash;
+      updates.keyPrefix = generated.keyPrefix;
+      rawKey = generated.rawKey;
+    }
+
+    const updatedKey = await prisma.aiGatewayKey.update({
+      where: { id: existing.id },
       data: updates,
+      select: {
+        id: true,
+        name: true,
+        keyPrefix: true,
+        monthlyLimit: true,
+        monthlySpent: true,
+        allowedModels: true,
+        expiresAt: true,
+        isActive: true,
+        lastUsedAt: true,
+        createdAt: true,
+      },
     });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      key: updatedKey,
+      ...(rawKey ? { rawKey } : {}),
+    });
   } catch (error) {
     console.error('[USER_AI_GATEWAY_PATCH]', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

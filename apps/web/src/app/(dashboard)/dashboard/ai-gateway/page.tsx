@@ -31,6 +31,7 @@ import {
   Sliders,
   Zap,
   ArrowUpRight,
+  Pencil,
 } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { cn } from '@/lib/utils';
@@ -218,6 +219,100 @@ export default function CustomerAiGatewayPage() {
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
   const [deletingKey, setDeletingKey] = useState<AiKeyItem | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Edit / Regenerate Key Modal State
+  const [editingKey, setEditingKey] = useState<AiKeyItem | null>(null);
+  const [editKeyName, setEditKeyName] = useState('');
+  const [editMonthlyLimit, setEditMonthlyLimit] = useState('');
+  const [editRestrictModels, setEditRestrictModels] = useState(false);
+  const [editAllowedModels, setEditAllowedModels] = useState<string[]>([]);
+  const [editModelSearch, setEditModelSearch] = useState('');
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [regeneratingKey, setRegeneratingKey] = useState(false);
+
+  const openEditKeyModal = (k: AiKeyItem) => {
+    setEditingKey(k);
+    setEditKeyName(k.name);
+    setEditMonthlyLimit(k.monthlyLimit ? String(k.monthlyLimit) : '');
+    const allowed = Array.isArray(k.allowedModels) ? k.allowedModels : [];
+    setEditRestrictModels(allowed.length > 0);
+    setEditAllowedModels(allowed);
+    setEditModelSearch('');
+  };
+
+  const handleSaveEditKey = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingKey) return;
+    if (!editKeyName.trim()) {
+      toast.error('Key label is required');
+      return;
+    }
+    if (editMonthlyLimit) {
+      const lim = Number(editMonthlyLimit);
+      if (!Number.isSafeInteger(lim) || lim < 1000 || lim > 100_000_000) {
+        toast.error('Monthly spend limit must be between Rp 1.000 and Rp 100.000.000');
+        return;
+      }
+    }
+    if (editRestrictModels && editAllowedModels.length === 0) {
+      toast.error('Select at least one allowed model or uncheck model restriction');
+      return;
+    }
+
+    setSavingEdit(true);
+    try {
+      const res = await fetch('/api/user/ai-gateway', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: editingKey.id,
+          name: editKeyName.trim(),
+          monthlyLimit: editMonthlyLimit ? Number(editMonthlyLimit) : null,
+          allowedModels: editRestrictModels ? editAllowedModels : [],
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to update API key');
+      if (json.key) {
+        setKeys((prev) => prev.map((item) => (item.id === json.key.id ? json.key : item)));
+      }
+      setEditingKey(null);
+      toast.success('API Key updated');
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to update API key');
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  const handleRegenerateKey = async () => {
+    if (!editingKey) return;
+    setRegeneratingKey(true);
+    try {
+      const res = await fetch('/api/user/ai-gateway', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: editingKey.id,
+          regenerateKey: true,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to regenerate API key');
+      if (json.key) {
+        setKeys((prev) => prev.map((item) => (item.id === json.key.id ? json.key : item)));
+      }
+      if (json.rawKey) {
+        setRevealedKey(json.rawKey);
+      }
+      setEditingKey(null);
+      toast.success('API Key regenerated - copy your new secret key now');
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to regenerate API key');
+    } finally {
+      setRegeneratingKey(false);
+    }
+  };
 
   // Playground State
   const [pgKeyId, setPgKeyId] = useState<number>(0);
@@ -1683,7 +1778,15 @@ aider --model openai/glm-5.3
                           {k.isActive ? 'ACTIVE' : 'PAUSED'}
                         </span>
                       </td>
-                      <td className="px-5 py-4 text-right space-x-2">
+                      <td className="px-5 py-4 text-right space-x-2 whitespace-nowrap">
+                        <button
+                          type="button"
+                          onClick={() => openEditKeyModal(k)}
+                          title="Edit Key, Models & Regenerate"
+                          className={cn('p-2 rounded-lg border transition-colors cursor-pointer', isDark ? 'border-white/10 hover:bg-white/10 text-cyan-400' : 'border-slate-200 hover:bg-slate-100 text-cyan-700')}
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
                         <button
                           type="button"
                           onClick={() => handleToggleKey(k)}
@@ -3380,6 +3483,200 @@ aider --model openai/glm-5.3
                   className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 cursor-pointer disabled:opacity-50"
                 >
                   {creating ? 'Creating...' : 'Create Key'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit & Regenerate Key Modal */}
+      {editingKey && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className={cn('w-full max-w-xl rounded-2xl border p-5 sm:p-6 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto', isDark ? 'bg-[#0c0c0e] border-white/[0.1]' : 'bg-white border-slate-200')}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/25 text-cyan-400 flex items-center justify-center">
+                  <Pencil className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className={cn('text-base font-bold', isDark ? 'text-white' : 'text-slate-900')}>Edit AI Gateway Key</h3>
+                  <p className="text-[11px] text-zinc-400 font-mono">{editingKey.keyPrefix}••••••••</p>
+                </div>
+              </div>
+              <button type="button" onClick={() => !savingEdit && !regeneratingKey && setEditingKey(null)} className="text-zinc-400 hover:text-white cursor-pointer">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditKey} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className={cn('text-xs font-bold uppercase tracking-wider block mb-1.5', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+                    Key Label
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    maxLength={64}
+                    value={editKeyName}
+                    onChange={(e) => setEditKeyName(e.target.value)}
+                    placeholder="e.g. Production App"
+                    className={cn('w-full px-3.5 py-2.5 rounded-xl text-sm border outline-none focus:border-cyan-500', isDark ? 'bg-[#141418] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
+                  />
+                </div>
+                <div>
+                  <label className={cn('text-xs font-bold uppercase tracking-wider block mb-1.5', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+                    Monthly Limit (Rp) - Optional
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={editMonthlyLimit ? Number(editMonthlyLimit).toLocaleString('id-ID') : ''}
+                    onChange={(e) => setEditMonthlyLimit(e.target.value.replace(/\D/g, '').slice(0, 9))}
+                    placeholder="e.g. 100.000 (blank = unlimited)"
+                    className={cn('w-full px-3.5 py-2.5 rounded-xl text-sm border outline-none focus:border-cyan-500 font-mono', isDark ? 'bg-[#141418] border-white/[0.08] text-white' : 'bg-slate-50 border-slate-200 text-slate-900')}
+                  />
+                </div>
+              </div>
+
+              {/* Allowed Models Editor */}
+              <div className={cn('rounded-xl border p-3.5 space-y-3', isDark ? 'bg-[#141418] border-white/[0.08]' : 'bg-slate-50 border-slate-200')}>
+                <div className="flex items-center justify-between gap-2">
+                  <AdminCheckbox
+                    checked={editRestrictModels}
+                    onChange={(checked) => setEditRestrictModels(checked)}
+                    label={
+                      <span className={cn('text-xs font-bold', isDark ? 'text-white' : 'text-slate-900')}>
+                        Only allow selected models
+                      </span>
+                    }
+                  />
+                  {editRestrictModels && (
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 whitespace-nowrap shrink-0">
+                      {editAllowedModels.length} selected
+                    </span>
+                  )}
+                </div>
+
+                {editRestrictModels && (
+                  <div className="space-y-2.5 pt-1">
+                    <div className="flex flex-wrap sm:flex-nowrap items-center gap-2">
+                      <div className="relative flex-1 min-w-[160px]">
+                        <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                        <input
+                          type="text"
+                          value={editModelSearch}
+                          onChange={(e) => setEditModelSearch(e.target.value)}
+                          placeholder="Filter chat or image models..."
+                          className={cn('w-full pl-8 pr-3 py-1.5 rounded-lg text-xs border outline-none focus:border-cyan-500', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white' : 'bg-white border-slate-200 text-slate-900')}
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setEditAllowedModels([
+                            ...models.map((m) => m.modelId),
+                            ...imageModels.map((im) => im.modelId),
+                          ])
+                        }
+                        className="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10 cursor-pointer"
+                      >
+                        All
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setEditAllowedModels([])}
+                        className={cn('px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border cursor-pointer', isDark ? 'border-white/10 text-zinc-400 hover:text-white' : 'border-slate-200 text-slate-600')}
+                      >
+                        Clear
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-52 overflow-y-auto pr-1">
+                      {[
+                        ...models.map((m) => ({ modelId: m.modelId, name: m.name, kind: 'Chat' as const })),
+                        ...imageModels.map((im) => ({ modelId: im.modelId, name: im.name, kind: 'Image' as const })),
+                      ]
+                        .filter(
+                          (item) =>
+                            !editModelSearch.trim() ||
+                            item.name.toLowerCase().includes(editModelSearch.toLowerCase()) ||
+                            item.modelId.toLowerCase().includes(editModelSearch.toLowerCase()),
+                        )
+                        .map((item) => {
+                          const isSelected = editAllowedModels.includes(item.modelId);
+                          return (
+                            <button
+                              key={item.modelId}
+                              type="button"
+                              onClick={() =>
+                                setEditAllowedModels((prev) =>
+                                  prev.includes(item.modelId)
+                                    ? prev.filter((id) => id !== item.modelId)
+                                    : [...prev, item.modelId],
+                                )
+                              }
+                              className={cn(
+                                'flex items-center justify-between gap-2 px-3 py-2 rounded-xl border text-left transition-all cursor-pointer',
+                                isSelected
+                                  ? 'bg-cyan-500/15 border-cyan-400 text-cyan-300 shadow-2xs shadow-cyan-500/10'
+                                  : isDark
+                                  ? 'bg-[#0a0a0c] border-white/[0.08] text-zinc-300 hover:border-cyan-500/40'
+                                  : 'bg-white border-slate-200 text-slate-700 hover:border-cyan-400',
+                              )}
+                            >
+                              <div className="min-w-0">
+                                <div className={cn('text-xs font-semibold truncate', isSelected && !isDark ? 'text-cyan-800' : '')}>{item.name}</div>
+                                <div className="text-[10px] font-mono text-zinc-500 truncate">{item.modelId}</div>
+                              </div>
+                              <span className="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded bg-white/[0.06] text-zinc-400 shrink-0">
+                                {item.kind}
+                              </span>
+                            </button>
+                          );
+                        })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Regenerate Secret Section */}
+              <div className={cn('rounded-xl border p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3', isDark ? 'bg-amber-500/[0.06] border-amber-500/25' : 'bg-amber-50 border-amber-200')}>
+                <div className="space-y-0.5">
+                  <div className={cn('text-xs font-bold', isDark ? 'text-amber-300' : 'text-amber-900')}>
+                    Regenerate Secret Key
+                  </div>
+                  <p className={cn('text-[11px]', isDark ? 'text-zinc-400' : 'text-amber-800')}>
+                    Immediately invalidates the current key and generates a new <code className="font-mono">masdika_ai_...</code> secret.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  disabled={regeneratingKey || savingEdit}
+                  onClick={handleRegenerateKey}
+                  className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
+                >
+                  <RefreshCw className={cn('w-3.5 h-3.5', regeneratingKey && 'animate-spin')} />
+                  <span>{regeneratingKey ? 'Regenerating...' : 'Regenerate Key'}</span>
+                </button>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  disabled={savingEdit || regeneratingKey}
+                  onClick={() => setEditingKey(null)}
+                  className={cn('px-4 py-2 rounded-xl text-xs font-semibold border cursor-pointer', isDark ? 'border-white/10 text-zinc-300 hover:bg-white/5' : 'border-slate-200 text-slate-600 hover:bg-slate-100')}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingEdit || regeneratingKey || (editRestrictModels && editAllowedModels.length === 0)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 cursor-pointer disabled:opacity-50"
+                >
+                  {savingEdit ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
             </form>
