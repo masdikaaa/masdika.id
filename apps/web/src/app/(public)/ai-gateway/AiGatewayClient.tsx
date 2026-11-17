@@ -37,7 +37,7 @@ import { ProvisioningSection } from "@/components/ui/ProvisioningSection";
 import { FaqSection } from "@/components/ui/FaqSection";
 import { cn } from "@/lib/utils";
 import { formatRupiah } from "@/lib/billing";
-import { DEFAULT_AI_MODELS, DEFAULT_AI_IMAGE_MODELS } from "@/lib/ai-gateway";
+import { DEFAULT_AI_MODELS, DEFAULT_AI_IMAGE_MODELS } from "@/lib/ai-gateway-constants";
 
 interface AiModelItem {
   id?: number;
