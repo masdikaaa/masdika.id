@@ -1718,11 +1718,12 @@ aider --model openai/glm-5.3
             </div>
           ) : (
             <div className="overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-              <table className="w-full min-w-[640px] text-left border-collapse">
+              <table className="w-full min-w-[760px] text-left border-collapse">
                 <thead>
                   <tr className={cn('text-[11px] font-bold uppercase tracking-wider border-b', isDark ? 'text-zinc-400 border-white/[0.08] bg-[#0a0a0c]' : 'text-slate-500 border-slate-200 bg-slate-50')}>
                     <th className="px-5 py-3.5">Name</th>
                     <th className="px-4 py-3.5">Key Prefix</th>
+                    <th className="px-4 py-3.5">Model Access</th>
                     <th className="px-4 py-3.5">Monthly Spend / Limit</th>
                     <th className="px-4 py-3.5">Last Used</th>
                     <th className="px-4 py-3.5">Status</th>
@@ -1734,25 +1735,32 @@ aider --model openai/glm-5.3
                     <tr key={k.id} className={cn(isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-slate-50')}>
                       <td className={cn('px-5 py-4 font-bold', isDark ? 'text-white' : 'text-slate-900')}>
                         <div>{k.name}</div>
-                        <div className="flex flex-wrap items-center gap-1.5 mt-1 font-normal">
-                          {k.allowedModels && k.allowedModels.length > 0 ? (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
-                              {k.allowedModels.length} {k.allowedModels.length === 1 ? 'model' : 'models'} only
-                            </span>
-                          ) : (
-                            <span className={cn('inline-flex items-center px-2 py-0.5 rounded-md text-[10px] border', isDark ? 'bg-white/[0.04] border-white/[0.08] text-zinc-400' : 'bg-slate-100 border-slate-200 text-slate-600')}>
-                              All models
-                            </span>
-                          )}
-                          {k.expiresAt && (
+                        {k.expiresAt && (
+                          <div className="mt-1 font-normal">
                             <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-mono bg-amber-500/10 border border-amber-500/20 text-amber-400">
                               Exp: {new Date(k.expiresAt).toLocaleDateString('id-ID')}
                             </span>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </td>
-                      <td className="px-4 py-4 font-mono text-xs text-cyan-400">
+                      <td className="px-4 py-4 font-mono text-xs text-cyan-400 whitespace-nowrap">
                         {k.keyPrefix}••••••••
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        {k.allowedModels && k.allowedModels.length > 0 ? (
+                          <span
+                            title={k.allowedModels.join(', ')}
+                            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-cyan-500/10 border border-cyan-500/25 text-cyan-400"
+                          >
+                            {k.allowedModels.length === 1
+                              ? k.allowedModels[0]
+                              : `${k.allowedModels.length} models`}
+                          </span>
+                        ) : (
+                          <span className={cn('inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium border', isDark ? 'bg-white/[0.04] border-white/[0.08] text-zinc-300' : 'bg-slate-100 border-slate-200 text-slate-700')}>
+                            All models
+                          </span>
+                        )}
                       </td>
                       <td className="px-4 py-4 font-mono text-xs">
                         <span className={isDark ? 'text-white font-bold' : 'text-slate-900 font-bold'}>
