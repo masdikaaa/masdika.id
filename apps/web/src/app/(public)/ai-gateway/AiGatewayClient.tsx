@@ -452,29 +452,29 @@ export default function AiGatewayClient({
                 </div>
               </div>
 
-              {/* Right: macOS-style Code Snippet Window */}
+              {/* Right: macOS-style Code Snippet Window (Light & Dark Mode Authentic) */}
               <div className="lg:col-span-7">
-                <div className="w-full rounded-2xl border border-white/10 dark:border-[var(--border-primary)] bg-[#0d0e15] text-slate-100 shadow-2xl overflow-hidden ring-1 ring-white/5">
+                <div className="w-full rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-[#0d0e15] text-slate-800 dark:text-slate-100 shadow-xl dark:shadow-2xl overflow-hidden ring-1 ring-black/5 dark:ring-white/5">
                   {/* macOS Window Titlebar */}
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08] bg-[#14151f] gap-3 select-none">
+                  <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 border-b border-slate-200/90 dark:border-white/[0.08] bg-slate-100/90 dark:bg-[#14151f] gap-2 sm:gap-3 select-none">
                     {/* macOS Traffic Light Buttons (Close, Minimize, Expand) */}
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e]/80 shadow-xs inline-block" />
-                      <span className="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123]/80 shadow-xs inline-block" />
-                      <span className="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29]/80 shadow-xs inline-block" />
+                    <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                      <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#ff5f56] border border-[#e0443e]/80 shadow-xs inline-block" />
+                      <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#ffbd2e] border border-[#dea123]/80 shadow-xs inline-block" />
+                      <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#27c93f] border border-[#1aab29]/80 shadow-xs inline-block" />
                     </div>
 
                     {/* Tabs / Switcher */}
-                    <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden flex-1 px-1 sm:px-2">
+                    <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden flex-1 min-w-0 px-1">
                       {CODE_EXAMPLES.map((c) => (
                         <button
                           key={c.id}
                           onClick={() => setActiveCodeTab(c.id)}
                           className={cn(
-                            "px-2.5 sm:px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap",
+                            "px-2 sm:px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0",
                             activeCodeTab === c.id
-                              ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-xs"
-                              : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5"
+                              ? "bg-white dark:bg-cyan-500/20 text-slate-900 dark:text-cyan-300 border border-slate-300/80 dark:border-cyan-500/40 shadow-xs font-bold"
+                              : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200 hover:bg-slate-200/50 dark:hover:bg-white/5"
                           )}
                         >
                           {c.label}
@@ -485,22 +485,22 @@ export default function AiGatewayClient({
                     {/* Copy Button */}
                     <button
                       onClick={() => handleCopyCode(currentCode.code)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-300 hover:text-cyan-300 bg-white/5 hover:bg-white/10 border border-white/10 transition-colors cursor-pointer shrink-0"
+                      className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-medium text-slate-700 dark:text-zinc-300 hover:text-cyan-600 dark:hover:text-cyan-300 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 shadow-xs transition-colors cursor-pointer shrink-0"
                       title="Copy code to clipboard"
                     >
-                      {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                      <span>{copiedCode ? "Copied!" : "Copy"}</span>
+                      {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span className="hidden xs:inline sm:inline">{copiedCode ? "Copied!" : "Copy"}</span>
                     </button>
                   </div>
 
                   {/* Code Area with Line Numbers (Clean, Hidden Scrollbars, No Bottom Status Bar) */}
-                  <div className="p-4 sm:p-5 flex text-xs font-mono overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden leading-relaxed bg-[#0a0b10]">
-                    <div className="select-none pr-4 text-right text-zinc-600 font-mono text-xs border-r border-white/[0.08] space-y-0.5 min-w-[2.2rem] shrink-0">
+                  <div className="p-3.5 sm:p-5 flex text-[11px] sm:text-xs font-mono overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden leading-relaxed bg-slate-50/70 dark:bg-[#0a0b10]">
+                    <div className="select-none pr-3 sm:pr-4 text-right text-slate-400 dark:text-zinc-600 font-mono text-[11px] sm:text-xs border-r border-slate-200/90 dark:border-white/[0.08] space-y-0.5 min-w-[1.8rem] sm:min-w-[2.2rem] shrink-0">
                       {currentCode.code.split("\n").map((_, i) => (
                         <div key={i}>{i + 1}</div>
                       ))}
                     </div>
-                    <pre className="pl-4 font-mono text-xs text-zinc-200 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden leading-relaxed flex-1">
+                    <pre className="pl-3 sm:pl-4 font-mono text-[11px] sm:text-xs text-slate-800 dark:text-zinc-200 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden leading-relaxed flex-1">
                       <code>{currentCode.code}</code>
                     </pre>
                   </div>
@@ -526,46 +526,48 @@ export default function AiGatewayClient({
 
           <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] shadow-xl overflow-hidden">
             {/* Control Bar: Model Type, Provider Pills & Search */}
-            <div className="p-4 border-b border-[var(--border-primary)] bg-[var(--surface-secondary)]/50 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
+            <div className="p-3.5 sm:p-4 border-b border-[var(--border-primary)] bg-[var(--surface-secondary)]/50 flex flex-col gap-3">
+              {/* Segmented Button Bar for Model Types */}
+              <div className="grid grid-cols-2 gap-1.5 sm:flex sm:items-center sm:gap-2 w-full sm:w-auto">
                 <button
                   onClick={() => setModelTypeTab("chat")}
                   className={cn(
-                    "px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2",
+                    "px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 text-center truncate",
                     modelTypeTab === "chat"
                       ? "bg-cyan-400 text-slate-950 shadow-xs"
-                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)]"
                   )}
                 >
-                  <Cpu className="w-3.5 h-3.5" />
-                  <span>Chat &amp; Reasoning Models ({allChatModels.length})</span>
+                  <Cpu className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">Chat &amp; Reasoning ({allChatModels.length})</span>
                 </button>
                 <button
                   onClick={() => setModelTypeTab("image")}
                   className={cn(
-                    "px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2",
+                    "px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 text-center truncate",
                     modelTypeTab === "image"
                       ? "bg-cyan-400 text-slate-950 shadow-xs"
-                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)]"
                   )}
                 >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>Image Models ({imageModels.length})</span>
+                  <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">Image Models ({imageModels.length})</span>
                 </button>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              {/* Bottom Filter Controls: Provider Horizontal Pills & Search */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
                 {modelTypeTab === "chat" && (
-                  <div className="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none]">
-                    {providers.slice(0, 7).map((p) => (
+                  <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-0.5 flex-1 w-full">
+                    {providers.slice(0, 8).map((p) => (
                       <button
                         key={p}
                         onClick={() => setSelectedProvider(p)}
                         className={cn(
-                          "px-2.5 py-1 rounded-lg text-xs font-semibold capitalize transition-all cursor-pointer whitespace-nowrap",
+                          "px-2.5 py-1 rounded-lg text-xs font-semibold capitalize transition-all cursor-pointer whitespace-nowrap shrink-0",
                           selectedProvider === p
-                            ? "bg-cyan-500/20 text-cyan-500 dark:text-cyan-300 border border-cyan-500/40"
-                            : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                            ? "bg-cyan-500/20 text-cyan-600 dark:text-cyan-300 border border-cyan-500/40 shadow-xs"
+                            : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)]"
                         )}
                       >
                         {p}
@@ -573,7 +575,7 @@ export default function AiGatewayClient({
                     ))}
                   </div>
                 )}
-                <div className="relative min-w-[220px]">
+                <div className="relative w-full sm:min-w-[220px]">
                   <Search className="w-3.5 h-3.5 text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
@@ -586,98 +588,160 @@ export default function AiGatewayClient({
               </div>
             </div>
 
-            {/* Models Table */}
+            {/* Models Table & Mobile Cards */}
             {modelTypeTab === "chat" ? (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="text-[11px] font-bold uppercase tracking-wider border-b border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-muted)]">
-                    <tr>
-                      <th className="px-5 py-3.5">Model Name</th>
-                      <th className="px-4 py-3.5">Model ID</th>
-                      <th className="px-4 py-3.5">Context</th>
-                      <th className="px-4 py-3.5">Input / 1M</th>
-                      <th className="px-4 py-3.5">Cache Read / 1M</th>
-                      <th className="px-4 py-3.5">Output / 1M</th>
-                      <th className="px-4 py-3.5 text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[var(--border-primary)]">
-                    {filteredChatModels.map((m) => (
-                      <tr
-                        key={m.modelId}
-                        className="hover:bg-[var(--surface-secondary)]/40 transition-colors"
-                      >
-                        <td className="px-5 py-4 whitespace-nowrap">
-                          <div className="font-bold flex items-center gap-2">
-                            <span className="text-[var(--text-primary)]">{m.name}</span>
+              <>
+                {/* 1. Desktop Table View (>= md screens) */}
+                <div className="hidden md:block overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                  <table className="w-full text-left text-xs">
+                    <thead className="text-[11px] font-bold uppercase tracking-wider border-b border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-muted)]">
+                      <tr>
+                        <th className="px-5 py-3.5">Model Name</th>
+                        <th className="px-4 py-3.5">Model ID</th>
+                        <th className="px-4 py-3.5">Context</th>
+                        <th className="px-4 py-3.5">Input / 1M</th>
+                        <th className="px-4 py-3.5">Cache Read / 1M</th>
+                        <th className="px-4 py-3.5">Output / 1M</th>
+                        <th className="px-4 py-3.5 text-right">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[var(--border-primary)]">
+                      {filteredChatModels.map((m) => (
+                        <tr
+                          key={m.modelId}
+                          className="hover:bg-[var(--surface-secondary)]/40 transition-colors"
+                        >
+                          <td className="px-5 py-4 whitespace-nowrap">
+                            <div className="font-bold flex items-center gap-2">
+                              <span className="text-[var(--text-primary)]">{m.name}</span>
+                              {m.discountBadge && (
+                                <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                  {m.discountBadge}
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-[11px] text-[var(--text-muted)]">{m.provider}</div>
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap">
+                            <code className="font-mono text-cyan-600 dark:text-cyan-400 text-xs font-semibold">{m.modelId}</code>
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap font-mono text-[var(--text-secondary)]">
+                            {m.contextWindow || "128K"}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap font-mono font-semibold text-emerald-600 dark:text-emerald-400">
+                            {formatRupiah(m.inputPricePer1M)}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap font-mono text-cyan-600 dark:text-cyan-400">
+                            {formatRupiah(m.cachePricePer1M)}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap font-mono font-bold text-sky-600 dark:text-sky-400">
+                            {formatRupiah(m.outputPricePer1M)}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-right">
+                            <button
+                              onClick={() => handleCopyModelId(m.modelId)}
+                              className={cn(
+                                "inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer",
+                                copiedModelId === m.modelId
+                                  ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border-emerald-500/40"
+                                  : "border-[var(--border-primary)] text-[var(--text-secondary)] hover:border-cyan-500 hover:text-cyan-600 dark:hover:text-cyan-300"
+                              )}
+                            >
+                              {copiedModelId === m.modelId ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+                              <span>{copiedModelId === m.modelId ? "Copied" : "Copy ID"}</span>
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* 2. Mobile Responsive Card List (< md screens) */}
+                <div className="block md:hidden divide-y divide-[var(--border-primary)]">
+                  {filteredChatModels.map((m) => (
+                    <div key={m.modelId} className="p-3.5 space-y-2.5">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-bold text-sm text-[var(--text-primary)]">{m.name}</span>
                             {m.discountBadge && (
                               <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                                 {m.discountBadge}
                               </span>
                             )}
                           </div>
-                          <div className="text-[11px] text-[var(--text-muted)]">{m.provider}</div>
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap">
-                          <code className="font-mono text-cyan-600 dark:text-cyan-400 text-xs font-semibold">{m.modelId}</code>
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap font-mono text-[var(--text-secondary)]">
-                          {m.contextWindow || "128K"}
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap font-mono font-semibold text-emerald-600 dark:text-emerald-400">
-                          {formatRupiah(m.inputPricePer1M)}
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap font-mono text-cyan-600 dark:text-cyan-400">
-                          {formatRupiah(m.cachePricePer1M)}
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap font-mono font-bold text-sky-600 dark:text-sky-400">
-                          {formatRupiah(m.outputPricePer1M)}
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-right">
-                          <button
-                            onClick={() => handleCopyModelId(m.modelId)}
-                            className={cn(
-                              "inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer",
-                              copiedModelId === m.modelId
-                                ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border-emerald-500/40"
-                                : "border-[var(--border-primary)] text-[var(--text-secondary)] hover:border-cyan-500 hover:text-cyan-600 dark:hover:text-cyan-300"
-                            )}
-                          >
-                            {copiedModelId === m.modelId ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
-                            <span>{copiedModelId === m.modelId ? "Copied" : "Copy ID"}</span>
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                          <span className="text-xs text-[var(--text-muted)]">{m.provider}</span>
+                        </div>
+                        <button
+                          onClick={() => handleCopyModelId(m.modelId)}
+                          className={cn(
+                            "inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border shrink-0 transition-all cursor-pointer",
+                            copiedModelId === m.modelId
+                              ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border-emerald-500/40"
+                              : "border-[var(--border-primary)] text-[var(--text-secondary)] hover:border-cyan-500"
+                          )}
+                        >
+                          {copiedModelId === m.modelId ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+                          <span>{copiedModelId === m.modelId ? "Copied" : "Copy ID"}</span>
+                        </button>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-2 text-xs">
+                        <code className="font-mono text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20 truncate">
+                          {m.modelId}
+                        </code>
+                        <span className="font-mono text-[11px] text-[var(--text-muted)] shrink-0">
+                          Context: {m.contextWindow || "128K"}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-2 pt-1 text-center font-mono text-xs">
+                        <div className="p-2 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-primary)]">
+                          <div className="text-[10px] text-[var(--text-muted)] font-sans uppercase">Input / 1M</div>
+                          <div className="font-semibold text-emerald-600 dark:text-emerald-400">{formatRupiah(m.inputPricePer1M)}</div>
+                        </div>
+                        <div className="p-2 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-primary)]">
+                          <div className="text-[10px] text-[var(--text-muted)] font-sans uppercase">Cache / 1M</div>
+                          <div className="font-semibold text-cyan-600 dark:text-cyan-400">{formatRupiah(m.cachePricePer1M)}</div>
+                        </div>
+                        <div className="p-2 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-primary)]">
+                          <div className="text-[10px] text-[var(--text-muted)] font-sans uppercase">Output / 1M</div>
+                          <div className="font-bold text-sky-600 dark:text-sky-400">{formatRupiah(m.outputPricePer1M)}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4 p-3.5 sm:p-5">
                 {filteredImageModels.map((img) => (
                   <div
                     key={img.modelId}
-                    className="p-4 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/30 flex flex-col justify-between"
+                    className="p-3.5 sm:p-4 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/30 flex flex-col justify-between hover:border-cyan-500/40 transition-colors"
                   >
                     <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="text-sm font-bold text-[var(--text-primary)]">
+                      <div className="flex items-center justify-between mb-2 gap-2">
+                        <h4 className="text-sm font-bold text-[var(--text-primary)] truncate">
                           {img.name}
                         </h4>
-                        <span className="font-mono text-xs font-bold text-cyan-600 dark:text-cyan-400">
+                        <span className="font-mono text-xs font-bold text-cyan-600 dark:text-cyan-400 shrink-0">
                           {formatRupiah(img.basePriceRp)} / img
                         </span>
                       </div>
-                      <code className="text-[11px] font-mono text-[var(--text-muted)] block mb-2">{img.modelId}</code>
+                      <code className="text-[11px] font-mono text-[var(--text-muted)] block mb-2 break-all bg-[var(--surface)] px-1.5 py-0.5 rounded border border-[var(--border-primary)] w-fit">
+                        {img.modelId}
+                      </code>
                       <p className="text-xs text-[var(--text-secondary)] leading-relaxed mb-3">
                         {img.description}
                       </p>
                     </div>
                     <div className="flex items-center justify-between pt-2 border-t border-[var(--border-primary)] text-[11px] text-[var(--text-muted)]">
-                      <span>Sizes: {img.sizes.join(", ")}</span>
+                      <span className="truncate">Sizes: {img.sizes.join(", ")}</span>
                       <button
                         onClick={() => handleCopyModelId(img.modelId)}
-                        className="text-cyan-600 dark:text-cyan-400 hover:underline cursor-pointer font-medium"
+                        className="text-cyan-600 dark:text-cyan-400 hover:underline cursor-pointer font-medium shrink-0 ml-2"
                       >
                         {copiedModelId === img.modelId ? "Copied!" : "Copy ID"}
                       </button>
@@ -703,9 +767,9 @@ export default function AiGatewayClient({
             </p>
           </div>
 
-          <div className="rounded-2xl sm:rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-10 md:p-12 shadow-xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div className="rounded-2xl sm:rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] p-4 sm:p-8 lg:p-12 shadow-xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center">
             {/* Left Controls */}
-            <div className="lg:col-span-7 space-y-6">
+            <div className="lg:col-span-7 space-y-5 sm:space-y-6">
               {/* Model Picker */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-2">
@@ -725,7 +789,7 @@ export default function AiGatewayClient({
               </div>
 
               {/* Sliders */}
-              <div className="space-y-5">
+              <div className="space-y-4 sm:space-y-5">
                 <div>
                   <div className="flex justify-between text-xs font-semibold mb-1.5">
                     <span className="text-[var(--text-secondary)]">Avg. Prompt Tokens per Request</span>
@@ -778,7 +842,7 @@ export default function AiGatewayClient({
 
             {/* Right Result Card */}
             <div className="lg:col-span-5">
-              <div className="p-6 sm:p-8 rounded-2xl border border-cyan-500/30 bg-[var(--surface-secondary)] text-center space-y-6 shadow-xl">
+              <div className="p-5 sm:p-6 lg:p-8 rounded-2xl border border-cyan-500/30 bg-[var(--surface-secondary)] text-center space-y-4 sm:space-y-6 shadow-xl">
                 <div>
                   <div className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-1">
                     ESTIMATED MONTHLY COST
@@ -791,7 +855,7 @@ export default function AiGatewayClient({
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] text-left space-y-2 text-xs">
+                <div className="p-3.5 sm:p-4 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] text-left space-y-2 text-xs">
                   <div className="flex justify-between items-center">
                     <span className="text-[var(--text-muted)]">Model Selected</span>
                     <span className="font-semibold text-[var(--text-primary)]">{activeCalcModel.name}</span>
