@@ -326,15 +326,15 @@ export default function AiGatewayClient({
                 </Badge>
               </div>
 
-              <h1 className="text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-4 text-[var(--text-primary)]">
-                One Universal Key &amp; <br />
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-5xl xl:text-6xl 2xl:text-[70px] font-black tracking-tight leading-[1.08] mb-4 text-[var(--text-primary)] text-balance">
+                AI Gateway &amp; <br className="hidden sm:inline" />
                 <span className="bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent">
-                  70+ Frontier AI Models.
+                  70+ Frontier Models.
                 </span>
               </h1>
 
               <p className="text-lg md:text-xl mb-10 max-w-xl leading-relaxed text-[var(--text-secondary)] font-normal">
-                Drop-in OpenAI compatible gateway routing your prompts to Claude 3.7, GPT-4o, Gemini 2.5, DeepSeek R1, and Qwen 3.7 with sub-millisecond edge latency and 100% Rupiah Pay-As-You-Go.
+                One universal API key to route your prompts to Claude 3.7, GPT-4o, Gemini 2.5, DeepSeek R1, and Qwen 3.7 with sub-millisecond edge latency and 100% Rupiah Pay-As-You-Go.
               </p>
 
               <div className="flex flex-wrap items-center gap-4">
