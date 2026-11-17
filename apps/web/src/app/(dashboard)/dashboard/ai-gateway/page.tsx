@@ -2677,8 +2677,24 @@ aider --model openai/glm-5.3
       {/* ==================================================================== */}
       {activeTab === 'usage' && (
         <div className="space-y-6">
-          {/* Customer Token Usage Trends Chart (Pure Cyan, Mobile Responsive) */}
-          <CustomerAiTokenUsageChart data={tokenUsageTimeline} />
+          {/* Section Header: Telemetry & Usage Analytics */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
+            <div>
+              <h2 className={cn('text-sm sm:text-base font-bold flex items-center gap-2', isDark ? 'text-white' : 'text-slate-900')}>
+                <Activity className="w-4 h-4 text-cyan-400" />
+                <span>Telemetry &amp; Usage Analytics</span>
+              </h2>
+              <p className={cn('text-xs mt-0.5', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+                Granular request logs, token consumption, latency, and costs per API key and model.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+              <span className={cn('inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold border', isDark ? 'bg-cyan-500/10 border-cyan-500/20 text-cyan-400' : 'bg-cyan-50 border-cyan-200 text-cyan-700')}>
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                <span>Live Telemetry</span>
+              </span>
+            </div>
+          </div>
 
           {/* Filter Bar */}
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -2736,10 +2752,10 @@ aider --model openai/glm-5.3
                   className={cn(
                     'px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer',
                     usageRange === r.id
-                      ? 'bg-cyan-400 text-slate-950'
+                      ? 'bg-cyan-400 text-slate-950 font-bold shadow-xs'
                       : isDark
                       ? 'text-zinc-400 hover:text-white'
-                      : 'text-slate-600'
+                      : 'text-slate-600 hover:text-slate-900'
                   )}
                 >
                   {r.label}
