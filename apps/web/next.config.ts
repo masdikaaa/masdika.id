@@ -16,6 +16,7 @@ const nextConfig: NextConfig = {
   output: "standalone",
   compress: true,
   experimental: {
+    agentUpgrade: "security",
     // Raise body size limit for server actions (admin needs up to 5GB)
     serverActions: {
       bodySizeLimit: "5gb",
