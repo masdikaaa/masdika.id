@@ -28,6 +28,7 @@ import {
   ChevronDown,
   Boxes,
   HardDrive,
+  Sparkles,
 } from "lucide-react";
 import {
   SiKubernetes,
@@ -58,7 +59,20 @@ const TypeAnimation = dynamic(
 );
 
 
-const PRODUCTS = [
+interface ProductItem {
+  icon: any;
+  title: string;
+  subtitle: string;
+  description: string;
+  href: string;
+  type: string;
+  sla: string;
+  specs: string[];
+  cta: string;
+  isCustom?: boolean;
+}
+
+const PRODUCTS: ProductItem[] = [
   {
     icon: HardDrive,
     title: "Object Storage",
@@ -120,17 +134,16 @@ const PRODUCTS = [
     cta: "Explore File CDN",
   },
   {
-    icon: Server,
-    title: "Custom Enterprise Infra",
-    subtitle: "Bespoke Cluster & BGP Peering",
+    icon: Sparkles,
+    title: "AI Gateway",
+    subtitle: "Unified OpenAI-Compatible Router",
     description:
-      "Need custom bare-metal topologies, multi-node HA database clusters, or dedicated MikroTik/WireGuard site-to-site tunnels?",
-    href: "/contact",
-    type: "Enterprise",
+      "Access 70+ frontier LLMs and image models with drop-in OpenAI compatibility, sub-millisecond edge routing, zero data retention, and Rupiah Pay-As-You-Go.",
+    href: "/ai-gateway",
+    type: "AI Gateway",
     sla: "98.99% SLA",
-    specs: ["Dedicated Hardware", "BGP / WireGuard", "24/7 SRE Support"],
-    cta: "Consult Architecture",
-    isCustom: true,
+    specs: ["70+ Frontier Models", "Drop-In OpenAI API", "IDR Pay-As-You-Go"],
+    cta: "Explore AI Gateway",
   },
 ];
 
