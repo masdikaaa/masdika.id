@@ -114,7 +114,7 @@ const PRODUCTS: ProductItem[] = [
     title: "Managed Applications",
     subtitle: "Kubernetes Production Microservices",
     description:
-      "Deploy autonomous AI agents, multi-LLM gateways, and workflow engines (Hermes Agent, 9Router, n8n, OpenCode, OpenClaw) with Let's Encrypt SSL and sandboxed SSH.",
+      "Deploy autonomous AI agents, multi-LLM gateways, and workflow engines (Hermes Agent, 9Router, n8n, OpenCode, OpenClaw, OmniRoute) with Let's Encrypt SSL and sandboxed SSH.",
     href: "/managed-apps",
     type: "App Hosting",
     sla: "98.99% SLA",

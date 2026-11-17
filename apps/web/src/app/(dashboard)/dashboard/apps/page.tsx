@@ -368,7 +368,7 @@ export default function ManagedAppsPage() {
             No Managed Applications Provisioned
           </h2>
           <p className={cn("text-xs sm:text-sm max-w-md mx-auto mb-6 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
-            Deploy Hermes Agent, 9Router, n8n, OpenCode, or OpenClaw in a single click with automated Let&apos;s Encrypt SSL, dedicated persistent SSD storage, and isolated containers.
+            Deploy Hermes Agent, 9Router, n8n, OpenCode, OpenClaw, or OmniRoute in a single click with automated Let&apos;s Encrypt SSL, dedicated persistent SSD storage, and isolated containers.
           </p>
           <Link
             href="/dashboard/apps/new"
@@ -609,7 +609,7 @@ export default function ManagedAppsPage() {
                 Deploy New App
               </h4>
               <p className={cn("text-xs mt-1 max-w-[200px] leading-relaxed", isDark ? "text-zinc-500" : "text-slate-500")}>
-                Deploy Hermes Agent, 9Router, n8n, OpenCode, or OpenClaw
+                Deploy Hermes Agent, 9Router, n8n, OpenCode, OpenClaw, or OmniRoute
               </p>
             </div>
           </Link>

@@ -158,7 +158,7 @@ const DEV_MENU_ITEMS: MenuItem[] = [
   },
   {
     title: "Managed Apps",
-    description: "Production Kubernetes hosting for Hermes Agent, 9Router, n8n, OpenCode & OpenClaw.",
+    description: "Production Kubernetes hosting for Hermes Agent, 9Router, n8n, OpenCode, OpenClaw & OmniRoute.",
     href: "/managed-apps",
     icon: Boxes,
     badge: "New",

@@ -83,7 +83,7 @@ const APP_FAQS = [
   },
   {
     q: "How is access handled for web applications vs. CLI/SSH applications?",
-    a: "Web-based applications (like n8n, 9Router, and OpenClaw) are automatically assigned a Let's Encrypt SSL-secured subdomain on *.app.masdika.id. Dual-access applications like Hermes Agent include both a browser-based Web Dashboard and a secure direct SSH terminal, while pure developer pods (like OpenCode) use dedicated NodePorts for SSH terminal access."
+    a: "Web-based applications (like n8n, 9Router, OpenClaw, and OmniRoute) are automatically assigned a Let's Encrypt SSL-secured subdomain on *.app.masdika.id. Dual-access applications like Hermes Agent include both a browser-based Web Dashboard and a secure direct SSH terminal, while pure developer pods (like OpenCode) use dedicated NodePorts for SSH terminal access."
   },
   {
     q: "Can I connect via SSH to Hermes Agent and OpenCode?",
@@ -312,7 +312,7 @@ export default function ManagedAppsClient({
               </h1>
 
               <p className="text-lg md:text-xl mb-10 max-w-xl leading-relaxed text-[var(--text-secondary)] font-normal">
-                Deploy production-grade Hermes Agent, 9Router, n8n, OpenCode, and OpenClaw in seconds. Powered by Kubernetes container isolation, automated SSL ingress, sandboxed SSH terminals, and under 20ms local latency across Indonesia.
+                Deploy production-grade Hermes Agent, 9Router, n8n, OpenCode, OpenClaw, and OmniRoute in seconds. Powered by Kubernetes container isolation, automated SSL ingress, sandboxed SSH terminals, and under 20ms local latency across Indonesia.
               </p>
 
               <div className="flex flex-wrap items-center gap-4">
@@ -592,10 +592,10 @@ export default function ManagedAppsClient({
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 sm:gap-4">
                 {catalog.map((app, idx) => {
                   const isSelected = selectedAppId === app.id;
-                  const isLastOdd = idx === catalog.length - 1;
+                  const isLastOdd = idx === catalog.length - 1 && catalog.length % 2 === 1;
                   return (
                     <button
                       key={app.id}
@@ -907,7 +907,7 @@ export default function ManagedAppsClient({
             </div>
 
             {[
-              { step: "01", title: "Select App & Plan", desc: "Choose Hermes Agent, 9Router, n8n, OpenCode, or OpenClaw and pick your compute tier." },
+              { step: "01", title: "Select App & Plan", desc: "Choose Hermes Agent, 9Router, n8n, OpenCode, OpenClaw, or OmniRoute and pick your compute tier." },
               { step: "02", title: "Top Up Balance", desc: "Fund your account via QRIS or automated gateway. Only pay for exact active hours." },
               { step: "03", title: "Connect & Build", desc: "Receive automated SSL endpoints or direct SSH access and launch your application instantly." }
             ].map((st, i) => (

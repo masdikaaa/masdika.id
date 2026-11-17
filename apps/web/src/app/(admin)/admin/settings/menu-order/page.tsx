@@ -20,7 +20,7 @@ const MENU_META: Record<string, { label: string; description: string; icon: Reac
   vps:       { label: "Cloud VPS",           description: "High-performance virtual private servers.",                    icon: Terminal,     color: "text-cyan-400", bg: "bg-cyan-500/10" },
   "app-catalog": { label: "App Catalog",     description: "1-Click automated deployment for Docker & AI stacks.",          icon: Rocket,    color: "text-cyan-400", bg: "bg-cyan-500/10" },
   "managed-db":  { label: "Managed DB",      description: "High-performance managed MySQL, MariaDB, PostgreSQL & MongoDB.", icon: Database,  color: "text-cyan-400", bg: "bg-cyan-500/10" },
-  "managed-apps": { label: "Managed Apps",   description: "Deploy Hermes Agent, 9Router, n8n, OpenCode & OpenClaw on Kubernetes.", icon: Boxes, color: "text-cyan-400", bg: "bg-cyan-500/10" },
+  "managed-apps": { label: "Managed Apps",   description: "Deploy Hermes Agent, 9Router, n8n, OpenCode, OpenClaw & OmniRoute on Kubernetes.", icon: Boxes, color: "text-cyan-400", bg: "bg-cyan-500/10" },
   about:     { label: "About",               description: "Learn more about who we are and what we do.",                  icon: User,      color: "text-cyan-400", bg: "bg-cyan-500/10" },
   services:  { label: "Services",            description: "Professional services tailored for your needs.",               icon: Server,    color: "text-cyan-400", bg: "bg-cyan-500/10" },
   portfolio: { label: "Portfolio",           description: "A showcase of our past projects and achievements.",            icon: LayoutDashboard, color: "text-cyan-400", bg: "bg-cyan-500/10" },

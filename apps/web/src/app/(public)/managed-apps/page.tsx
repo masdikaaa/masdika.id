@@ -10,12 +10,13 @@ export const metadata: Metadata = {
   title: {
     absolute: "Managed Applications - Kubernetes Production AI & Microservice Hosting",
   },
-  description: "Deploy autonomous AI agents, multi-LLM gateways, and workflow engines (Hermes Agent, 9Router, n8n, OpenCode, OpenClaw) in seconds. Powered by Kubernetes isolation, automated Let's Encrypt SSL, and sandboxed SSH terminal access.",
+  description: "Deploy autonomous AI agents, multi-LLM gateways, and workflow engines (Hermes Agent, 9Router, n8n, OpenCode, OpenClaw, OmniRoute) in seconds. Powered by Kubernetes isolation, automated Let's Encrypt SSL, and sandboxed SSH terminal access.",
   keywords: [
     "Managed Applications",
     "Kubernetes App Hosting",
     "Hermes Agent Hosting",
     "9Router AI Gateway",
+    "OmniRoute AI Gateway",
     "n8n Cloud Hosting",
     "OpenCode Developer Pod",
     "OpenClaw AI",
@@ -30,7 +31,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Managed Applications - Kubernetes Production AI & Microservice Hosting",
-    description: "Deploy autonomous AI agents, multi-LLM gateways, and workflow engines (Hermes Agent, 9Router, n8n, OpenCode, OpenClaw) in seconds. Powered by Kubernetes isolation, automated Let's Encrypt SSL, and sandboxed SSH terminal access.",
+    description: "Deploy autonomous AI agents, multi-LLM gateways, and workflow engines (Hermes Agent, 9Router, n8n, OpenCode, OpenClaw, OmniRoute) in seconds. Powered by Kubernetes isolation, automated Let's Encrypt SSL, and sandboxed SSH terminal access.",
     url: "https://www.masdika.id/managed-apps",
     siteName: "Masdika",
     images: [
@@ -47,7 +48,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Managed Applications - Kubernetes Production AI & Microservice Hosting",
-    description: "Deploy autonomous AI agents, multi-LLM gateways, and workflow engines (Hermes Agent, 9Router, n8n, OpenCode, OpenClaw) in seconds. Powered by Kubernetes isolation, automated Let's Encrypt SSL, and sandboxed SSH terminal access.",
+    description: "Deploy autonomous AI agents, multi-LLM gateways, and workflow engines (Hermes Agent, 9Router, n8n, OpenCode, OpenClaw, OmniRoute) in seconds. Powered by Kubernetes isolation, automated Let's Encrypt SSL, and sandboxed SSH terminal access.",
     images: [OG_IMAGE_PATH],
   },
 };
@@ -106,7 +107,7 @@ export default async function ManagedAppsLandingPage() {
             "name": "What applications are supported on Masdika Cloud Managed Apps?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "We natively support NousResearch Hermes Agent (autonomous learning AI), 9Router (multi-LLM router & token optimizer), n8n (visual workflow automation canvas), OpenCode (sandboxed terminal developer environment), and OpenClaw (multi-channel autonomous AI agent)."
+              "text": "We natively support NousResearch Hermes Agent (autonomous learning AI), 9Router (multi-LLM router & token optimizer), n8n (visual workflow automation canvas), OpenCode (sandboxed terminal developer environment), OpenClaw (multi-channel autonomous AI agent), and OmniRoute (cost-aware multi-provider AI gateway)."
             }
           },
           {
@@ -114,7 +115,7 @@ export default async function ManagedAppsLandingPage() {
             "name": "How does SSL and domain routing work?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "For web applications like 9Router, n8n, and OpenClaw, each deployment receives an automated Let's Encrypt SSL certificate and an isolated subdomain (*.app.masdika.id) with zero manual DNS configuration required."
+              "text": "For web applications like 9Router, n8n, OpenClaw, and OmniRoute, each deployment receives an automated Let's Encrypt SSL certificate and an isolated subdomain (*.app.masdika.id) with zero manual DNS configuration required."
             }
           },
           {

@@ -229,14 +229,14 @@ export default function AppCheckoutFlow() {
               <span>1. Choose Application</span>
             </h2>
             <span className={cn("text-xs font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
-              5 Official AI & Automation Engines
+              6 Official AI & Automation Engines
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
             {MANAGED_APPS_CATALOG.map((app, idx) => {
               const isSelected = selectedApp.id === app.id;
-              const isLast = idx === MANAGED_APPS_CATALOG.length - 1;
+              const isLastOdd = idx === MANAGED_APPS_CATALOG.length - 1 && MANAGED_APPS_CATALOG.length % 2 === 1;
               return (
                 <button
                   key={app.id}
@@ -244,7 +244,7 @@ export default function AppCheckoutFlow() {
                   onClick={() => handleSelectApp(app)}
                   className={cn(
                     "relative p-4 rounded-2xl border text-left transition-all flex flex-col justify-between cursor-pointer group text-left",
-                    isLast && "sm:col-span-2 md:col-span-1",
+                    isLastOdd && "sm:col-span-2 md:col-span-1",
                     isSelected
                       ? isDark
                         ? "bg-cyan-500/10 border-cyan-400 ring-2 ring-cyan-400/20 shadow-lg shadow-cyan-500/10"
