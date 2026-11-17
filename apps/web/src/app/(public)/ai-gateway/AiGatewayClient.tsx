@@ -579,23 +579,25 @@ export default function AiGatewayClient({
 
           <div id="models-table" className="rounded-2xl border border-[var(--border-primary)] dark:border-white/10 bg-[var(--surface)] dark:bg-[#0c0d12] shadow-xl overflow-hidden">
             {/* Control Bar: Model Type, Provider Pills & Search (Unified Single-Row on Desktop matching Gambar 1) */}
-            <div className="p-3 sm:p-3.5 border-b border-[var(--border-primary)] dark:border-white/10 bg-[var(--surface-secondary)]/50 dark:bg-[#0f1117] flex flex-col xl:flex-row xl:items-center justify-between gap-3">
-              {/* Left: Model Type Tabs */}
-              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <div className="p-3 sm:p-3.5 border-b border-[var(--border-primary)] dark:border-white/10 bg-[var(--surface-secondary)]/50 dark:bg-[#0f1117] flex flex-col xl:flex-row xl:items-center justify-between gap-2.5 sm:gap-3">
+              {/* Left: Model Type Tabs (Responsive with auto-scroll safeguard) */}
+              <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden w-full sm:w-auto shrink-0 pb-0.5 sm:pb-0">
                 <button
                   onClick={() => {
                     setModelTypeTab("chat");
                     setCurrentPage(1);
                   }}
                   className={cn(
-                    "px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shrink-0",
+                    "px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 sm:gap-2 whitespace-nowrap shrink-0",
                     modelTypeTab === "chat"
                       ? "bg-cyan-400 text-slate-950 shadow-xs font-black"
                       : "text-[var(--text-secondary)] dark:text-zinc-400 hover:text-[var(--text-primary)] dark:hover:text-white hover:bg-[var(--surface)] dark:hover:bg-white/5"
                   )}
                 >
                   <Cpu className="w-3.5 h-3.5 shrink-0" />
-                  <span>Chat &amp; Reasoning Models ({allChatModels.length})</span>
+                  <span>
+                    Chat &amp; Reasoning<span className="hidden sm:inline">&nbsp;Models</span> ({allChatModels.length})
+                  </span>
                 </button>
                 <button
                   onClick={() => {
@@ -603,20 +605,22 @@ export default function AiGatewayClient({
                     setCurrentPage(1);
                   }}
                   className={cn(
-                    "px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shrink-0",
+                    "px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 sm:gap-2 whitespace-nowrap shrink-0",
                     modelTypeTab === "image"
                       ? "bg-cyan-400 text-slate-950 shadow-xs font-black"
                       : "text-[var(--text-secondary)] dark:text-zinc-400 hover:text-[var(--text-primary)] dark:hover:text-white hover:bg-[var(--surface)] dark:hover:bg-white/5"
                   )}
                 >
                   <Sparkles className="w-3.5 h-3.5 shrink-0" />
-                  <span>Image Models ({allImageModels.length})</span>
+                  <span>
+                    Image<span className="hidden sm:inline">&nbsp;Models</span> ({allImageModels.length})
+                  </span>
                 </button>
               </div>
 
               {/* Center: Provider Horizontal Filter Pills (Chat only) */}
               {modelTypeTab === "chat" && (
-                <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-0.5 max-w-full">
+                <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-0.5 w-full xl:w-auto max-w-full">
                   {providers.slice(0, 10).map((p) => {
                     const isSelected = selectedProvider.toLowerCase() === p.toLowerCase();
                     return (
@@ -811,7 +815,7 @@ export default function AiGatewayClient({
                           </button>
                         </div>
 
-                        <div className="flex items-center justify-between gap-2 text-xs">
+                        <div className="flex items-center justify-between gap-2 text-xs min-w-0">
                           <code className="font-mono text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20 truncate">
                             {m.modelId}
                           </code>
@@ -821,32 +825,32 @@ export default function AiGatewayClient({
                         </div>
 
                         <div className="grid grid-cols-3 gap-2 pt-1 text-center font-mono text-xs">
-                          <div className="p-2 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-primary)]">
-                            <div className="text-[10px] text-[var(--text-muted)] font-sans uppercase">Input / 1M</div>
+                          <div className="p-2 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-primary)] min-w-0">
+                            <div className="text-[10px] text-[var(--text-muted)] font-sans uppercase truncate">Input / 1M</div>
                             {m.originalInputPricePer1M && m.originalInputPricePer1M > m.inputPricePer1M && (
-                              <span className="text-[10px] font-normal line-through text-zinc-400 dark:text-zinc-500 block">
+                              <span className="text-[10px] font-normal line-through text-zinc-400 dark:text-zinc-500 block truncate">
                                 {formatRupiah(m.originalInputPricePer1M)}
                               </span>
                             )}
-                            <div className="font-semibold text-cyan-600 dark:text-cyan-400">{formatRupiah(m.inputPricePer1M)}</div>
+                            <div className="font-semibold text-cyan-600 dark:text-cyan-400 truncate">{formatRupiah(m.inputPricePer1M)}</div>
                           </div>
-                          <div className="p-2 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-primary)]">
-                            <div className="text-[10px] text-[var(--text-muted)] font-sans uppercase">Cache / 1M</div>
+                          <div className="p-2 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-primary)] min-w-0">
+                            <div className="text-[10px] text-[var(--text-muted)] font-sans uppercase truncate">Cache / 1M</div>
                             {m.originalCachePricePer1M && m.originalCachePricePer1M > m.cachePricePer1M && (
-                              <span className="text-[10px] font-normal line-through text-zinc-400 dark:text-zinc-500 block">
+                              <span className="text-[10px] font-normal line-through text-zinc-400 dark:text-zinc-500 block truncate">
                                 {formatRupiah(m.originalCachePricePer1M)}
                               </span>
                             )}
-                            <div className="font-semibold text-cyan-600 dark:text-cyan-400">{formatRupiah(m.cachePricePer1M)}</div>
+                            <div className="font-semibold text-cyan-600 dark:text-cyan-400 truncate">{formatRupiah(m.cachePricePer1M)}</div>
                           </div>
-                          <div className="p-2 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-primary)]">
-                            <div className="text-[10px] text-[var(--text-muted)] font-sans uppercase">Output / 1M</div>
+                          <div className="p-2 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-primary)] min-w-0">
+                            <div className="text-[10px] text-[var(--text-muted)] font-sans uppercase truncate">Output / 1M</div>
                             {m.originalOutputPricePer1M && m.originalOutputPricePer1M > m.outputPricePer1M && (
-                              <span className="text-[10px] font-normal line-through text-zinc-400 dark:text-zinc-500 block">
+                              <span className="text-[10px] font-normal line-through text-zinc-400 dark:text-zinc-500 block truncate">
                                 {formatRupiah(m.originalOutputPricePer1M)}
                               </span>
                             )}
-                            <div className="font-bold text-cyan-600 dark:text-cyan-400">{formatRupiah(m.outputPricePer1M)}</div>
+                            <div className="font-bold text-cyan-600 dark:text-cyan-400 truncate">{formatRupiah(m.outputPricePer1M)}</div>
                           </div>
                         </div>
                       </div>
@@ -947,7 +951,7 @@ export default function AiGatewayClient({
                   </div>
 
                   {totalPages > 1 && (
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-w-full py-0.5">
                       <button
                         onClick={() => handlePageChange(safePage - 1)}
                         disabled={safePage === 1}
