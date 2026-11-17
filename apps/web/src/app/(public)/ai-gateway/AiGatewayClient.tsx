@@ -27,6 +27,7 @@ import {
   Gauge,
   ChevronLeft,
   ChevronRight,
+  Rocket,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -599,7 +600,7 @@ export default function AiGatewayClient({
               No hidden foreign exchange markups or minimum billing brackets. Filter through 70+ text and image models.
             </p>
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-cyan-500/40 bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 text-xs font-medium shadow-xs">
-              <Zap className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
+              <Rocket className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
               <span>Pay-as-you-go per token in Rupiah – no token bundles required. Failed requests cost Rp 0.</span>
             </div>
           </div>
