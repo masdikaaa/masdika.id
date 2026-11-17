@@ -44,6 +44,7 @@ import { Select } from '@/components/ui/Select';
 import { Pagination } from '@/components/ui/Pagination';
 import { AdminCheckbox } from '@/components/ui/AdminCheckbox';
 import { PlainTextArea } from '@/components/ui/PlainTextArea';
+import { CustomerAiTokenUsageChart, type CustomerTokenTimelineEntry } from '@/components/dashboard/CustomerAiTokenUsageChart';
 import { AiToolIcon, type QuickstartDocId } from '@/components/ai-gateway/AiToolIcons';
 import { AiGatewayDocsPortal } from '@/components/ai-gateway/AiGatewayDocsPortal';
 import {
@@ -188,6 +189,7 @@ export default function CustomerAiGatewayPage() {
   const [imageModels, setImageModels] = useState<AiImageModelItem[]>([]);
   const [keys, setKeys] = useState<AiKeyItem[]>([]);
   const [usageLogs, setUsageLogs] = useState<AiUsageItem[]>([]);
+  const [tokenUsageTimeline, setTokenUsageTimeline] = useState<CustomerTokenTimelineEntry[]>([]);
   const [thisMonthByModel, setThisMonthByModel] = useState<MonthModelSummary[]>([]);
   const [stats, setStats] = useState({
     totalRequests: 0,
@@ -414,6 +416,7 @@ export default function CustomerAiGatewayPage() {
         setImgKeyId((prev) => (prev > 0 ? prev : firstActiveKey.id));
       }
       setUsageLogs(d.usageLogs || []);
+      setTokenUsageTimeline(d.tokenUsageTimeline || []);
       setThisMonthByModel(d.thisMonthByModel || []);
       setStats(
         d.stats || {
@@ -1689,6 +1692,8 @@ aider --model openai/glm-5.3
       {/* ==================================================================== */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
+          {/* Customer Token Usage Trends Chart (Pure Cyan, Mobile Responsive) */}
+          <CustomerAiTokenUsageChart data={tokenUsageTimeline} />
 
           {/* 2-Column Masdika Control Panel: Left = AI Balance & Auto Top-Up, Right = Quick Actions & Monthly Breakdown */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
@@ -2682,6 +2687,9 @@ aider --model openai/glm-5.3
       {/* ==================================================================== */}
       {activeTab === 'usage' && (
         <div className="space-y-6">
+          {/* Customer Token Usage Trends Chart (Pure Cyan, Mobile Responsive) */}
+          <CustomerAiTokenUsageChart data={tokenUsageTimeline} />
+
           {/* Filter Bar */}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">

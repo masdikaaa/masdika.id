@@ -30,8 +30,9 @@ export async function GET() {
     await ensureAiModelsExist();
     const now = new Date();
     const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+    const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
 
-    const [dbUser, config, commitment, models, keys, usageLogs, aggregate, monthAggregate, monthByModel] =
+    const [dbUser, config, commitment, models, keys, usageLogs, aggregate, monthAggregate, monthByModel, timelineLogs] =
       await Promise.all([
         prisma.user.findUnique({
           where: { id: user.id },
@@ -101,7 +102,78 @@ export async function GET() {
             outputTokens: true,
           },
         }),
+        prisma.aiUsageLog.findMany({
+          where: {
+            userId: user.id,
+            createdAt: { gte: fourteenDaysAgo },
+          },
+          select: {
+            createdAt: true,
+            inputTokens: true,
+            cachedTokens: true,
+            outputTokens: true,
+            costRp: true,
+          },
+          orderBy: { createdAt: 'asc' },
+        }),
       ]);
+
+    const timelineMap = new Map<string, {
+      date: string;
+      fullDate: string;
+      inputTokens: number;
+      cachedTokens: number;
+      outputTokens: number;
+      totalTokens: number;
+      requests: number;
+      costRp: number;
+    }>();
+
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+      const key = d.toISOString().slice(0, 10);
+      const dateLabel = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      timelineMap.set(key, {
+        date: dateLabel,
+        fullDate: key,
+        inputTokens: 0,
+        cachedTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+        requests: 0,
+        costRp: 0,
+      });
+    }
+
+    for (const log of timelineLogs) {
+      const key = log.createdAt.toISOString().slice(0, 10);
+      let entry = timelineMap.get(key);
+      if (!entry) {
+        const dateLabel = log.createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        entry = {
+          date: dateLabel,
+          fullDate: key,
+          inputTokens: 0,
+          cachedTokens: 0,
+          outputTokens: 0,
+          totalTokens: 0,
+          requests: 0,
+          costRp: 0,
+        };
+        timelineMap.set(key, entry);
+      }
+      const inT = log.inputTokens || 0;
+      const outT = log.outputTokens || 0;
+      const cacheT = log.cachedTokens || 0;
+      entry.inputTokens += inT;
+      entry.outputTokens += outT;
+      entry.cachedTokens += cacheT;
+      entry.totalTokens += inT + outT + cacheT;
+      entry.requests += 1;
+      entry.costRp += log.costRp || 0;
+    }
+
+    const tokenUsageTimeline = Array.from(timelineMap.values());
 
     const walletBalance = dbUser?.balance ?? user.balance;
     const lockedCommitment = commitment.totalMonthly;
@@ -160,6 +232,7 @@ export async function GET() {
         })),
         keys,
         usageLogs,
+        tokenUsageTimeline,
         thisMonthByModel: monthByModel.map((g) => ({
           modelId: g.modelId,
           requests: g._count.id,
