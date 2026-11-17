@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { getCachedData } from "@/lib/cache";
-import { DEFAULT_AI_IMAGE_MODELS, getAiGatewayConfig } from "@/lib/ai-gateway";
+import { DEFAULT_AI_IMAGE_MODELS, DEFAULT_AI_MODELS, ensureAiModelsExist, getAiGatewayConfig } from "@/lib/ai-gateway";
 import AiGatewayClient from "./AiGatewayClient";
 
 export const dynamic = 'force-dynamic';
@@ -54,13 +54,14 @@ export const metadata: Metadata = {
 
 export default async function AiGatewayLandingPage() {
   const { chatModels, imageModels, isGatewayEnabled } = await getCachedData(
-    'pricing:ai_gateway_landing',
-    300,
+    'pricing:ai_gateway_landing_v2',
+    60,
     async () => {
       let models: any[] = [];
       let enabled = true;
 
       try {
+        await ensureAiModelsExist().catch(() => {});
         const [dbModels, config] = await Promise.all([
           prisma.aiModel.findMany({
             where: { isActive: true },
@@ -68,10 +69,10 @@ export default async function AiGatewayLandingPage() {
           }),
           getAiGatewayConfig().catch(() => ({ enabled: true })),
         ]);
-        models = dbModels;
+        models = dbModels && dbModels.length > 0 ? dbModels : (DEFAULT_AI_MODELS as any);
         enabled = config.enabled !== false;
       } catch {
-        // Fallback gracefully
+        models = DEFAULT_AI_MODELS as any;
       }
 
       return {

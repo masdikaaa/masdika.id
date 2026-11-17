@@ -35,6 +35,7 @@ import { ProvisioningSection } from "@/components/ui/ProvisioningSection";
 import { FaqSection } from "@/components/ui/FaqSection";
 import { cn } from "@/lib/utils";
 import { formatRupiah } from "@/lib/billing";
+import { DEFAULT_AI_MODELS, DEFAULT_AI_IMAGE_MODELS } from "@/lib/ai-gateway";
 
 interface AiModelItem {
   id?: number;
@@ -230,24 +231,16 @@ export default function AiGatewayClient({
   const [completionTokens, setCompletionTokens] = useState(800);
   const [monthlyRequests, setMonthlyRequests] = useState(2500);
 
-  // Fallback chat models if database empty
+  // Fallback chat models & image models from single source of truth if empty
   const allChatModels: AiModelItem[] = useMemo(() => {
     if (chatModels && chatModels.length > 0) return chatModels;
-    return [
-      { modelId: "qwen3.7-flash", name: "Qwen 3.7 Flash", provider: "Qwen", contextWindow: "128K", inputPricePer1M: 1500, cachePricePer1M: 750, outputPricePer1M: 4500, discountBadge: "Fast & Cheap" },
-      { modelId: "deepseek-v3", name: "DeepSeek V3", provider: "DeepSeek", contextWindow: "64K", inputPricePer1M: 4500, cachePricePer1M: 1500, outputPricePer1M: 18000, discountBadge: "Cost Leader" },
-      { modelId: "deepseek-r1", name: "DeepSeek R1", provider: "DeepSeek", contextWindow: "64K", inputPricePer1M: 15000, cachePricePer1M: 5000, outputPricePer1M: 60000, discountBadge: "Deep Reasoning" },
-      { modelId: "claude-3-7-sonnet", name: "Claude 3.7 Sonnet", provider: "Anthropic", contextWindow: "200K", inputPricePer1M: 48000, cachePricePer1M: 4800, outputPricePer1M: 240000, discountBadge: "Top Coding" },
-      { modelId: "claude-3-5-haiku", name: "Claude 3.5 Haiku", provider: "Anthropic", contextWindow: "200K", inputPricePer1M: 16000, cachePricePer1M: 1600, outputPricePer1M: 80000 },
-      { modelId: "gpt-4o", name: "OpenAI GPT-4o", provider: "OpenAI", contextWindow: "128K", inputPricePer1M: 40000, cachePricePer1M: 20000, outputPricePer1M: 160000 },
-      { modelId: "gpt-4o-mini", name: "OpenAI GPT-4o Mini", provider: "OpenAI", contextWindow: "128K", inputPricePer1M: 2500, cachePricePer1M: 1250, outputPricePer1M: 10000 },
-      { modelId: "gemini-2.5-flash", name: "Gemini 2.5 Flash", provider: "Google", contextWindow: "1M", inputPricePer1M: 2500, cachePricePer1M: 625, outputPricePer1M: 10000, discountBadge: "1M Context" },
-      { modelId: "gemini-2.5-pro", name: "Gemini 2.5 Pro", provider: "Google", contextWindow: "2M", inputPricePer1M: 20000, cachePricePer1M: 5000, outputPricePer1M: 80000 },
-      { modelId: "llama-3.3-70b", name: "Meta Llama 3.3 70B", provider: "Meta", contextWindow: "128K", inputPricePer1M: 8000, cachePricePer1M: 2500, outputPricePer1M: 24000 },
-      { modelId: "minimax-01", name: "MiniMax-01", provider: "MiniMax", contextWindow: "1M", inputPricePer1M: 4000, cachePricePer1M: 1000, outputPricePer1M: 18000 },
-      { modelId: "glm-5.3", name: "GLM-5.3 Turbo", provider: "Zhipu", contextWindow: "128K", inputPricePer1M: 5000, cachePricePer1M: 1500, outputPricePer1M: 20000 },
-    ];
+    return DEFAULT_AI_MODELS as AiModelItem[];
   }, [chatModels]);
+
+  const allImageModels: AiImageModelItem[] = useMemo(() => {
+    if (imageModels && imageModels.length > 0) return imageModels;
+    return DEFAULT_AI_IMAGE_MODELS as AiImageModelItem[];
+  }, [imageModels]);
 
   const providers = useMemo(() => {
     const set = new Set<string>();
@@ -270,14 +263,14 @@ export default function AiGatewayClient({
 
   const filteredImageModels = useMemo(() => {
     const q = modelSearch.toLowerCase().trim();
-    if (!q) return imageModels;
-    return imageModels.filter(
+    if (!q) return allImageModels;
+    return allImageModels.filter(
       (m) =>
         m.name.toLowerCase().includes(q) ||
         m.modelId.toLowerCase().includes(q) ||
         (m.description && m.description.toLowerCase().includes(q))
     );
-  }, [imageModels, modelSearch]);
+  }, [allImageModels, modelSearch]);
 
   // Current calculator model
   const activeCalcModel = useMemo(() => {
@@ -519,9 +512,13 @@ export default function AiGatewayClient({
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
               Transparent Token Pricing in Rupiah
             </h2>
-            <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed">
+            <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed mb-4">
               No hidden foreign exchange markups or minimum billing brackets. Filter through 70+ text and image models.
             </p>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-cyan-500/40 bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 text-xs font-medium shadow-xs">
+              <Zap className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
+              <span>Pay-as-you-go per token in Rupiah – no token bundles required. Failed requests cost Rp 0.</span>
+            </div>
           </div>
 
           <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] shadow-xl overflow-hidden">
@@ -551,7 +548,7 @@ export default function AiGatewayClient({
                   )}
                 >
                   <Sparkles className="w-3.5 h-3.5 shrink-0" />
-                  <span className="truncate">Image Models ({imageModels.length})</span>
+                  <span className="truncate">Image Models ({allImageModels.length})</span>
                 </button>
               </div>
 
@@ -599,119 +596,179 @@ export default function AiGatewayClient({
                         <th className="px-5 py-3.5">Model Name</th>
                         <th className="px-4 py-3.5">Model ID</th>
                         <th className="px-4 py-3.5">Context</th>
-                        <th className="px-4 py-3.5">Input / 1M</th>
-                        <th className="px-4 py-3.5">Cache Read / 1M</th>
-                        <th className="px-4 py-3.5">Output / 1M</th>
+                        <th className="px-4 py-3.5 text-right">Input / 1M</th>
+                        <th className="px-4 py-3.5 text-right">Cache Read / 1M</th>
+                        <th className="px-4 py-3.5 text-right">Output / 1M</th>
                         <th className="px-4 py-3.5 text-right">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--border-primary)]">
-                      {filteredChatModels.map((m) => (
-                        <tr
-                          key={m.modelId}
-                          className="hover:bg-[var(--surface-secondary)]/40 transition-colors"
-                        >
-                          <td className="px-5 py-4 whitespace-nowrap">
-                            <div className="font-bold flex items-center gap-2">
-                              <span className="text-[var(--text-primary)]">{m.name}</span>
-                              {m.discountBadge && (
-                                <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                                  {m.discountBadge}
+                      {filteredChatModels.map((m) => {
+                        const discountPct =
+                          m.originalOutputPricePer1M && m.originalOutputPricePer1M > m.outputPricePer1M
+                            ? Math.round(((m.originalOutputPricePer1M - m.outputPricePer1M) / m.originalOutputPricePer1M) * 100)
+                            : m.originalInputPricePer1M && m.originalInputPricePer1M > m.inputPricePer1M
+                            ? Math.round(((m.originalInputPricePer1M - m.inputPricePer1M) / m.originalInputPricePer1M) * 100)
+                            : 0;
+                        const badgeText = m.discountBadge || (discountPct > 0 ? `-${discountPct}%` : null);
+
+                        return (
+                          <tr
+                            key={m.modelId}
+                            className="hover:bg-[var(--surface-secondary)]/40 transition-colors"
+                          >
+                            <td className="px-5 py-4 whitespace-nowrap">
+                              <div className="font-bold flex items-center gap-2">
+                                <span className="text-[var(--text-primary)]">{m.name}</span>
+                                {badgeText && (
+                                  <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-cyan-400/15 text-cyan-600 dark:text-cyan-400 border border-cyan-400/30">
+                                    {badgeText}
+                                  </span>
+                                )}
+                                {m.hasPeakPricing && (
+                                  <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold border bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 border-zinc-200 dark:border-white/10">
+                                    Off-Peak
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-[11px] text-[var(--text-muted)]">{m.provider}</div>
+                            </td>
+                            <td className="px-4 py-4 whitespace-nowrap">
+                              <code className="font-mono text-cyan-600 dark:text-cyan-400 text-xs font-semibold">{m.modelId}</code>
+                            </td>
+                            <td className="px-4 py-4 whitespace-nowrap font-mono text-[var(--text-secondary)]">
+                              {m.contextWindow || "128K"}
+                            </td>
+                            <td className="px-4 py-4 whitespace-nowrap font-mono font-bold text-right text-cyan-600 dark:text-cyan-400">
+                              {m.originalInputPricePer1M && m.originalInputPricePer1M > m.inputPricePer1M && (
+                                <span className="text-[11px] font-normal line-through text-zinc-400 dark:text-zinc-500 block">
+                                  {formatRupiah(m.originalInputPricePer1M)}
                                 </span>
                               )}
-                            </div>
-                            <div className="text-[11px] text-[var(--text-muted)]">{m.provider}</div>
-                          </td>
-                          <td className="px-4 py-4 whitespace-nowrap">
-                            <code className="font-mono text-cyan-600 dark:text-cyan-400 text-xs font-semibold">{m.modelId}</code>
-                          </td>
-                          <td className="px-4 py-4 whitespace-nowrap font-mono text-[var(--text-secondary)]">
-                            {m.contextWindow || "128K"}
-                          </td>
-                          <td className="px-4 py-4 whitespace-nowrap font-mono font-semibold text-emerald-600 dark:text-emerald-400">
-                            {formatRupiah(m.inputPricePer1M)}
-                          </td>
-                          <td className="px-4 py-4 whitespace-nowrap font-mono text-cyan-600 dark:text-cyan-400">
-                            {formatRupiah(m.cachePricePer1M)}
-                          </td>
-                          <td className="px-4 py-4 whitespace-nowrap font-mono font-bold text-sky-600 dark:text-sky-400">
-                            {formatRupiah(m.outputPricePer1M)}
-                          </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-right">
-                            <button
-                              onClick={() => handleCopyModelId(m.modelId)}
-                              className={cn(
-                                "inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer",
-                                copiedModelId === m.modelId
-                                  ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border-emerald-500/40"
-                                  : "border-[var(--border-primary)] text-[var(--text-secondary)] hover:border-cyan-500 hover:text-cyan-600 dark:hover:text-cyan-300"
+                              {formatRupiah(m.inputPricePer1M)}
+                            </td>
+                            <td className="px-4 py-4 whitespace-nowrap font-mono text-right text-cyan-600 dark:text-cyan-400">
+                              {m.originalCachePricePer1M && m.originalCachePricePer1M > m.cachePricePer1M && (
+                                <span className="text-[11px] font-normal line-through text-zinc-400 dark:text-zinc-500 block">
+                                  {formatRupiah(m.originalCachePricePer1M)}
+                                </span>
                               )}
-                            >
-                              {copiedModelId === m.modelId ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
-                              <span>{copiedModelId === m.modelId ? "Copied" : "Copy ID"}</span>
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
+                              {formatRupiah(m.cachePricePer1M)}
+                            </td>
+                            <td className="px-4 py-4 whitespace-nowrap font-mono font-bold text-right text-cyan-600 dark:text-cyan-400">
+                              {m.originalOutputPricePer1M && m.originalOutputPricePer1M > m.outputPricePer1M && (
+                                <span className="text-[11px] font-normal line-through text-zinc-400 dark:text-zinc-500 block">
+                                  {formatRupiah(m.originalOutputPricePer1M)}
+                                </span>
+                              )}
+                              {formatRupiah(m.outputPricePer1M)}
+                            </td>
+                            <td className="px-4 py-4 whitespace-nowrap text-right">
+                              <button
+                                onClick={() => handleCopyModelId(m.modelId)}
+                                className={cn(
+                                  "inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer",
+                                  copiedModelId === m.modelId
+                                    ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border-emerald-500/40"
+                                    : "border-[var(--border-primary)] text-[var(--text-secondary)] hover:border-cyan-500 hover:text-cyan-600 dark:hover:text-cyan-300"
+                                )}
+                              >
+                                {copiedModelId === m.modelId ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+                                <span>{copiedModelId === m.modelId ? "Copied" : "Copy ID"}</span>
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
 
                 {/* 2. Mobile Responsive Card List (< md screens) */}
                 <div className="block md:hidden divide-y divide-[var(--border-primary)]">
-                  {filteredChatModels.map((m) => (
-                    <div key={m.modelId} className="p-3.5 space-y-2.5">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="font-bold text-sm text-[var(--text-primary)]">{m.name}</span>
-                            {m.discountBadge && (
-                              <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                                {m.discountBadge}
+                  {filteredChatModels.map((m) => {
+                    const discountPct =
+                      m.originalOutputPricePer1M && m.originalOutputPricePer1M > m.outputPricePer1M
+                        ? Math.round(((m.originalOutputPricePer1M - m.outputPricePer1M) / m.originalOutputPricePer1M) * 100)
+                        : m.originalInputPricePer1M && m.originalInputPricePer1M > m.inputPricePer1M
+                        ? Math.round(((m.originalInputPricePer1M - m.inputPricePer1M) / m.originalInputPricePer1M) * 100)
+                        : 0;
+                    const badgeText = m.discountBadge || (discountPct > 0 ? `-${discountPct}%` : null);
+
+                    return (
+                      <div key={m.modelId} className="p-3.5 space-y-2.5">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="font-bold text-sm text-[var(--text-primary)]">{m.name}</span>
+                              {badgeText && (
+                                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-cyan-400/15 text-cyan-600 dark:text-cyan-400 border border-cyan-400/30">
+                                  {badgeText}
+                                </span>
+                              )}
+                              {m.hasPeakPricing && (
+                                <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold border bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 border-zinc-200 dark:border-white/10">
+                                  Off-Peak
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-xs text-[var(--text-muted)]">{m.provider}</span>
+                          </div>
+                          <button
+                            onClick={() => handleCopyModelId(m.modelId)}
+                            className={cn(
+                              "inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border shrink-0 transition-all cursor-pointer",
+                              copiedModelId === m.modelId
+                                ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border-emerald-500/40"
+                                : "border-[var(--border-primary)] text-[var(--text-secondary)] hover:border-cyan-500"
+                            )}
+                          >
+                            {copiedModelId === m.modelId ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+                            <span>{copiedModelId === m.modelId ? "Copied" : "Copy ID"}</span>
+                          </button>
+                        </div>
+
+                        <div className="flex items-center justify-between gap-2 text-xs">
+                          <code className="font-mono text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20 truncate">
+                            {m.modelId}
+                          </code>
+                          <span className="font-mono text-[11px] text-[var(--text-muted)] shrink-0">
+                            Context: {m.contextWindow || "128K"}
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-2 pt-1 text-center font-mono text-xs">
+                          <div className="p-2 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-primary)]">
+                            <div className="text-[10px] text-[var(--text-muted)] font-sans uppercase">Input / 1M</div>
+                            {m.originalInputPricePer1M && m.originalInputPricePer1M > m.inputPricePer1M && (
+                              <span className="text-[10px] font-normal line-through text-zinc-400 dark:text-zinc-500 block">
+                                {formatRupiah(m.originalInputPricePer1M)}
                               </span>
                             )}
+                            <div className="font-semibold text-cyan-600 dark:text-cyan-400">{formatRupiah(m.inputPricePer1M)}</div>
                           </div>
-                          <span className="text-xs text-[var(--text-muted)]">{m.provider}</span>
-                        </div>
-                        <button
-                          onClick={() => handleCopyModelId(m.modelId)}
-                          className={cn(
-                            "inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border shrink-0 transition-all cursor-pointer",
-                            copiedModelId === m.modelId
-                              ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border-emerald-500/40"
-                              : "border-[var(--border-primary)] text-[var(--text-secondary)] hover:border-cyan-500"
-                          )}
-                        >
-                          {copiedModelId === m.modelId ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
-                          <span>{copiedModelId === m.modelId ? "Copied" : "Copy ID"}</span>
-                        </button>
-                      </div>
-
-                      <div className="flex items-center justify-between gap-2 text-xs">
-                        <code className="font-mono text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20 truncate">
-                          {m.modelId}
-                        </code>
-                        <span className="font-mono text-[11px] text-[var(--text-muted)] shrink-0">
-                          Context: {m.contextWindow || "128K"}
-                        </span>
-                      </div>
-
-                      <div className="grid grid-cols-3 gap-2 pt-1 text-center font-mono text-xs">
-                        <div className="p-2 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-primary)]">
-                          <div className="text-[10px] text-[var(--text-muted)] font-sans uppercase">Input / 1M</div>
-                          <div className="font-semibold text-emerald-600 dark:text-emerald-400">{formatRupiah(m.inputPricePer1M)}</div>
-                        </div>
-                        <div className="p-2 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-primary)]">
-                          <div className="text-[10px] text-[var(--text-muted)] font-sans uppercase">Cache / 1M</div>
-                          <div className="font-semibold text-cyan-600 dark:text-cyan-400">{formatRupiah(m.cachePricePer1M)}</div>
-                        </div>
-                        <div className="p-2 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-primary)]">
-                          <div className="text-[10px] text-[var(--text-muted)] font-sans uppercase">Output / 1M</div>
-                          <div className="font-bold text-sky-600 dark:text-sky-400">{formatRupiah(m.outputPricePer1M)}</div>
+                          <div className="p-2 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-primary)]">
+                            <div className="text-[10px] text-[var(--text-muted)] font-sans uppercase">Cache / 1M</div>
+                            {m.originalCachePricePer1M && m.originalCachePricePer1M > m.cachePricePer1M && (
+                              <span className="text-[10px] font-normal line-through text-zinc-400 dark:text-zinc-500 block">
+                                {formatRupiah(m.originalCachePricePer1M)}
+                              </span>
+                            )}
+                            <div className="font-semibold text-cyan-600 dark:text-cyan-400">{formatRupiah(m.cachePricePer1M)}</div>
+                          </div>
+                          <div className="p-2 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border-primary)]">
+                            <div className="text-[10px] text-[var(--text-muted)] font-sans uppercase">Output / 1M</div>
+                            {m.originalOutputPricePer1M && m.originalOutputPricePer1M > m.outputPricePer1M && (
+                              <span className="text-[10px] font-normal line-through text-zinc-400 dark:text-zinc-500 block">
+                                {formatRupiah(m.originalOutputPricePer1M)}
+                              </span>
+                            )}
+                            <div className="font-bold text-cyan-600 dark:text-cyan-400">{formatRupiah(m.outputPricePer1M)}</div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </>
             ) : (
