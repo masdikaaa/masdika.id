@@ -3650,12 +3650,12 @@ aider --model openai/glm-5.3
               </div>
 
               {/* Regenerate Secret Section */}
-              <div className={cn('rounded-xl border p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3', isDark ? 'bg-amber-500/[0.06] border-amber-500/25' : 'bg-amber-50 border-amber-200')}>
+              <div className={cn('rounded-xl border p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3', isDark ? 'bg-cyan-500/[0.06] border-cyan-500/25' : 'bg-cyan-50 border-cyan-200')}>
                 <div className="space-y-0.5">
-                  <div className={cn('text-xs font-bold', isDark ? 'text-amber-300' : 'text-amber-900')}>
+                  <div className={cn('text-xs font-bold', isDark ? 'text-cyan-300' : 'text-cyan-900')}>
                     Regenerate Secret Key
                   </div>
-                  <p className={cn('text-[11px]', isDark ? 'text-zinc-400' : 'text-amber-800')}>
+                  <p className={cn('text-[11px]', isDark ? 'text-zinc-400' : 'text-cyan-800')}>
                     Immediately invalidates the current key and generates a new <code className="font-mono">masdika_ai_...</code> secret.
                   </p>
                 </div>
@@ -3663,7 +3663,12 @@ aider --model openai/glm-5.3
                   type="button"
                   disabled={regeneratingKey || savingEdit}
                   onClick={handleRegenerateKey}
-                  className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
+                  className={cn(
+                    'inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50 transition-colors',
+                    isDark
+                      ? 'bg-cyan-500/20 hover:bg-cyan-500/30 border-cyan-500/40 text-cyan-300'
+                      : 'bg-cyan-600 hover:bg-cyan-700 border-cyan-600 text-white'
+                  )}
                 >
                   <RefreshCw className={cn('w-3.5 h-3.5', regeneratingKey && 'animate-spin')} />
                   <span>{regeneratingKey ? 'Regenerating...' : 'Regenerate Key'}</span>
