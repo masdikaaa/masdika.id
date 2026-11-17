@@ -360,6 +360,12 @@ export default function CustomerAiGatewayPage() {
   const [monthModelPage, setMonthModelPage] = useState<number>(1);
   const [monthModelPageSize, setMonthModelPageSize] = useState<number>(10);
 
+  // Models Catalog Tab: Chat & Image Models Pagination
+  const [modelCatalogPage, setModelCatalogPage] = useState<number>(1);
+  const [modelCatalogPageSize, setModelCatalogPageSize] = useState<number>(10);
+  const [imageModelPage, setImageModelPage] = useState<number>(1);
+  const [imageModelPageSize, setImageModelPageSize] = useState<number>(10);
+
   const handleCopyReqId = (id: string) => {
     navigator.clipboard.writeText(id);
     setCopiedReqId(id);
@@ -853,6 +859,38 @@ export default function CustomerAiGatewayPage() {
     const start = (safeMonthModelPage - 1) * monthModelPageSize;
     return searchedMonthByModel.slice(start, start + monthModelPageSize);
   }, [searchedMonthByModel, safeMonthModelPage, monthModelPageSize]);
+
+  // Models Catalog Tab: Pagination calculation for Chat Models
+  const totalModelCatalogPages = Math.max(
+    1,
+    Math.ceil(
+      filteredModels.length /
+        (modelCatalogPageSize === -1 ? filteredModels.length || 1 : modelCatalogPageSize)
+    )
+  );
+  const safeModelCatalogPage = Math.min(Math.max(1, modelCatalogPage), totalModelCatalogPages);
+
+  const paginatedModels = useMemo(() => {
+    if (modelCatalogPageSize === -1) return filteredModels;
+    const start = (safeModelCatalogPage - 1) * modelCatalogPageSize;
+    return filteredModels.slice(start, start + modelCatalogPageSize);
+  }, [filteredModels, safeModelCatalogPage, modelCatalogPageSize]);
+
+  // Models Catalog Tab: Pagination calculation for Image Models
+  const totalImageModelPages = Math.max(
+    1,
+    Math.ceil(
+      imageModels.length /
+        (imageModelPageSize === -1 ? imageModels.length || 1 : imageModelPageSize)
+    )
+  );
+  const safeImageModelPage = Math.min(Math.max(1, imageModelPage), totalImageModelPages);
+
+  const paginatedImageModels = useMemo(() => {
+    if (imageModelPageSize === -1) return imageModels;
+    const start = (safeImageModelPage - 1) * imageModelPageSize;
+    return imageModels.slice(start, start + imageModelPageSize);
+  }, [imageModels, safeImageModelPage, imageModelPageSize]);
 
   const usageMetrics = useMemo(() => {
     const reqCount = filteredUsageLogs.length;
@@ -3083,7 +3121,10 @@ aider --model openai/glm-5.3
             <div className={cn('w-full sm:w-auto grid grid-cols-2 sm:inline-flex items-center gap-1.5 p-1.5 rounded-xl border', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200')}>
               <button
                 type="button"
-                onClick={() => setModelTypeTab('chat')}
+                onClick={() => {
+                  setModelTypeTab('chat');
+                  setModelCatalogPage(1);
+                }}
                 className={cn(
                   'inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer',
                   modelTypeTab === 'chat'
@@ -3101,7 +3142,10 @@ aider --model openai/glm-5.3
               </button>
               <button
                 type="button"
-                onClick={() => setModelTypeTab('image')}
+                onClick={() => {
+                  setModelTypeTab('image');
+                  setImageModelPage(1);
+                }}
                 className={cn(
                   'inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer',
                   modelTypeTab === 'image'
@@ -3129,21 +3173,40 @@ aider --model openai/glm-5.3
           <div className={cn('rounded-2xl border overflow-hidden', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}>
             <div className={cn('p-4 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3', isDark ? 'border-white/[0.08]' : 'border-slate-200')}>
               <div className="relative flex-1 max-w-md">
-                <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   type="text"
                   value={modelSearch}
-                  onChange={(e) => setModelSearch(e.target.value)}
+                  onChange={(e) => {
+                    setModelSearch(e.target.value);
+                    setModelCatalogPage(1);
+                  }}
                   placeholder="Search model name, ID, or provider..."
-                  className={cn('w-full pl-10 pr-4 py-2 rounded-xl text-xs sm:text-sm border outline-none transition-colors', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white focus:border-cyan-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-cyan-500')}
+                  className={cn('w-full pl-10 pr-8 py-2 rounded-xl text-xs sm:text-sm border outline-none transition-colors', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-white focus:border-cyan-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-cyan-500')}
                 />
+                {modelSearch && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setModelSearch('');
+                      setModelCatalogPage(1);
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-400 hover:text-white cursor-pointer"
+                    title="Clear search"
+                  >
+                    ✕
+                  </button>
+                )}
               </div>
               <div className="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                 {providers.map((prov) => (
                   <button
                     key={prov}
                     type="button"
-                    onClick={() => setProviderFilter(prov)}
+                    onClick={() => {
+                      setProviderFilter(prov);
+                      setModelCatalogPage(1);
+                    }}
                     className={cn(
                       'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap cursor-pointer',
                       providerFilter === prov
@@ -3172,7 +3235,35 @@ aider --model openai/glm-5.3
                   </tr>
                 </thead>
                 <tbody className={cn('divide-y text-xs sm:text-sm', isDark ? 'divide-white/[0.06]' : 'divide-slate-100')}>
-                  {filteredModels.map((m) => {
+                  {filteredModels.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-5 py-12 text-center text-xs space-y-3">
+                        <div className="text-zinc-400">
+                          No models found matching &quot;<span className="text-cyan-400 font-semibold">{modelSearch}</span>&quot;
+                          {providerFilter !== 'ALL' && (
+                            <span>
+                              {' '}under provider{' '}
+                              <span className="text-cyan-400 font-semibold">
+                                {providerFilter === 'ON_PROMO' ? 'On Promo' : providerFilter}
+                              </span>
+                            </span>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setModelSearch('');
+                            setProviderFilter('ALL');
+                            setModelCatalogPage(1);
+                          }}
+                          className="px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-400 text-slate-950 hover:bg-cyan-300 transition-colors cursor-pointer"
+                        >
+                          Clear Filters
+                        </button>
+                      </td>
+                    </tr>
+                  ) : (
+                    paginatedModels.map((m) => {
                     const discountPct =
                       m.originalOutputPricePer1M && m.originalOutputPricePer1M > m.outputPricePer1M
                         ? Math.round(((m.originalOutputPricePer1M - m.outputPricePer1M) / m.originalOutputPricePer1M) * 100)
@@ -3345,10 +3436,65 @@ aider --model openai/glm-5.3
                         )}
                       </Fragment>
                     );
-                  })}
+                  })
+                )}
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination Controls */}
+            {filteredModels.length > 0 && (
+              <div className={cn(
+                'px-4 sm:px-5 py-3 border-t flex flex-col sm:flex-row items-center justify-between gap-3 text-xs',
+                isDark ? 'border-white/[0.06] bg-[#0c0d12]' : 'border-slate-100 bg-slate-50/70'
+              )}>
+                {/* Left: Range Info */}
+                <div className={cn('text-center sm:text-left', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+                  Showing <span className={cn('font-bold font-mono', isDark ? 'text-white' : 'text-slate-900')}>
+                    {(safeModelCatalogPage - 1) * (modelCatalogPageSize === -1 ? filteredModels.length : modelCatalogPageSize) + 1}
+                  </span> to <span className={cn('font-bold font-mono', isDark ? 'text-white' : 'text-slate-900')}>
+                    {modelCatalogPageSize === -1 ? filteredModels.length : Math.min(safeModelCatalogPage * modelCatalogPageSize, filteredModels.length)}
+                  </span> of <span className={cn('font-bold font-mono', isDark ? 'text-white' : 'text-slate-900')}>
+                    {filteredModels.length}
+                  </span> models
+                </div>
+
+                {/* Right: Page Size & Pagination */}
+                <div className="flex items-center gap-3 flex-wrap justify-center">
+                  <div className="flex items-center gap-1.5 text-zinc-400">
+                    <span className="hidden xs:inline">Show:</span>
+                    <div className="w-24">
+                      <Select
+                        value={modelCatalogPageSize}
+                        onChange={(val) => {
+                          setModelCatalogPageSize(Number(val));
+                          setModelCatalogPage(1);
+                        }}
+                        options={[
+                          { value: 10, label: '10' },
+                          { value: 20, label: '20' },
+                          { value: 50, label: '50' },
+                          { value: -1, label: `All (${filteredModels.length})` },
+                        ]}
+                        direction="up"
+                        className="py-1 px-2.5 text-xs font-semibold rounded-lg"
+                      />
+                    </div>
+                  </div>
+
+                  {totalModelCatalogPages > 1 && (
+                    <Pagination
+                      currentPage={safeModelCatalogPage}
+                      totalPages={totalModelCatalogPages}
+                      onPageChange={(page) => {
+                        setModelCatalogPage(page);
+                        setExpandedModelId(null);
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+            )}
           </div>
           )}
 
@@ -3365,7 +3511,7 @@ aider --model openai/glm-5.3
             </div>
             {/* Mobile Stacked Cards for Image Models */}
             <div className="md:hidden divide-y divide-white/[0.06]">
-              {imageModels.map((im) => (
+              {paginatedImageModels.map((im) => (
                 <div key={`mob-im-${im.modelId}`} className="p-4 space-y-2.5">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
@@ -3443,7 +3589,7 @@ aider --model openai/glm-5.3
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/[0.06]">
-                  {imageModels.map((im) => (
+                  {paginatedImageModels.map((im) => (
                     <tr key={im.modelId} className={isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-slate-50'}>
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-2">
@@ -3480,9 +3626,9 @@ aider --model openai/glm-5.3
                               <span
                                 key={sz}
                                 className={cn(
-                                  'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono text-[11px]',
-                                  isDark ? 'bg-[#0a0a0c] border-white/[0.1] text-zinc-200' : 'bg-slate-50 border-slate-200 text-slate-800'
-                                )}
+                                   'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono text-[11px]',
+                                   isDark ? 'bg-[#0a0a0c] border-white/[0.1] text-zinc-200' : 'bg-slate-50 border-slate-200 text-slate-800'
+                                 )}
                               >
                                 <span>{sz.replace('x', '×')}</span>
                                 <span className="text-cyan-400 font-bold">{formatRupiah(szPrice)}</span>
@@ -3513,6 +3659,56 @@ aider --model openai/glm-5.3
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination Controls for Image Models */}
+            {imageModels.length > 0 && (
+              <div className={cn(
+                'px-4 sm:px-5 py-3 border-t flex flex-col sm:flex-row items-center justify-between gap-3 text-xs',
+                isDark ? 'border-white/[0.06] bg-[#0c0d12]' : 'border-slate-100 bg-slate-50/70'
+              )}>
+                {/* Left: Range Info */}
+                <div className={cn('text-center sm:text-left', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+                  Showing <span className={cn('font-bold font-mono', isDark ? 'text-white' : 'text-slate-900')}>
+                    {(safeImageModelPage - 1) * (imageModelPageSize === -1 ? imageModels.length : imageModelPageSize) + 1}
+                  </span> to <span className={cn('font-bold font-mono', isDark ? 'text-white' : 'text-slate-900')}>
+                    {imageModelPageSize === -1 ? imageModels.length : Math.min(safeImageModelPage * imageModelPageSize, imageModels.length)}
+                  </span> of <span className={cn('font-bold font-mono', isDark ? 'text-white' : 'text-slate-900')}>
+                    {imageModels.length}
+                  </span> image models
+                </div>
+
+                {/* Right: Page Size & Pagination */}
+                <div className="flex items-center gap-3 flex-wrap justify-center">
+                  <div className="flex items-center gap-1.5 text-zinc-400">
+                    <span className="hidden xs:inline">Show:</span>
+                    <div className="w-24">
+                      <Select
+                        value={imageModelPageSize}
+                        onChange={(val) => {
+                          setImageModelPageSize(Number(val));
+                          setImageModelPage(1);
+                        }}
+                        options={[
+                          { value: 10, label: '10' },
+                          { value: 20, label: '20' },
+                          { value: -1, label: `All (${imageModels.length})` },
+                        ]}
+                        direction="up"
+                        className="py-1 px-2.5 text-xs font-semibold rounded-lg"
+                      />
+                    </div>
+                  </div>
+
+                  {totalImageModelPages > 1 && (
+                    <Pagination
+                      currentPage={safeImageModelPage}
+                      totalPages={totalImageModelPages}
+                      onPageChange={setImageModelPage}
+                    />
+                  )}
+                </div>
+              </div>
+            )}
           </div>
           )}
         </div>
