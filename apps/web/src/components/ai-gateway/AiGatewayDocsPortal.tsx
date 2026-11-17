@@ -548,8 +548,8 @@ aider --model openai/glm-5.3`,
     },
     pricing: {
       title: 'Pricing and billing',
-      subtitle: 'Understand AI Balance holds, token cost calculation, prompt caching, and Peak Hours in WIB.',
-      anchors: ['AI Balance & Top-Up', 'Token formula', 'Peak hours (WIB)'],
+      subtitle: 'Pay-as-you-go per token in Rupiah from your AI Balance - no token bundles or expiring quotas.',
+      anchors: ['Pay-as-you-go per token', 'Hold & settle lifecycle', 'Token formula & Peak hours', 'Image billing & Commitment'],
     },
     limits: {
       title: 'Limits and errors',
@@ -1074,15 +1074,27 @@ aider --model openai/glm-5.3`,
 
           {/* PAGE: PRICING & BILLING */}
           {page === 'pricing' && (
-            <div className="space-y-5 text-xs leading-relaxed">
+            <div className="space-y-4 text-xs leading-relaxed">
+              <Callout variant="info" title="100% Pay-As-You-Go Per Token (No Token Bundles)" isDark={isDark}>
+                You do not buy fixed token packs. Simply top up your <strong>AI Balance</strong> in Rupiah from your Masdika Wallet (minimum Rp 5.000, platform fee Rp {topupFeeRp.toLocaleString('id-ID')}) and pay only for the exact tokens each request uses.
+              </Callout>
+
               <div className={cn('rounded-xl border p-4 space-y-2', isDark ? 'bg-[#0b0d12] border-white/[0.08] text-zinc-300' : 'bg-slate-50 border-slate-200 text-slate-700')}>
-                <div className={cn('font-bold text-sm', isDark ? 'text-white' : 'text-slate-900')}>AI Balance &amp; Top-Up</div>
-                <p>Gateway usage is billed directly in Rupiah from your dedicated <strong>AI Balance</strong>. Top up from your Masdika Wallet manually or enable <strong>Auto Top-Up</strong> (minimum top-up Rp 5.000, platform fee Rp {topupFeeRp.toLocaleString('id-ID')}).</p>
+                <div className={cn('font-bold text-sm', isDark ? 'text-white' : 'text-slate-900')}>Hold, Settle &amp; Zero Charge on Failure</div>
+                <p>Before forwarding a request, the gateway reserves a small estimated hold from your AI Balance. Once the model finishes, only the exact token cost is settled and any unused hold is immediately refunded.</p>
+                <p>Failed or rejected upstream requests (<code className="font-mono">4xx/5xx</code>) are <strong>never charged (Rp 0)</strong> - the full hold is released back to your AI Balance.</p>
               </div>
+
               <div className={cn('rounded-xl border p-4 space-y-2', isDark ? 'bg-[#0b0d12] border-white/[0.08] text-zinc-300' : 'bg-slate-50 border-slate-200 text-slate-700')}>
-                <div className={cn('font-bold text-sm', isDark ? 'text-white' : 'text-slate-900')}>Token Formula &amp; Peak Hours (WIB)</div>
-                <p>Cost formula: <code className="font-mono text-cyan-400">(input × inputPrice + cached × cachePrice + output × outputPrice) / 1,000,000</code>.</p>
-                <p>Models with <strong>Peak Pricing</strong> apply peak multipliers on <strong>Monday-Friday, 08:00-11:00 and 13:00-17:00 WIB</strong>. Failed upstream requests (<code className="font-mono">4xx/5xx</code>) cost Rp 0.</p>
+                <div className={cn('font-bold text-sm', isDark ? 'text-white' : 'text-slate-900')}>Token Formula, Prompt Caching &amp; Peak Hours (WIB)</div>
+                <p>Cost formula: <code className="font-mono text-cyan-400">(input × inputPrice + cached × cachePrice + output × outputPrice) / 1,000,000</code> in Rupiah.</p>
+                <p>Cached prompt reads are billed at the lower <code className="font-mono">cachePrice</code>. Models marked with <strong>Peak Pricing</strong> apply peak multipliers on <strong>Monday-Friday, 08:00-11:00 and 13:00-17:00 WIB</strong>.</p>
+              </div>
+
+              <div className={cn('rounded-xl border p-4 space-y-2', isDark ? 'bg-[#0b0d12] border-white/[0.08] text-zinc-300' : 'bg-slate-50 border-slate-200 text-slate-700')}>
+                <div className={cn('font-bold text-sm', isDark ? 'text-white' : 'text-slate-900')}>Image Billing &amp; Active Service Commitment Guard</div>
+                <p>Image generation is billed <strong>per delivered image</strong> according to the model and resolution. Failed or refused generations cost Rp 0.</p>
+                <p>Both manual and Auto Top-Up always protect the wallet balance locked by your active Masdika services (Cloud VPS, Managed Database, Managed Apps, File CDN, Object Storage) so AI top-ups never consume committed service funds.</p>
               </div>
             </div>
           )}

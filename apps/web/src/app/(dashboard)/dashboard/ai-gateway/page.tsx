@@ -2570,6 +2570,11 @@ aider --model openai/glm-5.3
                 </span>
               </button>
             </div>
+
+            <div className={cn('inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[11px]', isDark ? 'bg-cyan-500/10 border-cyan-500/25 text-cyan-300' : 'bg-cyan-50 border-cyan-200 text-cyan-800')}>
+              <Zap className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+              <span>Pay-as-you-go per token in Rupiah - no token bundles required. Failed requests cost Rp 0.</span>
+            </div>
           </div>
 
           {modelTypeTab === 'chat' && (
