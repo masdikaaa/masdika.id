@@ -110,8 +110,16 @@ import (
 func main() {
   // Stream multipart payload to Masdika File CDN
   fmt.Println("Upload completed -> https://www.masdika.id/api/media/b8f9e0a2")
-}`
+}
+`
 };
+
+const CDN_CODE_TABS = [
+  { id: "curl", label: "cURL" },
+  { id: "javascript", label: "JavaScript" },
+  { id: "python", label: "Python" },
+  { id: "go", label: "Go" },
+] as const;
 
 interface PlanItem {
   id: number;
@@ -277,209 +285,60 @@ export default function FileCdnClient({
         <section className="py-10 sm:py-14 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             
-            {/* Left: Dedicated High-Contrast Code Terminal */}
+            {/* Left: Dedicated macOS-style Code Snippet Window (Light & Dark Adaptive) */}
             <div className="lg:col-span-7">
               <FadeIn direction="up">
-                <div 
-                  className="rounded-2xl border border-slate-700/80 shadow-2xl overflow-hidden"
-                  style={{ backgroundColor: "#060d19" }}
-                >
-                  
-                  {/* Row 1: Window Controls + Title + Copy Button (Fixed Header) */}
-                  <div 
-                    className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 border-b border-slate-800"
-                    style={{ backgroundColor: "#0c1425" }}
-                  >
-                    <div className="flex items-center gap-2.5 shrink-0">
-                      <div className="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e]" />
-                      <div className="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123]" />
-                      <div className="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29]" />
-                      <span className="text-xs font-mono font-bold text-slate-200 ml-1.5 tracking-wide">
-                        bash — upload.sh
-                      </span>
+                <div className="w-full rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-[#0d0e15] text-slate-800 dark:text-slate-100 shadow-xl dark:shadow-2xl overflow-hidden ring-1 ring-black/5 dark:ring-white/5">
+                  {/* macOS Window Titlebar */}
+                  <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 border-b border-slate-200/90 dark:border-white/[0.08] bg-slate-100/90 dark:bg-[#14151f] gap-2 sm:gap-3 select-none">
+                    {/* macOS Traffic Light Buttons */}
+                    <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                      <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#ff5f56] border border-[#e0443e]/80 shadow-xs inline-block" />
+                      <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#ffbd2e] border border-[#dea123]/80 shadow-xs inline-block" />
+                      <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#27c93f] border border-[#1aab29]/80 shadow-xs inline-block" />
                     </div>
 
-                    {/* Copy Button in Header Bar - Never overlaps code on mobile */}
-                    <button
-                      onClick={handleCopyCode}
-                      className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-bold transition-all flex items-center gap-1.5 text-xs cursor-pointer shadow-sm hover:scale-105 active:scale-95 shrink-0"
-                      title="Copy code snippet"
-                    >
-                      {copied ? (
-                        <>
-                          <Check className="w-3.5 h-3.5 text-emerald-400" />
-                          <span className="text-emerald-400 font-sans text-xs">Copied!</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3.5 h-3.5 text-cyan-400" />
-                          <span className="font-sans text-slate-100 text-xs">Copy</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-
-                  {/* Row 2: Language Switcher Tabs Sub-bar */}
-                  <div 
-                    className="px-4 sm:px-6 py-2 border-b border-slate-800/80 flex items-center justify-between gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-                    style={{ backgroundColor: "#080f1d" }}
-                  >
-                    <div className="flex items-center gap-1 p-0.5 rounded-xl border border-slate-800 shadow-inner bg-[#040810]">
-                      {(["curl", "javascript", "python", "go"] as const).map((tab) => (
+                    {/* Tabs / Switcher */}
+                    <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden flex-1 min-w-0 px-1">
+                      {CDN_CODE_TABS.map((c) => (
                         <button
-                          key={tab}
-                          onClick={() => setActiveCodeTab(tab)}
+                          key={c.id}
+                          type="button"
+                          onClick={() => setActiveCodeTab(c.id)}
                           className={cn(
-                            "px-2.5 sm:px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer shrink-0",
-                            activeCodeTab === tab
-                              ? "bg-cyan-500 text-slate-950 shadow-sm"
-                              : "text-slate-300 hover:text-white hover:bg-slate-800/80"
+                            "px-2 sm:px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0",
+                            activeCodeTab === c.id
+                              ? "bg-white dark:bg-cyan-500/20 text-slate-900 dark:text-cyan-300 border border-slate-300/80 dark:border-cyan-500/40 shadow-xs font-bold"
+                              : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200 hover:bg-slate-200/50 dark:hover:bg-white/5"
                           )}
                         >
-                          {tab}
+                          {c.label}
                         </button>
                       ))}
                     </div>
 
-                    <span className="text-[11px] font-mono text-slate-400 hidden sm:inline">
-                      POST /api/v1/cdn/upload
-                    </span>
+                    {/* Copy Button */}
+                    <button
+                      type="button"
+                      onClick={handleCopyCode}
+                      className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-medium text-slate-700 dark:text-zinc-300 hover:text-cyan-600 dark:hover:text-cyan-300 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 shadow-xs transition-colors cursor-pointer shrink-0"
+                      title="Copy code to clipboard"
+                    >
+                      {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span className="hidden xs:inline sm:inline">{copied ? "Copied!" : "Copy"}</span>
+                    </button>
                   </div>
 
-                  {/* Code Body with Sleek Subtle Scrollbar & Zero Overlap */}
-                  <div className="relative p-4 sm:p-6 font-mono text-xs sm:text-[14px] md:text-[15px] leading-relaxed overflow-x-auto [scrollbar-width:thin] [scrollbar-color:#334155_transparent] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-700/80 [&::-webkit-scrollbar-thumb]:rounded-full">
-                    <div className="flex">
-                      {/* Line Numbers Column */}
-                      <div className="select-none text-right pr-4 mr-4 border-r border-slate-800 text-slate-500 font-mono text-xs sm:text-sm leading-relaxed space-y-0.5">
-                        {activeCodeTab === "curl" && (
-                          <>
-                            <div>1</div>
-                            <div>2</div>
-                            <div>3</div>
-                          </>
-                        )}
-                        {activeCodeTab === "javascript" && (
-                          <>
-                            <div>1</div>
-                            <div>2</div>
-                            <div>3</div>
-                            <div>4</div>
-                            <div>5</div>
-                            <div>6</div>
-                            <div>7</div>
-                            <div>8</div>
-                            <div>9</div>
-                            <div>10</div>
-                            <div>11</div>
-                          </>
-                        )}
-                        {activeCodeTab === "python" && (
-                          <>
-                            <div>1</div>
-                            <div>2</div>
-                            <div>3</div>
-                            <div>4</div>
-                            <div>5</div>
-                            <div>6</div>
-                            <div>7</div>
-                            <div>8</div>
-                            <div>9</div>
-                          </>
-                        )}
-                        {activeCodeTab === "go" && (
-                          <>
-                            <div>1</div>
-                            <div>2</div>
-                            <div>3</div>
-                            <div>4</div>
-                            <div>5</div>
-                            <div>6</div>
-                            <div>7</div>
-                            <div>8</div>
-                            <div>9</div>
-                            <div>10</div>
-                            <div>11</div>
-                          </>
-                        )}
-                      </div>
-
-                      {/* Code Content */}
-                      <div className="flex-1 min-w-0 font-mono text-slate-100 selection:bg-cyan-500/30 whitespace-pre">
-                        {activeCodeTab === "curl" && (
-                          <div>
-                            <div><span className="text-cyan-400 font-bold">curl</span> <span className="text-amber-300 font-bold">-X</span> <span className="text-emerald-400 font-black">POST</span> <span className="text-sky-300 font-semibold underline underline-offset-4 decoration-cyan-500/40">https://www.masdika.id/api/v1/cdn/upload</span> <span className="text-slate-400 font-bold">\</span></div>
-                            <div>{"  "}<span className="text-amber-300 font-bold">-H</span> <span className="text-emerald-300 font-semibold">&quot;Authorization: Bearer YOUR_API_KEY&quot;</span> <span className="text-slate-400 font-bold">\</span></div>
-                            <div>{"  "}<span className="text-amber-300 font-bold">-F</span> <span className="text-emerald-300 font-semibold">&quot;file=@asset.png&quot;</span></div>
-                          </div>
-                        )}
-                        {activeCodeTab === "javascript" && (
-                          <div>
-                            <div><span className="text-purple-400 font-bold">const</span> <span className="text-slate-100 font-semibold">formData</span> = <span className="text-purple-400 font-bold">new</span> <span className="text-sky-300 font-bold">FormData</span>();</div>
-                            <div><span className="text-slate-100">formData</span>.<span className="text-blue-300 font-semibold">append</span>(<span className="text-emerald-300 font-medium">&apos;file&apos;</span>, fileInput.files[<span className="text-amber-300 font-bold">0</span>]);</div>
-                            <div>&nbsp;</div>
-                            <div><span className="text-purple-400 font-bold">const</span> <span className="text-slate-100 font-semibold">res</span> = <span className="text-purple-400 font-bold">await</span> <span className="text-blue-300 font-semibold">fetch</span>(<span className="text-emerald-300 font-medium">&apos;https://www.masdika.id/api/v1/cdn/upload&apos;</span>, &#123;</div>
-                            <div>{"  "}method: <span className="text-emerald-400 font-bold">&apos;POST&apos;</span>,</div>
-                            <div>{"  "}headers: &#123; <span className="text-emerald-300 font-medium">&apos;Authorization&apos;</span>: <span className="text-emerald-300 font-medium">&apos;Bearer YOUR_API_KEY&apos;</span> &#125;,</div>
-                            <div>{"  "}body: <span className="text-slate-100">formData</span></div>
-                            <div>&#125;);</div>
-                            <div>&nbsp;</div>
-                            <div><span className="text-purple-400 font-bold">const</span> &#123; <span className="text-cyan-300 font-semibold">file</span> &#125; = <span className="text-purple-400 font-bold">await</span> <span className="text-slate-100">res</span>.<span className="text-blue-300 font-semibold">json</span>();</div>
-                            <div>console.<span className="text-blue-300 font-semibold">log</span>(<span className="text-emerald-300 font-medium">&apos;CDN Link:&apos;</span>, <span className="text-cyan-300 font-semibold">file.url</span>);</div>
-                          </div>
-                        )}
-                        {activeCodeTab === "python" && (
-                          <div>
-                            <div><span className="text-purple-400 font-bold">import</span> <span className="text-sky-300 font-bold">requests</span></div>
-                            <div>&nbsp;</div>
-                            <div><span className="text-slate-100 font-semibold">url</span> = <span className="text-emerald-300 font-medium">&quot;https://www.masdika.id/api/v1/cdn/upload&quot;</span></div>
-                            <div><span className="text-slate-100 font-semibold">headers</span> = &#123;<span className="text-emerald-300 font-medium">&quot;Authorization&quot;</span>: <span className="text-emerald-300 font-medium">&quot;Bearer YOUR_API_KEY&quot;</span>&#125;</div>
-                            <div>&nbsp;</div>
-                            <div><span className="text-purple-400 font-bold">with</span> <span className="text-blue-300 font-semibold">open</span>(<span className="text-emerald-300 font-medium">&quot;asset.png&quot;</span>, <span className="text-emerald-300 font-medium">&quot;rb&quot;</span>) <span className="text-purple-400 font-bold">as</span> <span className="text-slate-100">f</span>:</div>
-                            <div>{"  "}<span className="text-slate-100 font-semibold">res</span> = requests.<span className="text-blue-300 font-semibold">post</span>(url, headers=headers, files=&#123;<span className="text-emerald-300 font-medium">&quot;file&quot;</span>: f&#125;)</div>
-                            <div>&nbsp;</div>
-                            <div><span className="text-blue-300 font-semibold">print</span>(<span className="text-emerald-300 font-medium">&quot;CDN Link:&quot;</span>, res.<span className="text-blue-300 font-semibold">json</span>()[<span className="text-emerald-300 font-medium">&quot;file&quot;</span>][<span className="text-emerald-300 font-medium">&quot;url&quot;</span>])</div>
-                          </div>
-                        )}
-                        {activeCodeTab === "go" && (
-                          <div>
-                            <div><span className="text-purple-400 font-bold">package</span> <span className="text-sky-300 font-bold">main</span></div>
-                            <div>&nbsp;</div>
-                            <div><span className="text-purple-400 font-bold">import</span> (</div>
-                            <div>{"  "}<span className="text-emerald-300 font-medium">&quot;fmt&quot;</span></div>
-                            <div>{"  "}<span className="text-emerald-300 font-medium">&quot;net/http&quot;</span></div>
-                            <div>)</div>
-                            <div>&nbsp;</div>
-                            <div><span className="text-purple-400 font-bold">func</span> <span className="text-blue-300 font-semibold">main</span>() &#123;</div>
-                            <div>{"  "}<span className="text-slate-400 italic">// Stream multipart payload to Masdika File CDN</span></div>
-                            <div>{"  "}fmt.<span className="text-blue-300 font-semibold">Println</span>(<span className="text-emerald-300 font-medium">&quot;Upload completed -&gt; https://www.masdika.id/api/media/b8f9e0a2&quot;</span>)</div>
-                            <div>&#125;</div>
-                          </div>
-                        )}
-                      </div>
+                  {/* Code Area with Line Numbers */}
+                  <div className="p-3.5 sm:p-5 flex text-[11px] sm:text-xs font-mono overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden leading-relaxed bg-slate-50/70 dark:bg-[#0a0b10]">
+                    <div className="select-none pr-3 sm:pr-4 text-right text-slate-400 dark:text-zinc-600 font-mono text-[11px] sm:text-xs border-r border-slate-200/90 dark:border-white/[0.08] space-y-0.5 min-w-[1.8rem] sm:min-w-[2.2rem] shrink-0">
+                      {RAW_CODE[activeCodeTab].trim().split("\n").map((_, i) => (
+                        <div key={i}>{i + 1}</div>
+                      ))}
                     </div>
-                  </div>
-
-                  {/* Code Box Footer: Response Preview */}
-                  <div 
-                    className="px-4 sm:px-6 py-2.5 sm:py-3 border-t border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono"
-                    style={{ backgroundColor: "#0c1425" }}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                      </span>
-                      <span className="font-bold text-emerald-400">HTTP 201 Created</span>
-                      <span className="text-slate-500">•</span>
-                      <span className="text-slate-300">24h Auto-Expiry</span>
-                    </div>
-
-                    <div className="text-slate-200 font-medium flex items-center gap-1.5 overflow-x-auto text-[11px] sm:text-xs">
-                      <span className="text-slate-400 shrink-0">Payload:</span>
-                      <span className="text-cyan-300 font-bold bg-[#060d19] px-2 py-0.5 rounded border border-cyan-800/60 truncate max-w-[280px] sm:max-w-none">
-                        &#123;&quot;success&quot;: true, &quot;file&quot;: &#123;&quot;url&quot;: &quot;https://www.masdika.id/api/media/b8f9e0a2&quot;&#125;&#125;
-                      </span>
-                    </div>
+                    <pre className="pl-3 sm:pl-4 font-mono text-[11px] sm:text-xs text-slate-800 dark:text-zinc-200 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden leading-relaxed flex-1">
+                      <code>{RAW_CODE[activeCodeTab].trim()}</code>
+                    </pre>
                   </div>
                 </div>
               </FadeIn>

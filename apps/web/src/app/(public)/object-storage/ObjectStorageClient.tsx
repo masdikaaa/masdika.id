@@ -115,6 +115,13 @@ print("Uploaded to S3!")`,
 ],`
 };
 
+const S3_CODE_TABS = [
+  { id: "aws-cli", label: "AWS CLI" },
+  { id: "nodejs", label: "Node.js (AWS SDK v3)" },
+  { id: "python", label: "Python (Boto3)" },
+  { id: "laravel", label: "Laravel" },
+] as const;
+
 interface PlanItem {
   id: number;
   name: string;
@@ -273,170 +280,60 @@ export default function ObjectStorageClient({
         <section className="py-10 sm:py-14 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
 
-            {/* Left: Dedicated High-Contrast Code Terminal */}
+            {/* Left: Dedicated macOS-style Code Snippet Window (Light & Dark Adaptive) */}
             <div className="lg:col-span-7">
               <FadeIn direction="up">
-                <div
-                  className="rounded-2xl border border-slate-700/80 shadow-2xl overflow-hidden"
-                  style={{ backgroundColor: "#060d19" }}
-                >
-
-                  {/* Row 1: Window Controls + Title + Copy Button */}
-                  <div
-                    className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 border-b border-slate-800"
-                    style={{ backgroundColor: "#0c1425" }}
-                  >
-                    <div className="flex items-center gap-2.5 shrink-0">
-                      <div className="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e]" />
-                      <div className="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123]" />
-                      <div className="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29]" />
-                      <span className="text-xs font-mono font-bold text-slate-200 ml-1.5 tracking-wide">
-                        s3-sdk — integration
-                      </span>
+                <div className="w-full rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-[#0d0e15] text-slate-800 dark:text-slate-100 shadow-xl dark:shadow-2xl overflow-hidden ring-1 ring-black/5 dark:ring-white/5">
+                  {/* macOS Window Titlebar */}
+                  <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 border-b border-slate-200/90 dark:border-white/[0.08] bg-slate-100/90 dark:bg-[#14151f] gap-2 sm:gap-3 select-none">
+                    {/* macOS Traffic Light Buttons */}
+                    <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                      <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#ff5f56] border border-[#e0443e]/80 shadow-xs inline-block" />
+                      <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#ffbd2e] border border-[#dea123]/80 shadow-xs inline-block" />
+                      <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#27c93f] border border-[#1aab29]/80 shadow-xs inline-block" />
                     </div>
 
-                    <button
-                      onClick={handleCopyCode}
-                      className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-bold transition-all flex items-center gap-1.5 text-xs cursor-pointer shadow-sm hover:scale-105 active:scale-95 shrink-0"
-                      title="Copy code snippet"
-                    >
-                      {copied ? (
-                        <>
-                          <Check className="w-3.5 h-3.5 text-emerald-400" />
-                          <span className="text-emerald-400 font-sans text-xs">Copied!</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3.5 h-3.5 text-cyan-400" />
-                          <span className="font-sans text-slate-100 text-xs">Copy</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-
-                  {/* Row 2: Language Switcher Tabs Sub-bar */}
-                  <div
-                    className="px-4 sm:px-6 py-2 border-b border-slate-800/80 flex items-center justify-between gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-                    style={{ backgroundColor: "#080f1d" }}
-                  >
-                    <div className="flex items-center gap-1 p-0.5 rounded-xl border border-slate-800 shadow-inner bg-[#040810]">
-                      {(["aws-cli", "nodejs", "python", "laravel"] as const).map((tab) => (
+                    {/* Tabs / Switcher */}
+                    <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden flex-1 min-w-0 px-1">
+                      {S3_CODE_TABS.map((c) => (
                         <button
-                          key={tab}
-                          onClick={() => setActiveCodeTab(tab)}
+                          key={c.id}
+                          type="button"
+                          onClick={() => setActiveCodeTab(c.id)}
                           className={cn(
-                            "px-2.5 sm:px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer shrink-0",
-                            activeCodeTab === tab
-                              ? "bg-cyan-500 text-slate-950 shadow-sm"
-                              : "text-slate-300 hover:text-white hover:bg-slate-800/80"
+                            "px-2 sm:px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0",
+                            activeCodeTab === c.id
+                              ? "bg-white dark:bg-cyan-500/20 text-slate-900 dark:text-cyan-300 border border-slate-300/80 dark:border-cyan-500/40 shadow-xs font-bold"
+                              : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200 hover:bg-slate-200/50 dark:hover:bg-white/5"
                           )}
                         >
-                          {tab}
+                          {c.label}
                         </button>
                       ))}
                     </div>
 
-                    <span className="text-[11px] font-mono text-slate-400 hidden sm:inline">
-                      https://s3.masdika.id
-                    </span>
+                    {/* Copy Button */}
+                    <button
+                      type="button"
+                      onClick={handleCopyCode}
+                      className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-medium text-slate-700 dark:text-zinc-300 hover:text-cyan-600 dark:hover:text-cyan-300 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 shadow-xs transition-colors cursor-pointer shrink-0"
+                      title="Copy code to clipboard"
+                    >
+                      {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span className="hidden xs:inline sm:inline">{copied ? "Copied!" : "Copy"}</span>
+                    </button>
                   </div>
 
-                  {/* Code Body */}
-                  <div className="relative p-4 sm:p-6 font-mono text-xs sm:text-[14px] md:text-[15px] leading-relaxed overflow-x-auto [scrollbar-width:thin] [scrollbar-color:#334155_transparent] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-700/80 [&::-webkit-scrollbar-thumb]:rounded-full">
-                    <div className="flex">
-                      {/* Line Numbers Column */}
-                      <div className="select-none text-right pr-4 mr-4 border-r border-slate-800 text-slate-500 font-mono text-xs sm:text-sm leading-relaxed space-y-0.5">
-                        {RAW_CODE[activeCodeTab].split("\n").map((_, idx) => (
-                          <div key={idx}>{idx + 1}</div>
-                        ))}
-                      </div>
-
-                      {/* Code Content */}
-                      <div className="flex-1 min-w-0 font-mono text-slate-100 selection:bg-cyan-500/30 whitespace-pre">
-                        {activeCodeTab === "aws-cli" && (
-                          <div>
-                            <div><span className="text-purple-400 font-bold">export</span> <span className="text-cyan-300">AWS_ACCESS_KEY_ID</span>=<span className="text-emerald-300">&quot;YOUR_ACCESS_KEY&quot;</span></div>
-                            <div><span className="text-purple-400 font-bold">export</span> <span className="text-cyan-300">AWS_SECRET_ACCESS_KEY</span>=<span className="text-emerald-300">&quot;YOUR_SECRET_KEY&quot;</span></div>
-                            <div>&nbsp;</div>
-                            <div><span className="text-cyan-400 font-bold">aws</span> s3 cp ./backup.tar.gz <span className="text-sky-300">s3://my-app-bucket/backups/</span> <span className="text-slate-400 font-bold">\</span></div>
-                            <div>{"  "}<span className="text-amber-300 font-bold">--endpoint-url</span> <span className="text-emerald-300">https://s3.masdika.id</span></div>
-                          </div>
-                        )}
-                        {activeCodeTab === "nodejs" && (
-                          <div>
-                            <div><span className="text-purple-400 font-bold">import</span> &#123; <span className="text-sky-300">S3Client</span>, <span className="text-sky-300">PutObjectCommand</span> &#125; <span className="text-purple-400 font-bold">from</span> <span className="text-emerald-300">&quot;@aws-sdk/client-s3&quot;</span>;</div>
-                            <div>&nbsp;</div>
-                            <div><span className="text-purple-400 font-bold">const</span> <span className="text-slate-100">s3</span> = <span className="text-purple-400 font-bold">new</span> <span className="text-sky-300">S3Client</span>(&#123;</div>
-                            <div>{"  "}region: <span className="text-emerald-300">&quot;id-sidoarjo-1&quot;</span>,</div>
-                            <div>{"  "}endpoint: <span className="text-emerald-300">&quot;https://s3.masdika.id&quot;</span>,</div>
-                            <div>{"  "}forcePathStyle: <span className="text-amber-300">true</span>,</div>
-                            <div>{"  "}credentials: &#123;</div>
-                            <div>{"    "}accessKeyId: process.env.S3_ACCESS_KEY!,</div>
-                            <div>{"    "}secretAccessKey: process.env.S3_SECRET_KEY!,</div>
-                            <div>{"  "}&#125;,</div>
-                            <div>&#125;);</div>
-                            <div>&nbsp;</div>
-                            <div><span className="text-purple-400 font-bold">await</span> s3.<span className="text-blue-300">send</span>(<span className="text-purple-400 font-bold">new</span> <span className="text-sky-300">PutObjectCommand</span>(&#123;</div>
-                            <div>{"  "}Bucket: <span className="text-emerald-300">&quot;my-app-bucket&quot;</span>,</div>
-                            <div>{"  "}Key: <span className="text-emerald-300">&quot;uploads/avatar.webp&quot;</span>,</div>
-                            <div>{"  "}Body: fileBuffer,</div>
-                            <div>&#125;));</div>
-                          </div>
-                        )}
-                        {activeCodeTab === "python" && (
-                          <div>
-                            <div><span className="text-purple-400 font-bold">import</span> <span className="text-sky-300 font-bold">boto3</span></div>
-                            <div>&nbsp;</div>
-                            <div><span className="text-slate-100">s3</span> = boto3.<span className="text-blue-300">client</span>(</div>
-                            <div>{"    "}<span className="text-emerald-300">&quot;s3&quot;</span>,</div>
-                            <div>{"    "}endpoint_url=<span className="text-emerald-300">&quot;https://s3.masdika.id&quot;</span>,</div>
-                            <div>{"    "}aws_access_key_id=<span className="text-emerald-300">&quot;YOUR_ACCESS_KEY&quot;</span>,</div>
-                            <div>{"    "}aws_secret_access_key=<span className="text-emerald-300">&quot;YOUR_SECRET_KEY&quot;</span>,</div>
-                            <div>)</div>
-                            <div>&nbsp;</div>
-                            <div>s3.<span className="text-blue-300">upload_file</span>(<span className="text-emerald-300">&quot;report.pdf&quot;</span>, <span className="text-emerald-300">&quot;my-app-bucket&quot;</span>, <span className="text-emerald-300">&quot;docs/report.pdf&quot;</span>)</div>
-                            <div><span className="text-blue-300">print</span>(<span className="text-emerald-300">&quot;Uploaded to S3!&quot;</span>)</div>
-                          </div>
-                        )}
-                        {activeCodeTab === "laravel" && (
-                          <div>
-                            <div><span className="text-slate-400 italic">// config/filesystems.php</span></div>
-                            <div><span className="text-emerald-300">&apos;s3&apos;</span> =&gt; [</div>
-                            <div>{"    "}<span className="text-emerald-300">&apos;driver&apos;</span> =&gt; <span className="text-emerald-300">&apos;s3&apos;</span>,</div>
-                            <div>{"    "}<span className="text-emerald-300">&apos;key&apos;</span> =&gt; env(<span className="text-emerald-300">&apos;AWS_ACCESS_KEY_ID&apos;</span>),</div>
-                            <div>{"    "}<span className="text-emerald-300">&apos;secret&apos;</span> =&gt; env(<span className="text-emerald-300">&apos;AWS_SECRET_ACCESS_KEY&apos;</span>),</div>
-                            <div>{"    "}<span className="text-emerald-300">&apos;region&apos;</span> =&gt; <span className="text-emerald-300">&apos;id-sidoarjo-1&apos;</span>,</div>
-                            <div>{"    "}<span className="text-emerald-300">&apos;bucket&apos;</span> =&gt; env(<span className="text-emerald-300">&apos;AWS_BUCKET&apos;</span>),</div>
-                            <div>{"    "}<span className="text-emerald-300">&apos;endpoint&apos;</span> =&gt; <span className="text-emerald-300">&apos;https://s3.masdika.id&apos;</span>,</div>
-                            <div>{"    "}<span className="text-emerald-300">&apos;use_path_style_endpoint&apos;</span> =&gt; <span className="text-amber-300">true</span>,</div>
-                            <div>],</div>
-                          </div>
-                        )}
-                      </div>
+                  {/* Code Area with Line Numbers */}
+                  <div className="p-3.5 sm:p-5 flex text-[11px] sm:text-xs font-mono overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden leading-relaxed bg-slate-50/70 dark:bg-[#0a0b10]">
+                    <div className="select-none pr-3 sm:pr-4 text-right text-slate-400 dark:text-zinc-600 font-mono text-[11px] sm:text-xs border-r border-slate-200/90 dark:border-white/[0.08] space-y-0.5 min-w-[1.8rem] sm:min-w-[2.2rem] shrink-0">
+                      {RAW_CODE[activeCodeTab].trim().split("\n").map((_, i) => (
+                        <div key={i}>{i + 1}</div>
+                      ))}
                     </div>
-                  </div>
-
-                  {/* Code Box Footer */}
-                  <div
-                    className="px-4 sm:px-6 py-2.5 sm:py-3 border-t border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono"
-                    style={{ backgroundColor: "#0c1425" }}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                      </span>
-                      <span className="font-bold text-emerald-400">200 OK (ETag Verified)</span>
-                      <span className="text-slate-500">•</span>
-                      <span className="text-slate-300">S3 SigV4</span>
-                    </div>
-
-                    <div className="text-slate-200 font-medium flex items-center gap-1.5 overflow-x-auto text-[11px] sm:text-xs">
-                      <span className="text-slate-400 shrink-0">Endpoint:</span>
-                      <span className="text-cyan-300 font-bold bg-[#060d19] px-2 py-0.5 rounded border border-cyan-800/60 truncate max-w-[260px] sm:max-w-none">
-                        https://s3.masdika.id
-                      </span>
-                    </div>
+                    <pre className="pl-3 sm:pl-4 font-mono text-[11px] sm:text-xs text-slate-800 dark:text-zinc-200 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden leading-relaxed flex-1">
+                      <code>{RAW_CODE[activeCodeTab].trim()}</code>
+                    </pre>
                   </div>
                 </div>
               </FadeIn>
