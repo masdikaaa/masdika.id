@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { Select } from "@/components/ui/Select";
 import { HeroAvatarFrame } from "@/components/ui/HeroAvatarFrame";
 import { FadeIn } from "@/components/animations/FadeIn";
 import { AnimatedBeam, OrbitalRings } from "@/components/animations/DeploymentAnimations";
@@ -332,6 +333,13 @@ export default function AiGatewayClient({
   const activeCalcModel = useMemo(() => {
     return allChatModels.find((m) => m.modelId === calcModelId) || allChatModels[0];
   }, [allChatModels, calcModelId]);
+
+  const calcModelOptions = useMemo(() => {
+    return allChatModels.map((m) => ({
+      value: m.modelId,
+      label: `${m.name} (${m.provider}) • Input ${formatRupiah(m.inputPricePer1M)}/1M, Output ${formatRupiah(m.outputPricePer1M)}/1M`,
+    }));
+  }, [allChatModels]);
 
   // Calculator cost math
   const costPerRequestRp = useMemo(() => {
@@ -935,19 +943,23 @@ export default function AiGatewayClient({
                 <div className="flex items-center gap-3 flex-wrap justify-center">
                   <div className="flex items-center gap-1.5 text-[var(--text-secondary)] dark:text-zinc-400">
                     <span className="hidden xs:inline">Show:</span>
-                    <select
-                      value={pageSize}
-                      onChange={(e) => {
-                        setPageSize(Number(e.target.value));
-                        setCurrentPage(1);
-                      }}
-                      className="px-2 py-1 rounded-lg border border-[var(--border-primary)] dark:border-white/10 bg-[var(--surface)] dark:bg-[#14151f] text-[var(--text-primary)] dark:text-white text-xs font-semibold outline-none cursor-pointer focus:border-cyan-500"
-                    >
-                      <option value={10}>10</option>
-                      <option value={20}>20</option>
-                      <option value={50}>50</option>
-                      <option value={-1}>All ({currentTotal})</option>
-                    </select>
+                    <div className="w-24">
+                      <Select
+                        value={pageSize}
+                        onChange={(val) => {
+                          setPageSize(Number(val));
+                          setCurrentPage(1);
+                        }}
+                        options={[
+                          { value: 10, label: "10" },
+                          { value: 20, label: "20" },
+                          { value: 50, label: "50" },
+                          { value: -1, label: `All (${currentTotal})` },
+                        ]}
+                        direction="up"
+                        className="py-1 px-2.5 text-xs font-semibold rounded-lg"
+                      />
+                    </div>
                   </div>
 
                   {totalPages > 1 && (
@@ -1029,17 +1041,13 @@ export default function AiGatewayClient({
                 <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-2">
                   Select AI Model
                 </label>
-                <select
+                <Select
                   value={calcModelId}
-                  onChange={(e) => setCalcModelId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl text-xs sm:text-sm border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-primary)] outline-none font-semibold transition-colors cursor-pointer focus:border-cyan-500"
-                >
-                  {allChatModels.map((m) => (
-                    <option key={m.modelId} value={m.modelId}>
-                      {m.name} ({m.provider}) • Input {formatRupiah(m.inputPricePer1M)}/1M, Output {formatRupiah(m.outputPricePer1M)}/1M
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val) => setCalcModelId(String(val))}
+                  options={calcModelOptions}
+                  placeholder="Select AI Model..."
+                  className="py-2.5 sm:py-3 text-xs sm:text-sm font-semibold rounded-xl"
+                />
               </div>
 
               {/* Sliders */}
