@@ -133,10 +133,12 @@ export default function proxy(request: NextRequest) {
     });
   }
 
-  // 1. User Agent Filtering (exempt machine-to-machine endpoints: Reseller API, Duitku Webhook, Cron, Internal Metrics)
+  // 1. User Agent Filtering (exempt machine-to-machine endpoints: Reseller API, AI Gateway & Management API, Duitku Webhook, Cron, Internal Metrics)
   const userAgent = request.headers.get('user-agent') || '';
   const isMachineApi =
     pathname.startsWith('/api/v1') ||
+    pathname.startsWith('/api/ai/') ||
+    pathname === '/api/ai' ||
     pathname === '/api/payment/callback' ||
     pathname.startsWith('/api/cron/') ||
     pathname === '/api/metrics' ||
