@@ -1398,6 +1398,117 @@ ${appInfoCmd}
     }
   },
 
+  // OmniRoute (Artificial Intelligence / Developer)
+  {
+    id: "omniroute",
+    name: "OMNIROUTE",
+    category: "Artificial Intelligence",
+    secondaryCategories: ["Developer"],
+    description: "Self-hosted, cost-aware AI proxy and routing gateway providing unified OpenAI-compatible endpoints, smart load balancing, retries, and multi-provider failover.",
+    icon: "/images/apps/omniroute.svg",
+    defaultPort: 20128,
+    defaultProtocol: "http",
+    isWebAccess: true,
+    accessType: "web",
+    accessNote: "Web dashboard & AI routing gateway at http://<ip>:20128 (Password-only authentication, no username required). CLI 'omniroute' also available via SSH.",
+    osBase: "Ubuntu 26.04",
+    appVersion: "Latest",
+    versions: [
+      { id: "latest-ubu26", label: "OmniRoute Latest - Ubuntu 26.04", osBase: "Ubuntu 26.04", appVersion: "Latest" },
+    ],
+    minSpecs: { cpu: 1, ram: 1, disk: 15 },
+    estimatedTime: "~2-3 mins",
+    adminUsername: "None (Password Only)",
+    instructions: "Access the OmniRoute web dashboard at http://${ip}:20128. Authentication requires Password only (no username required). Password: VPS Root Password. OpenAI endpoint: http://${ip}:20128/v1",
+    getInstallScript: (ip, rootPassword, config = {}) => {
+      const adminPassword = config.adminPassword || rootPassword;
+      const appInfoCmd = buildAppInfoJson({
+        appId: "omniroute",
+        appName: "OmniRoute",
+        port: 20128,
+        protocol: "http",
+        path: "",
+        username: "None (Password Only)",
+        password: adminPassword,
+        url: `http://${ip}:20128`
+      });
+
+      return `
+set -e
+export DEBIAN_FRONTEND=noninteractive
+apt-get update && apt-get install -y curl ufw
+
+# 1. Install Node.js runtime and Docker
+which node || (curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && apt-get install -y nodejs)
+which docker || (curl -fsSL https://get.docker.com | sh)
+systemctl enable --now docker 2>/dev/null || true
+for i in {1..30}; do docker info >/dev/null 2>&1 && break || sleep 1; done
+
+# 2. Deploy OmniRoute via official Docker container
+mkdir -p /opt/omniroute/data
+if docker info >/dev/null 2>&1; then
+  echo "[OMNIROUTE] Deploying official diegosouzapw/omniroute Docker container..."
+  docker pull diegosouzapw/omniroute:latest || true
+  docker stop omniroute 2>/dev/null || true
+  docker rm omniroute 2>/dev/null || true
+  docker run -d --name omniroute --restart always -p 20128:20128 \\
+    -v /opt/omniroute/data:/app/data \\
+    -e DATA_DIR=/app/data \\
+    -e PORT=20128 \\
+    -e HOSTNAME=0.0.0.0 \\
+    -e INITIAL_PASSWORD="${adminPassword}" \\
+    -e DASHBOARD_PASSWORD="${adminPassword}" \\
+    diegosouzapw/omniroute:latest || true
+fi
+
+# 3. Also install omniroute CLI globally via npm
+npm install -g omniroute || true
+
+# 4. If container is not running, run omniroute via systemd background daemon
+if ! docker ps 2>/dev/null | grep -q "omniroute"; then
+  cat << 'EOF' > /etc/systemd/system/omniroute.service
+[Unit]
+Description=OmniRoute - Multi-Provider AI Gateway & Intelligent Router
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root
+Environment="PORT=20128"
+Environment="HOSTNAME=0.0.0.0"
+Environment="DATA_DIR=/opt/omniroute/data"
+Environment="INITIAL_PASSWORD=${adminPassword}"
+Environment="DASHBOARD_PASSWORD=${adminPassword}"
+ExecStart=/usr/bin/env omniroute
+Restart=always
+RestartSec=5
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target
+EOF
+  systemctl daemon-reload
+  systemctl enable --now omniroute
+fi
+
+# 5. Open firewall port 20128
+(ufw allow 20128/tcp 2>/dev/null || true)
+(iptables -I INPUT -p tcp --dport 20128 -j ACCEPT 2>/dev/null || true)
+
+# 6. Wait briefly for endpoint to bind
+for i in {1..15}; do
+  if ss -tulpn | grep -q ":20128" || curl -s http://127.0.0.1:20128 >/dev/null 2>&1; then
+    break
+  fi
+  sleep 1
+done
+
+${appInfoCmd}
+`;
+    }
+  },
+
   // 13. OpenCode (Artificial Intelligence / Developer)
   {
     id: "opencode",

@@ -563,8 +563,8 @@ export default function AppDetailPage({
             </div>
           )}
 
-          {/* Card: Web Dashboard Authentication (9Router Password vs n8n Owner Setup) */}
-          {app.appType === "ninerouter" && (
+          {/* Card: Web Dashboard Authentication (9Router & OmniRoute Password vs n8n Owner Setup) */}
+          {(app.appType === "ninerouter" || app.appType === "omniroute") && (
             <div className={cn(
               "border rounded-2xl p-5 sm:p-6 space-y-4 transition-all shadow-2xs",
               isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
@@ -572,7 +572,7 @@ export default function AppDetailPage({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                 <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
                   <Lock className="w-4 h-4 shrink-0" />
-                  <span>9Router Dashboard Authentication</span>
+                  <span>{app.appType === "omniroute" ? "OmniRoute" : "9Router"} Dashboard Authentication</span>
                 </h3>
                 <span className={cn(
                   "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold self-start sm:self-auto shrink-0 border",
@@ -620,7 +620,7 @@ export default function AppDetailPage({
                   isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-cyan-50/60 border-cyan-200 text-slate-700"
                 )}>
                   <p className="text-[11px] leading-relaxed">
-                    Sign in to 9Router Web Dashboard using the generated password above. You can update your password and configure AI model providers anytime in 9Router Settings.
+                    Sign in to {app.appType === "omniroute" ? "OmniRoute" : "9Router"} Web Dashboard using the generated password above. You can update your password and configure AI model providers anytime in settings.
                   </p>
                 </div>
               </div>
@@ -1114,6 +1114,22 @@ export default function AppDetailPage({
                 <div className={cn("p-3.5 rounded-xl border font-mono text-[11px] space-y-1", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-slate-50 border-slate-200/90 text-slate-800 shadow-2xs")}>
                   <div className={isDark ? "text-zinc-500" : "text-slate-500"}># OpenAI Compatible Router Base URL</div>
                   <div>OPENAI_BASE_URL={httpsUrl}/v1</div>
+                </div>
+              </div>
+            )}
+
+            {app.appType === "omniroute" && (
+              <div className="space-y-3 text-xs leading-relaxed">
+                <p className={isDark ? "text-zinc-300" : "text-slate-700"}>
+                  OmniRoute acts as your unified multi-provider AI gateway, intelligent LLM router, and cost-aware proxy. Click <strong>Open App</strong> above to open the web dashboard, then sign in with your application password <code className={cn("font-mono font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>{app.password || "••••••••"}</code>. You can connect this endpoint directly to Claude Code, Cursor, Cline, Continue.dev, or any OpenAI-compatible client:
+                </p>
+                <div className={cn("p-3.5 rounded-xl border font-mono text-[11px] space-y-2", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-slate-50 border-slate-200/90 text-slate-800 shadow-2xs")}>
+                  <div className={isDark ? "text-zinc-500" : "text-slate-500"}># 1. OpenAI-Compatible Gateway Base URL</div>
+                  <div className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>OPENAI_BASE_URL={httpsUrl}/v1</div>
+                  <div className={cn("pt-1", isDark ? "text-zinc-500" : "text-slate-500")}># 2. Use with Claude Code (Anthropic Format)</div>
+                  <div>ANTHROPIC_BASE_URL={httpsUrl}</div>
+                  <div className={cn("pt-1", isDark ? "text-zinc-500" : "text-slate-500")}># 3. Persistent Storage &amp; SQLite State</div>
+                  <div>/app/data (Mounted on dedicated persistent volume)</div>
                 </div>
               </div>
             )}

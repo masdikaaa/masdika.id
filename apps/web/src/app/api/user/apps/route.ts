@@ -128,7 +128,7 @@ export async function POST(req: NextRequest) {
     const catalogItem = getAppDefinition(typeNormalized);
     if (!catalogItem) {
       return NextResponse.json({
-        error: `Invalid application type. Allowed: hermes, ninerouter, n8n, opencode, openclaw`,
+        error: `Invalid application type. Allowed: hermes, ninerouter, n8n, opencode, openclaw, omniroute`,
       }, { status: 400 });
     }
 

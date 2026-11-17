@@ -49,14 +49,15 @@ vi.mock('../prisma', () => ({
 
 describe('Managed Apps Catalog & Engine', () => {
   describe('App Catalog & Flavors', () => {
-    it('should have all 5 requested apps with official branding and ports', () => {
-      expect(MANAGED_APPS_CATALOG).toHaveLength(5);
+    it('should have all 6 requested apps with official branding and ports', () => {
+      expect(MANAGED_APPS_CATALOG).toHaveLength(6);
       const ids = MANAGED_APPS_CATALOG.map((a) => a.id);
       expect(ids).toContain('hermes');
       expect(ids).toContain('ninerouter');
       expect(ids).toContain('n8n');
       expect(ids).toContain('opencode');
       expect(ids).toContain('openclaw');
+      expect(ids).toContain('omniroute');
 
       const n8n = getAppDefinition('n8n');
       expect(n8n).toBeDefined();
@@ -72,6 +73,13 @@ describe('Managed Apps Catalog & Engine', () => {
       const router = getAppDefinition('ninerouter');
       expect(router).toBeDefined();
       expect(router?.appPort).toBe(20128);
+
+      const omniroute = getAppDefinition('omniroute');
+      expect(omniroute).toBeDefined();
+      expect(omniroute?.appPort).toBe(20128);
+      expect(omniroute?.accessProtocol).toBe('WEB');
+      expect(omniroute?.dataDir).toBe('/app/data');
+      expect(omniroute?.defaultImage).toBe('docker.io/diegosouzapw/omniroute:latest');
 
       const opencode = getAppDefinition('opencode');
       expect(opencode).toBeDefined();
@@ -130,8 +138,8 @@ describe('Managed Apps Catalog & Engine', () => {
       expect(formatRupiah(375000)).toBe('Rp 375.000');
     });
 
-    it('should generate valid Kubernetes manifests for all 5 catalog apps without YAML syntax errors', () => {
-      const appTypes = ['hermes', 'n8n', 'ninerouter', 'opencode', 'openclaw'];
+    it('should generate valid Kubernetes manifests for all 6 catalog apps without YAML syntax errors', () => {
+      const appTypes = ['hermes', 'n8n', 'ninerouter', 'opencode', 'openclaw', 'omniroute'];
       for (const appType of appTypes) {
         const dummyApp: any = {
           id: 42,
@@ -312,6 +320,23 @@ spec:
       expect(hermesSpec.securityContextYaml).toContain('- NET_ADMIN');
       expect(hermesSpec.commandYaml).toContain('/usr/bin/apt-get');
       expect(hermesSpec.commandYaml).toContain('PermitTunnel no');
+
+      const omnirouteSpec = buildAppContainerSpec({
+        id: 77,
+        userId: 1,
+        name: 'my-omniroute',
+        appType: 'omniroute',
+        subdomain: 'my-omniroute',
+        appPort: 20128,
+        password: 'OmniPassword123!',
+      } as any);
+      expect(omnirouteSpec.image).toBe('docker.io/diegosouzapw/omniroute:latest');
+      expect(omnirouteSpec.envYaml).toContain('INITIAL_PASSWORD');
+      expect(omnirouteSpec.envYaml).toContain('value: "OmniPassword123!"');
+      expect(omnirouteSpec.envYaml).toContain('DASHBOARD_PASSWORD');
+      expect(omnirouteSpec.envYaml).toContain('PORT');
+      expect(omnirouteSpec.envYaml).toContain('value: "20128"');
+      expect(omnirouteSpec.dataMount).toBe('/app/data');
     });
   });
 

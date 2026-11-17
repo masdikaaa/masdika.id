@@ -1,5 +1,5 @@
 export interface ManagedAppDefinition {
-  id: 'hermes' | 'ninerouter' | 'n8n' | 'opencode' | 'openclaw';
+  id: 'hermes' | 'ninerouter' | 'n8n' | 'opencode' | 'openclaw' | 'omniroute';
   name: string;
   tagline: string;
   category: string;
@@ -141,6 +141,28 @@ export const MANAGED_APPS_CATALOG: ManagedAppDefinition[] = [
       'Direct SSH CLI for Device Pairing & Channel Setup',
       'WhatsApp, Telegram, Discord & Slack Agent Bridge',
       'Persistent Workspace & State (/home/node/.openclaw)',
+    ],
+  },
+  {
+    id: 'omniroute',
+    name: 'OmniRoute',
+    tagline: 'Multi-Provider AI Gateway & Intelligent LLM Router',
+    category: 'AI Gateway',
+    description: 'Self-hosted, cost-aware AI proxy and routing gateway providing unified OpenAI-compatible endpoints, smart load balancing, retries, and multi-provider failover.',
+    icon: '/images/apps/omniroute.svg',
+    appPort: 20128,
+    dataDir: '/app/data',
+    defaultImage: 'docker.io/diegosouzapw/omniroute:latest',
+    color: 'from-cyan-500 to-blue-600',
+    badge: 'API Gateway',
+    accessProtocol: 'WEB',
+    website: 'https://omniroute.online',
+    github: 'https://github.com/ChrisCompton/omniroute',
+    features: [
+      'Unified OpenAI-Compatible Multi-Model Proxy (/v1)',
+      'Smart Routing, Load Balancing & Automatic Retries',
+      'Cost & Quota Awareness with Fallback Rules',
+      'Compatible with Cursor, Claude Code, Cline & Continue.dev',
     ],
   },
 ];

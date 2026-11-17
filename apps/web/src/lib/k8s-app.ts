@@ -785,6 +785,23 @@ ${buildPkgLockdownSnippet('apt')}
              fi || true) && \\
             exec /entrypoint.sh node custom-server.js
 `;
+  } else if (appType === 'omniroute') {
+    image = 'docker.io/diegosouzapw/omniroute:latest';
+    const initialPassword = app.password || '123456';
+    envYaml = `
+        - name: PORT
+          value: "${app.appPort}"
+        - name: HOSTNAME
+          value: "0.0.0.0"
+        - name: DATA_DIR
+          value: "${dataMount}"
+        - name: NODE_ENV
+          value: "production"
+        - name: INITIAL_PASSWORD
+          value: "${initialPassword}"
+        - name: DASHBOARD_PASSWORD
+          value: "${initialPassword}"
+`;
   } else if (appType === 'opencode') {
     image = 'docker.io/library/node:22-alpine';
     const sshPassword = app.password || 'OpenCode123!';
@@ -1046,10 +1063,11 @@ export async function deployAppService(app: AppServiceRecord): Promise<{
   const isOpencode = appTypeLower === 'opencode';
   const isOpenclaw = appTypeLower === 'openclaw';
   const isNinerouter = appTypeLower === 'ninerouter';
+  const isOmniroute = appTypeLower === 'omniroute';
   const isDualWebSsh = catalogItem?.accessProtocol === 'BOTH' || isHermes || isOpencode || isOpenclaw;
   const hasWeb = catalogItem?.accessProtocol === 'WEB' || isDualWebSsh;
   const isPureSsh = catalogItem?.accessProtocol === 'SSH' && !isDualWebSsh;
-  const isExtendedBoot = isDualWebSsh || isNinerouter;
+  const isExtendedBoot = isDualWebSsh || isNinerouter || isOmniroute;
   const serviceType = isDualWebSsh || isPureSsh ? 'NodePort' : 'ClusterIP';
 
   const cpuReq = `${Math.max(0.1, Number((app.cpuShares * 0.4).toFixed(2)))}`;
