@@ -262,3 +262,49 @@ export const DEFAULT_AI_IMAGE_MODELS: AiImageModelSpec[] = [
   { modelId: 'wand-vega-image-1.5-pro', name: 'Vega Image 1.5 Pro', description: 'High-quality 1K images, takes reference images.', sizes: ['1024x1024'], tokensPerImage: 41875, basePriceRp: 1193, maxN: 1, maxRefImages: 4 },
   { modelId: 'wand-vega-image-pro', name: 'Vega Image Pro', description: 'Premium 1K images.', sizes: ['1024x1024'], tokensPerImage: 80156, basePriceRp: 2283, maxN: 1, maxRefImages: 0 },
 ];
+
+export interface AiModelLike {
+  originalOutputPricePer1M?: number | null;
+  outputPricePer1M?: number;
+  originalInputPricePer1M?: number | null;
+  inputPricePer1M?: number;
+  originalCachePricePer1M?: number | null;
+  cachePricePer1M?: number;
+  discountBadge?: string | null;
+}
+
+export function isModelPromo(m: AiModelLike): boolean {
+  if (Boolean(m.discountBadge)) return true;
+  if (Boolean(m.originalOutputPricePer1M && m.outputPricePer1M !== undefined && m.originalOutputPricePer1M > m.outputPricePer1M)) return true;
+  if (Boolean(m.originalInputPricePer1M && m.inputPricePer1M !== undefined && m.originalInputPricePer1M > m.inputPricePer1M)) return true;
+  if (Boolean(m.originalCachePricePer1M && m.cachePricePer1M !== undefined && m.originalCachePricePer1M > m.cachePricePer1M)) return true;
+  return false;
+}
+
+export function getModelDiscountPct(m: AiModelLike): number {
+  if (m.originalOutputPricePer1M && m.outputPricePer1M !== undefined && m.originalOutputPricePer1M > m.outputPricePer1M) {
+    return ((m.originalOutputPricePer1M - m.outputPricePer1M) / m.originalOutputPricePer1M) * 100;
+  }
+  if (m.originalInputPricePer1M && m.inputPricePer1M !== undefined && m.originalInputPricePer1M > m.inputPricePer1M) {
+    return ((m.originalInputPricePer1M - m.inputPricePer1M) / m.originalInputPricePer1M) * 100;
+  }
+  if (m.discountBadge) {
+    const num = parseInt(m.discountBadge.replace(/[^0-9]/g, ''), 10);
+    return isNaN(num) ? 1 : num;
+  }
+  return 0;
+}
+
+export function sortModelsWithPromoFirst<T extends AiModelLike>(list: T[]): T[] {
+  return [...list].sort((a, b) => {
+    const promoA = isModelPromo(a);
+    const promoB = isModelPromo(b);
+    if (promoA && !promoB) return -1;
+    if (!promoA && promoB) return 1;
+    if (promoA && promoB) {
+      const diff = getModelDiscountPct(b) - getModelDiscountPct(a);
+      if (diff !== 0) return diff;
+    }
+    return 0;
+  });
+}

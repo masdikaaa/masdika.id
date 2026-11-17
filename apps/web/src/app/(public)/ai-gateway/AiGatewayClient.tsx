@@ -38,7 +38,7 @@ import { ProvisioningSection } from "@/components/ui/ProvisioningSection";
 import { FaqSection } from "@/components/ui/FaqSection";
 import { cn } from "@/lib/utils";
 import { formatRupiah } from "@/lib/billing";
-import { DEFAULT_AI_MODELS, DEFAULT_AI_IMAGE_MODELS } from "@/lib/ai-gateway-constants";
+import { DEFAULT_AI_MODELS, DEFAULT_AI_IMAGE_MODELS, sortModelsWithPromoFirst, isModelPromo } from "@/lib/ai-gateway-constants";
 
 interface AiModelItem {
   id?: number;
@@ -249,10 +249,10 @@ export default function AiGatewayClient({
     return DEFAULT_AI_IMAGE_MODELS as AiImageModelItem[];
   }, [imageModels]);
 
-  // Pre-seed priority providers matching Gambar 1 (Qwen, OpenAI, Anthropic, Hunyuan, DeepSeek, GLM)
+  // Pre-seed priority providers matching Gambar 1 (On Promo, Qwen, OpenAI, Anthropic, Hunyuan, DeepSeek, GLM)
   const providers = useMemo(() => {
     const set = new Set<string>();
-    const priority = ["Qwen", "OpenAI", "Anthropic", "Hunyuan", "DeepSeek", "GLM"];
+    const priority = ["on promo", "Qwen", "OpenAI", "Anthropic", "Hunyuan", "DeepSeek", "GLM"];
     priority.forEach((p) => set.add(p));
     allChatModels.forEach((m) => {
       if (m.provider) set.add(m.provider);
@@ -261,8 +261,12 @@ export default function AiGatewayClient({
   }, [allChatModels]);
 
   const filteredChatModels = useMemo(() => {
-    return allChatModels.filter((m) => {
-      const matchProvider = selectedProvider === "all" || m.provider.toLowerCase() === selectedProvider.toLowerCase();
+    const filtered = allChatModels.filter((m) => {
+      const matchProvider =
+        selectedProvider === "all" ||
+        (selectedProvider === "on promo"
+          ? isModelPromo(m)
+          : m.provider.toLowerCase() === selectedProvider.toLowerCase());
       const q = modelSearch.toLowerCase().trim();
       const matchSearch =
         !q ||
@@ -271,6 +275,7 @@ export default function AiGatewayClient({
         m.provider.toLowerCase().includes(q);
       return matchProvider && matchSearch;
     });
+    return sortModelsWithPromoFirst(filtered);
   }, [allChatModels, selectedProvider, modelSearch]);
 
   const filteredImageModels = useMemo(() => {
@@ -629,7 +634,7 @@ export default function AiGatewayClient({
               {/* Center: Provider Horizontal Filter Pills (Chat only) */}
               {modelTypeTab === "chat" && (
                 <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-0.5 w-full xl:w-auto max-w-full">
-                  {providers.slice(0, 10).map((p) => {
+                  {providers.map((p) => {
                     const isSelected = selectedProvider.toLowerCase() === p.toLowerCase();
                     return (
                       <button
@@ -645,7 +650,7 @@ export default function AiGatewayClient({
                             : "text-[var(--text-secondary)] dark:text-zinc-400 hover:text-[var(--text-primary)] dark:hover:text-white hover:bg-[var(--surface)] dark:hover:bg-white/5"
                         )}
                       >
-                        {p === "all" ? "All" : p}
+                        {p === "all" ? "All" : p === "on promo" ? "On Promo" : p}
                       </button>
                     );
                   })}

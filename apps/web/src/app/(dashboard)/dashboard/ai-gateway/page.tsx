@@ -46,6 +46,7 @@ import { AdminCheckbox } from '@/components/ui/AdminCheckbox';
 import { PlainTextArea } from '@/components/ui/PlainTextArea';
 import { AiToolIcon, type QuickstartDocId } from '@/components/ai-gateway/AiToolIcons';
 import { AiGatewayDocsPortal } from '@/components/ai-gateway/AiGatewayDocsPortal';
+import { sortModelsWithPromoFirst, isModelPromo } from '@/lib/ai-gateway-constants';
 
 interface AiModelItem {
   id: number;
@@ -759,9 +760,9 @@ export default function CustomerAiGatewayPage() {
 
   const filteredModels = useMemo(() => {
     const q = modelSearch.trim().toLowerCase();
-    return models.filter((m) => {
+    const filtered = models.filter((m) => {
       if (providerFilter === 'ON_PROMO') {
-        if (!m.discountBadge && !(m.originalOutputPricePer1M && m.originalOutputPricePer1M > m.outputPricePer1M)) {
+        if (!isModelPromo(m)) {
           return false;
         }
       } else if (providerFilter !== 'ALL' && m.provider !== providerFilter) {
@@ -774,6 +775,7 @@ export default function CustomerAiGatewayPage() {
         m.provider.toLowerCase().includes(q)
       );
     });
+    return sortModelsWithPromoFirst(filtered);
   }, [models, modelSearch, providerFilter]);
 
   const filteredUsageLogs = useMemo(() => {
