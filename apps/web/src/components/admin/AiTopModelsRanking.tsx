@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   Trophy,
   Award,
@@ -12,16 +12,11 @@ import {
   Copy,
   Check,
   Cpu,
-  Layers,
-  ArrowDownLeft,
-  ArrowUpRight,
-  Database,
-  Clock,
-  Sparkles,
 } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { Pagination } from '@/components/ui/Pagination';
 
 export interface TopModelRankingItem {
   rank: number;
@@ -60,6 +55,8 @@ export function AiTopModelsRanking({
   const [sortBy, setSortBy] = useState<'requests' | 'tokens' | 'revenue' | 'profit'>('requests');
   const [search, setSearch] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   const handleCopy = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
@@ -79,7 +76,12 @@ export function AiTopModelsRanking({
     return `Rp ${val.toLocaleString('id-ID')}`;
   };
 
-  // Sort and filter
+  // Reset page when search or sortBy changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, sortBy]);
+
+  // Sort and filter (Top 20 models)
   const sortedAndFiltered = useMemo(() => {
     let list = [...(rankings || [])];
 
@@ -103,10 +105,17 @@ export function AiTopModelsRanking({
       return 0;
     });
 
-    return list;
+    return list.slice(0, 20);
   }, [rankings, search, sortBy]);
 
-  // Top 3 Podium
+  // Pagination calculation
+  const totalPages = Math.max(1, Math.ceil(sortedAndFiltered.length / pageSize));
+  const paginatedModels = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return sortedAndFiltered.slice(start, start + pageSize);
+  }, [sortedAndFiltered, currentPage, pageSize]);
+
+  // Top 3 Podium (Masdika Cyan Theme)
   const topThree = useMemo(() => {
     const list = [...(rankings || [])].sort((a, b) => b.requests - a.requests);
     return list.slice(0, 3);
@@ -114,7 +123,7 @@ export function AiTopModelsRanking({
 
   return (
     <div className="space-y-6">
-      {/* Top 3 Visual Podium Highlights */}
+      {/* Top 3 Visual Podium Highlights - Pure Masdika Cyan */}
       {topThree.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Rank #1 Champion */}
@@ -123,18 +132,18 @@ export function AiTopModelsRanking({
               className={cn(
                 'relative rounded-2xl p-5 border transition-all overflow-hidden flex flex-col justify-between order-1 md:order-2',
                 isDark
-                  ? 'bg-gradient-to-b from-amber-500/10 via-[#111115] to-[#111115] border-amber-500/30 shadow-lg shadow-amber-500/5'
-                  : 'bg-gradient-to-b from-amber-50 to-white border-amber-300 shadow-md',
+                  ? 'bg-gradient-to-b from-cyan-500/15 via-[#111115] to-[#111115] border-cyan-400/40 shadow-lg shadow-cyan-500/5'
+                  : 'bg-gradient-to-b from-cyan-50 to-white border-cyan-300 shadow-sm',
               )}
             >
-              <div className="absolute -top-6 -right-6 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
+              <div className="absolute -top-6 -right-6 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none" />
               <div>
                 <div className="flex items-center justify-between gap-2 mb-3">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black bg-amber-400 text-slate-950 shadow-sm">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black bg-cyan-400 text-slate-950 shadow-xs">
                     <Trophy className="w-3.5 h-3.5 fill-current" />
-                    <span>#1 Most Used Model</span>
+                    <span>#1 Top Model</span>
                   </div>
-                  <span className="text-xs font-mono font-bold text-amber-500 dark:text-amber-400">
+                  <span className="text-xs font-mono font-bold text-cyan-400">
                     {topThree[0].requestSharePct}% Traffic
                   </span>
                 </div>
@@ -183,7 +192,7 @@ export function AiTopModelsRanking({
                 </div>
                 <div className="p-2 rounded-xl bg-black/10 dark:bg-white/[0.03]">
                   <span className="text-[10px] text-zinc-400 block">Revenue</span>
-                  <span className="text-xs font-black font-mono text-emerald-500">
+                  <span className="text-xs font-black font-mono text-cyan-300">
                     {formatRp(topThree[0].revenueRp)}
                   </span>
                 </div>
@@ -197,17 +206,17 @@ export function AiTopModelsRanking({
               className={cn(
                 'relative rounded-2xl p-5 border transition-all overflow-hidden flex flex-col justify-between order-2 md:order-1',
                 isDark
-                  ? 'bg-gradient-to-b from-slate-400/10 via-[#111115] to-[#111115] border-slate-400/25 shadow-sm'
-                  : 'bg-gradient-to-b from-slate-50 to-white border-slate-300 shadow-sm',
+                  ? 'bg-gradient-to-b from-cyan-500/10 via-[#111115] to-[#111115] border-cyan-500/25 shadow-xs'
+                  : 'bg-gradient-to-b from-cyan-50/50 to-white border-cyan-200 shadow-xs',
               )}
             >
               <div>
                 <div className="flex items-center justify-between gap-2 mb-3">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-300 text-slate-900 dark:bg-slate-300 dark:text-slate-950">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
                     <Award className="w-3.5 h-3.5" />
                     <span>#2 Runner Up</span>
                   </div>
-                  <span className="text-xs font-mono font-bold text-slate-400">
+                  <span className="text-xs font-mono font-bold text-cyan-400/80">
                     {topThree[1].requestSharePct}% Traffic
                   </span>
                 </div>
@@ -256,7 +265,7 @@ export function AiTopModelsRanking({
                 </div>
                 <div className="p-2 rounded-xl bg-black/10 dark:bg-white/[0.03]">
                   <span className="text-[10px] text-zinc-400 block">Revenue</span>
-                  <span className="text-xs font-black font-mono text-emerald-500">
+                  <span className="text-xs font-black font-mono text-cyan-300">
                     {formatRp(topThree[1].revenueRp)}
                   </span>
                 </div>
@@ -270,17 +279,17 @@ export function AiTopModelsRanking({
               className={cn(
                 'relative rounded-2xl p-5 border transition-all overflow-hidden flex flex-col justify-between order-3',
                 isDark
-                  ? 'bg-gradient-to-b from-amber-700/15 via-[#111115] to-[#111115] border-amber-700/30 shadow-sm'
-                  : 'bg-gradient-to-b from-orange-50 to-white border-amber-200 shadow-sm',
+                  ? 'bg-gradient-to-b from-cyan-500/5 via-[#111115] to-[#111115] border-cyan-500/20 shadow-xs'
+                  : 'bg-gradient-to-b from-cyan-50/30 to-white border-cyan-200/80 shadow-xs',
               )}
             >
               <div>
                 <div className="flex items-center justify-between gap-2 mb-3">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-700 text-white dark:bg-amber-800 dark:text-amber-100">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
                     <Award className="w-3.5 h-3.5" />
-                    <span>#3 Bronze</span>
+                    <span>#3 Third Place</span>
                   </div>
-                  <span className="text-xs font-mono font-bold text-amber-600 dark:text-amber-500">
+                  <span className="text-xs font-mono font-bold text-cyan-400/70">
                     {topThree[2].requestSharePct}% Traffic
                   </span>
                 </div>
@@ -329,7 +338,7 @@ export function AiTopModelsRanking({
                 </div>
                 <div className="p-2 rounded-xl bg-black/10 dark:bg-white/[0.03]">
                   <span className="text-[10px] text-zinc-400 block">Revenue</span>
-                  <span className="text-xs font-black font-mono text-emerald-500">
+                  <span className="text-xs font-black font-mono text-cyan-300">
                     {formatRp(topThree[2].revenueRp)}
                   </span>
                 </div>
@@ -342,38 +351,38 @@ export function AiTopModelsRanking({
       {/* Main Leaderboard Table Container */}
       <div
         className={cn(
-          'rounded-2xl border transition-all overflow-hidden space-y-4 p-5 sm:p-6',
+          'rounded-2xl border transition-all overflow-hidden space-y-4 p-4 sm:p-6',
           isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-sm',
         )}
       >
         {/* Header & Filter Controls */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b pb-4 border-inherit">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4 border-b pb-4 border-inherit">
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <div className="w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
                 <Trophy className="w-4 h-4" />
               </div>
               <h2
                 className={cn(
-                  'text-sm font-bold uppercase tracking-wider',
+                  'text-xs sm:text-sm font-bold uppercase tracking-wider',
                   isDark ? 'text-white' : 'text-slate-900',
                 )}
               >
-                Top AI Models Leaderboard
+                Top 20 AI Models Leaderboard
               </h2>
               <span
                 className={cn(
                   'px-2 py-0.5 rounded-full text-[10px] font-mono font-bold border',
                   isDark
-                    ? 'bg-white/[0.04] text-zinc-400 border-white/10'
-                    : 'bg-slate-100 text-slate-600 border-slate-200',
+                    ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
+                    : 'bg-cyan-50 text-cyan-700 border-cyan-200',
                 )}
               >
-                {sortedAndFiltered.length} Active Models
+                {sortedAndFiltered.length} Models
               </span>
             </div>
-            <p className={cn('text-xs mt-1', isDark ? 'text-zinc-400' : 'text-slate-600')}>
-              Rankings of models used by customers, ordered by request traffic volume, tokens, or revenue.
+            <p className={cn('text-[11px] sm:text-xs mt-1', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+              Top 20 most utilized models ranked by request traffic volume, tokens, or revenue.
             </p>
           </div>
 
@@ -465,8 +474,8 @@ export function AiTopModelsRanking({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-inherit">
-                  {sortedAndFiltered.map((item, idx) => {
-                    const rankNum = idx + 1;
+                  {paginatedModels.map((item, idx) => {
+                    const rankNum = (currentPage - 1) * pageSize + idx + 1;
                     return (
                       <tr
                         key={item.modelId}
@@ -475,18 +484,18 @@ export function AiTopModelsRanking({
                           isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-slate-50/80',
                         )}
                       >
-                        {/* Rank Badge - Typography only, no emojis */}
+                        {/* Rank Badge - Typography only in pure Cyan */}
                         <td className="py-3.5 px-3">
                           {rankNum === 1 ? (
-                            <span className="w-7 h-7 rounded-lg bg-amber-400 text-slate-950 font-black flex items-center justify-center text-xs font-mono shadow-xs">
+                            <span className="w-7 h-7 rounded-lg bg-cyan-400 text-slate-950 font-black flex items-center justify-center text-xs font-mono shadow-xs">
                               #1
                             </span>
                           ) : rankNum === 2 ? (
-                            <span className="w-7 h-7 rounded-lg bg-slate-300 text-slate-950 font-black flex items-center justify-center text-xs font-mono shadow-xs">
+                            <span className="w-7 h-7 rounded-lg bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 font-bold flex items-center justify-center text-xs font-mono shadow-xs">
                               #2
                             </span>
                           ) : rankNum === 3 ? (
-                            <span className="w-7 h-7 rounded-lg bg-amber-700 text-amber-100 font-black flex items-center justify-center text-xs font-mono shadow-xs">
+                            <span className="w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 font-bold flex items-center justify-center text-xs font-mono shadow-xs">
                               #3
                             </span>
                           ) : (
@@ -586,15 +595,15 @@ export function AiTopModelsRanking({
                           </div>
                         </td>
 
-                        {/* Financials */}
+                        {/* Financials (Pure Cyan) */}
                         <td className="py-3.5 px-3">
                           <div>
-                            <span className="font-bold text-xs text-emerald-500">
+                            <span className="font-bold text-xs text-cyan-400">
                               {formatRp(item.revenueRp)}
                             </span>
                             <div className="text-[10px] text-zinc-500 mt-0.5 flex items-center gap-1.5">
                               <span>Upstream: {formatRp(item.upstreamCostRp)}</span>
-                              <span className="text-cyan-400 font-bold">
+                              <span className="text-cyan-300 font-bold">
                                 (+{item.marginPercent}% margin)
                               </span>
                             </div>
@@ -603,16 +612,7 @@ export function AiTopModelsRanking({
 
                         {/* Avg Latency */}
                         <td className="py-3.5 px-3 text-right">
-                          <span
-                            className={cn(
-                              'px-2 py-0.5 rounded text-[11px] font-mono font-bold',
-                              item.avgLatencyMs < 1200
-                                ? 'bg-cyan-500/10 text-cyan-400'
-                                : item.avgLatencyMs < 3000
-                                ? 'bg-amber-500/10 text-amber-400'
-                                : 'bg-rose-500/10 text-rose-400',
-                            )}
-                          >
+                          <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
                             {item.avgLatencyMs} ms
                           </span>
                         </td>
@@ -625,8 +625,8 @@ export function AiTopModelsRanking({
 
             {/* Mobile / Tablet Responsive Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:hidden gap-3">
-              {sortedAndFiltered.map((item, idx) => {
-                const rankNum = idx + 1;
+              {paginatedModels.map((item, idx) => {
+                const rankNum = (currentPage - 1) * pageSize + idx + 1;
                 return (
                   <div
                     key={item.modelId}
@@ -639,13 +639,13 @@ export function AiTopModelsRanking({
                       <div className="flex items-center gap-2">
                         <span
                           className={cn(
-                            'w-6 h-6 rounded-md flex items-center justify-center text-xs font-black',
+                            'w-6 h-6 rounded-md flex items-center justify-center text-xs font-black font-mono',
                             rankNum === 1
-                              ? 'bg-amber-400 text-slate-950'
+                              ? 'bg-cyan-400 text-slate-950'
                               : rankNum === 2
-                              ? 'bg-slate-300 text-slate-950'
+                              ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
                               : rankNum === 3
-                              ? 'bg-amber-700 text-white'
+                              ? 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/20'
                               : isDark
                               ? 'bg-white/10 text-zinc-400'
                               : 'bg-slate-200 text-slate-700',
@@ -666,7 +666,7 @@ export function AiTopModelsRanking({
                       <span
                         className={cn(
                           'px-1.5 py-0.5 rounded text-[10px] font-bold uppercase',
-                          isDark ? 'bg-white/[0.05] text-zinc-400' : 'bg-white text-slate-600 border border-slate-200',
+                          isDark ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'bg-cyan-50 text-cyan-700 border border-cyan-200',
                         )}
                       >
                         {item.provider}
@@ -696,7 +696,7 @@ export function AiTopModelsRanking({
                       </div>
                       <div>
                         <span className="text-[10px] text-zinc-500 block">Revenue</span>
-                        <span className="font-bold text-emerald-500">
+                        <span className="font-bold text-cyan-400">
                           {formatRp(item.revenueRp)}
                         </span>
                       </div>
@@ -705,6 +705,20 @@ export function AiTopModelsRanking({
                 );
               })}
             </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-inherit">
+                <span className={cn('text-xs font-mono', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+                  Showing {(currentPage - 1) * pageSize + 1} - {Math.min(currentPage * pageSize, sortedAndFiltered.length)} of {sortedAndFiltered.length} Top Models
+                </span>
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
+            )}
           </>
         )}
       </div>

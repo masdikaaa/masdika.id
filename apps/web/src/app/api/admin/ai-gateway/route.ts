@@ -97,6 +97,7 @@ export async function GET() {
             id: 'desc',
           },
         },
+        take: 20,
       }),
     ]);
 
@@ -202,7 +203,7 @@ export async function GET() {
     const modelLookup = new Map(models.map((m) => [m.modelId, m]));
     const imageModelLookup = new Map(DEFAULT_AI_IMAGE_MODELS.map((m) => [m.modelId, m]));
 
-    const topModelRankings = modelRankingsRaw.map((item, index) => {
+    const topModelRankings = modelRankingsRaw.slice(0, 20).map((item, index) => {
       const dbModel = modelLookup.get(item.modelId);
       const imgModel = imageModelLookup.get(item.modelId);
 

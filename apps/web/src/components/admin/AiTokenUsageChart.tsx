@@ -175,10 +175,10 @@ export function AiTokenUsageChart({ data }: AiTokenUsageChartProps) {
         <div
           className={cn(
             'p-2.5 sm:p-3 rounded-xl border',
-            isDark ? 'bg-black/30 border-white/[0.06]' : 'bg-slate-50 border-slate-200',
+            isDark ? 'bg-black/30 border-cyan-500/15' : 'bg-slate-50 border-cyan-100',
           )}
         >
-          <div className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-500 truncate">
+          <div className="flex items-center gap-1.5 text-[11px] font-medium text-cyan-500 truncate">
             <ArrowUpRight className="w-3.5 h-3.5 shrink-0" />
             <span className="truncate">Output Tokens</span>
           </div>
@@ -198,10 +198,10 @@ export function AiTokenUsageChart({ data }: AiTokenUsageChartProps) {
         <div
           className={cn(
             'p-2.5 sm:p-3 rounded-xl border',
-            isDark ? 'bg-black/30 border-white/[0.06]' : 'bg-slate-50 border-slate-200',
+            isDark ? 'bg-black/30 border-cyan-500/15' : 'bg-slate-50 border-cyan-100',
           )}
         >
-          <div className="flex items-center gap-1.5 text-[11px] font-medium text-purple-400 truncate">
+          <div className="flex items-center gap-1.5 text-[11px] font-medium text-cyan-300 truncate">
             <Database className="w-3.5 h-3.5 shrink-0" />
             <span className="truncate">Cached Tokens</span>
           </div>
@@ -237,16 +237,16 @@ export function AiTokenUsageChart({ data }: AiTokenUsageChartProps) {
                 <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
               </linearGradient>
               <linearGradient id="colorInput" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#38bdf8" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#38bdf8" stopOpacity={0} />
+                <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.28} />
+                <stop offset="95%" stopColor="#22d3ee" stopOpacity={0} />
               </linearGradient>
               <linearGradient id="colorOutput" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                <stop offset="5%" stopColor="#0891b2" stopOpacity={0.28} />
+                <stop offset="95%" stopColor="#0891b2" stopOpacity={0} />
               </linearGradient>
               <linearGradient id="colorCache" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#a855f7" stopOpacity={0.25} />
-                <stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
+                <stop offset="5%" stopColor="#67e8f9" stopOpacity={0.22} />
+                <stop offset="95%" stopColor="#67e8f9" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid
@@ -280,8 +280,8 @@ export function AiTokenUsageChart({ data }: AiTokenUsageChartProps) {
                       className={cn(
                         'border rounded-xl p-3.5 shadow-xl text-xs space-y-2 min-w-[210px]',
                         isDark
-                          ? 'bg-[#0f1015] border-white/10 text-white'
-                          : 'bg-white border-slate-200 text-slate-900',
+                          ? 'bg-[#0f1015] border-cyan-500/30 text-white'
+                          : 'bg-white border-cyan-200 text-slate-900',
                       )}
                     >
                       <div className="flex items-center justify-between border-b pb-1.5 border-inherit">
@@ -300,24 +300,24 @@ export function AiTokenUsageChart({ data }: AiTokenUsageChartProps) {
                             {entry.totalTokens.toLocaleString('id-ID')}
                           </span>
                         </div>
-                        <div className="flex items-center justify-between text-sky-400">
+                        <div className="flex items-center justify-between text-cyan-300">
                           <span className="flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full bg-sky-400" />
+                            <span className="w-2 h-2 rounded-full bg-cyan-300" />
                             Input:
                           </span>
                           <span>{entry.inputTokens.toLocaleString('id-ID')}</span>
                         </div>
-                        <div className="flex items-center justify-between text-emerald-400">
+                        <div className="flex items-center justify-between text-cyan-500">
                           <span className="flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                            <span className="w-2 h-2 rounded-full bg-cyan-500" />
                             Output:
                           </span>
                           <span>{entry.outputTokens.toLocaleString('id-ID')}</span>
                         </div>
                         {entry.cachedTokens > 0 && (
-                          <div className="flex items-center justify-between text-purple-400">
+                          <div className="flex items-center justify-between text-cyan-200">
                             <span className="flex items-center gap-1.5">
-                              <span className="w-2 h-2 rounded-full bg-purple-400" />
+                              <span className="w-2 h-2 rounded-full bg-cyan-200" />
                               Cached:
                             </span>
                             <span>{entry.cachedTokens.toLocaleString('id-ID')}</span>
@@ -325,7 +325,7 @@ export function AiTokenUsageChart({ data }: AiTokenUsageChartProps) {
                         )}
                         <div className="flex items-center justify-between pt-1 border-t border-inherit text-zinc-400 text-[10px]">
                           <span>Billed:</span>
-                          <span className="font-bold text-emerald-400">
+                          <span className="font-bold text-cyan-400">
                             Rp {(entry.costRp || 0).toLocaleString('id-ID')}
                           </span>
                         </div>
@@ -364,14 +364,14 @@ export function AiTokenUsageChart({ data }: AiTokenUsageChartProps) {
                   type="monotone"
                   dataKey="inputTokens"
                   name="Input Tokens"
-                  stroke="#38bdf8"
+                  stroke="#22d3ee"
                   strokeWidth={2}
                   fillOpacity={1}
                   fill="url(#colorInput)"
                   activeDot={{
                     r: 4,
                     fill: isDark ? '#09090b' : '#ffffff',
-                    stroke: '#38bdf8',
+                    stroke: '#22d3ee',
                     strokeWidth: 2,
                   }}
                 />
@@ -379,14 +379,14 @@ export function AiTokenUsageChart({ data }: AiTokenUsageChartProps) {
                   type="monotone"
                   dataKey="outputTokens"
                   name="Output Tokens"
-                  stroke="#10b981"
+                  stroke="#0891b2"
                   strokeWidth={2}
                   fillOpacity={1}
                   fill="url(#colorOutput)"
                   activeDot={{
                     r: 4,
                     fill: isDark ? '#09090b' : '#ffffff',
-                    stroke: '#10b981',
+                    stroke: '#0891b2',
                     strokeWidth: 2,
                   }}
                 />
@@ -394,14 +394,14 @@ export function AiTokenUsageChart({ data }: AiTokenUsageChartProps) {
                   type="monotone"
                   dataKey="cachedTokens"
                   name="Cached Tokens"
-                  stroke="#a855f7"
+                  stroke="#67e8f9"
                   strokeWidth={1.5}
                   fillOpacity={1}
                   fill="url(#colorCache)"
                   activeDot={{
                     r: 4,
                     fill: isDark ? '#09090b' : '#ffffff',
-                    stroke: '#a855f7',
+                    stroke: '#67e8f9',
                     strokeWidth: 2,
                   }}
                 />

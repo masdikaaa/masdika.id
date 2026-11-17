@@ -765,12 +765,12 @@ export default function AdminAiGatewayPage() {
                             {rankItem && rankItem.rank <= 3 && (
                               <span
                                 className={cn(
-                                  'px-1.5 py-0.5 rounded text-[10px] font-black',
+                                  'px-1.5 py-0.5 rounded text-[10px] font-black font-mono',
                                   rankItem.rank === 1
-                                    ? 'bg-amber-400 text-slate-950'
+                                    ? 'bg-cyan-400 text-slate-950'
                                     : rankItem.rank === 2
-                                    ? 'bg-slate-300 text-slate-950'
-                                    : 'bg-amber-700 text-white',
+                                    ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+                                    : 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/20',
                                 )}
                               >
                                 #{rankItem.rank} Top
