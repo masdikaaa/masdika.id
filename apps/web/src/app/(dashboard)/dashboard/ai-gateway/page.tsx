@@ -1702,24 +1702,14 @@ aider --model openai/glm-5.3
               onSubmit={handleSaveAutoTopup}
               className={cn('lg:col-span-7 rounded-2xl border p-5 sm:p-6 space-y-5', isDark ? 'bg-[#111115] border-white/[0.08]' : 'bg-white border-slate-200 shadow-2xs')}
             >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/[0.06]">
-                <div>
-                  <h2 className={cn('text-sm sm:text-base font-bold flex items-center gap-2', isDark ? 'text-white' : 'text-slate-900')}>
-                    <RefreshCw className="w-4 h-4 text-cyan-400" />
-                    AI Credit &amp; Auto Top-Up Configuration
-                  </h2>
-                  <p className={cn('text-xs mt-1', isDark ? 'text-zinc-400' : 'text-slate-500')}>
-                    Fund your AI Credit Balance manually from your Masdika Wallet or enable automatic refill when balance drops low.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setIsTopupModalOpen(true)}
-                  className="px-4 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-xs inline-flex items-center gap-1.5 shrink-0 cursor-pointer self-start sm:self-auto"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  Top Up AI Balance
-                </button>
+              <div className="pb-4 border-b border-white/[0.06]">
+                <h2 className={cn('text-sm sm:text-base font-bold flex items-center gap-2', isDark ? 'text-white' : 'text-slate-900')}>
+                  <RefreshCw className="w-4 h-4 text-cyan-400" />
+                  AI Credit &amp; Auto Top-Up Configuration
+                </h2>
+                <p className={cn('text-xs mt-1', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+                  Fund your AI Credit Balance manually from your Masdika Wallet or enable automatic refill when balance drops low.
+                </p>
               </div>
 
               <div className={cn('rounded-xl border p-4 flex items-center justify-between gap-3', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-slate-50 border-slate-200')}>
