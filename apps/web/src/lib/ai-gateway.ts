@@ -211,40 +211,88 @@ export async function ensureAiModelsExist() {
     return;
   }
 
+  // Ensure any newly added models from DEFAULT_AI_MODELS exist in DB
+  const existingAll = await prisma.aiModel.findMany({ select: { modelId: true } });
+  const existingSet = new Set(existingAll.map((m) => m.modelId));
+  const missingModels = DEFAULT_AI_MODELS.filter((m) => !existingSet.has(m.modelId));
+  if (missingModels.length > 0) {
+    await prisma.aiModel.createMany({
+      data: missingModels.map((m, idx) => ({
+        modelId: m.modelId,
+        name: m.name,
+        provider: m.provider,
+        contextWindow: m.contextWindow,
+        inputPricePer1M: m.inputPricePer1M,
+        cachePricePer1M: m.cachePricePer1M,
+        outputPricePer1M: m.outputPricePer1M,
+        originalInputPricePer1M: m.originalInputPricePer1M ?? null,
+        originalCachePricePer1M: m.originalCachePricePer1M ?? null,
+        originalOutputPricePer1M: m.originalOutputPricePer1M ?? null,
+        discountBadge: m.discountBadge ?? null,
+        openaiOnly: Boolean(m.openaiOnly),
+        hasPeakPricing: Boolean(m.hasPeakPricing),
+        isActive: true,
+        sortOrder: existingAll.length + idx + 1,
+      })),
+      skipDuplicates: true,
+    });
+  }
+
   // Backfill discount/strikethrough prices on existing seeded rows if not yet set
   const discountedSeeds = DEFAULT_AI_MODELS.filter((m) => Boolean(m.discountBadge));
-  if (discountedSeeds.length === 0) return;
+  if (discountedSeeds.length > 0) {
+    const existing = await prisma.aiModel.findMany({
+      where: {
+        modelId: { in: discountedSeeds.map((m) => m.modelId) },
+        originalInputPricePer1M: null,
+        discountBadge: null,
+      },
+      select: { modelId: true },
+    });
 
-  const existing = await prisma.aiModel.findMany({
-    where: {
-      modelId: { in: discountedSeeds.map((m) => m.modelId) },
-      originalInputPricePer1M: null,
-      discountBadge: null,
-    },
-    select: { modelId: true },
-  });
-
-  if (existing.length > 0) {
-    const missingSet = new Set(existing.map((e) => e.modelId));
-    await Promise.all(
-      discountedSeeds
-        .filter((m) => missingSet.has(m.modelId))
-        .map((m) =>
-          prisma.aiModel.update({
-            where: { modelId: m.modelId },
-            data: {
-              inputPricePer1M: m.inputPricePer1M,
-              cachePricePer1M: m.cachePricePer1M,
-              outputPricePer1M: m.outputPricePer1M,
-              originalInputPricePer1M: m.originalInputPricePer1M ?? null,
-              originalCachePricePer1M: m.originalCachePricePer1M ?? null,
-              originalOutputPricePer1M: m.originalOutputPricePer1M ?? null,
-              discountBadge: m.discountBadge ?? null,
-            },
-          })
-        )
-    );
+    if (existing.length > 0) {
+      const missingSet = new Set(existing.map((e) => e.modelId));
+      await Promise.all(
+        discountedSeeds
+          .filter((m) => missingSet.has(m.modelId))
+          .map((m) =>
+            prisma.aiModel.update({
+              where: { modelId: m.modelId },
+              data: {
+                inputPricePer1M: m.inputPricePer1M,
+                cachePricePer1M: m.cachePricePer1M,
+                outputPricePer1M: m.outputPricePer1M,
+                originalInputPricePer1M: m.originalInputPricePer1M ?? null,
+                originalCachePricePer1M: m.originalCachePricePer1M ?? null,
+                originalOutputPricePer1M: m.originalOutputPricePer1M ?? null,
+                discountBadge: m.discountBadge ?? null,
+              },
+            })
+          )
+      );
+    }
   }
+
+  // Ensure deepseek-v4.1-flash-1017 has the exact prices as configured
+  await prisma.aiModel.updateMany({
+    where: {
+      modelId: 'deepseek-v4.1-flash-1017',
+      OR: [
+        { inputPricePer1M: { not: 6141 } },
+        { cachePricePer1M: { not: 123 } },
+        { outputPricePer1M: { not: 24564 } },
+      ],
+    },
+    data: {
+      name: 'DeepSeek V4.1 Flash 1017',
+      provider: 'DeepSeek',
+      contextWindow: '1M',
+      inputPricePer1M: 6141,
+      cachePricePer1M: 123,
+      outputPricePer1M: 24564,
+      isActive: true,
+    },
+  });
 }
 
 export async function getAiGatewayConfig() {

@@ -50,6 +50,15 @@ export const DEFAULT_AI_MODELS: AiModelSeed[] = [
     hasPeakPricing: true,
   },
   {
+    modelId: 'deepseek-v4.1-flash-1017',
+    name: 'DeepSeek V4.1 Flash 1017',
+    provider: 'DeepSeek',
+    contextWindow: '1M',
+    inputPricePer1M: 6141,
+    cachePricePer1M: 123,
+    outputPricePer1M: 24564,
+  },
+  {
     modelId: 'glm-5.3-flash',
     name: 'GLM-5.3 Flash',
     provider: 'GLM',

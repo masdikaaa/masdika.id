@@ -1426,7 +1426,7 @@ aider --model openai/glm-5.3
             </span>
           </div>
           <p className={cn('text-xs sm:text-sm font-medium mt-1.5 max-w-2xl leading-relaxed', isDark ? 'text-zinc-400' : 'text-slate-500')}>
-            One API key for {models.length || 73}+ chat models and {imageModels.length || 13} image models - billed per token in Rupiah from your dedicated AI Balance.
+            One API key for {models.length || 74}+ chat models and {imageModels.length || 13} image models - billed per token in Rupiah from your dedicated AI Balance.
           </p>
         </div>
 
