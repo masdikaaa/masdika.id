@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useId } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -14,26 +14,25 @@ import {
   CheckCircle2,
   Lock,
   Layers,
-  Sliders,
   Search,
   Copy,
   Check,
   RefreshCw,
-  ExternalLink,
   Coins,
   Activity,
-  CodeXml,
-  Boxes,
-  HelpCircle,
-  TrendingDown,
-  ArrowUpRight,
+  KeyRound,
+  Bot,
+  Workflow,
+  Sliders,
+  Gauge,
 } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { HeroAvatarFrame } from "@/components/ui/HeroAvatarFrame";
 import { FadeIn } from "@/components/animations/FadeIn";
+import { AnimatedBeam, OrbitalRings } from "@/components/animations/DeploymentAnimations";
 import { ProvisioningSection } from "@/components/ui/ProvisioningSection";
 import { FaqSection } from "@/components/ui/FaqSection";
-import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
 import { formatRupiah } from "@/lib/billing";
 
@@ -165,36 +164,25 @@ const masdika = createOpenAI({
 
 export async function POST(req: Request) {
   const { messages } = await req.json();
-
   const result = streamText({
     model: masdika("gemini-2.5-flash"),
     messages,
   });
-
   return result.toDataStreamResponse();
 }`,
   },
   {
     id: "cursor",
     label: "Cursor / Aider",
-    language: "yaml",
-    code: `# In Cursor: Settings -> Models -> OpenAI API Key
-# 1. Override Base URL:
-https://www.masdika.id/api/ai/openai/v1
+    language: "plaintext",
+    code: `# Cursor IDE Settings -> Models -> OpenAI API Key:
+Base URL: https://www.masdika.id/api/ai/openai/v1
+API Key : masdika_ai_YOUR_KEY_HERE
 
-# 2. Enter API Key:
-masdika_ai_YOUR_SECRET_KEY
-
-# 3. Add Custom Models:
-claude-3-7-sonnet
-deepseek-r1
-qwen3.7-flash
-gpt-4o
-
-# In Aider CLI:
-export OPENAI_API_BASE="https://www.masdika.id/api/ai/openai/v1"
-export OPENAI_API_KEY="masdika_ai_YOUR_KEY"
-aider --model openai/claude-3-7-sonnet`,
+# Aider CLI Configuration (.env):
+OPENAI_API_BASE=https://www.masdika.id/api/ai/openai/v1
+OPENAI_API_KEY=masdika_ai_YOUR_KEY_HERE
+AIDER_MODEL=openai/claude-3-7-sonnet`,
   },
 ];
 
@@ -226,9 +214,6 @@ export default function AiGatewayClient({
   imageModels = [],
   isGatewayEnabled = true,
 }: AiGatewayClientProps) {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-
   // Code snippet state
   const [activeCodeTab, setActiveCodeTab] = useState("curl");
   const [copiedCode, setCopiedCode] = useState(false);
@@ -274,7 +259,11 @@ export default function AiGatewayClient({
     return allChatModels.filter((m) => {
       const matchProvider = selectedProvider === "all" || m.provider.toLowerCase() === selectedProvider.toLowerCase();
       const q = modelSearch.toLowerCase().trim();
-      const matchSearch = !q || m.name.toLowerCase().includes(q) || m.modelId.toLowerCase().includes(q) || m.provider.toLowerCase().includes(q);
+      const matchSearch =
+        !q ||
+        m.name.toLowerCase().includes(q) ||
+        m.modelId.toLowerCase().includes(q) ||
+        m.provider.toLowerCase().includes(q);
       return matchProvider && matchSearch;
     });
   }, [allChatModels, selectedProvider, modelSearch]);
@@ -282,7 +271,12 @@ export default function AiGatewayClient({
   const filteredImageModels = useMemo(() => {
     const q = modelSearch.toLowerCase().trim();
     if (!q) return imageModels;
-    return imageModels.filter((m) => m.name.toLowerCase().includes(q) || m.modelId.toLowerCase().includes(q) || (m.description && m.description.toLowerCase().includes(q)));
+    return imageModels.filter(
+      (m) =>
+        m.name.toLowerCase().includes(q) ||
+        m.modelId.toLowerCase().includes(q) ||
+        (m.description && m.description.toLowerCase().includes(q))
+    );
   }, [imageModels, modelSearch]);
 
   // Current calculator model
@@ -317,91 +311,158 @@ export default function AiGatewayClient({
   const currentCode = CODE_EXAMPLES.find((c) => c.id === activeCodeTab) || CODE_EXAMPLES[0];
 
   return (
-    <div className="relative w-full overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-16 sm:space-y-24">
-        {/* ── 0. HERO SECTION ──────────────────────────────────────────────── */}
-        <section className="relative pt-0 pb-6 sm:pb-10 flex items-center">
+    <div className="flex flex-col min-h-screen pt-28 sm:pt-36 md:pt-40 pb-10 sm:pb-14 overflow-x-hidden">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
+
+        {/* ── 0. HERO (Identical to Managed Apps & Managed DB Page Pattern) ───── */}
+        <section className="relative pt-0 pb-8 sm:pb-12 flex items-center">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-start w-full">
-            {/* Left: Headline & Code Showcase */}
-            <div className="flex flex-col items-start text-left z-10">
-              <FadeIn delay={0.05}>
-                <div
-                  className={cn(
-                    "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-bold tracking-widest uppercase mb-6 shadow-xs",
-                    isDark ? "border-cyan-800/80 bg-cyan-950/30 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700"
-                  )}
+
+            {/* Left – Text & Actions */}
+            <div className="max-w-2xl relative z-30 lg:pt-20">
+              <div className="mb-8">
+                <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase whitespace-nowrap">
+                  UNIFIED AI INFERENCE GATEWAY
+                </Badge>
+              </div>
+
+              <h1 className="text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-4 text-[var(--text-primary)]">
+                One Universal Key &amp; <br />
+                <span className="bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent">
+                  70+ Frontier AI Models.
+                </span>
+              </h1>
+
+              <p className="text-lg md:text-xl mb-10 max-w-xl leading-relaxed text-[var(--text-secondary)] font-normal">
+                Drop-in OpenAI compatible gateway routing your prompts to Claude 3.7, GPT-4o, Gemini 2.5, DeepSeek R1, and Qwen 3.7 with sub-millisecond edge latency and 100% Rupiah Pay-As-You-Go.
+              </p>
+
+              <div className="flex flex-wrap items-center gap-4">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  href="/dashboard/ai-gateway"
+                  rightIcon={<ArrowRight className="w-4 h-4" />}
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                  <span>UNIFIED AI INFERENCE GATEWAY</span>
+                  Get API Key
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  href="#models"
+                  leftIcon={<Sparkles className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />}
+                >
+                  Explore 70+ Models
+                </Button>
+              </div>
+            </div>
+
+            {/* Right – Hero Avatar (ai-gateway.webp) with 4 Floating Badges */}
+            <div className="relative flex items-center justify-center mt-6 lg:mt-0 lg:self-center">
+              <HeroAvatarFrame
+                imageSrc="/images/mascots/ai-gateway.webp"
+                imageAlt="Masdika AI Gateway – Unified OpenAI-Compatible Router"
+                imageWidth={1536}
+                imageHeight={1024}
+                badges={[
+                  { icon: Sparkles, label: "Live LLM Models", value: "70+ Live Models" },
+                  { icon: Terminal, label: "Compatibility", value: "OpenAI Drop-In" },
+                  { icon: Zap, label: "Edge Latency", value: "Sub-ms Edge Proxy" },
+                  { icon: ShieldCheck, label: "Data Privacy", value: "Zero Data Training" },
+                ]}
+              />
+            </div>
+
+          </div>
+        </section>
+
+        {/* ── 1. VALUE PILLARS (4 Trust Highlights) ───────────────────────── */}
+        <section className="py-10 sm:py-14 relative z-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+            {[
+              {
+                icon: Terminal,
+                title: "100% OpenAI Drop-In",
+                desc: "Switch baseURL to masdika.id/api/ai/openai/v1. Works out of the box with Cursor, Aider, LangChain, and official OpenAI SDKs.",
+              },
+              {
+                icon: Sparkles,
+                title: "70+ Frontier AI Models",
+                desc: "Direct access to Claude 3.7 Sonnet, GPT-4o, Gemini 2.5 Flash, DeepSeek R1/V3, Qwen 3.7, and Kling Image models.",
+              },
+              {
+                icon: Coins,
+                title: "Rupiah Pay-As-You-Go",
+                desc: "Pay per exact prompt and completion token from your deposit balance. Zero expired bundles; failed calls cost Rp 0.",
+              },
+              {
+                icon: Lock,
+                title: "Zero Data Retention",
+                desc: "Enterprise privacy: prompts pass through in-memory proxy and are never stored or used to train any public or private models.",
+              },
+            ].map((pillar, i) => (
+              <FadeIn key={i} delay={i * 0.1} direction="up" className="h-full">
+                <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] flex items-start gap-4 h-full shadow-sm hover:border-cyan-500/40 transition-colors">
+                  <div className="w-11 h-11 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
+                    <pillar.icon className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base font-bold text-[var(--text-primary)] mb-1">
+                      {pillar.title}
+                    </h3>
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                      {pillar.desc}
+                    </p>
+                  </div>
                 </div>
               </FadeIn>
+            ))}
+          </div>
+        </section>
 
-              <FadeIn delay={0.1}>
-                <h1
-                  className={cn(
-                    "text-3xl sm:text-4xl md:text-5xl lg:text-[46px] font-black tracking-tight leading-[1.12] mb-5",
-                    isDark ? "text-white" : "text-slate-900"
-                  )}
-                >
-                  One Universal Key.{" "}
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-500">
-                    70+ Frontier AI Models.
-                  </span>{" "}
-                  100% Rupiah Pay-As-You-Go.
-                </h1>
-              </FadeIn>
-
-              <FadeIn delay={0.15}>
-                <p
-                  className={cn(
-                    "text-base sm:text-lg mb-8 leading-relaxed max-w-xl font-normal",
-                    isDark ? "text-zinc-300" : "text-slate-600"
-                  )}
-                >
-                  Drop-in OpenAI compatible gateway routing your prompts to Claude 3.7, GPT-4o, Gemini 2.5, DeepSeek R1, and Qwen 3.7 with sub-millisecond edge latency and zero expired token bundles.
+        {/* ── 2. CODE INTEGRATION SHOWCASE (Matching Managed Apps Section 3) ── */}
+        <section id="integration" className="scroll-mt-24 py-10 sm:py-14 relative z-10">
+          <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-8 sm:p-12 shadow-xl overflow-hidden">
+            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+              <div className="lg:col-span-5">
+                <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+                  OPENAI DROP-IN COMPATIBILITY
+                </span>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+                  Change One Line of Code. Unlock 70+ Models.
+                </h2>
+                <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed mb-8 max-w-xl">
+                  Masdika AI Gateway natively implements the OpenAI v1 API specification. Replace your <code className="text-xs px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-mono">baseURL</code> and pass your API key to route to Claude, GPT-4o, DeepSeek, Qwen, or Gemini instantly.
                 </p>
-              </FadeIn>
 
-              <FadeIn delay={0.2} className="w-full">
-                <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-8">
-                  <Link
-                    href="/dashboard/ai-gateway"
-                    className="inline-flex items-center gap-2 font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 shadow-lg shadow-cyan-500/20 rounded-xl px-6 py-3.5 text-sm sm:text-base transition-colors"
-                  >
-                    <span>Get API Key</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                  <a
-                    href="#models"
-                    className={cn(
-                      "inline-flex items-center gap-2 font-semibold rounded-xl px-5 py-3.5 text-sm sm:text-base border transition-colors",
-                      isDark
-                        ? "border-white/10 hover:border-cyan-500/50 hover:bg-white/5 text-zinc-200"
-                        : "border-slate-200 hover:border-cyan-500 hover:bg-slate-100 text-slate-700"
-                    )}
-                  >
-                    <Sliders className="w-4 h-4 text-cyan-400" />
-                    <span>Explore 70+ Models</span>
-                  </a>
+                <div className="space-y-3.5">
+                  {[
+                    "Compatible with Cursor IDE, Windsurf, Aider CLI & Claude Code",
+                    "High-throughput Server-Sent Events (SSE) streaming at 85+ tok/s",
+                    "Zero code rewrite: works with official OpenAI Python & Node.js SDKs",
+                    "Granular per-key model whitelisting and hard monthly spend limits",
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
+                      <div className="w-6 h-6 rounded-md bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                      </div>
+                      <span className="font-medium text-[var(--text-primary)]">{item}</span>
+                    </div>
+                  ))}
                 </div>
-              </FadeIn>
+              </div>
 
-              {/* Code Snippet Switcher Box */}
-              <FadeIn delay={0.25} className="w-full">
-                <div
-                  className={cn(
-                    "w-full rounded-2xl border shadow-xl overflow-hidden",
-                    isDark ? "bg-[#0c0c10] border-white/[0.08]" : "bg-slate-900 border-slate-800 text-slate-100"
-                  )}
-                >
-                  <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-white/[0.08] bg-black/30">
-                    <div className="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none]">
+              {/* Right: Code Snippet Card */}
+              <div className="lg:col-span-7">
+                <div className="w-full rounded-2xl border border-[var(--border-primary)] bg-slate-950 text-slate-100 shadow-2xl overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08] bg-black/40">
+                    <div className="flex items-center gap-2 overflow-x-auto [scrollbar-width:none]">
                       {CODE_EXAMPLES.map((c) => (
                         <button
                           key={c.id}
                           onClick={() => setActiveCodeTab(c.id)}
                           className={cn(
-                            "px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap",
+                            "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap",
                             activeCodeTab === c.id
                               ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40"
                               : "text-zinc-400 hover:text-zinc-200"
@@ -413,133 +474,38 @@ export default function AiGatewayClient({
                     </div>
                     <button
                       onClick={() => handleCopyCode(currentCode.code)}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium text-zinc-400 hover:text-cyan-300 transition-colors cursor-pointer"
-                      title="Copy code snippet"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-300 hover:text-cyan-300 bg-white/5 hover:bg-white/10 transition-colors cursor-pointer shrink-0"
                     >
                       {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                      <span>{copiedCode ? "Copied" : "Copy"}</span>
+                      <span>{copiedCode ? "Copied!" : "Copy"}</span>
                     </button>
                   </div>
-                  <pre className="p-4 text-xs font-mono text-zinc-200 overflow-x-auto leading-relaxed max-h-56">
+                  <pre className="p-5 text-xs font-mono text-zinc-200 overflow-x-auto leading-relaxed max-h-80">
                     <code>{currentCode.code}</code>
                   </pre>
                 </div>
-              </FadeIn>
-            </div>
-
-            {/* Right: Hero Mascot Illustration Frame */}
-            <div className="relative flex items-center justify-center mt-4 lg:mt-0 lg:self-center">
-              <HeroAvatarFrame
-                imageSrc="/images/mascots/ai-gateway.webp"
-                imageAlt="Masdika AI Gateway - Unified OpenAI-Compatible Router"
-                imageWidth={1240}
-                imageHeight={1268}
-                badges={[
-                  { icon: Sparkles, label: "MODELS", value: "70+ Live LLMs" },
-                  { icon: Terminal, label: "COMPATIBILITY", value: "OpenAI Drop-In" },
-                  { icon: Zap, label: "LATENCY", value: "Sub-ms Edge Proxy" },
-                  { icon: ShieldCheck, label: "PRIVACY", value: "Zero Data Training" },
-                ]}
-              />
+              </div>
             </div>
           </div>
         </section>
 
-        {/* ── 1. VALUE PILLARS (4 Trust Highlights) ────────────────────────── */}
-        <section className="py-6 sm:py-10 relative z-10">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
-            {[
-              {
-                icon: Terminal,
-                title: "100% OpenAI Drop-in",
-                desc: "Switch baseURL to masdika.id/api/ai/openai/v1. Works seamlessly with Cursor, Aider, LangChain, and official OpenAI SDKs.",
-                badge: "Zero Rewrite",
-              },
-              {
-                icon: Sparkles,
-                title: "70+ Frontier Models",
-                desc: "Direct access to Claude 3.7 Sonnet, GPT-4o, Gemini 2.5 Flash & Pro, DeepSeek R1/V3, Qwen 3.7, and Kling Image generators.",
-                badge: "All-in-One",
-              },
-              {
-                icon: Coins,
-                title: "Rupiah Pay-As-You-Go",
-                desc: "Pay per exact prompt and completion token from your AI Balance. No monthly lock-ins, and failed requests cost exactly Rp 0.",
-                badge: "Rp 0 Failed Calls",
-              },
-              {
-                icon: Lock,
-                title: "Zero Training Retention",
-                desc: "Enterprise data privacy: your prompts and generated output pass through volatile memory and are never stored to train models.",
-                badge: "100% Confidential",
-              },
-            ].map((p, i) => (
-              <FadeIn key={i} delay={0.08 * i}>
-                <div
-                  className={cn(
-                    "h-full p-6 rounded-2xl border flex flex-col justify-between transition-all group hover:border-cyan-500/50 shadow-sm",
-                    isDark ? "bg-[var(--surface)] border-[var(--border-primary)]" : "bg-white border-slate-200"
-                  )}
-                >
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <div
-                        className={cn(
-                          "w-10 h-10 rounded-xl border flex items-center justify-center transition-colors group-hover:bg-cyan-500/20 group-hover:border-cyan-500/40",
-                          isDark ? "bg-cyan-500/10 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700"
-                        )}
-                      >
-                        <p.icon className="w-5 h-5" />
-                      </div>
-                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                        {p.badge}
-                      </span>
-                    </div>
-                    <h3 className={cn("text-base font-bold mb-2", isDark ? "text-white" : "text-slate-900")}>
-                      {p.title}
-                    </h3>
-                    <p className={cn("text-xs sm:text-sm leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
-                      {p.desc}
-                    </p>
-                  </div>
-                </div>
-              </FadeIn>
-            ))}
-          </div>
-        </section>
-
-        {/* ── 2. FRONTIER MODEL DIRECTORY & PRICING TABLE ──────────────────── */}
-        <section id="models" className="scroll-mt-24 py-6 sm:py-10 relative z-10">
+        {/* ── 3. FRONTIER MODEL DIRECTORY & PRICING TABLE ─────────────────── */}
+        <section id="models" className="scroll-mt-24 py-10 sm:py-14 relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
-            <div
-              className={cn(
-                "inline-flex items-center gap-2 px-3.5 py-1 rounded-full border text-[11px] font-bold tracking-widest uppercase mb-4 shadow-xs",
-                isDark ? "border-cyan-800/80 bg-cyan-950/30 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600"
-              )}
-            >
-              MODEL CATALOG & PRICING
-            </div>
-            <h2 className={cn("text-3xl sm:text-4xl font-black mb-3", isDark ? "text-white" : "text-slate-900")}>
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+              MODEL CATALOG &amp; PRICING
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
               Transparent Token Pricing in Rupiah
             </h2>
-            <p className={cn("text-sm sm:text-base leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
+            <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed">
               No hidden foreign exchange markups or minimum billing brackets. Filter through 70+ text and image models.
             </p>
           </div>
 
-          <div
-            className={cn(
-              "rounded-2xl border shadow-xl overflow-hidden",
-              isDark ? "bg-[var(--surface)] border-[var(--border-primary)]" : "bg-white border-slate-200"
-            )}
-          >
+          <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] shadow-xl overflow-hidden">
             {/* Control Bar: Model Type, Provider Pills & Search */}
-            <div
-              className={cn(
-                "p-4 border-b flex flex-col lg:flex-row lg:items-center justify-between gap-4",
-                isDark ? "border-white/[0.08]" : "border-slate-200"
-              )}
-            >
+            <div className="p-4 border-b border-[var(--border-primary)] bg-[var(--surface-secondary)]/50 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setModelTypeTab("chat")}
@@ -547,13 +513,11 @@ export default function AiGatewayClient({
                     "px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2",
                     modelTypeTab === "chat"
                       ? "bg-cyan-400 text-slate-950 shadow-xs"
-                      : isDark
-                      ? "text-zinc-400 hover:text-white"
-                      : "text-slate-600 hover:text-slate-900"
+                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                   )}
                 >
                   <Cpu className="w-3.5 h-3.5" />
-                  <span>Chat & Reasoning Models ({allChatModels.length})</span>
+                  <span>Chat &amp; Reasoning Models ({allChatModels.length})</span>
                 </button>
                 <button
                   onClick={() => setModelTypeTab("image")}
@@ -561,9 +525,7 @@ export default function AiGatewayClient({
                     "px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2",
                     modelTypeTab === "image"
                       ? "bg-cyan-400 text-slate-950 shadow-xs"
-                      : isDark
-                      ? "text-zinc-400 hover:text-white"
-                      : "text-slate-600 hover:text-slate-900"
+                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                   )}
                 >
                   <Sparkles className="w-3.5 h-3.5" />
@@ -581,10 +543,8 @@ export default function AiGatewayClient({
                         className={cn(
                           "px-2.5 py-1 rounded-lg text-xs font-semibold capitalize transition-all cursor-pointer whitespace-nowrap",
                           selectedProvider === p
-                            ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40"
-                            : isDark
-                            ? "text-zinc-400 hover:text-zinc-200"
-                            : "text-slate-600 hover:text-slate-900"
+                            ? "bg-cyan-500/20 text-cyan-500 dark:text-cyan-300 border border-cyan-500/40"
+                            : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                         )}
                       >
                         {p}
@@ -593,18 +553,13 @@ export default function AiGatewayClient({
                   </div>
                 )}
                 <div className="relative min-w-[220px]">
-                  <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Search className="w-3.5 h-3.5 text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={modelSearch}
                     onChange={(e) => setModelSearch(e.target.value)}
                     placeholder="Search model ID or name..."
-                    className={cn(
-                      "w-full pl-8 pr-3 py-1.5 rounded-xl text-xs border outline-none transition-colors",
-                      isDark
-                        ? "bg-[#0a0a0c] border-white/[0.08] text-white focus:border-cyan-500"
-                        : "bg-slate-50 border-slate-200 text-slate-900 focus:border-cyan-500"
-                    )}
+                    className="w-full pl-8 pr-3 py-1.5 rounded-xl text-xs border border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-primary)] outline-none focus:border-cyan-500 transition-colors"
                   />
                 </div>
               </div>
@@ -614,12 +569,7 @@ export default function AiGatewayClient({
             {modelTypeTab === "chat" ? (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                  <thead
-                    className={cn(
-                      "text-[11px] font-bold uppercase tracking-wider border-b",
-                      isDark ? "bg-[#0d0d12] border-white/[0.08] text-zinc-400" : "bg-slate-50 border-slate-200 text-slate-600"
-                    )}
-                  >
+                  <thead className="text-[11px] font-bold uppercase tracking-wider border-b border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-muted)]">
                     <tr>
                       <th className="px-5 py-3.5">Model Name</th>
                       <th className="px-4 py-3.5">Model ID</th>
@@ -630,39 +580,36 @@ export default function AiGatewayClient({
                       <th className="px-4 py-3.5 text-right">Action</th>
                     </tr>
                   </thead>
-                  <tbody className={cn("divide-y", isDark ? "divide-white/[0.06]" : "divide-slate-200")}>
+                  <tbody className="divide-y divide-[var(--border-primary)]">
                     {filteredChatModels.map((m) => (
                       <tr
                         key={m.modelId}
-                        className={cn(
-                          "transition-colors",
-                          isDark ? "hover:bg-white/[0.02]" : "hover:bg-slate-50"
-                        )}
+                        className="hover:bg-[var(--surface-secondary)]/40 transition-colors"
                       >
                         <td className="px-5 py-4 whitespace-nowrap">
                           <div className="font-bold flex items-center gap-2">
-                            <span className={isDark ? "text-white" : "text-slate-900"}>{m.name}</span>
+                            <span className="text-[var(--text-primary)]">{m.name}</span>
                             {m.discountBadge && (
-                              <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                                 {m.discountBadge}
                               </span>
                             )}
                           </div>
-                          <div className="text-[11px] text-zinc-400">{m.provider}</div>
+                          <div className="text-[11px] text-[var(--text-muted)]">{m.provider}</div>
                         </td>
                         <td className="px-4 py-4 whitespace-nowrap">
-                          <code className="font-mono text-cyan-400 text-xs">{m.modelId}</code>
+                          <code className="font-mono text-cyan-600 dark:text-cyan-400 text-xs font-semibold">{m.modelId}</code>
                         </td>
-                        <td className="px-4 py-4 whitespace-nowrap font-mono text-zinc-400">
+                        <td className="px-4 py-4 whitespace-nowrap font-mono text-[var(--text-secondary)]">
                           {m.contextWindow || "128K"}
                         </td>
-                        <td className="px-4 py-4 whitespace-nowrap font-mono font-semibold text-emerald-400">
+                        <td className="px-4 py-4 whitespace-nowrap font-mono font-semibold text-emerald-600 dark:text-emerald-400">
                           {formatRupiah(m.inputPricePer1M)}
                         </td>
-                        <td className="px-4 py-4 whitespace-nowrap font-mono text-cyan-400">
+                        <td className="px-4 py-4 whitespace-nowrap font-mono text-cyan-600 dark:text-cyan-400">
                           {formatRupiah(m.cachePricePer1M)}
                         </td>
-                        <td className="px-4 py-4 whitespace-nowrap font-mono font-bold text-sky-400">
+                        <td className="px-4 py-4 whitespace-nowrap font-mono font-bold text-sky-600 dark:text-sky-400">
                           {formatRupiah(m.outputPricePer1M)}
                         </td>
                         <td className="px-4 py-4 whitespace-nowrap text-right">
@@ -671,13 +618,11 @@ export default function AiGatewayClient({
                             className={cn(
                               "inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer",
                               copiedModelId === m.modelId
-                                ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
-                                : isDark
-                                ? "border-white/10 text-zinc-300 hover:border-cyan-500 hover:text-cyan-300"
-                                : "border-slate-200 text-slate-700 hover:border-cyan-500 hover:text-cyan-600"
+                                ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border-emerald-500/40"
+                                : "border-[var(--border-primary)] text-[var(--text-secondary)] hover:border-cyan-500 hover:text-cyan-600 dark:hover:text-cyan-300"
                             )}
                           >
-                            {copiedModelId === m.modelId ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                            {copiedModelId === m.modelId ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
                             <span>{copiedModelId === m.modelId ? "Copied" : "Copy ID"}</span>
                           </button>
                         </td>
@@ -691,30 +636,27 @@ export default function AiGatewayClient({
                 {filteredImageModels.map((img) => (
                   <div
                     key={img.modelId}
-                    className={cn(
-                      "p-4 rounded-xl border flex flex-col justify-between",
-                      isDark ? "bg-[#0c0c10] border-white/[0.08]" : "bg-slate-50 border-slate-200"
-                    )}
+                    className="p-4 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/30 flex flex-col justify-between"
                   >
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <h4 className={cn("text-sm font-bold", isDark ? "text-white" : "text-slate-900")}>
+                        <h4 className="text-sm font-bold text-[var(--text-primary)]">
                           {img.name}
                         </h4>
-                        <span className="font-mono text-xs font-bold text-cyan-400">
+                        <span className="font-mono text-xs font-bold text-cyan-600 dark:text-cyan-400">
                           {formatRupiah(img.basePriceRp)} / img
                         </span>
                       </div>
-                      <code className="text-[11px] font-mono text-zinc-400 block mb-2">{img.modelId}</code>
-                      <p className={cn("text-xs leading-relaxed mb-3", isDark ? "text-zinc-400" : "text-slate-600")}>
+                      <code className="text-[11px] font-mono text-[var(--text-muted)] block mb-2">{img.modelId}</code>
+                      <p className="text-xs text-[var(--text-secondary)] leading-relaxed mb-3">
                         {img.description}
                       </p>
                     </div>
-                    <div className="flex items-center justify-between pt-2 border-t border-white/[0.06] text-[11px] text-zinc-400">
+                    <div className="flex items-center justify-between pt-2 border-t border-[var(--border-primary)] text-[11px] text-[var(--text-muted)]">
                       <span>Sizes: {img.sizes.join(", ")}</span>
                       <button
                         onClick={() => handleCopyModelId(img.modelId)}
-                        className="text-cyan-400 hover:underline cursor-pointer"
+                        className="text-cyan-600 dark:text-cyan-400 hover:underline cursor-pointer font-medium"
                       >
                         {copiedModelId === img.modelId ? "Copied!" : "Copy ID"}
                       </button>
@@ -726,46 +668,32 @@ export default function AiGatewayClient({
           </div>
         </section>
 
-        {/* ── 3. INTERACTIVE TOKEN COST ESTIMATOR ───────────────────────────── */}
-        <section id="calculator" className="scroll-mt-24 py-6 sm:py-10 relative z-10">
-          <div
-            className={cn(
-              "rounded-2xl border p-6 sm:p-10 shadow-xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-8 items-center",
-              isDark ? "bg-[var(--surface)] border-[var(--border-primary)]" : "bg-white border-slate-200"
-            )}
-          >
+        {/* ── 4. INTERACTIVE TOKEN COST ESTIMATOR ──────────────────────────── */}
+        <section id="calculator" className="scroll-mt-24 py-10 sm:py-14 relative z-10">
+          <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+              TOKEN COST ESTIMATOR
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+              Pay-As-You-Go Token Cost Calculator
+            </h2>
+            <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed">
+              Drag the sliders to estimate real token consumption. See how much you save with Pay-As-You-Go Rupiah billing.
+            </p>
+          </div>
+
+          <div className="rounded-2xl sm:rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-10 md:p-12 shadow-xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             {/* Left Controls */}
             <div className="lg:col-span-7 space-y-6">
-              <div>
-                <div
-                  className={cn(
-                    "inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[11px] font-bold tracking-widest uppercase mb-3 shadow-xs",
-                    isDark ? "border-cyan-800/80 bg-cyan-950/30 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600"
-                  )}
-                >
-                  <Coins className="w-3.5 h-3.5" />
-                  <span>TOKEN COST CALCULATOR</span>
-                </div>
-                <h3 className={cn("text-2xl sm:text-3xl font-black mb-2", isDark ? "text-white" : "text-slate-900")}>
-                  Estimate Your Monthly AI Spend
-                </h3>
-                <p className={cn("text-xs sm:text-sm leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
-                  Drag the sliders to estimate real token consumption. See how much you save with Pay-As-You-Go Rupiah billing.
-                </p>
-              </div>
-
               {/* Model Picker */}
               <div>
-                <label className={cn("block text-xs font-bold mb-2", isDark ? "text-zinc-300" : "text-slate-700")}>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-2">
                   Select AI Model
                 </label>
                 <select
                   value={calcModelId}
                   onChange={(e) => setCalcModelId(e.target.value)}
-                  className={cn(
-                    "w-full px-3.5 py-2.5 rounded-xl text-xs sm:text-sm border outline-none font-semibold transition-colors cursor-pointer",
-                    isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white focus:border-cyan-500" : "bg-slate-50 border-slate-200 text-slate-900 focus:border-cyan-500"
-                  )}
+                  className="w-full px-3.5 py-2.5 rounded-xl text-xs sm:text-sm border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-primary)] outline-none font-semibold transition-colors cursor-pointer focus:border-cyan-500"
                 >
                   {allChatModels.map((m) => (
                     <option key={m.modelId} value={m.modelId}>
@@ -776,11 +704,11 @@ export default function AiGatewayClient({
               </div>
 
               {/* Sliders */}
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <div>
                   <div className="flex justify-between text-xs font-semibold mb-1.5">
-                    <span className={isDark ? "text-zinc-300" : "text-slate-700"}>Avg. Prompt Tokens per Request</span>
-                    <span className="font-mono text-cyan-400 font-bold">{promptTokens.toLocaleString()} tokens</span>
+                    <span className="text-[var(--text-secondary)]">Avg. Prompt Tokens per Request</span>
+                    <span className="font-mono text-cyan-600 dark:text-cyan-400 font-bold">{promptTokens.toLocaleString()} tokens</span>
                   </div>
                   <input
                     type="range"
@@ -795,8 +723,8 @@ export default function AiGatewayClient({
 
                 <div>
                   <div className="flex justify-between text-xs font-semibold mb-1.5">
-                    <span className={isDark ? "text-zinc-300" : "text-slate-700"}>Avg. Completion Tokens per Request</span>
-                    <span className="font-mono text-cyan-400 font-bold">{completionTokens.toLocaleString()} tokens</span>
+                    <span className="text-[var(--text-secondary)]">Avg. Completion Tokens per Request</span>
+                    <span className="font-mono text-cyan-600 dark:text-cyan-400 font-bold">{completionTokens.toLocaleString()} tokens</span>
                   </div>
                   <input
                     type="range"
@@ -811,8 +739,8 @@ export default function AiGatewayClient({
 
                 <div>
                   <div className="flex justify-between text-xs font-semibold mb-1.5">
-                    <span className={isDark ? "text-zinc-300" : "text-slate-700"}>Estimated Requests per Month</span>
-                    <span className="font-mono text-cyan-400 font-bold">{monthlyRequests.toLocaleString()} calls</span>
+                    <span className="text-[var(--text-secondary)]">Estimated Requests per Month</span>
+                    <span className="font-mono text-cyan-600 dark:text-cyan-400 font-bold">{monthlyRequests.toLocaleString()} calls</span>
                   </div>
                   <input
                     type="range"
@@ -829,58 +757,152 @@ export default function AiGatewayClient({
 
             {/* Right Result Card */}
             <div className="lg:col-span-5">
-              <div
-                className={cn(
-                  "p-6 sm:p-8 rounded-2xl border text-center space-y-6 shadow-xl",
-                  isDark ? "bg-[#0c0c10] border-cyan-500/30" : "bg-cyan-50/50 border-cyan-200"
-                )}
-              >
+              <div className="p-6 sm:p-8 rounded-2xl border border-cyan-500/30 bg-[var(--surface-secondary)] text-center space-y-6 shadow-xl">
                 <div>
-                  <div className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 mb-1">
+                  <div className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-1">
                     ESTIMATED MONTHLY COST
                   </div>
-                  <div className="text-3xl sm:text-4xl font-black text-cyan-400 font-mono tracking-tight">
+                  <div className="text-3xl sm:text-4xl font-black text-cyan-600 dark:text-cyan-400 font-mono tracking-tight">
                     {formatRupiah(monthlyTotalRp)}
                   </div>
-                  <div className="text-xs text-zinc-400 mt-1">
+                  <div className="text-xs text-[var(--text-muted)] mt-1">
                     approx. {formatRupiah(costPerRequestRp)} per API call
                   </div>
                 </div>
 
-                <div className={cn("p-4 rounded-xl border text-left space-y-2 text-xs", isDark ? "bg-[#141418] border-white/[0.08]" : "bg-white border-cyan-100")}>
+                <div className="p-4 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] text-left space-y-2 text-xs">
                   <div className="flex justify-between items-center">
-                    <span className="text-zinc-400">Model Selected</span>
-                    <span className="font-semibold">{activeCalcModel.name}</span>
+                    <span className="text-[var(--text-muted)]">Model Selected</span>
+                    <span className="font-semibold text-[var(--text-primary)]">{activeCalcModel.name}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-zinc-400">Total Monthly Tokens</span>
-                    <span className="font-mono font-bold text-zinc-300">
+                    <span className="text-[var(--text-muted)]">Total Monthly Tokens</span>
+                    <span className="font-mono font-bold text-[var(--text-primary)]">
                       {((promptTokens + completionTokens) * monthlyRequests).toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-zinc-400">Failed Request Cost</span>
-                    <span className="font-mono font-bold text-emerald-400">Rp 0 (Guaranteed)</span>
+                    <span className="text-[var(--text-muted)]">Failed Request Cost</span>
+                    <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">Rp 0 (Guaranteed)</span>
                   </div>
                 </div>
 
-                <Link
+                <Button
+                  variant="primary"
+                  size="lg"
                   href="/dashboard/ai-gateway"
-                  className="block w-full font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 py-3 rounded-xl shadow-md text-center transition-colors"
+                  className="w-full justify-center"
                 >
-                  Top Up & Start Querying
-                </Link>
+                  Top Up &amp; Start Querying
+                </Button>
               </div>
             </div>
           </div>
         </section>
 
-        {/* ── 4. LIVE INFERENCE PIPELINE SIMULATOR ──────────────────────────── */}
+        {/* ── 5. ENTERPRISE CAPABILITIES GRID ─────────────────────────────── */}
+        <section className="py-10 sm:py-14 relative z-10">
+          <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+              ENTERPRISE CAPABILITIES
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+              Everything Your AI Infrastructure Requires
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { icon: Terminal, title: "100% OpenAI Drop-In", desc: "No migration rewrite needed. Use existing OpenAI SDKs, LangChain, or Cursor." },
+              { icon: Zap, title: "Sub-Millisecond Edge Routing", desc: "In-memory proxy routing prompts directly to optimal upstream clusters." },
+              { icon: ShieldCheck, title: "Strict Zero Data Retention", desc: "Your proprietary code and prompts are never stored to train AI models." },
+              { icon: Coins, title: "Zero Markup Rupiah PAYG", desc: "Clear IDR token rates without hidden currency conversions or bank surcharges." },
+              { icon: KeyRound, title: "Scoped API Keys", desc: "Restrict tokens to specific models and enforce hard monthly spending budgets." },
+              { icon: RefreshCw, title: "Auto-Failover Resilience", desc: "Automated retries across global nodes ensure 99.9% inference availability." },
+              { icon: Activity, title: "Real-Time Usage Telemetry", desc: "Inspect exact prompt tokens, completion tokens, latency, and costs in real time." },
+              { icon: Bot, title: "Multi-Model Orchestration", desc: "Switch seamlessly between reasoning, coding, and fast flash models with one key." },
+            ].map((feat, i) => (
+              <FadeIn key={i} delay={i * 0.05} direction="up" className="h-full">
+                <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-colors flex flex-col justify-between h-full shadow-sm">
+                  <div>
+                    <div className="w-10 h-10 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-4">
+                      <feat.icon className="w-5 h-5" />
+                    </div>
+                    <h3 className="text-base font-bold text-[var(--text-primary)] mb-2">
+                      {feat.title}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
+                      {feat.desc}
+                    </p>
+                  </div>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </section>
+
+        {/* ── 6. HOW IT WORKS SECTION (Provisioning Workflow 3 Steps) ─────── */}
+        <section className="py-10 sm:py-14 relative z-10">
+          <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+              GETTING STARTED
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+              Start Querying 70+ Models in 3 Steps
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative items-stretch">
+            <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-[2px] bg-slate-200 dark:bg-white/10 overflow-hidden rounded-full">
+              <AnimatedBeam />
+            </div>
+
+            {[
+              {
+                step: "01",
+                title: "Generate API Key",
+                desc: "Create a universal Masdika AI Bearer token and optionally scope it to specific models.",
+              },
+              {
+                step: "02",
+                title: "Top Up Balance",
+                desc: "Deposit starting from Rp 10.000 via QRIS or automated gateway. No expiring token bundles.",
+              },
+              {
+                step: "03",
+                title: "Point baseURL & Stream",
+                desc: "Set baseURL to https://www.masdika.id/api/ai/openai/v1 in Cursor, Aider, Python, or Node.js.",
+              },
+            ].map((st, i) => (
+              <FadeIn key={i} delay={i * 0.15} direction="up" className="h-full">
+                <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-8 text-center shadow-sm hover:border-cyan-500/40 transition-all duration-300 h-full flex flex-col justify-between relative z-10 group">
+                  <div>
+                    <div className="w-20 h-20 mx-auto rounded-full bg-[var(--surface-secondary)] border border-[var(--border-primary)] flex items-center justify-center mb-6 relative group-hover:scale-110 transition-transform duration-300">
+                      <OrbitalRings />
+                      <span className="relative z-10 text-3xl font-black bg-gradient-to-br from-cyan-600 to-cyan-400 bg-clip-text text-transparent">
+                        {st.step}
+                      </span>
+                    </div>
+
+                    <h3 className="text-xl font-bold text-[var(--text-primary)] mb-3">
+                      {st.title}
+                    </h3>
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                      {st.desc}
+                    </p>
+                  </div>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </section>
+
+        {/* ── 7. PROVISIONING SECTION (Live Inference Pipeline Visualizer) ── */}
         <ProvisioningSection
           subtitle="REAL-TIME INFERENCE PIPELINE"
           title="Edge Routing With Sub-Millisecond Overhead"
-          description="Every prompt is cryptographically validated at the edge, token-metered in real time, and streamed via low-latency Server-Sent Events with zero retention."
-          buttonText="Test in Playground"
+          description="Every prompt is cryptographically validated at the edge, token-metered in real time, and streamed via low-latency Server-Sent Events with zero data retention."
+          buttonText="Open AI Gateway Panel"
           buttonHref="/dashboard/ai-gateway"
           logs={AI_TERMINAL_LOGS}
           stats={AI_TERMINAL_STATS}
@@ -890,56 +912,44 @@ export default function AiGatewayClient({
           provisionEstimate="Latency: Sub-ms Proxy + Instant TTFT"
         />
 
-        {/* ── 5. FREQUENTLY ASKED QUESTIONS ─────────────────────────────────── */}
-        <FaqSection faqs={AI_FAQS} />
-
-        {/* ── 6. FINAL CALL TO ACTION ───────────────────────────────────────── */}
-        <section className="py-6 sm:py-10 relative z-10 w-full">
-          <div
-            className={cn(
-              "relative rounded-2xl border p-10 md:p-16 text-center shadow-xl overflow-hidden w-full",
-              isDark ? "bg-[var(--surface)] border-[var(--border-primary)]" : "bg-white border-slate-200"
-            )}
-          >
-            <div className="relative z-10 max-w-2xl mx-auto space-y-6">
-              <div
-                className={cn(
-                  "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-bold tracking-widest uppercase shadow-xs",
-                  isDark ? "border-cyan-800/80 bg-cyan-950/30 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700"
-                )}
-              >
-                <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-                <span>START IN UNDER 60 SECONDS</span>
-              </div>
-              <h2 className={cn("text-3xl sm:text-4xl md:text-5xl font-black leading-tight", isDark ? "text-white" : "text-slate-900")}>
+        {/* ── 8. FINAL CTA SECTION ────────────────────────────────────────── */}
+        <section className="py-10 sm:py-14 relative z-10 w-full">
+          <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-10 md:p-16 text-center shadow-xl overflow-hidden w-full">
+            <div className="relative z-10 max-w-2xl mx-auto">
+              <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+                START BUILDING TODAY
+              </span>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-tight mb-4">
                 Build Smarter Apps With Universal AI Inference
               </h2>
-              <p className={cn("text-sm sm:text-base leading-relaxed font-normal", isDark ? "text-zinc-300" : "text-slate-600")}>
+              <p className="text-base sm:text-lg text-[var(--text-secondary)] mb-8 leading-relaxed">
                 Generate an API key, top up your AI balance starting from Rp 10.000, and query 70+ state-of-the-art AI models today.
               </p>
-              <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
-                <Link
+
+              <div className="flex flex-wrap items-center justify-center gap-4">
+                <Button
+                  variant="primary"
+                  size="lg"
                   href="/dashboard/ai-gateway"
-                  className="inline-flex items-center gap-2 font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 shadow-lg shadow-cyan-500/20 rounded-xl px-8 py-3.5 text-sm sm:text-base transition-colors"
+                  rightIcon={<ArrowRight className="w-4 h-4" />}
                 >
-                  <span>Generate API Key</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-                <Link
+                  Get Your API Key
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="lg"
                   href="/register"
-                  className={cn(
-                    "inline-flex items-center font-semibold rounded-xl px-6 py-3.5 text-sm sm:text-base border transition-colors",
-                    isDark
-                      ? "border-white/10 hover:border-cyan-500/50 hover:bg-white/5 text-zinc-200"
-                      : "border-slate-200 hover:border-cyan-500 hover:bg-slate-100 text-slate-700"
-                  )}
                 >
                   Create Account
-                </Link>
+                </Button>
               </div>
             </div>
           </div>
         </section>
+
+        {/* ── 9. FAQ SECTION ──────────────────────────────────────────────── */}
+        <FaqSection faqs={AI_FAQS} />
+
       </div>
     </div>
   );
