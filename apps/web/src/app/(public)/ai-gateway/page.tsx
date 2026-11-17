@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { OG_IMAGE_PATH } from "@/lib/og-image";
 import { prisma } from "@/lib/prisma";
 import { getCachedData } from "@/lib/cache";
 import { DEFAULT_AI_IMAGE_MODELS, DEFAULT_AI_MODELS, ensureAiModelsExist, getAiGatewayConfig } from "@/lib/ai-gateway";
@@ -35,9 +36,9 @@ export const metadata: Metadata = {
     siteName: "Masdika",
     images: [
       {
-        url: "/images/mascots/ai-token-gateway.webp",
-        width: 1240,
-        height: 1268,
+        url: OG_IMAGE_PATH,
+        width: 1200,
+        height: 630,
         alt: "Masdika AI Gateway - Unified OpenAI-Compatible API",
       },
     ],
@@ -48,7 +49,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "AI Gateway - Unified OpenAI-Compatible API with 70+ Frontier AI Models",
     description: "Access 70+ frontier LLMs and image models with a single OpenAI-compatible API key. Pay-as-you-go per token in Rupiah, sub-millisecond edge routing, and zero training data retention.",
-    images: ["/images/mascots/ai-token-gateway.webp"],
+    images: [OG_IMAGE_PATH],
   },
 };
 
