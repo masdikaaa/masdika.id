@@ -52,6 +52,7 @@ import {
   isModelPromo,
   getModelCapabilities,
   modelHasCapability,
+  MODEL_SORT_OPTIONS,
   type AiModelCapability,
 } from '@/lib/ai-gateway-constants';
 
@@ -3279,24 +3280,17 @@ aider --model openai/glm-5.3
 
               <div className="flex items-center gap-2 shrink-0">
                 <span className={cn('text-xs font-medium', isDark ? 'text-zinc-400' : 'text-slate-600')}>Urutkan</span>
-                <select
-                  value={modelSortBy}
-                  onChange={(e) => {
-                    setModelSortBy(e.target.value);
-                    setModelCatalogPage(1);
-                  }}
-                  className={cn(
-                    'px-3 py-1 rounded-lg text-xs font-medium border outline-none cursor-pointer transition-colors',
-                    isDark
-                      ? 'bg-[#18181b] border-white/10 text-white focus:border-cyan-500'
-                      : 'bg-white border-slate-200 text-slate-900 focus:border-cyan-500'
-                  )}
-                >
-                  <option value="recommended">Rekomendasi</option>
-                  <option value="price_asc">Harga: Rendah ke Tinggi</option>
-                  <option value="price_desc">Harga: Tinggi ke Rendah</option>
-                  <option value="context_desc">Context Window</option>
-                </select>
+                <div className="w-44 sm:w-52">
+                  <Select
+                    value={modelSortBy}
+                    onChange={(val) => {
+                      setModelSortBy(val);
+                      setModelCatalogPage(1);
+                    }}
+                    options={MODEL_SORT_OPTIONS}
+                    className="py-1.5 px-3 text-xs rounded-xl font-medium"
+                  />
+                </div>
               </div>
             </div>
 

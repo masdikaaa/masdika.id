@@ -47,6 +47,7 @@ import {
   isModelPromo,
   getModelCapabilities,
   modelHasCapability,
+  MODEL_SORT_OPTIONS,
   type AiModelCapability,
 } from "@/lib/ai-gateway-constants";
 
@@ -718,8 +719,8 @@ export default function AiGatewayClient({
                         className={cn(
                           'px-2.5 sm:px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer border',
                           isSelected
-                            ? 'border-emerald-500 bg-emerald-500/15 text-emerald-400 font-semibold shadow-xs shadow-emerald-500/20'
-                            : 'border-[var(--border-primary)] dark:border-white/10 bg-[var(--surface)] dark:bg-white/[0.03] text-[var(--text-secondary)] dark:text-zinc-400 hover:text-[var(--text-primary)] dark:hover:text-white'
+                            ? 'border-emerald-500 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-semibold shadow-xs shadow-emerald-500/20'
+                            : 'border-slate-200 dark:border-white/10 bg-white dark:bg-white/[0.03] text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-white/20'
                         )}
                       >
                         {cap}
@@ -733,7 +734,7 @@ export default function AiGatewayClient({
                         setSelectedCapability(null);
                         setCurrentPage(1);
                       }}
-                      className="text-[11px] text-zinc-500 hover:text-zinc-300 underline cursor-pointer ml-1"
+                      className="text-[11px] text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 underline cursor-pointer ml-1"
                     >
                       Reset
                     </button>
@@ -742,19 +743,17 @@ export default function AiGatewayClient({
 
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="text-xs font-medium text-[var(--text-muted)] dark:text-zinc-400">Urutkan</span>
-                  <select
-                    value={modelSortBy}
-                    onChange={(e) => {
-                      setModelSortBy(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    className="px-3 py-1 rounded-lg text-xs font-medium border outline-none cursor-pointer transition-colors border-[var(--border-primary)] dark:border-white/10 bg-[var(--surface)] dark:bg-[#18181b] text-[var(--text-primary)] dark:text-white focus:border-cyan-500"
-                  >
-                    <option value="recommended">Rekomendasi</option>
-                    <option value="price_asc">Harga: Rendah ke Tinggi</option>
-                    <option value="price_desc">Harga: Tinggi ke Rendah</option>
-                    <option value="context_desc">Context Window</option>
-                  </select>
+                  <div className="w-44 sm:w-52">
+                    <Select
+                      value={modelSortBy}
+                      onChange={(val) => {
+                        setModelSortBy(val);
+                        setCurrentPage(1);
+                      }}
+                      options={MODEL_SORT_OPTIONS}
+                      className="py-1.5 px-3 text-xs rounded-xl font-medium"
+                    />
+                  </div>
                 </div>
               </div>
             )}
@@ -813,7 +812,7 @@ export default function AiGatewayClient({
                                 {getModelCapabilities(m.modelId).map((cap) => (
                                   <span
                                     key={cap}
-                                    className="px-1.5 py-0.2 rounded text-[10px] font-medium bg-zinc-800/80 text-zinc-400 border border-zinc-700/50"
+                                    className="px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors bg-slate-100 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-400 border border-slate-200 dark:border-zinc-700/50"
                                   >
                                     {cap}
                                   </span>
@@ -924,7 +923,7 @@ export default function AiGatewayClient({
                           {getModelCapabilities(m.modelId).map((cap) => (
                             <span
                               key={cap}
-                              className="px-1.5 py-0.2 rounded text-[10px] font-medium bg-zinc-800/80 text-zinc-400 border border-zinc-700/50"
+                              className="px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors bg-slate-100 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-400 border border-slate-200 dark:border-zinc-700/50"
                             >
                               {cap}
                             </span>
