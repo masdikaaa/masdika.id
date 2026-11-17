@@ -25,6 +25,8 @@ import {
   Workflow,
   Sliders,
   Gauge,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -225,6 +227,10 @@ export default function AiGatewayClient({
   const [modelSearch, setModelSearch] = useState("");
   const [copiedModelId, setCopiedModelId] = useState<string | null>(null);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+
   // Calculator state
   const [calcModelId, setCalcModelId] = useState("qwen3.7-flash");
   const [promptTokens, setPromptTokens] = useState(2000);
@@ -242,9 +248,14 @@ export default function AiGatewayClient({
     return DEFAULT_AI_IMAGE_MODELS as AiImageModelItem[];
   }, [imageModels]);
 
+  // Pre-seed priority providers matching Gambar 1 (Qwen, OpenAI, Anthropic, Hunyuan, DeepSeek, GLM)
   const providers = useMemo(() => {
     const set = new Set<string>();
-    allChatModels.forEach((m) => set.add(m.provider));
+    const priority = ["Qwen", "OpenAI", "Anthropic", "Hunyuan", "DeepSeek", "GLM"];
+    priority.forEach((p) => set.add(p));
+    allChatModels.forEach((m) => {
+      if (m.provider) set.add(m.provider);
+    });
     return ["all", ...Array.from(set)];
   }, [allChatModels]);
 
@@ -271,6 +282,51 @@ export default function AiGatewayClient({
         (m.description && m.description.toLowerCase().includes(q))
     );
   }, [allImageModels, modelSearch]);
+
+  // Pagination calculation
+  const currentTotal = modelTypeTab === "chat" ? filteredChatModels.length : filteredImageModels.length;
+  const effectivePageSize = pageSize === -1 ? currentTotal : pageSize;
+  const totalPages = Math.max(1, Math.ceil(currentTotal / (effectivePageSize || 1)));
+  const safePage = Math.min(Math.max(1, currentPage), totalPages);
+
+  const paginatedChatModels = useMemo(() => {
+    if (pageSize === -1 || pageSize >= filteredChatModels.length) return filteredChatModels;
+    const start = (safePage - 1) * pageSize;
+    return filteredChatModels.slice(start, start + pageSize);
+  }, [filteredChatModels, safePage, pageSize]);
+
+  const paginatedImageModels = useMemo(() => {
+    if (pageSize === -1 || pageSize >= filteredImageModels.length) return filteredImageModels;
+    const start = (safePage - 1) * pageSize;
+    return filteredImageModels.slice(start, start + pageSize);
+  }, [filteredImageModels, safePage, pageSize]);
+
+  const startItem = currentTotal === 0 ? 0 : (safePage - 1) * effectivePageSize + 1;
+  const endItem = currentTotal === 0 ? 0 : Math.min(safePage * effectivePageSize, currentTotal);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    const el = document.getElementById("models-table");
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < 80) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+  };
+
+  const pageNumbers = useMemo(() => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (safePage <= 4) {
+      return [1, 2, 3, 4, 5, "...", totalPages];
+    }
+    if (safePage >= totalPages - 3) {
+      return [1, "...", totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    }
+    return [1, "...", safePage - 1, safePage, safePage + 1, "...", totalPages];
+  }, [safePage, totalPages]);
 
   // Current calculator model
   const activeCalcModel = useMemo(() => {
@@ -521,67 +577,94 @@ export default function AiGatewayClient({
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] shadow-xl overflow-hidden">
-            {/* Control Bar: Model Type, Provider Pills & Search */}
-            <div className="p-3.5 sm:p-4 border-b border-[var(--border-primary)] bg-[var(--surface-secondary)]/50 flex flex-col gap-3">
-              {/* Segmented Button Bar for Model Types */}
-              <div className="grid grid-cols-2 gap-1.5 sm:flex sm:items-center sm:gap-2 w-full sm:w-auto">
+          <div id="models-table" className="rounded-2xl border border-[var(--border-primary)] dark:border-white/10 bg-[var(--surface)] dark:bg-[#0c0d12] shadow-xl overflow-hidden">
+            {/* Control Bar: Model Type, Provider Pills & Search (Unified Single-Row on Desktop matching Gambar 1) */}
+            <div className="p-3 sm:p-3.5 border-b border-[var(--border-primary)] dark:border-white/10 bg-[var(--surface-secondary)]/50 dark:bg-[#0f1117] flex flex-col xl:flex-row xl:items-center justify-between gap-3">
+              {/* Left: Model Type Tabs */}
+              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                 <button
-                  onClick={() => setModelTypeTab("chat")}
+                  onClick={() => {
+                    setModelTypeTab("chat");
+                    setCurrentPage(1);
+                  }}
                   className={cn(
-                    "px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 text-center truncate",
+                    "px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shrink-0",
                     modelTypeTab === "chat"
-                      ? "bg-cyan-400 text-slate-950 shadow-xs"
-                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)]"
+                      ? "bg-cyan-400 text-slate-950 shadow-xs font-black"
+                      : "text-[var(--text-secondary)] dark:text-zinc-400 hover:text-[var(--text-primary)] dark:hover:text-white hover:bg-[var(--surface)] dark:hover:bg-white/5"
                   )}
                 >
                   <Cpu className="w-3.5 h-3.5 shrink-0" />
-                  <span className="truncate">Chat &amp; Reasoning ({allChatModels.length})</span>
+                  <span>Chat &amp; Reasoning Models ({allChatModels.length})</span>
                 </button>
                 <button
-                  onClick={() => setModelTypeTab("image")}
+                  onClick={() => {
+                    setModelTypeTab("image");
+                    setCurrentPage(1);
+                  }}
                   className={cn(
-                    "px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 text-center truncate",
+                    "px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shrink-0",
                     modelTypeTab === "image"
-                      ? "bg-cyan-400 text-slate-950 shadow-xs"
-                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)]"
+                      ? "bg-cyan-400 text-slate-950 shadow-xs font-black"
+                      : "text-[var(--text-secondary)] dark:text-zinc-400 hover:text-[var(--text-primary)] dark:hover:text-white hover:bg-[var(--surface)] dark:hover:bg-white/5"
                   )}
                 >
                   <Sparkles className="w-3.5 h-3.5 shrink-0" />
-                  <span className="truncate">Image Models ({allImageModels.length})</span>
+                  <span>Image Models ({allImageModels.length})</span>
                 </button>
               </div>
 
-              {/* Bottom Filter Controls: Provider Horizontal Pills & Search */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
-                {modelTypeTab === "chat" && (
-                  <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-0.5 flex-1 w-full">
-                    {providers.slice(0, 8).map((p) => (
+              {/* Center: Provider Horizontal Filter Pills (Chat only) */}
+              {modelTypeTab === "chat" && (
+                <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-0.5 max-w-full">
+                  {providers.slice(0, 10).map((p) => {
+                    const isSelected = selectedProvider.toLowerCase() === p.toLowerCase();
+                    return (
                       <button
                         key={p}
-                        onClick={() => setSelectedProvider(p)}
+                        onClick={() => {
+                          setSelectedProvider(p);
+                          setCurrentPage(1);
+                        }}
                         className={cn(
-                          "px-2.5 py-1 rounded-lg text-xs font-semibold capitalize transition-all cursor-pointer whitespace-nowrap shrink-0",
-                          selectedProvider === p
-                            ? "bg-cyan-500/20 text-cyan-600 dark:text-cyan-300 border border-cyan-500/40 shadow-xs"
-                            : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)]"
+                          "px-2.5 sm:px-3 py-1 rounded-lg text-xs font-semibold capitalize transition-all cursor-pointer whitespace-nowrap shrink-0",
+                          isSelected
+                            ? "bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 border border-cyan-500/50 shadow-xs font-bold"
+                            : "text-[var(--text-secondary)] dark:text-zinc-400 hover:text-[var(--text-primary)] dark:hover:text-white hover:bg-[var(--surface)] dark:hover:bg-white/5"
                         )}
                       >
-                        {p}
+                        {p === "all" ? "All" : p}
                       </button>
-                    ))}
-                  </div>
-                )}
-                <div className="relative w-full sm:min-w-[220px]">
-                  <Search className="w-3.5 h-3.5 text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    value={modelSearch}
-                    onChange={(e) => setModelSearch(e.target.value)}
-                    placeholder="Search model ID or name..."
-                    className="w-full pl-8 pr-3 py-1.5 rounded-xl text-xs border border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-primary)] outline-none focus:border-cyan-500 transition-colors"
-                  />
+                    );
+                  })}
                 </div>
+              )}
+
+              {/* Right: Search Input */}
+              <div className="relative w-full sm:w-60 xl:w-64 shrink-0">
+                <Search className="w-3.5 h-3.5 text-[var(--text-muted)] dark:text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={modelSearch}
+                  onChange={(e) => {
+                    setModelSearch(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  placeholder="Search model ID or name..."
+                  className="w-full pl-8 pr-7 py-1.5 rounded-xl text-xs border border-[var(--border-primary)] dark:border-white/10 bg-[var(--surface)] dark:bg-[#0c0d14] text-[var(--text-primary)] dark:text-zinc-100 placeholder:text-zinc-500 outline-none focus:border-cyan-500 transition-colors"
+                />
+                {modelSearch && (
+                  <button
+                    onClick={() => {
+                      setModelSearch("");
+                      setCurrentPage(1);
+                    }}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-zinc-400 hover:text-white cursor-pointer"
+                    title="Clear search"
+                  >
+                    ✕
+                  </button>
+                )}
               </div>
             </div>
 
@@ -603,7 +686,7 @@ export default function AiGatewayClient({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--border-primary)]">
-                      {filteredChatModels.map((m) => {
+                      {paginatedChatModels.map((m) => {
                         const discountPct =
                           m.originalOutputPricePer1M && m.originalOutputPricePer1M > m.outputPricePer1M
                             ? Math.round(((m.originalOutputPricePer1M - m.outputPricePer1M) / m.originalOutputPricePer1M) * 100)
@@ -686,7 +769,7 @@ export default function AiGatewayClient({
 
                 {/* 2. Mobile Responsive Card List (< md screens) */}
                 <div className="block md:hidden divide-y divide-[var(--border-primary)]">
-                  {filteredChatModels.map((m) => {
+                  {paginatedChatModels.map((m) => {
                     const discountPct =
                       m.originalOutputPricePer1M && m.originalOutputPricePer1M > m.outputPricePer1M
                         ? Math.round(((m.originalOutputPricePer1M - m.outputPricePer1M) / m.originalOutputPricePer1M) * 100)
@@ -773,7 +856,7 @@ export default function AiGatewayClient({
               </>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4 p-3.5 sm:p-5">
-                {filteredImageModels.map((img) => (
+                {paginatedImageModels.map((img) => (
                   <div
                     key={img.modelId}
                     className="p-3.5 sm:p-4 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/30 flex flex-col justify-between hover:border-cyan-500/40 transition-colors"
@@ -805,6 +888,116 @@ export default function AiGatewayClient({
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+
+            {/* Empty State */}
+            {currentTotal === 0 && (
+              <div className="py-14 px-4 text-center space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center mx-auto border border-cyan-500/20">
+                  <Search className="w-6 h-6" />
+                </div>
+                <h3 className="text-sm font-bold text-[var(--text-primary)]">No models found</h3>
+                <p className="text-xs text-[var(--text-secondary)] dark:text-zinc-400 max-w-sm mx-auto">
+                  No models matching <span className="font-semibold text-cyan-600 dark:text-cyan-400">"{modelSearch}"</span> in category{" "}
+                  <span className="capitalize">{selectedProvider}</span>.
+                </p>
+                <button
+                  onClick={() => {
+                    setModelSearch("");
+                    setSelectedProvider("all");
+                    setCurrentPage(1);
+                  }}
+                  className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-cyan-400 text-slate-950 hover:bg-cyan-300 transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  Reset Filters
+                </button>
+              </div>
+            )}
+
+            {/* Pagination Controls */}
+            {currentTotal > 0 && (
+              <div className="p-3.5 sm:p-4 border-t border-[var(--border-primary)] dark:border-white/10 bg-[var(--surface-secondary)]/40 dark:bg-[#0c0d14] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                {/* Left: Range Info */}
+                <div className="text-[var(--text-secondary)] dark:text-zinc-400 text-center sm:text-left">
+                  Showing <span className="font-bold text-[var(--text-primary)] dark:text-white">{startItem}</span> to{" "}
+                  <span className="font-bold text-[var(--text-primary)] dark:text-white">{endItem}</span> of{" "}
+                  <span className="font-bold text-[var(--text-primary)] dark:text-white">{currentTotal}</span>{" "}
+                  {modelTypeTab === "chat" ? "chat models" : "image models"}
+                </div>
+
+                {/* Right: Page Size & Nav */}
+                <div className="flex items-center gap-3 flex-wrap justify-center">
+                  <div className="flex items-center gap-1.5 text-[var(--text-secondary)] dark:text-zinc-400">
+                    <span className="hidden xs:inline">Show:</span>
+                    <select
+                      value={pageSize}
+                      onChange={(e) => {
+                        setPageSize(Number(e.target.value));
+                        setCurrentPage(1);
+                      }}
+                      className="px-2 py-1 rounded-lg border border-[var(--border-primary)] dark:border-white/10 bg-[var(--surface)] dark:bg-[#14151f] text-[var(--text-primary)] dark:text-white text-xs font-semibold outline-none cursor-pointer focus:border-cyan-500"
+                    >
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                      <option value={50}>50</option>
+                      <option value={-1}>All ({currentTotal})</option>
+                    </select>
+                  </div>
+
+                  {totalPages > 1 && (
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => handlePageChange(safePage - 1)}
+                        disabled={safePage === 1}
+                        className="p-1.5 rounded-lg border border-[var(--border-primary)] dark:border-white/10 bg-[var(--surface)] dark:bg-[#14151f] text-[var(--text-secondary)] dark:text-zinc-400 hover:text-[var(--text-primary)] dark:hover:text-white hover:border-cyan-500 disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
+                        title="Previous page"
+                        aria-label="Previous page"
+                      >
+                        <ChevronLeft className="w-3.5 h-3.5" />
+                      </button>
+
+                      <div className="flex items-center gap-1">
+                        {pageNumbers.map((p, idx) => {
+                          if (p === "...") {
+                            return (
+                              <span key={`ellipsis-${idx}`} className="px-1 text-[var(--text-muted)] dark:text-zinc-600 font-mono">
+                                ...
+                              </span>
+                            );
+                          }
+                          const pageNum = Number(p);
+                          const isActive = pageNum === safePage;
+                          return (
+                            <button
+                              key={`page-${pageNum}`}
+                              onClick={() => handlePageChange(pageNum)}
+                              className={cn(
+                                "min-w-[28px] h-7 px-2 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer border",
+                                isActive
+                                  ? "bg-cyan-400 border-cyan-400 text-slate-950 shadow-xs font-black ring-1 ring-cyan-300/40"
+                                  : "border-[var(--border-primary)] dark:border-white/10 bg-[var(--surface)] dark:bg-[#14151f] text-[var(--text-secondary)] dark:text-zinc-400 hover:border-cyan-500 hover:text-[var(--text-primary)] dark:hover:text-white"
+                              )}
+                            >
+                              {pageNum}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <button
+                        onClick={() => handlePageChange(safePage + 1)}
+                        disabled={safePage === totalPages}
+                        className="p-1.5 rounded-lg border border-[var(--border-primary)] dark:border-white/10 bg-[var(--surface)] dark:bg-[#14151f] text-[var(--text-secondary)] dark:text-zinc-400 hover:text-[var(--text-primary)] dark:hover:text-white hover:border-cyan-500 disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
+                        title="Next page"
+                        aria-label="Next page"
+                      >
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
