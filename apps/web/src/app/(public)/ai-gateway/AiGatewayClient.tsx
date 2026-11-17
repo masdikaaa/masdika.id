@@ -465,7 +465,7 @@ export default function AiGatewayClient({
                     </div>
 
                     {/* Tabs / Switcher */}
-                    <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto [scrollbar-width:none] flex-1 px-1 sm:px-2">
+                    <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden flex-1 px-1 sm:px-2">
                       {CODE_EXAMPLES.map((c) => (
                         <button
                           key={c.id}
@@ -493,28 +493,16 @@ export default function AiGatewayClient({
                     </button>
                   </div>
 
-                  {/* Code Area with Line Numbers (macOS Editor Style) */}
-                  <div className="p-4 sm:p-5 flex text-xs font-mono overflow-x-auto leading-relaxed bg-[#0a0b10] max-h-80">
+                  {/* Code Area with Line Numbers (Clean, Hidden Scrollbars, No Bottom Status Bar) */}
+                  <div className="p-4 sm:p-5 flex text-xs font-mono overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden leading-relaxed bg-[#0a0b10]">
                     <div className="select-none pr-4 text-right text-zinc-600 font-mono text-xs border-r border-white/[0.08] space-y-0.5 min-w-[2.2rem] shrink-0">
                       {currentCode.code.split("\n").map((_, i) => (
                         <div key={i}>{i + 1}</div>
                       ))}
                     </div>
-                    <pre className="pl-4 font-mono text-xs text-zinc-200 overflow-x-auto leading-relaxed flex-1">
+                    <pre className="pl-4 font-mono text-xs text-zinc-200 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden leading-relaxed flex-1">
                       <code>{currentCode.code}</code>
                     </pre>
-                  </div>
-
-                  {/* macOS Editor Status Bar */}
-                  <div className="flex items-center justify-between px-4 py-2 border-t border-white/[0.06] bg-[#12131b] text-[11px] font-mono text-zinc-400 select-none">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                      <span className="text-zinc-400">OpenAI v1 Compatible • Edge Inference</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-zinc-500 hidden sm:inline">UTF-8</span>
-                      <span className="text-cyan-400 font-semibold uppercase">{currentCode.language}</span>
-                    </div>
                   </div>
                 </div>
               </div>
