@@ -135,6 +135,14 @@ export class CircuitBreaker {
     }
   }
 
+  public recordSuccess() {
+    this.onSuccess();
+  }
+
+  public recordFailure(error?: Error) {
+    this.onFailure(error || new Error('External service failure'));
+  }
+
   private onSuccess() {
     if (this.state === 'HALF_OPEN') {
       // Downstream recovered! Re-close circuit

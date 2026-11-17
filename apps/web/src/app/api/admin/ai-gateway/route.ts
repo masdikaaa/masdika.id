@@ -7,6 +7,9 @@ import {
   applyMarkupPrice,
   ensureAiModelsExist,
   getAiGatewayConfig,
+  invalidateAiGatewayConfigCache,
+  invalidateAiKeyAuthCacheForUser,
+  invalidateAiModelCache,
   syncAiModelsFromUpstream,
 } from '@/lib/ai-gateway';
 import { decryptDeterministic, encryptDeterministic } from '@/lib/encryption';
@@ -225,6 +228,8 @@ export async function PUT(req: NextRequest) {
     // 1. Trigger manual upstream sync
     if (body.action === 'sync_upstream') {
       const result = await syncAiModelsFromUpstream();
+      invalidateAiModelCache();
+      invalidateAiGatewayConfigCache();
       return NextResponse.json({
         success: true,
         synced: true,
@@ -286,6 +291,7 @@ export async function PUT(req: NextRequest) {
         },
       });
 
+      invalidateAiModelCache(updated.modelId);
       return NextResponse.json({ success: true, model: updated });
     }
 
@@ -334,6 +340,7 @@ export async function PUT(req: NextRequest) {
         },
       });
 
+      invalidateAiKeyAuthCacheForUser(userId);
       return NextResponse.json({
         success: true,
         user: updatedUser,
@@ -412,6 +419,7 @@ export async function PUT(req: NextRequest) {
 
     if (ops.length > 0) {
       await Promise.all(ops);
+      invalidateAiGatewayConfigCache();
     }
 
     const updatedConfig = await getAiGatewayConfig();

@@ -3,16 +3,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from './prisma';
 import {
   AI_CORS_HEADERS,
+  acquireConcurrencySlot,
   aiGatewayError,
+  aiUpstreamCircuitBreaker,
   authenticateAiGatewayKey,
   calculateTokenCostRp,
   ensureAiModelsExist,
   estimatePromptTokensFromBody,
   getAiGatewayConfig,
+  getAiModelCached,
   isModelAllowedForKey,
   parseContextWindowTokens,
   recordAiUsageAndCharge,
   releaseAiBalanceHold,
+  releaseConcurrencySlot,
   reserveAiBalanceHold,
 } from './ai-gateway';
 
@@ -252,9 +256,42 @@ export async function handleAiProxyRequest(
     });
   }
 
+  // Circuit Breaker check to fail fast if upstream provider has an active outage
+  if (aiUpstreamCircuitBreaker.getState() === 'OPEN') {
+    return aiGatewayError(
+      'Upstream AI provider is temporarily experiencing an outage. Protected by Circuit Breaker, retrying automatically.',
+      'upstream_unavailable',
+      503,
+      requestId,
+      errorFormat
+    );
+  }
+
+  // Fair-share in-flight concurrency limiter per user (prevents single-account thread/socket exhaustion)
+  const concurrencyKey = `user:${auth.user.id}`;
+  const slotAcquired = await acquireConcurrencySlot(concurrencyKey, 30);
+  if (!slotAcquired) {
+    return aiGatewayError(
+      'Too many concurrent requests on this account (limit 30 in-flight). Please wait for active streams to finish.',
+      'concurrency_limit_exceeded',
+      429,
+      requestId,
+      errorFormat
+    );
+  }
+
+  let concurrencyReleased = false;
+  const releaseSlotOnce = () => {
+    if (!concurrencyReleased) {
+      concurrencyReleased = true;
+      releaseConcurrencySlot(concurrencyKey).catch(() => {});
+    }
+  };
+
   await ensureAiModelsExist();
-  const model = await prisma.aiModel.findUnique({ where: { modelId } });
+  const model = await getAiModelCached(modelId);
   if (!model || !model.isActive) {
+    releaseSlotOnce();
     return aiGatewayError(
       `Model '${modelId}' not found or disabled.`,
       'model_not_found',
@@ -265,6 +302,7 @@ export async function handleAiProxyRequest(
   }
 
   if (!isModelAllowedForKey(auth.keyRecord, model.modelId)) {
+    releaseSlotOnce();
     return aiGatewayError(
       `This API key is not permitted to use model '${model.modelId}'.`,
       'model_not_allowed',
@@ -275,6 +313,7 @@ export async function handleAiProxyRequest(
   }
 
   if (format === 'anthropic' && model.openaiOnly) {
+    releaseSlotOnce();
     return aiGatewayError(
       'This model accepts only the OpenAI format — send it to /api/ai/v1/chat/completions.',
       'unsupported_format',
@@ -288,6 +327,7 @@ export async function handleAiProxyRequest(
   const estimatedPromptTokens = estimatePromptTokensFromBody(body);
   const maxContextTokens = parseContextWindowTokens(model.contextWindow);
   if (estimatedPromptTokens > maxContextTokens) {
+    releaseSlotOnce();
     return aiGatewayError(
       `Estimated prompt (~${estimatedPromptTokens.toLocaleString()} tokens) exceeds ${model.modelId} context window (${model.contextWindow}).`,
       'context_length_exceeded',
@@ -314,6 +354,7 @@ export async function handleAiProxyRequest(
     auth.keyRecord.monthlyLimit !== null &&
     auth.keyRecord.monthlySpent + estimatedHoldRp > auth.keyRecord.monthlyLimit
   ) {
+    releaseSlotOnce();
     return aiGatewayError(
       'This API key does not have enough remaining monthly spend limit for this request.',
       'key_spend_limit_reached',
@@ -326,6 +367,7 @@ export async function handleAiProxyRequest(
   // Atomic Balance Hold (prevents concurrent double-spend & negative balance)
   const reserved = await reserveAiBalanceHold(auth.user.id, estimatedHoldRp);
   if (!reserved) {
+    releaseSlotOnce();
     return aiGatewayError(
       'Insufficient balance. Top up your AI balance to continue.',
       'insufficient_balance',
@@ -356,16 +398,46 @@ export async function handleAiProxyRequest(
     if (anthropicVersion) headers['anthropic-version'] = anthropicVersion;
   }
 
+  // Connect & initial response timeout (45 seconds) + Client disconnect listener
+  const abortController = new AbortController();
+  const connectTimeoutTimer = setTimeout(() => {
+    abortController.abort(new Error('UPSTREAM_CONNECT_TIMEOUT'));
+  }, 45_000);
+
+  const onClientAbort = () => {
+    abortController.abort(new Error('CLIENT_ABORTED'));
+  };
+  req.signal?.addEventListener('abort', onClientAbort);
+
   let upstreamRes: Response;
   try {
     upstreamRes = await fetch(targetUrl, {
       method: 'POST',
       headers,
       body: JSON.stringify(forwardBody),
+      signal: abortController.signal,
     });
-  } catch (err) {
-    console.error('[AI_GATEWAY_UPSTREAM]', err);
+  } catch (err: any) {
+    clearTimeout(connectTimeoutTimer);
+    req.signal?.removeEventListener('abort', onClientAbort);
+    releaseSlotOnce();
     await releaseAiBalanceHold(auth.user.id, estimatedHoldRp).catch(() => {});
+
+    const isAbort = err?.name === 'AbortError' || String(err?.message || '').includes('ABORT');
+    const isTimeout = String(err?.message || '').includes('TIMEOUT');
+    if (!isAbort || isTimeout) {
+      aiUpstreamCircuitBreaker.recordFailure(err instanceof Error ? err : new Error(String(err)));
+    }
+    console.error('[AI_GATEWAY_UPSTREAM]', err);
+    if (isTimeout) {
+      return aiGatewayError(
+        'Upstream AI provider response timed out after 45 seconds.',
+        'upstream_timeout',
+        504,
+        requestId,
+        errorFormat
+      );
+    }
     return aiGatewayError(
       'Upstream AI provider is unreachable.',
       'upstream_unreachable',
@@ -373,9 +445,19 @@ export async function handleAiProxyRequest(
       requestId,
       errorFormat
     );
+  } finally {
+    clearTimeout(connectTimeoutTimer);
+    req.signal?.removeEventListener('abort', onClientAbort);
+  }
+
+  if (upstreamRes.ok) {
+    aiUpstreamCircuitBreaker.recordSuccess();
+  } else if (upstreamRes.status >= 500) {
+    aiUpstreamCircuitBreaker.recordFailure(new Error(`Upstream status ${upstreamRes.status}`));
   }
 
   if (!upstreamRes.ok) {
+    releaseSlotOnce();
     await releaseAiBalanceHold(auth.user.id, estimatedHoldRp).catch(() => {});
     const errText = await upstreamRes.text().catch(() => '');
     const status = upstreamRes.status >= 500 ? 502 : upstreamRes.status;
@@ -397,6 +479,7 @@ export async function handleAiProxyRequest(
   if (!isStream || !upstreamRes.body) {
     const jsonData = await upstreamRes.json().catch(() => null);
     if (!jsonData) {
+      releaseSlotOnce();
       await releaseAiBalanceHold(auth.user.id, estimatedHoldRp).catch(() => {});
       return aiGatewayError(
         'Invalid response from upstream AI provider.',
@@ -437,6 +520,8 @@ export async function handleAiProxyRequest(
       statusCode: 200,
       heldRp: estimatedHoldRp,
     }).catch((err) => console.error('[AI_GATEWAY_CHARGE]', err));
+
+    releaseSlotOnce();
 
     return NextResponse.json(jsonData, {
       status: 200,
@@ -512,22 +597,30 @@ export async function handleAiProxyRequest(
 
   const stream = new ReadableStream({
     async pull(controller) {
-      const { done, value } = await reader.read();
-      if (done) {
-        await finalizeCharge();
-        controller.close();
-        return;
-      }
+      try {
+        const { done, value } = await reader.read();
+        if (done) {
+          await finalizeCharge();
+          releaseSlotOnce();
+          controller.close();
+          return;
+        }
 
-      controller.enqueue(value);
-      sseBuffer += decoder.decode(value, { stream: true });
-      const lines = sseBuffer.split('\n');
-      sseBuffer = lines.pop() ?? '';
-      parseSseLines(lines);
+        controller.enqueue(value);
+        sseBuffer += decoder.decode(value, { stream: true });
+        const lines = sseBuffer.split('\n');
+        sseBuffer = lines.pop() ?? '';
+        parseSseLines(lines);
+      } catch (err) {
+        await finalizeCharge();
+        releaseSlotOnce();
+        controller.error(err);
+      }
     },
     async cancel() {
       await reader.cancel().catch(() => {});
       await finalizeCharge();
+      releaseSlotOnce();
     },
   });
 

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import {
   AI_CORS_HEADERS,
   DEFAULT_AI_IMAGE_MODELS,
+  acquireConcurrencySlot,
   aiGatewayError,
   aiGatewayOptionsResponse,
   applyMarkupPrice,
@@ -11,6 +12,7 @@ import {
   isModelAllowedForKey,
   recordAiUsageAndCharge,
   releaseAiBalanceHold,
+  releaseConcurrencySlot,
   reserveAiBalanceHold,
 } from '@/lib/ai-gateway';
 
@@ -84,6 +86,25 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const concurrencyKey = `img:${auth.user.id}`;
+  const slotAcquired = await acquireConcurrencySlot(concurrencyKey, 6);
+  if (!slotAcquired) {
+    return aiGatewayError(
+      'Too many concurrent image requests (limit 6 in-flight). Please wait for active generations to finish.',
+      'concurrency_limit_exceeded',
+      429,
+      requestId
+    );
+  }
+
+  let concurrencyReleased = false;
+  const releaseSlotOnce = () => {
+    if (!concurrencyReleased) {
+      concurrencyReleased = true;
+      releaseConcurrencySlot(concurrencyKey).catch(() => {});
+    }
+  };
+
   const imgSpec = DEFAULT_AI_IMAGE_MODELS.find((m) => m.modelId === modelId);
   const countN = Math.max(1, Math.min(4, Number(body.n) || 1));
   const baseUnitRp =
@@ -96,6 +117,7 @@ export async function POST(req: NextRequest) {
 
   const reserved = await reserveAiBalanceHold(auth.user.id, holdRp);
   if (!reserved) {
+    releaseSlotOnce();
     return aiGatewayError(
       'Insufficient balance. Your AI balance cannot cover the image generation hold.',
       'insufficient_balance',
@@ -103,6 +125,16 @@ export async function POST(req: NextRequest) {
       requestId
     );
   }
+
+  const abortController = new AbortController();
+  const timeoutTimer = setTimeout(() => {
+    abortController.abort(new Error('IMAGE_UPSTREAM_TIMEOUT'));
+  }, 60_000);
+
+  const onClientAbort = () => {
+    abortController.abort(new Error('CLIENT_ABORTED'));
+  };
+  req.signal?.addEventListener('abort', onClientAbort);
 
   try {
     const upstreamRes = await fetch(`${config.upstreamUrl}/v1/images/generations`, {
@@ -113,6 +145,7 @@ export async function POST(req: NextRequest) {
         'x-api-key': config.upstreamKey,
       },
       body: JSON.stringify(body),
+      signal: abortController.signal,
     });
 
     const text = await upstreamRes.text();
@@ -144,6 +177,8 @@ export async function POST(req: NextRequest) {
       await releaseAiBalanceHold(auth.user.id, holdRp).catch(() => {});
     }
 
+    releaseSlotOnce();
+
     return new NextResponse(text, {
       status: upstreamRes.status,
       headers: {
@@ -152,8 +187,15 @@ export async function POST(req: NextRequest) {
         'x-request-id': jsonData?.id || requestId,
       },
     });
-  } catch {
+  } catch (err: any) {
+    releaseSlotOnce();
     await releaseAiBalanceHold(auth.user.id, holdRp).catch(() => {});
+    if (err?.name === 'AbortError' || String(err?.message || '').includes('TIMEOUT')) {
+      return aiGatewayError('Image generation timed out after 60 seconds.', 'upstream_timeout', 504, requestId);
+    }
     return aiGatewayError('Upstream AI provider is unreachable.', 'upstream_unreachable', 502, requestId);
+  } finally {
+    clearTimeout(timeoutTimer);
+    req.signal?.removeEventListener('abort', onClientAbort);
   }
 }

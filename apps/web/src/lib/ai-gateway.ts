@@ -6,6 +6,68 @@ import { checkRateLimit } from './rate-limit';
 import { getUserServicesCommitment } from './billing-commitment';
 import { redis } from './redis';
 import { sendAiInsufficientBalanceEmail, sendAiBalanceTopupEmail } from './email';
+import { circuitBreakerRegistry } from './circuit-breaker';
+
+// Enterprise Circuit Breaker for Upstream AI Provider (protects our gateway during upstream outages)
+export const aiUpstreamCircuitBreaker = circuitBreakerRegistry.getOrCreate('ai_upstream_provider', {
+  timeoutMs: 45000,
+  errorThresholdPercentage: 60,
+  volumeThreshold: 6,
+  resetTimeoutMs: 15000,
+});
+
+// Active in-flight concurrency limiter per key/user to ensure fair share and prevent resource hoarding
+const activeInMemoryConcurrency = new Map<string, number>();
+
+export async function acquireConcurrencySlot(key: string, maxConcurrent: number = 30): Promise<boolean> {
+  const safeKey = String(key || 'unknown').slice(0, 100);
+  if (redis) {
+    try {
+      const redisKey = `ai_gw_concurrency:${safeKey}`;
+      const active = await redis.incr(redisKey);
+      if (active === 1) {
+        await redis.expire(redisKey, 300); // 5 min safety TTL in case worker dies
+      }
+      if (active > maxConcurrent) {
+        await redis.decr(redisKey);
+        return false;
+      }
+      return true;
+    } catch {
+      // fallback to memory
+    }
+  }
+
+  const current = activeInMemoryConcurrency.get(safeKey) || 0;
+  if (current >= maxConcurrent) {
+    return false;
+  }
+  activeInMemoryConcurrency.set(safeKey, current + 1);
+  return true;
+}
+
+export async function releaseConcurrencySlot(key: string): Promise<void> {
+  const safeKey = String(key || 'unknown').slice(0, 100);
+  if (redis) {
+    try {
+      const redisKey = `ai_gw_concurrency:${safeKey}`;
+      const rem = await redis.decr(redisKey);
+      if (rem <= 0) {
+        await redis.del(redisKey);
+      }
+      return;
+    } catch {
+      // fallback
+    }
+  }
+
+  const current = activeInMemoryConcurrency.get(safeKey) || 0;
+  if (current <= 1) {
+    activeInMemoryConcurrency.delete(safeKey);
+  } else {
+    activeInMemoryConcurrency.set(safeKey, current - 1);
+  }
+}
 
 import {
   DEFAULT_AI_MODELS,
@@ -185,7 +247,13 @@ export function estimatePromptTokensFromBody(body: any): number {
   return Math.max(16, Math.ceil(chars / 3.8));
 }
 
-export async function ensureAiModelsExist() {
+let lastAiModelsEnsureCheck = 0;
+const MODELS_ENSURE_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes throttle to avoid DB load spikes
+
+export async function ensureAiModelsExist(force: boolean = false) {
+  if (!force && Date.now() - lastAiModelsEnsureCheck < MODELS_ENSURE_INTERVAL_MS) {
+    return;
+  }
   const count = await prisma.aiModel.count();
   if (count === 0) {
     await prisma.aiModel.createMany({
@@ -208,6 +276,8 @@ export async function ensureAiModelsExist() {
       })),
       skipDuplicates: true,
     });
+    lastAiModelsEnsureCheck = Date.now();
+    invalidateAiModelCache();
     return;
   }
 
@@ -293,9 +363,72 @@ export async function ensureAiModelsExist() {
       isActive: true,
     },
   });
+
+  lastAiModelsEnsureCheck = Date.now();
+  invalidateAiModelCache();
 }
 
-export async function getAiGatewayConfig() {
+// In-memory model caching with 60-second TTL to avoid repeated DB lookups during high traffic
+const aiModelCache = new Map<string, { model: any; cachedAt: number }>();
+let cachedActiveAiModels: { models: any[]; cachedAt: number } | null = null;
+const MODEL_CACHE_TTL_MS = 60_000;
+
+export function invalidateAiModelCache(modelId?: string) {
+  cachedActiveAiModels = null;
+  if (modelId) {
+    aiModelCache.delete(modelId);
+  } else {
+    aiModelCache.clear();
+  }
+}
+
+export async function getAiModelCached(modelId: string) {
+  const cached = aiModelCache.get(modelId);
+  if (cached && Date.now() - cached.cachedAt < MODEL_CACHE_TTL_MS) {
+    return cached.model;
+  }
+  const model = await prisma.aiModel.findUnique({ where: { modelId } });
+  if (model) {
+    aiModelCache.set(modelId, { model, cachedAt: Date.now() });
+  }
+  return model;
+}
+
+export async function getActiveAiModelsCached() {
+  if (cachedActiveAiModels && Date.now() - cachedActiveAiModels.cachedAt < MODEL_CACHE_TTL_MS) {
+    return cachedActiveAiModels.models;
+  }
+  const models = await prisma.aiModel.findMany({
+    where: { isActive: true },
+    orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
+  });
+  cachedActiveAiModels = { models, cachedAt: Date.now() };
+  return models;
+}
+
+export interface AiGatewayConfig {
+  enabled: boolean;
+  upstreamUrl: string;
+  upstreamKey: string;
+  managementKey: string;
+  markupPercent: number;
+  topupFeeRp: number;
+  lastSyncAt: string | null;
+  lastSyncStatus: string | null;
+}
+
+let cachedAiConfig: { config: AiGatewayConfig; cachedAt: number } | null = null;
+const AI_CONFIG_CACHE_TTL_MS = 15_000; // 15 seconds
+
+export function invalidateAiGatewayConfigCache(): void {
+  cachedAiConfig = null;
+}
+
+export async function getAiGatewayConfig(): Promise<AiGatewayConfig> {
+  if (cachedAiConfig && Date.now() - cachedAiConfig.cachedAt < AI_CONFIG_CACHE_TTL_MS) {
+    return cachedAiConfig.config;
+  }
+
   const settings = await prisma.setting.findMany({
     where: {
       key: {
@@ -329,7 +462,7 @@ export async function getAiGatewayConfig() {
   const lastSyncAt = map.get(AI_GATEWAY_SETTING_KEYS.LAST_SYNC_AT) || null;
   const lastSyncStatus = map.get(AI_GATEWAY_SETTING_KEYS.LAST_SYNC_STATUS) || null;
 
-  return {
+  const result: AiGatewayConfig = {
     enabled,
     upstreamUrl,
     upstreamKey,
@@ -339,6 +472,8 @@ export async function getAiGatewayConfig() {
     lastSyncAt,
     lastSyncStatus,
   };
+  cachedAiConfig = { config: result, cachedAt: Date.now() };
+  return result;
 }
 
 function inferProviderFromModelId(modelId: string): string {
@@ -744,8 +879,29 @@ export async function notifyAiInsufficientBalanceOnce(userId: number, requiredRp
 
 export async function clearAiInsufficientBalanceNotice(userId: number): Promise<void> {
   memInsufficientNotified.delete(userId);
+  invalidateAiKeyAuthCacheForUser(userId);
   if (redis) {
     await redis.del(`ai_insufficient_notified:${userId}`).catch(() => {});
+  }
+}
+
+// In-memory key auth cache to eliminate repeated DB reads during high-concurrency traffic
+const keyAuthCache = new Map<string, { keyRecord: any; cachedAt: number }>();
+const KEY_AUTH_CACHE_TTL_MS = 15_000;
+
+export function invalidateAiKeyAuthCache(keyHash?: string) {
+  if (keyHash) {
+    keyAuthCache.delete(keyHash);
+  } else {
+    keyAuthCache.clear();
+  }
+}
+
+export function invalidateAiKeyAuthCacheForUser(userId: number) {
+  for (const [hash, item] of keyAuthCache.entries()) {
+    if (item.keyRecord?.userId === userId || item.keyRecord?.user?.id === userId) {
+      keyAuthCache.delete(hash);
+    }
   }
 }
 
@@ -774,25 +930,35 @@ export async function authenticateAiGatewayKey(
   }
 
   const keyHash = hashAiGatewayKey(rawKey);
-  const keyRecord = await prisma.aiGatewayKey.findUnique({
-    where: { keyHash },
-    include: {
-      user: {
-        select: {
-          id: true,
-          balance: true,
-          aiBalance: true,
-          aiAutoTopupEnabled: true,
-          aiAutoTopupThreshold: true,
-          aiAutoTopupAmount: true,
-          isSuspended: true,
-          role: true,
+  let keyRecord: any = null;
+  const cachedAuth = keyAuthCache.get(keyHash);
+  if (cachedAuth && Date.now() - cachedAuth.cachedAt < KEY_AUTH_CACHE_TTL_MS) {
+    keyRecord = cachedAuth.keyRecord;
+  } else {
+    keyRecord = await prisma.aiGatewayKey.findUnique({
+      where: { keyHash },
+      include: {
+        user: {
+          select: {
+            id: true,
+            balance: true,
+            aiBalance: true,
+            aiAutoTopupEnabled: true,
+            aiAutoTopupThreshold: true,
+            aiAutoTopupAmount: true,
+            isSuspended: true,
+            role: true,
+          },
         },
       },
-    },
-  });
+    });
+    if (keyRecord) {
+      keyAuthCache.set(keyHash, { keyRecord, cachedAt: Date.now() });
+    }
+  }
 
   if (!keyRecord || !keyRecord.isActive) {
+    keyAuthCache.delete(keyHash);
     const allowed = await checkRateLimit('AI_GW_BAD_AUTH', ip, 30, 60);
     if (!allowed) {
       return { error: aiGatewayError('Too many failed authentication attempts.', 'rate_limited', 429, requestId, format) };
@@ -801,10 +967,12 @@ export async function authenticateAiGatewayKey(
   }
 
   if (keyRecord.expiresAt && keyRecord.expiresAt <= new Date()) {
+    keyAuthCache.delete(keyHash);
     return { error: aiGatewayError('This AI API key has expired.', 'expired_api_key', 401, requestId, format) };
   }
 
   if (keyRecord.user.isSuspended) {
+    keyAuthCache.delete(keyHash);
     return { error: aiGatewayError('Your account is suspended.', 'account_suspended', 403, requestId, format) };
   }
 
@@ -913,6 +1081,7 @@ export async function reserveAiBalanceHold(userId: number, holdRp: number): Prom
     data: { aiBalance: { decrement: safeHold } },
   });
   if (res.count !== 1) {
+    invalidateAiKeyAuthCacheForUser(userId);
     notifyAiInsufficientBalanceOnce(userId, safeHold).catch(() => {});
     return false;
   }

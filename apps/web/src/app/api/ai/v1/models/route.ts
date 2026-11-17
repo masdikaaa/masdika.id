@@ -7,6 +7,7 @@ import {
   applyMarkupPrice,
   authenticateAiGatewayKey,
   ensureAiModelsExist,
+  getActiveAiModelsCached,
   getAiGatewayConfig,
   isModelAllowedForKey,
 } from '@/lib/ai-gateway';
@@ -25,10 +26,7 @@ export async function GET(req: NextRequest) {
   await ensureAiModelsExist();
   const [config, models] = await Promise.all([
     getAiGatewayConfig(),
-    prisma.aiModel.findMany({
-      where: { isActive: true },
-      orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
-    }),
+    getActiveAiModelsCached(),
   ]);
 
   const allowedModels = models.filter((m) => isModelAllowedForKey(auth.keyRecord, m.modelId));

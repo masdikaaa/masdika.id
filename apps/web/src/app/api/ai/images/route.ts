@@ -169,22 +169,39 @@ export async function POST(req: NextRequest) {
     }
     heldRp = holdRp;
 
-    const upstreamRes = await fetch(`${config.upstreamUrl}/v1/images/generations`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        authorization: `Bearer ${config.upstreamKey}`,
-        'x-api-key': config.upstreamKey,
-      },
-      body: JSON.stringify({
-        model: imageModel.modelId,
-        prompt,
-        size,
-        n,
-        ...(refImages.length > 0 ? { image: refImages[0] } : {}),
-      }),
-      cache: 'no-store',
-    });
+    const abortController = new AbortController();
+    const timeoutTimer = setTimeout(() => {
+      abortController.abort(new Error('UPSTREAM_IMAGE_TIMEOUT'));
+    }, 60_000);
+
+    const onClientAbort = () => {
+      abortController.abort(new Error('CLIENT_ABORTED'));
+    };
+    req.signal?.addEventListener('abort', onClientAbort);
+
+    let upstreamRes: Response;
+    try {
+      upstreamRes = await fetch(`${config.upstreamUrl}/v1/images/generations`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${config.upstreamKey}`,
+          'x-api-key': config.upstreamKey,
+        },
+        body: JSON.stringify({
+          model: imageModel.modelId,
+          prompt,
+          size,
+          n,
+          ...(refImages.length > 0 ? { image: refImages[0] } : {}),
+        }),
+        cache: 'no-store',
+        signal: abortController.signal,
+      });
+    } finally {
+      clearTimeout(timeoutTimer);
+      req.signal?.removeEventListener('abort', onClientAbort);
+    }
 
     const data = await upstreamRes.json().catch(() => null);
     if (!upstreamRes.ok || !data) {
