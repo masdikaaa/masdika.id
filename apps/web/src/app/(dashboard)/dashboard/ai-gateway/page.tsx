@@ -312,8 +312,8 @@ export default function CustomerAiGatewayPage() {
 
   // Open Confirmation Modal before Top-up
   const requestTopupConfirmation = (amount: number) => {
-    if (!Number.isSafeInteger(amount) || amount < 5000) {
-      toast.error('Minimum AI balance top-up is Rp 5.000');
+    if (!Number.isSafeInteger(amount) || amount < 10000) {
+      toast.error('Minimum AI balance top-up is Rp 10.000');
       return;
     }
     setPendingTopupAmount(amount);
@@ -323,8 +323,8 @@ export default function CustomerAiGatewayPage() {
   const handleConfirmTopupAiBalance = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const amount = pendingTopupAmount ?? Number(customTopupAmount);
-    if (!Number.isSafeInteger(amount) || amount < 5000) {
-      toast.error('Minimum AI balance top-up is Rp 5.000');
+    if (!Number.isSafeInteger(amount) || amount < 10000) {
+      toast.error('Minimum AI balance top-up is Rp 10.000');
       return;
     }
     setToppingUp(true);
@@ -353,12 +353,12 @@ export default function CustomerAiGatewayPage() {
     e.preventDefault();
     const threshold = Number(autoTopupThreshold);
     const amount = Number(autoTopupAmount);
-    if (!Number.isSafeInteger(threshold) || threshold < 5000) {
-      toast.error('Trigger balance threshold must be at least Rp 5.000');
+    if (!Number.isSafeInteger(threshold) || threshold < 10000) {
+      toast.error('Trigger balance threshold must be at least Rp 10.000');
       return;
     }
-    if (!Number.isSafeInteger(amount) || amount < 5000) {
-      toast.error('Auto top-up amount must be at least Rp 5.000');
+    if (!Number.isSafeInteger(amount) || amount < 10000) {
+      toast.error('Auto top-up amount must be at least Rp 10.000');
       return;
     }
     setSavingAutoTopup(true);
@@ -1534,7 +1534,7 @@ aider --model openai/glm-5.3
 
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
                 <span className="text-[11px] text-zinc-500">
-                  Minimum top-up &amp; threshold: Rp 5.000
+                  Minimum top-up &amp; threshold: Rp 10.000
                 </span>
                 <button
                   type="submit"
@@ -3044,7 +3044,7 @@ aider --model openai/glm-5.3
 
               <div>
                 <label className={cn('text-xs font-bold uppercase tracking-wider block mb-1.5', isDark ? 'text-zinc-400' : 'text-slate-600')}>
-                  Custom Amount (Min Rp 5.000)
+                  Custom Amount (Min Rp 10.000)
                 </label>
                 <div className="relative">
                   <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-mono text-zinc-500">
@@ -3149,7 +3149,7 @@ aider --model openai/glm-5.3
                       </button>
                       <button
                         type="submit"
-                        disabled={toppingUp || topupCredit < 5000 || isInsufficient}
+                        disabled={toppingUp || topupCredit < 10000 || isInsufficient}
                         className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 cursor-pointer disabled:opacity-50"
                       >
                         {toppingUp

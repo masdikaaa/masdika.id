@@ -814,7 +814,7 @@ export async function tryAutoTopupAiBalance(userId: number): Promise<number> {
   if (
     !u.aiAutoTopupEnabled ||
     u.aiBalance >= u.aiAutoTopupThreshold ||
-    u.aiAutoTopupAmount < 5000 ||
+    u.aiAutoTopupAmount < 10000 ||
     u.balance < totalWalletDeduction
   ) {
     return u.aiBalance;

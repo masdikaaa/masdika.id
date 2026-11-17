@@ -25,7 +25,7 @@ export const AI_TOPUP_PACKS: AiTopupPack[] = [
   { id: 'pack-1m', name: 'Rp 1.000.000', amount: 1000000, bonus: 0 },
 ];
 
-export const AI_MGMT_MIN_TOPUP = 5000;
+export const AI_MGMT_MIN_TOPUP = 10000;
 
 export function aiMgmtSuccess(data: unknown, status = 200) {
   return NextResponse.json(

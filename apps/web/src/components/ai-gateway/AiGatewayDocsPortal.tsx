@@ -1076,7 +1076,7 @@ aider --model openai/glm-5.3`,
           {page === 'pricing' && (
             <div className="space-y-4 text-xs leading-relaxed">
               <Callout variant="info" title="100% Pay-As-You-Go Per Token (No Token Bundles)" isDark={isDark}>
-                You do not buy fixed token packs. Simply top up your <strong>AI Balance</strong> in Rupiah from your Masdika Wallet (minimum Rp 5.000, platform fee Rp {topupFeeRp.toLocaleString('id-ID')}) and pay only for the exact tokens each request uses.
+                You do not buy fixed token packs. Simply top up your <strong>AI Balance</strong> in Rupiah from your Masdika Wallet (minimum Rp 10.000, platform fee Rp {topupFeeRp.toLocaleString('id-ID')}) and pay only for the exact tokens each request uses.
               </Callout>
 
               <div className={cn('rounded-xl border p-4 space-y-2', isDark ? 'bg-[#0b0d12] border-white/[0.08] text-zinc-300' : 'bg-slate-50 border-slate-200 text-slate-700')}>
@@ -1164,7 +1164,7 @@ aider --model openai/glm-5.3`,
                   isDark={isDark}
                   rows={[
                     { prop: 'packId?', type: 'string', desc: 'Pack ID (e.g. "pack-50k", "pack-100k", "pack-250k", "pack-500k", "pack-1m"). Send either packId or amount.' },
-                    { prop: 'amount?', type: 'number', desc: 'Custom top-up amount in Rupiah (minimum Rp 5.000).' },
+                    { prop: 'amount?', type: 'number', desc: 'Custom top-up amount in Rupiah (minimum Rp 10.000).' },
                   ]}
                 />
                 <CodeBox

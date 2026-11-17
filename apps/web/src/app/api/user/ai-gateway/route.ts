@@ -201,9 +201,9 @@ export async function POST(req: NextRequest) {
     // 1. Manual Top-up AI Balance from Masdika Wallet
     if (body?.action === 'topup_ai_balance') {
       const amount = Number(body.amount);
-      if (!Number.isSafeInteger(amount) || amount < 5000) {
+      if (!Number.isSafeInteger(amount) || amount < 10000) {
         return NextResponse.json(
-          { error: 'Minimum AI balance top-up is Rp 5.000' },
+          { error: 'Minimum AI balance top-up is Rp 10.000' },
           { status: 400 }
         );
       }
@@ -295,15 +295,15 @@ export async function POST(req: NextRequest) {
       const threshold = Number(body.threshold ?? 20000);
       const amount = Number(body.amount ?? 100000);
 
-      if (!Number.isSafeInteger(threshold) || threshold < 5000) {
+      if (!Number.isSafeInteger(threshold) || threshold < 10000) {
         return NextResponse.json(
-          { error: 'Auto top-up trigger threshold must be at least Rp 5.000' },
+          { error: 'Auto top-up trigger threshold must be at least Rp 10.000' },
           { status: 400 }
         );
       }
-      if (!Number.isSafeInteger(amount) || amount < 5000) {
+      if (!Number.isSafeInteger(amount) || amount < 10000) {
         return NextResponse.json(
-          { error: 'Auto top-up amount must be at least Rp 5.000' },
+          { error: 'Auto top-up amount must be at least Rp 10.000' },
           { status: 400 }
         );
       }
