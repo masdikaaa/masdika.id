@@ -831,11 +831,11 @@ ${buildPkgLockdownSnippet('apt')}
     const b64WordpressMotd = Buffer.from(
       '════════════════════════════════════════════════════════════\n' +
       '  Masdika Cloud - Dedicated Managed WordPress Instance\n' +
-      '  Application Mode: HTTPS Website + Embedded MariaDB + SSH\n' +
+      '  Application Mode: HTTPS Website + Embedded SQLite + SSH\n' +
       `  Website URL: https://${fullDomain}\n` +
       `  WP Admin:    https://${fullDomain}/wp-admin\n` +
       '  Web Root:    /var/www/html (Persistent: /app/data/html)\n' +
-      '  Database:    MariaDB (127.0.0.1 / wordpress / wpuser)\n' +
+      '  Database:    Embedded SQLite (/app/data/html/wp-content/database)\n' +
       '  Security Notice: Package installation & tunneling restricted.\n' +
       '════════════════════════════════════════════════════════════\n'
     ).toString('base64');
@@ -846,8 +846,8 @@ ${buildPkgLockdownSnippet('apt')}
       `<?php\n` +
       `define( 'DB_NAME', 'wordpress' );\n` +
       `define( 'DB_USER', 'wpuser' );\n` +
-      `define( 'DB_PASSWORD', '${dbPassEscaped}' );\n` +
-      `define( 'DB_HOST', '127.0.0.1' );\n` +
+      `define( 'DB_PASSWORD', '' );\n` +
+      `define( 'DB_HOST', 'localhost' );\n` +
       `define( 'DB_CHARSET', 'utf8mb4' );\n` +
       `define( 'DB_COLLATE', '' );\n` +
       `$table_prefix = 'wp_';\n` +
@@ -864,12 +864,6 @@ ${buildPkgLockdownSnippet('apt')}
     envYaml = `
         - name: TERM
           value: "xterm-256color"
-        - name: WORDPRESS_DB_HOST
-          value: "127.0.0.1"
-        - name: WORDPRESS_DB_NAME
-          value: "wordpress"
-        - name: WORDPRESS_DB_USER
-          value: "wpuser"
 `;
     commandYaml = `
         command: ["/bin/sh", "-c"]
@@ -879,10 +873,9 @@ ${buildPkgLockdownSnippet('apt')}
             export DEBIAN_FRONTEND=noninteractive
             if [ -f /etc/apt/sources.list ] || [ -d /etc/apt/sources.list.d ]; then
               apt-get update
-              apt-get install -y --no-install-recommends openssh-server mariadb-server ca-certificates procps bash curl nano
+              apt-get install -y --no-install-recommends openssh-server ca-certificates procps bash curl nano unzip
             fi
-            mkdir -p /run/sshd /var/run/sshd /run/mysqld ${dataMount}/html ${dataMount}/mysql
-            chown -R mysql:mysql ${dataMount}/mysql /run/mysqld
+            mkdir -p /run/sshd /var/run/sshd ${dataMount}/html
 ${buildHardenedSshdSnippet(sshPassword)}
 ${buildPkgLockdownSnippet('apt')}
             echo "${b64WordpressMotd}" | base64 -d > /etc/motd
@@ -890,24 +883,23 @@ ${buildPkgLockdownSnippet('apt')}
             grep -q '/var/www/html' /root/.bashrc 2>/dev/null || cat /etc/profile.d/wordpress.sh >> /root/.bashrc
             grep -q '/var/www/html' /root/.profile 2>/dev/null || cat /etc/profile.d/wordpress.sh >> /root/.profile
             /usr/sbin/sshd -p 22
-            if [ ! -d "${dataMount}/mysql/mysql" ]; then
-              mariadb-install-db --user=mysql --datadir=${dataMount}/mysql >/dev/null 2>&1 || mysql_install_db --user=mysql --datadir=${dataMount}/mysql >/dev/null 2>&1
-            fi
-            mariadbd --user=mysql --datadir=${dataMount}/mysql --bind-address=127.0.0.1 --port=3306 &
-            for i in $(seq 1 30); do
-              mysqladmin --protocol=tcp -h 127.0.0.1 ping >/dev/null 2>&1 && break
-              sleep 1
-            done
-            mysql --protocol=tcp -h 127.0.0.1 -e "CREATE DATABASE IF NOT EXISTS wordpress DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; CREATE USER IF NOT EXISTS 'wpuser'@'127.0.0.1' IDENTIFIED BY '${dbPassEscaped}'; CREATE USER IF NOT EXISTS 'wpuser'@'localhost' IDENTIFIED BY '${dbPassEscaped}'; GRANT ALL PRIVILEGES ON wordpress.* TO 'wpuser'@'127.0.0.1'; GRANT ALL PRIVILEGES ON wordpress.* TO 'wpuser'@'localhost'; FLUSH PRIVILEGES;" || true
             if [ ! -f "${dataMount}/html/wp-login.php" ] && [ -d /usr/src/wordpress ]; then
               cp -a /usr/src/wordpress/. ${dataMount}/html/
+            fi
+            if [ ! -f "${dataMount}/html/wp-content/db.php" ]; then
+              curl -sSL https://downloads.wordpress.org/plugin/sqlite-database-integration.latest-stable.zip -o /tmp/sqlite.zip
+              unzip -qo /tmp/sqlite.zip -d ${dataMount}/html/wp-content/plugins/
+              rm -f /tmp/sqlite.zip
+              cp ${dataMount}/html/wp-content/plugins/sqlite-database-integration/db.copy ${dataMount}/html/wp-content/db.php
+              sed -i "s|{SQLITE_IMPLEMENTATION_FOLDER_PATH}|${dataMount}/html/wp-content/plugins/sqlite-database-integration|g; s|{SQLITE_PLUGIN}|sqlite-database-integration/load.php|g" ${dataMount}/html/wp-content/db.php
             fi
             if [ ! -f "${dataMount}/html/wp-config.php" ]; then
               echo "${b64WpConfig}" | base64 -d > ${dataMount}/html/wp-config.php
             fi
+            mkdir -p ${dataMount}/html/wp-content/database
             rm -rf /var/www/html && ln -sfn ${dataMount}/html /var/www/html
             chown -R www-data:www-data ${dataMount}/html
-            if ! mysql --protocol=tcp -h 127.0.0.1 -u wpuser -p'${dbPassEscaped}' -e "SELECT 1 FROM wordpress.wp_users LIMIT 1;" >/dev/null 2>&1; then
+            if [ ! -f "${dataMount}/html/wp-content/database/.ht.sqlite" ]; then
               WP_SITE_URL="https://${fullDomain}" WP_ADMIN_PASS='${dbPassEscaped}' php -r '
                 $_SERVER["HTTP_HOST"] = parse_url(getenv("WP_SITE_URL"), PHP_URL_HOST);
                 $_SERVER["HTTPS"] = "on";
@@ -918,11 +910,11 @@ ${buildPkgLockdownSnippet('apt')}
                 update_option("siteurl", getenv("WP_SITE_URL"));
                 update_option("home", getenv("WP_SITE_URL"));
               ' >/dev/null 2>&1 || true
+              chown -R www-data:www-data ${dataMount}/html
             fi
             set +e
             while true; do
               pgrep -x sshd >/dev/null 2>&1 || /usr/sbin/sshd -p 22
-              pgrep -x mariadbd >/dev/null 2>&1 || mariadbd --user=mysql --datadir=${dataMount}/mysql --bind-address=127.0.0.1 --port=3306 &
               apache2-foreground >> ${dataMount}/apache.log 2>&1
               sleep 3
             done

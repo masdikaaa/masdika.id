@@ -168,9 +168,9 @@ export const MANAGED_APPS_CATALOG: ManagedAppDefinition[] = [
   {
     id: 'wordpress',
     name: 'WordPress',
-    tagline: 'Managed WordPress CMS with MariaDB, Auto SSL & Direct SSH',
+    tagline: 'Managed WordPress CMS with Embedded SQLite, Auto SSL & Direct SSH',
     category: 'CMS & Website',
-    description: 'Production-ready WordPress instance with Apache, PHP 8.3, embedded MariaDB database, Let\'s Encrypt HTTPS ingress, and direct sandboxed SSH terminal access for WP-CLI and file management.',
+    description: 'Production-ready WordPress instance with Apache, PHP 8.3, embedded SQLite database, Let\'s Encrypt HTTPS ingress, and direct sandboxed SSH terminal access for WP-CLI and file management.',
     icon: '/images/apps/wordpress.svg',
     appPort: 80,
     dataDir: '/app/data',
@@ -182,7 +182,7 @@ export const MANAGED_APPS_CATALOG: ManagedAppDefinition[] = [
     website: 'https://wordpress.org',
     github: 'https://github.com/WordPress/WordPress',
     features: [
-      'Pre-Configured Apache + PHP 8.3 + Embedded MariaDB',
+      'Pre-Configured Apache + PHP 8.3 + Embedded SQLite Engine',
       'Automated HTTPS Website & /wp-admin with Let\'s Encrypt SSL',
       'Direct SSH Terminal Access for Plugins, Themes & /var/www/html',
       'Persistent Web Root & Database Storage (/app/data)',

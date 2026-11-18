@@ -793,7 +793,7 @@ export default function AppDetailPage({
                   isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-cyan-50/60 border-cyan-200 text-slate-700"
                 )}>
                   <p className="text-[11px] leading-relaxed">
-                    Sign in at <code className="font-mono font-semibold">{httpsUrl}/wp-admin</code> using username <code className="font-mono font-semibold">admin</code> and the password above. Embedded MariaDB (<code className="font-mono">127.0.0.1</code> / DB <code className="font-mono">wordpress</code> / user <code className="font-mono">wpuser</code>) uses the same password.
+                    Sign in at <code className="font-mono font-semibold">{httpsUrl}/wp-admin</code> using username <code className="font-mono font-semibold">admin</code> and the password above. Database is persisted automatically via Embedded SQLite (<code className="font-mono">/app/data/html/wp-content/database</code>).
                   </p>
                 </div>
               </div>

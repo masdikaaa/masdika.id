@@ -375,7 +375,7 @@ spec:
       } as any);
       expect(wordpressSpec.image).toBe('docker.io/library/wordpress:latest');
       expect(wordpressSpec.commandYaml).toContain('openssh-server');
-      expect(wordpressSpec.commandYaml).toContain('mariadb-server');
+      expect(wordpressSpec.commandYaml).toContain('sqlite-database-integration');
       expect(wordpressSpec.commandYaml).toContain('/usr/sbin/sshd -p 22');
       expect(wordpressSpec.commandYaml).toContain('apache2-foreground');
       expect(wordpressSpec.dataMount).toBe('/app/data');
