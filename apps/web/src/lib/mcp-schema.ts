@@ -153,6 +153,34 @@ export const MASDIKA_MCP_TOOLS: McpToolDefinition[] = [
       required: ["vpsId", "password"],
     },
   },
+  {
+    name: "masdika_list_vps_firewall",
+    description: "List all active Proxmox firewall rules (inbound/outbound) configured for a Cloud VPS instance.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        vpsId: { type: "number", description: "The ID of the VPS instance." },
+      },
+      required: ["vpsId"],
+    },
+  },
+  {
+    name: "masdika_add_vps_firewall",
+    description: "Add a new inbound or outbound firewall rule (ACCEPT/DROP/REJECT) to a Cloud VPS instance.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        vpsId: { type: "number", description: "The ID of the VPS instance." },
+        type: { type: "string", enum: ["in", "out"], description: "Traffic direction: 'in' (inbound) or 'out' (outbound)." },
+        action: { type: "string", enum: ["ACCEPT", "DROP", "REJECT"], description: "Rule action: 'ACCEPT', 'DROP', or 'REJECT'." },
+        proto: { type: "string", enum: ["tcp", "udp", "icmp", "any"], description: "Network protocol (e.g. 'tcp', 'udp')." },
+        dport: { type: "string", description: "Destination port or range (e.g. '80', '443', '8000:8080')." },
+        source: { type: "string", description: "Optional source IP or CIDR (e.g. '0.0.0.0/0' or '1.2.3.4')." },
+        comment: { type: "string", description: "Optional rule description/comment." },
+      },
+      required: ["vpsId", "type", "action"],
+    },
+  },
 
   // ── 3. MANAGED DATABASE ──
   {
@@ -288,6 +316,17 @@ export const MASDIKA_MCP_TOOLS: McpToolDefinition[] = [
     },
   },
   {
+    name: "masdika_delete_cdn_file",
+    description: "Delete a previously uploaded file from Masdika File CDN by its token or file ID.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        token: { type: "string", description: "The public token or file ID of the CDN asset to delete." },
+      },
+      required: ["token"],
+    },
+  },
+  {
     name: "masdika_list_storage",
     description: "List S3-compatible Object Storage services, storage consumption, buckets, and S3 API endpoint.",
     inputSchema: { type: "object", properties: {} },
@@ -343,6 +382,17 @@ export const MASDIKA_MCP_TOOLS: McpToolDefinition[] = [
     inputSchema: { type: "object", properties: {} },
   },
   {
+    name: "masdika_revoke_ai_key",
+    description: "Revoke and permanently delete a Masdika AI Gateway API Key by ID.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        keyId: { type: "number", description: "The ID of the AI Gateway key to revoke." },
+      },
+      required: ["keyId"],
+    },
+  },
+  {
     name: "masdika_topup_ai_balance",
     description: "Transfer balance from your main Masdika Wallet directly into your AI Gateway balance for LLM token usage.",
     inputSchema: {
@@ -373,8 +423,24 @@ export const MASDIKA_MCP_TOOLS: McpToolDefinition[] = [
     },
   },
   {
+    name: "masdika_delete_ssh_key",
+    description: "Remove a registered SSH public key from your Masdika Cloud account.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        keyId: { type: "number", description: "The ID of the SSH key to delete." },
+      },
+      required: ["keyId"],
+    },
+  },
+  {
     name: "masdika_list_reserved_ips",
     description: "List Elastic Static Reserved IP addresses and see which VPS instance each IP is attached to.",
+    inputSchema: { type: "object", properties: {} },
+  },
+  {
+    name: "masdika_list_cloudflared_tunnels",
+    description: "List all active Cloudflare Tunnels configured on your account, including tunnel IDs and public hostnames.",
     inputSchema: { type: "object", properties: {} },
   },
 

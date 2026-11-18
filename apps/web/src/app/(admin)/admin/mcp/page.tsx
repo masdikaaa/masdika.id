@@ -84,6 +84,8 @@ export default function AdminMcpPage() {
   const [toolSearchQuery, setToolSearchQuery] = useState("");
   const [selectedToolCategory, setSelectedToolCategory] = useState<string>("All");
   const [expandedTool, setExpandedTool] = useState<string | null>(null);
+  const [toolPage, setToolPage] = useState(1);
+  const TOOLS_PER_PAGE = 8;
 
   const fetchMcpData = async () => {
     try {
@@ -551,7 +553,18 @@ export default function AdminMcpPage() {
         </div>
       )}
 
-      {activeTab === "tools" && (
+      {activeTab === "tools" && (() => {
+        const filteredTools = MASDIKA_MCP_TOOLS.filter((t) => {
+          if (!toolSearchQuery) return true;
+          const q = toolSearchQuery.toLowerCase();
+          return t.name.toLowerCase().includes(q) || t.description.toLowerCase().includes(q);
+        });
+        const totalToolPages = Math.max(1, Math.ceil(filteredTools.length / TOOLS_PER_PAGE));
+        const safeToolPage = Math.min(toolPage, totalToolPages);
+        const startToolIndex = (safeToolPage - 1) * TOOLS_PER_PAGE;
+        const paginatedTools = filteredTools.slice(startToolIndex, startToolIndex + TOOLS_PER_PAGE);
+
+        return (
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
@@ -569,7 +582,10 @@ export default function AdminMcpPage() {
                 type="text"
                 placeholder="Search tools or arguments..."
                 value={toolSearchQuery}
-                onChange={(e) => setToolSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setToolSearchQuery(e.target.value);
+                  setToolPage(1);
+                }}
                 className={cn(
                   "w-full pl-9 pr-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-cyan-400/20 focus:border-cyan-400",
                   isDark
@@ -581,12 +597,14 @@ export default function AdminMcpPage() {
           </div>
 
           {/* Tools Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {MASDIKA_MCP_TOOLS.filter((t) => {
-              if (!toolSearchQuery) return true;
-              const q = toolSearchQuery.toLowerCase();
-              return t.name.toLowerCase().includes(q) || t.description.toLowerCase().includes(q);
-            }).map((tool) => {
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+            {paginatedTools.length === 0 ? (
+              <div className={cn("col-span-full p-8 text-center rounded-2xl border", isDark ? "border-white/10 bg-white/5 text-zinc-400" : "border-slate-200 bg-slate-50 text-slate-500")}>
+                <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm font-semibold">No tools found matching &quot;{toolSearchQuery}&quot;</p>
+              </div>
+            ) : (
+              paginatedTools.map((tool) => {
               const isExpanded = expandedTool === tool.name;
               const props = tool.inputSchema?.properties || {};
               const propKeys = Object.keys(props);
@@ -595,7 +613,7 @@ export default function AdminMcpPage() {
                 <div
                   key={tool.name}
                   className={cn(
-                    "rounded-2xl border transition-all shadow-2xs overflow-hidden flex flex-col justify-start",
+                    "self-start rounded-2xl border transition-all shadow-2xs overflow-hidden flex flex-col justify-start",
                     isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200 shadow-2xs"
                   )}
                 >
@@ -676,10 +694,100 @@ export default function AdminMcpPage() {
                   )}
                 </div>
               );
-            })}
+            }))}
           </div>
+
+          {/* Pagination Bar */}
+          {filteredTools.length > 0 && totalToolPages > 1 && (
+            <div className={cn(
+              "flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 pb-1 border-t",
+              isDark ? "border-white/10 text-zinc-400" : "border-slate-200 text-slate-600"
+            )}>
+              <div className="text-xs font-medium">
+                Showing <span className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>{startToolIndex + 1}</span> to{" "}
+                <span className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>
+                  {Math.min(startToolIndex + TOOLS_PER_PAGE, filteredTools.length)}
+                </span>{" "}
+                of <span className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>{filteredTools.length}</span> tools
+              </div>
+
+              <div className="flex items-center gap-1.5 flex-wrap justify-center">
+                <button
+                  type="button"
+                  disabled={safeToolPage <= 1}
+                  onClick={() => setToolPage((p) => Math.max(1, p - 1))}
+                  className={cn(
+                    "px-3 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed",
+                    isDark
+                      ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white"
+                      : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-2xs"
+                  )}
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                  <span>Previous</span>
+                </button>
+
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalToolPages }, (_, idx) => idx + 1).map((pageNum) => {
+                    if (
+                      totalToolPages > 5 &&
+                      pageNum !== 1 &&
+                      pageNum !== totalToolPages &&
+                      Math.abs(pageNum - safeToolPage) > 1
+                    ) {
+                      if (pageNum === 2 || pageNum === totalToolPages - 1) {
+                        return (
+                          <span key={pageNum} className="px-1 text-xs text-zinc-500 select-none">
+                            ...
+                          </span>
+                        );
+                      }
+                      return null;
+                    }
+
+                    const isActive = pageNum === safeToolPage;
+                    return (
+                      <button
+                        key={pageNum}
+                        type="button"
+                        onClick={() => setToolPage(pageNum)}
+                        className={cn(
+                          "w-8 h-8 rounded-xl text-xs font-bold border flex items-center justify-center transition-all cursor-pointer",
+                          isActive
+                            ? isDark
+                              ? "bg-cyan-400 text-slate-950 border-cyan-400 shadow-sm"
+                              : "bg-cyan-500 text-white border-cyan-500 shadow-sm"
+                            : isDark
+                              ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300"
+                              : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-2xs"
+                        )}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  type="button"
+                  disabled={safeToolPage >= totalToolPages}
+                  onClick={() => setToolPage((p) => Math.min(totalToolPages, p + 1))}
+                  className={cn(
+                    "px-3 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed",
+                    isDark
+                      ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white"
+                      : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-2xs"
+                  )}
+                >
+                  <span>Next</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+        );
+      })()}
 
       {activeTab === "architecture" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

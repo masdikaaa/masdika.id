@@ -584,6 +584,84 @@ export async function executeMcpTool(
         };
       }
 
+      case "masdika_list_vps_firewall": {
+        const vpsId = Number(args.vpsId);
+        const vps = await prisma.vpsService.findFirst({
+          where: { id: vpsId, userId: user.id },
+        });
+
+        if (!vps || !vps.node || !vps.vmid) {
+          return { content: [{ type: "text", text: `VPS with ID ${vpsId} not found or not provisioned.` }], isError: true };
+        }
+
+        const pveRes = await getActiveProxmoxClient();
+        if (pveRes.error || !pveRes.proxmox) {
+          return { content: [{ type: "text", text: "Hypervisor node is currently unavailable." }], isError: true };
+        }
+
+        const rules = await pveRes.proxmox.getFirewallRules(vps.node, vps.vmid).catch(() => []);
+        if (!rules || rules.length === 0) {
+          return { content: [{ type: "text", text: `No firewall rules configured for VPS **${vps.hostname || vps.id}**.` }] };
+        }
+
+        const list = rules.map((r: any, idx: number) =>
+          `- **#${r.pos ?? idx}** | \`${(r.type || "in").toUpperCase()}\` | **${r.action}** | Proto: \`${r.proto || "any"}\` | Port: \`${r.dport || "*"}\` | Source: \`${r.source || "any"}\` ${r.comment ? `— *${r.comment}*` : ""}`
+        ).join("\n");
+
+        return {
+          content: [{ type: "text", text: `### Firewall Rules for **${vps.hostname || vps.id}** (${rules.length}):\n${list}` }],
+        };
+      }
+
+      case "masdika_add_vps_firewall": {
+        const vpsId = Number(args.vpsId);
+        const type = String(args.type || "in").toLowerCase();
+        const action = String(args.action || "ACCEPT").toUpperCase();
+        const proto = String(args.proto || "tcp").toLowerCase();
+        const dport = args.dport ? String(args.dport).replace(/[^0-9:]/g, "").slice(0, 16) : undefined;
+        const source = args.source ? String(args.source).replace(/[^0-9a-fA-F.:/]/g, "").slice(0, 48) : undefined;
+        const comment = args.comment ? String(args.comment).slice(0, 80) : "Added via MCP Agent";
+
+        if (!["in", "out"].includes(type)) {
+          return { content: [{ type: "text", text: "Invalid type. Must be 'in' or 'out'." }], isError: true };
+        }
+        if (!["ACCEPT", "DROP", "REJECT"].includes(action)) {
+          return { content: [{ type: "text", text: "Invalid action. Must be 'ACCEPT', 'DROP', or 'REJECT'." }], isError: true };
+        }
+        if (!["tcp", "udp", "icmp", "any"].includes(proto)) {
+          return { content: [{ type: "text", text: "Invalid proto. Must be 'tcp', 'udp', 'icmp', or 'any'." }], isError: true };
+        }
+
+        const vps = await prisma.vpsService.findFirst({
+          where: { id: vpsId, userId: user.id },
+        });
+        if (!vps || !vps.node || !vps.vmid) {
+          return { content: [{ type: "text", text: `VPS with ID ${vpsId} not found or not provisioned.` }], isError: true };
+        }
+        if (vps.status === "SUSPENDED" || vps.status === "TERMINATED") {
+          return { content: [{ type: "text", text: `VPS is ${vps.status}. Cannot modify firewall rules.` }], isError: true };
+        }
+
+        const pveRes = await getActiveProxmoxClient();
+        if (pveRes.error || !pveRes.proxmox) {
+          return { content: [{ type: "text", text: "Hypervisor node is currently unavailable." }], isError: true };
+        }
+
+        await pveRes.proxmox.createFirewallRule(vps.node, vps.vmid, {
+          type,
+          action,
+          proto,
+          ...(dport ? { dport } : {}),
+          ...(source ? { source } : {}),
+          comment,
+          enable: 1,
+        });
+
+        return {
+          content: [{ type: "text", text: `Firewall rule added to VPS **${vps.hostname || vps.id}**: \`${type.toUpperCase()} ${action} ${proto}${dport ? ` port ${dport}` : ""}\`.` }],
+        };
+      }
+
       // ══════════════════════════════════════════════════════
       // 3. MANAGED DATABASE
       // ══════════════════════════════════════════════════════
@@ -1035,6 +1113,25 @@ export async function executeMcpTool(
         };
       }
 
+      case "masdika_delete_cdn_file": {
+        const token = String(args.token || "").trim();
+        if (!token) {
+          return { content: [{ type: "text", text: "File token is required." }], isError: true };
+        }
+
+        const file = await prisma.secureMedia.findFirst({
+          where: { token, userId: user.id },
+        });
+        if (!file) {
+          return { content: [{ type: "text", text: `CDN file with token '${token}' not found in your account.` }], isError: true };
+        }
+
+        await prisma.secureMedia.delete({ where: { id: file.id } });
+        return {
+          content: [{ type: "text", text: `CDN file **${file.originalName || file.filename}** (\`${token}\`) deleted successfully.` }],
+        };
+      }
+
       case "masdika_list_storage": {
         const storages = await prisma.objectStorageService.findMany({
           where: { userId: user.id },
@@ -1274,7 +1371,7 @@ export async function executeMcpTool(
 
         const lines = keys.map(
           (k) =>
-            `- **${k.name}**\n  - Prefix: \`${k.keyPrefix}...\`\n  - Created: ${new Date(k.createdAt).toISOString().split("T")[0]}\n  - Last Used: ${k.lastUsedAt ? new Date(k.lastUsedAt).toISOString() : "Never"}`
+            `- **ID:** ${k.id} | **${k.name}**\n  - Prefix: \`${k.keyPrefix}...\`\n  - Created: ${new Date(k.createdAt).toISOString().split("T")[0]}\n  - Last Used: ${k.lastUsedAt ? new Date(k.lastUsedAt).toISOString() : "Never"}`
         );
 
         return {
@@ -1284,6 +1381,25 @@ export async function executeMcpTool(
               text: `### Masdika AI Gateway Keys (${keys.length}):\n\n${lines.join("\n\n")}`,
             },
           ],
+        };
+      }
+
+      case "masdika_revoke_ai_key": {
+        const keyId = Number(args.keyId);
+        if (!Number.isSafeInteger(keyId) || keyId <= 0) {
+          return { content: [{ type: "text", text: "Valid keyId is required." }], isError: true };
+        }
+
+        const key = await prisma.aiGatewayKey.findFirst({
+          where: { id: keyId, userId: user.id },
+        });
+        if (!key) {
+          return { content: [{ type: "text", text: `AI Gateway Key with ID ${keyId} not found.` }], isError: true };
+        }
+
+        await prisma.aiGatewayKey.delete({ where: { id: key.id } });
+        return {
+          content: [{ type: "text", text: `AI Gateway Key **${key.name}** (ID: ${keyId}) has been permanently revoked.` }],
         };
       }
 
@@ -1371,7 +1487,7 @@ export async function executeMcpTool(
 
         const lines = keys.map(
           (k) =>
-            `- **${k.name}**\n  - Fingerprint: \`${k.fingerprint || "SHA256:..."}\`\n  - Created: ${new Date(k.createdAt).toISOString().split("T")[0]}`
+            `- **ID:** ${k.id} | **${k.name}**\n  - Fingerprint: \`${k.fingerprint || "SHA256:..."}\`\n  - Created: ${new Date(k.createdAt).toISOString().split("T")[0]}`
         );
 
         return {
@@ -1412,6 +1528,25 @@ export async function executeMcpTool(
         };
       }
 
+      case "masdika_delete_ssh_key": {
+        const keyId = Number(args.keyId);
+        if (!Number.isSafeInteger(keyId) || keyId <= 0) {
+          return { content: [{ type: "text", text: "Valid keyId is required." }], isError: true };
+        }
+
+        const sshKey = await prisma.userSshKey.findFirst({
+          where: { id: keyId, userId: user.id },
+        });
+        if (!sshKey) {
+          return { content: [{ type: "text", text: `SSH Key with ID ${keyId} not found.` }], isError: true };
+        }
+
+        await prisma.userSshKey.delete({ where: { id: sshKey.id } });
+        return {
+          content: [{ type: "text", text: `SSH Key **${sshKey.name}** (ID: ${keyId}) removed successfully.` }],
+        };
+      }
+
       case "masdika_list_reserved_ips": {
         const ips = await prisma.reservedIp.findMany({
           where: { userId: user.id },
@@ -1434,6 +1569,33 @@ export async function executeMcpTool(
             {
               type: "text",
               text: `### Reserved Elastic IPs (${ips.length}):\n\n${lines.join("\n\n")}`,
+            },
+          ],
+        };
+      }
+
+      case "masdika_list_cloudflared_tunnels": {
+        const tunnels = await prisma.cloudflareTunnel.findMany({
+          where: { userId: user.id },
+          orderBy: { createdAt: "desc" },
+        });
+
+        if (tunnels.length === 0) {
+          return {
+            content: [{ type: "text", text: "No Cloudflare Tunnels found in your account." }],
+          };
+        }
+
+        const lines = tunnels.map(
+          (t) =>
+            `- **${t.name}**\n  - Tunnel ID: \`${t.cfTunnelId}\`\n  - Created: ${new Date(t.createdAt).toISOString().split("T")[0]}`
+        );
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: `### Cloudflare Tunnels (${tunnels.length}):\n\n${lines.join("\n\n")}`,
             },
           ],
         };

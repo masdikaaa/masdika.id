@@ -168,7 +168,7 @@ describe("Masdika Model Context Protocol (MCP) Gateway", () => {
     vi.clearAllMocks();
   });
 
-  it("1. registers all 39 platform service tools with valid schemas", () => {
+  it("1. registers all 45 platform service tools with valid schemas", () => {
     const toolNames = MASDIKA_MCP_TOOLS.map((t) => t.name);
     // Billing
     expect(toolNames).toContain("masdika_get_account");
@@ -186,6 +186,8 @@ describe("Masdika Model Context Protocol (MCP) Gateway", () => {
     expect(toolNames).toContain("masdika_create_vps_snapshot");
     expect(toolNames).toContain("masdika_list_vps_snapshots");
     expect(toolNames).toContain("masdika_reset_vps_password");
+    expect(toolNames).toContain("masdika_list_vps_firewall");
+    expect(toolNames).toContain("masdika_add_vps_firewall");
 
     // Database
     expect(toolNames).toContain("masdika_list_databases");
@@ -204,6 +206,7 @@ describe("Masdika Model Context Protocol (MCP) Gateway", () => {
     // Storage & CDN
     expect(toolNames).toContain("masdika_upload_cdn");
     expect(toolNames).toContain("masdika_list_cdn_files");
+    expect(toolNames).toContain("masdika_delete_cdn_file");
     expect(toolNames).toContain("masdika_list_storage");
     expect(toolNames).toContain("masdika_create_bucket");
     expect(toolNames).toContain("masdika_create_s3_key");
@@ -213,19 +216,22 @@ describe("Masdika Model Context Protocol (MCP) Gateway", () => {
     expect(toolNames).toContain("masdika_list_ai_models");
     expect(toolNames).toContain("masdika_create_ai_key");
     expect(toolNames).toContain("masdika_list_ai_keys");
+    expect(toolNames).toContain("masdika_revoke_ai_key");
     expect(toolNames).toContain("masdika_topup_ai_balance");
 
     // Network & Security
     expect(toolNames).toContain("masdika_list_ssh_keys");
     expect(toolNames).toContain("masdika_create_ssh_key");
+    expect(toolNames).toContain("masdika_delete_ssh_key");
     expect(toolNames).toContain("masdika_list_reserved_ips");
+    expect(toolNames).toContain("masdika_list_cloudflared_tunnels");
 
     // Support
     expect(toolNames).toContain("masdika_list_tickets");
     expect(toolNames).toContain("masdika_create_ticket");
     expect(toolNames).toContain("masdika_reply_ticket");
 
-    expect(MASDIKA_MCP_TOOLS.length).toBe(39);
+    expect(MASDIKA_MCP_TOOLS.length).toBe(45);
   });
 
   it("2. masdika_get_account correctly formats wallet balance and counts", async () => {

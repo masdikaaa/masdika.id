@@ -138,6 +138,16 @@ const TOOL_METADATA: Record<string, { category: ToolCategory; icon: any; prompt:
     icon: Lock,
     prompt: "Reset the root administrator password for VPS 12.",
   },
+  masdika_list_vps_firewall: {
+    category: "Cloud VPS",
+    icon: Shield,
+    prompt: "List all firewall rules currently configured on VPS 12.",
+  },
+  masdika_add_vps_firewall: {
+    category: "Cloud VPS",
+    icon: ShieldCheck,
+    prompt: "Open inbound TCP port 8080 on VPS 12 in the firewall.",
+  },
 
   // ── 3. MANAGED DATABASE ──
   masdika_list_databases: {
@@ -204,6 +214,11 @@ const TOOL_METADATA: Record<string, { category: ToolCategory; icon: any; prompt:
     icon: FileText,
     prompt: "List my recently uploaded files on Masdika File CDN.",
   },
+  masdika_delete_cdn_file: {
+    category: "Storage & CDN",
+    icon: Trash2,
+    prompt: "Delete the obsolete CDN file with token abc123def.",
+  },
   masdika_list_storage: {
     category: "Storage & CDN",
     icon: HardDrive,
@@ -241,6 +256,11 @@ const TOOL_METADATA: Record<string, { category: ToolCategory; icon: any; prompt:
     icon: Sparkles,
     prompt: "List all my Masdika AI Gateway API Keys.",
   },
+  masdika_revoke_ai_key: {
+    category: "AI Gateway",
+    icon: Trash2,
+    prompt: "Revoke my unused AI Gateway key with ID 4.",
+  },
   masdika_topup_ai_balance: {
     category: "AI Gateway",
     icon: ArrowRightLeft,
@@ -258,10 +278,20 @@ const TOOL_METADATA: Record<string, { category: ToolCategory; icon: any; prompt:
     icon: Key,
     prompt: "Register my new SSH public key 'MacBook Pro' on Masdika Cloud.",
   },
+  masdika_delete_ssh_key: {
+    category: "Network",
+    icon: Trash2,
+    prompt: "Remove my old SSH key with ID 3 from my account.",
+  },
   masdika_list_reserved_ips: {
     category: "Network",
     icon: Globe,
     prompt: "List all my Elastic Static Reserved IPs and their VPS attachments.",
+  },
+  masdika_list_cloudflared_tunnels: {
+    category: "Network",
+    icon: Globe,
+    prompt: "List all my active Cloudflare Tunnels and their status.",
   },
 
   // ── 8. SUPPORT ──
