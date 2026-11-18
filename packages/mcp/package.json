@@ -4,8 +4,8 @@
   "description": "Official Model Context Protocol (MCP) server for Masdika Cloud infrastructure management",
   "main": "bin/mcp.js",
   "bin": {
-    "masdika-mcp": "./bin/mcp.js",
-    "masdika": "./bin/mcp.js"
+    "masdika-mcp": "bin/mcp.js",
+    "masdika": "bin/mcp.js"
   },
   "keywords": [
     "mcp",
