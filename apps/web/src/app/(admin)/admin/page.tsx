@@ -224,10 +224,10 @@ export default function AdminDashboard() {
         <Link
           href="/admin/customers"
           className={cn(
-            "rounded-2xl border p-4 sm:p-5 transition-all group cursor-pointer",
+            "backdrop-blur-md rounded-2xl border p-4 sm:p-5 transition-all group cursor-pointer shadow-sm",
             isDark
               ? "bg-[#0c0c0e] border-white/[0.08] hover:border-cyan-500/40"
-              : "bg-white border-slate-200 hover:border-cyan-400 shadow-2xs"
+              : "bg-white border-slate-200 hover:border-cyan-400"
           )}
         >
           <div className="flex items-center justify-between mb-3">
@@ -252,17 +252,17 @@ export default function AdminDashboard() {
         <Link
           href="/admin/payg-monitor"
           className={cn(
-            "rounded-2xl border p-4 sm:p-5 transition-all group cursor-pointer",
+            "backdrop-blur-md rounded-2xl border p-4 sm:p-5 transition-all group cursor-pointer shadow-sm",
             isDark
               ? "bg-[#0c0c0e] border-white/[0.08] hover:border-cyan-500/40"
-              : "bg-white border-slate-200 hover:border-cyan-400 shadow-2xs"
+              : "bg-white border-slate-200 hover:border-cyan-400"
           )}
         >
           <div className="flex items-center justify-between mb-3">
             <span className={cn("text-[11px] font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
               ACTIVE SERVICES
             </span>
-            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700")}>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
               <Server className="w-4 h-4" />
             </div>
           </div>
@@ -270,7 +270,7 @@ export default function AdminDashboard() {
             <span className={cn("text-2xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>
               {totalActiveServices}
             </span>
-            <span className={cn("text-[11px] font-semibold truncate", isDark ? "text-emerald-400" : "text-emerald-700")}>
+            <span className={cn("text-[11px] font-semibold truncate", isDark ? "text-cyan-400" : "text-cyan-700")}>
               {stats.cloud.activeVps} VPS · {stats.cloud.activeDatabases} DB · {stats.cloud.activeApps} App
             </span>
           </div>
@@ -280,10 +280,10 @@ export default function AdminDashboard() {
         <Link
           href="/admin/revenue"
           className={cn(
-            "rounded-2xl border p-4 sm:p-5 transition-all group cursor-pointer",
+            "backdrop-blur-md rounded-2xl border p-4 sm:p-5 transition-all group cursor-pointer shadow-sm",
             isDark
               ? "bg-[#0c0c0e] border-white/[0.08] hover:border-cyan-500/40"
-              : "bg-white border-slate-200 hover:border-cyan-400 shadow-2xs"
+              : "bg-white border-slate-200 hover:border-cyan-400"
           )}
         >
           <div className="flex items-center justify-between mb-3">
@@ -308,10 +308,10 @@ export default function AdminDashboard() {
         <Link
           href="/admin/tickets"
           className={cn(
-            "rounded-2xl border p-4 sm:p-5 transition-all group cursor-pointer",
+            "backdrop-blur-md rounded-2xl border p-4 sm:p-5 transition-all group cursor-pointer shadow-sm",
             isDark
               ? "bg-[#0c0c0e] border-white/[0.08] hover:border-cyan-500/40"
-              : "bg-white border-slate-200 hover:border-cyan-400 shadow-2xs"
+              : "bg-white border-slate-200 hover:border-cyan-400"
           )}
         >
           <div className="flex items-center justify-between mb-3">
@@ -346,7 +346,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Cloud Infrastructure Breakdown */}
-          <div className={cn("rounded-2xl border p-4 sm:p-5 space-y-4", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
+          <div className={cn("backdrop-blur-md rounded-2xl border p-4 sm:p-5 space-y-4 shadow-sm", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200")}>
             <div className="flex items-center justify-between gap-2">
               <div>
                 <h2 className={cn("text-sm sm:text-base font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
@@ -375,8 +375,8 @@ export default function AdminDashboard() {
                     className={cn(
                       "p-3.5 rounded-xl border transition-all flex items-center justify-between gap-3 group",
                       isDark
-                        ? "bg-[#111115] border-white/[0.06] hover:border-cyan-500/35 hover:bg-white/[0.03]"
-                        : "bg-slate-50/70 border-slate-200 hover:border-cyan-400 hover:bg-cyan-50/40"
+                        ? "bg-[#0a0a0c] border-white/[0.08] hover:border-cyan-500/35 hover:bg-white/[0.04]"
+                        : "bg-slate-50 border-slate-200 hover:border-cyan-400 hover:bg-cyan-50/40"
                     )}
                   >
                     <div className="flex items-center gap-3 min-w-0">
@@ -405,7 +405,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Quick Management Shortcuts */}
-          <div className={cn("rounded-2xl border p-4 sm:p-5 space-y-4", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
+          <div className={cn("backdrop-blur-md rounded-2xl border p-4 sm:p-5 space-y-4 shadow-sm", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200")}>
             <div className="flex items-center justify-between">
               <h2 className={cn("text-sm sm:text-base font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
                 Quick Management Shortcuts
@@ -425,8 +425,8 @@ export default function AdminDashboard() {
                     className={cn(
                       "p-3 rounded-xl border transition-all flex items-center justify-between gap-2.5 group",
                       isDark
-                        ? "bg-[#111115] border-white/[0.06] hover:border-cyan-500/35"
-                        : "bg-slate-50/70 border-slate-200 hover:border-cyan-400"
+                        ? "bg-[#0a0a0c] border-white/[0.08] hover:border-cyan-500/35 hover:bg-white/[0.04]"
+                        : "bg-slate-50 border-slate-200 hover:border-cyan-400"
                     )}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
@@ -541,7 +541,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Content & Organic Reach Compact Summary */}
-          <div className={cn("rounded-2xl border p-4 sm:p-5 space-y-3", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200 shadow-sm")}>
+          <div className={cn("backdrop-blur-md rounded-2xl border p-4 sm:p-5 space-y-3 shadow-sm", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200")}>
             <div className="flex items-center justify-between">
               <span className={cn("text-[11px] font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
                 CONTENT &amp; ORGANIC REACH
@@ -555,7 +555,7 @@ export default function AdminDashboard() {
                 href="/admin/portfolio"
                 className={cn(
                   "p-3 rounded-xl border transition-all flex items-center justify-between",
-                  isDark ? "bg-[#111115] border-white/[0.06] hover:border-cyan-500/30" : "bg-slate-50 border-slate-200 hover:border-cyan-400"
+                  isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-cyan-500/30" : "bg-slate-50 border-slate-200 hover:border-cyan-400"
                 )}
               >
                 <div className="flex items-center gap-2">
@@ -568,7 +568,7 @@ export default function AdminDashboard() {
                 href="/admin/blog"
                 className={cn(
                   "p-3 rounded-xl border transition-all flex items-center justify-between",
-                  isDark ? "bg-[#111115] border-white/[0.06] hover:border-cyan-500/30" : "bg-slate-50 border-slate-200 hover:border-cyan-400"
+                  isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-cyan-500/30" : "bg-slate-50 border-slate-200 hover:border-cyan-400"
                 )}
               >
                 <div className="flex items-center gap-2">
