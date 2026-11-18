@@ -174,7 +174,7 @@ export const MANAGED_APPS_CATALOG: ManagedAppDefinition[] = [
     icon: '/images/apps/uptime-kuma.svg',
     appPort: 3001,
     dataDir: '/app/data',
-    defaultImage: 'docker.io/louislam/uptime-kuma:latest',
+    defaultImage: 'docker.io/louislam/uptime-kuma:2',
     color: 'from-emerald-500 to-teal-600',
     badge: 'Monitoring',
     accessProtocol: 'WEB',

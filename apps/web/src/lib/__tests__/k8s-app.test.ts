@@ -364,7 +364,7 @@ spec:
         subdomain: 'my-uptime',
         appPort: 3001,
       } as any);
-      expect(uptimekumaSpec.image).toBe('docker.io/louislam/uptime-kuma:latest');
+      expect(uptimekumaSpec.image).toBe('docker.io/louislam/uptime-kuma:2');
       expect(uptimekumaSpec.envYaml).toContain('UPTIME_KUMA_PORT');
       expect(uptimekumaSpec.envYaml).toContain('value: "3001"');
       expect(uptimekumaSpec.commandYaml).toBe('');

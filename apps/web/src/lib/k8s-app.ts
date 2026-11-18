@@ -803,7 +803,7 @@ ${buildPkgLockdownSnippet('apt')}
           value: "${initialPassword}"
 `;
   } else if (appType === 'uptimekuma') {
-    image = 'docker.io/louislam/uptime-kuma:latest';
+    image = 'docker.io/louislam/uptime-kuma:2';
     envYaml = `
         - name: UPTIME_KUMA_PORT
           value: "${app.appPort}"
