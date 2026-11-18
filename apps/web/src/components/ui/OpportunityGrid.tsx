@@ -7,6 +7,7 @@ import Link from "next/link";
 import type { Opportunity } from "@prisma/client";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
+import { getPaginationItems } from "@/components/ui/Pagination";
 
 interface OpportunityGridProps {
   opportunities: Opportunity[];
@@ -227,20 +228,27 @@ export function OpportunityGrid({ opportunities, emptyType = 'ALL' }: Opportunit
                         <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                       </button>
 
-                      <div className="flex items-center gap-1 sm:gap-1.5">
-                        {Array.from({ length: totalPages }).map((_, idx) => {
-                          const pageNum = idx + 1;
+                      <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-1.5">
+                        {getPaginationItems(currentPage, totalPages).map((item) => {
+                          if (item === "ellipsis-left" || item === "ellipsis-right") {
+                            return (
+                              <span key={item} className="w-6 h-9 sm:h-10 flex items-center justify-center text-xs sm:text-sm font-mono text-[var(--text-muted)] select-none">
+                                ...
+                              </span>
+                            );
+                          }
+                          const pageNum = item;
                           const isActive = currentPage === pageNum;
                           return (
                             <button
-                              key={idx}
+                              key={pageNum}
                               onClick={() => {
                                 setCurrentPage(pageNum);
                                 document.getElementById('vacancies-grid')?.scrollIntoView({ behavior: 'smooth' });
                                 document.getElementById('events-grid')?.scrollIntoView({ behavior: 'smooth' });
                               }}
                               className={cn(
-                                "w-9 h-9 sm:w-10 sm:h-10 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center border",
+                                "w-9 h-9 sm:w-10 sm:h-10 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center border shrink-0",
                                 isActive
                                   ? "bg-cyan-400 text-slate-950 font-bold border-cyan-400 shadow-md shadow-cyan-400/20 scale-105"
                                   : "bg-[var(--surface)] border-[var(--border-primary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-cyan-500/40"

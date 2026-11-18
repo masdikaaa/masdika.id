@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { getPaginationItems } from "@/components/ui/Pagination";
 import {
   Grid,
   Server,
@@ -307,21 +308,31 @@ export function PortfolioClient({ initialProjects = [] }: PortfolioClientProps) 
                   <ChevronLeft className="w-5 h-5" />
                 </button>
 
-                <div className="flex gap-1.5">
-                  {Array.from({ length: totalPages }).map((_, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setCurrentPage(idx + 1)}
-                      className={cn(
-                        "w-10 h-10 rounded-xl font-bold text-sm transition-all flex items-center justify-center border",
-                        currentPage === idx + 1
-                          ? "bg-cyan-500 text-slate-950 font-bold border-cyan-500 shadow-sm"
-                          : "bg-[var(--surface)] border-[var(--border-primary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-cyan-500/40"
-                      )}
-                    >
-                      {idx + 1}
-                    </button>
-                  ))}
+                <div className="flex flex-wrap items-center justify-center gap-1.5">
+                  {getPaginationItems(currentPage, totalPages).map((item) => {
+                    if (item === "ellipsis-left" || item === "ellipsis-right") {
+                      return (
+                        <span key={item} className="w-6 h-10 flex items-center justify-center text-sm font-mono text-[var(--text-muted)] select-none">
+                          ...
+                        </span>
+                      );
+                    }
+                    const pageNum = item;
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={cn(
+                          "w-9 h-9 sm:w-10 sm:h-10 rounded-xl font-bold text-sm transition-all flex items-center justify-center border shrink-0",
+                          currentPage === pageNum
+                            ? "bg-cyan-500 text-slate-950 font-bold border-cyan-500 shadow-sm"
+                            : "bg-[var(--surface)] border-[var(--border-primary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-cyan-500/40"
+                        )}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
                 </div>
 
                 <button

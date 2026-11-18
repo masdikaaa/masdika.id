@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
+import { getPaginationItems } from "@/components/ui/Pagination";
 import { 
   BookOpen, 
   ArrowRight, 
@@ -723,9 +724,16 @@ export function BlogContent({ initialPosts = [] }: { initialPosts?: BlogPostItem
                     <ChevronLeft className="w-4 h-4" />
                   </button>
 
-                  <div className="flex gap-2">
-                    {Array.from({ length: totalPages }).map((_, idx) => {
-                      const pageNum = idx + 1;
+                  <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+                    {getPaginationItems(currentPage, totalPages).map((item) => {
+                      if (item === "ellipsis-left" || item === "ellipsis-right") {
+                        return (
+                          <span key={item} className="w-6 h-10 flex items-center justify-center text-sm font-mono text-[var(--text-muted)] select-none">
+                            ...
+                          </span>
+                        );
+                      }
+                      const pageNum = item;
                       const isActive = currentPage === pageNum;
                       return (
                         <button
@@ -733,7 +741,7 @@ export function BlogContent({ initialPosts = [] }: { initialPosts?: BlogPostItem
                           type="button"
                           onClick={() => setCurrentPage(pageNum)}
                           className={cn(
-                            "w-10 h-10 rounded-xl text-sm font-bold transition-all border",
+                            "w-9 h-9 sm:w-10 sm:h-10 rounded-xl text-sm font-bold transition-all border shrink-0",
                             isActive
                               ? "bg-cyan-400 text-slate-950 border-cyan-400 shadow-sm"
                               : "border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-secondary)] hover:text-cyan-600 dark:hover:text-cyan-400 hover:border-cyan-500/40"
