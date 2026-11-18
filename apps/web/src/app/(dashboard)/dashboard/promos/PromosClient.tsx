@@ -109,7 +109,7 @@ export default function PromosClient({ promos, totalPages, currentPage }: Promos
             <span className={cn("text-[11px] font-bold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
               CLAIMED REWARDS
             </span>
-            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-emerald-500/15 border-emerald-500/25 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700")}>
+            <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
               <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
@@ -117,7 +117,7 @@ export default function PromosClient({ promos, totalPages, currentPage }: Promos
             <span className={cn("text-2xl font-black tracking-tight", isDark ? "text-white" : "text-slate-900")}>
               {claimedCount}
             </span>
-            <span className={cn("text-xs font-semibold", isDark ? "text-emerald-400" : "text-emerald-600")}>
+            <span className={cn("text-xs font-semibold", isDark ? "text-cyan-400" : "text-cyan-600")}>
               Redeemed
             </span>
           </div>
