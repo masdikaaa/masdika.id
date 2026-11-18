@@ -42,6 +42,17 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       type: "IP_RESERVATION",
     });
 
+    if (user.email) {
+      const { sendTerminationEmail } = await import("@/lib/email");
+      sendTerminationEmail(
+        user.email,
+        user.name || "Customer",
+        reservedIp.publicIp || reservedIp.ipAddress || `Reserved IP #${reservedIp.id}`,
+        "Reserved IP",
+        "Terminated by user from dashboard"
+      ).catch((err) => console.error("[RESERVED_IP_TERMINATION_EMAIL_ERROR]", err));
+    }
+
     return NextResponse.json({ success: true, message: "Reserved IP deleted successfully" });
   } catch (error: any) {
     console.error("Release Reserved IP Error:", error);

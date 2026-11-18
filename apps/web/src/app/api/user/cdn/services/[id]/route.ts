@@ -278,6 +278,10 @@ export async function DELETE(
 
   const sub = await prisma.subscription.findFirst({
     where: { id: subId, userId, plan: { service: 'CDN' } },
+    include: {
+      plan: true,
+      user: { select: { email: true, name: true } },
+    },
   });
   if (!sub) return NextResponse.json({ error: 'File CDN service not found' }, { status: 404 });
 
@@ -298,6 +302,17 @@ export async function DELETE(
     userId,
     subscriptionId: sub.id,
   });
+
+  if (sub.user?.email) {
+    const { sendTerminationEmail } = await import('@/lib/email');
+    sendTerminationEmail(
+      sub.user.email,
+      sub.user.name || 'Customer',
+      sub.name || sub.plan?.name || 'File CDN',
+      'File CDN',
+      'Terminated by user from dashboard'
+    ).catch((err) => console.error('[CDN_TERMINATION_EMAIL_ERROR]', err));
+  }
 
   return NextResponse.json({ success: true });
 }

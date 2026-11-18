@@ -968,13 +968,22 @@ export const sendAutoRenewDisabledSuspensionEmail = async (email: string, userNa
   });
 };
 
-export const sendTerminationEmail = async (email: string, userName: string, planName: string, serviceName: string) => {
+export const sendTerminationEmail = async (
+  email: string,
+  userName: string,
+  planName: string,
+  serviceName: string,
+  reason?: string
+) => {
   const decEmail = decryptDeterministic(email) || email;
   const decName = decryptDeterministic(userName) || userName;
+  const reasonParagraph = reason
+    ? `<p>Your service <strong>${planName} (${serviceName.replace('_', ' ')})</strong> has been formally terminated (${reason}).</p>`
+    : `<p>As we did not receive top up or payment within the 3-day suspension grace period, your service <strong>${planName} (${serviceName.replace('_', ' ')})</strong> has been formally terminated.</p>`;
   const content = `
     <h2 style="color: #7f1d1d; margin-bottom: 20px;">Service Terminated</h2>
     <p>Hello <strong>${decName}</strong>,</p>
-    <p>As we did not receive top up or payment within the 3-day suspension grace period, your service <strong>${planName} (${serviceName.replace('_', ' ')})</strong> has been formally terminated.</p>
+    ${reasonParagraph}
     <p>Any associated service data has been permanently removed from the cluster. If you wish to use our services again, you can deploy a new instance anytime from your dashboard.</p>
     <p>Thank you for having used Masdika Cloud.</p>
   `;

@@ -279,7 +279,13 @@ export async function DELETE(
   if (service.user?.email) {
     const plainEmail = decryptDeterministic(service.user.email) || service.user.email;
     const plainName = decryptDeterministic(service.user.name) || service.user.name || 'Customer';
-    sendTerminationEmail(plainEmail, plainName, service.planName, service.name).catch(() => {});
+    sendTerminationEmail(
+      plainEmail,
+      plainName,
+      service.planName,
+      service.name,
+      'Terminated by user from dashboard'
+    ).catch(() => {});
   }
 
   return NextResponse.json({ success: true });

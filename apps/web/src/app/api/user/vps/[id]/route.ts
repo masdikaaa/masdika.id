@@ -266,7 +266,8 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     const vps = await prisma.vpsService.findFirst({
       where: whereClause,
       include: {
-        assignedIps: true
+        assignedIps: true,
+        user: { select: { email: true, name: true } },
       }
     });
 
@@ -349,6 +350,17 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     cleanupUserCloudflareResourcesIfNoActiveVps(vps.userId).catch((err) => {
       console.error("[Auto-Cleanup] Failed to cleanup Cloudflare resources after user VPS deletion:", err);
     });
+
+    if (vps.user?.email) {
+      const { sendTerminationEmail } = await import('@/lib/email');
+      sendTerminationEmail(
+        vps.user.email,
+        vps.user.name || 'Customer',
+        vps.hostname || `VPS #${vps.id}`,
+        'Cloud VPS',
+        'Terminated by user from dashboard'
+      ).catch((err) => console.error('[VPS_TERMINATION_EMAIL_ERROR]', err));
+    }
 
     return NextResponse.json({ success: true, message: "VPS Terminated successfully" });
   } catch (error) {

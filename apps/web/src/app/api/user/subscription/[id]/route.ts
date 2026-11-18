@@ -28,6 +28,7 @@ export async function DELETE(
       },
       include: {
         plan: true,
+        user: { select: { email: true, name: true } },
       }
     });
 
@@ -79,6 +80,17 @@ export async function DELETE(
           autoRenew: false
         }
       });
+
+      if (subscription.user?.email) {
+        const { sendTerminationEmail } = await import('@/lib/email');
+        sendTerminationEmail(
+          subscription.user.email,
+          subscription.user.name || 'Customer',
+          subscription.name || subscription.plan.name,
+          serviceType,
+          'Terminated by user from dashboard'
+        ).catch((err) => console.error('[SUBSCRIPTION_TERMINATION_EMAIL_ERROR]', err));
+      }
 
       return NextResponse.json({ success: true, message: "Subscription terminated successfully." });
 

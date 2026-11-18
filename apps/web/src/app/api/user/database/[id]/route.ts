@@ -15,6 +15,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
     const db = await prisma.databaseService.findFirst({
       where: user.role === "ADMIN" ? { id: dbId } : { id: dbId, userId: user.id },
+      include: { user: { select: { email: true, name: true } } },
     });
 
     if (!db || db.status === "TERMINATED") {
@@ -74,6 +75,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
     const db = await prisma.databaseService.findFirst({
       where: user.role === "ADMIN" ? { id: dbId } : { id: dbId, userId: user.id },
+      include: { user: { select: { email: true, name: true } } },
     });
 
     if (!db || db.status === "TERMINATED" || db.status === "TERMINATING") {
@@ -108,6 +110,17 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       serviceName: db.name,
       type: "MANAGED_DATABASE",
     });
+
+    if (db.user?.email) {
+      const { sendTerminationEmail } = await import("@/lib/email");
+      sendTerminationEmail(
+        db.user.email,
+        db.user.name || "Customer",
+        `${db.name} (${db.type})`,
+        "Managed Database",
+        "Terminated by user from dashboard"
+      ).catch((err) => console.error("[DB_TERMINATION_EMAIL_ERROR]", err));
+    }
 
     return NextResponse.json({ success: true, message: "Database instance terminated" });
   } catch (error: any) {

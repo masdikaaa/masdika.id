@@ -29,6 +29,7 @@ export async function GET(
 
     const app = await prisma.appService.findFirst({
       where: user.role === "ADMIN" ? { id } : { id, userId: user.id },
+      include: { user: { select: { email: true, name: true } } },
     });
 
     if (!app || app.status === "TERMINATED") {
@@ -87,6 +88,7 @@ export async function DELETE(
 
     const app = await prisma.appService.findFirst({
       where: user.role === "ADMIN" ? { id } : { id, userId: user.id },
+      include: { user: { select: { email: true, name: true } } },
     });
 
     if (!app || app.status === "TERMINATED" || app.status === "TERMINATING") {
@@ -125,6 +127,17 @@ export async function DELETE(
       serviceName: app.name,
       type: "MANAGED_APP",
     });
+
+    if (app.user?.email) {
+      const { sendTerminationEmail } = await import("@/lib/email");
+      sendTerminationEmail(
+        app.user.email,
+        app.user.name || "Customer",
+        `${app.name} (${app.appType})`,
+        "Managed Application",
+        "Terminated by user from dashboard"
+      ).catch((err) => console.error("[APP_TERMINATION_EMAIL_ERROR]", err));
+    }
 
     const clientIp = getClientIp(req);
     await logClientActivity({
