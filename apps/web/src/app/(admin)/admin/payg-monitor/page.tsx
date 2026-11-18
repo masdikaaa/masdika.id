@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 import React, { useState, useEffect, Fragment } from "react";
@@ -244,14 +244,14 @@ export default function PaygMonitorPage() {
         <div className={cn("relative overflow-hidden rounded-2xl border p-3.5 sm:p-5 transition-colors", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}>
           <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
             <span className={cn("text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight min-w-0 pr-1 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Total Accumulated</span>
-            <div className={cn("w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl border flex items-center justify-center shrink-0 -mt-0.5", isDark ? "bg-emerald-500/15 border-emerald-500/25 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-600")}>
+            <div className={cn("w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl border flex items-center justify-center shrink-0 -mt-0.5", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600")}>
               <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             </div>
           </div>
-          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight text-emerald-400 truncate")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight text-cyan-400 truncate")}>
             {formatRupiah(totalAccumulatedCost)}
           </div>
-          <div className={cn("mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium truncate", isDark ? "text-emerald-500" : "text-emerald-700")}>
+          <div className={cn("mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium truncate", isDark ? "text-cyan-400" : "text-cyan-700")}>
             Current Cycle Unbilled
           </div>
         </div>
@@ -263,14 +263,14 @@ export default function PaygMonitorPage() {
         >
           <div className="flex items-start justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
             <span className={cn("text-[10px] sm:text-xs font-semibold uppercase tracking-tight sm:tracking-wider leading-tight min-w-0 pr-1 break-words", isDark ? "text-zinc-400" : "text-slate-500")}>Needs Top-up</span>
-            <div className={cn("w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl border flex items-center justify-center shrink-0 -mt-0.5", (lowCount + exhaustedCount) > 0 ? (isDark ? "bg-amber-500/15 border-amber-500/25 text-amber-400" : "bg-amber-50 border-amber-200 text-amber-600") : (isDark ? "bg-emerald-500/15 border-emerald-500/25 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-600"))}>
+            <div className={cn("w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl border flex items-center justify-center shrink-0 -mt-0.5", (lowCount + exhaustedCount) > 0 ? (isDark ? "bg-amber-500/15 border-amber-500/25 text-amber-400" : "bg-amber-50 border-amber-200 text-amber-600") : (isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-600"))}>
               {(lowCount + exhaustedCount) > 0 ? <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" /> : <Wallet className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />}
             </div>
           </div>
-          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", (lowCount + exhaustedCount) > 0 ? "text-amber-400" : "text-emerald-400")}>
+          <div className={cn("text-xl sm:text-2xl font-bold tracking-tight", (lowCount + exhaustedCount) > 0 ? "text-amber-400" : "text-cyan-400")}>
             {lowCount + exhaustedCount}
           </div>
-          <div className={cn("mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium truncate", (lowCount + exhaustedCount) > 0 ? "text-amber-500" : "text-emerald-500")}>
+          <div className={cn("mt-1 sm:mt-2 text-[10px] sm:text-xs font-medium truncate", (lowCount + exhaustedCount) > 0 ? "text-amber-500" : "text-cyan-400")}>
             {exhaustedCount > 0 ? `${exhaustedCount} Exhausted, ${lowCount} Low` : (lowCount > 0 ? 'Low (<24 hrs)' : 'All Accounts Healthy')}
           </div>
         </div>
