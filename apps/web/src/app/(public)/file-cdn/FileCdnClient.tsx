@@ -281,13 +281,55 @@ export default function FileCdnClient({
           </div>
         </section>
 
-        {/* ── 2. DEVELOPER CODE & INTEGRATION SHOWCASE (High Contrast Terminal in Both Themes) ────────── */}
+        {/* ── 2. DEVELOPER CODE & INTEGRATION SHOWCASE ────────── */}
         <section className="py-10 sm:py-14 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            
-            {/* Left: Dedicated macOS-style Code Snippet Window (Light & Dark Adaptive) */}
-            <div className="lg:col-span-7">
-              <FadeIn direction="up">
+          <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-10 lg:p-12 shadow-xl overflow-hidden">
+            {/* Ambient decorative glow */}
+            <div className="absolute top-0 right-1/4 -mt-24 w-96 h-96 bg-cyan-500/10 dark:bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+              
+              {/* Left Column: Heading, Architecture Highlights & Stat Cards */}
+              <div className="lg:col-span-5 space-y-6">
+                <div>
+                  <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+                    DEVELOPER ARCHITECTURE
+                  </span>
+                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+                    Instant Ingestion, Zero Complexity
+                  </h2>
+                  <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed mb-6 font-normal">
+                    Designed for developers who need robust temporary media hosting, automated CI/CD artifact sharing, and high-performance edge CDN delivery without configuring complex cloud storage buckets.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3.5">
+                  {[
+                    { label: "Edge Hit Ratio", value: "99.4%", sub: "Cached at Sidoarjo DC" },
+                    { label: "Median TTFB", value: "<12ms", sub: "Direct IIX Peering" },
+                    { label: "Max File Size", value: "100 MB", sub: "Per Direct Upload" },
+                    { label: "Link Expiration", value: "Custom", sub: "Auto-Scrubbed TTL" },
+                  ].map((stat, i) => (
+                    <div 
+                      key={i} 
+                      className="p-3.5 sm:p-4 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/60 dark:bg-white/[0.03] shadow-xs"
+                    >
+                      <div className="text-xl sm:text-2xl lg:text-3xl font-black text-cyan-600 dark:text-cyan-400 mb-0.5">
+                        {stat.value}
+                      </div>
+                      <div className="text-xs font-bold text-[var(--text-primary)] leading-tight">
+                        {stat.label}
+                      </div>
+                      <div className="text-[11px] text-[var(--text-secondary)] mt-0.5">
+                        {stat.sub}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Right Column: Dedicated macOS-style Code Snippet Window */}
+              <div className="lg:col-span-7">
                 <div className="w-full rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-[#0d0e15] text-slate-800 dark:text-slate-100 shadow-xl dark:shadow-2xl overflow-hidden ring-1 ring-black/5 dark:ring-white/5">
                   {/* macOS Window Titlebar */}
                   <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 border-b border-slate-200/90 dark:border-white/[0.08] bg-slate-100/90 dark:bg-[#14151f] gap-2 sm:gap-3 select-none">
@@ -341,50 +383,9 @@ export default function FileCdnClient({
                     </pre>
                   </div>
                 </div>
-              </FadeIn>
+              </div>
+
             </div>
-
-            {/* Right: Architectural Highlights */}
-            <div className="lg:col-span-5 space-y-6">
-              <FadeIn direction="up" delay={0.2}>
-                <div>
-                  <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
-                    DEVELOPER ARCHITECTURE
-                  </span>
-                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
-                    Instant Ingestion, Zero Complexity
-                  </h2>
-                  <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed mb-8 font-normal">
-                    Designed for developers who need robust temporary media hosting, automated CI/CD artifact sharing, and high-performance edge CDN delivery without configuring complex cloud storage buckets.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  {[
-                    { label: "Edge Hit Ratio", value: "99.4%", sub: "Cached at Sidoarjo DC" },
-                    { label: "Median TTFB", value: "<12ms", sub: "Direct IIX Peering" },
-                    { label: "Max File Size", value: "100 MB", sub: "Per Direct Upload" },
-                    { label: "Link Expiration", value: "Custom", sub: "Auto-Scrubbed TTL" },
-                  ].map((stat, i) => (
-                    <div 
-                      key={i} 
-                      className="p-4 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] shadow-sm"
-                    >
-                      <div className="text-2xl sm:text-3xl font-black text-cyan-600 dark:text-cyan-400 mb-1">
-                        {stat.value}
-                      </div>
-                      <div className="text-xs font-bold text-[var(--text-primary)] leading-tight">
-                        {stat.label}
-                      </div>
-                      <div className="text-[11px] text-[var(--text-secondary)] mt-0.5">
-                        {stat.sub}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </FadeIn>
-            </div>
-
           </div>
         </section>
 
