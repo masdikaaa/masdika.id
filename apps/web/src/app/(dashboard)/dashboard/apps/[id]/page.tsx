@@ -1373,9 +1373,13 @@ export default function AppDetailPage({
 
               <div className={cn("flex items-center justify-between pb-2 border-b", isDark ? "border-white/[0.06]" : "border-slate-200")}>
                 <span className={isDark ? "text-zinc-400" : "text-slate-500"}>Release Version:</span>
-                <span className={cn("font-mono font-bold flex items-center gap-1.5 text-[11px]", isDark ? "text-violet-400" : "text-violet-700")}>
+                <span className={cn("font-mono font-bold flex items-center gap-1.5 text-[11px]", isDark ? "text-cyan-400" : "text-cyan-700")}>
                   <ArrowUpCircle className="w-3.5 h-3.5" />
-                  Latest • Zero Data Loss
+                  {app.telemetry?.appVersion
+                    ? `v${String(app.telemetry.appVersion).replace(/^v/i, "")}`
+                    : app.telemetry?.imageTag
+                      ? app.telemetry.imageTag
+                      : catalog?.defaultImage?.split(":")[1] || "latest"} • Zero Data Loss
                 </span>
               </div>
 

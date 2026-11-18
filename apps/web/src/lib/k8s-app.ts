@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { Writable } from 'stream';
 import * as k8s from '@kubernetes/client-node';
 import { prisma } from './prisma';
 import { decryptDeterministic, encryptDeterministic } from './encryption';
@@ -1520,6 +1521,118 @@ export async function deleteAppService(app: AppServiceRecord): Promise<void> {
   } catch { }
 }
 
+const LIVE_VERSION_CACHE_TTL_MS = 10 * 60 * 1000;
+const liveAppVersionCache = new Map<string, { version: string; expiresAt: number }>();
+
+function getVersionProbeCommand(appType: string): string {
+  switch (appType.toLowerCase()) {
+    case 'uptimekuma':
+      return `node -p "require('/app/package.json').version" 2>/dev/null`;
+    case 'n8n':
+      return `n8n --version 2>/dev/null || node -p "require('/usr/local/lib/node_modules/n8n/package.json').version" 2>/dev/null`;
+    case 'ninerouter':
+      return `node -p "require('/app/package.json').version" 2>/dev/null || 9router --version 2>/dev/null`;
+    case 'omniroute':
+      return `node -p "require('/app/package.json').version" 2>/dev/null || omniroute --version 2>/dev/null`;
+    case 'opencode':
+      return `opencode --version 2>/dev/null`;
+    case 'openclaw':
+      return `openclaw --version 2>/dev/null || node -p "require('/app/package.json').version" 2>/dev/null`;
+    case 'hermes':
+      return `/app/data/venv/bin/hermes --version 2>/dev/null || /app/data/venv/bin/python -c "import importlib.metadata; print(importlib.metadata.version('hermes-agent'))" 2>/dev/null`;
+    case 'qwenpaw':
+      return `qwenpaw --version 2>/dev/null || python3 -c "import importlib.metadata; print(importlib.metadata.version('qwenpaw'))" 2>/dev/null`;
+    default:
+      return `node -p "require('/app/package.json').version" 2>/dev/null`;
+  }
+}
+
+async function detectLiveAppVersion(
+  kc: k8s.KubeConfig,
+  namespace: string,
+  podName: string,
+  containerName: string,
+  appType: string,
+  imageId: string
+): Promise<string | undefined> {
+  const cacheKey = `${namespace}/${podName}/${imageId || appType}`;
+  const cached = liveAppVersionCache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.version;
+  }
+
+  const probeCmd = getVersionProbeCommand(appType);
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (version?: string) => {
+      if (settled) return;
+      settled = true;
+      if (version) {
+        liveAppVersionCache.set(cacheKey, {
+          version,
+          expiresAt: Date.now() + LIVE_VERSION_CACHE_TTL_MS,
+        });
+      }
+      resolve(version);
+    };
+
+    const timer = setTimeout(() => finish(undefined), 2500);
+
+    try {
+      const exec = new k8s.Exec(kc);
+      const stdoutChunks: Buffer[] = [];
+      const stdoutStream = new Writable({
+        write(chunk, _encoding, callback) {
+          stdoutChunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+          callback();
+        },
+      });
+      const stderrStream = new Writable({
+        write(_chunk, _encoding, callback) {
+          callback();
+        },
+      });
+
+      exec
+        .exec(
+          namespace,
+          podName,
+          containerName,
+          ['/bin/sh', '-c', probeCmd],
+          stdoutStream,
+          stderrStream,
+          null,
+          false,
+          () => {
+            clearTimeout(timer);
+            const raw = Buffer.concat(stdoutChunks).toString('utf8').trim();
+            const match = raw.match(/(\d+\.\d+\.\d+(?:-[a-zA-Z0-9.]+)?)/);
+            finish(match ? match[1] : undefined);
+          }
+        )
+        .then((ws: any) => {
+          ws?.on?.('close', () => {
+            clearTimeout(timer);
+            const raw = Buffer.concat(stdoutChunks).toString('utf8').trim();
+            const match = raw.match(/(\d+\.\d+\.\d+(?:-[a-zA-Z0-9.]+)?)/);
+            finish(match ? match[1] : undefined);
+          });
+          ws?.on?.('error', () => {
+            clearTimeout(timer);
+            finish(undefined);
+          });
+        })
+        .catch(() => {
+          clearTimeout(timer);
+          finish(undefined);
+        });
+    } catch {
+      clearTimeout(timer);
+      finish(undefined);
+    }
+  });
+}
+
 /**
  * Get App Pod status & telemetry with reboot and node-recovery resilience
  */
@@ -1530,9 +1643,11 @@ export async function getAppPodStatus(app: AppServiceRecord): Promise<{
   podName?: string;
   uptimeSeconds?: number;
   statusLabel?: string;
+  appVersion?: string;
+  imageTag?: string;
 }> {
   try {
-    const { coreApi } = await getAppK8sClients();
+    const { kc, coreApi } = await getAppK8sClients();
     const ns = app.k8sNamespace || 'managed-apps';
     const labelSelector = `app=${app.k8sDeployment ? app.k8sDeployment.replace(/^deploy-/, '') : `app-${app.id}-${app.subdomain}`}`;
 
@@ -1585,13 +1700,27 @@ export async function getAppPodStatus(app: AppServiceRecord): Promise<{
       uptimeSeconds = Math.max(0, Math.floor((Date.now() - new Date(activePod.status.startTime).getTime()) / 1000));
     }
 
+    const containerSpec = activePod.spec?.containers?.[0];
+    const imageRef: string = containerSpec?.image || '';
+    const imageTag = imageRef.includes(':') ? imageRef.split(':').pop() : undefined;
+    const podName: string | undefined = activePod.metadata?.name;
+    const containerName: string = containerSpec?.name || '';
+    const imageId: string = containerStatus?.imageID || '';
+
+    const appVersion =
+      ready && podName && containerName
+        ? await detectLiveAppVersion(kc, ns, podName, containerName, app.appType, imageId)
+        : undefined;
+
     return {
       phase,
       ready,
       restartCount,
-      podName: activePod.metadata?.name,
+      podName,
       uptimeSeconds,
       statusLabel,
+      appVersion,
+      imageTag,
     };
   } catch {
     // When cluster is rebooting or kubelet is temporarily reconnecting:
