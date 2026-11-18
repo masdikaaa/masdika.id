@@ -1,0 +1,25 @@
+{
+  "name": "@masdika/mcp",
+  "version": "1.0.0",
+  "description": "Official Model Context Protocol (MCP) server for Masdika Cloud infrastructure management",
+  "main": "bin/mcp.js",
+  "bin": {
+    "masdika-mcp": "./bin/mcp.js",
+    "masdika": "./bin/mcp.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "masdika",
+    "cloud",
+    "cursor",
+    "claude",
+    "ai-agent",
+    "devops"
+  ],
+  "author": "Masdika Cloud Team <dev@masdika.id>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

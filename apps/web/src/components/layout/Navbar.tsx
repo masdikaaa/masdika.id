@@ -29,6 +29,7 @@ import {
   Boxes,
   HardDrive,
   Sparkles,
+  Bot,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
@@ -119,6 +120,13 @@ const DEV_MENU_ITEMS: MenuItem[] = [
     description: "Universal OpenAI-compatible API gateway with 70+ AI models & Rupiah Pay-As-You-Go.",
     href: "/ai-gateway",
     icon: Sparkles,
+    badge: "New",
+  },
+  {
+    title: "Masdika MCP",
+    description: "Connect Cursor, Claude Desktop & AI Agents directly to Masdika Cloud infrastructure.",
+    href: "/dashboard/mcp",
+    icon: Bot,
     badge: "New",
   },
   {

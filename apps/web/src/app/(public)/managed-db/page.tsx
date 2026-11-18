@@ -1,3 +1,4 @@
+import { OG_IMAGE_PATH } from "@/lib/og-image";
 import { prisma } from "@/lib/prisma";
 import { Metadata } from "next";
 import ManagedDbClient from "./ManagedDbClient";
@@ -34,9 +35,9 @@ export const metadata: Metadata = {
     siteName: "Masdika",
     images: [
       {
-        url: "/images/mascots/managed-db.webp",
-        width: 1536,
-        height: 1024,
+        url: OG_IMAGE_PATH,
+        width: 1200,
+        height: 630,
         alt: "Masdika Managed Database - Kubernetes High Availability Cloud DB",
       },
     ],
@@ -47,7 +48,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Managed Database - Kubernetes High Availability Cloud DB",
     description: "Deploy production-ready MySQL, PostgreSQL, MariaDB, Redis, and MongoDB clusters in seconds. Powered by Kubernetes isolation, persistent SATA SSD storage, instant data export & import, browser web GUIs, and low-latency IIX routing.",
-    images: ["/images/mascots/managed-db.webp"],
+    images: [OG_IMAGE_PATH],
   },
 };
 

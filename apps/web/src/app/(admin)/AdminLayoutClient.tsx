@@ -38,6 +38,7 @@ const SIDEBAR_LINKS = [
   { name: "Object Storage", href: "/admin/object-storage", icon: Database, color: "text-cyan-400", group: "Cloud Services" },
   { name: "File CDN", href: "/admin/customer-cdn", icon: UploadCloud, color: "text-cyan-400", group: "Cloud Services" },
   { name: "AI Gateway", href: "/admin/ai-gateway", icon: Sparkles, color: "text-cyan-400", group: "Cloud Services" },
+  { name: "Model Context Protocol", href: "/admin/mcp", icon: Bot, color: "text-cyan-400", group: "Cloud Services" },
   { name: "Cloudflared Tunnels", href: "/admin/cloudflared", icon: SiCloudflare, color: "text-cyan-400", group: "Cloud Services" },
 
   { name: "Customers", href: "/admin/customers", icon: Users, color: "text-cyan-400", group: "Billing & Subscriptions" },

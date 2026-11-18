@@ -57,13 +57,16 @@ export async function POST(req: NextRequest) {
       normalizedService !== "VPS" &&
       normalizedService !== "RESELLER" &&
       normalizedService !== "AI" &&
-      normalizedService !== "ALL"
+      normalizedService !== "ALL" &&
+      normalizedService !== "MCP"
     ) {
       return NextResponse.json({ error: "Unsupported API key service type" }, { status: 400 });
     }
 
     const safeName = typeof name === "string" && name.trim().length > 0
       ? name.trim().slice(0, 64)
+      : normalizedService === "MCP"
+      ? "Masdika MCP Key"
       : normalizedService === "AI"
       ? "AI Management Key"
       : normalizedService === "ALL"
@@ -82,6 +85,18 @@ export async function POST(req: NextRequest) {
         });
         if (vpsCount === 0) {
           throw new Error("NO_VPS_ORDERED");
+        }
+      }
+
+      if (normalizedService === "MCP") {
+        const mcpCount = await tx.apiKey.count({
+          where: {
+            userId: user.id,
+            service: "MCP",
+          },
+        });
+        if (mcpCount >= 1) {
+          throw new Error("MCP_KEY_LIMIT_REACHED");
         }
       }
 
@@ -108,6 +123,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         error: "You must order at least one Cloud VPS instance before generating an API key."
       }, { status: 403 });
+    }
+    if (error?.message === "MCP_KEY_LIMIT_REACHED") {
+      return NextResponse.json({
+        error: "Only 1 active MCP API key is allowed per account. Please revoke your existing key to generate a new one."
+      }, { status: 400 });
     }
     if (error?.message === "KEY_LIMIT_REACHED") {
       return NextResponse.json({ 
