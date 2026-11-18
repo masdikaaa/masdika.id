@@ -1,6 +1,6 @@
 {
   "name": "@masdika/mcp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Official Model Context Protocol (MCP) server for Masdika Cloud infrastructure management",
   "main": "bin/mcp.js",
   "bin": {
