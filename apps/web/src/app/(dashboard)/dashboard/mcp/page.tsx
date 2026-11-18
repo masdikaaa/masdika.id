@@ -718,7 +718,7 @@ export default function McpDashboardPage() {
               @masdika/mcp
             </span>
             <span className={cn("text-xs font-semibold shrink-0", isDark ? "text-cyan-400" : "text-cyan-600")}>
-              v1.0.0
+              v1.0.1
             </span>
           </div>
         </div>
@@ -879,6 +879,39 @@ export default function McpDashboardPage() {
                 </pre>
               </div>
             </div>
+          </div>
+
+          {/* Installation & Usage Guide */}
+          <div className={cn(
+            "p-4 sm:p-5 rounded-2xl border text-xs space-y-3 transition-all shadow-2xs",
+            isDark ? "bg-[#111115] border-white/[0.08] text-zinc-300" : "bg-white border-slate-200 text-slate-700 shadow-2xs"
+          )}>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Package className="w-4 h-4 text-cyan-400 shrink-0" />
+                <span className={cn("font-bold text-xs sm:text-sm", isDark ? "text-white" : "text-slate-900")}>
+                  How to Install &amp; Use @masdika/mcp
+                </span>
+              </div>
+              <span className={cn("text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full border", isDark ? "bg-white/5 border-white/10 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-600")}>
+                Requires Node.js &ge; 18
+              </span>
+            </div>
+
+            <ol className="space-y-2 list-decimal list-inside leading-relaxed">
+              <li>
+                <span className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>Generate MCP Key:</span>{" "}
+                Click <span className="font-semibold text-cyan-500">Generate MCP Key</span> at the top right to create your dedicated <code className="font-mono text-cyan-400">MASDIKA_API_KEY</code>.
+              </li>
+              <li>
+                <span className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>Zero-Install via npx:</span>{" "}
+                Copy the JSON config above into your AI editor. Running <code className={cn("px-1.5 py-0.5 rounded font-mono text-[11px] border", isDark ? "bg-black/40 border-white/10 text-cyan-300" : "bg-slate-100 border-slate-200 text-slate-800")}>npx -y @masdika/mcp</code> automatically fetches and runs the latest package without manual installation. (Optional global install: <code className={cn("px-1.5 py-0.5 rounded font-mono text-[11px] border", isDark ? "bg-black/40 border-white/10 text-cyan-300" : "bg-slate-100 border-slate-200 text-slate-800")}>npm install -g @masdika/mcp</code>)
+              </li>
+              <li>
+                <span className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>Reload &amp; Prompt:</span>{" "}
+                Restart your editor to load the MCP server, then chat naturally (e.g., <em>&ldquo;Check my Masdika wallet balance and list my VPS&rdquo;</em>).
+              </li>
+            </ol>
           </div>
 
           {/* Quick Setup Instructions & Tips (Cyan Theme - Consistent with Brand) */}
