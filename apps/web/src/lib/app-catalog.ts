@@ -1,5 +1,5 @@
 export interface ManagedAppDefinition {
-  id: 'hermes' | 'ninerouter' | 'n8n' | 'opencode' | 'openclaw' | 'omniroute';
+  id: 'hermes' | 'ninerouter' | 'n8n' | 'opencode' | 'openclaw' | 'omniroute' | 'wordpress' | 'uptimekuma';
   name: string;
   tagline: string;
   category: string;
@@ -165,6 +165,51 @@ export const MANAGED_APPS_CATALOG: ManagedAppDefinition[] = [
       'Compatible with Cursor, Claude Code, Cline & Continue.dev',
     ],
   },
+  {
+    id: 'wordpress',
+    name: 'WordPress',
+    tagline: 'Managed WordPress CMS with MariaDB, Auto SSL & Direct SSH',
+    category: 'CMS & Website',
+    description: 'Production-ready WordPress instance with Apache, PHP 8.3, embedded MariaDB database, Let\'s Encrypt HTTPS ingress, and direct sandboxed SSH terminal access for WP-CLI and file management.',
+    icon: '/images/apps/wordpress.svg',
+    appPort: 80,
+    dataDir: '/app/data',
+    defaultImage: 'docker.io/library/wordpress:latest',
+    color: 'from-sky-500 to-blue-600',
+    badge: 'WEB + SSH',
+    accessProtocol: 'BOTH',
+    minMemoryMb: 1024,
+    website: 'https://wordpress.org',
+    github: 'https://github.com/WordPress/WordPress',
+    features: [
+      'Pre-Configured Apache + PHP 8.3 + Embedded MariaDB',
+      'Automated HTTPS Website & /wp-admin with Let\'s Encrypt SSL',
+      'Direct SSH Terminal Access for Plugins, Themes & /var/www/html',
+      'Persistent Web Root & Database Storage (/app/data)',
+    ],
+  },
+  {
+    id: 'uptimekuma',
+    name: 'Uptime Kuma',
+    tagline: 'Self-Hosted Monitoring Dashboard & Public Status Pages',
+    category: 'Monitoring',
+    description: 'Sleek self-hosted uptime monitoring tool supporting HTTP(s), TCP, Ping, DNS, and Docker checks with real-time notifications (Telegram, Discord, Slack, Webhook) and custom status pages.',
+    icon: '/images/apps/uptime-kuma.svg',
+    appPort: 3001,
+    dataDir: '/app/data',
+    defaultImage: 'docker.io/louislam/uptime-kuma:latest',
+    color: 'from-emerald-500 to-teal-600',
+    badge: 'Monitoring',
+    accessProtocol: 'WEB',
+    website: 'https://uptime.kuma.pet',
+    github: 'https://github.com/louislam/uptime-kuma',
+    features: [
+      'HTTP(s), TCP, Ping, DNS & Keyword Uptime Monitors',
+      '90+ Notification Integrations (Telegram, Discord, Slack, Email)',
+      'Customizable Public Status Pages with Auto HTTPS SSL',
+      'Persistent SQLite Metrics & Alert History (/app/data)',
+    ],
+  },
 ];
 
 export const MANAGED_APP_PLANS: ManagedAppPlanDefinition[] = [
@@ -262,8 +307,12 @@ export const MANAGED_APP_PLANS: ManagedAppPlanDefinition[] = [
 ];
 
 export function getAppDefinition(id: string): ManagedAppDefinition | undefined {
+  const normalized = id.toLowerCase().trim();
   return MANAGED_APPS_CATALOG.find(
-    (app) => app.id.toLowerCase() === id.toLowerCase() || app.name.toLowerCase() === id.toLowerCase()
+    (app) =>
+      app.id.toLowerCase() === normalized ||
+      app.name.toLowerCase() === normalized ||
+      (app.id === 'uptimekuma' && normalized === 'uptime-kuma')
   );
 }
 

@@ -49,8 +49,8 @@ vi.mock('../prisma', () => ({
 
 describe('Managed Apps Catalog & Engine', () => {
   describe('App Catalog & Flavors', () => {
-    it('should have all 6 requested apps with official branding and ports', () => {
-      expect(MANAGED_APPS_CATALOG).toHaveLength(6);
+    it('should have all 8 requested apps with official branding and ports', () => {
+      expect(MANAGED_APPS_CATALOG).toHaveLength(8);
       const ids = MANAGED_APPS_CATALOG.map((a) => a.id);
       expect(ids).toContain('hermes');
       expect(ids).toContain('ninerouter');
@@ -58,6 +58,8 @@ describe('Managed Apps Catalog & Engine', () => {
       expect(ids).toContain('opencode');
       expect(ids).toContain('openclaw');
       expect(ids).toContain('omniroute');
+      expect(ids).toContain('wordpress');
+      expect(ids).toContain('uptimekuma');
 
       const n8n = getAppDefinition('n8n');
       expect(n8n).toBeDefined();
@@ -97,6 +99,21 @@ describe('Managed Apps Catalog & Engine', () => {
       expect(openclaw?.dataDir).toBe('/home/node/.openclaw');
       expect(router?.accessProtocol).toBe('WEB');
       expect(n8n?.accessProtocol).toBe('WEB');
+
+      const wordpress = getAppDefinition('wordpress');
+      expect(wordpress).toBeDefined();
+      expect(wordpress?.icon).toBe('/images/apps/wordpress.svg');
+      expect(wordpress?.accessProtocol).toBe('BOTH');
+      expect(wordpress?.appPort).toBe(80);
+      expect(wordpress?.dataDir).toBe('/app/data');
+
+      const uptimekuma = getAppDefinition('uptimekuma');
+      expect(uptimekuma).toBeDefined();
+      expect(uptimekuma?.icon).toBe('/images/apps/uptime-kuma.svg');
+      expect(uptimekuma?.accessProtocol).toBe('WEB');
+      expect(uptimekuma?.appPort).toBe(3001);
+      expect(uptimekuma?.dataDir).toBe('/app/data');
+      expect(getAppDefinition('uptime-kuma')?.id).toBe('uptimekuma');
     });
 
     it('should have all 7 compute plans matching user requirements', () => {
@@ -138,8 +155,8 @@ describe('Managed Apps Catalog & Engine', () => {
       expect(formatRupiah(375000)).toBe('Rp 375.000');
     });
 
-    it('should generate valid Kubernetes manifests for all 6 catalog apps without YAML syntax errors', () => {
-      const appTypes = ['hermes', 'n8n', 'ninerouter', 'opencode', 'openclaw', 'omniroute'];
+    it('should generate valid Kubernetes manifests for all 8 catalog apps without YAML syntax errors', () => {
+      const appTypes = ['hermes', 'n8n', 'ninerouter', 'opencode', 'openclaw', 'omniroute', 'wordpress', 'uptimekuma'];
       for (const appType of appTypes) {
         const dummyApp: any = {
           id: 42,
@@ -337,6 +354,36 @@ spec:
       expect(omnirouteSpec.envYaml).toContain('PORT');
       expect(omnirouteSpec.envYaml).toContain('value: "20128"');
       expect(omnirouteSpec.dataMount).toBe('/app/data');
+
+      const wordpressSpec = buildAppContainerSpec({
+        id: 78,
+        userId: 1,
+        name: 'my-wordpress',
+        appType: 'wordpress',
+        subdomain: 'my-wordpress',
+        appPort: 80,
+        password: 'WpPassword123!',
+      } as any);
+      expect(wordpressSpec.image).toBe('docker.io/library/wordpress:latest');
+      expect(wordpressSpec.commandYaml).toContain('openssh-server');
+      expect(wordpressSpec.commandYaml).toContain('mariadb-server');
+      expect(wordpressSpec.commandYaml).toContain('/usr/sbin/sshd -p 22');
+      expect(wordpressSpec.commandYaml).toContain('apache2-foreground');
+      expect(wordpressSpec.dataMount).toBe('/app/data');
+
+      const uptimekumaSpec = buildAppContainerSpec({
+        id: 79,
+        userId: 1,
+        name: 'my-uptime',
+        appType: 'uptimekuma',
+        subdomain: 'my-uptime',
+        appPort: 3001,
+      } as any);
+      expect(uptimekumaSpec.image).toBe('docker.io/louislam/uptime-kuma:latest');
+      expect(uptimekumaSpec.envYaml).toContain('UPTIME_KUMA_PORT');
+      expect(uptimekumaSpec.envYaml).toContain('value: "3001"');
+      expect(uptimekumaSpec.commandYaml).toBe('');
+      expect(uptimekumaSpec.dataMount).toBe('/app/data');
     });
   });
 

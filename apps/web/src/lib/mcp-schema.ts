@@ -239,16 +239,16 @@ export const MASDIKA_MCP_TOOLS: McpToolDefinition[] = [
   // ── 4. MANAGED APPLICATIONS ──
   {
     name: "masdika_list_apps",
-    description: "List all Managed Applications (n8n, OmniRoute, 9Router, OpenClaw, Hermes Agent, OpenCode, WordPress) deployed on Masdika.",
+    description: "List all Managed Applications (n8n, OmniRoute, 9Router, OpenClaw, Hermes Agent, OpenCode, WordPress, Uptime Kuma) deployed on Masdika.",
     inputSchema: { type: "object", properties: {} },
   },
   {
     name: "masdika_deploy_app",
-    description: "Deploy a high-availability Managed Application on Masdika Kubernetes cluster (OmniRoute, n8n, 9Router, OpenClaw, etc.).",
+    description: "Deploy a high-availability Managed Application on Masdika Kubernetes cluster (OmniRoute, n8n, 9Router, OpenClaw, WordPress, Uptime Kuma, etc.).",
     inputSchema: {
       type: "object",
       properties: {
-        appType: { type: "string", enum: ["omniroute", "n8n", "9router", "openclaw", "hermes", "opencode", "wordpress"], description: "Application engine type." },
+        appType: { type: "string", enum: ["omniroute", "n8n", "9router", "openclaw", "hermes", "opencode", "wordpress", "uptimekuma"], description: "Application engine type." },
         name: { type: "string", description: "Instance name for the application." },
       },
       required: ["appType", "name"],

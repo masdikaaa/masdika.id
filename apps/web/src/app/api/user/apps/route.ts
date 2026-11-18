@@ -9,6 +9,7 @@ import {
   checkAppClusterCapacity,
 } from "@/lib/k8s-app";
 import {
+  MANAGED_APPS_CATALOG,
   getAppDefinition,
   resolveAuthoritativeAppPlan,
   sanitizeCustomSubdomain,
@@ -128,7 +129,7 @@ export async function POST(req: NextRequest) {
     const catalogItem = getAppDefinition(typeNormalized);
     if (!catalogItem) {
       return NextResponse.json({
-        error: `Invalid application type. Allowed: hermes, ninerouter, n8n, opencode, openclaw, omniroute`,
+        error: `Invalid application type. Allowed: ${MANAGED_APPS_CATALOG.map((a) => a.id).join(", ")}`,
       }, { status: 400 });
     }
 
