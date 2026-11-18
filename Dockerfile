@@ -76,7 +76,6 @@ RUN npx esbuild apps/web/scripts/worker.ts \
     --external:https \
     --external:node-cron \
     --external:@prisma/client \
-    --external:node-ssh \
     --external:@next/env \
     --external:@elastic/elasticsearch \
     --external:elastic-apm-node
