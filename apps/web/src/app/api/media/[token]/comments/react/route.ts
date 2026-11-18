@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getClientIp } from "@/lib/get-ip";
 import { prisma } from "@/lib/prisma";
+import { requireAuth } from "@/lib/auth-middleware";
 import crypto from "crypto";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -18,9 +19,24 @@ export async function POST(
 
     const media = await prisma.secureMedia.findUnique({
       where: { token },
-      select: { id: true },
+      select: { id: true, isPublic: true, userId: true, expiresAt: true },
     });
     if (!media) return new NextResponse("Not Found", { status: 404 });
+
+    if (media.expiresAt && new Date(media.expiresAt).getTime() < Date.now()) {
+      return NextResponse.json({ error: "Link has expired." }, { status: 410 });
+    }
+
+    if (!media.isPublic) {
+      const auth = await requireAuth({ allowedRoles: ["USER", "ADMIN"] });
+      if (auth.error) {
+        return NextResponse.json({ error: "Access denied. This media file is private." }, { status: 403 });
+      }
+      const isAdmin = auth.user?.role === "ADMIN" || auth.user?.role === "SUPER_ADMIN";
+      if (!isAdmin && media.userId !== auth.user?.id) {
+        return NextResponse.json({ error: "Access denied. This media file is private." }, { status: 403 });
+      }
+    }
 
     const body = await req.json().catch(() => null);
     const commentId = Number(body?.commentId);

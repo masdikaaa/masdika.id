@@ -1170,6 +1170,10 @@ export async function recordAiUsageAndCharge(params: {
     });
   });
 
+  if (params.apiKeyId !== null && params.apiKeyId !== undefined && params.costRp > 0) {
+    invalidateAiKeyAuthCacheForUser(params.userId);
+  }
+
   // Trigger auto top-up in background if AI balance fell below threshold after charge
   if (params.costRp > 0) {
     await tryAutoTopupAiBalance(params.userId).catch(() => {});

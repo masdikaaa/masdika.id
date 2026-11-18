@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     {
       inputTokens: estimatedInput,
       cachedTokens: 0,
-      outputTokens: Math.min(maxTokens, 1024),
+      outputTokens: Math.floor(maxTokens),
     },
     modelRecord,
     config.markupPercent,

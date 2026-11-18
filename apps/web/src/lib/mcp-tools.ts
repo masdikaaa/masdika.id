@@ -294,6 +294,16 @@ export async function executeMcpTool(
           return { content: [{ type: "text", text: `VPS ${vps.hostname || vps.id} is not bound to a physical hypervisor node.` }], isError: true };
         }
 
+        if (vps.status === "TERMINATED") {
+          return { content: [{ type: "text", text: `VPS ${vps.hostname || vps.id} has been terminated.` }], isError: true };
+        }
+        if (vps.status === "SUSPENDED") {
+          return { content: [{ type: "text", text: `VPS ${vps.hostname || vps.id} is suspended. Please top up your balance or contact support.` }], isError: true };
+        }
+        if (action !== "status" && vps.status !== "RUNNING" && vps.status !== "STOPPED") {
+          return { content: [{ type: "text", text: `VPS ${vps.hostname || vps.id} is currently in '${vps.status}' state.` }], isError: true };
+        }
+
         const pveRes = await getActiveProxmoxClient();
         if (pveRes.error || !pveRes.proxmox) {
           return { content: [{ type: "text", text: "Hypervisor node is currently unavailable." }], isError: true };
@@ -458,8 +468,11 @@ export async function executeMcpTool(
         if (!vps) {
           return { content: [{ type: "text", text: `Cloud VPS with ID ${vpsId} not found.` }], isError: true };
         }
-        if (vps.status === "PROVISIONING") {
-          return { content: [{ type: "text", text: `VPS '${vps.hostname || vps.vmid}' is already being provisioned or reinstalled.` }], isError: true };
+        if (vps.status !== "RUNNING" && vps.status !== "STOPPED") {
+          return {
+            content: [{ type: "text", text: `VPS '${vps.hostname || vps.vmid}' cannot be reinstalled while in '${vps.status}' state.` }],
+            isError: true,
+          };
         }
         await prisma.vpsService.update({
           where: { id: vps.id },
@@ -788,6 +801,12 @@ export async function executeMcpTool(
         if (!db) {
           return { content: [{ type: "text", text: `Managed Database with ID ${dbId} not found.` }], isError: true };
         }
+        if (db.status !== "RUNNING" && db.status !== "STOPPED") {
+          return {
+            content: [{ type: "text", text: `Managed Database '${db.name}' cannot be controlled while in '${db.status}' state.` }],
+            isError: true,
+          };
+        }
 
         if (action === "start") {
           await startDatabase(db as any);
@@ -962,6 +981,12 @@ export async function executeMcpTool(
 
         if (!app) {
           return { content: [{ type: "text", text: `Managed Application with ID ${appId} not found.` }], isError: true };
+        }
+        if (app.status !== "RUNNING" && app.status !== "STOPPED") {
+          return {
+            content: [{ type: "text", text: `Application '${app.name}' cannot be controlled while in '${app.status}' state.` }],
+            isError: true,
+          };
         }
 
         if (action === "start") {
@@ -1429,27 +1454,25 @@ export async function executeMcpTool(
 
         try {
           const updatedUser = await prisma.$transaction(async (tx) => {
-            const freshUser = await tx.user.findUnique({
-              where: { id: user.id },
-              select: { id: true, balance: true, aiBalance: true, isSuspended: true },
-            });
-
-            if (!freshUser) {
-              throw new Error("USER_NOT_FOUND");
-            }
-            if (freshUser.isSuspended) {
-              throw new Error("ACCOUNT_SUSPENDED");
-            }
-            if ((freshUser.balance || 0) < amount) {
-              throw new Error("INSUFFICIENT_BALANCE");
-            }
-
-            const res = await tx.user.update({
-              where: { id: user.id },
+            const debited = await tx.user.updateMany({
+              where: { id: user.id, isSuspended: false, balance: { gte: amount } },
               data: {
                 balance: { decrement: amount },
                 aiBalance: { increment: amount },
               },
+            });
+            if (debited.count === 0) {
+              const checkUser = await tx.user.findUnique({
+                where: { id: user.id },
+                select: { isSuspended: true },
+              });
+              if (!checkUser) throw new Error("USER_NOT_FOUND");
+              if (checkUser.isSuspended) throw new Error("ACCOUNT_SUSPENDED");
+              throw new Error("INSUFFICIENT_BALANCE");
+            }
+
+            const res = await tx.user.findUniqueOrThrow({
+              where: { id: user.id },
             });
 
             await tx.clientActivityLog.create({

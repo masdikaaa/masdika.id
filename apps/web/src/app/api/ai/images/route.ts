@@ -174,11 +174,6 @@ export async function POST(req: NextRequest) {
       abortController.abort(new Error('UPSTREAM_IMAGE_TIMEOUT'));
     }, 60_000);
 
-    const onClientAbort = () => {
-      abortController.abort(new Error('CLIENT_ABORTED'));
-    };
-    req.signal?.addEventListener('abort', onClientAbort);
-
     let upstreamRes: Response;
     try {
       upstreamRes = await fetch(`${config.upstreamUrl}/v1/images/generations`, {
@@ -200,7 +195,6 @@ export async function POST(req: NextRequest) {
       });
     } finally {
       clearTimeout(timeoutTimer);
-      req.signal?.removeEventListener('abort', onClientAbort);
     }
 
     const data = await upstreamRes.json().catch(() => null);

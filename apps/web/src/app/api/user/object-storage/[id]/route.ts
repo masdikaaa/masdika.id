@@ -193,27 +193,43 @@ export async function PATCH(
       ? matchedPlan.hourlyPrice || Math.max(1, Math.ceil(matchedPlan.price / 730))
       : Math.max(1, Math.ceil(nextMonthly / 730));
 
-    if (nextMonthly > service.monthlyPrice) {
-      const freshUser = await prisma.user.findUnique({ where: { id: user.id }, select: { balance: true } });
-      try {
-        await assertSufficientCommitmentBalance({
-          userId: user.id,
-          userBalance: freshUser?.balance || 0,
-          newServiceMonthly: nextMonthly - service.monthlyPrice,
-          serviceName: `Scale ${service.name} to ${nextGb} GB`,
-        });
-      } catch (balErr: any) {
-        return NextResponse.json(
-          { error: balErr?.message || 'Insufficient account balance for upgrade.' },
-          { status: 400 }
-        );
-      }
-    }
-
     updates.storageGb = nextGb;
     updates.planName = matchedPlan ? matchedPlan.name : `S3 ${nextGb >= 1000 ? `${nextGb / 1000} TB` : `${nextGb} GB`}`;
     updates.monthlyPrice = nextMonthly;
     updates.hourlyRate = nextHourly;
+
+    try {
+      const updated = await prisma.$transaction(async (tx) => {
+        if (nextMonthly > service.monthlyPrice) {
+          await tx.$executeRaw`SELECT id FROM "User" WHERE id = ${user.id} FOR UPDATE`;
+          const freshUser = await tx.user.findUnique({ where: { id: user.id }, select: { balance: true } });
+          await assertSufficientCommitmentBalance({
+            userId: user.id,
+            userBalance: freshUser?.balance || 0,
+            newServiceMonthly: nextMonthly - service.monthlyPrice,
+            serviceName: `Scale ${service.name} to ${nextGb} GB`,
+            tx,
+          });
+        }
+
+        return tx.objectStorageService.update({
+          where: { id: service.id },
+          data: updates,
+        });
+      });
+
+      if (updates.storageGb !== undefined && service.buckets.length > 0) {
+        const quotaBytes = updates.storageGb * 1024 * 1024 * 1024;
+        await Promise.all(service.buckets.map((b) => setCustomerBucketQuota(b.name, quotaBytes).catch(() => {})));
+      }
+
+      return NextResponse.json({ success: true, service: updated });
+    } catch (balErr: any) {
+      return NextResponse.json(
+        { error: balErr?.message || 'Insufficient account balance for upgrade.' },
+        { status: 400 }
+      );
+    }
   }
 
   const updated = await prisma.objectStorageService.update({

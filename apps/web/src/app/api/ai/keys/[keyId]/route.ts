@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { invalidateAiKeyAuthCacheForUser } from '@/lib/ai-gateway';
 import {
   aiMgmtError,
   aiMgmtOptionsResponse,
@@ -41,6 +42,7 @@ export async function DELETE(
       where: { id: existing.id },
       data: { isActive: false },
     });
+    invalidateAiKeyAuthCacheForUser(user.id);
   }
 
   return aiMgmtSuccess({ id: existing.id, revoked: true });
