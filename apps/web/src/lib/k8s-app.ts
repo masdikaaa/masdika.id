@@ -824,102 +824,6 @@ ${buildPkgLockdownSnippet('apt')}
         - name: QWENPAW_AUTH_PASSWORD
           value: "${authPassword}"
 `;
-  } else if (appType === 'wordpress') {
-    image = 'docker.io/library/wordpress:latest';
-    const sshPassword = app.password || 'WordPress123!';
-    const dbPassEscaped = sshPassword.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-    const b64WordpressMotd = Buffer.from(
-      '════════════════════════════════════════════════════════════\n' +
-      '  Masdika Cloud - Dedicated Managed WordPress Instance\n' +
-      '  Application Mode: HTTPS Website + Embedded SQLite + SSH\n' +
-      `  Website URL: https://${fullDomain}\n` +
-      `  WP Admin:    https://${fullDomain}/wp-admin\n` +
-      '  Web Root:    /app/data/html\n' +
-      '  Database:    Embedded SQLite (/app/data/html/wp-content/database)\n' +
-      '  Security Notice: Package installation & tunneling restricted.\n' +
-      '════════════════════════════════════════════════════════════\n'
-    ).toString('base64');
-    const b64WordpressProfile = Buffer.from(
-      `cd ${dataMount}/html 2>/dev/null || true\n`
-    ).toString('base64');
-    const b64WpConfig = Buffer.from(
-      `<?php\n` +
-      `define( 'DB_NAME', 'wordpress' );\n` +
-      `define( 'DB_USER', 'wpuser' );\n` +
-      `define( 'DB_PASSWORD', '' );\n` +
-      `define( 'DB_HOST', 'localhost' );\n` +
-      `define( 'DB_CHARSET', 'utf8mb4' );\n` +
-      `define( 'DB_COLLATE', '' );\n` +
-      `$table_prefix = 'wp_';\n` +
-      `define( 'WP_DEBUG', false );\n` +
-      `if ( isset( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) && strpos( $_SERVER['HTTP_X_FORWARDED_PROTO'], 'https' ) !== false ) {\n` +
-      `    $_SERVER['HTTPS'] = 'on';\n` +
-      `}\n` +
-      `if ( ! defined( 'ABSPATH' ) ) {\n` +
-      `    define( 'ABSPATH', __DIR__ . '/' );\n` +
-      `}\n` +
-      `require_once ABSPATH . 'wp-settings.php';\n`
-    ).toString('base64');
-
-    envYaml = `
-        - name: TERM
-          value: "xterm-256color"
-`;
-    commandYaml = `
-        command: ["/bin/sh", "-c"]
-        args:
-          - |
-            set -e
-            export DEBIAN_FRONTEND=noninteractive
-            if [ -f /etc/apt/sources.list ] || [ -d /etc/apt/sources.list.d ]; then
-              apt-get update
-              apt-get install -y --no-install-recommends openssh-server ca-certificates procps bash curl nano unzip
-            fi
-            mkdir -p /run/sshd /var/run/sshd ${dataMount}/html
-${buildHardenedSshdSnippet(sshPassword)}
-${buildPkgLockdownSnippet('apt')}
-            echo "${b64WordpressMotd}" | base64 -d > /etc/motd
-            echo "${b64WordpressProfile}" | base64 -d > /etc/profile.d/wordpress.sh
-            grep -q '/var/www/html' /root/.bashrc 2>/dev/null || cat /etc/profile.d/wordpress.sh >> /root/.bashrc
-            grep -q '/var/www/html' /root/.profile 2>/dev/null || cat /etc/profile.d/wordpress.sh >> /root/.profile
-            /usr/sbin/sshd -p 22
-            if [ ! -f "${dataMount}/html/wp-login.php" ] && [ -d /usr/src/wordpress ]; then
-              cp -a /usr/src/wordpress/. ${dataMount}/html/
-            fi
-            if [ ! -f "${dataMount}/html/wp-content/db.php" ]; then
-              curl -sSL https://downloads.wordpress.org/plugin/sqlite-database-integration.latest-stable.zip -o /tmp/sqlite.zip
-              unzip -qo /tmp/sqlite.zip -d ${dataMount}/html/wp-content/plugins/
-              rm -f /tmp/sqlite.zip
-              cp ${dataMount}/html/wp-content/plugins/sqlite-database-integration/db.copy ${dataMount}/html/wp-content/db.php
-              sed -i "s|{SQLITE_IMPLEMENTATION_FOLDER_PATH}|${dataMount}/html/wp-content/plugins/sqlite-database-integration|g; s|{SQLITE_PLUGIN}|sqlite-database-integration/load.php|g" ${dataMount}/html/wp-content/db.php
-            fi
-            if [ ! -f "${dataMount}/html/wp-config.php" ]; then
-              echo "${b64WpConfig}" | base64 -d > ${dataMount}/html/wp-config.php
-            fi
-            mkdir -p ${dataMount}/html/wp-content/database
-            sed -i "s|/var/www/html|${dataMount}/html|g" /etc/apache2/sites-available/*.conf /etc/apache2/apache2.conf
-            printf '<Directory ${dataMount}/html>\\n  Options FollowSymLinks\\n  AllowOverride All\\n  Require all granted\\n</Directory>\\n' > /etc/apache2/conf-enabled/masdika-wordpress.conf
-            chown -R www-data:www-data ${dataMount}/html
-            if [ ! -f "${dataMount}/html/wp-content/database/.ht.sqlite" ]; then
-              WP_SITE_URL="https://${fullDomain}" WP_ADMIN_PASS='${dbPassEscaped}' php -r '
-                $_SERVER["HTTP_HOST"] = parse_url(getenv("WP_SITE_URL"), PHP_URL_HOST);
-                $_SERVER["HTTPS"] = "on";
-                define("WP_INSTALLING", true);
-                require "${dataMount}/html/wp-load.php";
-                require_once "${dataMount}/html/wp-admin/includes/upgrade.php";
-                wp_install("Masdika WordPress", "admin", "admin@masdika.id", true, "", getenv("WP_ADMIN_PASS"));
-                update_option("siteurl", getenv("WP_SITE_URL"));
-                update_option("home", getenv("WP_SITE_URL"));
-              ' >/dev/null 2>&1 || true
-              chown -R www-data:www-data ${dataMount}/html
-            fi
-            set +e
-            while true; do
-              pgrep -x sshd >/dev/null 2>&1 || /usr/sbin/sshd -p 22
-              apache2-foreground >> ${dataMount}/apache.log 2>&1
-              sleep 3
-            done
-`;
   } else if (appType === 'opencode') {
     image = 'docker.io/library/node:22-alpine';
     const sshPassword = app.password || 'OpenCode123!';
@@ -1180,10 +1084,9 @@ export async function deployAppService(app: AppServiceRecord): Promise<{
   const isHermes = appTypeLower === 'hermes';
   const isOpencode = appTypeLower === 'opencode';
   const isOpenclaw = appTypeLower === 'openclaw';
-  const isWordpress = appTypeLower === 'wordpress';
   const isNinerouter = appTypeLower === 'ninerouter';
   const isOmniroute = appTypeLower === 'omniroute';
-  const isDualWebSsh = catalogItem?.accessProtocol === 'BOTH' || isHermes || isOpencode || isOpenclaw || isWordpress;
+  const isDualWebSsh = catalogItem?.accessProtocol === 'BOTH' || isHermes || isOpencode || isOpenclaw;
   const hasWeb = catalogItem?.accessProtocol === 'WEB' || isDualWebSsh;
   const isPureSsh = catalogItem?.accessProtocol === 'SSH' && !isDualWebSsh;
   const isExtendedBoot = isDualWebSsh || isNinerouter || isOmniroute;
@@ -1197,13 +1100,11 @@ export async function deployAppService(app: AppServiceRecord): Promise<{
 
   const webBackendPort = isHermes
     ? 9119
-    : isWordpress
-      ? (app.appPort && app.appPort !== 22 ? app.appPort : 80)
-      : isOpencode
-        ? (app.appPort && app.appPort !== 22 ? app.appPort : 4096)
-        : isOpenclaw
-          ? (app.appPort && app.appPort !== 22 && app.appPort !== 3000 ? app.appPort : 18789)
-          : app.appPort;
+    : isOpencode
+      ? (app.appPort && app.appPort !== 22 ? app.appPort : 4096)
+      : isOpenclaw
+        ? (app.appPort && app.appPort !== 22 && app.appPort !== 3000 ? app.appPort : 18789)
+        : app.appPort;
 
   const ingressYaml = hasWeb ? `
 ---

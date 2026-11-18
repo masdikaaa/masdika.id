@@ -49,8 +49,8 @@ vi.mock('../prisma', () => ({
 
 describe('Managed Apps Catalog & Engine', () => {
   describe('App Catalog & Flavors', () => {
-    it('should have all 9 requested apps with official branding and ports', () => {
-      expect(MANAGED_APPS_CATALOG).toHaveLength(9);
+    it('should have all 8 requested apps with official branding and ports', () => {
+      expect(MANAGED_APPS_CATALOG).toHaveLength(8);
       const ids = MANAGED_APPS_CATALOG.map((a) => a.id);
       expect(ids).toContain('hermes');
       expect(ids).toContain('ninerouter');
@@ -58,7 +58,6 @@ describe('Managed Apps Catalog & Engine', () => {
       expect(ids).toContain('opencode');
       expect(ids).toContain('openclaw');
       expect(ids).toContain('omniroute');
-      expect(ids).toContain('wordpress');
       expect(ids).toContain('uptimekuma');
       expect(ids).toContain('qwenpaw');
 
@@ -100,13 +99,6 @@ describe('Managed Apps Catalog & Engine', () => {
       expect(openclaw?.dataDir).toBe('/home/node/.openclaw');
       expect(router?.accessProtocol).toBe('WEB');
       expect(n8n?.accessProtocol).toBe('WEB');
-
-      const wordpress = getAppDefinition('wordpress');
-      expect(wordpress).toBeDefined();
-      expect(wordpress?.icon).toBe('/images/apps/wordpress.svg');
-      expect(wordpress?.accessProtocol).toBe('BOTH');
-      expect(wordpress?.appPort).toBe(80);
-      expect(wordpress?.dataDir).toBe('/app/data');
 
       const uptimekuma = getAppDefinition('uptimekuma');
       expect(uptimekuma).toBeDefined();
@@ -164,8 +156,8 @@ describe('Managed Apps Catalog & Engine', () => {
       expect(formatRupiah(375000)).toBe('Rp 375.000');
     });
 
-    it('should generate valid Kubernetes manifests for all 9 catalog apps without YAML syntax errors', () => {
-      const appTypes = ['hermes', 'n8n', 'ninerouter', 'opencode', 'openclaw', 'omniroute', 'wordpress', 'uptimekuma', 'qwenpaw'];
+    it('should generate valid Kubernetes manifests for all 8 catalog apps without YAML syntax errors', () => {
+      const appTypes = ['hermes', 'n8n', 'ninerouter', 'opencode', 'openclaw', 'omniroute', 'uptimekuma', 'qwenpaw'];
       for (const appType of appTypes) {
         const dummyApp: any = {
           id: 42,
@@ -363,22 +355,6 @@ spec:
       expect(omnirouteSpec.envYaml).toContain('PORT');
       expect(omnirouteSpec.envYaml).toContain('value: "20128"');
       expect(omnirouteSpec.dataMount).toBe('/app/data');
-
-      const wordpressSpec = buildAppContainerSpec({
-        id: 78,
-        userId: 1,
-        name: 'my-wordpress',
-        appType: 'wordpress',
-        subdomain: 'my-wordpress',
-        appPort: 80,
-        password: 'WpPassword123!',
-      } as any);
-      expect(wordpressSpec.image).toBe('docker.io/library/wordpress:latest');
-      expect(wordpressSpec.commandYaml).toContain('openssh-server');
-      expect(wordpressSpec.commandYaml).toContain('sqlite-database-integration');
-      expect(wordpressSpec.commandYaml).toContain('/usr/sbin/sshd -p 22');
-      expect(wordpressSpec.commandYaml).toContain('apache2-foreground');
-      expect(wordpressSpec.dataMount).toBe('/app/data');
 
       const uptimekumaSpec = buildAppContainerSpec({
         id: 79,

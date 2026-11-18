@@ -1,5 +1,5 @@
 export interface ManagedAppDefinition {
-  id: 'hermes' | 'ninerouter' | 'n8n' | 'opencode' | 'openclaw' | 'omniroute' | 'wordpress' | 'uptimekuma' | 'qwenpaw';
+  id: 'hermes' | 'ninerouter' | 'n8n' | 'opencode' | 'openclaw' | 'omniroute' | 'uptimekuma' | 'qwenpaw';
   name: string;
   tagline: string;
   category: string;
@@ -163,29 +163,6 @@ export const MANAGED_APPS_CATALOG: ManagedAppDefinition[] = [
       'Smart Routing, Load Balancing & Automatic Retries',
       'Cost & Quota Awareness with Fallback Rules',
       'Compatible with Cursor, Claude Code, Cline & Continue.dev',
-    ],
-  },
-  {
-    id: 'wordpress',
-    name: 'WordPress',
-    tagline: 'Managed WordPress CMS with Embedded SQLite, Auto SSL & Direct SSH',
-    category: 'CMS & Website',
-    description: 'Production-ready WordPress instance with Apache, PHP 8.3, embedded SQLite database, Let\'s Encrypt HTTPS ingress, and direct sandboxed SSH terminal access for WP-CLI and file management.',
-    icon: '/images/apps/wordpress.svg',
-    appPort: 80,
-    dataDir: '/app/data',
-    defaultImage: 'docker.io/library/wordpress:latest',
-    color: 'from-sky-500 to-blue-600',
-    badge: 'WEB + SSH',
-    accessProtocol: 'BOTH',
-    minMemoryMb: 1024,
-    website: 'https://wordpress.org',
-    github: 'https://github.com/WordPress/WordPress',
-    features: [
-      'Pre-Configured Apache + PHP 8.3 + Embedded SQLite Engine',
-      'Automated HTTPS Website & /wp-admin with Let\'s Encrypt SSL',
-      'Direct SSH Terminal Access for Plugins, Themes & /var/www/html',
-      'Persistent Web Root & Database Storage (/app/data)',
     ],
   },
   {
