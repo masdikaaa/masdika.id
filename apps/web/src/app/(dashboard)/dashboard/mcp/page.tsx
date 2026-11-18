@@ -743,7 +743,7 @@ export default function McpDashboardPage() {
               {/* API Key Selector Custom Reinstall-style Dropdown */}
               <div className="flex items-center gap-2 w-full sm:w-auto min-w-0">
                 <span className={cn("text-xs font-bold uppercase tracking-wider shrink-0", isDark ? "text-zinc-400" : "text-slate-500")}>Key:</span>
-                <div className="flex-1 min-w-0 sm:w-60 sm:flex-initial">
+                <div className="flex-1 min-w-0 sm:w-auto sm:max-w-[260px] sm:flex-initial">
                   <Select
                     value={selectedKey}
                     onChange={(val) => setSelectedKey(String(val))}
@@ -752,8 +752,9 @@ export default function McpDashboardPage() {
                         ? apiKeys.map((k) => ({
                             value: k.key,
                             label: (
-                              <div className="flex items-center justify-between gap-1.5 w-full text-xs min-w-0">
+                              <div className="flex items-center gap-1.5 text-xs min-w-0">
                                 <span className="font-semibold truncate">{k.name || "API Key"}</span>
+                                <span className={cn("shrink-0", isDark ? "text-zinc-600" : "text-slate-400")}>•</span>
                                 <span className="font-mono text-[11px] text-cyan-400 shrink-0">{k.key.slice(0, 10)}...</span>
                               </div>
                             ),
