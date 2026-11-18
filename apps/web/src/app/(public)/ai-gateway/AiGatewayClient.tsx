@@ -439,7 +439,7 @@ export default function AiGatewayClient({
             <div className="relative flex items-center justify-center mt-6 lg:mt-0 lg:self-center">
               <HeroAvatarFrame
                 imageSrc="/images/mascots/ai-token-gateway.webp"
-                imageAlt="Masdika AI Gateway – Unified OpenAI-Compatible Router"
+                imageAlt="Masdika AI Gateway – Unified Multi-Model AI Router"
                 imageWidth={1536}
                 imageHeight={1024}
                 badges={[

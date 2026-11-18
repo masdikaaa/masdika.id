@@ -136,7 +136,7 @@ const PRODUCTS: ProductItem[] = [
   {
     icon: Sparkles,
     title: "AI Gateway",
-    subtitle: "Unified OpenAI-Compatible Router",
+    subtitle: "Unified Multi-Model AI Router",
     description:
       "Access 70+ frontier LLMs and image models with drop-in OpenAI compatibility, sub-millisecond edge routing, zero data retention, and Rupiah Pay-As-You-Go.",
     href: "/ai-gateway",

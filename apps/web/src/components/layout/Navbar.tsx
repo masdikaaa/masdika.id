@@ -116,7 +116,7 @@ const COMPANY_MENU_ITEMS: MenuItem[] = [
 const DEV_MENU_ITEMS: MenuItem[] = [
   {
     title: "AI Gateway",
-    description: "Universal OpenAI-compatible API gateway with 70+ AI models & Rupiah Pay-As-You-Go.",
+    description: "Unified multi-model AI API gateway with 70+ LLM & image models & Rupiah Pay-As-You-Go.",
     href: "/ai-gateway",
     icon: Sparkles,
     badge: "New",

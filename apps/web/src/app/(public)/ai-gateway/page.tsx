@@ -9,29 +9,30 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: {
-    absolute: "AI Gateway - Unified OpenAI-Compatible API with 70+ Frontier AI Models",
+    absolute: "AI Gateway - Unified Multi-Model AI API (LLM & Image) | Masdika",
   },
-  description: "Access 70+ frontier LLMs and image models (Claude 3.7, GPT-4o, Gemini 2.5, DeepSeek R1/V3, Qwen 3.7) with a single OpenAI-compatible API key. Pay-as-you-go per token in Rupiah, sub-millisecond edge routing, and zero data training retention.",
+  description: "Access 70+ frontier LLMs and image models (Claude, GPT, Gemini, DeepSeek, Qwen) with a single unified API key. OpenAI & Anthropic protocol support, pay-as-you-go per token in Rupiah, and zero data training retention.",
   keywords: [
     "AI Gateway",
-    "OpenAI Compatible API",
-    "Claude 3.7 Sonnet API",
+    "Unified AI API",
+    "Multi-Model LLM API",
+    "Claude API",
     "DeepSeek R1 API",
     "DeepSeek V3 API",
-    "Qwen 3.7 Flash",
+    "Gemini API",
+    "Qwen API",
     "LLM Gateway Indonesia",
     "Pay As You Go AI",
     "Masdika AI",
     "AI API Indonesia",
-    "ChatGPT API Murah",
     "AI Inference Router",
   ],
   alternates: {
     canonical: "https://www.masdika.id/ai-gateway",
   },
   openGraph: {
-    title: "AI Gateway - Unified OpenAI-Compatible API with 70+ Frontier AI Models",
-    description: "Access 70+ frontier LLMs and image models with a single OpenAI-compatible API key. Pay-as-you-go per token in Rupiah, sub-millisecond edge routing, and zero training data retention.",
+    title: "AI Gateway - Unified Multi-Model AI API (LLM & Image)",
+    description: "Access 70+ frontier LLMs and image models (Claude, GPT, Gemini, DeepSeek, Qwen) with a single unified API key. Pay-as-you-go per token in Rupiah, sub-millisecond edge routing, and zero training data retention.",
     url: "https://www.masdika.id/ai-gateway",
     siteName: "Masdika",
     images: [
@@ -39,7 +40,7 @@ export const metadata: Metadata = {
         url: OG_IMAGE_PATH,
         width: 1200,
         height: 630,
-        alt: "Masdika AI Gateway - Unified OpenAI-Compatible API",
+        alt: "Masdika AI Gateway - Unified Multi-Model AI API",
       },
     ],
     locale: "en_US",
@@ -47,8 +48,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "AI Gateway - Unified OpenAI-Compatible API with 70+ Frontier AI Models",
-    description: "Access 70+ frontier LLMs and image models with a single OpenAI-compatible API key. Pay-as-you-go per token in Rupiah, sub-millisecond edge routing, and zero training data retention.",
+    title: "AI Gateway - Unified Multi-Model AI API (LLM & Image) | Masdika",
+    description: "Access 70+ frontier LLMs and image models (Claude, GPT, Gemini, DeepSeek, Qwen) with a single unified API key. Pay-as-you-go per token in Rupiah, sub-millisecond edge routing, and zero training data retention.",
     images: [OG_IMAGE_PATH],
   },
 };
@@ -90,7 +91,7 @@ export default async function AiGatewayLandingPage() {
       {
         "@type": "Product",
         "@id": "https://www.masdika.id/ai-gateway#product",
-        "name": "AI Gateway - Unified OpenAI-Compatible LLM & Image Router",
+        "name": "AI Gateway - Unified Multi-Model LLM & Image Router",
         "sku": "MASDIKA-AIGW-ID",
         "mpn": "AIGW-01",
         "description": "High-Performance Unified AI Gateway providing drop-in OpenAI compatible routing across 70+ frontier models (Claude 3.7, GPT-4o, Gemini 2.5, DeepSeek R1, Qwen 3.7) with transparent Rupiah Pay-As-You-Go per token pricing.",

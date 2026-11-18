@@ -14,7 +14,7 @@ const MENU_META: Record<string, { label: string; description: string; icon: Reac
   community: { label: "Community",           description: "Connect and discuss with other developers in the community.",   icon: Users,     color: "text-cyan-400", bg: "bg-cyan-500/10" },
   blog:      { label: "Blog & Articles",     description: "Read our latest technical insights and tutorials.",            icon: FileText,  color: "text-cyan-400", bg: "bg-cyan-500/10" },
   series:    { label: "Series",              description: "Structured learning paths covering networking, cloud, DevOps.", icon: BookOpen,  color: "text-cyan-400",   bg: "bg-cyan-500/10"   },
-  "ai-gateway": { label: "AI Gateway", description: "Unified OpenAI-compatible API gateway with 70+ AI models & Rupiah Pay-As-You-Go.", icon: Sparkles, color: "text-cyan-400", bg: "bg-cyan-500/10" },
+  "ai-gateway": { label: "AI Gateway", description: "Unified multi-model AI API gateway with 70+ AI models & Rupiah Pay-As-You-Go.", icon: Sparkles, color: "text-cyan-400", bg: "bg-cyan-500/10" },
   upload:    { label: "File CDN",       description: "Securely upload temporary files up to 100MB.",                 icon: UploadCloud, color: "text-cyan-400", bg: "bg-cyan-500/10" },
   "object-storage": { label: "Object Storage", description: "S3-compatible buckets with IAM keys and presigned URLs.", icon: Database, color: "text-cyan-400", bg: "bg-cyan-500/10" },
   vps:       { label: "Cloud VPS",           description: "High-performance virtual private servers.",                    icon: Terminal,     color: "text-cyan-400", bg: "bg-cyan-500/10" },
