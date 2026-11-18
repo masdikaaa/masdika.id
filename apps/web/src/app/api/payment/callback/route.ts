@@ -535,8 +535,8 @@ export async function POST(req: NextRequest) {
       try {
         const amountStr = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(invoice.amount);
         const notifSubject = invoice.type === 'TOP_UP'
-          ? `💰 Top Up: ${customerName} - ${amountStr}`
-          : `🛒 Order Paid: ${customerName} - ${invoice.subscription?.plan?.name || 'Plan'} (${amountStr})`;
+          ? `Top Up: ${customerName} - ${amountStr}`
+          : `Order Paid: ${customerName} - ${invoice.subscription?.plan?.name || 'Plan'} (${amountStr})`;
         const notifContent = invoice.type === 'TOP_UP'
           ? `${customerName} (${customerEmail}) has completed a balance top-up of ${amountStr} via ${invoice.paymentMethod || 'Unknown'}.`
           : `${customerName} (${customerEmail}) has paid for ${invoice.subscription?.plan?.name || 'Plan'} (${invoice.subscription?.plan?.service?.replace('_', ' ') || 'Service'}) - ${amountStr} via ${invoice.paymentMethod || 'Unknown'}.`;

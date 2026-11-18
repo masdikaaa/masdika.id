@@ -519,7 +519,7 @@ export default function AdminDashboard() {
                             {msg.name}
                           </div>
                           <div className="text-[10px] text-zinc-500 truncate mt-0.5">
-                            {msg.subject || "No Subject"}
+                            {(msg.subject || "No Subject").replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}\uFE0F\u200D]+\s*/gu, "")}
                           </div>
                         </div>
                       </div>

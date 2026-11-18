@@ -3,7 +3,7 @@ import { useUrlNumber } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect } from "react";
-import { Mail, MailOpen, Trash2, CheckCircle2, MessageSquareQuote, Check, CheckCircle, RefreshCw, Search } from "lucide-react";
+import { Mail, MailOpen, Trash2, CheckCircle2, MessageSquareQuote, Check, CheckCircle, RefreshCw, Search, Wallet, Bell } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -136,32 +136,38 @@ export default function AdminMessagesPage() {
     }
   };
 
+  const cleanNotificationText = (text: string) =>
+    (text || '').replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}\uFE0F\u200D]+\s*/gu, '').trim();
+
   const renderMessageContent = (content: string) => {
-    if (content.includes('- Automatically generated notification')) {
+    const isSystemAuto = content.includes('- Automatically generated notification');
+    if (isSystemAuto) {
       const match = content.match(/New verified comment submitted:\n\n"([\s\S]*?)"\n\nIP Address: (.*?)\n\n- Automatically generated notification/);
       if (match) {
         const [, commentText, ip] = match;
         return (
-          <div className="mt-1.5 space-y-2">
-            <div className={cn("flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider", isDark ? "text-cyan-400" : "text-cyan-700")}>
-              <MessageSquareQuote className="w-3.5 h-3.5" /> System Notification
-            </div>
-            <div className="p-3 bg-gradient-to-br from-cyan-500/10 to-cyan-500/5 border-l-2 border-cyan-500 rounded-r-xl rounded-l-sm relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-2 opacity-5">
-                 <MessageSquareQuote className="w-10 h-10" />
-              </div>
-              <p className={cn("leading-relaxed italic relative z-10 text-xs", isDark ? "text-zinc-200" : "text-slate-700")}>"{commentText}"</p>
+          <div className="space-y-2">
+            <div className="p-3 bg-cyan-500/5 border-l-2 border-cyan-500 rounded-r-lg">
+              <p className={cn("leading-relaxed text-xs", isDark ? "text-zinc-200" : "text-slate-700")}>"{commentText}"</p>
             </div>
             <div className="flex items-center gap-2 text-[11px] text-zinc-500">
-               <span className={cn("px-2 py-0.5 rounded font-mono border text-[10px]", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-slate-400" : "bg-slate-100 border-slate-200 text-slate-600")}>IP: {ip}</span>
+              <span className={cn("px-2 py-0.5 rounded font-mono border text-[10px]", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-600")}>IP: {ip}</span>
             </div>
           </div>
         );
       }
+      const cleanedBody = cleanNotificationText(
+        content.replace(/\n*- Automatically generated notification\s*$/i, '')
+      );
+      return (
+        <p className={cn("text-xs leading-relaxed", isDark ? "text-zinc-300" : "text-slate-600")}>
+          {cleanedBody}
+        </p>
+      );
     }
     return (
-      <div className={cn("p-3 rounded-xl border leading-relaxed text-xs whitespace-pre-wrap", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-600")}>
-        {content}
+      <div className={cn("p-3 rounded-lg border leading-relaxed text-xs whitespace-pre-wrap", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-600")}>
+        {cleanNotificationText(content)}
       </div>
     );
   };
@@ -392,25 +398,45 @@ export default function AdminMessagesPage() {
                     {selectedIds.includes(msg.id) && <CheckCircle className="w-3 h-3 text-slate-950" />}
                   </button>
                 </div>
-                <div className="flex-1 space-y-2.5 min-w-0">
-                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-1.5 sm:gap-4">
-                    <div className="min-w-0">
-                      <div className="flex items-start gap-2 mb-0.5">
-                        {!msg.isRead && <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse mt-1.5 shrink-0" />}
-                        <h3 className={cn("text-xs sm:text-sm font-bold break-words", isDark ? "text-white" : "text-slate-900")}>{msg.subject || 'No Subject'}</h3>
+                <div className="flex-1 space-y-2 min-w-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={cn(
+                        "w-8 h-8 rounded-lg border flex items-center justify-center shrink-0",
+                        isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700"
+                      )}>
+                        {msg.name === "System Notification" ? (
+                          cleanNotificationText(msg.subject || "").toLowerCase().includes("top up") || cleanNotificationText(msg.subject || "").toLowerCase().includes("order") ? (
+                            <Wallet className="w-4 h-4" />
+                          ) : (
+                            <Bell className="w-4 h-4" />
+                          )
+                        ) : (
+                          <MessageSquareQuote className="w-4 h-4" />
+                        )}
                       </div>
-                      <div className="flex flex-wrap items-center gap-1.5 text-xs">
-                        <span className={cn("font-medium truncate max-w-full", isDark ? "text-cyan-400" : "text-cyan-700")}>{msg.name}</span>
-                        <span className="text-zinc-600 hidden sm:inline">•</span>
-                        <span className={cn("break-all text-[11px]", isDark ? "text-zinc-400" : "text-slate-500")}>{msg.email}</span>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          {!msg.isRead && <span className="w-2 h-2 rounded-full bg-cyan-400 shrink-0" />}
+                          <h3 className={cn("text-xs sm:text-sm font-bold truncate", isDark ? "text-white" : "text-slate-900")}>
+                            {cleanNotificationText(msg.subject || '') || 'No Subject'}
+                          </h3>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-1.5 text-[11px] mt-0.5">
+                          <span className={cn("font-semibold", isDark ? "text-cyan-400" : "text-cyan-700")}>{msg.name}</span>
+                          <span className="text-zinc-600">·</span>
+                          <span className={cn("truncate", isDark ? "text-zinc-400" : "text-slate-500")}>{msg.email}</span>
+                        </div>
                       </div>
                     </div>
-                    <div className="text-[11px] font-medium text-zinc-500 whitespace-nowrap sm:text-right">
+                    <div className="text-[11px] font-mono text-zinc-500 whitespace-nowrap sm:text-right pl-11 sm:pl-0">
                       {new Date(msg.createdAt).toLocaleString()}
                     </div>
                   </div>
                   
-                  {renderMessageContent(msg.content)}
+                  <div className="pl-0 sm:pl-11">
+                    {renderMessageContent(msg.content)}
+                  </div>
                 </div>
 
                 <div className="flex flex-row md:flex-col items-center justify-end gap-1.5 sm:gap-2 shrink-0 pt-1 w-full md:w-auto mt-2 md:mt-0">
