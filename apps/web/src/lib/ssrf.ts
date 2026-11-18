@@ -228,3 +228,82 @@ export async function validateSafeUrl(
     return { safe: false, reason: `Malformed URL: ${err.message}` };
   }
 }
+
+function isLoopbackOrMetadataIp(ip: string): boolean {
+  const clean = ip.replace(/^\[|\]$/g, '').trim().toLowerCase();
+  if (!clean || clean === '0.0.0.0' || clean === '::' || clean === '::1') return true;
+  if (clean.startsWith('::ffff:')) {
+    const mapped = clean.slice('::ffff:'.length);
+    if (net.isIPv4(mapped)) return isLoopbackOrMetadataIp(mapped);
+    const hexMatch = mapped.match(/^([0-9a-f]{1,4}):([0-9a-f]{1,4})$/);
+    if (hexMatch) {
+      const hi = parseInt(hexMatch[1], 16);
+      const lo = parseInt(hexMatch[2], 16);
+      const ipv4 = `${(hi >> 8) & 0xff}.${hi & 0xff}.${(lo >> 8) & 0xff}.${lo & 0xff}`;
+      return isLoopbackOrMetadataIp(ipv4);
+    }
+  }
+  if (net.isIPv4(clean)) {
+    const [a, b] = clean.split('.').map(Number);
+    if (a === 127 || a === 0) return true; // Loopback / "this network"
+    if (a === 169 && b === 254) return true; // Cloud metadata / link-local
+    return false;
+  }
+  if (net.isIPv6(clean)) {
+    try {
+      const groups = new Address6(clean).parsedAddress.map((g) => parseInt(g, 16));
+      if (groups.length !== 8 || groups.some(isNaN)) return true;
+      if (groups.slice(0, 7).every((g) => g === 0) && (groups[7] === 0 || groups[7] === 1)) return true; // :: / ::1
+      if ((groups[0] & 0xffc0) === 0xfe80) return true; // fe80::/10 link-local
+      return false;
+    } catch {
+      return true;
+    }
+  }
+  return true;
+}
+
+/**
+ * Validates admin-configured infrastructure endpoints (Kubernetes API Server, RustFS S3).
+ * Permits RFC1918 LAN IPs (10/8, 172.16/12, 192.168/16) for private clusters, while
+ * blocking loopback, link-local, cloud metadata endpoints, embedded credentials, and DNS rebinding to them.
+ */
+export async function validateClusterOrStorageEndpoint(rawUrl: string, label: string = 'Endpoint'): Promise<void> {
+  let parsed: URL;
+  try {
+    parsed = new URL(rawUrl);
+  } catch {
+    throw new Error(`Invalid ${label} URL format.`);
+  }
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    throw new Error(`${label} must use http:// or https:// protocol.`);
+  }
+  if (parsed.username || parsed.password) {
+    throw new Error(`${label} URL must not embed credentials.`);
+  }
+  const host = parsed.hostname.replace(/^\[|\]$/g, '').toLowerCase();
+  if (
+    !host ||
+    host === 'localhost' ||
+    host.endsWith('.localhost') ||
+    host === 'metadata.google.internal' ||
+    host === 'metadata'
+  ) {
+    throw new Error(`${label} cannot target loopback or cloud metadata addresses.`);
+  }
+  if (net.isIP(host)) {
+    if (isLoopbackOrMetadataIp(host)) {
+      throw new Error(`${label} cannot target loopback or cloud metadata addresses.`);
+    }
+    return;
+  }
+  let addresses: dns.LookupAddress[];
+  try {
+    addresses = await dns.promises.lookup(host, { all: true });
+  } catch {
+    throw new Error(`Unable to resolve ${label} hostname '${host}'.`);
+  }
+  if (!addresses || addresses.length === 0 || addresses.some((a) => isLoopbackOrMetadataIp(a.address))) {
+    throw new Error(`${label} resolves to a restricted loopback or cloud metadata address.`);
+  }
+}

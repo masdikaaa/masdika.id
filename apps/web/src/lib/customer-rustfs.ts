@@ -17,6 +17,7 @@ import {
 import * as crypto from 'crypto';
 import { Readable } from 'stream';
 import { prisma } from './prisma';
+import { validateClusterOrStorageEndpoint } from './ssrf';
 
 export interface CustomerRustFSConfig {
   enabled: boolean;
@@ -1061,7 +1062,17 @@ export async function testCustomerRustFSConnection(customConfig?: {
     const endpoint = (customConfig?.endpoint ?? storedConfig.endpoint).trim().replace(/\/+$/, '');
     const accessKey = (customConfig?.accessKey ?? storedConfig.accessKey).trim();
     const rawSecret = customConfig?.secretKey !== undefined ? customConfig.secretKey.trim() : storedConfig.secretKey;
-    const secretKey = rawSecret === '••••••••' ? storedConfig.secretKey : rawSecret;
+
+    let secretKey = rawSecret;
+    if (rawSecret === '••••••••' || (customConfig?.secretKey === undefined && customConfig?.endpoint)) {
+      if (endpoint && storedConfig.endpoint && endpoint !== storedConfig.endpoint.trim().replace(/\/+$/, '')) {
+        return {
+          success: false,
+          message: 'Please enter the Secret Key explicitly when testing a different endpoint URL.',
+        };
+      }
+      secretKey = storedConfig.secretKey;
+    }
 
     if (!endpoint || !accessKey || !secretKey) {
       return {
@@ -1071,6 +1082,7 @@ export async function testCustomerRustFSConnection(customConfig?: {
     }
 
     validateCustomerRustFSEndpoint(endpoint);
+    await validateClusterOrStorageEndpoint(endpoint, 'Customer RustFS endpoint');
 
     const client = new S3Client({
       region: 'us-east-1',

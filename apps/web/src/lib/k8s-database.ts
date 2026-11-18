@@ -7,6 +7,7 @@ import * as os from 'os';
 import tarStream from 'tar-stream';
 import { prisma } from './prisma';
 import { decryptDeterministic, encryptDeterministic } from './encryption';
+import { validateClusterOrStorageEndpoint } from './ssrf';
 
 export interface DatabaseServiceRecord {
   id: number;
@@ -1775,6 +1776,13 @@ export async function testK8sClusterConnection(customConfig?: {
 
     if (kubeconfig && kubeconfig !== '••••••••' && kubeconfig.trim().length > 0) {
       kc.loadFromString(kubeconfig.trim());
+      if (kc.getUsers().some((u: any) => Boolean(u?.exec))) {
+        return {
+          success: false,
+          message: 'Kubeconfig exec auth plugins are not permitted for security reasons.',
+          latencyMs: Date.now() - startTime,
+        };
+      }
       if (apiServer && apiServer.trim().length > 0) {
         const cluster = kc.getCurrentCluster();
         if (cluster) {
@@ -1796,6 +1804,13 @@ export async function testK8sClusterConnection(customConfig?: {
       );
     } else {
       const activeConfig = await getK8sClusterConfig();
+      if (apiServer && apiServer.trim() && activeConfig.apiServer && apiServer.trim() !== activeConfig.apiServer.trim()) {
+        return {
+          success: false,
+          message: 'Explicit Kubeconfig YAML or Service Token is required when testing a different API Server URL.',
+          latencyMs: Date.now() - startTime,
+        };
+      }
       if (activeConfig.kubeconfig) {
         kc.loadFromString(activeConfig.kubeconfig);
         if (activeConfig.apiServer) {
@@ -1825,6 +1840,16 @@ export async function testK8sClusterConnection(customConfig?: {
         };
       }
     }
+
+    const targetServer = kc.getCurrentCluster()?.server;
+    if (!targetServer) {
+      return {
+        success: false,
+        message: 'No cluster server URL found in Kubeconfig.',
+        latencyMs: Date.now() - startTime,
+      };
+    }
+    await validateClusterOrStorageEndpoint(targetServer, 'Kubernetes API Server');
 
     const coreApi = kc.makeApiClient(k8s.CoreV1Api);
     const nodesRes = await coreApi.listNode();

@@ -341,7 +341,9 @@ export async function handleAiProxyRequest(
     body.max_completion_tokens ?? body.max_tokens ?? body.max_output_tokens ?? 4096
   );
   const requestedCap = Number.isFinite(rawCap) && rawCap > 0 ? Math.min(rawCap, maxContextTokens) : 4096;
-  const holdOutputTokens = Math.min(Math.max(256, requestedCap), 16384);
+  const rawN = Number(body.n);
+  const nCompletions = Number.isFinite(rawN) && rawN >= 1 ? Math.min(Math.floor(rawN), 10) : 1;
+  const holdOutputTokens = Math.max(256, requestedCap) * nCompletions;
 
   const { costRp: estimatedHoldRp } = calculateTokenCostRp(
     { inputTokens: estimatedPromptTokens, cachedTokens: 0, outputTokens: holdOutputTokens },
@@ -421,7 +423,34 @@ export async function handleAiProxyRequest(
     clearTimeout(connectTimeoutTimer);
     req.signal?.removeEventListener('abort', onClientAbort);
     releaseSlotOnce();
-    await releaseAiBalanceHold(auth.user.id, estimatedHoldRp).catch(() => {});
+
+    const isClientAbort =
+      String(err?.message || '').includes('CLIENT_ABORTED') ||
+      String(abortController.signal.reason || '').includes('CLIENT_ABORTED');
+    if (isClientAbort) {
+      const { costRp: promptCostRp, upstreamCostRp: promptUpstreamRp } = calculateTokenCostRp(
+        { inputTokens: estimatedPromptTokens, cachedTokens: 0, outputTokens: 0 },
+        model,
+        config.markupPercent
+      );
+      await recordAiUsageAndCharge({
+        userId: auth.user.id,
+        apiKeyId: auth.keyRecord.id,
+        requestId,
+        modelId: model.modelId,
+        endpoint,
+        inputTokens: estimatedPromptTokens,
+        cachedTokens: 0,
+        outputTokens: 0,
+        costRp: promptCostRp,
+        upstreamCostRp: promptUpstreamRp,
+        latencyMs: Date.now() - startedAt,
+        statusCode: 499,
+        heldRp: estimatedHoldRp,
+      }).catch(() => {});
+    } else {
+      await releaseAiBalanceHold(auth.user.id, estimatedHoldRp).catch(() => {});
+    }
 
     const isAbort = err?.name === 'AbortError' || String(err?.message || '').includes('ABORT');
     const isTimeout = String(err?.message || '').includes('TIMEOUT');
@@ -562,19 +591,21 @@ export async function handleAiProxyRequest(
     }
   };
 
-  const finalizeCharge = async () => {
+  const finalizeCharge = async (abortedByClient: boolean = false) => {
     if (charged) return;
     charged = true;
     if (sseBuffer.trim()) {
       parseSseLines(sseBuffer.split('\n'));
       sseBuffer = '';
     }
-    // Per docs: If client closes connection mid-stream before final usage event, estimate from text received
+    // If client closes connection mid-stream before final usage event, estimate from text received (or at least prompt tokens on abort)
     if (usage.outputTokens === 0 && streamedOutputChars > 0) {
       if (usage.inputTokens === 0 && usage.cachedTokens === 0) {
         usage.inputTokens = estimatedPromptTokens;
       }
       usage.outputTokens = Math.max(1, Math.floor(streamedOutputChars / 4));
+    } else if (abortedByClient && usage.inputTokens === 0 && usage.cachedTokens === 0) {
+      usage.inputTokens = estimatedPromptTokens;
     }
 
     const { costRp, upstreamCostRp } = calculateTokenCostRp(usage, model, config.markupPercent);
@@ -619,7 +650,7 @@ export async function handleAiProxyRequest(
     },
     async cancel() {
       await reader.cancel().catch(() => {});
-      await finalizeCharge();
+      await finalizeCharge(true);
       releaseSlotOnce();
     },
   });

@@ -4,6 +4,7 @@ import * as k8s from '@kubernetes/client-node';
 import { prisma } from './prisma';
 import { decryptDeterministic, encryptDeterministic } from './encryption';
 import { getAppDefinition } from './app-catalog';
+import { validateClusterOrStorageEndpoint } from './ssrf';
 
 export interface AppServiceRecord {
   id: number;
@@ -389,9 +390,19 @@ export async function testAppClusterConnection(customConfig?: {
     let serviceToken = customConfig?.serviceToken;
     let skipTls = customConfig?.skipTlsVerify ?? true;
 
+    const isMaskedKubeconfig = !kubeconfig || kubeconfig === '••••••••' || kubeconfig.trim().length === 0;
+    const isMaskedToken = !serviceToken || serviceToken === '••••••••' || serviceToken.trim().length === 0;
+
     // Fallback to active saved DB configuration if not provided or masked
-    if (!kubeconfig || kubeconfig === '••••••••' || kubeconfig.trim().length === 0) {
+    if (isMaskedKubeconfig && isMaskedToken) {
       const activeConfig = await getAppClusterConfig();
+      if (apiServer && apiServer.trim() && activeConfig.apiServer && apiServer.trim() !== activeConfig.apiServer.trim()) {
+        return {
+          success: false,
+          message: 'Explicit Kubeconfig YAML or Service Token is required when testing a different API Server URL.',
+          latencyMs: Date.now() - startTime,
+        };
+      }
       kubeconfig = activeConfig.kubeconfig;
       if (!apiServer) apiServer = activeConfig.apiServer;
       if (!serviceToken) serviceToken = activeConfig.serviceToken;
@@ -400,6 +411,13 @@ export async function testAppClusterConnection(customConfig?: {
 
     if (kubeconfig && kubeconfig !== '••••••••' && kubeconfig.trim().length > 0) {
       kc.loadFromString(kubeconfig.trim());
+      if (kc.getUsers().some((u: any) => Boolean(u?.exec))) {
+        return {
+          success: false,
+          message: 'Kubeconfig exec auth plugins are not permitted for security reasons.',
+          latencyMs: Date.now() - startTime,
+        };
+      }
       if (apiServer && apiServer.trim().length > 0) {
         const cluster = kc.getCurrentCluster();
         if (cluster) {
@@ -426,6 +444,16 @@ export async function testAppClusterConnection(customConfig?: {
         latencyMs: Date.now() - startTime,
       };
     }
+
+    const targetServer = kc.getCurrentCluster()?.server;
+    if (!targetServer) {
+      return {
+        success: false,
+        message: 'No cluster server URL found in Kubeconfig.',
+        latencyMs: Date.now() - startTime,
+      };
+    }
+    await validateClusterOrStorageEndpoint(targetServer, 'Kubernetes API Server');
 
     const coreApi = kc.makeApiClient(k8s.CoreV1Api);
     const nodeRes = await coreApi.listNode();

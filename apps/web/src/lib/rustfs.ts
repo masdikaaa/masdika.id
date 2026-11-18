@@ -9,6 +9,7 @@ import {
   ListObjectsV2Command
 } from '@aws-sdk/client-s3';
 import { prisma } from './prisma';
+import { validateClusterOrStorageEndpoint } from './ssrf';
 import fs from 'fs';
 import path from 'path';
 import { Readable } from 'stream';
@@ -294,6 +295,7 @@ export async function testRustFSConnection(customConfig?: Partial<RustFSConfig>)
     }
 
     validateRustFSEndpoint(config.endpoint);
+    await validateClusterOrStorageEndpoint(config.endpoint, 'RustFS endpoint');
 
     const client = new S3Client({
       endpoint: config.endpoint,

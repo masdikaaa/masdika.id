@@ -223,9 +223,19 @@ export function calculateTokenCostRp(
 export function estimatePromptTokensFromBody(body: any): number {
   if (!body || typeof body !== 'object') return 32;
   let chars = 0;
-  if (typeof body.system === 'string') chars += body.system.length;
+  if (typeof body.system === 'string') {
+    chars += body.system.length;
+  } else if (body.system && typeof body.system === 'object') {
+    chars += JSON.stringify(body.system).length;
+  }
   if (typeof body.instructions === 'string') chars += body.instructions.length;
   if (typeof body.input === 'string') chars += body.input.length;
+  if (Array.isArray(body.tools) && body.tools.length > 0) {
+    chars += JSON.stringify(body.tools).length;
+  }
+  if (Array.isArray(body.functions) && body.functions.length > 0) {
+    chars += JSON.stringify(body.functions).length;
+  }
   const list = Array.isArray(body.messages)
     ? body.messages
     : Array.isArray(body.input)
@@ -237,11 +247,22 @@ export function estimatePromptTokensFromBody(body: any): number {
       chars += item.content.length;
     } else if (Array.isArray(item.content)) {
       for (const part of item.content) {
-        if (typeof part?.text === 'string') chars += part.text.length;
-        else if (part?.type === 'image_url' || part?.type === 'image' || part?.type === 'input_image') {
+        if (typeof part?.text === 'string') {
+          chars += part.text.length;
+        } else if (part?.type === 'image_url' || part?.type === 'image' || part?.type === 'input_image') {
           chars += 4000; // fixed image token allowance (~1000 tokens)
+        } else if (part && typeof part === 'object') {
+          chars += JSON.stringify(part).length;
         }
       }
+    } else if (item.content && typeof item.content === 'object') {
+      chars += JSON.stringify(item.content).length;
+    }
+    if (item.tool_calls) {
+      chars += JSON.stringify(item.tool_calls).length;
+    }
+    if (item.function_call) {
+      chars += JSON.stringify(item.function_call).length;
     }
   }
   return Math.max(16, Math.ceil(chars / 3.8));
