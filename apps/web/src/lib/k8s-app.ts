@@ -898,6 +898,7 @@ ${buildPkgLockdownSnippet('apt')}
             fi
             mkdir -p ${dataMount}/html/wp-content/database
             sed -i "s|/var/www/html|${dataMount}/html|g" /etc/apache2/sites-available/*.conf /etc/apache2/apache2.conf
+            printf '<Directory ${dataMount}/html>\\n  Options FollowSymLinks\\n  AllowOverride All\\n  Require all granted\\n</Directory>\\n' > /etc/apache2/conf-enabled/masdika-wordpress.conf
             chown -R www-data:www-data ${dataMount}/html
             if [ ! -f "${dataMount}/html/wp-content/database/.ht.sqlite" ]; then
               WP_SITE_URL="https://${fullDomain}" WP_ADMIN_PASS='${dbPassEscaped}' php -r '
