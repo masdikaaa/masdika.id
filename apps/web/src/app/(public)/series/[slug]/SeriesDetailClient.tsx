@@ -201,7 +201,7 @@ export function SeriesDetailClient({ initialSeries, slug }: { initialSeries: any
       {/* JSON-LD */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
       />
 
       <div className="flex flex-col min-h-screen pt-28 sm:pt-36 md:pt-40 pb-20 lg:pb-28 overflow-x-hidden">

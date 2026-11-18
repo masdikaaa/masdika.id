@@ -217,7 +217,7 @@ export default async function EpisodePage({
   return (
     <>
       {jsonLd.map((item, i) => (
-        <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(item) }} />
+        <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(item).replace(/</g, "\\u003c") }} />
       ))}
       <div className="w-full max-w-full overflow-x-hidden min-w-0">
         <div className="pt-28 sm:pt-36 md:pt-40 lg:pt-56 pb-16 sm:pb-24 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

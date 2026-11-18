@@ -507,13 +507,20 @@ function sendError(id, code, message) {
 function forwardToMasdika(payload) {
   return new Promise((resolve, reject) => {
     const urlObj = new URL(DEFAULT_API_URL);
+    const isLocalhost = urlObj.hostname === "localhost" || urlObj.hostname === "127.0.0.1";
+    if (urlObj.protocol !== "https:" && !(urlObj.protocol === "http:" && isLocalhost)) {
+      reject(new Error("Refusing to send Masdika API key over insecure http:// to a non-localhost host."));
+      return;
+    }
     const client = urlObj.protocol === "http:" ? http : https;
     const bodyStr = JSON.stringify(payload);
+    const MAX_RESPONSE_BYTES = 10 * 1024 * 1024;
 
     const req = client.request(
       urlObj,
       {
         method: "POST",
+        timeout: 30000,
         headers: {
           "Content-Type": "application/json",
           "Content-Length": Buffer.byteLength(bodyStr),
@@ -523,7 +530,13 @@ function forwardToMasdika(payload) {
       },
       (res) => {
         let data = "";
+        let totalBytes = 0;
         res.on("data", (chunk) => {
+          totalBytes += Buffer.byteLength(chunk);
+          if (totalBytes > MAX_RESPONSE_BYTES) {
+            req.destroy(new Error("MCP response exceeded maximum allowed size."));
+            return;
+          }
           data += chunk;
         });
         res.on("end", () => {
@@ -543,6 +556,10 @@ function forwardToMasdika(payload) {
         });
       }
     );
+
+    req.on("timeout", () => {
+      req.destroy(new Error("Request to Masdika MCP API timed out after 30s."));
+    });
 
     req.on("error", (err) => {
       reject(err);
