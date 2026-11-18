@@ -711,6 +711,95 @@ export default function AppDetailPage({
             </div>
           )}
 
+          {app.appType === "wordpress" && (
+            <div className={cn(
+              "border rounded-2xl p-5 sm:p-6 space-y-4 transition-all shadow-2xs",
+              isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
+            )}>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                  <Lock className="w-4 h-4 shrink-0" />
+                  <span>WordPress Admin &amp; Database Credentials</span>
+                </h3>
+                <a
+                  href={`${httpsUrl}/wp-admin`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    "inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-bold self-start sm:self-auto shrink-0 border transition-colors",
+                    isDark ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/25 hover:bg-cyan-500/25" : "bg-cyan-50 text-cyan-700 border-cyan-200 hover:bg-cyan-100"
+                  )}
+                >
+                  <span>Open /wp-admin</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className={cn(
+                  "p-3.5 rounded-xl border space-y-1 text-xs",
+                  isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200/90 shadow-2xs"
+                )}>
+                  <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-500")}>
+                    WP Admin Username
+                  </span>
+                  <div className="flex items-center justify-between font-mono font-bold text-xs pt-0.5">
+                    <span className={cn("truncate mr-2", isDark ? "text-white" : "text-slate-900")}>
+                      admin
+                    </span>
+                    <button
+                      onClick={() => copyToClipboard("admin", "WP Admin Username")}
+                      className={cn("cursor-pointer transition-colors shrink-0", isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-500 hover:text-cyan-700")}
+                      title="Copy Username"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className={cn(
+                  "p-3.5 rounded-xl border space-y-1 text-xs",
+                  isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200/90 shadow-2xs"
+                )}>
+                  <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-500")}>
+                    WP Admin &amp; DB Password
+                  </span>
+                  <div className="flex items-center justify-between font-mono font-bold text-xs pt-0.5">
+                    <span className={cn("truncate mr-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                      {showPassword ? (app.password || "••••••••") : "••••••••••••"}
+                    </span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className={cn("cursor-pointer transition-colors", isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-500 hover:text-cyan-700")}
+                        title={showPassword ? "Hide Password" : "Show Password"}
+                      >
+                        {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </button>
+                      <button
+                        onClick={() => copyToClipboard(app.password || "", "Password")}
+                        className={cn("cursor-pointer transition-colors", isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-500 hover:text-cyan-700")}
+                        title="Copy Password"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={cn(
+                  "p-3 rounded-xl border space-y-1 text-xs sm:col-span-2",
+                  isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-cyan-50/60 border-cyan-200 text-slate-700"
+                )}>
+                  <p className="text-[11px] leading-relaxed">
+                    Sign in at <code className="font-mono font-semibold">{httpsUrl}/wp-admin</code> using username <code className="font-mono font-semibold">admin</code> and the password above. Embedded MariaDB (<code className="font-mono">127.0.0.1</code> / DB <code className="font-mono">wordpress</code> / user <code className="font-mono">wpuser</code>) uses the same password.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {isN8n && (
             <div className={cn(
               "border rounded-2xl p-5 sm:p-6 space-y-4 transition-all shadow-2xs",

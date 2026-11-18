@@ -907,6 +907,18 @@ ${buildPkgLockdownSnippet('apt')}
             fi
             rm -rf /var/www/html && ln -sfn ${dataMount}/html /var/www/html
             chown -R www-data:www-data ${dataMount}/html
+            if ! mysql --protocol=tcp -h 127.0.0.1 -u wpuser -p'${dbPassEscaped}' -e "SELECT 1 FROM wordpress.wp_users LIMIT 1;" >/dev/null 2>&1; then
+              WP_SITE_URL="https://${fullDomain}" WP_ADMIN_PASS='${dbPassEscaped}' php -r '
+                $_SERVER["HTTP_HOST"] = parse_url(getenv("WP_SITE_URL"), PHP_URL_HOST);
+                $_SERVER["HTTPS"] = "on";
+                define("WP_INSTALLING", true);
+                require "/var/www/html/wp-load.php";
+                require_once "/var/www/html/wp-admin/includes/upgrade.php";
+                wp_install("Masdika WordPress", "admin", "admin@masdika.id", true, "", getenv("WP_ADMIN_PASS"));
+                update_option("siteurl", getenv("WP_SITE_URL"));
+                update_option("home", getenv("WP_SITE_URL"));
+              ' >/dev/null 2>&1 || true
+            fi
             set +e
             while true; do
               pgrep -x sshd >/dev/null 2>&1 || /usr/sbin/sshd -p 22
@@ -1309,12 +1321,18 @@ spec:
         image: ${image}
         imagePullPolicy: Always
 ${containerPortsYaml}${securityContextYaml}${commandYaml}${envYaml ? `\n        env:${envYaml}` : ''}
-        readinessProbe:
+${isExtendedBoot ? `        startupProbe:
+          tcpSocket:
+            port: ${readinessProbePort}
+          initialDelaySeconds: 15
+          periodSeconds: 5
+          failureThreshold: 60
+` : ''}        readinessProbe:
           tcpSocket:
             port: ${readinessProbePort}
           initialDelaySeconds: 15
           periodSeconds: ${isExtendedBoot ? 5 : 10}
-          failureThreshold: ${isExtendedBoot ? 36 : 6}
+          failureThreshold: ${isExtendedBoot ? 60 : 6}
         livenessProbe:
           tcpSocket:
             port: ${livenessProbePort}
