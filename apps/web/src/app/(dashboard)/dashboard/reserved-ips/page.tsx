@@ -273,34 +273,34 @@ export default function ElasticIpsPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 shrink-0">
+        <div className="grid grid-cols-1 sm:flex sm:items-center gap-2.5 w-full sm:w-auto shrink-0">
           {unattachedIps.length > 0 && (
             <button
               onClick={() => setIsBulkReleaseOpen(true)}
               className={cn(
-                'inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-sm font-medium border transition-colors',
+                'inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-sm font-medium border transition-colors whitespace-nowrap',
                 isDark
                   ? 'bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20'
                   : 'bg-red-50 hover:bg-red-100 text-red-600 border-red-200'
               )}
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-4 h-4 shrink-0" />
               Release Unattached ({unattachedIps.length})
             </button>
           )}
           {quotaReached ? (
             <span
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-zinc-700 text-zinc-400 cursor-not-allowed"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-zinc-700 text-zinc-400 cursor-not-allowed whitespace-nowrap"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 shrink-0" />
               Quota Reached ({MAX_ELASTIC_IP_QUOTA}/{MAX_ELASTIC_IP_QUOTA})
             </span>
           ) : (
             <Link
               href="/dashboard/reserved-ips/new"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg bg-cyan-400 hover:bg-cyan-300 text-zinc-950 shadow-cyan-500/20"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg bg-cyan-400 hover:bg-cyan-300 text-zinc-950 shadow-cyan-500/20 whitespace-nowrap"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 shrink-0" />
               Allocate Elastic IP
             </Link>
           )}
@@ -369,7 +369,7 @@ export default function ElasticIpsPage() {
               <span className={cn('text-2xl font-bold', isDark ? 'text-white' : 'text-slate-900')}>
                 {unattachedIps.length}
               </span>
-              <span className="text-xs text-amber-400 ml-1.5 font-medium">Available</span>
+              <span className="text-xs text-cyan-400 ml-1.5 font-medium">Available</span>
             </div>
           </div>
           <p className={cn('text-xs mt-2.5', isDark ? 'text-zinc-500' : 'text-slate-500')}>
@@ -588,8 +588,8 @@ export default function ElasticIpsPage() {
                           Attached
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
                           Available
                         </span>
                       )}
@@ -649,7 +649,7 @@ export default function ElasticIpsPage() {
                       </div>
 
                       <div className="flex items-center gap-1.5">
-                        <Zap className="w-3.5 h-3.5 text-amber-400" />
+                        <Zap className="w-3.5 h-3.5 text-cyan-400" />
                         <span className={isDark ? 'text-zinc-500' : 'text-slate-500'}>Rate:</span>
                         <span className={cn('font-semibold', isDark ? 'text-zinc-200' : 'text-slate-800')}>
                           {formatRupiah(ip.hourlyRate)}/hr
@@ -674,18 +674,18 @@ export default function ElasticIpsPage() {
                   </div>
 
                   {/* Right: Actions */}
-                  <div className="flex flex-wrap items-center gap-2 shrink-0">
+                  <div className="grid grid-cols-2 lg:flex lg:items-center gap-2 w-full lg:w-auto shrink-0">
                     {ip.isAttached ? (
                       <button
                         onClick={() => setDetachingIp(ip)}
                         className={cn(
-                          'inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border transition-colors',
+                          'col-span-2 lg:col-span-1 inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border transition-colors whitespace-nowrap',
                           isDark
-                            ? 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/20'
-                            : 'bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200'
+                            ? 'bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20'
+                            : 'bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border-cyan-200'
                         )}
                       >
-                        <Unlink className="w-3.5 h-3.5" />
+                        <Unlink className="w-3.5 h-3.5 shrink-0" />
                         Detach
                       </button>
                     ) : (
@@ -695,35 +695,35 @@ export default function ElasticIpsPage() {
                             setAttachingIp(ip);
                             setSelectedVpsId('');
                           }}
-                          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-cyan-400 hover:bg-cyan-300 text-zinc-950 transition-colors"
+                          className="col-span-2 lg:col-span-1 inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-cyan-400 hover:bg-cyan-300 text-zinc-950 transition-colors whitespace-nowrap"
                         >
-                          <LinkIcon className="w-3.5 h-3.5" />
+                          <LinkIcon className="w-3.5 h-3.5 shrink-0" />
                           Attach to VPS
                         </button>
 
                         <Link
                           href={`/dashboard/vps/new?reservedIpId=${ip.id}`}
                           className={cn(
-                            'inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border transition-colors',
+                            'inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border transition-colors whitespace-nowrap',
                             isDark
                               ? 'bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border-white/[0.08]'
                               : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
                           )}
                         >
                           Deploy VPS
-                          <ArrowRight className="w-3.5 h-3.5" />
+                          <ArrowRight className="w-3.5 h-3.5 shrink-0" />
                         </Link>
 
                         <button
                           onClick={() => setReleasingIp(ip)}
                           className={cn(
-                            'inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-colors',
+                            'inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-colors whitespace-nowrap',
                             isDark
                               ? 'bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20'
                               : 'bg-red-50 hover:bg-red-100 text-red-600 border-red-200'
                           )}
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          <Trash2 className="w-3.5 h-3.5 shrink-0" />
                           Release
                         </button>
                       </>
