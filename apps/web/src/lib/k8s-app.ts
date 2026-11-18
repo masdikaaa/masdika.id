@@ -834,13 +834,13 @@ ${buildPkgLockdownSnippet('apt')}
       '  Application Mode: HTTPS Website + Embedded SQLite + SSH\n' +
       `  Website URL: https://${fullDomain}\n` +
       `  WP Admin:    https://${fullDomain}/wp-admin\n` +
-      '  Web Root:    /var/www/html (Persistent: /app/data/html)\n' +
+      '  Web Root:    /app/data/html\n' +
       '  Database:    Embedded SQLite (/app/data/html/wp-content/database)\n' +
       '  Security Notice: Package installation & tunneling restricted.\n' +
       '════════════════════════════════════════════════════════════\n'
     ).toString('base64');
     const b64WordpressProfile = Buffer.from(
-      'cd /var/www/html 2>/dev/null || true\n'
+      `cd ${dataMount}/html 2>/dev/null || true\n`
     ).toString('base64');
     const b64WpConfig = Buffer.from(
       `<?php\n` +
@@ -897,15 +897,15 @@ ${buildPkgLockdownSnippet('apt')}
               echo "${b64WpConfig}" | base64 -d > ${dataMount}/html/wp-config.php
             fi
             mkdir -p ${dataMount}/html/wp-content/database
-            rm -rf /var/www/html && ln -sfn ${dataMount}/html /var/www/html
+            sed -i "s|/var/www/html|${dataMount}/html|g" /etc/apache2/sites-available/*.conf /etc/apache2/apache2.conf
             chown -R www-data:www-data ${dataMount}/html
             if [ ! -f "${dataMount}/html/wp-content/database/.ht.sqlite" ]; then
               WP_SITE_URL="https://${fullDomain}" WP_ADMIN_PASS='${dbPassEscaped}' php -r '
                 $_SERVER["HTTP_HOST"] = parse_url(getenv("WP_SITE_URL"), PHP_URL_HOST);
                 $_SERVER["HTTPS"] = "on";
                 define("WP_INSTALLING", true);
-                require "/var/www/html/wp-load.php";
-                require_once "/var/www/html/wp-admin/includes/upgrade.php";
+                require "${dataMount}/html/wp-load.php";
+                require_once "${dataMount}/html/wp-admin/includes/upgrade.php";
                 wp_install("Masdika WordPress", "admin", "admin@masdika.id", true, "", getenv("WP_ADMIN_PASS"));
                 update_option("siteurl", getenv("WP_SITE_URL"));
                 update_option("home", getenv("WP_SITE_URL"));
