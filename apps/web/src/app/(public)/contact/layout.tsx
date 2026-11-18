@@ -33,7 +33,7 @@ async function getContactSettings() {
 
 export async function generateMetadata(): Promise<Metadata> {
   const { description } = await getContactSettings();
-  const title = 'Contact';
+  const title = 'Contact Masdika for Cloud Support & Project Inquiries';
 
   return {
     title: {

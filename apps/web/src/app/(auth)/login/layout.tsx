@@ -2,11 +2,11 @@ import { OG_IMAGE_PATH } from "@/lib/og-image";
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Login',
-  description: 'Sign in to your Masdika account to access your personalized dashboard and manage your services.',
+  title: 'Sign In to Your Masdika Cloud & AI Gateway Account',
+  description: 'Sign in to your Masdika account to manage Cloud VPS, Managed Databases, Managed Apps, Object Storage, File CDN, and unified AI Gateway API keys securely.',
   openGraph: {
-    title: 'Login',
-    description: 'Sign in to your Masdika account to access your personalized dashboard and manage your services.',
+    title: 'Sign In to Your Masdika Cloud & AI Gateway Account',
+    description: 'Sign in to your Masdika account to manage Cloud VPS, Managed Databases, Managed Apps, Object Storage, File CDN, and unified AI Gateway API keys securely.',
     images: [OG_IMAGE_PATH],
   }
 };

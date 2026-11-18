@@ -4,7 +4,7 @@ import { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
 
 export async function generateMetadata(): Promise<Metadata> {
-  let description = "Professional services including cloud architecture, devops, and web development.";
+  let description = "Explore Masdika cloud services: High-Performance VPS, Managed Databases, Managed Applications, S3 Object Storage, File CDN, and unified AI Gateway APIs.";
   try {
     const metaDescSetting = await prisma.setting.findUnique({ where: { key: 'meta_description_services' } });
     if (metaDescSetting && metaDescSetting.value.trim() !== '') {
@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
     console.error("Error fetching services meta description:", error);
   }
 
-  const title = 'Services';
+  const title = 'Cloud VPS, Managed Databases, Apps & Storage Services';
   return {
     title,
     description,

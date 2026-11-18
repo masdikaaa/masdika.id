@@ -10,12 +10,12 @@ import { decryptDeterministic } from '@/lib/encryption';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Dashboard',
-  description: 'Manage your API keys, subscriptions, and Masdika cloud services.',
+  title: 'Cloud Infrastructure, AI Gateway & Billing Console',
+  description: 'Manage your Cloud VPS, Managed Databases, Managed Apps, Object Storage, File CDN, AI Gateway API keys, and Pay-As-You-Go billing from one cloud console.',
   openGraph: {
-    title: 'Dashboard',
-    description: 'Manage your API keys, subscriptions, and Masdika cloud services.',
-    url: 'https://masdika.com/dashboard',
+    title: 'Cloud Infrastructure, AI Gateway & Billing Console',
+    description: 'Manage your Cloud VPS, Managed Databases, Managed Apps, Object Storage, File CDN, AI Gateway API keys, and Pay-As-You-Go billing from one cloud console.',
+    url: 'https://www.masdika.id/dashboard',
     siteName: 'Masdika',
     images: [
       {
@@ -30,8 +30,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Dashboard',
-    description: 'Manage your API keys, subscriptions, and Masdika cloud services.',
+    title: 'Cloud Infrastructure, AI Gateway & Billing Console',
+    description: 'Manage your Cloud VPS, Managed Databases, Managed Apps, Object Storage, File CDN, AI Gateway API keys, and Pay-As-You-Go billing from one cloud console.',
     images: [OG_IMAGE_PATH],
   },
 };
