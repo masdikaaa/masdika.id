@@ -377,7 +377,7 @@ export default function RegisterPage() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className={cn("text-xs font-bold truncate", isDark ? "text-white" : "text-slate-800")}>Welcome to Masdika!</p>
-                <p className={cn("text-[11px] leading-tight truncate sm:whitespace-normal", isDark ? "text-zinc-400" : "text-slate-500")}>Fast setup for Cloud VPS & API Hub.</p>
+                <p className={cn("text-[11px] leading-tight truncate sm:whitespace-normal", isDark ? "text-zinc-400" : "text-slate-500")}>Fast setup for Cloud VPS, Managed Apps &amp; AI Gateway.</p>
               </div>
             </div>
 
@@ -1052,7 +1052,7 @@ export default function RegisterPage() {
               <span className={cn("w-1 h-1 rounded-full", isDark ? "bg-white/20" : "bg-slate-300")} />
               <div className="flex items-center gap-1.5">
                 <Cpu className={cn("w-3.5 h-3.5", isDark ? "text-cyan-400" : "text-cyan-700")} />
-                <span className={cn("text-[11px] font-bold", isDark ? "text-zinc-300" : "text-slate-700")}>Public API Hub</span>
+                <span className={cn("text-[11px] font-bold", isDark ? "text-zinc-300" : "text-slate-700")}>AI Gateway &amp; MCP</span>
               </div>
             </div>
           </div>

@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: {
-    absolute: "AI Gateway - Unified Multi-Model AI API (LLM & Image) | Masdika",
+    absolute: "AI Gateway - Unified Multi-Model AI API (LLM & Image)",
   },
   description: "Access 70+ frontier LLMs and image models (Claude, GPT, Gemini, DeepSeek, Qwen) with a single unified API key. OpenAI & Anthropic protocol support, pay-as-you-go per token in Rupiah, and zero data training retention.",
   keywords: [
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "AI Gateway - Unified Multi-Model AI API (LLM & Image) | Masdika",
+    title: "AI Gateway - Unified Multi-Model AI API (LLM & Image)",
     description: "Access 70+ frontier LLMs and image models (Claude, GPT, Gemini, DeepSeek, Qwen) with a single unified API key. Pay-as-you-go per token in Rupiah, sub-millisecond edge routing, and zero training data retention.",
     images: [OG_IMAGE_PATH],
   },

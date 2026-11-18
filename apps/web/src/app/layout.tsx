@@ -49,7 +49,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL(siteUrl),
     title: {
-      template: "%s | Masdika",
+      template: "%s",
       default: "Masdika | Cloud & DevOps Engineer",
     },
     description,
