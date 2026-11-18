@@ -221,7 +221,8 @@ export default function NewObjectStoragePage() {
             <h1 className={cn('text-lg sm:text-2xl font-bold tracking-tight', isDark ? 'text-white' : 'text-slate-900')}>
               Deploy Object Storage (S3)
             </h1>
-            <span className={cn('px-2 py-0.5 rounded-full text-[11px] sm:text-xs font-bold border shrink-0', isDark ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' : 'bg-cyan-50 text-cyan-700 border-cyan-200')}>
+            <span className={cn('inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-semibold border shrink-0', isDark ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' : 'bg-cyan-50 text-cyan-700 border-cyan-200')}>
+              <HardDrive className="w-3 h-3 shrink-0" />
               Isolated S3 &amp; IAM Keys
             </span>
           </div>

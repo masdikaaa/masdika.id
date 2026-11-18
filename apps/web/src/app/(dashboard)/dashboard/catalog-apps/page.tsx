@@ -70,9 +70,10 @@ export default function CatalogAppsPage() {
               App Catalog
             </h1>
             <span className={cn(
-              "px-2.5 py-0.5 rounded-full text-xs font-semibold border font-mono",
+              "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border font-mono",
               isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-800 border-cyan-200"
             )}>
+              <Rocket className="w-3 h-3 shrink-0" />
               {filteredApps.length} Available
             </span>
           </div>

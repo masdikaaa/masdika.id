@@ -78,7 +78,8 @@ export default function ApiStatsPage() {
             <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
               API Statistics
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium border bg-cyan-500/10 border-cyan-500/20 text-cyan-400">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border bg-cyan-500/10 border-cyan-500/20 text-cyan-400">
+              <Activity className="w-3 h-3 shrink-0" />
               Analytics Engine
             </span>
           </div>

@@ -229,16 +229,10 @@ export default function ManagedAppsPage() {
             <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
               Managed Applications
             </h1>
-            <div className="flex flex-wrap items-center gap-2 shrink-0">
-              <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-semibold border whitespace-nowrap shrink-0", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
-                <Boxes className="w-3 h-3 shrink-0" />
-                Kubernetes Native
-              </span>
-              <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-semibold border whitespace-nowrap shrink-0", isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200")}>
-                <ShieldCheck className="w-3 h-3 shrink-0" />
-                Auto SSL
-              </span>
-            </div>
+            <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-semibold border whitespace-nowrap shrink-0", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
+              <Boxes className="w-3 h-3 shrink-0" />
+              Kubernetes Native
+            </span>
           </div>
           <p className={cn("text-xs sm:text-sm font-medium mt-1.5 max-w-2xl leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
             Deploy autonomous AI agents, multi-LLM gateways, and workflow engines with dedicated isolated containers and automated Let&apos;s Encrypt SSL.

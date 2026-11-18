@@ -2488,40 +2488,38 @@ aider --model openai/glm-5.3
                       }
 
                       const otherModels = imageModels.filter((m) => m.modelId !== cur?.modelId);
-                      if (otherModels.length > 0) {
+                      for (const om of otherModels) {
                         opts.push({
-                          value: '__hdr_other',
+                          value: `__hdr_${om.modelId}`,
                           disabled: true,
                           label: (
                             <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-                              Other Models
+                              {om.name}
                             </span>
                           ),
                         });
-                        for (const om of otherModels) {
-                          for (const sz of om.sizes) {
-                            const info = getSizeInfo(sz);
-                            const szPrice =
-                              om.sizePrices?.[sz] ??
-                              (om.modelId === 'seedream-image-v5.0-pro' && sz === '2048x2048'
-                                ? om.priceRp * 2
-                                : om.priceRp);
-                            opts.push({
-                              value: `${om.modelId}::${sz}`,
-                              label: (
-                                <span className="flex items-center justify-between gap-2 w-full whitespace-nowrap">
-                                  <span className="inline-flex items-center gap-2 min-w-0">
-                                    <span className={cn('border border-zinc-500 rounded-[2px] shrink-0 inline-block', info.boxCls)} />
-                                    <span className="text-xs font-semibold truncate">{info.orient}</span>
-                                    <span className="text-[10px] font-mono text-zinc-500">{info.display}</span>
-                                  </span>
-                                  <span className="text-[11px] text-zinc-400 shrink-0 font-mono">
-                                    {om.name} - <strong className="text-white">{formatRupiah(szPrice)}</strong>
-                                  </span>
+                        for (const sz of om.sizes) {
+                          const info = getSizeInfo(sz);
+                          const szPrice =
+                            om.sizePrices?.[sz] ??
+                            (om.modelId === 'seedream-image-v5.0-pro' && sz === '2048x2048'
+                              ? om.priceRp * 2
+                              : om.priceRp);
+                          opts.push({
+                            value: `${om.modelId}::${sz}`,
+                            label: (
+                              <span className="flex items-center justify-between gap-2 w-full whitespace-nowrap">
+                                <span className="inline-flex items-center gap-2 min-w-0">
+                                  <span className={cn('border border-zinc-400 rounded-[2px] shrink-0 inline-block', info.boxCls)} />
+                                  <span className="text-xs font-bold truncate">{info.orient}</span>
+                                  <span className="text-[11px] font-mono text-zinc-400 shrink-0">{info.display}</span>
                                 </span>
-                              ),
-                            });
-                          }
+                                <span className="text-xs font-mono font-bold text-cyan-400 shrink-0">
+                                  {formatRupiah(szPrice)}
+                                </span>
+                              </span>
+                            ),
+                          });
                         }
                       }
                       return opts;
