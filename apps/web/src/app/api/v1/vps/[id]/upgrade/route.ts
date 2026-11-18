@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { assertSufficientCommitmentBalance } from "@/lib/billing-commitment";
 import {
   authenticateVpsApiKey,
   getActiveProxmoxClient,
@@ -161,8 +162,28 @@ export async function POST(
           throw new Error("VPS_LOCKED");
         }
 
+        let txRequiredBalance = requiredBalance;
+        if (typeof (tx as any).$executeRaw === "function") {
+          await tx.$executeRaw`SELECT id FROM "User" WHERE id = ${auth.apiKey.userId} FOR UPDATE`;
+          if (additionalHourly > 0) {
+            const freshUser = await tx.user.findUnique({ where: { id: auth.apiKey.userId }, select: { balance: true } });
+            try {
+              const commitmentCheck = await assertSufficientCommitmentBalance({
+                userId: auth.apiKey.userId,
+                userBalance: freshUser?.balance || 0,
+                newServiceMonthly: additionalHourly * 730,
+                serviceName: "VPS Spec Upgrade",
+                tx,
+              });
+              txRequiredBalance = commitmentCheck.requiredBalance;
+            } catch (commitmentErr: any) {
+              throw new Error(`COMMITMENT_ERROR:${commitmentErr.message}`);
+            }
+          }
+        }
+
         const deductResult = await tx.user.updateMany({
-          where: { id: auth.apiKey.userId, balance: { gte: requiredBalance } },
+          where: { id: auth.apiKey.userId, balance: { gte: txRequiredBalance } },
           data: {
             ...(additionalHourly > 0 ? { balance: { decrement: additionalHourly } } : {}),
           },
@@ -172,6 +193,9 @@ export async function POST(
         }
       });
     } catch (lockErr: any) {
+      if (lockErr?.message?.startsWith("COMMITMENT_ERROR:")) {
+        return vpsApiError(lockErr.message.slice("COMMITMENT_ERROR:".length), 402);
+      }
       if (lockErr?.message === "VPS_LOCKED") {
         return vpsApiError(
           "VPS is currently being modified by another process. Please wait.",

@@ -3,6 +3,7 @@ import { requireAuth } from "@/lib/auth-middleware";
 import { prisma } from "@/lib/prisma";
 import { bandwidthToProxmoxRate, BASE_BANDWIDTH_MBPS } from "@/lib/vps-bandwidth";
 import { syncVpsAppUrlsWithPublicIp } from "@/lib/vps-app-urls";
+import { assertSufficientCommitmentBalance } from "@/lib/billing-commitment";
 
 const CANONICAL_IPV4_REGEX = /^(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/;
 
@@ -87,16 +88,27 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
 
     const requiredBalance = (vps.hourlyRate + ipPricePerHour) * 730;
-    if (user.balance < requiredBalance) {
-      return NextResponse.json(
-        { error: `A minimum balance of Rp ${requiredBalance.toLocaleString("id-ID")} (1 month estimation) is required to reserve this IP.` },
-        { status: 400 }
-      );
-    }
 
-    // Transaction to serialize pool allocation, verify ReservedIp & VpsIpAssignment, lock VPS, and deduct 1st hour upfront
+    // Transaction to serialize pool allocation, verify ReservedIp & VpsIpAssignment, lock User & VPS, enforce commitment, and deduct 1st hour upfront
     try {
       await prisma.$transaction(async (tx) => {
+        await tx.$executeRaw`SELECT id FROM "User" WHERE id = ${user.id} FOR UPDATE`;
+        const freshUser = await tx.user.findUnique({ where: { id: user.id }, select: { balance: true } });
+
+        let txRequiredBalance = requiredBalance;
+        try {
+          const commitmentCheck = await assertSufficientCommitmentBalance({
+            userId: user.id,
+            userBalance: freshUser?.balance || 0,
+            newServiceMonthly: ipPricePerHour * 730,
+            serviceName: "VPS IPv4 Address",
+            tx,
+          });
+          txRequiredBalance = commitmentCheck.requiredBalance;
+        } catch (commitmentErr: any) {
+          throw new Error(`COMMITMENT_ERROR:${commitmentErr.message}`);
+        }
+
         // 1. Serialize pool allocation
         await tx.ipPool.update({
           where: { id: targetPoolId! },
@@ -123,7 +135,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
         // 4. Deduct 1st hour upfront while verifying 730h minimum balance
         const deductResult = await tx.user.updateMany({
-          where: { id: user.id, balance: { gte: requiredBalance } },
+          where: { id: user.id, balance: { gte: txRequiredBalance } },
           data: { balance: { decrement: ipPricePerHour } }
         });
         if (deductResult.count === 0) {
@@ -162,6 +174,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         });
       });
     } catch (e: any) {
+      if (e.message?.startsWith("COMMITMENT_ERROR:")) {
+        return NextResponse.json({ error: e.message.slice("COMMITMENT_ERROR:".length) }, { status: 400 });
+      }
       if (e.message === "VPS_LOCKED") {
         return NextResponse.json({ error: "VPS is currently being modified by another process. Please wait." }, { status: 409 });
       }

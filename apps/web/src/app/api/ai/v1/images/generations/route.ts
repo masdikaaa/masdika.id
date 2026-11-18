@@ -1,5 +1,6 @@
 import * as crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 import {
   AI_CORS_HEADERS,
   DEFAULT_AI_IMAGE_MODELS,
@@ -27,32 +28,39 @@ export async function GET(req: NextRequest) {
   const auth = await authenticateAiGatewayKey(req, requestId, 'openai');
   if ('error' in auth && auth.error) return auth.error;
 
-  const config = await getAiGatewayConfig();
-  if (!config.enabled || !config.upstreamKey) {
-    return aiGatewayError('AI Gateway is currently unavailable.', 'upstream_unavailable', 503, requestId);
-  }
+  const limitRaw = Number(req.nextUrl.searchParams.get('limit') || '20');
+  const limit = Number.isFinite(limitRaw) ? Math.max(1, Math.min(100, Math.floor(limitRaw))) : 20;
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-  try {
-    const search = req.nextUrl.search || '';
-    const res = await fetch(`${config.upstreamUrl}/v1/images/generations${search}`, {
-      headers: {
-        authorization: `Bearer ${config.upstreamKey}`,
-        'x-api-key': config.upstreamKey,
-      },
-      cache: 'no-store',
-    });
-    const text = await res.text();
-    return new NextResponse(text, {
-      status: res.status,
+  const logs = await prisma.aiUsageLog.findMany({
+    where: {
+      userId: auth.user.id,
+      endpoint: '/v1/images/generations',
+      createdAt: { gte: sevenDaysAgo },
+    },
+    orderBy: { createdAt: 'desc' },
+    take: limit,
+  });
+
+  return NextResponse.json(
+    {
+      object: 'list',
+      data: logs.map((l) => ({
+        id: l.requestId,
+        object: 'image.generation',
+        model: l.modelId,
+        status: l.statusCode >= 200 && l.statusCode < 400 ? 'succeeded' : 'failed',
+        created: Math.floor(l.createdAt.getTime() / 1000),
+      })),
+    },
+    {
+      status: 200,
       headers: {
         ...AI_CORS_HEADERS,
-        'content-type': res.headers.get('content-type') || 'application/json',
         'x-request-id': requestId,
       },
-    });
-  } catch {
-    return aiGatewayError('Upstream AI provider is unreachable.', 'upstream_unreachable', 502, requestId);
-  }
+    }
+  );
 }
 
 export async function POST(req: NextRequest) {

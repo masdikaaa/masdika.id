@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth-middleware";
 import { prisma } from "@/lib/prisma";
 import { ProxmoxClient } from "@/lib/proxmox";
+import { assertSufficientCommitmentBalance } from "@/lib/billing-commitment";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   let user: any = null;
@@ -56,9 +57,26 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "Disk pricing calculation out of range" }, { status: 400 });
     }
 
-    // Atomic VPS Lock + 1-month minimum balance check + 1st hour upfront deduction BEFORE Provisioning
+    // Atomic VPS Lock + User row lock + multi-service commitment check + 1st hour upfront deduction BEFORE Provisioning
     try {
       await prisma.$transaction(async (tx) => {
+        await tx.$executeRaw`SELECT id FROM "User" WHERE id = ${user.id} FOR UPDATE`;
+        const freshUser = await tx.user.findUnique({ where: { id: user.id }, select: { balance: true } });
+
+        let txRequiredBalance = requiredBalance;
+        try {
+          const commitmentCheck = await assertSufficientCommitmentBalance({
+            userId: user.id,
+            userBalance: freshUser?.balance || 0,
+            newServiceMonthly: hourlyCost * 730,
+            serviceName: "VPS Add-on Disk",
+            tx,
+          });
+          txRequiredBalance = commitmentCheck.requiredBalance;
+        } catch (commitmentErr: any) {
+          throw new Error(`COMMITMENT_ERROR:${commitmentErr.message}`);
+        }
+
         const lockResult = await tx.vpsService.updateMany({
           where: { id: vpsId, userId: user.id, status: vps.status },
           data: { status: "PROVISIONING" }
@@ -68,7 +86,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         }
 
         const deductResult = await tx.user.updateMany({
-          where: { id: user.id, balance: { gte: requiredBalance } },
+          where: { id: user.id, balance: { gte: txRequiredBalance } },
           data: { balance: { decrement: hourlyCost } }
         });
         if (deductResult.count === 0) {
@@ -76,6 +94,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         }
       });
     } catch (err: any) {
+      if (err.message?.startsWith("COMMITMENT_ERROR:")) {
+        return NextResponse.json({ error: err.message.slice("COMMITMENT_ERROR:".length) }, { status: 400 });
+      }
       if (err.message === "VPS_LOCKED") {
         return NextResponse.json({ error: "VPS is currently being modified by another process. Please wait." }, { status: 409 });
       }

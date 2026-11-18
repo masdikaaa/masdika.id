@@ -5,6 +5,7 @@ import { ProxmoxClient } from "@/lib/proxmox";
 import { createDuitkuTransaction } from "@/lib/duitku";
 import { decryptDeterministic } from "@/lib/encryption";
 import { getBandwidthOptions, bandwidthUpgradeHourlyCost, bandwidthToProxmoxRate, BASE_BANDWIDTH_MBPS } from "@/lib/vps-bandwidth";
+import { assertSufficientCommitmentBalance } from "@/lib/billing-commitment";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -163,9 +164,28 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const server = await prisma.proxmoxServer.findFirst({ where: { isActive: true } });
     if (!server) return NextResponse.json({ error: "No active Proxmox server configured" }, { status: 500 });
 
-    // Atomically lock VPS AND verify 730h balance + deduct initial hour BEFORE touching Proxmox hypervisor!
+    // Atomically lock User & VPS, verify multi-service commitment + 730h balance, and deduct initial hour BEFORE touching Proxmox hypervisor!
     try {
       await prisma.$transaction(async (tx) => {
+        await tx.$executeRaw`SELECT id FROM "User" WHERE id = ${user.id} FOR UPDATE`;
+        const freshUser = await tx.user.findUnique({ where: { id: user.id }, select: { balance: true } });
+
+        let txRequiredBalance = requiredBalance;
+        if (additionalHourlyRate > 0) {
+          try {
+            const commitmentCheck = await assertSufficientCommitmentBalance({
+              userId: user.id,
+              userBalance: freshUser?.balance || 0,
+              newServiceMonthly: additionalHourlyRate * 730,
+              serviceName: "VPS Spec Upgrade",
+              tx,
+            });
+            txRequiredBalance = commitmentCheck.requiredBalance;
+          } catch (commitmentErr: any) {
+            throw new Error(`COMMITMENT_ERROR:${commitmentErr.message}`);
+          }
+        }
+
         const lockResult = await tx.vpsService.updateMany({
           where: { id: vpsId, userId: user.id, status: vps.status },
           data: { status: 'PROVISIONING' }
@@ -175,7 +195,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         }
 
         const deductResult = await tx.user.updateMany({
-          where: { id: user.id, balance: { gte: requiredBalance } },
+          where: { id: user.id, balance: { gte: txRequiredBalance } },
           data: {
             ...(additionalHourlyRate > 0 ? { balance: { decrement: additionalHourlyRate } } : {})
           }
@@ -185,6 +205,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         }
       });
     } catch (lockErr: any) {
+      if (lockErr.message?.startsWith("COMMITMENT_ERROR:")) {
+        return NextResponse.json({ error: lockErr.message.slice("COMMITMENT_ERROR:".length) }, { status: 400 });
+      }
       if (lockErr.message === "VPS_LOCKED") {
         return NextResponse.json({ error: "VPS is currently being modified by another process. Please wait." }, { status: 409 });
       }

@@ -97,24 +97,29 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: `No public IPv${version} pool is currently configured.` }, { status: 409 });
     }
 
-    // Commitment balance pre-check before opening transaction
-    const currentUser = await prisma.user.findUnique({ where: { id: user.id } });
     const newIpMonthly = ipPricePerHour * 730;
     let requiredBalance = newIpMonthly;
-    try {
-      const commitmentCheck = await assertSufficientCommitmentBalance({
-        userId: user.id,
-        userBalance: currentUser?.balance || 0,
-        newServiceMonthly: newIpMonthly,
-        serviceName: `Elastic IPv${version}`,
-      });
-      requiredBalance = commitmentCheck.requiredBalance;
-    } catch (commitmentErr: any) {
-      return NextResponse.json({ error: commitmentErr.message }, { status: 400 });
-    }
 
     try {
       const result = await prisma.$transaction(async (tx) => {
+        await tx.$executeRaw`SELECT id FROM "User" WHERE id = ${user.id} FOR UPDATE`;
+        const freshUser = await tx.user.findUnique({
+          where: { id: user.id },
+          select: { balance: true },
+        });
+        try {
+          const commitmentCheck = await assertSufficientCommitmentBalance({
+            userId: user.id,
+            userBalance: freshUser?.balance || 0,
+            newServiceMonthly: newIpMonthly,
+            serviceName: `Elastic IPv${version}`,
+            tx,
+          });
+          requiredBalance = commitmentCheck.requiredBalance;
+        } catch (commitmentErr: any) {
+          throw new Error(`COMMITMENT_ERROR:${commitmentErr.message}`);
+        }
+
         // Quota Limit enforced atomically inside transaction: Max 5 Reserved IPs per User Account
         if (user.role === "USER") {
           const existingReservedIpsCount = await tx.reservedIp.count({
@@ -210,7 +215,7 @@ export async function POST(req: NextRequest) {
           where: { id: user.id, balance: { gte: requiredBalance } },
           data: { balance: { decrement: ipPricePerHour } },
         });
-        if (updateResult.count === 0) throw new Error("INSUFFICIENT_BALANCE");
+        if (updateResult.count === 0) throw new Error(`COMMITMENT_ERROR:A minimum balance of Rp ${requiredBalance.toLocaleString("id-ID")} is required.`);
 
         const reservedIp = await tx.reservedIp.create({
           data: {
@@ -251,6 +256,9 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json({ success: true, ip: result });
     } catch (e: any) {
+      if (e.message?.startsWith("COMMITMENT_ERROR:")) {
+        return NextResponse.json({ error: e.message.slice("COMMITMENT_ERROR:".length) }, { status: 400 });
+      }
       if (e.message === "QUOTA_EXCEEDED") {
         return NextResponse.json(
           { error: "Maximum quota reached. You can only allocate up to 5 Elastic IPs." },

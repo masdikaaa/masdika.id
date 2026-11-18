@@ -219,30 +219,46 @@ export async function PATCH(
     const nextMonthly = targetPlan.price;
     const nextHourly = targetPlan.hourlyPrice || Math.max(1, Math.ceil(nextMonthly / 730));
 
-    if (nextMonthly > currentMonthly) {
-      const freshUser = await prisma.user.findUnique({ where: { id: userId }, select: { balance: true } });
-      try {
-        await assertSufficientCommitmentBalance({
-          userId,
-          userBalance: freshUser?.balance || 0,
-          newServiceMonthly: nextMonthly - currentMonthly,
-          serviceName: `Upgrade ${sub.name || 'File CDN'} to ${targetPlan.name}`,
-        });
-      } catch (balErr: any) {
-        return NextResponse.json(
-          { error: balErr?.message || 'Insufficient account balance for upgrade.' },
-          { status: 400 }
-        );
-      }
-    }
-
     updateData.planId = targetPlan.id;
     updateData.lockedPrice = nextMonthly;
     updateData.lockedHourlyPrice = nextHourly;
 
-    if (nextGb > 0 && bucketNames.length > 0) {
-      const quotaBytes = nextGb * 1024 * 1024 * 1024;
-      await Promise.all(bucketNames.map((b) => setCustomerBucketQuota(b, quotaBytes).catch(() => {})));
+    try {
+      const updated = await prisma.$transaction(async (tx) => {
+        if (nextMonthly > currentMonthly) {
+          await tx.$executeRaw`SELECT id FROM "User" WHERE id = ${userId} FOR UPDATE`;
+          const freshUser = await tx.user.findUnique({ where: { id: userId }, select: { balance: true } });
+          await assertSufficientCommitmentBalance({
+            userId,
+            userBalance: freshUser?.balance || 0,
+            newServiceMonthly: nextMonthly - currentMonthly,
+            serviceName: `Upgrade ${sub.name || 'File CDN'} to ${targetPlan.name}`,
+            tx,
+          });
+        }
+        return tx.subscription.update({
+          where: { id: sub.id },
+          data: updateData,
+          include: { plan: true },
+        });
+      });
+
+      if (nextGb > 0 && bucketNames.length > 0) {
+        const quotaBytes = nextGb * 1024 * 1024 * 1024;
+        await Promise.all(bucketNames.map((b) => setCustomerBucketQuota(b, quotaBytes).catch(() => {})));
+      }
+
+      return NextResponse.json({
+        success: true,
+        name: updated.name,
+        planId: updated.planId,
+        planName: updated.plan?.name,
+      });
+    } catch (balErr: any) {
+      return NextResponse.json(
+        { error: balErr?.message || 'Insufficient account balance for upgrade.' },
+        { status: 400 }
+      );
     }
   }
 

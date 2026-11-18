@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 import { getAiGatewayConfig } from '@/lib/ai-gateway';
 import {
   AI_MGMT_CORS_HEADERS,
@@ -24,6 +25,14 @@ export async function GET(
   const { requestId } = await context.params;
   if (!requestId) {
     return aiMgmtError('NOT_FOUND', 'Image generation request not found.', 404);
+  }
+
+  const owned = await prisma.aiUsageLog.findFirst({
+    where: { requestId, userId: auth.ctx.user.id },
+    select: { id: true },
+  });
+  if (!owned) {
+    return aiMgmtError('NOT_FOUND', `Image request '${requestId}' not found.`, 404);
   }
 
   const config = await getAiGatewayConfig();

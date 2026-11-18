@@ -1,6 +1,13 @@
 import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
-import { decryptDeterministic } from "@/lib/encryption";
+import { decryptDeterministic, encryptDeterministic } from "@/lib/encryption";
+import { validateFileUploadSecurity } from "@/lib/upload-security";
+
+const MCP_CDN_ALLOWED_EXTENSIONS = new Set([
+  ".png", ".jpg", ".jpeg", ".webp", ".gif",
+  ".pdf", ".txt", ".csv", ".json", ".md",
+  ".mp4", ".webm", ".mp3", ".wav", ".zip",
+]);
 import { formatRupiah } from "@/lib/billing";
 import { createDuitkuTransaction } from "@/lib/duitku";
 import { getActiveProxmoxClient, LIVE_VPS_STATUSES } from "@/lib/vps-api";
@@ -1059,12 +1066,25 @@ export async function executeMcpTool(
         const buffer = isBase64 ? Buffer.from(content, "base64") : Buffer.from(content, "utf-8");
         const safeName = String(fileName).replace(/[^a-zA-Z0-9._-]/g, "_");
 
+        const secCheck = validateFileUploadSecurity({
+          filename: safeName,
+          headBuffer: buffer.subarray(0, 4096),
+          tailBuffer: buffer.length > 4096 ? buffer.subarray(buffer.length - 4096) : undefined,
+          allowedExtensions: MCP_CDN_ALLOWED_EXTENSIONS,
+        });
+        if (!secCheck.valid || !secCheck.resolvedMime) {
+          return {
+            content: [{ type: "text", text: `Upload rejected by security policy: ${secCheck.error || "Forbidden file type."}` }],
+            isError: true,
+          };
+        }
+
         const cdnRecord = await prisma.secureMedia.create({
           data: {
             userId: user.id,
             filename: `${Date.now()}_${safeName}`,
             originalName: safeName,
-            mimeType: mimeType || "application/octet-stream",
+            mimeType: secCheck.resolvedMime,
             size: buffer.length,
             folderPath: "/",
             isPublic: true,
@@ -1227,26 +1247,24 @@ export async function executeMcpTool(
       }
 
       case "masdika_create_s3_key": {
-        let storage = await prisma.objectStorageService.findFirst({
-          where: { userId: user.id, status: { not: "TERMINATED" } },
+        const storage = await prisma.objectStorageService.findFirst({
+          where: { userId: user.id, status: "RUNNING" },
         });
         if (!storage) {
-          storage = await prisma.objectStorageService.create({
-            data: {
-              userId: user.id,
-              name: `${user.name || "user"}-s3`,
-              planName: "S3-50GB",
-              storageGb: 50,
-              status: "RUNNING",
-              hourlyRate: 21,
-              monthlyPrice: 15000,
-              billingMode: "PAYG",
-            },
-          });
+          return {
+            content: [
+              {
+                type: "text",
+                text: "No active Object Storage service found. Please order an Object Storage plan in the dashboard before generating S3 keys.",
+              },
+            ],
+            isError: true,
+          };
         }
 
         const accessKey = `MSDK${crypto.randomBytes(10).toString("hex").toUpperCase()}`;
         const secretKey = crypto.randomBytes(24).toString("base64url");
+        const encryptedSecretKey = encryptDeterministic(secretKey);
         const keyName = args.name ? String(args.name).slice(0, 50) : "S3 Access Key";
         const permission = args.permission === "READ_ONLY" ? "READ_ONLY" : "READ_WRITE";
 
@@ -1256,7 +1274,7 @@ export async function executeMcpTool(
             userId: user.id,
             name: keyName,
             accessKey,
-            secretKey,
+            secretKey: encryptedSecretKey,
             permission,
           },
         });

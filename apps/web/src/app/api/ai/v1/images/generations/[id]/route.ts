@@ -1,5 +1,6 @@
 import * as crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 import {
   AI_CORS_HEADERS,
   aiGatewayError,
@@ -22,6 +23,14 @@ export async function GET(
   const requestId = `req_${crypto.randomBytes(8).toString('hex')}`;
   const auth = await authenticateAiGatewayKey(req, requestId, 'openai');
   if ('error' in auth && auth.error) return auth.error;
+
+  const owned = await prisma.aiUsageLog.findFirst({
+    where: { requestId: id, userId: auth.user.id },
+    select: { id: true },
+  });
+  if (!owned) {
+    return aiGatewayError('Image generation request not found.', 'not_found', 404, requestId);
+  }
 
   const config = await getAiGatewayConfig();
   if (!config.enabled || !config.upstreamKey) {

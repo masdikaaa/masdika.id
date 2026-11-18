@@ -129,11 +129,20 @@ export async function POST(
   const cleanName = sanitizeObjectKey(file.name || 'object.bin');
   const key = prefix ? `${prefix.replace(/\/+$/, '')}/${cleanName}` : cleanName;
 
+  const lowerName = cleanName.toLowerCase();
+  const rawMime = (file.type || 'application/octet-stream').toLowerCase();
+  const isActiveWebContent =
+    /\.(html?|xhtml|svgz?|xml|shtml|mhtml)$/.test(lowerName) ||
+    rawMime.includes('html') ||
+    rawMime.includes('svg') ||
+    rawMime.includes('xml');
+  const safeContentType = isActiveWebContent ? 'application/octet-stream' : (file.type || 'application/octet-stream');
+
   const ok = await uploadBufferToCustomerRustFS(
     bucket.name,
     key,
     buf,
-    file.type || 'application/octet-stream'
+    safeContentType
   );
   if (!ok) {
     return NextResponse.json({ error: 'Failed to upload object to RustFS' }, { status: 502 });
