@@ -11,17 +11,31 @@ export const fetchCache = 'force-no-store';
 
 export async function generateMetadata(): Promise<Metadata> {
   const ogImageUrl = getFreshOgImagePath();
+  const title = "Masdika - Cloud & DevOps Portfolio, VPS, Apps & AI Cloud";
+  let description = "Portfolio of Masdika, Cloud & DevOps Engineer, offering Cloud VPS, Managed Databases, Managed Apps, Object Storage, File CDN, and AI Gateway services.";
+
+  try {
+    const metaDescSetting = await getCachedData('setting:meta_description', 3600, () =>
+      prisma.setting.findUnique({ where: { key: 'meta_description' } })
+    );
+    if (metaDescSetting?.value?.trim()) {
+      description = metaDescSetting.value.trim();
+    }
+  } catch (error) {
+    console.error("Failed to fetch homepage meta_description:", error);
+  }
+
   return {
     title: {
-      absolute: "Masdika | Cloud & DevOps Engineer",
+      absolute: title,
     },
-    description: "Portfolio of Masdika, Cloud & DevOps Engineer. Discover enterprise infrastructure projects, high-performance Cloud VPS hosting, Managed Kubernetes, and scalable cloud solutions.",
+    description,
     alternates: {
       canonical: "https://www.masdika.id",
     },
     openGraph: {
-      title: "Masdika | Cloud & DevOps Engineer",
-      description: "Portfolio of Masdika, Cloud & DevOps Engineer. Discover enterprise infrastructure projects, high-performance Cloud VPS hosting, Managed Kubernetes, and scalable cloud solutions.",
+      title,
+      description,
       url: "https://www.masdika.id",
       siteName: "Masdika",
       images: [
@@ -29,7 +43,7 @@ export async function generateMetadata(): Promise<Metadata> {
           url: ogImageUrl,
           width: 1200,
           height: 630,
-          alt: "Masdika | Cloud & DevOps Engineer",
+          alt: title,
         },
       ],
       locale: "en_US",
@@ -37,8 +51,8 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: "Masdika | Cloud & DevOps Engineer",
-      description: "Portfolio of Masdika, Cloud & DevOps Engineer. Discover enterprise infrastructure projects, high-performance Cloud VPS hosting, Managed Kubernetes, and scalable cloud solutions.",
+      title,
+      description,
       images: [ogImageUrl],
     },
   };

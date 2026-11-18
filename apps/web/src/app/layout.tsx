@@ -32,7 +32,7 @@ const getCachedMetaDescription = () =>
   );
 
 export async function generateMetadata(): Promise<Metadata> {
-  let description = "Portfolio of Masdika, Cloud & DevOps Engineer. Discover enterprise infrastructure projects, high-performance Cloud VPS hosting, Managed Kubernetes, and scalable cloud solutions.";
+  let description = "Portfolio of Masdika, Cloud & DevOps Engineer, offering Cloud VPS, Managed Databases, Managed Apps, Object Storage, File CDN, and AI Gateway services.";
   try {
     const metaDescSetting = await getCachedMetaDescription();
     if (metaDescSetting && metaDescSetting.value.trim() !== '') {
@@ -46,24 +46,36 @@ export async function generateMetadata(): Promise<Metadata> {
   const siteUrl = rawSiteUrl.replace(/^["']|["']$/g, '').trim();
   const ogImageUrl = getFreshOgImagePath();
 
+  const siteTitle = "Masdika - Cloud & DevOps Portfolio, VPS, Apps & AI Cloud";
+
   return {
     metadataBase: new URL(siteUrl),
     title: {
       template: "%s",
-      default: "Masdika | Cloud & DevOps Engineer",
+      default: siteTitle,
     },
     description,
     keywords: [
       "Masdika",
-      "Cloud Engineer",
-      "DevOps Engineer",
-      "System Administrator",
+      "Masdika Cloud",
+      "masdika.id",
       "Portfolio Masdika",
-      "Cloud Infrastructure",
-      "Linux Administrator",
+      "Cloud & DevOps Engineer",
+      "Cloud Engineer Indonesia",
+      "DevOps Engineer Indonesia",
       "Kubernetes Engineer",
-      "Cloud VPS",
-      "DevOps Indonesia",
+      "Cloud VPS Indonesia",
+      "High-Performance VPS",
+      "Managed Database",
+      "Managed PostgreSQL",
+      "Managed Applications",
+      "Managed Kubernetes",
+      "S3 Object Storage",
+      "File CDN",
+      "AI Gateway",
+      "Unified LLM API",
+      "Pay-As-You-Go Cloud",
+      "Cloud Infrastructure",
       "Sidoarjo",
       "Surabaya"
     ],
@@ -90,7 +102,7 @@ export async function generateMetadata(): Promise<Metadata> {
       },
     },
     openGraph: {
-      title: "Masdika - Cloud VPS Indonesia, High-Performance Compute & Kubernetes",
+      title: siteTitle,
       description,
       url: siteUrl,
       siteName: 'Masdika',
@@ -99,7 +111,7 @@ export async function generateMetadata(): Promise<Metadata> {
           url: ogImageUrl,
           width: 1200,
           height: 630,
-          alt: "Masdika - High-Performance Cloud VPS & Infrastructure",
+          alt: siteTitle,
         },
       ],
       locale: 'en_US',
@@ -107,7 +119,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: "Masdika - Cloud VPS Indonesia, High-Performance Compute & Kubernetes",
+      title: siteTitle,
       description,
       images: [ogImageUrl],
       creator: "@masdikaid",
