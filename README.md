@@ -17,7 +17,9 @@
     <img src="https://img.shields.io/badge/Trivy_Operator-Continuous_CVE_Scan-00599C?style=for-the-badge&logo=securityscorecard&logoColor=white" alt="Trivy Operator" />
     <img src="https://img.shields.io/badge/Elastic_Stack-8.11_Observability-005571?style=for-the-badge&logo=elastic&logoColor=white" alt="Elastic Stack" />
     <img src="https://img.shields.io/badge/Object_Storage-RustFS_S3-E95420?style=for-the-badge&logo=amazons3&logoColor=white" alt="RustFS S3" />
-    <img src="https://img.shields.io/badge/Testing-Vitest_47_Tests-6E9F18?style=for-the-badge&logo=vitest&logoColor=white" alt="Vitest Testing" />
+    <img src="https://img.shields.io/badge/AI_Gateway-OpenAI_%26_Anthropic-00ADD8?style=for-the-badge&logo=openai&logoColor=white" alt="AI Gateway" />
+    <img src="https://img.shields.io/badge/MCP_Server-@masdika%2Fmcp_v1.0.1-06B6D4?style=for-the-badge&logo=npm&logoColor=white" alt="Masdika MCP" />
+    <img src="https://img.shields.io/badge/Testing-Vitest_140_Tests-6E9F18?style=for-the-badge&logo=vitest&logoColor=white" alt="Vitest Testing" />
     <img src="https://img.shields.io/badge/SRE-SLO_99.9%25_%26_Error_Budget-4CAF50?style=for-the-badge&logo=googlecloud&logoColor=white" alt="Google SRE" />
     <img src="https://img.shields.io/badge/Resilience-Circuit_Breaker-FFB300?style=for-the-badge&logo=circuitverse&logoColor=white" alt="Circuit Breaker" />
     <img src="https://img.shields.io/badge/Chaos-Chaos_Monkey_Drills-8E24AA?style=for-the-badge&logo=linux&logoColor=white" alt="Chaos Engineering" />
@@ -48,6 +50,45 @@ Platform ini mengadopsi standar **Tier-1 Tech Engineering (Gojek / Tokopedia / G
 * **Full-Stack Elastic Observability**: Elastic Stack 8.11 (Elasticsearch, Kibana, APM, Filebeat, Metricbeat, Heartbeat Synthetics) dengan indeks teroptimasi metadata host fisik dan **Index Lifecycle Management (ILM)** retensi otomatis 14 hari.
 * **Automated Disaster Recovery**: Backup terjadwal terenkripsi simetris GPG AES-256 yang disinkronkan offsite ke RustFS Cloud Storage S3 dengan retensi rotasi 14 hari.
 * **Host Storage Safeguard & Kubelet Image GC**: Proteksi 3-lapis anti-kehabisan disk di host produksi (`192.168.79.4`); Kubelet auto-pruning terpicu saat disk mencapai 60% dan membersihkan hingga 45%, hard-cap log Linux `systemd-journald` 500 MB, serta cron maintenance harian.
+
+---
+
+## ☁️ Katalog Layanan Cloud & Ekosistem Developer
+
+Seluruh layanan Masdika Cloud berjalan dengan sistem billing seragam (**Pay-As-You-Go Per Jam** maupun **Bulanan**), proteksi *3-Day Grace Period*, *Auto-Unsuspend* saat top-up, serta notifikasi email & invoice terpusat (`INV-PAYG-...` / `INV-ORD-...`):
+
+| Layanan | Teknologi & Kemampuan Utama | Endpoint / Paket |
+| :--- | :--- | :--- |
+| **Cloud VPS (Proxmox KVM)** | Provisioning instan VM KVM (Ubuntu, Debian, Rocky Linux, Windows Server), Live noVNC Console, Snapshot & Backup terjadwal, Proxmox Firewall per VM, VPC Router, Reserved Elastic IP, Cloudflared Tunnels, dan SSH Key injection otomatis. | `/vps`, `/dashboard/vps` |
+| **Managed Database (Kubernetes)** | 1-Click deploy klaster database terisolasi (**PostgreSQL, MySQL, MariaDB, Redis, MongoDB**) dengan persistent SSD, alokasi NodePort otomatis, Web GUI admin, serta fitur export/import data. | `/managed-db`, `/dashboard/database` |
+| **Managed Applications** | Deploy aplikasi AI & otomasi siap pakai (**OmniRoute, n8n, 9Router, OpenClaw, Hermes Agent, OpenCode, WordPress**) lengkap dengan subdomain HTTPS otomatis (`*.apps.masdika.id`), live pod logs, dan kontrol power/upgrade. | `/managed-apps`, `/dashboard/apps` |
+| **Object Storage (S3)** | Penyimpanan objek kompatibel **AWS S3** berbasis RustFS (`https://s3.masdika.id`), manajemen bucket Private/Public, serta pembuatan S3 Access Key & Secret Key untuk AWS CLI / `rclone`. | `/object-storage`, `/dashboard/object-storage` |
+| **File CDN** | Upload file, gambar, atau skrip statis dengan link delivery publik instan berkecepatan tinggi melalui routing Edge IIX/OpenIX. | `/file-cdn`, `/dashboard/cdn` |
+| **AI Token Gateway** | Multi-LLM API Gateway kompatibel **OpenAI SDK** (`/api/ai/openai/v1`) & **Anthropic SDK** (`/api/ai/anthropic/v1`) untuk model DeepSeek, Qwen, Gemini, Claude, Llama, serta Image Generation dengan dompet token terpisah (`aiBalance`). | `/ai-gateway`, `/dashboard/ai-gateway` |
+| **Masdika MCP (`@masdika/mcp`)** | Server **Model Context Protocol** resmi (npm: `@masdika/mcp@1.0.1`) untuk menghubungkan **Cursor IDE, Claude Desktop, Windsurf, Antigravity, dan Claude Code CLI** langsung ke infrastruktur Masdika dengan **45 Core Tools** melalui JSON-RPC 2.0 & Stdio. | `/dashboard/mcp`, `/admin/mcp`, `/api/v1/mcp` |
+
+---
+
+### 🤖 Masdika Model Context Protocol (`@masdika/mcp`)
+
+Masdika menyediakan integrasi MCP resmi agar developer dapat mengelola server, database, aplikasi, firewall, AI key, hingga membuat tagihan top-up QRIS/VA cukup lewat perintah bahasa natural di AI editor:
+
+```bash
+# Jalankan langsung tanpa install manual (membutuhkan Node.js >= 18)
+npx -y @masdika/mcp
+```
+
+* **45 Tools Lengkap (8 Kategori)**:
+  * **Billing & Account (5)**: `masdika_get_account`, `masdika_create_topup`, `masdika_check_invoice`, `masdika_list_invoices`, `masdika_check_voucher`.
+  * **Cloud VPS (10)**: `masdika_list_vps`, `masdika_control_vps`, `masdika_get_vps_metrics`, `masdika_upgrade_vps`, `masdika_reinstall_vps`, `masdika_create_vps_snapshot`, `masdika_list_vps_snapshots`, `masdika_reset_vps_password`, `masdika_list_vps_firewall`, `masdika_add_vps_firewall`.
+  * **Managed Database (5)**: `masdika_list_databases`, `masdika_create_database`, `masdika_control_database`, `masdika_get_database_connection`, `masdika_delete_database`.
+  * **Managed Applications (5)**: `masdika_list_apps`, `masdika_deploy_app`, `masdika_control_app`, `masdika_get_app_logs`, `masdika_delete_app`.
+  * **Storage & File CDN (7)**: `masdika_upload_cdn`, `masdika_list_cdn_files`, `masdika_delete_cdn_file`, `masdika_list_storage`, `masdika_create_bucket`, `masdika_create_s3_key`, `masdika_list_s3_keys`.
+  * **AI Token Gateway (5)**: `masdika_list_ai_models`, `masdika_create_ai_key`, `masdika_list_ai_keys`, `masdika_revoke_ai_key`, `masdika_topup_ai_balance`.
+  * **Network & Security (5)**: `masdika_list_ssh_keys`, `masdika_create_ssh_key`, `masdika_delete_ssh_key`, `masdika_list_reserved_ips`, `masdika_list_cloudflared_tunnels`.
+  * **Support & Tickets (3)**: `masdika_list_tickets`, `masdika_create_ticket`, `masdika_reply_ticket`.
+* **Keamanan & Anti-Manipulasi**:
+  * Pembatasan ketat **1 MCP Key aktif per akun** (`service = "MCP"`), isolasi kepemilikan `userId` pada seluruh query, *rate limit* 180 req/menit, pengecekan saldo komitmen atomik (anti *race-condition*), dan panel kontrol admin penuh di `/admin/mcp`.
 
 ---
 
