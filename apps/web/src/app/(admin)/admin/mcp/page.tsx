@@ -206,21 +206,9 @@ export default function AdminMcpPage() {
       {/* ── 1. HEADER SECTION (Consistent with other Admin pages) ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
-              Model Context Protocol (MCP) Gateway
-            </h1>
-            <div className="flex flex-wrap items-center gap-2">
-              <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
-                <Bot className="w-3 h-3 shrink-0" />
-                Official Protocol
-              </span>
-              <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border", isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200")}>
-                <ShieldCheck className="w-3 h-3 shrink-0" />
-                JSON-RPC 2.0 &amp; Stdio
-              </span>
-            </div>
-          </div>
+          <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>
+            Model Context Protocol (MCP) Gateway
+          </h1>
           <p className={cn("text-xs sm:text-sm font-medium mt-1.5 max-w-3xl leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
             Manage Model Context Protocol client tokens, inspect tool invocation telemetry, and configure autonomous AI access across Masdika Cloud infrastructure.
           </p>
