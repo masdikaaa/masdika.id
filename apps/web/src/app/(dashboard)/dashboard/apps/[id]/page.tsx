@@ -627,6 +627,90 @@ export default function AppDetailPage({
             </div>
           )}
 
+          {app.appType === "qwenpaw" && (
+            <div className={cn(
+              "border rounded-2xl p-5 sm:p-6 space-y-4 transition-all shadow-2xs",
+              isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
+            )}>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                  <Lock className="w-4 h-4 shrink-0" />
+                  <span>QwenPaw Web Console Authentication</span>
+                </h3>
+                <span className={cn(
+                  "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold self-start sm:self-auto shrink-0 border",
+                  isDark ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/25" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                )}>
+                  <span className={cn("w-1.5 h-1.5 rounded-full animate-pulse", isDark ? "bg-emerald-400" : "bg-emerald-500")} />
+                  <span>Web Login Enabled</span>
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className={cn(
+                  "p-3.5 rounded-xl border space-y-1 text-xs",
+                  isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200/90 shadow-2xs"
+                )}>
+                  <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-500")}>
+                    Username
+                  </span>
+                  <div className="flex items-center justify-between font-mono font-bold text-xs pt-0.5">
+                    <span className={cn("truncate mr-2", isDark ? "text-white" : "text-slate-900")}>
+                      {app.username || "admin"}
+                    </span>
+                    <button
+                      onClick={() => copyToClipboard(app.username || "admin", "Username")}
+                      className={cn("cursor-pointer transition-colors shrink-0", isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-500 hover:text-cyan-700")}
+                      title="Copy Username"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className={cn(
+                  "p-3.5 rounded-xl border space-y-1 text-xs",
+                  isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200/90 shadow-2xs"
+                )}>
+                  <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-500")}>
+                    Password
+                  </span>
+                  <div className="flex items-center justify-between font-mono font-bold text-xs pt-0.5">
+                    <span className={cn("truncate mr-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                      {showPassword ? (app.password || "••••••••") : "••••••••••••"}
+                    </span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className={cn("cursor-pointer transition-colors", isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-500 hover:text-cyan-700")}
+                        title={showPassword ? "Hide Password" : "Show Password"}
+                      >
+                        {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </button>
+                      <button
+                        onClick={() => copyToClipboard(app.password || "", "Password")}
+                        className={cn("cursor-pointer transition-colors", isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-500 hover:text-cyan-700")}
+                        title="Copy Password"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={cn(
+                  "p-3 rounded-xl border space-y-1 text-xs sm:col-span-2",
+                  isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-cyan-50/60 border-cyan-200 text-slate-700"
+                )}>
+                  <p className="text-[11px] leading-relaxed">
+                    Sign in to QwenPaw Web Console using the username and password above. Authentication is enforced automatically via HTTPS.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {isN8n && (
             <div className={cn(
               "border rounded-2xl p-5 sm:p-6 space-y-4 transition-all shadow-2xs",

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <defs>
+    <linearGradient id="qp-bg" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#8B5CF6"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#qp-bg)"/>
+  <ellipse cx="40" cy="44" rx="9" ry="12" transform="rotate(-15 40 44)" fill="#FFFFFF"/>
+  <ellipse cx="64" cy="36" rx="9" ry="12" fill="#FFFFFF"/>
+  <ellipse cx="88" cy="44" rx="9" ry="12" transform="rotate(15 88 44)" fill="#FFFFFF"/>
+  <path d="M64 56C47 56 35 69 35 83C35 94 44 100 54 100C58 100 61 98 64 98C67 98 70 100 74 100C84 100 93 94 93 83C93 69 81 56 64 56Z" fill="#FFFFFF"/>
+</svg>

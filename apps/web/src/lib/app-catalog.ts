@@ -1,5 +1,5 @@
 export interface ManagedAppDefinition {
-  id: 'hermes' | 'ninerouter' | 'n8n' | 'opencode' | 'openclaw' | 'omniroute' | 'wordpress' | 'uptimekuma';
+  id: 'hermes' | 'ninerouter' | 'n8n' | 'opencode' | 'openclaw' | 'omniroute' | 'wordpress' | 'uptimekuma' | 'qwenpaw';
   name: string;
   tagline: string;
   category: string;
@@ -208,6 +208,28 @@ export const MANAGED_APPS_CATALOG: ManagedAppDefinition[] = [
       '90+ Notification Integrations (Telegram, Discord, Slack, Email)',
       'Customizable Public Status Pages with Auto HTTPS SSL',
       'Persistent SQLite Metrics & Alert History (/app/data)',
+    ],
+  },
+  {
+    id: 'qwenpaw',
+    name: 'QwenPaw',
+    tagline: 'AgentScope Personal AI Assistant with Authenticated Web Console',
+    category: 'AI Agent',
+    description: 'Official AgentScope QwenPaw personal AI assistant featuring a password-protected HTTPS Web Console, persistent working directory, secrets vault, and automated backups.',
+    icon: '/images/apps/qwenpaw.svg',
+    appPort: 8088,
+    dataDir: '/app/working',
+    defaultImage: 'docker.io/agentscope/qwenpaw:latest',
+    color: 'from-indigo-500 to-violet-600',
+    badge: 'Web UI',
+    accessProtocol: 'WEB',
+    website: 'https://qwenpaw.agentscope.io',
+    github: 'https://github.com/agentscope-ai/QwenPaw',
+    features: [
+      'Authenticated Web Console with Let\'s Encrypt HTTPS SSL',
+      'Pre-Configured Admin Login (Username & Generated Password)',
+      'Persistent Working Memory, Secrets & Backups (/app/working)',
+      'Multi-Model AI Assistant Powered by AgentScope',
     ],
   },
 ];

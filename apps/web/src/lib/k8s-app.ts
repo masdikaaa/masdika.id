@@ -810,6 +810,20 @@ ${buildPkgLockdownSnippet('apt')}
         - name: DATA_DIR
           value: "${dataMount}/"
 `;
+  } else if (appType === 'qwenpaw') {
+    image = 'docker.io/agentscope/qwenpaw:latest';
+    const authUser = app.username || 'admin';
+    const authPassword = app.password || 'QwenPaw123!';
+    envYaml = `
+        - name: QWENPAW_PORT
+          value: "${app.appPort}"
+        - name: QWENPAW_AUTH_ENABLED
+          value: "true"
+        - name: QWENPAW_AUTH_USERNAME
+          value: "${authUser}"
+        - name: QWENPAW_AUTH_PASSWORD
+          value: "${authPassword}"
+`;
   } else if (appType === 'wordpress') {
     image = 'docker.io/library/wordpress:latest';
     const sshPassword = app.password || 'WordPress123!';
@@ -1317,8 +1331,16 @@ ${containerPortsYaml}${securityContextYaml}${commandYaml}${envYaml ? `\n        
             memory: "${memLim}"
             ephemeral-storage: "2Gi"
         volumeMounts:
+${appTypeLower === 'qwenpaw' ? `        - name: app-storage
+          mountPath: /app/working
+          subPath: working
         - name: app-storage
-          mountPath: ${dataMount}
+          mountPath: /app/working.secret
+          subPath: working-secret
+        - name: app-storage
+          mountPath: /app/working.backups
+          subPath: working-backups` : `        - name: app-storage
+          mountPath: ${dataMount}`}
       volumes:
       - name: app-storage
         persistentVolumeClaim:

@@ -49,8 +49,8 @@ vi.mock('../prisma', () => ({
 
 describe('Managed Apps Catalog & Engine', () => {
   describe('App Catalog & Flavors', () => {
-    it('should have all 8 requested apps with official branding and ports', () => {
-      expect(MANAGED_APPS_CATALOG).toHaveLength(8);
+    it('should have all 9 requested apps with official branding and ports', () => {
+      expect(MANAGED_APPS_CATALOG).toHaveLength(9);
       const ids = MANAGED_APPS_CATALOG.map((a) => a.id);
       expect(ids).toContain('hermes');
       expect(ids).toContain('ninerouter');
@@ -60,6 +60,7 @@ describe('Managed Apps Catalog & Engine', () => {
       expect(ids).toContain('omniroute');
       expect(ids).toContain('wordpress');
       expect(ids).toContain('uptimekuma');
+      expect(ids).toContain('qwenpaw');
 
       const n8n = getAppDefinition('n8n');
       expect(n8n).toBeDefined();
@@ -114,6 +115,14 @@ describe('Managed Apps Catalog & Engine', () => {
       expect(uptimekuma?.appPort).toBe(3001);
       expect(uptimekuma?.dataDir).toBe('/app/data');
       expect(getAppDefinition('uptime-kuma')?.id).toBe('uptimekuma');
+
+      const qwenpaw = getAppDefinition('qwenpaw');
+      expect(qwenpaw).toBeDefined();
+      expect(qwenpaw?.icon).toBe('/images/apps/qwenpaw.svg');
+      expect(qwenpaw?.accessProtocol).toBe('WEB');
+      expect(qwenpaw?.appPort).toBe(8088);
+      expect(qwenpaw?.dataDir).toBe('/app/working');
+      expect(qwenpaw?.defaultImage).toBe('docker.io/agentscope/qwenpaw:latest');
     });
 
     it('should have all 7 compute plans matching user requirements', () => {
@@ -155,8 +164,8 @@ describe('Managed Apps Catalog & Engine', () => {
       expect(formatRupiah(375000)).toBe('Rp 375.000');
     });
 
-    it('should generate valid Kubernetes manifests for all 8 catalog apps without YAML syntax errors', () => {
-      const appTypes = ['hermes', 'n8n', 'ninerouter', 'opencode', 'openclaw', 'omniroute', 'wordpress', 'uptimekuma'];
+    it('should generate valid Kubernetes manifests for all 9 catalog apps without YAML syntax errors', () => {
+      const appTypes = ['hermes', 'n8n', 'ninerouter', 'opencode', 'openclaw', 'omniroute', 'wordpress', 'uptimekuma', 'qwenpaw'];
       for (const appType of appTypes) {
         const dummyApp: any = {
           id: 42,
@@ -384,6 +393,28 @@ spec:
       expect(uptimekumaSpec.envYaml).toContain('value: "3001"');
       expect(uptimekumaSpec.commandYaml).toBe('');
       expect(uptimekumaSpec.dataMount).toBe('/app/data');
+
+      const qwenpawSpec = buildAppContainerSpec({
+        id: 80,
+        userId: 1,
+        name: 'my-qwenpaw',
+        appType: 'qwenpaw',
+        subdomain: 'my-qwenpaw',
+        appPort: 8088,
+        username: 'admin',
+        password: 'QwenPawPassword123!',
+      } as any);
+      expect(qwenpawSpec.image).toBe('docker.io/agentscope/qwenpaw:latest');
+      expect(qwenpawSpec.envYaml).toContain('QWENPAW_AUTH_ENABLED');
+      expect(qwenpawSpec.envYaml).toContain('value: "true"');
+      expect(qwenpawSpec.envYaml).toContain('QWENPAW_AUTH_USERNAME');
+      expect(qwenpawSpec.envYaml).toContain('value: "admin"');
+      expect(qwenpawSpec.envYaml).toContain('QWENPAW_AUTH_PASSWORD');
+      expect(qwenpawSpec.envYaml).toContain('value: "QwenPawPassword123!"');
+      expect(qwenpawSpec.envYaml).toContain('QWENPAW_PORT');
+      expect(qwenpawSpec.envYaml).toContain('value: "8088"');
+      expect(qwenpawSpec.commandYaml).toBe('');
+      expect(qwenpawSpec.dataMount).toBe('/app/working');
     });
   });
 
