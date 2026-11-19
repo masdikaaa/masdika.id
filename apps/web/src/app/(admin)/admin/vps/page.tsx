@@ -11,6 +11,7 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { Select } from "@/components/ui/Select";
 import { Pagination } from "@/components/ui/Pagination";
 import { getOsIconUrl, formatOsName, OS_GROUPS } from "@/lib/vps-os";
+import CreateVpsModal from "./CreateVpsModal";
 
 type VpsService = {
   id: number;
@@ -289,6 +290,7 @@ export default function VpsManagementPage() {
   // Services State
   const [vpsServices, setVpsServices] = useState<VpsService[]>([]);
   const [loadingServices, setLoadingServices] = useState(false);
+  const [showCreateVpsModal, setShowCreateVpsModal] = useState(false);
   const [actionLoading, setActionLoading] = useState<number | null>(null);
   const [consoleLoading, setConsoleLoading] = useState<number | null>(null);
   const [showSuspendModal, setShowSuspendModal] = useState<VpsService | null>(null);
@@ -2198,25 +2200,35 @@ export default function VpsManagementPage() {
                   : "Monitor and manage all client 1-Click Application deployments."}
               </p>
             </div>
-            <div className="flex flex-col md:flex-row gap-3 items-center w-full md:w-auto">
+            <div className="flex flex-wrap sm:flex-nowrap gap-2.5 items-center w-full md:w-auto">
               {selectedVps.length > 0 && (
                 <button
                   onClick={() => setShowBulkTerminateModal(selectedVps)}
-                  className={cn("px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-xl text-sm font-medium hover:bg-red-500 hover:text-white transition-colors h-[48px] flex items-center whitespace-nowrap", isDark ? "text-red-400" : "text-red-700")}
+                  className={cn("px-3.5 py-2 bg-red-500/10 border border-red-500/20 rounded-xl text-xs font-semibold hover:bg-red-500 hover:text-white transition-colors h-10 flex items-center whitespace-nowrap", isDark ? "text-red-400" : "text-red-700")}
                 >
                   Delete Selected ({selectedVps.length})
                 </button>
               )}
-              <div className="relative w-full md:w-64">
-                <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+              <div className="relative flex-1 sm:w-64">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
                 <input
                   type="text"
                   placeholder="Search hostname, email, app..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className={cn("w-full border focus:border-cyan-500 rounded-2xl py-3.5 pl-10 pr-4 outline-none transition-all h-[48px]", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
+                  className={cn("w-full border focus:border-cyan-500 rounded-xl py-2 pl-9 pr-3 text-xs outline-none transition-all h-10", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder:text-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400")}
                 />
               </div>
+              {activeTab === "services" && (
+                <button
+                  type="button"
+                  onClick={() => setShowCreateVpsModal(true)}
+                  className="px-3.5 h-10 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm whitespace-nowrap cursor-pointer shrink-0"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Create VPS
+                </button>
+              )}
             </div>
           </div>
 
@@ -3452,6 +3464,12 @@ export default function VpsManagementPage() {
         onClose={() => setDeleteReservedIpId(null)}
         isLoading={reservedIpActionLoading === deleteReservedIpId}
         variant="danger"
+      />
+
+      <CreateVpsModal
+        isOpen={showCreateVpsModal}
+        onClose={() => setShowCreateVpsModal(false)}
+        onSuccess={() => fetchVpsServices()}
       />
     </div>
   );

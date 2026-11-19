@@ -13,6 +13,8 @@ export async function GET(req: Request) {
     const url = new URL(req.url);
     const search = url.searchParams.get('q') || url.searchParams.get('search') || '';
     const status = url.searchParams.get('status'); // 'active' | 'blocked' | 'suspended' | null
+    const rawLimit = url.searchParams.get('limit');
+    const parsedLimit = rawLimit ? Math.min(200, Math.max(1, parseInt(rawLimit, 10) || 50)) : undefined;
     const isBlockedFilter = status === 'blocked' || status === 'suspended';
 
     // 1. Attempt Elasticsearch search if query is provided
@@ -20,7 +22,7 @@ export async function GET(req: Request) {
     if (search.trim()) {
       elasticUserIds = await searchCustomersElastic(search.trim(), {
         isSuspended: isBlockedFilter ? true : status === 'active' ? false : undefined,
-        limit: 100,
+        limit: parsedLimit || 100,
       });
     }
 
@@ -35,6 +37,7 @@ export async function GET(req: Request) {
 
     const users = await prisma.user.findMany({
       where: whereClause,
+      ...(parsedLimit ? { take: parsedLimit } : {}),
       select: {
         id: true,
         email: true,

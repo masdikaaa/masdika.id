@@ -783,14 +783,26 @@ export default function AdminCustomersPage() {
                   />
                 </div>
                 {blockUserTarget.lastSubnet && (
-                  <label className={cn("flex items-start gap-2.5 p-3 rounded-xl border text-xs cursor-pointer", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-700")}>
+                  <label className={cn("group flex items-start gap-2.5 p-3 rounded-xl border text-xs cursor-pointer select-none transition-colors", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300 hover:border-white/15" : "bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300")}>
                     <input
                       type="checkbox"
                       checked={blockIpSubnet}
                       onChange={(e) => setBlockIpSubnet(e.target.checked)}
-                      className="mt-0.5 rounded border-zinc-600 text-red-500 focus:ring-red-500"
+                      className="sr-only"
                     />
-                    <span>
+                    <span
+                      className={cn(
+                        "w-5 h-5 border rounded flex items-center justify-center transition-colors shrink-0 mt-0.5",
+                        blockIpSubnet
+                          ? "bg-cyan-500 border-cyan-500"
+                          : isDark
+                            ? "border-slate-700 bg-[#0a0a0c] group-hover:border-cyan-400"
+                            : "border-zinc-300 bg-white group-hover:border-cyan-600"
+                      )}
+                    >
+                      {blockIpSubnet && <CheckCircle className="w-3.5 h-3.5 text-slate-900" />}
+                    </span>
+                    <span className="leading-relaxed">
                       Also block IP subnet <code className="font-mono font-semibold text-red-400">{blockUserTarget.lastSubnet}</code> in real time across the entire website
                     </span>
                   </label>
