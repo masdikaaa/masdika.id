@@ -833,7 +833,12 @@ export default function AdminCustomersPage() {
               <button
                 onClick={handleBlockToggle}
                 disabled={isBlocking || (!blockUserTarget.isSuspended && !blockReason.trim())}
-                className={`px-4 py-2 rounded-xl text-white font-semibold transition-colors disabled:opacity-50 ${blockUserTarget.isSuspended ? 'bg-emerald-500 hover:bg-emerald-400' : 'bg-red-600 hover:bg-red-500'}`}
+                className={cn(
+                  "px-4 py-2 rounded-xl font-bold transition-colors disabled:opacity-50",
+                  blockUserTarget.isSuspended
+                    ? "bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 shadow-sm"
+                    : "bg-red-600 hover:bg-red-500 text-white"
+                )}
               >
                 {isBlocking ? "Saving..." : (blockUserTarget.isSuspended ? "Unblock" : "Block")}
               </button>
