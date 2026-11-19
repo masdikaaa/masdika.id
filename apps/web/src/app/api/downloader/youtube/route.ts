@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-middleware';
 import { validateApiKey } from '@/lib/api-key';
-import ytdl from '@distube/ytdl-core';
+import { Ytdl } from '@distube/ytdl-core';
+
+const ytdl = new Ytdl();
 
 export async function POST(req: Request) {
   let userId = null;
@@ -55,11 +57,11 @@ export async function POST(req: Request) {
     const duration = info.videoDetails.lengthSeconds;
 
     // Filter formats: get highest video + audio (mp4)
-    const videoFormats = ytdl.filterFormats(info.formats, 'videoandaudio');
+    const videoFormats = info.formats.filter((f) => f.hasVideo && f.hasAudio && f.url);
     const highestVideo = videoFormats.length > 0 ? videoFormats[0].url : null;
 
     // Filter formats: get highest audio only (for mp3/m4a)
-    const audioFormats = ytdl.filterFormats(info.formats, 'audioonly');
+    const audioFormats = info.formats.filter((f) => !f.hasVideo && f.hasAudio && f.url);
     const highestAudio = audioFormats.length > 0 ? audioFormats[0].url : null;
 
     return NextResponse.json({
