@@ -50,7 +50,6 @@ export async function GET() {
       }),
       prisma.user.findMany({
         orderBy: [{ aiBalance: 'desc' }, { balance: 'desc' }, { id: 'asc' }],
-        take: 100,
         select: {
           id: true,
           name: true,

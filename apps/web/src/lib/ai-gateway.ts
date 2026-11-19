@@ -364,27 +364,6 @@ export async function ensureAiModelsExist(force: boolean = false) {
     }
   }
 
-  // Ensure deepseek-v4.1-flash-1017 has the exact prices as configured
-  await prisma.aiModel.updateMany({
-    where: {
-      modelId: 'deepseek-v4.1-flash-1017',
-      OR: [
-        { inputPricePer1M: { not: 6141 } },
-        { cachePricePer1M: { not: 123 } },
-        { outputPricePer1M: { not: 24564 } },
-      ],
-    },
-    data: {
-      name: 'DeepSeek V4.1 Flash 1017',
-      provider: 'DeepSeek',
-      contextWindow: '1M',
-      inputPricePer1M: 6141,
-      cachePricePer1M: 123,
-      outputPricePer1M: 24564,
-      isActive: true,
-    },
-  });
-
   lastAiModelsEnsureCheck = Date.now();
   invalidateAiModelCache();
 }

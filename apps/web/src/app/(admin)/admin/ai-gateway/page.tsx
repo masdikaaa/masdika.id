@@ -82,6 +82,160 @@ interface CustomerAiItem {
   };
 }
 
+function paginateItems<T>(items: T[], page: number, perPage: number) {
+  const totalPages = perPage === -1 ? 1 : Math.max(1, Math.ceil(items.length / (perPage > 0 ? perPage : 10)));
+  const safePage = Math.min(Math.max(1, page), totalPages);
+  const paginated = perPage === -1 ? items : items.slice((safePage - 1) * perPage, safePage * perPage);
+  const startItem = items.length > 0 ? (perPage === -1 ? 1 : (safePage - 1) * perPage + 1) : 0;
+  const endItem = perPage === -1 ? items.length : Math.min(safePage * perPage, items.length);
+
+  let pageNumbers: (number | '...')[] = [];
+  if (totalPages <= 7) {
+    pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
+  } else if (safePage <= 4) {
+    pageNumbers = [1, 2, 3, 4, 5, '...', totalPages];
+  } else if (safePage >= totalPages - 3) {
+    pageNumbers = [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+  } else {
+    pageNumbers = [1, '...', safePage - 1, safePage, safePage + 1, '...', totalPages];
+  }
+
+  return { paginated, totalPages, safePage, startItem, endItem, pageNumbers };
+}
+
+function TablePaginationBar({
+  totalItems,
+  itemLabel,
+  page,
+  perPage,
+  totalPages,
+  startItem,
+  endItem,
+  pageNumbers,
+  isDark,
+  onPageChange,
+  onPerPageChange,
+}: {
+  totalItems: number;
+  itemLabel: string;
+  page: number;
+  perPage: number;
+  totalPages: number;
+  startItem: number;
+  endItem: number;
+  pageNumbers: (number | '...')[];
+  isDark: boolean;
+  onPageChange: (nextPage: number) => void;
+  onPerPageChange: (nextPerPage: number) => void;
+}) {
+  if (totalItems === 0) return null;
+
+  return (
+    <div
+      className={cn(
+        "pt-3 sm:pt-4 border-t flex flex-col sm:flex-row items-center justify-between gap-3 text-xs",
+        isDark ? "border-white/[0.07]" : "border-slate-200"
+      )}
+    >
+      <div className={cn(isDark ? "text-zinc-400" : "text-slate-600", "text-center sm:text-left")}>
+        Showing <span className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>{startItem}</span> to{" "}
+        <span className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>{endItem}</span> of{" "}
+        <span className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>{totalItems}</span> {itemLabel}
+      </div>
+
+      <div className="flex items-center gap-3 flex-wrap justify-center">
+        <div className={cn("flex items-center gap-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
+          <span className="hidden xs:inline">Show:</span>
+          <div className="w-24">
+            <Select
+              value={perPage}
+              onChange={(val) => {
+                onPerPageChange(Number(val));
+                onPageChange(1);
+              }}
+              options={[
+                { value: 10, label: "10" },
+                { value: 25, label: "25" },
+                { value: 50, label: "50" },
+                { value: -1, label: `All (${totalItems})` },
+              ]}
+              direction="up"
+              className="py-1 px-2.5 text-xs font-semibold rounded-lg"
+            />
+          </div>
+        </div>
+
+        {totalPages > 1 && (
+          <div className="flex items-center gap-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-w-full py-0.5">
+            <button
+              type="button"
+              onClick={() => onPageChange(Math.max(1, page - 1))}
+              disabled={page === 1}
+              className={cn(
+                "p-1.5 rounded-lg border transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none",
+                isDark
+                  ? "border-white/10 bg-[#14151f] text-zinc-400 hover:text-white hover:border-cyan-500"
+                  : "border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:border-cyan-500"
+              )}
+              title="Previous page"
+              aria-label="Previous page"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
+
+            <div className="flex items-center gap-1">
+              {pageNumbers.map((p, idx) => {
+                if (p === '...') {
+                  return (
+                    <span key={`ellipsis-${idx}`} className={cn("px-1 font-mono", isDark ? "text-zinc-600" : "text-slate-400")}>
+                      ...
+                    </span>
+                  );
+                }
+                const pageNum = Number(p);
+                const isActive = pageNum === page;
+                return (
+                  <button
+                    key={`page-${pageNum}`}
+                    type="button"
+                    onClick={() => onPageChange(pageNum)}
+                    className={cn(
+                      "min-w-[28px] h-7 px-2 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer border",
+                      isActive
+                        ? "bg-cyan-400 border-cyan-400 text-slate-950 font-black shadow-xs ring-1 ring-cyan-300/40"
+                        : isDark
+                        ? "border-white/10 bg-[#14151f] text-zinc-400 hover:border-cyan-500 hover:text-white"
+                        : "border-slate-200 bg-white text-slate-600 hover:border-cyan-500 hover:text-slate-900"
+                    )}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => onPageChange(Math.min(totalPages, page + 1))}
+              disabled={page === totalPages}
+              className={cn(
+                "p-1.5 rounded-lg border transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none",
+                isDark
+                  ? "border-white/10 bg-[#14151f] text-zinc-400 hover:text-white hover:border-cyan-500"
+                  : "border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:border-cyan-500"
+              )}
+              title="Next page"
+              aria-label="Next page"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function AdminAiGatewayPage() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
@@ -128,10 +282,14 @@ export default function AdminAiGatewayPage() {
   const [topModelRankings, setTopModelRankings] = useState<TopModelRankingItem[]>([]);
   const [recentLogs, setRecentLogs] = useState<any[]>([]);
 
-  // Filters
+  // Filters & Pagination
   const [searchQuery, setSearchQuery] = useState('');
   const [modelTypeFilter, setModelTypeFilter] = useState<string>('ALL');
+  const [modelsPage, setModelsPage] = useState<number>(1);
+  const [modelsPerPage, setModelsPerPage] = useState<number>(10);
   const [customerSearch, setCustomerSearch] = useState('');
+  const [customersPage, setCustomersPage] = useState<number>(1);
+  const [customersPerPage, setCustomersPerPage] = useState<number>(10);
   const [logSearch, setLogSearch] = useState('');
   const [logsPage, setLogsPage] = useState<number>(1);
   const [logsPerPage, setLogsPerPage] = useState<number>(10);
@@ -354,29 +512,21 @@ export default function AdminAiGatewayPage() {
     );
   }, [recentLogs, logSearch]);
 
-  const totalLogPages = Math.max(1, Math.ceil(filteredLogs.length / (logsPerPage > 0 ? logsPerPage : 10)));
-  const safeLogsPage = Math.min(logsPage, totalLogPages);
-  const paginatedLogs = useMemo(() => {
-    if (logsPerPage === -1) return filteredLogs;
-    const start = (safeLogsPage - 1) * logsPerPage;
-    return filteredLogs.slice(start, start + logsPerPage);
-  }, [filteredLogs, safeLogsPage, logsPerPage]);
+  const modelsPagination = useMemo(
+    () => paginateItems(filteredModels, modelsPage, modelsPerPage),
+    [filteredModels, modelsPage, modelsPerPage],
+  );
 
-  const logPageNumbers = useMemo(() => {
-    if (totalLogPages <= 7) {
-      return Array.from({ length: totalLogPages }, (_, i) => i + 1);
-    }
-    if (safeLogsPage <= 4) {
-      return [1, 2, 3, 4, 5, '...', totalLogPages];
-    }
-    if (safeLogsPage >= totalLogPages - 3) {
-      return [1, '...', totalLogPages - 4, totalLogPages - 3, totalLogPages - 2, totalLogPages - 1, totalLogPages];
-    }
-    return [1, '...', safeLogsPage - 1, safeLogsPage, safeLogsPage + 1, '...', totalLogPages];
-  }, [safeLogsPage, totalLogPages]);
+  const customersPagination = useMemo(
+    () => paginateItems(filteredCustomers, customersPage, customersPerPage),
+    [filteredCustomers, customersPage, customersPerPage],
+  );
 
-  const startLogItem = filteredLogs.length > 0 ? (logsPerPage === -1 ? 1 : (safeLogsPage - 1) * logsPerPage + 1) : 0;
-  const endLogItem = logsPerPage === -1 ? filteredLogs.length : Math.min(safeLogsPage * logsPerPage, filteredLogs.length);
+  const logsPagination = useMemo(
+    () => paginateItems(filteredLogs, logsPage, logsPerPage),
+    [filteredLogs, logsPage, logsPerPage],
+  );
+  const paginatedLogs = logsPagination.paginated;
 
   if (loading) {
     return (
@@ -709,7 +859,10 @@ export default function AdminAiGatewayPage() {
               <div className="w-48">
                 <Select
                   value={modelTypeFilter}
-                  onChange={(val) => setModelTypeFilter(val)}
+                  onChange={(val) => {
+                    setModelTypeFilter(val);
+                    setModelsPage(1);
+                  }}
                   options={[
                     { value: 'ALL', label: 'All Model Types' },
                     { value: 'chat', label: `Chat / LLM (${models.length})` },
@@ -723,7 +876,10 @@ export default function AdminAiGatewayPage() {
                 <input
                   type="text"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setModelsPage(1);
+                  }}
                   placeholder="Search model ID or provider..."
                   className={cn(isDark ? 'w-full pl-9 pr-3.5 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white focus:border-cyan-400 focus:outline-none' : 'w-full pl-9 pr-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:border-cyan-400 focus:outline-none')}
                 />
@@ -746,7 +902,7 @@ export default function AdminAiGatewayPage() {
                   </tr>
                 </thead>
                 <tbody className={cn("divide-y text-xs", isDark ? "divide-white/[0.05]" : "divide-slate-100")}>
-                  {filteredModels.map((m) => {
+                  {modelsPagination.paginated.map((m) => {
                     const sellIn = Math.round(m.inputPricePer1M * (1 + config.markupPercent / 100));
                     const sellOut = Math.round(m.outputPricePer1M * (1 + config.markupPercent / 100));
                     const rankItem = topModelRankings.find((r) => r.modelId === m.modelId);
@@ -907,6 +1063,19 @@ export default function AdminAiGatewayPage() {
                   })}
                 </tbody>
               </table>
+              <TablePaginationBar
+                totalItems={filteredModels.length}
+                itemLabel="models"
+                page={modelsPagination.safePage}
+                perPage={modelsPerPage}
+                totalPages={modelsPagination.totalPages}
+                startItem={modelsPagination.startItem}
+                endItem={modelsPagination.endItem}
+                pageNumbers={modelsPagination.pageNumbers}
+                isDark={isDark}
+                onPageChange={setModelsPage}
+                onPerPageChange={setModelsPerPage}
+              />
             </div>
           )}
 
@@ -967,7 +1136,10 @@ export default function AdminAiGatewayPage() {
               <input
                 type="text"
                 value={customerSearch}
-                onChange={(e) => setCustomerSearch(e.target.value)}
+                onChange={(e) => {
+                  setCustomerSearch(e.target.value);
+                  setCustomersPage(1);
+                }}
                 placeholder="Search customer name or email..."
                 className={cn(isDark ? 'w-full pl-9 pr-3.5 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white focus:border-cyan-400 focus:outline-none' : 'w-full pl-9 pr-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:border-cyan-400 focus:outline-none')}
               />
@@ -994,7 +1166,7 @@ export default function AdminAiGatewayPage() {
                     </td>
                   </tr>
                 ) : (
-                  filteredCustomers.map((c) => (
+                  customersPagination.paginated.map((c) => (
                     <tr key={c.id} className={cn("transition-colors", isDark ? "hover:bg-white/[0.02]" : "hover:bg-slate-50/80")}>
                       <td className="py-3 px-3">
                         <div className={cn(isDark ? 'font-bold text-white' : 'font-bold text-slate-900')}>{c.name || 'Unnamed User'}</div>
@@ -1045,6 +1217,19 @@ export default function AdminAiGatewayPage() {
               </tbody>
             </table>
           </div>
+          <TablePaginationBar
+            totalItems={filteredCustomers.length}
+            itemLabel="customers"
+            page={customersPagination.safePage}
+            perPage={customersPerPage}
+            totalPages={customersPagination.totalPages}
+            startItem={customersPagination.startItem}
+            endItem={customersPagination.endItem}
+            pageNumbers={customersPagination.pageNumbers}
+            isDark={isDark}
+            onPageChange={setCustomersPage}
+            onPerPageChange={setCustomersPerPage}
+          />
         </div>
       )}
 
@@ -1133,110 +1318,19 @@ export default function AdminAiGatewayPage() {
           </div>
 
           {/* Pagination Controls */}
-          {filteredLogs.length > 0 && (
-            <div className={cn(
-              "pt-3 sm:pt-4 border-t flex flex-col sm:flex-row items-center justify-between gap-3 text-xs",
-              isDark ? "border-white/[0.07]" : "border-slate-200"
-            )}>
-              {/* Left: Range Info */}
-              <div className={cn(isDark ? "text-zinc-400" : "text-slate-600", "text-center sm:text-left")}>
-                Showing <span className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>{startLogItem}</span> to{" "}
-                <span className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>{endLogItem}</span> of{" "}
-                <span className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>{filteredLogs.length}</span> requests
-              </div>
-
-              {/* Right: Page Size & Nav */}
-              <div className="flex items-center gap-3 flex-wrap justify-center">
-                <div className={cn("flex items-center gap-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
-                  <span className="hidden xs:inline">Show:</span>
-                  <div className="w-24">
-                    <Select
-                      value={logsPerPage}
-                      onChange={(val) => {
-                        setLogsPerPage(Number(val));
-                        setLogsPage(1);
-                      }}
-                      options={[
-                        { value: 10, label: "10" },
-                        { value: 25, label: "25" },
-                        { value: 50, label: "50" },
-                        { value: -1, label: `All (${filteredLogs.length})` },
-                      ]}
-                      direction="up"
-                      className="py-1 px-2.5 text-xs font-semibold rounded-lg"
-                    />
-                  </div>
-                </div>
-
-                {totalLogPages > 1 && (
-                  <div className="flex items-center gap-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-w-full py-0.5">
-                    <button
-                      type="button"
-                      onClick={() => setLogsPage((p) => Math.max(1, p - 1))}
-                      disabled={safeLogsPage === 1}
-                      className={cn(
-                        "p-1.5 rounded-lg border transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none",
-                        isDark 
-                          ? "border-white/10 bg-[#14151f] text-zinc-400 hover:text-white hover:border-cyan-500" 
-                          : "border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:border-cyan-500"
-                      )}
-                      title="Previous page"
-                      aria-label="Previous page"
-                    >
-                      <ChevronLeft className="w-3.5 h-3.5" />
-                    </button>
-
-                    <div className="flex items-center gap-1">
-                      {logPageNumbers.map((p, idx) => {
-                        if (p === '...') {
-                          return (
-                            <span key={`ellipsis-${idx}`} className={cn("px-1 font-mono", isDark ? "text-zinc-600" : "text-slate-400")}>
-                              ...
-                            </span>
-                          );
-                        }
-                        const pageNum = Number(p);
-                        const isActive = pageNum === safeLogsPage;
-                        return (
-                          <button
-                            key={`log-page-${pageNum}`}
-                            type="button"
-                            onClick={() => setLogsPage(pageNum)}
-                            className={cn(
-                              "min-w-[28px] h-7 px-2 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer border",
-                              isActive
-                                ? "bg-cyan-400 border-cyan-400 text-slate-950 font-black shadow-xs ring-1 ring-cyan-300/40"
-                                : isDark
-                                ? "border-white/10 bg-[#14151f] text-zinc-400 hover:border-cyan-500 hover:text-white"
-                                : "border-slate-200 bg-white text-slate-600 hover:border-cyan-500 hover:text-slate-900"
-                            )}
-                          >
-                            {pageNum}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => setLogsPage((p) => Math.min(totalLogPages, p + 1))}
-                      disabled={safeLogsPage === totalLogPages}
-                      className={cn(
-                        "p-1.5 rounded-lg border transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none",
-                        isDark 
-                          ? "border-white/10 bg-[#14151f] text-zinc-400 hover:text-white hover:border-cyan-500" 
-                          : "border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:border-cyan-500"
-                      )}
-                      title="Next page"
-                      aria-label="Next page"
-                    >
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+          <TablePaginationBar
+            totalItems={filteredLogs.length}
+            itemLabel="requests"
+            page={logsPagination.safePage}
+            perPage={logsPerPage}
+            totalPages={logsPagination.totalPages}
+            startItem={logsPagination.startItem}
+            endItem={logsPagination.endItem}
+            pageNumbers={logsPagination.pageNumbers}
+            isDark={isDark}
+            onPageChange={setLogsPage}
+            onPerPageChange={setLogsPerPage}
+          />
         </div>
       )}
 

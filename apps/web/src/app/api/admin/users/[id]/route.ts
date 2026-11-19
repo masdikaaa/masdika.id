@@ -224,8 +224,10 @@ export async function DELETE(req: Request, props: { params: Promise<{ id: string
     await prisma.affiliateEarning.deleteMany({ where: { OR: [{ referrerId: user.id }, { referredId: user.id }] } });
     await prisma.user.updateMany({ where: { referredById: user.id }, data: { referredById: null } });
 
-    // Billing cleanup
+    // Billing & Services cleanup (strict FK order: Invoice -> ReservedIp -> VpsService -> Subscription/VPC/K8s)
     await prisma.invoice.deleteMany({ where: { userId: user.id } });
+    await prisma.reservedIp.deleteMany({ where: { userId: user.id } });
+    await prisma.vpsService.deleteMany({ where: { userId: user.id } });
     await prisma.subscription.deleteMany({ where: { userId: user.id } });
 
     // Support cleanup
@@ -238,11 +240,16 @@ export async function DELETE(req: Request, props: { params: Promise<{ id: string
     }
     await prisma.ticketMessage.deleteMany({ where: { userId: user.id } }); // Delete any messages they sent on other tickets
 
-    // Services cleanup
-    await prisma.vpsService.deleteMany({ where: { userId: user.id } });
+    // Remaining Services & AI Gateway cleanup
     await prisma.vpcNetwork.deleteMany({ where: { userId: user.id } });
     await prisma.kubernetesCluster.deleteMany({ where: { userId: user.id } });
-    await prisma.reservedIp.deleteMany({ where: { userId: user.id } });
+    await prisma.databaseService.deleteMany({ where: { userId: user.id } });
+    await prisma.appService.deleteMany({ where: { userId: user.id } });
+    await prisma.objectStorageService.deleteMany({ where: { userId: user.id } });
+    await prisma.cdnApiKey.deleteMany({ where: { userId: user.id } });
+    await prisma.cdnBucket.deleteMany({ where: { userId: user.id } });
+    await prisma.aiUsageLog.deleteMany({ where: { userId: user.id } });
+    await prisma.aiGatewayKey.deleteMany({ where: { userId: user.id } });
     await prisma.secureMedia.deleteMany({ where: { userId: user.id } });
 
     // Blog cleanup
