@@ -20,7 +20,8 @@ RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public" \
 # Reinstall sharp specifically for Alpine/musl so the native binary is correct
 # This MUST happen in deps so runner can simply copy node_modules without any npm run
 RUN rm -rf node_modules/@img node_modules/sharp && \
-    npm install --os=linux --libc=musl --cpu=x64 sharp --legacy-peer-deps
+    npm install --os=linux --libc=musl --cpu=x64 sharp --legacy-peer-deps && \
+    mkdir -p /app/apps/web/node_modules
 
 # ─── Stage 2: Build the Next.js app ───────────────────────────────────────────
 FROM base AS builder
@@ -33,8 +34,9 @@ COPY . .
 # Force remove any node_modules or .next that might have bypassed .dockerignore from host
 RUN rm -rf node_modules apps/web/node_modules apps/web/.next
 
-# Now copy the cleanly built node_modules from deps stage
+# Now copy the cleanly built node_modules from deps stage (including workspace-nested packages)
 COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
@@ -125,6 +127,7 @@ COPY --chown=nextjs:nodejs package.json ./package.json
 # from deps stage (which includes next, react, ws, cookie, @swc/helpers, and
 # Alpine-compatible sharp). NO npm install runs here to avoid pruning.
 COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
+COPY --from=deps --chown=nextjs:nodejs /app/apps/web/node_modules ./apps/web/node_modules
 RUN rm -rf /app/node_modules/minimatch /app/node_modules/@typescript-eslint /app/node_modules/postcss-selector-parser
 
 ENV NEXT_SHARP_PATH=/app/node_modules/sharp
