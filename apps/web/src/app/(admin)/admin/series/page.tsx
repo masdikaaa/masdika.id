@@ -8,6 +8,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { AdminLoader } from "@/components/admin/AdminLoader";
+import { Pagination } from "@/components/ui/Pagination";
 
 export default function AdminSeriesPage() {
   const { theme } = useTheme();
@@ -396,29 +397,11 @@ export default function AdminSeriesPage() {
           </table>
         </div>
         {totalPages > 1 && (
-          <div className={cn("flex flex-col sm:flex-row items-center justify-between px-6 py-4 border-t gap-4", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
-            <div className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
+          <div className={cn("flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-4 border-t gap-3", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
+            <div className={cn("text-xs sm:text-sm text-center sm:text-left", isDark ? "text-zinc-400" : "text-slate-500")}>
               Showing <span className={cn("font-medium", isDark ? "text-white" : "text-slate-900")}>{series.length}</span> of <span className={cn("font-medium", isDark ? "text-white" : "text-slate-900")}>{total}</span> results
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className={cn("px-3 py-1 text-sm rounded-lg border disabled:opacity-50 disabled:cursor-not-allowed transition-colors", isDark ? "border-white/[0.08] text-zinc-300 hover:bg-slate-800/50" : "border-slate-200 text-slate-600 hover:bg-slate-100")}
-              >
-                Previous
-              </button>
-              <div className={cn("text-sm mx-2", isDark ? "text-zinc-400" : "text-slate-500")}>
-                Page <span className={cn("font-medium", isDark ? "text-white" : "text-slate-900")}>{page}</span> of {totalPages}
-              </div>
-              <button
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className={cn("px-3 py-1 text-sm rounded-lg border disabled:opacity-50 disabled:cursor-not-allowed transition-colors", isDark ? "border-white/[0.08] text-zinc-300 hover:bg-slate-800/50" : "border-slate-200 text-slate-600 hover:bg-slate-100")}
-              >
-                Next
-              </button>
-            </div>
+            <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
           </div>
         )}
       </div>

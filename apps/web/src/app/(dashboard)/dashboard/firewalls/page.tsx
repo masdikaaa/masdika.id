@@ -337,7 +337,7 @@ export default function FirewallsDashboardPage() {
                 <p className={cn("text-xs sm:text-sm max-w-sm mx-auto", isDark ? "text-zinc-400" : "text-slate-500")}>Please select a VPS instance from the dropdown above to manage its firewall rules.</p>
              </div>
           ) : (
-            <div className={cn("overflow-x-auto w-full border-t pt-2 mt-4", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>
+            <div className={cn("w-full border-t pt-2 mt-4", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>
               {firewallLoading ? (
                 <div className="w-full flex items-center justify-center py-16">
                   <RefreshCw className="w-8 h-8 text-cyan-500 animate-spin" />
@@ -357,6 +357,7 @@ export default function FirewallsDashboardPage() {
                       </div>
                     </div>
                   )}
+                  <div className="overflow-x-auto w-full">
                   <table className={cn("w-full text-left text-sm min-w-[700px]", isDark ? "text-zinc-400" : "text-slate-600")}>
                     <thead className={cn("text-xs uppercase rounded-t-xl border-b", isDark ? "text-zinc-400 bg-white/[0.02] border-white/[0.08]" : "text-slate-500 bg-slate-50/80 border-slate-200/90")}>
                       <tr>
@@ -460,6 +461,7 @@ export default function FirewallsDashboardPage() {
                     )}
                   </tbody>
                 </table>
+                  </div>
                 {totalRulePages > 1 && (
                   <div className={cn("p-4 border-t shrink-0", isDark ? "border-white/[0.08] bg-white/[0.02]" : "border-slate-200/90 bg-slate-50/80")}>
                     <Pagination

@@ -221,7 +221,7 @@ export default function AdminLiveChat() {
           </div>
           {totalPages > 1 && (
             <div className={cn("p-3 border-t", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
-              <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+              <Pagination compact currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
             </div>
           )}
         </div>

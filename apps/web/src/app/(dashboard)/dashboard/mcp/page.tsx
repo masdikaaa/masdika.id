@@ -19,7 +19,6 @@ import {
   Code2,
   ChevronDown,
   ChevronRight,
-  ChevronLeft,
   Boxes,
   Package,
   Wallet,
@@ -52,6 +51,7 @@ import {
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
 import { Select } from "@/components/ui/Select";
+import { Pagination } from "@/components/ui/Pagination";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { MASDIKA_MCP_TOOLS } from "@/lib/mcp-schema";
 
@@ -1244,7 +1244,7 @@ export default function McpDashboardPage() {
             isDark ? "border-white/10 text-zinc-400" : "border-slate-200 text-slate-600"
           )}>
             {/* Page indicator info */}
-            <div className="text-xs font-medium">
+            <div className="text-xs font-medium text-center sm:text-left">
               Showing <span className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>{startIndex + 1}</span> to{" "}
               <span className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>
                 {Math.min(startIndex + ITEMS_PER_PAGE, filteredTools.length)}
@@ -1252,80 +1252,11 @@ export default function McpDashboardPage() {
               of <span className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>{filteredTools.length}</span> tools
             </div>
 
-            {/* Controls */}
-            <div className="flex items-center gap-1.5 flex-wrap justify-center">
-              <button
-                type="button"
-                disabled={safePage <= 1}
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                className={cn(
-                  "px-3 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed",
-                  isDark
-                    ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white"
-                    : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-2xs"
-                )}
-              >
-                <ChevronLeft className="w-3.5 h-3.5" />
-                <span>Previous</span>
-              </button>
-
-              {/* Page numbers */}
-              <div className="flex items-center gap-1">
-                {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((pageNum) => {
-                  if (
-                    totalPages > 5 &&
-                    pageNum !== 1 &&
-                    pageNum !== totalPages &&
-                    Math.abs(pageNum - safePage) > 1
-                  ) {
-                    if (pageNum === 2 || pageNum === totalPages - 1) {
-                      return (
-                        <span key={pageNum} className="px-1 text-xs text-zinc-500 select-none">
-                          ...
-                        </span>
-                      );
-                    }
-                    return null;
-                  }
-
-                  const isActive = pageNum === safePage;
-                  return (
-                    <button
-                      key={pageNum}
-                      type="button"
-                      onClick={() => setCurrentPage(pageNum)}
-                      className={cn(
-                        "w-8 h-8 rounded-xl text-xs font-bold border flex items-center justify-center transition-all cursor-pointer",
-                        isActive
-                          ? isDark
-                            ? "bg-cyan-400 text-slate-950 border-cyan-400 shadow-sm"
-                            : "bg-cyan-500 text-white border-cyan-500 shadow-sm"
-                          : isDark
-                            ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300"
-                            : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-2xs"
-                      )}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <button
-                type="button"
-                disabled={safePage >= totalPages}
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                className={cn(
-                  "px-3 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed",
-                  isDark
-                    ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white"
-                    : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-2xs"
-                )}
-              >
-                <span>Next</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
+            <Pagination
+              currentPage={safePage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         )}
       </div>

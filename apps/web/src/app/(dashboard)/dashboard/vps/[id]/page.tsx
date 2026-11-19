@@ -2378,7 +2378,8 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                           </button>
                         </div>
                       )}
-                      <div className={cn("overflow-x-auto w-full rounded-xl border", isDark ? "border-white/[0.08] bg-[#0a0a0c]" : "border-slate-200/90 bg-white shadow-2xs")}>
+                      <div className={cn("w-full rounded-xl border overflow-hidden", isDark ? "border-white/[0.08] bg-[#0a0a0c]" : "border-slate-200/90 bg-white shadow-2xs")}>
+                        <div className="overflow-x-auto w-full">
                         <table className="w-full text-left text-sm">
                           <thead className={cn("text-xs uppercase font-bold tracking-wider border-b", isDark ? "bg-black/20 text-zinc-400 border-white/[0.08]" : "bg-slate-50 text-slate-700 border-slate-200/90")}>
                             <tr>
@@ -2473,6 +2474,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                             )}
                           </tbody>
                         </table>
+                        </div>
                         {totalRulePages > 1 && (
                           <div className={cn("p-4 border-t shrink-0", isDark ? "border-white/[0.08] bg-black/20" : "border-slate-200 bg-slate-50/50")}>
                             <Pagination
@@ -4371,26 +4373,15 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
 
                             {/* Pagination Controls */}
                             {filteredTasks.length > 10 && (
-                              <div className={cn("flex items-center justify-between pt-4 border-t", isDark ? "border-white/5" : "border-slate-300")}>
-                                <span className={cn("text-xs font-medium", isDark ? "text-zinc-400" : "text-slate-700")}>
+                              <div className={cn("flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t", isDark ? "border-white/5" : "border-slate-300")}>
+                                <span className={cn("text-xs font-medium text-center sm:text-left", isDark ? "text-zinc-400" : "text-slate-700")}>
                                   Showing {(taskPage - 1) * 10 + 1} to {Math.min(taskPage * 10, filteredTasks.length)} of {filteredTasks.length}
                                 </span>
-                                <div className="flex gap-2">
-                                  <button
-                                    onClick={() => setTaskPage(Math.max(1, taskPage - 1))}
-                                    disabled={taskPage === 1}
-                                    className={cn("px-3 py-1 rounded-lg text-xs font-bold disabled:opacity-50 transition-colors", isDark ? "bg-white/5 hover:bg-white/10 text-white" : "bg-slate-100 hover:bg-slate-200 text-slate-900 border border-slate-300")}
-                                  >
-                                    Previous
-                                  </button>
-                                  <button
-                                    onClick={() => setTaskPage(taskPage + 1)}
-                                    disabled={taskPage * 10 >= filteredTasks.length}
-                                    className={cn("px-3 py-1 rounded-lg text-xs font-bold disabled:opacity-50 transition-colors", isDark ? "bg-white/5 hover:bg-white/10 text-white" : "bg-slate-100 hover:bg-slate-200 text-slate-900 border border-slate-300")}
-                                  >
-                                    Next
-                                  </button>
-                                </div>
+                                <Pagination
+                                  currentPage={taskPage}
+                                  totalPages={Math.ceil(filteredTasks.length / 10)}
+                                  onPageChange={setTaskPage}
+                                />
                               </div>
                             )}
                           </>

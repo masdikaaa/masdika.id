@@ -13,6 +13,7 @@ import Editor from "@/components/admin/Editor";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { motion } from "framer-motion";
 import { Select } from "@/components/ui/Select";
+import { Pagination } from "@/components/ui/Pagination";
 
 const LEVELS = ["Beginner", "Intermediate", "Advanced"];
 
@@ -383,29 +384,11 @@ export default function EditSeriesPage({ params }: { params: Promise<{ id: strin
           </div>
 
           {epTotalPages > 1 && (
-            <div className={cn("flex flex-col sm:flex-row items-center justify-between pt-4 border-t gap-4 mt-6", isDark ? "border-white/[0.08]" : "border-slate-200")}>
-              <div className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
+            <div className={cn("flex flex-col sm:flex-row items-center justify-between pt-4 border-t gap-3 mt-6", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+              <div className={cn("text-xs sm:text-sm text-center sm:text-left", isDark ? "text-zinc-400" : "text-slate-500")}>
                 Showing <span className={cn("font-medium", isDark ? "text-white" : "text-slate-900")}>{episodes.length}</span> of <span className={cn("font-medium", isDark ? "text-white" : "text-slate-900")}>{epTotal}</span> episodes
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setEpPage(p => Math.max(1, p - 1))}
-                  disabled={epPage === 1}
-                  className={cn("px-3 py-1.5 text-sm rounded-lg border disabled:opacity-50 disabled:cursor-not-allowed transition-colors", isDark ? "border-white/[0.08] text-zinc-300 hover:bg-slate-800/50" : "border-slate-200 text-slate-600 hover:bg-slate-100")}
-                >
-                  Previous
-                </button>
-                <div className={cn("text-sm mx-2", isDark ? "text-zinc-400" : "text-slate-500")}>
-                  Page <span className={cn("font-medium", isDark ? "text-white" : "text-slate-900")}>{epPage}</span> of {epTotalPages}
-                </div>
-                <button
-                  onClick={() => setEpPage(p => Math.min(epTotalPages, p + 1))}
-                  disabled={epPage === epTotalPages}
-                  className={cn("px-3 py-1.5 text-sm rounded-lg border disabled:opacity-50 disabled:cursor-not-allowed transition-colors", isDark ? "border-white/[0.08] text-zinc-300 hover:bg-slate-800/50" : "border-slate-200 text-slate-600 hover:bg-slate-100")}
-                >
-                  Next
-                </button>
-              </div>
+              <Pagination currentPage={epPage} totalPages={epTotalPages} onPageChange={setEpPage} />
             </div>
           )}
         </motion.div>

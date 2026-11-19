@@ -2,7 +2,7 @@
 
 import { useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
-import { Receipt, Globe, Clock, CheckCircle, XCircle, CreditCard, ExternalLink, ArrowUpCircle, Printer, Plus, X, Wallet, Building2, Store, QrCode, Database, Layers, ArrowRight, RefreshCw, HardDrive, Cloud, Activity, Music, PlaySquare, FileText, Code2, Server, Terminal, Network, Box, Boxes, Loader2, Search, Calendar, Filter, ChevronLeft, ChevronRight } from "lucide-react";
+import { Receipt, Globe, Clock, CheckCircle, XCircle, CreditCard, ExternalLink, ArrowUpCircle, Printer, Plus, X, Wallet, Building2, Store, QrCode, Database, Layers, ArrowRight, RefreshCw, HardDrive, Cloud, Activity, Music, PlaySquare, FileText, Code2, Server, Terminal, Network, Box, Boxes, Loader2, Search, Calendar, Filter } from "lucide-react";
 import Link from "next/link";
 import { formatRupiah, getCycleText } from "@/lib/billing";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -448,26 +448,16 @@ export default function CustomerBillingPage() {
                   })}
                 </div>
                 {totalActive > servicesPerPage && (
-                  <div className={cn("p-3 border-t flex justify-between items-center", isDark ? "border-white/[0.08] bg-[#111115]" : "border-slate-200/90 bg-slate-50/80")}>
-                    <span className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>
+                  <div className={cn("p-3 border-t flex flex-col sm:flex-row justify-between items-center gap-2.5", isDark ? "border-white/[0.08] bg-[#111115]" : "border-slate-200/90 bg-slate-50/80")}>
+                    <span className={cn("text-xs text-center sm:text-left", isDark ? "text-zinc-500" : "text-slate-500")}>
                       Showing {(servicesPage - 1) * servicesPerPage + 1} to {Math.min(servicesPage * servicesPerPage, totalActive)} of {totalActive}
                     </span>
-                    <div className="flex gap-2">
-                      <button 
-                        onClick={() => setServicesPage(p => Math.max(1, p - 1))} 
-                        disabled={servicesPage === 1} 
-                        className={cn("p-1.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed border transition-all", isDark ? "bg-white/[0.03] hover:bg-white/[0.08] border-white/[0.08] text-zinc-300" : "bg-white hover:bg-slate-100 border-slate-200/90 text-slate-700")}
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                      </button>
-                      <button 
-                        onClick={() => setServicesPage(p => Math.min(Math.ceil(totalActive / servicesPerPage), p + 1))} 
-                        disabled={servicesPage >= Math.ceil(totalActive / servicesPerPage)} 
-                        className={cn("p-1.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed border transition-all", isDark ? "bg-white/[0.03] hover:bg-white/[0.08] border-white/[0.08] text-zinc-300" : "bg-white hover:bg-slate-100 border-slate-200/90 text-slate-700")}
-                      >
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
+                    <Pagination
+                      compact
+                      currentPage={servicesPage}
+                      totalPages={Math.ceil(totalActive / servicesPerPage)}
+                      onPageChange={setServicesPage}
+                    />
                   </div>
                 )}
               </div>

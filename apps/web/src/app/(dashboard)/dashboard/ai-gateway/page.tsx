@@ -1887,7 +1887,7 @@ aider --model openai/glm-5.3
 
                   {/* Overview Mini Pagination */}
                   {totalOverviewModelPages > 1 && (
-                    <div className="flex items-center justify-between pt-2 border-t border-white/[0.06] text-xs">
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-white/[0.06] text-xs">
                       <span className={cn('text-[11px]', isDark ? 'text-zinc-500' : 'text-slate-500')}>
                         Showing {(safeOverviewModelPage - 1) * OVERVIEW_MODELS_PER_PAGE + 1} - {Math.min(safeOverviewModelPage * OVERVIEW_MODELS_PER_PAGE, filteredOverviewModels.length)} of {filteredOverviewModels.length}
                       </span>
@@ -2277,7 +2277,6 @@ aider --model openai/glm-5.3
                       {m.images && m.images.length > 0 && (
                         <div className="flex flex-wrap gap-2 mb-2">
                           {m.images.map((imgSrc, iIdx) => (
-                            // eslint-disable-next-line @next/next/no-img-element
                             <img
                               key={iIdx}
                               src={imgSrc}
@@ -2320,7 +2319,6 @@ aider --model openai/glm-5.3
               <div className={cn('px-3 pt-2.5 flex items-center gap-2 border-t', isDark ? 'bg-[#12151e] border-white/[0.07]' : 'bg-slate-50 border-slate-200')}>
                 {pgImages.map((src, idx) => (
                   <div key={idx} className="relative group">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={src} alt="Preview" className="w-12 h-12 rounded-lg object-cover border border-cyan-500/40" />
                     <button
                       type="button"
@@ -2644,7 +2642,6 @@ aider --model openai/glm-5.3
                     key={img.id}
                     className={cn('rounded-xl border overflow-hidden flex flex-col', isDark ? 'bg-[#0a0a0c] border-white/[0.08]' : 'bg-slate-50 border-slate-200')}
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={img.url} alt={img.prompt} className="w-full aspect-square object-cover" />
                     <div className="p-3 space-y-2">
                       <p className={cn('text-xs line-clamp-2', isDark ? 'text-zinc-200' : 'text-slate-800')}>
@@ -2930,7 +2927,7 @@ aider --model openai/glm-5.3
                   </div>
 
                   {/* Right: Page Size & Pagination */}
-                  <div className="flex items-center gap-3 flex-wrap justify-center">
+                  <div className="flex flex-col sm:flex-row items-center gap-2.5 sm:gap-3 w-full sm:w-auto justify-center">
                     <div className="flex items-center gap-1.5 text-zinc-400">
                       <span className="hidden xs:inline">Show:</span>
                       <div className="w-24">
@@ -3101,7 +3098,7 @@ aider --model openai/glm-5.3
                   </div>
 
                   {/* Right: Page Size & Pagination */}
-                  <div className="flex items-center gap-3 flex-wrap justify-center">
+                  <div className="flex flex-col sm:flex-row items-center gap-2.5 sm:gap-3 w-full sm:w-auto justify-center">
                     <div className="flex items-center gap-1.5 text-zinc-400">
                       <span className="hidden xs:inline">Show:</span>
                       <div className="w-24">
@@ -3568,7 +3565,7 @@ aider --model openai/glm-5.3
                 </div>
 
                 {/* Right: Page Size & Pagination */}
-                <div className="flex items-center gap-3 flex-wrap justify-center">
+                <div className="flex flex-col sm:flex-row items-center gap-2.5 sm:gap-3 w-full sm:w-auto justify-center">
                   <div className="flex items-center gap-1.5 text-zinc-400">
                     <span className="hidden xs:inline">Show:</span>
                     <div className="w-24">
@@ -3786,7 +3783,7 @@ aider --model openai/glm-5.3
                 </div>
 
                 {/* Right: Page Size & Pagination */}
-                <div className="flex items-center gap-3 flex-wrap justify-center">
+                <div className="flex flex-col sm:flex-row items-center gap-2.5 sm:gap-3 w-full sm:w-auto justify-center">
                   <div className="flex items-center gap-1.5 text-zinc-400">
                     <span className="hidden xs:inline">Show:</span>
                     <div className="w-24">

@@ -708,8 +708,8 @@ export function AiTopModelsRanking({
 
             {/* Pagination Controls */}
             {totalPages > 1 && (
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-inherit">
-                <span className={cn('text-xs font-mono', isDark ? 'text-zinc-400' : 'text-slate-600')}>
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-inherit">
+                <span className={cn('text-xs font-mono text-center sm:text-left', isDark ? 'text-zinc-400' : 'text-slate-600')}>
                   Showing {(currentPage - 1) * pageSize + 1} - {Math.min(currentPage * pageSize, sortedAndFiltered.length)} of {sortedAndFiltered.length} Top Models
                 </span>
                 <Pagination

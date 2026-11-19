@@ -2,10 +2,11 @@
 
 import { useUrlNumber, useUrlTab } from "@/lib/useUrlTab";
 import { useState, useEffect, useRef } from "react";
-import { Plus, Server, Trash2, RefreshCw, Loader2, Link2, AlertTriangle, CheckCircle, Info, ShieldAlert, Network, Clock, Plug, Unplug, Copy, ToggleLeft, ToggleRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Server, Trash2, RefreshCw, Loader2, Link2, AlertTriangle, CheckCircle, Info, ShieldAlert, Network, Clock, Plug, Unplug, Copy, ToggleLeft, ToggleRight } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { Select } from "@/components/ui/Select";
+import { Pagination } from "@/components/ui/Pagination";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -990,14 +991,12 @@ export default function VpcDashboardPage() {
                     ))}
                   </tbody>
                 </table>
+                </div>
                 {totalVpcsPages > 1 && (
-                  <div className="flex items-center justify-center gap-2 mt-6">
-                    <button onClick={() => setVpcsPage(p => Math.max(1, p - 1))} disabled={vpcsPage === 1} className={cn("px-3 py-1 bg-white/[0.02] border rounded-lg disabled:opacity-50", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>Prev</button>
-                    <span className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Page {vpcsPage} / {totalVpcsPages}</span>
-                    <button onClick={() => setVpcsPage(p => Math.min(totalVpcsPages, p + 1))} disabled={vpcsPage === totalVpcsPages} className={cn("px-3 py-1 bg-white/[0.02] border rounded-lg disabled:opacity-50", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>Next</button>
+                  <div className={cn("pt-4 mt-2 border-t flex justify-center", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                    <Pagination currentPage={vpcsPage} totalPages={totalVpcsPages} onPageChange={setVpcsPage} />
                   </div>
                 )}
-              </div>
             </>
           )}
         </div>
@@ -1140,14 +1139,12 @@ export default function VpcDashboardPage() {
                     ))}
                   </tbody>
                 </table>
-                {totalPeeringsPages > 1 && (
-                  <div className="flex items-center justify-center gap-2 mt-6 mb-2">
-                    <button onClick={() => setPeeringsPage(p => Math.max(1, p - 1))} disabled={peeringsPage === 1} className={cn("px-3 py-1 bg-white/[0.02] border rounded-lg disabled:opacity-50", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>Prev</button>
-                    <span className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>Page {peeringsPage} / {totalPeeringsPages}</span>
-                    <button onClick={() => setPeeringsPage(p => Math.min(totalPeeringsPages, p + 1))} disabled={peeringsPage === totalPeeringsPages} className={cn("px-3 py-1 bg-white/[0.02] border rounded-lg disabled:opacity-50", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>Next</button>
-                  </div>
-                )}
               </div>
+              {totalPeeringsPages > 1 && (
+                <div className={cn("pt-4 mt-2 border-t flex justify-center", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                  <Pagination currentPage={peeringsPage} totalPages={totalPeeringsPages} onPageChange={setPeeringsPage} />
+                </div>
+              )}
             </>
           )}
         </div>
@@ -1593,24 +1590,8 @@ export default function VpcDashboardPage() {
                       </div>
 
                       {totalPages > 1 && (
-                        <div className={cn("flex items-center justify-between pt-4 border-t mt-4", isDark ? "border-white/[0.08]" : "border-slate-200")}>
-                          <button
-                            onClick={() => setManageVmsPage(p => Math.max(1, p - 1))}
-                            disabled={manageVmsPage === 1}
-                            className={cn("px-4 py-2 border rounded-xl text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed", isDark ? "bg-white/[0.02] hover:bg-white/[0.06] border-white/[0.08] text-zinc-300" : "bg-white hover:bg-slate-50 border-slate-200/90 text-slate-700")}
-                          >
-                            Previous
-                          </button>
-                          <span className={cn("text-sm font-medium px-3 py-1 rounded-full border", isDark ? "text-zinc-400 bg-white/[0.02] border-white/[0.08]" : "text-slate-500 bg-slate-50/80 border-slate-200/90")}>
-                            Page {manageVmsPage} of {totalPages}
-                          </span>
-                          <button
-                            onClick={() => setManageVmsPage(p => Math.min(totalPages, p + 1))}
-                            disabled={manageVmsPage === totalPages}
-                            className={cn("px-4 py-2 border rounded-xl text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed", isDark ? "bg-white/[0.02] hover:bg-white/[0.06] border-white/[0.08] text-zinc-300" : "bg-white hover:bg-slate-50 border-slate-200/90 text-slate-700")}
-                          >
-                            Next
-                          </button>
+                        <div className={cn("flex justify-center pt-4 border-t mt-4", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                          <Pagination compact currentPage={manageVmsPage} totalPages={totalPages} onPageChange={setManageVmsPage} />
                         </div>
                       )}
                     </div>

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/components/ThemeProvider';
 import { toast } from 'sonner';
+import { Pagination } from '@/components/ui/Pagination';
 import {
   ObjectStorageScaleModal,
   type ObjectStoragePlanOption,
@@ -1501,38 +1502,16 @@ s3 = boto3.client(
 
                     {/* Object Browser Pagination */}
                     {filteredObjects.length > 0 && (
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 text-[11px]">
-                        <span className={isDark ? 'text-zinc-500' : 'text-slate-500'}>
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-2 text-[11px]">
+                        <span className={cn("text-center sm:text-left", isDark ? 'text-zinc-500' : 'text-slate-500')}>
                           Showing {(safeObjectPage - 1) * OBJECTS_PER_PAGE + 1}–{Math.min(safeObjectPage * OBJECTS_PER_PAGE, filteredObjects.length)} of {filteredObjects.length} objects
                         </span>
                         {totalObjectPages > 1 && (
-                          <div className="flex items-center gap-1.5">
-                            <button
-                              type="button"
-                              onClick={() => setObjectPage((p) => Math.max(1, p - 1))}
-                              disabled={safeObjectPage <= 1}
-                              className={cn(
-                                'px-2.5 py-1 rounded-lg border font-semibold transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed',
-                                isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-zinc-300 hover:bg-white/[0.05]' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-                              )}
-                            >
-                              Prev
-                            </button>
-                            <span className={cn('px-2 font-mono font-semibold', isDark ? 'text-zinc-300' : 'text-slate-700')}>
-                              Page {safeObjectPage} / {totalObjectPages}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => setObjectPage((p) => Math.min(totalObjectPages, p + 1))}
-                              disabled={safeObjectPage >= totalObjectPages}
-                              className={cn(
-                                'px-2.5 py-1 rounded-lg border font-semibold transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed',
-                                isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-zinc-300 hover:bg-white/[0.05]' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-                              )}
-                            >
-                              Next
-                            </button>
-                          </div>
+                          <Pagination
+                            currentPage={safeObjectPage}
+                            totalPages={totalObjectPages}
+                            onPageChange={setObjectPage}
+                          />
                         )}
                       </div>
                     )}

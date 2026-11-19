@@ -18,12 +18,11 @@ import {
   ShieldCheck,
   Activity,
   Search,
-  ChevronLeft,
-  ChevronRight,
 } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { cn } from '@/lib/utils';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { Pagination } from '@/components/ui/Pagination';
 
 interface ApiKeyItem {
   id: number;
@@ -544,48 +543,20 @@ export default function ApiVpsPage() {
             {totalVpsPages > 1 && (
               <div
                 className={cn(
-                  'px-5 py-3.5 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-3',
+                  'px-4 sm:px-5 py-3.5 border-t flex flex-col sm:flex-row items-center justify-between gap-3',
                   isDark ? 'border-white/[0.08]' : 'border-slate-200'
                 )}
               >
-                <span className={cn('text-xs', isDark ? 'text-zinc-400' : 'text-slate-500')}>
+                <span className={cn('text-xs text-center sm:text-left', isDark ? 'text-zinc-400' : 'text-slate-500')}>
                   Showing {(safeVpsPage - 1) * VPS_PER_PAGE + 1}–
                   {Math.min(safeVpsPage * VPS_PER_PAGE, filteredVpsList.length)} of{' '}
                   {filteredVpsList.length} instances
                 </span>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => setVpsPage((p) => Math.max(1, p - 1))}
-                    disabled={safeVpsPage <= 1}
-                    className={cn(
-                      'inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors disabled:opacity-40 disabled:pointer-events-none',
-                      isDark
-                        ? 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border-white/[0.08]'
-                        : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
-                    )}
-                  >
-                    <ChevronLeft className="w-3.5 h-3.5" />
-                    Prev
-                  </button>
-                  <span className={cn('text-xs font-medium px-2', isDark ? 'text-zinc-300' : 'text-slate-700')}>
-                    Page {safeVpsPage} / {totalVpsPages}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setVpsPage((p) => Math.min(totalVpsPages, p + 1))}
-                    disabled={safeVpsPage >= totalVpsPages}
-                    className={cn(
-                      'inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors disabled:opacity-40 disabled:pointer-events-none',
-                      isDark
-                        ? 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border-white/[0.08]'
-                        : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
-                    )}
-                  >
-                    Next
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+                <Pagination
+                  currentPage={safeVpsPage}
+                  totalPages={totalVpsPages}
+                  onPageChange={setVpsPage}
+                />
               </div>
             )}
           </>

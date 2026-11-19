@@ -1,14 +1,15 @@
-﻿"use client";
+"use client";
 
 import { useUpdateEffect, useUrlNumber, useUrlString, useUrlTab } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
-import { Plus, Server, HardDrive, Edit, Trash2, Cpu, MemoryStick, RefreshCw, Network, Search, Play, Square, RefreshCcw, Power, ShieldAlert, XCircle, AlertTriangle, Receipt, Settings, CheckCircle, Save, FileText, Globe, X, ChevronLeft, ChevronRight, Terminal, Key, Loader2, GripVertical, Gauge, Activity, Zap, Copy, Check, Info, Rocket } from "lucide-react";
+import { Plus, Server, HardDrive, Edit, Trash2, Cpu, MemoryStick, RefreshCw, Network, Search, Play, Square, RefreshCcw, Power, ShieldAlert, XCircle, AlertTriangle, Receipt, Settings, CheckCircle, Save, FileText, Globe, X, Terminal, Key, Loader2, GripVertical, Gauge, Activity, Zap, Copy, Check, Info, Rocket } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Reorder } from "framer-motion";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { Select } from "@/components/ui/Select";
+import { Pagination } from "@/components/ui/Pagination";
 import { getOsIconUrl, formatOsName, OS_GROUPS } from "@/lib/vps-os";
 
 type VpsService = {
@@ -1499,26 +1500,15 @@ export default function VpsManagementPage() {
             </table>
           </div>
           {pools.length > poolsPerPage && (
-            <div className={cn("px-6 py-4 border-t flex items-center justify-between", isDark ? "border-white/10" : "border-slate-200")}>
-              <span className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
+            <div className={cn("px-4 sm:px-6 py-3.5 border-t flex flex-col sm:flex-row items-center justify-between gap-3", isDark ? "border-white/10" : "border-slate-200")}>
+              <span className={cn("text-xs sm:text-sm text-center sm:text-left", isDark ? "text-zinc-400" : "text-slate-500")}>
                 Showing {((poolCurrentPage - 1) * poolsPerPage) + 1} to {Math.min(poolCurrentPage * poolsPerPage, pools.length)} of {pools.length} pools
               </span>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setPoolCurrentPage(p => Math.max(1, p - 1))}
-                  disabled={poolCurrentPage === 1}
-                  className={cn("p-1 rounded hover:bg-white/10 disabled:opacity-50 transition-colors", isDark ? "text-white" : "text-slate-900")}
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setPoolCurrentPage(p => Math.min(Math.ceil(pools.length / poolsPerPage), p + 1))}
-                  disabled={poolCurrentPage === Math.ceil(pools.length / poolsPerPage)}
-                  className={cn("p-1 rounded hover:bg-white/10 disabled:opacity-50 transition-colors", isDark ? "text-white" : "text-slate-900")}
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
+              <Pagination
+                currentPage={poolCurrentPage}
+                totalPages={Math.ceil(pools.length / poolsPerPage)}
+                onPageChange={setPoolCurrentPage}
+              />
             </div>
           )}
         </div>
@@ -2178,26 +2168,15 @@ export default function VpsManagementPage() {
               {filteredPlans.length === 0 && <div className="text-zinc-500 text-center py-6">No fixed plans configured for {planFilterDiskType} yet.</div>}
 
               {filteredPlans.length > plansPerPage && (
-                <div className={cn("px-6 py-4 border-t mt-4 flex items-center justify-between", isDark ? "border-white/[0.08]" : "border-slate-200")}>
-                  <span className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
+                <div className={cn("px-4 sm:px-6 py-3.5 border-t mt-4 flex flex-col sm:flex-row items-center justify-between gap-3", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                  <span className={cn("text-xs sm:text-sm text-center sm:text-left", isDark ? "text-zinc-400" : "text-slate-500")}>
                     Showing {((planCurrentPage - 1) * plansPerPage) + 1} to {Math.min(planCurrentPage * plansPerPage, filteredPlans.length)} of {filteredPlans.length} plans
                   </span>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setPlanCurrentPage(p => Math.max(1, p - 1))}
-                      disabled={planCurrentPage === 1}
-                      className={cn("p-1 rounded hover:bg-white/10 disabled:opacity-50 transition-colors", isDark ? "text-white" : "text-slate-900")}
-                    >
-                      <ChevronLeft className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={() => setPlanCurrentPage(p => Math.min(Math.ceil(filteredPlans.length / plansPerPage), p + 1))}
-                      disabled={planCurrentPage === Math.ceil(filteredPlans.length / plansPerPage)}
-                      className={cn("p-1 rounded hover:bg-white/10 disabled:opacity-50 transition-colors", isDark ? "text-white" : "text-slate-900")}
-                    >
-                      <ChevronRight className="w-5 h-5" />
-                    </button>
-                  </div>
+                  <Pagination
+                    currentPage={planCurrentPage}
+                    totalPages={Math.ceil(filteredPlans.length / plansPerPage)}
+                    onPageChange={setPlanCurrentPage}
+                  />
                 </div>
               )}
             </div>
@@ -2611,26 +2590,15 @@ export default function VpsManagementPage() {
 
           {/* Pagination Controls */}
           {!loadingServices && displayedServices.length > vpsPerPage && (
-            <div className={cn("px-6 py-4 border mt-4 rounded-2xl flex items-center justify-between glass", isDark ? "border-white/10" : "border-slate-200")}>
-              <span className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
+            <div className={cn("px-4 sm:px-6 py-3.5 border mt-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 glass", isDark ? "border-white/10" : "border-slate-200")}>
+              <span className={cn("text-xs sm:text-sm text-center sm:text-left", isDark ? "text-zinc-400" : "text-slate-500")}>
                 Showing {((vpsCurrentPage - 1) * vpsPerPage) + 1} to {Math.min(vpsCurrentPage * vpsPerPage, displayedServices.length)} of {displayedServices.length} entries
               </span>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setVpsCurrentPage(p => Math.max(1, p - 1))}
-                  disabled={vpsCurrentPage === 1}
-                  className={cn("p-1 rounded hover:bg-white/10 disabled:opacity-50 transition-colors", isDark ? "text-white" : "text-slate-900")}
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setVpsCurrentPage(p => Math.min(Math.ceil(displayedServices.length / vpsPerPage), p + 1))}
-                  disabled={vpsCurrentPage === Math.ceil(displayedServices.length / vpsPerPage)}
-                  className={cn("p-1 rounded hover:bg-white/10 disabled:opacity-50 transition-colors", isDark ? "text-white" : "text-slate-900")}
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
+              <Pagination
+                currentPage={vpsCurrentPage}
+                totalPages={Math.ceil(displayedServices.length / vpsPerPage)}
+                onPageChange={setVpsCurrentPage}
+              />
             </div>
           )}
         </div>
@@ -2839,29 +2807,21 @@ export default function VpsManagementPage() {
           )}
 
           {/* Pagination Controls */}
-          {!loadingReservedIps && reservedIps.filter((ip) => ip.ipAddress.includes(searchQuery) || (ip.publicIp || "").includes(searchQuery) || ip.user.email.includes(searchQuery) || ip.user.name.toLowerCase().includes(searchQuery.toLowerCase())).length > reservedIpsPerPage && (
-            <div className={cn("px-6 py-4 border mt-4 rounded-2xl flex items-center justify-between glass", isDark ? "border-white/10" : "border-slate-200")}>
-              <span className={cn("text-sm", isDark ? "text-zinc-400" : "text-slate-500")}>
-                Showing {((reservedIpCurrentPage - 1) * reservedIpsPerPage) + 1} to {Math.min(reservedIpCurrentPage * reservedIpsPerPage, reservedIps.filter((ip) => ip.ipAddress.includes(searchQuery) || (ip.publicIp || "").includes(searchQuery) || ip.user.email.includes(searchQuery) || ip.user.name.toLowerCase().includes(searchQuery.toLowerCase())).length)} of {reservedIps.filter((ip) => ip.ipAddress.includes(searchQuery) || (ip.publicIp || "").includes(searchQuery) || ip.user.email.includes(searchQuery) || ip.user.name.toLowerCase().includes(searchQuery.toLowerCase())).length} entries
-              </span>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setReservedIpCurrentPage(p => Math.max(1, p - 1))}
-                  disabled={reservedIpCurrentPage === 1}
-                  className={cn("p-1 rounded hover:bg-white/10 disabled:opacity-50 transition-colors", isDark ? "text-white" : "text-slate-900")}
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setReservedIpCurrentPage(p => Math.min(Math.ceil(reservedIps.filter((ip) => ip.ipAddress.includes(searchQuery) || (ip.publicIp || "").includes(searchQuery) || ip.user.email.includes(searchQuery) || ip.user.name.toLowerCase().includes(searchQuery.toLowerCase())).length / reservedIpsPerPage), p + 1))}
-                  disabled={reservedIpCurrentPage === Math.ceil(reservedIps.filter((ip) => ip.ipAddress.includes(searchQuery) || (ip.publicIp || "").includes(searchQuery) || ip.user.email.includes(searchQuery) || ip.user.name.toLowerCase().includes(searchQuery.toLowerCase())).length / reservedIpsPerPage)}
-                  className={cn("p-1 rounded hover:bg-white/10 disabled:opacity-50 transition-colors", isDark ? "text-white" : "text-slate-900")}
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
+          {!loadingReservedIps && reservedIps.filter((ip) => ip.ipAddress.includes(searchQuery) || (ip.publicIp || "").includes(searchQuery) || ip.user.email.includes(searchQuery) || ip.user.name.toLowerCase().includes(searchQuery.toLowerCase())).length > reservedIpsPerPage && (() => {
+            const filteredReservedIpCount = reservedIps.filter((ip) => ip.ipAddress.includes(searchQuery) || (ip.publicIp || "").includes(searchQuery) || ip.user.email.includes(searchQuery) || ip.user.name.toLowerCase().includes(searchQuery.toLowerCase())).length;
+            return (
+              <div className={cn("px-4 sm:px-6 py-3.5 border mt-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 glass", isDark ? "border-white/10" : "border-slate-200")}>
+                <span className={cn("text-xs sm:text-sm text-center sm:text-left", isDark ? "text-zinc-400" : "text-slate-500")}>
+                  Showing {((reservedIpCurrentPage - 1) * reservedIpsPerPage) + 1} to {Math.min(reservedIpCurrentPage * reservedIpsPerPage, filteredReservedIpCount)} of {filteredReservedIpCount} entries
+                </span>
+                <Pagination
+                  currentPage={reservedIpCurrentPage}
+                  totalPages={Math.ceil(filteredReservedIpCount / reservedIpsPerPage)}
+                  onPageChange={setReservedIpCurrentPage}
+                />
               </div>
-            </div>
-          )}
+            );
+          })()}
         </div>
       )}      {/* Suspend VPS Modal */}
       {showSuspendModal && (

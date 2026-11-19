@@ -1115,10 +1115,10 @@ export function K8sResourceMonitor({
       {/* Pagination */}
       {filteredItems.length > itemsPerPage && (
         <div className={cn("p-4 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-3", isDark ? "bg-[#0c0c0e] border-white/10" : "bg-white border-slate-200")}>
-          <div className={cn("text-xs", isDark ? "text-zinc-400" : "text-slate-500")}>
-            Showing <span className="font-semibold text-white">{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
-            <span className="font-semibold text-white">{Math.min(currentPage * itemsPerPage, filteredItems.length)}</span> of{" "}
-            <span className="font-semibold text-white">{filteredItems.length}</span> workloads
+          <div className={cn("text-xs text-center sm:text-left", isDark ? "text-zinc-400" : "text-slate-500")}>
+            Showing <span className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
+            <span className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>{Math.min(currentPage * itemsPerPage, filteredItems.length)}</span> of{" "}
+            <span className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>{filteredItems.length}</span> workloads
           </div>
           <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={(p) => setCurrentPage(p)} />
         </div>

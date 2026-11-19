@@ -3,7 +3,7 @@
 import { useUrlNumber } from "@/lib/useUrlTab";
 import { useState, useEffect } from "react";
 import { useTheme } from "@/components/ThemeProvider";
-import { Wallet, Building2, Store, QrCode, Loader2, ArrowLeft, Check, Plus, ShieldCheck, ChevronLeft, ChevronRight, X, Sparkles } from "lucide-react";
+import { Wallet, Building2, Store, QrCode, Loader2, ArrowLeft, Check, Plus, ShieldCheck, ChevronLeft, X, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { formatRupiah } from "@/lib/billing";
 import { toast } from "sonner";
@@ -302,24 +302,8 @@ export default function TopUpPage() {
                   </div>
                   
                   {totalPages > 1 && (
-                    <div className={cn("mt-6 flex items-center justify-center gap-4 border-t pt-5", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>
-                      <button
-                        onClick={() => setPage(p => Math.max(1, p - 1))}
-                        disabled={page === 1}
-                        className={cn("p-2 rounded-xl border disabled:opacity-50 disabled:cursor-not-allowed transition-colors", isDark ? "bg-[#111115] hover:bg-white/[0.06] border-white/[0.08] text-zinc-400 hover:text-white" : "bg-white hover:bg-slate-50 border-slate-200/90 text-slate-500 hover:text-slate-900")}
-                      >
-                        <ChevronLeft className="w-5 h-5" />
-                      </button>
-                      <span className={cn("text-sm font-bold tracking-widest", isDark ? "text-white" : "text-slate-900")}>
-                        {page}/{totalPages}
-                      </span>
-                      <button
-                        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                        disabled={page === totalPages}
-                        className={cn("p-2 rounded-xl border disabled:opacity-50 disabled:cursor-not-allowed transition-colors", isDark ? "bg-[#111115] hover:bg-white/[0.06] border-white/[0.08] text-zinc-400 hover:text-white" : "bg-white hover:bg-slate-50 border-slate-200/90 text-slate-500 hover:text-slate-900")}
-                      >
-                        <ChevronRight className="w-5 h-5" />
-                      </button>
+                    <div className={cn("mt-6 flex justify-center border-t pt-4", isDark ? "border-white/[0.08]" : "border-slate-200/90")}>
+                      <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
                     </div>
                   )}
                 </>

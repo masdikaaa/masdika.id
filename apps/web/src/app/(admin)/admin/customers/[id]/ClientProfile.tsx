@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { useUrlNumber, useUrlTab } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
@@ -1192,32 +1192,12 @@ export default function ClientProfile({ userId }: { userId: string }) {
 
               {/* Pagination matching WHMCS Image 1 */}
               {Math.ceil(emailLogs.length / emailsPerPage) > 1 && (
-                <div className={cn("p-3 px-4 border-t flex items-center justify-between", isDark ? "border-white/[0.08] bg-[#0a0a0c]" : "border-slate-200 bg-slate-50")}>
-                  <button
-                    type="button"
-                    disabled={emailCurrentPage === 1}
-                    onClick={() => setEmailCurrentPage(p => Math.max(1, p - 1))}
-                    className={cn(
-                      "px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-xs",
-                      isDark ? "bg-[#0c0c0e] border-slate-700 text-zinc-300 hover:bg-white/5" : "bg-white border-slate-300 text-slate-700 hover:bg-slate-100"
-                    )}
-                  >
-                    « Previous Page
-                  </button>
-                  <span className={cn("text-xs font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>
-                    Page {emailCurrentPage} of {Math.ceil(emailLogs.length / emailsPerPage)}
-                  </span>
-                  <button
-                    type="button"
-                    disabled={emailCurrentPage >= Math.ceil(emailLogs.length / emailsPerPage)}
-                    onClick={() => setEmailCurrentPage(p => Math.min(Math.ceil(emailLogs.length / emailsPerPage), p + 1))}
-                    className={cn(
-                      "px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-xs",
-                      isDark ? "bg-[#0c0c0e] border-slate-700 text-zinc-300 hover:bg-white/5" : "bg-white border-slate-300 text-slate-700 hover:bg-slate-100"
-                    )}
-                  >
-                    Next Page »
-                  </button>
+                <div className={cn("p-3 sm:p-4 border-t flex justify-center", isDark ? "border-white/[0.08] bg-[#0a0a0c]" : "border-slate-200 bg-slate-50")}>
+                  <Pagination
+                    currentPage={emailCurrentPage}
+                    totalPages={Math.ceil(emailLogs.length / emailsPerPage)}
+                    onPageChange={setEmailCurrentPage}
+                  />
                 </div>
               )}
             </div>
@@ -1460,54 +1440,12 @@ export default function ClientProfile({ userId }: { userId: string }) {
 
               {/* Bottom Pagination */}
               {logPagination.totalPages > 1 && (
-                <div className={cn("p-4 border-t flex flex-wrap items-center justify-center gap-2", isDark ? "border-white/[0.08] bg-[#0a0a0c]/50" : "border-slate-200 bg-slate-50")}>
-                  <button
-                    type="button"
-                    disabled={logPagination.currentPage === 1}
-                    onClick={() => fetchActivityLogs(Math.max(1, logPagination.currentPage - 1))}
-                    className={cn(
-                      "px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-xs",
-                      isDark ? "bg-[#0c0c0e] border-slate-700 text-zinc-300 hover:bg-white/5" : "bg-white border-slate-300 text-slate-700 hover:bg-slate-100"
-                    )}
-                  >
-                    « Previous Page
-                  </button>
-                  
-                  {Array.from({ length: logPagination.totalPages }, (_, i) => i + 1)
-                    .filter(p => p === 1 || p === logPagination.totalPages || Math.abs(p - logPagination.currentPage) <= 2)
-                    .map((p, i, arr) => {
-                      const prev = arr[i - 1];
-                      const showEllipsis = prev && p - prev > 1;
-                      return (
-                        <div key={p} className="flex items-center gap-1">
-                          {showEllipsis && <span className="px-1 text-zinc-500 text-xs">...</span>}
-                          <button
-                            type="button"
-                            onClick={() => fetchActivityLogs(p)}
-                            className={cn(
-                              "w-7 h-7 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center justify-center",
-                              logPagination.currentPage === p
-                                ? "bg-cyan-500 text-slate-950 shadow-xs"
-                                : isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:bg-slate-200"
-                            )}
-                          >
-                            {p}
-                          </button>
-                        </div>
-                      );
-                    })}
-
-                  <button
-                    type="button"
-                    disabled={logPagination.currentPage >= logPagination.totalPages}
-                    onClick={() => fetchActivityLogs(Math.min(logPagination.totalPages, logPagination.currentPage + 1))}
-                    className={cn(
-                      "px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-xs",
-                      isDark ? "bg-[#0c0c0e] border-slate-700 text-zinc-300 hover:bg-white/5" : "bg-white border-slate-300 text-slate-700 hover:bg-slate-100"
-                    )}
-                  >
-                    Next Page »
-                  </button>
+                <div className={cn("p-3 sm:p-4 border-t flex justify-center", isDark ? "border-white/[0.08] bg-[#0a0a0c]/50" : "border-slate-200 bg-slate-50")}>
+                  <Pagination
+                    currentPage={logPagination.currentPage}
+                    totalPages={logPagination.totalPages}
+                    onPageChange={(p) => fetchActivityLogs(p)}
+                  />
                 </div>
               )}
             </div>

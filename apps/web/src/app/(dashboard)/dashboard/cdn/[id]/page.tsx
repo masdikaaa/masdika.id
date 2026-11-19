@@ -8,6 +8,7 @@ import { formatRupiah } from '@/lib/billing';
 import { useTheme } from '@/components/ThemeProvider';
 import { toast } from 'sonner';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { Pagination } from '@/components/ui/Pagination';
 import {
   ChevronLeft,
   Cloud,
@@ -1354,32 +1355,12 @@ export default function FileCdnConsolePage({ params }: { params: Promise<{ id: s
               )}
 
               {/* Pagination */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 text-[11px]">
-                <span className={isDark ? 'text-zinc-500' : 'text-slate-500'}>
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-2 text-[11px]">
+                <span className={cn("text-center sm:text-left", isDark ? 'text-zinc-500' : 'text-slate-500')}>
                   Showing {(safePage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(safePage * ITEMS_PER_PAGE, filteredMedia.length)} of {filteredMedia.length} items
                 </span>
                 {totalPages > 1 && (
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => setPage((p) => Math.max(1, p - 1))}
-                      disabled={safePage <= 1}
-                      className={cn('px-2.5 py-1 rounded-lg border font-semibold cursor-pointer disabled:opacity-40', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-zinc-300' : 'bg-white border-slate-200 text-slate-700')}
-                    >
-                      Prev
-                    </button>
-                    <span className={cn('px-2 font-mono font-semibold', isDark ? 'text-zinc-300' : 'text-slate-700')}>
-                      Page {safePage} / {totalPages}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                      disabled={safePage >= totalPages}
-                      className={cn('px-2.5 py-1 rounded-lg border font-semibold cursor-pointer disabled:opacity-40', isDark ? 'bg-[#0a0a0c] border-white/[0.08] text-zinc-300' : 'bg-white border-slate-200 text-slate-700')}
-                    >
-                      Next
-                    </button>
-                  </div>
+                  <Pagination currentPage={safePage} totalPages={totalPages} onPageChange={setPage} />
                 )}
               </div>
             </div>

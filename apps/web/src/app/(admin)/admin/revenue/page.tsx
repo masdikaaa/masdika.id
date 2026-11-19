@@ -4,8 +4,9 @@ import { cn } from "@/lib/utils";
 import { useState, useEffect, useCallback } from "react";
 import { formatCompact } from "@/lib/utils";
 import { formatRupiah } from "@/lib/billing";
-import { Receipt, Wallet, TrendingUp, Calendar, CreditCard, Activity, ArrowUpRight, Search, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
+import { Receipt, Wallet, TrendingUp, Calendar, CreditCard, Activity, ArrowUpRight, Search, RefreshCw } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
+import { Pagination } from "@/components/ui/Pagination";
 import dynamic from "next/dynamic";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -272,33 +273,15 @@ export default function AdminRevenuePage() {
 
         {/* Pagination Controls */}
         {data.pagination && data.pagination.totalPages > 0 && (
-          <div className={cn("flex items-center justify-between mt-6 pt-4 border-t", isDark ? "border-white/[0.08]" : "border-slate-200")}>
-            <div className="text-xs text-zinc-500 font-medium">
+          <div className={cn("flex flex-col sm:flex-row items-center justify-between gap-3 mt-6 pt-4 border-t", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+            <div className="text-xs text-zinc-500 font-medium text-center sm:text-left">
               Showing <span className={cn(isDark ? "text-white" : "text-slate-900")}>{(data.pagination.page - 1) * data.pagination.limit + (data.recentInvoices.length > 0 ? 1 : 0)}</span> to <span className={cn(isDark ? "text-white" : "text-slate-900")}>{(data.pagination.page - 1) * data.pagination.limit + data.recentInvoices.length}</span> of <span className={cn(isDark ? "text-white" : "text-slate-900")}>{data.pagination.total}</span> entries
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={data.pagination.page === 1 || loading}
-                className={cn("p-2 rounded-lg border disabled:opacity-50 disabled:cursor-not-allowed transition-all", isDark ? "border-white/[0.08] bg-[#0a0a0c] text-slate-400 hover:text-white hover:bg-slate-800" : "border-slate-200 bg-white text-slate-500 hover:text-slate-900 hover:bg-slate-50")}
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              
-              <div className="flex items-center gap-1">
-                <span className={cn("text-sm font-bold w-8 text-center", isDark ? "text-white" : "text-slate-900")}>{data.pagination.page}</span>
-                <span className="text-sm text-zinc-500">/</span>
-                <span className="text-sm font-medium text-zinc-500 w-8 text-center">{data.pagination.totalPages}</span>
-              </div>
-
-              <button
-                onClick={() => setPage(p => Math.min(data.pagination.totalPages, p + 1))}
-                disabled={data.pagination.page === data.pagination.totalPages || loading}
-                className={cn("p-2 rounded-lg border disabled:opacity-50 disabled:cursor-not-allowed transition-all", isDark ? "border-white/[0.08] bg-[#0a0a0c] text-slate-400 hover:text-white hover:bg-slate-800" : "border-slate-200 bg-white text-slate-500 hover:text-slate-900 hover:bg-slate-50")}
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
+            <Pagination
+              currentPage={data.pagination.page}
+              totalPages={data.pagination.totalPages}
+              onPageChange={setPage}
+            />
           </div>
         )}
       </div>

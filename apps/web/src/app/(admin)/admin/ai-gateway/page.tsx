@@ -26,11 +26,10 @@ import {
   X,
   Image as ImageIcon,
   MessageSquare,
-  ChevronLeft,
-  ChevronRight,
   Trophy,
 } from 'lucide-react';
 import { Select } from '@/components/ui/Select';
+import { Pagination } from '@/components/ui/Pagination';
 import { AdminCheckbox } from '@/components/ui/AdminCheckbox';
 import { useTheme } from '@/components/ThemeProvider';
 import { cn } from '@/lib/utils';
@@ -89,18 +88,7 @@ function paginateItems<T>(items: T[], page: number, perPage: number) {
   const startItem = items.length > 0 ? (perPage === -1 ? 1 : (safePage - 1) * perPage + 1) : 0;
   const endItem = perPage === -1 ? items.length : Math.min(safePage * perPage, items.length);
 
-  let pageNumbers: (number | '...')[] = [];
-  if (totalPages <= 7) {
-    pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
-  } else if (safePage <= 4) {
-    pageNumbers = [1, 2, 3, 4, 5, '...', totalPages];
-  } else if (safePage >= totalPages - 3) {
-    pageNumbers = [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
-  } else {
-    pageNumbers = [1, '...', safePage - 1, safePage, safePage + 1, '...', totalPages];
-  }
-
-  return { paginated, totalPages, safePage, startItem, endItem, pageNumbers };
+  return { paginated, totalPages, safePage, startItem, endItem };
 }
 
 function TablePaginationBar({
@@ -111,7 +99,6 @@ function TablePaginationBar({
   totalPages,
   startItem,
   endItem,
-  pageNumbers,
   isDark,
   onPageChange,
   onPerPageChange,
@@ -123,7 +110,6 @@ function TablePaginationBar({
   totalPages: number;
   startItem: number;
   endItem: number;
-  pageNumbers: (number | '...')[];
   isDark: boolean;
   onPageChange: (nextPage: number) => void;
   onPerPageChange: (nextPerPage: number) => void;
@@ -143,7 +129,7 @@ function TablePaginationBar({
         <span className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>{totalItems}</span> {itemLabel}
       </div>
 
-      <div className="flex items-center gap-3 flex-wrap justify-center">
+      <div className="flex flex-col sm:flex-row items-center gap-2.5 sm:gap-3 w-full sm:w-auto justify-center">
         <div className={cn("flex items-center gap-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
           <span className="hidden xs:inline">Show:</span>
           <div className="w-24">
@@ -165,72 +151,7 @@ function TablePaginationBar({
           </div>
         </div>
 
-        {totalPages > 1 && (
-          <div className="flex items-center gap-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-w-full py-0.5">
-            <button
-              type="button"
-              onClick={() => onPageChange(Math.max(1, page - 1))}
-              disabled={page === 1}
-              className={cn(
-                "p-1.5 rounded-lg border transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none",
-                isDark
-                  ? "border-white/10 bg-[#14151f] text-zinc-400 hover:text-white hover:border-cyan-500"
-                  : "border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:border-cyan-500"
-              )}
-              title="Previous page"
-              aria-label="Previous page"
-            >
-              <ChevronLeft className="w-3.5 h-3.5" />
-            </button>
-
-            <div className="flex items-center gap-1">
-              {pageNumbers.map((p, idx) => {
-                if (p === '...') {
-                  return (
-                    <span key={`ellipsis-${idx}`} className={cn("px-1 font-mono", isDark ? "text-zinc-600" : "text-slate-400")}>
-                      ...
-                    </span>
-                  );
-                }
-                const pageNum = Number(p);
-                const isActive = pageNum === page;
-                return (
-                  <button
-                    key={`page-${pageNum}`}
-                    type="button"
-                    onClick={() => onPageChange(pageNum)}
-                    className={cn(
-                      "min-w-[28px] h-7 px-2 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer border",
-                      isActive
-                        ? "bg-cyan-400 border-cyan-400 text-slate-950 font-black shadow-xs ring-1 ring-cyan-300/40"
-                        : isDark
-                        ? "border-white/10 bg-[#14151f] text-zinc-400 hover:border-cyan-500 hover:text-white"
-                        : "border-slate-200 bg-white text-slate-600 hover:border-cyan-500 hover:text-slate-900"
-                    )}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              })}
-            </div>
-
-            <button
-              type="button"
-              onClick={() => onPageChange(Math.min(totalPages, page + 1))}
-              disabled={page === totalPages}
-              className={cn(
-                "p-1.5 rounded-lg border transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none",
-                isDark
-                  ? "border-white/10 bg-[#14151f] text-zinc-400 hover:text-white hover:border-cyan-500"
-                  : "border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:border-cyan-500"
-              )}
-              title="Next page"
-              aria-label="Next page"
-            >
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
+        <Pagination currentPage={page} totalPages={totalPages} onPageChange={onPageChange} />
       </div>
     </div>
   );
@@ -888,6 +809,7 @@ export default function AdminAiGatewayPage() {
           </div>
 
           {filteredModels.length > 0 && (
+            <>
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
@@ -1063,20 +985,20 @@ export default function AdminAiGatewayPage() {
                   })}
                 </tbody>
               </table>
-              <TablePaginationBar
-                totalItems={filteredModels.length}
-                itemLabel="models"
-                page={modelsPagination.safePage}
-                perPage={modelsPerPage}
-                totalPages={modelsPagination.totalPages}
-                startItem={modelsPagination.startItem}
-                endItem={modelsPagination.endItem}
-                pageNumbers={modelsPagination.pageNumbers}
-                isDark={isDark}
-                onPageChange={setModelsPage}
-                onPerPageChange={setModelsPerPage}
-              />
             </div>
+            <TablePaginationBar
+              totalItems={filteredModels.length}
+              itemLabel="models"
+              page={modelsPagination.safePage}
+              perPage={modelsPerPage}
+              totalPages={modelsPagination.totalPages}
+              startItem={modelsPagination.startItem}
+              endItem={modelsPagination.endItem}
+              isDark={isDark}
+              onPageChange={setModelsPage}
+              onPerPageChange={setModelsPerPage}
+            />
+            </>
           )}
 
           {filteredImageModels.length > 0 && (
@@ -1225,7 +1147,6 @@ export default function AdminAiGatewayPage() {
             totalPages={customersPagination.totalPages}
             startItem={customersPagination.startItem}
             endItem={customersPagination.endItem}
-            pageNumbers={customersPagination.pageNumbers}
             isDark={isDark}
             onPageChange={setCustomersPage}
             onPerPageChange={setCustomersPerPage}
@@ -1326,7 +1247,6 @@ export default function AdminAiGatewayPage() {
             totalPages={logsPagination.totalPages}
             startItem={logsPagination.startItem}
             endItem={logsPagination.endItem}
-            pageNumbers={logsPagination.pageNumbers}
             isDark={isDark}
             onPageChange={setLogsPage}
             onPerPageChange={setLogsPerPage}

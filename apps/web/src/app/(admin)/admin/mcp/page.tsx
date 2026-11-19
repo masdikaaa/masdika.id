@@ -22,12 +22,12 @@ import {
   Code2,
   ChevronDown,
   ChevronRight,
-  ChevronLeft,
   Sliders,
   Shield,
   Layers,
 } from "lucide-react";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { Pagination } from "@/components/ui/Pagination";
 import { MASDIKA_MCP_TOOLS } from "@/lib/mcp-schema";
 
 interface AdminMcpKeyItem {
@@ -703,7 +703,7 @@ export default function AdminMcpPage() {
               "flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 pb-1 border-t",
               isDark ? "border-white/10 text-zinc-400" : "border-slate-200 text-slate-600"
             )}>
-              <div className="text-xs font-medium">
+              <div className="text-xs font-medium text-center sm:text-left">
                 Showing <span className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>{startToolIndex + 1}</span> to{" "}
                 <span className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>
                   {Math.min(startToolIndex + TOOLS_PER_PAGE, filteredTools.length)}
@@ -711,78 +711,11 @@ export default function AdminMcpPage() {
                 of <span className={cn("font-bold", isDark ? "text-white" : "text-slate-900")}>{filteredTools.length}</span> tools
               </div>
 
-              <div className="flex items-center gap-1.5 flex-wrap justify-center">
-                <button
-                  type="button"
-                  disabled={safeToolPage <= 1}
-                  onClick={() => setToolPage((p) => Math.max(1, p - 1))}
-                  className={cn(
-                    "px-3 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed",
-                    isDark
-                      ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white"
-                      : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-2xs"
-                  )}
-                >
-                  <ChevronLeft className="w-3.5 h-3.5" />
-                  <span>Previous</span>
-                </button>
-
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: totalToolPages }, (_, idx) => idx + 1).map((pageNum) => {
-                    if (
-                      totalToolPages > 5 &&
-                      pageNum !== 1 &&
-                      pageNum !== totalToolPages &&
-                      Math.abs(pageNum - safeToolPage) > 1
-                    ) {
-                      if (pageNum === 2 || pageNum === totalToolPages - 1) {
-                        return (
-                          <span key={pageNum} className="px-1 text-xs text-zinc-500 select-none">
-                            ...
-                          </span>
-                        );
-                      }
-                      return null;
-                    }
-
-                    const isActive = pageNum === safeToolPage;
-                    return (
-                      <button
-                        key={pageNum}
-                        type="button"
-                        onClick={() => setToolPage(pageNum)}
-                        className={cn(
-                          "w-8 h-8 rounded-xl text-xs font-bold border flex items-center justify-center transition-all cursor-pointer",
-                          isActive
-                            ? isDark
-                              ? "bg-cyan-400 text-slate-950 border-cyan-400 shadow-sm"
-                              : "bg-cyan-500 text-white border-cyan-500 shadow-sm"
-                            : isDark
-                              ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300"
-                              : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-2xs"
-                        )}
-                      >
-                        {pageNum}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <button
-                  type="button"
-                  disabled={safeToolPage >= totalToolPages}
-                  onClick={() => setToolPage((p) => Math.min(totalToolPages, p + 1))}
-                  className={cn(
-                    "px-3 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed",
-                    isDark
-                      ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white"
-                      : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-2xs"
-                  )}
-                >
-                  <span>Next</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
+              <Pagination
+                currentPage={safeToolPage}
+                totalPages={totalToolPages}
+                onPageChange={setToolPage}
+              />
             </div>
           )}
         </div>

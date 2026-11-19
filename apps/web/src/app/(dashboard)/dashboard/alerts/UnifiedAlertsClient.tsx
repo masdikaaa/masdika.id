@@ -147,7 +147,7 @@ export default function UnifiedAlertsClient({
   const PaginationControls = () => {
     if (totalPages <= 1) return null;
     return (
-      <div className="py-2">
+      <div className="w-full flex justify-center py-1">
         <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
       </div>
     );
@@ -329,7 +329,7 @@ export default function UnifiedAlertsClient({
           {totalPages > 1 && (
             <div
               className={cn(
-                "px-4 sm:px-6 py-2 border-b flex flex-wrap items-center justify-between gap-4",
+                "px-4 sm:px-6 py-2 border-b flex flex-wrap items-center justify-center gap-4",
                 isDark ? "border-white/[0.08] bg-white/[0.02]" : "border-slate-200/90 bg-slate-50/80"
               )}
             >

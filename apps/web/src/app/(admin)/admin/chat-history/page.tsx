@@ -3,13 +3,14 @@ import { useUrlString } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
 import { useState, useEffect, useCallback } from "react";
-import { Bot, Search, Trash2, CheckCircle, ChevronLeft, ChevronRight, Eye, X, AlertTriangle, Shield, Clock, MessageCircle, Check , RefreshCw , MessageSquare } from "lucide-react";
+import { Bot, Search, Trash2, CheckCircle, Eye, X, AlertTriangle, Shield, Clock, MessageCircle, Check , RefreshCw , MessageSquare } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from "sonner";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { AdminLoader } from "@/components/admin/AdminLoader";
 import { parseChatMarkdown } from "@/lib/render-chat-markdown";
 import { UserAvatar } from "@/components/ui/UserAvatar";
+import { Pagination } from "@/components/ui/Pagination";
 
 type ChatSessionItem = {
   id: number;
@@ -490,24 +491,8 @@ export default function AdminChatHistoryPage() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between mt-6">
-          <p className="text-xs text-zinc-500">Page {page} of {totalPages}</p>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page <= 1}
-              className={cn("px-3 py-2 hover:bg-white/10 rounded-lg disabled:opacity-30 transition-colors border", isDark ? "text-zinc-400 border-white/10" : "text-slate-500 border-slate-200")}
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-              disabled={page >= totalPages}
-              className={cn("px-3 py-2 hover:bg-white/10 rounded-lg disabled:opacity-30 transition-colors border", isDark ? "text-zinc-400 border-white/10" : "text-slate-500 border-slate-200")}
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
+        <div className="flex justify-center mt-6">
+          <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
         </div>
       )}
 

@@ -464,8 +464,9 @@ export default function PaygMonitorPage() {
             )}
           </div>
         ) : (
-          <div className="overflow-x-auto scrollbar-none">
-            <table className="w-full text-left text-xs sm:text-sm">
+          <>
+            <div className="overflow-x-auto scrollbar-none">
+              <table className="w-full text-left text-xs sm:text-sm">
               <thead className={cn("text-[11px] sm:text-xs uppercase tracking-wider", isDark ? "bg-[#0a0a0c] text-slate-400 border-b border-white/[0.08] font-semibold" : "bg-slate-50 text-slate-500 border-b border-slate-200 font-semibold")}>
                 <tr>
                   <th className="py-3 px-3 sm:px-4 rounded-l-lg font-semibold w-[26%]">
@@ -734,26 +735,16 @@ export default function PaygMonitorPage() {
                               </table>
                             </div>
                             {cust.services.length > servicesPerPage && (
-                              <div className={cn("flex items-center justify-between mt-3 pt-3 border-t", isDark ? "border-white/[0.08]" : "border-slate-200")}>
-                                <p className={cn("text-xs", isDark ? "text-zinc-500" : "text-slate-500")}>
+                              <div className={cn("flex flex-col sm:flex-row items-center justify-between gap-2 mt-3 pt-3 border-t", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                                <p className={cn("text-xs text-center sm:text-left", isDark ? "text-zinc-500" : "text-slate-500")}>
                                   Showing {((servicePageMap[cust.id] || 1) - 1) * servicesPerPage + 1} to {Math.min((servicePageMap[cust.id] || 1) * servicesPerPage, cust.services.length)} of {cust.services.length} services
                                 </p>
-                                <div className="flex gap-2">
-                                  <button
-                                    onClick={() => setServicePageMap(prev => ({ ...prev, [cust.id]: Math.max(1, (prev[cust.id] || 1) - 1) }))}
-                                    disabled={(servicePageMap[cust.id] || 1) === 1}
-                                    className={cn("px-2 py-1 text-xs rounded-lg disabled:opacity-50 disabled:cursor-not-allowed border transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-slate-300 hover:bg-slate-800" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50")}
-                                  >
-                                    Prev
-                                  </button>
-                                  <button
-                                    onClick={() => setServicePageMap(prev => ({ ...prev, [cust.id]: Math.min(Math.ceil(cust.services.length / servicesPerPage), (prev[cust.id] || 1) + 1) }))}
-                                    disabled={(servicePageMap[cust.id] || 1) >= Math.ceil(cust.services.length / servicesPerPage)}
-                                    className={cn("px-2 py-1 text-xs rounded-lg disabled:opacity-50 disabled:cursor-not-allowed border transition-all", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-slate-300 hover:bg-slate-800" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50")}
-                                  >
-                                    Next
-                                  </button>
-                                </div>
+                                <Pagination
+                                  compact
+                                  currentPage={servicePageMap[cust.id] || 1}
+                                  totalPages={Math.ceil(cust.services.length / servicesPerPage)}
+                                  onPageChange={(p) => setServicePageMap(prev => ({ ...prev, [cust.id]: p }))}
+                                />
                               </div>
                             )}
                           </div>
@@ -764,6 +755,7 @@ export default function PaygMonitorPage() {
                 ))}
               </tbody>
             </table>
+            </div>
             {filteredCustomers.length > customersPerPage && (
               <div className={cn("p-4 border-t", isDark ? "bg-[#0a0a0c]/50 border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
                 <Pagination 
@@ -773,7 +765,7 @@ export default function PaygMonitorPage() {
                 />
               </div>
             )}
-          </div>
+          </>
         )}
       </div>
     </div>

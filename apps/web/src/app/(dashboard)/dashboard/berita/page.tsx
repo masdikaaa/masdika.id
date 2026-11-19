@@ -136,7 +136,7 @@ export default function BeritaListPage() {
               Back to Dashboard
             </Link>
             
-            <div className="flex gap-1">
+            <div className="w-full sm:w-auto flex justify-center">
               <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
             </div>
           </div>

@@ -6,11 +6,12 @@ import { useState, useEffect, useRef } from 'react';
 import useSWR from 'swr';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { MessageSquare, ChevronRight, User, Trash2, X, CheckCircle, Search, ChevronLeft, Loader2, Plus, AlertCircle, Paperclip, FileText, Image as ImageIcon, RefreshCw } from 'lucide-react';
+import { MessageSquare, ChevronRight, User, Trash2, X, CheckCircle, Search, Loader2, Plus, AlertCircle, Paperclip, FileText, Image as ImageIcon, RefreshCw } from 'lucide-react';
 import { useTheme } from "@/components/ThemeProvider";
 import { toast } from 'sonner';
 import { AdminLoader } from '@/components/admin/AdminLoader';
 import { Select } from '@/components/ui/Select';
+import { Pagination } from '@/components/ui/Pagination';
 
 const fetcher = (url: string) => fetch(url).then(r => r.json());
 
@@ -436,24 +437,8 @@ export default function AdminTicketsClient() {
       </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-6">
-          <button
-            onClick={() => setPage(p => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className={cn("p-2.5 rounded-xl transition-all border shrink-0", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200")}
-          >
-            <ChevronLeft className={cn("w-5 h-5", isDark ? "text-white" : "text-slate-900")} />
-          </button>
-          <span className={cn("text-sm font-medium", isDark ? "text-zinc-400" : "text-slate-500")}>
-            Page {page} of {totalPages}
-          </span>
-          <button
-            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-            className={cn("p-2.5 rounded-xl transition-all border shrink-0", isDark ? "bg-white/5 hover:bg-white/10 text-white border-white/10" : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200")}
-          >
-            <ChevronRight className={cn("w-5 h-5", isDark ? "text-white" : "text-slate-900")} />
-          </button>
+        <div className="flex justify-center mt-6">
+          <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
         </div>
       )}
 

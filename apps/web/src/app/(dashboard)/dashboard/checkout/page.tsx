@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, Suspense } from "react";
 import { useTheme } from "@/components/ThemeProvider";
 import {
-  Check, ChevronRight, ChevronLeft, ShieldCheck,
+  Check, ChevronLeft, ShieldCheck,
   Wallet, Code2, Cloud, Database,
   UploadCloud, Server, FileVideo, Music, PlaySquare,
   FileText, Activity, X, ArrowUpCircle, ShoppingCart, Loader2, BadgeCheck, RefreshCw, Terminal, Plus, Rocket, Boxes
@@ -13,6 +13,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { formatRupiah } from "@/lib/billing";
 import { AdminCheckbox } from "@/components/ui/AdminCheckbox";
+import { Pagination } from "@/components/ui/Pagination";
 import { cn } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -41,48 +42,13 @@ function Pager({
   const from = (page - 1) * pageSize + 1;
   const to = Math.min(page * pageSize, total);
 
-  const navBtn = cn(
-    "w-8 h-8 rounded-lg border flex items-center justify-center transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer",
-    isDark
-      ? "bg-white/[0.02] border-white/[0.08] text-zinc-400 hover:text-white hover:border-white/[0.15]"
-      : "bg-white border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-300"
-  );
-
   return (
     <div className={cn("flex flex-col sm:flex-row items-center justify-between gap-3 mt-6 pt-5 border-t relative z-10 transition-colors", isDark ? "border-white/[0.07]" : "border-slate-100")}>
-      <div className={cn("text-xs font-medium", isDark ? "text-zinc-500" : "text-slate-500")}>
+      <div className={cn("text-xs font-medium text-center sm:text-left", isDark ? "text-zinc-500" : "text-slate-500")}>
         Showing <span className={cn("font-semibold", isDark ? "text-zinc-300" : "text-slate-700")}>{from}–{to}</span> of{" "}
         <span className={cn("font-semibold", isDark ? "text-zinc-300" : "text-slate-700")}>{total}</span> {label}
       </div>
-      <div className="flex items-center gap-1.5">
-        <button type="button" aria-label="Previous page" onClick={() => onChange(page - 1)} disabled={page === 1} className={navBtn}>
-          <ChevronLeft className="w-4 h-4" />
-        </button>
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
-          const active = p === page;
-          return (
-            <button
-              type="button"
-              key={p}
-              onClick={() => onChange(p)}
-              aria-current={active ? "page" : undefined}
-              className={cn(
-                "min-w-8 h-8 px-2.5 rounded-lg border text-xs font-bold transition-all duration-200 active:scale-95 cursor-pointer",
-                active
-                  ? "bg-cyan-400 border-cyan-400 text-slate-950 shadow-xs"
-                  : isDark
-                    ? "bg-white/[0.02] border-white/[0.08] text-zinc-400 hover:text-white hover:border-white/[0.15]"
-                    : "bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300"
-              )}
-            >
-              {p}
-            </button>
-          );
-        })}
-        <button type="button" aria-label="Next page" onClick={() => onChange(page + 1)} disabled={page === totalPages} className={navBtn}>
-          <ChevronRight className="w-4 h-4" />
-        </button>
-      </div>
+      <Pagination currentPage={page} totalPages={totalPages} onPageChange={onChange} />
     </div>
   );
 }
