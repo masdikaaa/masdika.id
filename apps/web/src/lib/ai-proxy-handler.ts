@@ -33,15 +33,16 @@ interface ParsedUsage {
 function extractOpenAiUsage(obj: any): ParsedUsage | null {
   const u = obj?.usage ?? obj?.response?.usage;
   if (!u || typeof u !== 'object') return null;
-  const prompt = Number(u.prompt_tokens ?? u.input_tokens ?? 0);
-  const cached = Number(
+  const toInt = (v: unknown) => (Number.isFinite(Number(v)) && Number(v) > 0 ? Math.floor(Number(v)) : 0);
+  const prompt = toInt(u.prompt_tokens ?? u.input_tokens ?? 0);
+  const cached = toInt(
     u.prompt_tokens_details?.cached_tokens ??
       u.input_tokens_details?.cached_tokens ??
       u.cached_tokens ??
       u.cache_read_input_tokens ??
       0
   );
-  const completion = Number(u.completion_tokens ?? u.output_tokens ?? 0);
+  const completion = toInt(u.completion_tokens ?? u.output_tokens ?? 0);
   return {
     inputTokens: Math.max(0, prompt - cached),
     cachedTokens: Math.max(0, cached),
@@ -380,10 +381,11 @@ export async function handleAiProxyRequest(
   }
 
   const isStream = Boolean(body.stream);
+  const sanitizedBody = body.n !== undefined ? { ...body, n: nCompletions } : body;
   const forwardBody =
     format === 'openai' && isStream
-      ? { ...body, stream_options: { ...(body.stream_options || {}), include_usage: true } }
-      : body;
+      ? { ...sanitizedBody, stream_options: { ...(sanitizedBody.stream_options || {}), include_usage: true } }
+      : sanitizedBody;
 
   const targetUrl = `${config.upstreamUrl}${endpoint}`;
   const headers: Record<string, string> = {

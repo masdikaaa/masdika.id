@@ -4,9 +4,9 @@ import { decryptDeterministic, encryptDeterministic } from "@/lib/encryption";
 import { validateFileUploadSecurity } from "@/lib/upload-security";
 
 const MCP_CDN_ALLOWED_EXTENSIONS = new Set([
-  ".png", ".jpg", ".jpeg", ".webp", ".gif",
-  ".pdf", ".txt", ".csv", ".json", ".md",
-  ".mp4", ".webm", ".mp3", ".wav", ".zip",
+  "png", "jpg", "jpeg", "webp", "gif",
+  "pdf", "txt", "csv", "json", "md",
+  "mp4", "webm", "mp3", "wav", "zip",
 ]);
 import { formatRupiah } from "@/lib/billing";
 import { createDuitkuTransaction } from "@/lib/duitku";
@@ -380,6 +380,9 @@ export async function executeMcpTool(
 
       case "masdika_upgrade_vps": {
         const vpsId = Number(args.vpsId);
+        if (!Number.isSafeInteger(vpsId) || vpsId <= 0) {
+          return { content: [{ type: "text", text: "Valid vpsId is required." }], isError: true };
+        }
         const { cpuCores, ramGb, diskGb } = args;
 
         const vps = await prisma.vpsService.findFirst({
@@ -389,14 +392,23 @@ export async function executeMcpTool(
         if (!vps) {
           return { content: [{ type: "text", text: `Cloud VPS with ID ${vpsId} not found.` }], isError: true };
         }
-
+        if (vps.isReseller) {
+          return { content: [{ type: "text", text: "Reseller VPS plans cannot be resized via this endpoint." }], isError: true };
+        }
         if (vps.status === "TERMINATED" || vps.status === "SUSPENDED" || vps.status === "PROVISIONING") {
           return { content: [{ type: "text", text: `VPS '${vps.hostname || vps.id}' is in ${vps.status} state. Upgrades are only permitted on active instances.` }], isError: true };
         }
 
-        const safeCpu = cpuCores ? Math.min(Math.max(Math.floor(Number(cpuCores)), 1), 32) : vps.cpuCores;
-        const safeRam = ramGb ? Math.min(Math.max(Math.floor(Number(ramGb)), 1), 128) : vps.ramGb;
-        const safeDisk = diskGb ? Math.min(Math.max(Math.floor(Number(diskGb)), 10), 2000) : vps.diskGb;
+        const safeCpu = cpuCores !== undefined ? Number(cpuCores) : vps.cpuCores;
+        const safeRam = ramGb !== undefined ? Number(ramGb) : vps.ramGb;
+        const safeDisk = diskGb !== undefined ? Number(diskGb) : vps.diskGb;
+        if (
+          !Number.isInteger(safeCpu) || safeCpu < 1 || safeCpu > 32 ||
+          !Number.isInteger(safeRam) || safeRam < 1 || safeRam > 128 ||
+          !Number.isInteger(safeDisk) || safeDisk < 10 || safeDisk > 2000
+        ) {
+          return { content: [{ type: "text", text: "Invalid target CPU (1-32), RAM (1-128 GB), or Disk (10-2000 GB) specification." }], isError: true };
+        }
 
         if (safeCpu < vps.cpuCores || safeRam < vps.ramGb || safeDisk < vps.diskGb) {
           return { content: [{ type: "text", text: "Downgrading specifications is prohibited. You can only scale up resources." }], isError: true };
@@ -407,32 +419,52 @@ export async function executeMcpTool(
           return { content: [{ type: "text", text: "No specification changes requested. Target values match current VPS specs." }], isError: true };
         }
 
-        // Calculate authoritative hourly rate increase
         let addedHourlyRate = 0;
         if (safeCpu > vps.cpuCores) {
-          const addedCores = safeCpu - vps.cpuCores;
-          addedHourlyRate += Math.ceil((addedCores * 50000) / 730);
+          addedHourlyRate += Math.ceil(((safeCpu - vps.cpuCores) * 50000) / 730);
         }
         if (safeRam > vps.ramGb) {
-          const addedRam = safeRam - vps.ramGb;
-          addedHourlyRate += Math.ceil((addedRam * 25000) / 730);
+          addedHourlyRate += Math.ceil(((safeRam - vps.ramGb) * 25000) / 730);
         }
         if (safeDisk > vps.diskGb) {
-          const addedDisk = safeDisk - vps.diskGb;
-          addedHourlyRate += Math.ceil((addedDisk * 5000) / 730);
+          addedHourlyRate += Math.ceil(((safeDisk - vps.diskGb) * 5000) / 730);
         }
-
+        const addedDisk = safeDisk - vps.diskGb;
         const newHourlyRate = (vps.hourlyRate || 0) + addedHourlyRate;
+        const newStoppedRate = (vps.stoppedRate || 0) + (addedDisk > 0 ? Math.ceil((addedDisk * 5000) / 730) : 0);
 
-        await prisma.vpsService.update({
-          where: { id: vps.id },
-          data: {
-            cpuCores: safeCpu,
-            ramGb: safeRam,
-            diskGb: safeDisk,
-            hourlyRate: newHourlyRate,
-          },
-        });
+        const { assertSufficientCommitmentBalance } = await import("@/lib/billing-commitment");
+        try {
+          await prisma.$transaction(async (tx) => {
+            await tx.$queryRaw`SELECT id FROM "User" WHERE id = ${user.id} FOR UPDATE`;
+            const freshUser = await tx.user.findUniqueOrThrow({ where: { id: user.id }, select: { balance: true } });
+            await assertSufficientCommitmentBalance({
+              tx,
+              userId: user.id,
+              userBalance: freshUser.balance,
+              newServiceMonthly: addedHourlyRate * 730,
+              serviceName: `VPS Upgrade (${vps.hostname || vps.id})`,
+            });
+            const debited = await tx.user.updateMany({
+              where: { id: user.id, balance: { gte: addedHourlyRate } },
+              data: { balance: { decrement: addedHourlyRate } },
+            });
+            if (debited.count === 0) throw new Error("Insufficient balance.");
+            await tx.vpsService.update({
+              where: { id: vps.id },
+              data: {
+                cpuCores: safeCpu,
+                ramGb: safeRam,
+                diskGb: safeDisk,
+                hourlyRate: newHourlyRate,
+                stoppedRate: newStoppedRate,
+                accumulatedCost: { increment: addedHourlyRate },
+              },
+            });
+          });
+        } catch (balErr: any) {
+          return { content: [{ type: "text", text: balErr?.message || "Insufficient balance for VPS upgrade." }], isError: true };
+        }
 
         if (vps.node && vps.vmid) {
           const pveRes = await getActiveProxmoxClient();
@@ -440,7 +472,12 @@ export async function executeMcpTool(
             const configPayload: any = {};
             if (safeCpu > vps.cpuCores) configPayload.cores = safeCpu;
             if (safeRam > vps.ramGb) configPayload.memory = safeRam * 1024;
-            await pveRes.proxmox.configVm(vps.node, vps.vmid, configPayload).catch(() => null);
+            if (Object.keys(configPayload).length > 0) {
+              await pveRes.proxmox.configVm(vps.node, vps.vmid, configPayload).catch(() => null);
+            }
+            if (addedDisk > 0) {
+              await pveRes.proxmox.resizeVmDisk(vps.node, vps.vmid, 'scsi0', `+${addedDisk}G`).catch(() => null);
+            }
           }
         }
 
@@ -448,7 +485,7 @@ export async function executeMcpTool(
           content: [
             {
               type: "text",
-              text: `🚀 **VPS '${vps.hostname || vps.id}' (ID: ${vps.id}) Resized Successfully!**\n- **CPU:** ${vps.cpuCores} vCPU ➔ **${safeCpu} vCPU**\n- **RAM:** ${vps.ramGb} GB ➔ **${safeRam} GB**\n- **Disk:** ${vps.diskGb} GB ➔ **${safeDisk} GB SSD**\n- **New Rate:** ${formatRupiah(newHourlyRate)}/hr (+${formatRupiah(addedHourlyRate)}/hr)`,
+              text: `VPS '${vps.hostname || vps.id}' (ID: ${vps.id}) Resized Successfully!\n- CPU: ${vps.cpuCores} vCPU -> ${safeCpu} vCPU\n- RAM: ${vps.ramGb} GB -> ${safeRam} GB\n- Disk: ${vps.diskGb} GB -> ${safeDisk} GB SSD\n- New Rate: ${formatRupiah(newHourlyRate)}/hr (+${formatRupiah(addedHourlyRate)}/hr)`,
             },
           ],
         };
@@ -568,10 +605,13 @@ export async function executeMcpTool(
 
       case "masdika_reset_vps_password": {
         const vpsId = Number(args.vpsId);
-        const password = String(args.password || "").trim();
+        if (!Number.isSafeInteger(vpsId) || vpsId <= 0) {
+          return { content: [{ type: "text", text: "Valid vpsId is required." }], isError: true };
+        }
+        const password = typeof args.password === "string" ? args.password.trim() : "";
 
-        if (password.length < 8) {
-          return { content: [{ type: "text", text: "Password must be at least 8 characters long." }], isError: true };
+        if (password.length < 8 || password.length > 128 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
+          return { content: [{ type: "text", text: "Password must be 8-128 characters long and contain both letters and numbers." }], isError: true };
         }
 
         const vps = await prisma.vpsService.findFirst({
@@ -581,18 +621,21 @@ export async function executeMcpTool(
         if (!vps) {
           return { content: [{ type: "text", text: `Cloud VPS with ID ${vpsId} not found.` }], isError: true };
         }
-
-        await prisma.vpsService.update({
-          where: { id: vps.id },
-          data: { rootPassword: password },
-        });
+        if (vps.status === "SUSPENDED" || vps.status === "TERMINATED" || vps.status === "PROVISIONING") {
+          return { content: [{ type: "text", text: `Cannot reset password while VPS is in ${vps.status} state.` }], isError: true };
+        }
 
         if (vps.node && vps.vmid) {
           const pveRes = await getActiveProxmoxClient();
           if (pveRes.proxmox) {
-            await pveRes.proxmox.configVm(vps.node, vps.vmid, { password } as any).catch(() => null);
+            await pveRes.proxmox.configVm(vps.node, vps.vmid, { cipassword: password });
           }
         }
+
+        await prisma.vpsService.update({
+          where: { id: vps.id },
+          data: { rootPassword: encryptDeterministic(password) },
+        });
 
         return {
           content: [
@@ -707,13 +750,6 @@ export async function executeMcpTool(
       }
 
       case "masdika_create_database": {
-        if ((user.balance || 0) < 10000) {
-          return {
-            content: [{ type: "text", text: `Insufficient wallet balance. You have ${formatRupiah(user.balance || 0)}. A minimum wallet balance of Rp 10,000 is required to provision a Managed Database.` }],
-            isError: true,
-          };
-        }
-
         const activeCount = await prisma.databaseService.count({
           where: { userId: user.id, status: { not: "TERMINATED" } },
         });
@@ -731,47 +767,109 @@ export async function executeMcpTool(
         const dbType = allowedTypes.includes(rawType) ? rawType : "POSTGRES";
         const planName = String(args.planName || "Starter");
 
+        const { calculateAuthoritativeDatabaseOrder } = await import("@/lib/database-plans");
+        const { checkDatabaseClusterCapacity, releaseReservedDbPort } = await import("@/lib/k8s-database");
+        const { assertSufficientCommitmentBalance } = await import("@/lib/billing-commitment");
+
+        const activeDbPlans = await prisma.plan.findMany({
+          where: { service: "DATABASE", isActive: true },
+          select: { id: true, name: true, limits: true, price: true, hourlyPrice: true, service: true, isActive: true },
+        });
+        const version = dbType === "POSTGRES" ? "16" : "8.0";
+        const authOrderRes = calculateAuthoritativeDatabaseOrder({
+          typeUpper: dbType,
+          version,
+          planName,
+          storageGb: 10,
+          activeDbPlans,
+        });
+        if (!authOrderRes.ok) {
+          return { content: [{ type: "text", text: authOrderRes.error }], isError: true };
+        }
+        const authOrder = authOrderRes.data;
+        const upfrontCharge = authOrder.hourlyRate;
+        const capCheck = await checkDatabaseClusterCapacity(authOrder.cpuShares, authOrder.memoryMb, authOrder.storageGb);
+        if (!capCheck.available) {
+          return { content: [{ type: "text", text: capCheck.userMessage || "Database cluster capacity full." }], isError: true };
+        }
+
         const port = await allocateAvailablePort();
         const generatedPassword = crypto.randomBytes(12).toString("base64url");
 
-        const newDb = await prisma.$transaction(async (tx) => {
-          const db = await tx.databaseService.create({
-            data: {
+        let newDb: any;
+        try {
+          newDb = await prisma.$transaction(async (tx) => {
+            await tx.$queryRaw`SELECT id FROM "User" WHERE id = ${user.id} FOR UPDATE`;
+            const freshUser = await tx.user.findUniqueOrThrow({ where: { id: user.id }, select: { balance: true } });
+            await assertSufficientCommitmentBalance({
+              tx,
               userId: user.id,
-              name,
-              type: dbType,
-              planName,
-              version: dbType === "POSTGRES" ? "16" : "8.0",
-              status: "PROVISIONING",
-              port,
-              username: "dbadmin",
-              password: generatedPassword,
-              dbName: name.replace(/-/g, "_"),
-              hourlyRate: 28,
+              userBalance: freshUser.balance,
+              newServiceMonthly: authOrder.monthlyPrice,
+              serviceName: `Managed Database (${name})`,
+            });
+            const debited = await tx.user.updateMany({
+              where: { id: user.id, balance: { gte: upfrontCharge } },
+              data: { balance: { decrement: upfrontCharge } },
+            });
+            if (debited.count === 0) throw new Error("Insufficient balance.");
+
+            const db = await tx.databaseService.create({
+              data: {
+                userId: user.id,
+                name,
+                type: dbType,
+                planName: authOrder.effectivePlanName,
+                version: authOrder.cleanVersion,
+                status: "PROVISIONING",
+                port,
+                username: "dbadmin",
+                password: generatedPassword,
+                dbName: name.replace(/-/g, "_"),
+                cpuShares: authOrder.cpuShares,
+                memoryMb: authOrder.memoryMb,
+                storageGb: authOrder.storageGb,
+                monthlyPrice: authOrder.monthlyPrice,
+                hourlyRate: authOrder.hourlyRate,
+                accumulatedCost: upfrontCharge,
+                lastBilledAt: new Date(),
+                billingMode: "PAYG",
+              },
+            });
+
+            await createServiceOrderInvoice(tx, {
+              userId: user.id,
+              serviceIdField: "databaseServiceId",
+              serviceId: db.id,
+              type: "MANAGED_DATABASE",
+              amount: upfrontCharge,
               billingMode: "PAYG",
-            },
+              serviceName: `Managed Database (${name})`,
+              extraDetails: {
+                planName: authOrder.effectivePlanName,
+                dbType,
+                port,
+              },
+            });
+
+            return db;
           });
+        } catch (txErr: any) {
+          releaseReservedDbPort(port);
+          return { content: [{ type: "text", text: txErr?.message || "Failed to create database order." }], isError: true };
+        }
 
-          await createServiceOrderInvoice(tx, {
-            userId: user.id,
-            serviceIdField: "databaseServiceId",
-            serviceId: db.id,
-            type: "MANAGED_DATABASE",
-            amount: 0,
-            billingMode: "PAYG",
-            serviceName: `Managed Database (${name})`,
-            extraDetails: {
-              planName,
-              dbType,
-              port,
-            },
-          });
-
-          return db;
-        });
-
-        // Deploy to K8s
-        await deployDatabase(newDb as any).catch((err: any) => console.error("[MCP_DB_DEPLOY]", err));
+        // Deploy to K8s with rollback on failure
+        try {
+          await deployDatabase(newDb as any);
+        } catch (deployErr: any) {
+          releaseReservedDbPort(port);
+          await prisma.$transaction(async (tx) => {
+            await tx.user.update({ where: { id: user.id }, data: { balance: { increment: upfrontCharge } } });
+            await tx.databaseService.delete({ where: { id: newDb.id } });
+          }).catch(() => {});
+          return { content: [{ type: "text", text: `Database deployment failed: ${deployErr?.message || "Cluster error"}` }], isError: true };
+        }
 
         await prisma.databaseService.update({
           where: { id: newDb.id },
@@ -808,20 +906,21 @@ export async function executeMcpTool(
           };
         }
 
+        const ns = db.k8sNamespace || "managed-db";
         if (action === "start") {
-          await startDatabase(db as any);
+          await startDatabase(db.id, ns);
           await prisma.databaseService.update({ where: { id: db.id }, data: { status: "RUNNING" } });
           return { content: [{ type: "text", text: `Managed Database '${db.name}' has been started.` }] };
         }
 
         if (action === "stop") {
-          await stopDatabase(db as any);
+          await stopDatabase(db.id, ns);
           await prisma.databaseService.update({ where: { id: db.id }, data: { status: "STOPPED" } });
           return { content: [{ type: "text", text: `Managed Database '${db.name}' has been stopped.` }] };
         }
 
         if (action === "restart") {
-          await restartDatabase(db as any);
+          await restartDatabase(db.id, ns);
           return { content: [{ type: "text", text: `Managed Database '${db.name}' restart initiated.` }] };
         }
 
@@ -852,6 +951,9 @@ export async function executeMcpTool(
 
       case "masdika_delete_database": {
         const dbId = Number(args.dbId);
+        if (!Number.isSafeInteger(dbId) || dbId <= 0) {
+          return { content: [{ type: "text", text: "Valid dbId is required." }], isError: true };
+        }
         const db = await prisma.databaseService.findFirst({
           where: { id: dbId, userId: user.id },
         });
@@ -860,11 +962,22 @@ export async function executeMcpTool(
           return { content: [{ type: "text", text: `Managed Database with ID ${dbId} not found.` }], isError: true };
         }
 
-        await deleteDatabase(db as any).catch(() => null);
-        await prisma.databaseService.delete({ where: { id: db.id } });
+        await deleteDatabase(db.id, db.k8sNamespace || "managed-db");
+        await prisma.$transaction(async (tx) => {
+          await tx.databaseService.update({
+            where: { id: db.id },
+            data: { status: "TERMINATED", terminationDate: new Date() },
+          });
+          const { settleServicePaygInvoices } = await import("@/lib/payg-invoice");
+          await settleServicePaygInvoices(tx, {
+            userId: user.id,
+            serviceIdField: "databaseServiceId",
+            serviceId: db.id,
+          });
+        });
 
         return {
-          content: [{ type: "text", text: `Managed Database '${db.name}' (ID: ${dbId}) has been completely deleted.` }],
+          content: [{ type: "text", text: `Managed Database '${db.name}' (ID: ${dbId}) has been terminated.` }],
         };
       }
 
@@ -894,13 +1007,6 @@ export async function executeMcpTool(
       }
 
       case "masdika_deploy_app": {
-        if ((user.balance || 0) < 10000) {
-          return {
-            content: [{ type: "text", text: `Insufficient wallet balance. You have ${formatRupiah(user.balance || 0)}. A minimum wallet balance of Rp 10,000 is required to deploy a Managed Application.` }],
-            isError: true,
-          };
-        }
-
         const activeCount = await prisma.appService.count({
           where: { userId: user.id, status: { not: "TERMINATED" } },
         });
@@ -911,50 +1017,105 @@ export async function executeMcpTool(
           };
         }
 
-        const appType = String(args.appType || "omniroute").toLowerCase().trim();
-        const rawName = String(args.name || `${appType}-app`).trim().toLowerCase().replace(/[^a-z0-9_-]/g, "");
+        const { getAppDefinition, resolveAuthoritativeAppPlan } = await import("@/lib/app-catalog");
+        const { checkAppClusterCapacity, releaseReservedAppPort } = await import("@/lib/k8s-app");
+        const { assertSufficientCommitmentBalance } = await import("@/lib/billing-commitment");
+
+        const rawAppType = String(args.appType || "omniroute").toLowerCase().trim();
+        const appDef = getAppDefinition(rawAppType);
+        if (!appDef) {
+          return { content: [{ type: "text", text: `Unsupported appType '${rawAppType}'.` }], isError: true };
+        }
+        const planSpec = await resolveAuthoritativeAppPlan(String(args.planName || "1C2G"), prisma);
+        if (!planSpec) {
+          return { content: [{ type: "text", text: "Invalid or inactive application plan." }], isError: true };
+        }
+        const upfrontCharge = planSpec.hourlyPrice;
+        const capCheck = await checkAppClusterCapacity(planSpec.cpuShares, planSpec.memoryMb);
+        if (!capCheck.available) {
+          return { content: [{ type: "text", text: capCheck.userMessage || "Application cluster capacity full." }], isError: true };
+        }
+
+        const rawName = String(args.name || `${appDef.id}-app`).trim().toLowerCase().replace(/[^a-z0-9_-]/g, "");
         const name = rawName.slice(0, 32) || `app-${Date.now().toString(36)}`;
 
         const port = await allocateAppPort();
         const subdomain = `${name}-${crypto.randomBytes(2).toString("hex")}`;
         const domain = `${subdomain}.apps.masdika.id`;
 
-        const newApp = await prisma.$transaction(async (tx) => {
-          const app = await tx.appService.create({
-            data: {
+        let newApp: any;
+        try {
+          newApp = await prisma.$transaction(async (tx) => {
+            await tx.$queryRaw`SELECT id FROM "User" WHERE id = ${user.id} FOR UPDATE`;
+            const freshUser = await tx.user.findUniqueOrThrow({ where: { id: user.id }, select: { balance: true } });
+            await assertSufficientCommitmentBalance({
+              tx,
               userId: user.id,
-              name,
-              appType: appType.toUpperCase(),
-              templateName: `${appType.toUpperCase()} (1C2G)`,
-              planName: "1C2G",
-              subdomain,
-              status: "PROVISIONING",
-              port,
-              hourlyRate: 35,
+              userBalance: freshUser.balance,
+              newServiceMonthly: planSpec.monthlyPrice,
+              serviceName: `Managed App (${name})`,
+            });
+            const debited = await tx.user.updateMany({
+              where: { id: user.id, balance: { gte: upfrontCharge } },
+              data: { balance: { decrement: upfrontCharge } },
+            });
+            if (debited.count === 0) throw new Error("Insufficient balance.");
+
+            const app = await tx.appService.create({
+              data: {
+                userId: user.id,
+                name,
+                appType: appDef.id,
+                templateName: `${appDef.name} (${planSpec.planCode})`,
+                planName: planSpec.planCode,
+                subdomain,
+                status: "PROVISIONING",
+                port,
+                cpuShares: planSpec.cpuShares,
+                memoryMb: planSpec.memoryMb,
+                storageGb: planSpec.storageGb,
+                monthlyPrice: planSpec.monthlyPrice,
+                hourlyRate: planSpec.hourlyPrice,
+                accumulatedCost: upfrontCharge,
+                lastBilledAt: new Date(),
+                billingMode: "PAYG",
+              },
+            });
+
+            await createServiceOrderInvoice(tx, {
+              userId: user.id,
+              serviceIdField: "appServiceId",
+              serviceId: app.id,
+              type: "MANAGED_APP",
+              amount: upfrontCharge,
               billingMode: "PAYG",
-            },
+              serviceName: `Managed App (${name})`,
+              extraDetails: {
+                appType: appDef.id,
+                planName: planSpec.planCode,
+                subdomain,
+                port,
+              },
+            });
+
+            return app;
           });
+        } catch (txErr: any) {
+          releaseReservedAppPort(port);
+          return { content: [{ type: "text", text: txErr?.message || "Failed to deploy application." }], isError: true };
+        }
 
-          await createServiceOrderInvoice(tx, {
-            userId: user.id,
-            serviceIdField: "appServiceId",
-            serviceId: app.id,
-            type: "MANAGED_APP",
-            amount: 0,
-            billingMode: "PAYG",
-            serviceName: `Managed App (${name})`,
-            extraDetails: {
-              appType,
-              subdomain,
-              port,
-            },
-          });
-
-          return app;
-        });
-
-        // Deploy to K8s
-        await deployAppService(newApp as any).catch((err: any) => console.error("[MCP_APP_DEPLOY]", err));
+        // Deploy to K8s with rollback on failure
+        try {
+          await deployAppService(newApp as any);
+        } catch (deployErr: any) {
+          releaseReservedAppPort(port);
+          await prisma.$transaction(async (tx) => {
+            await tx.user.update({ where: { id: user.id }, data: { balance: { increment: upfrontCharge } } });
+            await tx.appService.delete({ where: { id: newApp.id } });
+          }).catch(() => {});
+          return { content: [{ type: "text", text: `App deployment failed: ${deployErr?.message || "Cluster error"}` }], isError: true };
+        }
 
         await prisma.appService.update({
           where: { id: newApp.id },
@@ -965,7 +1126,7 @@ export async function executeMcpTool(
           content: [
             {
               type: "text",
-              text: `🎉 **Managed App '${name}' Deployed!**\n- **App Type:** ${appType}\n- **Status:** RUNNING\n- **URL:** https://${domain}\n- **Port:** ${port}\n*Billing: Pay-As-You-Go (Rp 35/hour)*`,
+              text: `Managed App '${name}' Deployed!\n- App Type: ${appDef.id}\n- Status: RUNNING\n- URL: https://${domain}\n- Port: ${port}\nBilling: Pay-As-You-Go (Rp ${planSpec.hourlyPrice}/hour)`,
             },
           ],
         };
@@ -1453,21 +1614,34 @@ export async function executeMcpTool(
         }
 
         try {
+          const { getAiGatewayConfig } = await import("@/lib/ai-gateway");
+          const { getUserServicesCommitment } = await import("@/lib/billing-commitment");
+          const config = await getAiGatewayConfig();
+          const feeRp = config.topupFeeRp || 0;
+          const totalWalletDeduction = amount + feeRp;
+
           const updatedUser = await prisma.$transaction(async (tx) => {
+            await tx.$queryRaw`SELECT id FROM "User" WHERE id = ${user.id} FOR UPDATE`;
+            const freshUser = await tx.user.findUnique({
+              where: { id: user.id },
+              select: { isSuspended: true, balance: true },
+            });
+            if (!freshUser) throw new Error("USER_NOT_FOUND");
+            if (freshUser.isSuspended) throw new Error("ACCOUNT_SUSPENDED");
+
+            const commitment = await getUserServicesCommitment(user.id, tx);
+            if (freshUser.balance < commitment.totalMonthly + totalWalletDeduction) {
+              throw new Error("COMMITMENT_LOCK_INSUFFICIENT");
+            }
+
             const debited = await tx.user.updateMany({
-              where: { id: user.id, isSuspended: false, balance: { gte: amount } },
+              where: { id: user.id, isSuspended: false, balance: { gte: totalWalletDeduction } },
               data: {
-                balance: { decrement: amount },
+                balance: { decrement: totalWalletDeduction },
                 aiBalance: { increment: amount },
               },
             });
             if (debited.count === 0) {
-              const checkUser = await tx.user.findUnique({
-                where: { id: user.id },
-                select: { isSuspended: true },
-              });
-              if (!checkUser) throw new Error("USER_NOT_FOUND");
-              if (checkUser.isSuspended) throw new Error("ACCOUNT_SUSPENDED");
               throw new Error("INSUFFICIENT_BALANCE");
             }
 
@@ -1543,19 +1717,27 @@ export async function executeMcpTool(
 
       case "masdika_create_ssh_key": {
         const { name, publicKey } = args;
-        if (!name || !publicKey) {
+        if (!name || typeof name !== "string" || !publicKey || typeof publicKey !== "string") {
           return { content: [{ type: "text", text: "name and publicKey are required." }], isError: true };
         }
 
-        const cleanKey = String(publicKey).trim();
-        const fingerprint = crypto.createHash("sha256").update(cleanKey).digest("hex").slice(0, 32);
+        const { parseAndValidateSshKey } = await import("@/lib/ssh-key-utils");
+        const sshValidation = parseAndValidateSshKey(publicKey);
+        if (!sshValidation.isValid || !sshValidation.fingerprint) {
+          return { content: [{ type: "text", text: sshValidation.error || "Invalid SSH public key." }], isError: true };
+        }
+
+        const keyCount = await prisma.userSshKey.count({ where: { userId: user.id } });
+        if (keyCount >= 25) {
+          return { content: [{ type: "text", text: "Maximum SSH key limit (25) reached." }], isError: true };
+        }
 
         const newKey = await prisma.userSshKey.create({
           data: {
             userId: user.id,
-            name: String(name).slice(0, 50),
-            publicKey: cleanKey,
-            fingerprint: `SHA256:${fingerprint}`,
+            name: name.trim().slice(0, 50),
+            publicKey: publicKey.trim(),
+            fingerprint: sshValidation.fingerprint,
           },
         });
 

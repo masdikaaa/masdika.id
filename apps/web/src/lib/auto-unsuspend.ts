@@ -573,8 +573,7 @@ export async function attemptAutoUnsuspendObjectStorage(serviceId: number) {
     if (!obj || !obj.user) return { success: false, message: 'Object Storage not found' };
     if (obj.status !== 'SUSPENDED') return { success: false, message: 'Object Storage is not suspended' };
 
-    const isBillingSuspended = !obj.suspendReason || obj.suspendReason.toLowerCase().includes('insufficient balance');
-    if (!isBillingSuspended) {
+    if (!isBillingSuspension(obj.suspendReason)) {
       return { success: false, unsuspended: false, reason: 'NON_BILLING_SUSPENSION' };
     }
 

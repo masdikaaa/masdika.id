@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth-middleware';
-import { createSessionToken } from '@/lib/session';
+import { createSessionToken, getSessionPayload } from '@/lib/session';
 import { decryptDeterministic } from '@/lib/encryption';
 import { logClientActivity } from '@/lib/activity-log';
 import { getClientIp } from '@/lib/get-ip';
@@ -50,10 +50,13 @@ export async function POST(req: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'Admin session token not found' }, { status: 401 });
     }
 
-    // Generate short-lived (2h) signed session token bound to impersonator admin ID
+    const adminSessionId = getSessionPayload(adminToken)?.sessionId;
+
+    // Generate short-lived (2h) signed session token bound to impersonator admin ID and session ID
     const { token: clientToken } = createSessionToken(targetUser.id, targetUser.role, false, undefined, {
       customMaxAgeSec: 7200,
       impersonatedBy: auth.user.id,
+      ...(adminSessionId ? { impersonatorSessionId: adminSessionId } : {}),
     });
     const adminName = auth.user.name ? decryptDeterministic(auth.user.name) : 'Admin';
     const targetName = decryptDeterministic(targetUser.name) || targetUser.name || 'User';

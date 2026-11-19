@@ -13,8 +13,14 @@ import {
 
 const MAX_CONSOLE_UPLOAD_BYTES = 100 * 1024 * 1024; // 100MB via browser console (larger via S3 CLI/SDK directly)
 
-function sanitizeObjectKey(key: string): string {
-  return key.replace(/^\/+/, '').replace(/\.\.\//g, '').trim();
+function sanitizeObjectKey(rawKey: string): string {
+  const cleaned = rawKey.replace(/[\0\x01-\x1f\x7f]/g, '').replace(/\\/g, '/').replace(/^\/+/, '').trim();
+  if (!cleaned || cleaned.length > 1024) return '';
+  const segments = cleaned.split('/').filter(Boolean);
+  if (segments.some((seg) => seg === '.' || seg === '..')) {
+    return '';
+  }
+  return segments.join('/');
 }
 
 export async function GET(
@@ -127,15 +133,23 @@ export async function POST(
 
   const prefix = sanitizeObjectKey(String(form.get('prefix') || ''));
   const cleanName = sanitizeObjectKey(file.name || 'object.bin');
+  if (!cleanName) {
+    return NextResponse.json({ error: 'Invalid object key or filename.' }, { status: 400 });
+  }
   const key = prefix ? `${prefix.replace(/\/+$/, '')}/${cleanName}` : cleanName;
 
   const lowerName = cleanName.toLowerCase();
   const rawMime = (file.type || 'application/octet-stream').toLowerCase();
   const isActiveWebContent =
-    /\.(html?|xhtml|svgz?|xml|shtml|mhtml)$/.test(lowerName) ||
+    /\.(html?|xhtml|svgz?|xml|xsl|xslt|shtml|mhtml|dhtml|js|mjs|cjs|jsx|swf|wasm|htc)$/.test(lowerName) ||
     rawMime.includes('html') ||
     rawMime.includes('svg') ||
-    rawMime.includes('xml');
+    rawMime.includes('xml') ||
+    rawMime.includes('javascript') ||
+    rawMime.includes('ecmascript') ||
+    rawMime.includes('wasm') ||
+    rawMime.includes('shockwave-flash') ||
+    rawMime.includes('xsl');
   const safeContentType = isActiveWebContent ? 'application/octet-stream' : (file.type || 'application/octet-stream');
 
   const ok = await uploadBufferToCustomerRustFS(

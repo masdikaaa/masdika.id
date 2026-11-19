@@ -114,11 +114,21 @@ export async function POST(req: NextRequest) {
   };
 
   const imgSpec = DEFAULT_AI_IMAGE_MODELS.find((m) => m.modelId === modelId);
-  const countN = Math.max(1, Math.min(4, Number(body.n) || 1));
+  if (!imgSpec) {
+    releaseSlotOnce();
+    return aiGatewayError(`Image model '${modelId}' is not supported.`, 'model_not_found', 404, requestId);
+  }
+  const rawN = body.n !== undefined ? Number(body.n) : 1;
+  if (!Number.isInteger(rawN) || rawN < 1 || rawN > imgSpec.maxN) {
+    releaseSlotOnce();
+    return aiGatewayError(`Parameter 'n' must be an integer between 1 and ${imgSpec.maxN}.`, 'invalid_request_error', 400, requestId);
+  }
+  const countN = rawN;
+  const trimmedSize = typeof body.size === 'string' ? body.size.trim() : '1024x1024';
   const baseUnitRp =
-    imgSpec && body.size === '2048x2048' && modelId === 'seedream-image-v5.0-pro'
+    trimmedSize === '2048x2048' && modelId === 'seedream-image-v5.0-pro'
       ? 1602
-      : imgSpec?.basePriceRp || 500;
+      : imgSpec.basePriceRp;
   const upstreamCostRp = baseUnitRp * countN;
   const costRp = applyMarkupPrice(upstreamCostRp, config.markupPercent);
   const holdRp = Math.ceil(costRp * 1.25);
@@ -152,7 +162,7 @@ export async function POST(req: NextRequest) {
         authorization: `Bearer ${config.upstreamKey}`,
         'x-api-key': config.upstreamKey,
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify({ ...body, n: countN, size: trimmedSize }),
       signal: abortController.signal,
     });
 

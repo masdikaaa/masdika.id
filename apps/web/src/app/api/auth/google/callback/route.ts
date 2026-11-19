@@ -104,12 +104,24 @@ export async function GET(req: Request) {
       const dummyPassword = crypto.randomBytes(32).toString('hex');
       const hashedPassword = hashPassword(dummyPassword);
 
+      let safePicture: string | null = null;
+      if (typeof picture === 'string' && picture.length <= 2048) {
+        try {
+          const parsedPic = new URL(picture);
+          if (parsedPic.protocol === 'https:' && parsedPic.hostname.toLowerCase().endsWith('.googleusercontent.com')) {
+            safePicture = picture;
+          }
+        } catch {
+          safePicture = null;
+        }
+      }
+
       user = await prisma.user.create({
         data: {
           email: encryptedEmail,
           password: hashedPassword,
           name: encryptDeterministic(name || 'Google User'),
-          image: picture || null,
+          image: safePicture,
           role: 'USER',
           balance: 0,
         },
@@ -120,7 +132,7 @@ export async function GET(req: Request) {
     }
 
     if (user.isSuspended) {
-      const suspRes = NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(user.suspendReason || 'Account suspended')}`, normalizedBase));
+      const suspRes = NextResponse.redirect(new URL('/login?error=AccountSuspended', normalizedBase));
       suspRes.cookies.delete('google_oauth_state');
       return suspRes;
     }

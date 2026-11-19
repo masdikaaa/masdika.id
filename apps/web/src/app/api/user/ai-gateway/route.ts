@@ -6,6 +6,7 @@ import { getUserServicesCommitment } from '@/lib/billing-commitment';
 import { sendAiBalanceTopupEmail } from '@/lib/email';
 import {
   DEFAULT_AI_IMAGE_MODELS,
+  acquireConcurrencySlot,
   applyMarkupPrice,
   calculateTokenCostRp,
   clearAiInsufficientBalanceNotice,
@@ -13,11 +14,16 @@ import {
   estimatePromptTokensFromBody,
   generateAiGatewayKey,
   getAiGatewayConfig,
+  invalidateAiKeyAuthCacheForUser,
   isModelAllowedForKey,
   isPeakHourWib,
   recordAiUsageAndCharge,
+  releaseAiBalanceHold,
+  releaseConcurrencySlot,
+  reserveAiBalanceHold,
   tryAutoTopupAiBalance,
 } from '@/lib/ai-gateway';
+import { validateSafeUrl } from '@/lib/ssrf';
 
 export const dynamic = 'force-dynamic';
 
@@ -464,12 +470,52 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      let currentAiBalance = await tryAutoTopupAiBalance(user.id);
-      if (currentAiBalance <= 0) {
-        const dbU = await prisma.user.findUnique({ where: { id: user.id }, select: { aiBalance: true } });
-        currentAiBalance = dbU?.aiBalance ?? 0;
+      if (keyRecord.monthlyLimit !== null && keyRecord.monthlySpent >= keyRecord.monthlyLimit) {
+        return NextResponse.json(
+          { error: 'Selected API key has reached its monthly spending limit.' },
+          { status: 429 }
+        );
       }
-      if (currentAiBalance <= 0) {
+
+      // Validate all user-supplied image URLs against SSRF before touching balance/upstream
+      for (const m of messages) {
+        const imgs: string[] = Array.isArray(m?.images) ? m.images.filter((x: any) => typeof x === 'string' && x) : [];
+        for (const img of imgs) {
+          if (!/^data:image\/(png|jpeg|jpg|webp|gif);base64,[a-zA-Z0-9+/=]+$/i.test(img)) {
+            if (!img.startsWith('https://')) {
+              return NextResponse.json({ error: 'Image URLs must use https://.' }, { status: 400 });
+            }
+            const ssrfCheck = await validateSafeUrl(img);
+            if (!ssrfCheck.safe) {
+              return NextResponse.json({ error: ssrfCheck.reason || 'Invalid image URL.' }, { status: 400 });
+            }
+          }
+        }
+      }
+
+      const config = await getAiGatewayConfig();
+      if (!config.enabled || !config.upstreamKey) {
+        return NextResponse.json({ error: 'AI Gateway is currently unavailable.' }, { status: 503 });
+      }
+
+      const estimatedPromptTokens = estimatePromptTokensFromBody({ messages, system: systemPrompt });
+      const { costRp: estimatedHoldRp } = calculateTokenCostRp(
+        { inputTokens: estimatedPromptTokens, cachedTokens: 0, outputTokens: Math.max(256, maxTokens) },
+        model,
+        config.markupPercent
+      );
+
+      await tryAutoTopupAiBalance(user.id);
+
+      const concurrencyKey = `user:${user.id}`;
+      const slotAcquired = await acquireConcurrencySlot(concurrencyKey, 30);
+      if (!slotAcquired) {
+        return NextResponse.json({ error: 'Too many concurrent AI requests. Please retry.' }, { status: 429 });
+      }
+
+      const reserved = await reserveAiBalanceHold(user.id, estimatedHoldRp);
+      if (!reserved) {
+        await releaseConcurrencySlot(concurrencyKey).catch(() => {});
         return NextResponse.json(
           {
             error: 'Insufficient balance. Top up your AI balance to continue. (insufficient_balance)',
@@ -480,10 +526,8 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const config = await getAiGatewayConfig();
-      if (!config.enabled || !config.upstreamKey) {
-        return NextResponse.json({ error: 'AI Gateway is currently unavailable.' }, { status: 503 });
-      }
+      let holdSettled = false;
+      try {
 
       const formattedMessages = messages.map((m: any) => {
         const imgs: string[] = Array.isArray(m?.images) ? m.images.filter((x: any) => typeof x === 'string' && x) : [];
@@ -613,9 +657,11 @@ export async function POST(req: NextRequest) {
         outputTokens,
         costRp,
         upstreamCostRp,
+        heldRp: estimatedHoldRp,
         latencyMs,
         statusCode: 200,
       });
+      holdSettled = true;
 
       const updatedUser = await prisma.user.findUnique({
         where: { id: user.id },
@@ -632,6 +678,12 @@ export async function POST(req: NextRequest) {
         aiBalance: updatedUser?.aiBalance ?? 0,
         walletBalance: updatedUser?.balance ?? 0,
       });
+      } finally {
+        if (!holdSettled) {
+          await releaseAiBalanceHold(user.id, estimatedHoldRp).catch(() => {});
+        }
+        await releaseConcurrencySlot(concurrencyKey).catch(() => {});
+      }
     }
 
     // 4. In-Dashboard Image Generation Request
@@ -681,21 +733,52 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'AI Gateway is currently unavailable.' }, { status: 503 });
       }
 
+      if (keyRecord.monthlyLimit !== null && keyRecord.monthlySpent >= keyRecord.monthlyLimit) {
+        return NextResponse.json(
+          { error: 'Selected API key has reached its monthly spending limit.' },
+          { status: 429 }
+        );
+      }
+
+      if (refImage) {
+        const refList = Array.isArray(refImage) ? refImage : [refImage];
+        for (const img of refList) {
+          if (typeof img !== 'string' || !img) continue;
+          if (!/^data:image\/(png|jpeg|jpg|webp|gif);base64,[a-zA-Z0-9+/=]+$/i.test(img)) {
+            if (!img.startsWith('https://')) {
+              return NextResponse.json({ error: 'Reference image URL must use https://.' }, { status: 400 });
+            }
+            const ssrfCheck = await validateSafeUrl(img);
+            if (!ssrfCheck.safe) {
+              return NextResponse.json({ error: ssrfCheck.reason || 'Invalid reference image URL.' }, { status: 400 });
+            }
+          }
+        }
+      }
+
       const imgSpec = DEFAULT_AI_IMAGE_MODELS.find((m) => m.modelId === modelId);
+      if (!imgSpec) {
+        return NextResponse.json({ error: `Image model '${modelId}' is not supported.` }, { status: 404 });
+      }
       const baseUnitRp =
-        imgSpec && size === '2048x2048' && modelId === 'seedream-image-v5.0-pro'
+        size === '2048x2048' && modelId === 'seedream-image-v5.0-pro'
           ? 1602
-          : imgSpec?.basePriceRp || 500;
+          : imgSpec.basePriceRp;
       const upstreamCostRp = baseUnitRp;
       const costRp = applyMarkupPrice(upstreamCostRp, config.markupPercent);
       const holdRp = Math.ceil(costRp * 1.25);
 
-      let currentAiBalance = await tryAutoTopupAiBalance(user.id);
-      if (currentAiBalance <= 0) {
-        const dbU = await prisma.user.findUnique({ where: { id: user.id }, select: { aiBalance: true } });
-        currentAiBalance = dbU?.aiBalance ?? 0;
+      await tryAutoTopupAiBalance(user.id);
+
+      const concurrencyKey = `img:${user.id}`;
+      const slotAcquired = await acquireConcurrencySlot(concurrencyKey, 6);
+      if (!slotAcquired) {
+        return NextResponse.json({ error: 'Too many concurrent image requests. Please retry.' }, { status: 429 });
       }
-      if (currentAiBalance < holdRp) {
+
+      const reserved = await reserveAiBalanceHold(user.id, holdRp);
+      if (!reserved) {
+        await releaseConcurrencySlot(concurrencyKey).catch(() => {});
         return NextResponse.json(
           {
             error: `Insufficient AI balance. Hold requires ${costRp} IDR. Please top up your AI balance first.`,
@@ -705,59 +788,69 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const upstreamRes = await fetch(`${config.upstreamUrl}/v1/images/generations`, {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          authorization: `Bearer ${config.upstreamKey}`,
-          'x-api-key': config.upstreamKey,
-        },
-        body: JSON.stringify({
-          model: modelId,
-          prompt,
-          size,
-          n: 1,
-          ...(refImage ? { images: refImage } : {}),
-        }),
-      });
-
-      const jsonData = await upstreamRes.json().catch(() => null);
-      if (!upstreamRes.ok || !jsonData) {
-        const errMsg =
-          jsonData?.error?.message || jsonData?.message || `Upstream returned HTTP ${upstreamRes.status}`;
-        return NextResponse.json({ error: errMsg }, { status: upstreamRes.status || 502 });
-      }
-
-      if (jsonData.status === 'succeeded' || Array.isArray(jsonData.data)) {
-        const tokens = Number(jsonData.usage?.total_tokens) || imgSpec?.tokensPerImage || 15000;
-        await recordAiUsageAndCharge({
-          userId: user.id,
-          apiKeyId: keyRecord.id,
-          requestId: jsonData.id || requestId,
-          modelId,
-          endpoint: '/v1/images/generations',
-          inputTokens: 0,
-          cachedTokens: 0,
-          outputTokens: tokens,
-          costRp,
-          upstreamCostRp,
-          latencyMs: Date.now() - startedAt,
-          statusCode: 200,
+      let holdSettled = false;
+      try {
+        const upstreamRes = await fetch(`${config.upstreamUrl}/v1/images/generations`, {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            authorization: `Bearer ${config.upstreamKey}`,
+            'x-api-key': config.upstreamKey,
+          },
+          body: JSON.stringify({
+            model: modelId,
+            prompt,
+            size,
+            n: 1,
+            ...(refImage ? { images: refImage } : {}),
+          }),
         });
+
+        const jsonData = await upstreamRes.json().catch(() => null);
+        if (!upstreamRes.ok || !jsonData) {
+          return NextResponse.json({ error: 'Upstream image provider error.' }, { status: upstreamRes.status >= 500 ? 502 : upstreamRes.status || 502 });
+        }
+
+        if (jsonData.status === 'succeeded' || Array.isArray(jsonData.data)) {
+          const tokens = Number.isFinite(Number(jsonData.usage?.total_tokens)) && Number(jsonData.usage?.total_tokens) > 0
+            ? Math.floor(Number(jsonData.usage.total_tokens))
+            : imgSpec.tokensPerImage || 15000;
+          await recordAiUsageAndCharge({
+            userId: user.id,
+            apiKeyId: keyRecord.id,
+            requestId: jsonData.id || requestId,
+            modelId,
+            endpoint: '/v1/images/generations',
+            inputTokens: 0,
+            cachedTokens: 0,
+            outputTokens: tokens,
+            costRp,
+            upstreamCostRp,
+            heldRp: holdRp,
+            latencyMs: Date.now() - startedAt,
+            statusCode: 200,
+          });
+          holdSettled = true;
+        }
+
+        const updatedUser = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { aiBalance: true, balance: true },
+        });
+
+        return NextResponse.json({
+          success: true,
+          result: jsonData,
+          costRp,
+          aiBalance: updatedUser?.aiBalance ?? 0,
+          walletBalance: updatedUser?.balance ?? 0,
+        });
+      } finally {
+        if (!holdSettled) {
+          await releaseAiBalanceHold(user.id, holdRp).catch(() => {});
+        }
+        await releaseConcurrencySlot(concurrencyKey).catch(() => {});
       }
-
-      const updatedUser = await prisma.user.findUnique({
-        where: { id: user.id },
-        select: { aiBalance: true, balance: true },
-      });
-
-      return NextResponse.json({
-        success: true,
-        result: jsonData,
-        costRp,
-        aiBalance: updatedUser?.aiBalance ?? 0,
-        walletBalance: updatedUser?.balance ?? 0,
-      });
     }
 
     // 5. Default POST: Create a new AI Gateway Key
@@ -937,6 +1030,7 @@ export async function PATCH(req: NextRequest) {
         createdAt: true,
       },
     });
+    invalidateAiKeyAuthCacheForUser(user.id);
 
     return NextResponse.json({
       success: true,
@@ -967,6 +1061,7 @@ export async function DELETE(req: NextRequest) {
     await prisma.aiGatewayKey.deleteMany({
       where: { id: keyId, userId: user.id },
     });
+    invalidateAiKeyAuthCacheForUser(user.id);
 
     return NextResponse.json({ success: true });
   } catch (error) {

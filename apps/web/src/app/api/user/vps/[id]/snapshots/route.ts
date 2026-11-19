@@ -54,13 +54,20 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     }
     const { snapname, description, includeRam } = body as {
       snapname?: unknown;
-      description?: string;
-      includeRam?: boolean;
+      description?: unknown;
+      includeRam?: unknown;
     };
 
-    if (!snapname || typeof snapname !== "string" || !/^[a-zA-Z0-9]+$/.test(snapname)) {
-        return NextResponse.json({ error: "Invalid snapshot name. Only alphanumeric characters are allowed without spaces." }, { status: 400 });
+    if (
+      !snapname ||
+      typeof snapname !== "string" ||
+      snapname === "current" ||
+      !/^[a-zA-Z][a-zA-Z0-9_-]{1,39}$/.test(snapname)
+    ) {
+        return NextResponse.json({ error: "Invalid snapshot name. Use 2-40 alphanumeric, hyphen, or underscore characters starting with a letter." }, { status: 400 });
     }
+    const safeDescription = typeof description === "string" ? description.trim().slice(0, 255) : "";
+    const safeIncludeRam = includeRam === true;
 
     const { id } = await params;
     const vpsId = parseInt(id, 10);
@@ -104,7 +111,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         return NextResponse.json({ error: "Maximum snapshot limit (2) reached. Please delete an old snapshot first." }, { status: 400 });
     }
 
-    const result = await proxmox.createVMSnapshot(vps.node, vps.vmid, snapname, description, includeRam);
+    const result = await proxmox.createVMSnapshot(vps.node, vps.vmid, snapname, safeDescription, safeIncludeRam);
     return NextResponse.json(result);
   } catch (error: any) {
     console.error("POST VPS snapshot error:", error);

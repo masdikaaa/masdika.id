@@ -79,9 +79,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     if (action === "change_ssh") {
         const { sshKey } = body;
-        if (!sshKey) return NextResponse.json({ error: "SSH Key is required" }, { status: 400 });
-        
-        let sshKeys = sshKey.trim() + "\n";
+        if (!sshKey || typeof sshKey !== "string") return NextResponse.json({ error: "SSH Key is required" }, { status: 400 });
+
+        const { parseAndValidateSshKey } = await import("@/lib/ssh-key-utils");
+        const sshValidation = parseAndValidateSshKey(sshKey);
+        if (!sshValidation.isValid) {
+          return NextResponse.json({ error: sshValidation.error || "Invalid SSH public key." }, { status: 400 });
+        }
+        const safeSshKey = sshKey.trim();
+
+        let sshKeys = safeSshKey + "\n";
         try {
           const systemKeyPath = require("path").join(process.cwd(), "storage", "ssh", "id_rsa.pub");
           if (require("fs").existsSync(systemKeyPath)) {
@@ -95,7 +102,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         // Update database
         await prisma.vpsService.update({
             where: { id: vps.id },
-            data: { sshKey: sshKey.trim() }
+            data: { sshKey: safeSshKey }
         });
         
         return NextResponse.json({ message: "SSH Key updated successfully. Reboot the VPS for changes to apply via Cloud-Init." });

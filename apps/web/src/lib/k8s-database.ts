@@ -142,6 +142,24 @@ export const MANAGED_DB_PMA_URL = process.env.MANAGED_DB_PMA_URL || 'https://pma
 export const MANAGED_DB_PGADMIN_URL = process.env.MANAGED_DB_PGADMIN_URL || 'https://pgadmin.db.masdika.id';
 export const MANAGED_DB_MONGO_URL = process.env.MANAGED_DB_MONGO_URL || 'https://mongo.db.masdika.id';
 
+export async function validateSafeKubeConfig(rawYaml: string, label: string = 'Kubeconfig'): Promise<void> {
+  const kc = new k8s.KubeConfig();
+  try {
+    kc.loadFromString(rawYaml);
+  } catch {
+    throw new Error(`Invalid ${label} YAML format.`);
+  }
+  const hasExecPlugin = kc.getUsers().some((u: any) => Boolean(u?.exec));
+  if (hasExecPlugin) {
+    throw new Error(`Security block: ${label} with external "exec" command plugins is not permitted.`);
+  }
+  for (const cluster of kc.getClusters()) {
+    if (cluster?.server) {
+      await validateClusterOrStorageEndpoint(cluster.server, `${label} server`);
+    }
+  }
+}
+
 /**
  * Build an authenticated KubeConfig instance from DB settings
  */
@@ -151,6 +169,9 @@ export async function getK8sKubeConfig(): Promise<k8s.KubeConfig> {
 
   if (config.authMode === 'KUBECONFIG' && config.kubeconfig && config.kubeconfig.trim().length > 0) {
     kc.loadFromString(config.kubeconfig.trim());
+    if (kc.getUsers().some((u: any) => Boolean(u?.exec))) {
+      throw new Error('Security block: Kubeconfigs with external "exec" command plugins are not permitted.');
+    }
     if (config.apiServer && config.apiServer.trim().length > 0) {
       const cluster = kc.getCurrentCluster();
       if (cluster) {

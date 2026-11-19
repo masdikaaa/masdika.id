@@ -318,6 +318,9 @@ export async function getAppKubeConfig(): Promise<k8s.KubeConfig> {
 
   if (config.authMode === 'KUBECONFIG' && config.kubeconfig && config.kubeconfig.trim().length > 0) {
     kc.loadFromString(config.kubeconfig.trim());
+    if (kc.getUsers().some((u: any) => Boolean(u?.exec))) {
+      throw new Error('Security block: Kubeconfigs with external "exec" command plugins are not permitted.');
+    }
     if (config.apiServer && config.apiServer.trim().length > 0) {
       const cluster = kc.getCurrentCluster();
       if (cluster) {

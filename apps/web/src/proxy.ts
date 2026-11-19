@@ -151,6 +151,11 @@ export default function proxy(request: NextRequest) {
   // 1b. Cross-Site Request Forgery (CSRF) Origin Validation for Cookie-Authenticated Mutations
   const isMutatingMethod = request.method === 'POST' || request.method === 'PUT' || request.method === 'PATCH' || request.method === 'DELETE';
   if (isMutatingMethod && pathname.startsWith('/api/') && !isMachineApi) {
+    const secFetchSite = request.headers.get('sec-fetch-site')?.toLowerCase();
+    if (secFetchSite === 'cross-site') {
+      return NextResponse.json({ error: 'Forbidden: Cross-site request blocked' }, { status: 403 });
+    }
+
     const originHeader = request.headers.get('origin');
     if (originHeader) {
       try {
@@ -158,11 +163,13 @@ export default function proxy(request: NextRequest) {
         const originHost = originUrl.host.toLowerCase();
         const originHostname = originUrl.hostname.toLowerCase();
 
-        // 1. Whitelist production domain and subdomains (e.g. masdika.id, www.masdika.id)
-        const isProductionDomain = originHostname === 'masdika.id' || originHostname.endsWith('.masdika.id');
+        // 1. Whitelist exact canonical platform domains (never wildcard *.masdika.id because tenant apps live on *.app.masdika.id)
+        const isProductionDomain = originHostname === 'masdika.id' || originHostname === 'www.masdika.id';
 
-        // 2. Whitelist local loopback
-        const isLocalDomain = originHostname === 'localhost' || originHostname === '127.0.0.1' || originHostname === '0.0.0.0';
+        // 2. Whitelist local loopback only in non-production
+        const isLocalDomain =
+          process.env.NODE_ENV !== 'production' &&
+          (originHostname === 'localhost' || originHostname === '127.0.0.1' || originHostname === '0.0.0.0');
 
         // 3. Whitelist matching APP_URL or NEXT_PUBLIC_APP_URL
         const configuredUrls = [process.env.APP_URL, process.env.NEXT_PUBLIC_APP_URL].filter(Boolean) as string[];
@@ -175,14 +182,7 @@ export default function proxy(request: NextRequest) {
           }
         });
 
-        // 4. Whitelist matching Host or X-Forwarded-Host header
-        const forwardedHost = request.headers.get('x-forwarded-host')?.split(',')[0]?.trim().toLowerCase();
-        const directHost = request.headers.get('host')?.trim().toLowerCase();
-        const matchesHost =
-          (forwardedHost && (originHost === forwardedHost || originHostname === forwardedHost.split(':')[0])) ||
-          (directHost && (originHost === directHost || originHostname === directHost.split(':')[0]));
-
-        if (!isProductionDomain && !isLocalDomain && !matchesConfigured && !matchesHost) {
+        if (!isProductionDomain && !isLocalDomain && !matchesConfigured) {
           return NextResponse.json({ error: 'Forbidden: Cross-origin request blocked' }, { status: 403 });
         }
       } catch {
@@ -253,13 +253,17 @@ export default function proxy(request: NextRequest) {
     response = NextResponse.next();
   }
 
-  // Check authentication for protected paths
-  if ((isProtectedUi || isProtectedApi) && !isStopImpersonate) {
-    // STRICT RUNTIME SECURITY CHECK
+  if (
+    ((isProtectedUi || isProtectedApi) && !isStopImpersonate) ||
+    pathname === '/login'
+  ) {
     if (process.env.NODE_ENV === 'production' && (!process.env.SESSION_SECRET || SESSION_SECRET === 'dev_fallback_session_secret_do_not_use_in_production')) {
       throw new Error('CRITICAL SECURITY ERROR: SESSION_SECRET is missing. Middleware cannot safely verify sessions.');
     }
+  }
 
+  // Check authentication for protected paths
+  if ((isProtectedUi || isProtectedApi) && !isStopImpersonate) {
     const sessionCookie = request.cookies.get('admin_session');
     const session = verifySessionTokenEdge(sessionCookie?.value, SESSION_SECRET);
 

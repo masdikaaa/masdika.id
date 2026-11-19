@@ -10,6 +10,7 @@ export interface SessionPayload {
   role?: string;
   sessionId?: string;
   impersonatedBy?: number;
+  impersonatorSessionId?: string;
   iat: number; // issued at (epoch seconds)
   exp: number; // expiration (epoch seconds)
 }
@@ -17,6 +18,7 @@ export interface SessionPayload {
 export interface SessionTokenOptions {
   customMaxAgeSec?: number;
   impersonatedBy?: number;
+  impersonatorSessionId?: string;
 }
 
 function assertProductionSecret(secret: string) {
@@ -120,6 +122,7 @@ export function createSessionToken(
     role,
     sessionId: activeSessionId,
     ...(options?.impersonatedBy ? { impersonatedBy: options.impersonatedBy } : {}),
+    ...(options?.impersonatorSessionId ? { impersonatorSessionId: options.impersonatorSessionId } : {}),
     iat: now,
     exp: now + maxAge,
   };

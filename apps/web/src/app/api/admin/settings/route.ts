@@ -8,10 +8,11 @@ import { requireAuth } from '@/lib/auth-middleware';
 import { getUploadsDir } from '@/lib/file-utils';
 import { invalidateRustFSCache } from '@/lib/rustfs';
 import { invalidateCustomerRustFSCache } from '@/lib/customer-rustfs';
-import { invalidateK8sClusterConfigCache } from '@/lib/k8s-database';
+import { invalidateK8sClusterConfigCache, validateSafeKubeConfig } from '@/lib/k8s-database';
 import { invalidatePublicSettingsCache } from '@/lib/settings';
 import { revalidatePath } from 'next/cache';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { validateClusterOrStorageEndpoint } from '@/lib/ssrf';
 
 const MASKED_SECRET = '••••••••';
 
@@ -239,6 +240,29 @@ export async function PUT(req: Request) {
     if (managed_app_ca_cert !== undefined) settingsToUpdate.push({ key: 'managed_app_ca_cert', value: String(managed_app_ca_cert).trim() });
     if (managed_app_public_domain !== undefined) settingsToUpdate.push({ key: 'managed_app_public_domain', value: String(managed_app_public_domain).trim() });
     if (managed_app_public_ip !== undefined) settingsToUpdate.push({ key: 'managed_app_public_ip', value: String(managed_app_public_ip).trim() });
+
+    // SSRF & Kubeconfig exec-plugin pre-flight validation before persisting settings
+    try {
+      const endpointChecks: Array<[unknown, string]> = [
+        [rustfs_endpoint, 'RustFS Endpoint'],
+        [customer_rustfs_endpoint, 'Customer RustFS Endpoint'],
+        [managed_db_api_server, 'Managed DB API Server'],
+        [managed_app_api_server, 'Managed App API Server'],
+      ];
+      for (const [val, label] of endpointChecks) {
+        if (val !== undefined && String(val).trim() !== '') {
+          await validateClusterOrStorageEndpoint(String(val).trim().replace(/\/+$/, ''), label);
+        }
+      }
+      if (managed_db_kubeconfig !== undefined && managed_db_kubeconfig !== MASKED_SECRET && String(managed_db_kubeconfig).trim() !== '') {
+        await validateSafeKubeConfig(String(managed_db_kubeconfig).trim(), 'Managed DB Kubeconfig');
+      }
+      if (managed_app_kubeconfig !== undefined && managed_app_kubeconfig !== MASKED_SECRET && String(managed_app_kubeconfig).trim() !== '') {
+        await validateSafeKubeConfig(String(managed_app_kubeconfig).trim(), 'Managed App Kubeconfig');
+      }
+    } catch (validationErr: any) {
+      return NextResponse.json({ error: validationErr?.message || 'Invalid endpoint or kubeconfig configuration.' }, { status: 400 });
+    }
 
     for (const setting of settingsToUpdate) {
       await prisma.setting.upsert({

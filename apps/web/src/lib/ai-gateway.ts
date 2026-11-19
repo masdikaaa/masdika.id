@@ -198,9 +198,9 @@ export function calculateTokenCostRp(
   markupPercent: number,
   now: Date = new Date()
 ): { costRp: number; upstreamCostRp: number } {
-  const input = Math.max(0, usage.inputTokens);
-  const cached = Math.max(0, usage.cachedTokens);
-  const output = Math.max(0, usage.outputTokens);
+  const input = Number.isFinite(usage.inputTokens) && usage.inputTokens > 0 ? usage.inputTokens : 0;
+  const cached = Number.isFinite(usage.cachedTokens) && usage.cachedTokens > 0 ? usage.cachedTokens : 0;
+  const output = Number.isFinite(usage.outputTokens) && usage.outputTokens > 0 ? usage.outputTokens : 0;
 
   const peakMultiplier = model.hasPeakPricing && isPeakHourWib(now) ? 2 : 1;
 

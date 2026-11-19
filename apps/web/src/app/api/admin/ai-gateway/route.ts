@@ -425,6 +425,12 @@ export async function PUT(req: NextRequest) {
 
     if (typeof upstreamUrl === 'string' && upstreamUrl.trim()) {
       const cleanUrl = upstreamUrl.trim().replace(/\/+$/, '');
+      const { validateClusterOrStorageEndpoint } = await import('@/lib/ssrf');
+      try {
+        await validateClusterOrStorageEndpoint(cleanUrl, 'AI Gateway Upstream URL');
+      } catch (err: any) {
+        return NextResponse.json({ error: err?.message || 'Invalid upstream URL.' }, { status: 400 });
+      }
       ops.push(
         prisma.setting.upsert({
           where: { key: AI_GATEWAY_SETTING_KEYS.UPSTREAM_URL },

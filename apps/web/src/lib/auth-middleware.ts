@@ -28,7 +28,7 @@ export async function requireAuth(options?: { allowedRoles?: string[] }) {
     }
   }
 
-  // If this is an admin impersonation session, also verify the impersonating admin is still active
+  // If this is an admin impersonation session, also verify the impersonating admin and their session are still active
   if (payload?.impersonatedBy) {
     const adminUser = await prisma.user.findUnique({
       where: { id: payload.impersonatedBy },
@@ -36,6 +36,15 @@ export async function requireAuth(options?: { allowedRoles?: string[] }) {
     });
     if (!adminUser || adminUser.isSuspended || !['ADMIN', 'SUPER_ADMIN'].includes(adminUser.role)) {
       return { error: 'Impersonation session is no longer valid.', status: 401 };
+    }
+    if (payload.impersonatorSessionId) {
+      const adminLog = await prisma.loginLog.findFirst({
+        where: { sessionId: payload.impersonatorSessionId },
+        select: { isRevoked: true }
+      });
+      if (adminLog?.isRevoked) {
+        return { error: 'Impersonator admin session has been revoked.', status: 401, isRevoked: true };
+      }
     }
   }
 
