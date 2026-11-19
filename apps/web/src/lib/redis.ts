@@ -18,6 +18,7 @@ if (redisUrl.includes('://:@')) {
 
 // Ultra-fast, low-latency Redis client configuration
 const redisOptions: RedisOptions = {
+  protocol: 2,                 // Explicit RESP2 for Redis 7 / proxy compatibility in ioredis v6
   maxRetriesPerRequest: 2,
   enableAutoPipelining: true,  // Automatically pipeline concurrent requests in the same event loop tick
   enableReadyCheck: true,
