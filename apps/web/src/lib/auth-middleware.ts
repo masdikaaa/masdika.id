@@ -57,7 +57,7 @@ export async function requireAuth(options?: { allowedRoles?: string[] }) {
   }
 
   if (user.isSuspended) {
-    return { error: user.suspendReason || 'Account suspended', status: 403, isSuspended: true, userId, user };
+    return { error: user.suspendReason || 'Your account has been blocked.', status: 403, isSuspended: true, userId, user };
   }
 
   const rawAllowedRoles = options?.allowedRoles || ['ADMIN'];

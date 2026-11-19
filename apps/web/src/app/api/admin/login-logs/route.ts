@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth-middleware';
+import { invalidateSecurityBlockCache } from '@/lib/ip-check';
 
 export async function GET(req: Request) {
   try {
@@ -50,6 +51,7 @@ export async function DELETE(req: Request) {
         where: { ipAddress: ipAddress, isBanned: true },
         data: { isBanned: false }
       });
+      await invalidateSecurityBlockCache();
       return NextResponse.json({ success: true, message: `IP ${ipAddress} unbanned` });
     }
 

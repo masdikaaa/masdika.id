@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth-middleware';
+import { invalidateSecurityBlockCache } from '@/lib/ip-check';
 
 export async function GET(req: Request) {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
@@ -59,6 +60,8 @@ export async function POST(req: Request) {
       },
     });
 
+    await invalidateSecurityBlockCache();
+
     return NextResponse.json(blockedUser);
   } catch (error) {
     console.error('Error blocking user:', error);
@@ -90,6 +93,8 @@ export async function DELETE(req: Request) {
         }
       }
     });
+
+    await invalidateSecurityBlockCache();
 
     return NextResponse.json({ message: 'User unblocked successfully' });
   } catch (error) {

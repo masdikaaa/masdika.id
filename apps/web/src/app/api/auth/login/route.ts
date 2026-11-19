@@ -4,7 +4,7 @@ import { getClientIp } from '@/lib/get-ip';
 import { prisma } from '@/lib/prisma';
 import { decryptDeterministic, encryptDeterministic, hashPassword, verifyPassword } from '@/lib/encryption';
 import { create2FAChallengeToken, createSessionToken, verify2FAChallengeToken } from '@/lib/session';
-import { isIpBlocked } from '@/lib/ip-check';
+import { invalidateSecurityBlockCache, isIpBlocked } from '@/lib/ip-check';
 import { verify } from 'otplib';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
@@ -67,6 +67,7 @@ export async function POST(req: Request) {
           update: { reason: 'Brute force login attempts (Max 5x)' },
           create: { type: 'IP', value: ip, reason: 'Brute force login attempts (Max 5x)' }
         });
+        await invalidateSecurityBlockCache();
       }
 
       const safeAttemptEmail = attemptedEmail ? String(attemptedEmail).trim().toLowerCase() : (email ? String(email).trim().toLowerCase() : 'unknown');
@@ -249,7 +250,7 @@ export async function POST(req: Request) {
 
     if (user.isSuspended) {
       await handleFailedLogin(normalizedEmail);
-      return NextResponse.json({ error: user.suspendReason || 'Your account has been suspended.' }, { status: 403 });
+      return NextResponse.json({ error: user.suspendReason || 'Your account has been blocked.' }, { status: 403 });
     }
 
     // Check 2FA

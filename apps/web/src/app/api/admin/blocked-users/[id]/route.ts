@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth-middleware';
+import { invalidateSecurityBlockCache } from '@/lib/ip-check';
 
 export async function DELETE(
   req: Request,
@@ -16,6 +17,8 @@ export async function DELETE(
     await prisma.blockedUser.delete({
       where: { id }
     });
+
+    await invalidateSecurityBlockCache();
 
     return NextResponse.json({ message: 'User unblocked successfully' });
   } catch (error) {

@@ -1030,7 +1030,7 @@ export default function AdminCustomerCdnPage() {
                     className="max-h-[65vh] max-w-full object-contain rounded-lg"
                   />
                 ) : previewItem.mimeType.startsWith("video/") ? (
-                  <div className="w-full max-w-3xl p-2 flex items-center justify-center">
+                  <div className="w-full flex items-center justify-center">
                     <VideoPlayer
                       src={`/api/media/${previewItem.token}?inline=true`}
                       mimeType={previewItem.mimeType}

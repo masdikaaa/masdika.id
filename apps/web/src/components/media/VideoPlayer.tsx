@@ -186,6 +186,7 @@ function VideoPlayerInner({
           --media-popover: rgba(10, 15, 30, 0.88);
           --media-popover-foreground: #f1f5f9;
           --media-border-color: rgba(255, 255, 255, 0.08);
+          --media-frame-border: transparent;
           --media-surface-border: rgba(255, 255, 255, 0.12);
           --media-ring: #22d3ee;
           --media-border-radius: 0px;

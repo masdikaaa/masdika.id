@@ -28,7 +28,67 @@ const parseCookie = (str: string) => {
     return acc;
   }, {} as Record<string, string>);
 };
-import { verifySessionToken } from "./lib/session";
+
+function extractHeaderValue(val: string | string[] | undefined): string {
+  if (Array.isArray(val)) return val[0] || "";
+  return val || "";
+}
+
+function extractNodeClientIp(req: { headers: Record<string, string | string[] | undefined>; socket?: { remoteAddress?: string } }): string {
+  const cfIp = extractHeaderValue(req.headers["cf-connecting-ip"]).trim();
+  if (cfIp && cfIp !== "unknown") return cfIp;
+
+  const trueClientIp = extractHeaderValue(req.headers["true-client-ip"]).trim();
+  if (trueClientIp && trueClientIp !== "unknown") return trueClientIp;
+
+  const realIp = extractHeaderValue(req.headers["x-real-ip"]).trim();
+  if (realIp && realIp !== "unknown") return realIp;
+
+  const forwarded = extractHeaderValue(req.headers["x-forwarded-for"]);
+  if (forwarded) {
+    const first = forwarded.split(",")[0].trim();
+    if (first && first !== "unknown") return first;
+  }
+
+  return req.socket?.remoteAddress || "";
+}
+
+function sendBlockedHttpResponse(res: any, pathname: string, message: string, clearSessionCookie = false) {
+  if (clearSessionCookie) {
+    res.setHeader("Set-Cookie", "admin_session=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax");
+  }
+  if (pathname.startsWith("/api/")) {
+    res.writeHead(403, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+    res.end(JSON.stringify({ error: message, isBlocked: true }));
+    return;
+  }
+  res.writeHead(403, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
+  res.end(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Access Blocked - Masdika Cloud</title>
+  <style>
+    body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#030712;color:#f8fafc;font-family:system-ui,-apple-system,sans-serif;padding:24px}
+    .card{max-width:460px;width:100%;background:#0c0c0e;border:1px solid rgba(239,68,68,.3);border-radius:16px;padding:32px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.6)}
+    .badge{display:inline-block;padding:6px 12px;border-radius:9999px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#f87171;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:16px}
+    h1{font-size:22px;margin:0 0 10px}
+    p{font-size:14px;color:#94a3b8;line-height:1.6;margin:0}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge">403 Forbidden</div>
+    <h1>Access Blocked</h1>
+    <p>${message}</p>
+  </div>
+</body>
+</html>`);
+}
+
+import { getSessionPayload } from "./lib/session";
+import { isIpBlocked, isUserBlocked } from "./lib/ip-check";
 import cron from "node-cron";
 
 const dev = process.env.NODE_ENV !== "production";
@@ -46,6 +106,42 @@ app.prepare().then(async () => {
     try {
       const reqUrl = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
       const normalizedPathname = reqUrl.pathname.replace(/\/+/g, '/');
+
+      const isBlockBypassPath =
+        normalizedPathname === "/api/health" ||
+        normalizedPathname === "/api/metrics" ||
+        normalizedPathname.startsWith("/_next/") ||
+        normalizedPathname === "/favicon.ico" ||
+        normalizedPathname.startsWith("/api/cron/") ||
+        normalizedPathname === "/api/payment/callback";
+
+      if (!isBlockBypassPath) {
+        const clientIp = extractNodeClientIp(req);
+        if (await isIpBlocked(clientIp)) {
+          sendBlockedHttpResponse(
+            res,
+            normalizedPathname,
+            "Access denied. Your IP address or network subnet has been blocked by Masdika Cloud Security."
+          );
+          return;
+        }
+
+        const rawCookie = req.headers.cookie || "";
+        if (rawCookie) {
+          const parsedCookies = parseCookie(rawCookie);
+          const sessionToken = parsedCookies["admin_session"] || parsedCookies["user_session"];
+          const sessionPayload = sessionToken ? getSessionPayload(sessionToken) : null;
+          if (sessionPayload?.userId && (await isUserBlocked(sessionPayload.userId))) {
+            sendBlockedHttpResponse(
+              res,
+              normalizedPathname,
+              "Your account has been blocked by an administrator.",
+              true
+            );
+            return;
+          }
+        }
+      }
 
       if (apm.isStarted()) {
         // Ganti angka ID dan UUID menjadi :id agar metrik di APM terkumpul rapi (tidak mencar)
@@ -247,6 +343,25 @@ app.prepare().then(async () => {
   server.on("upgrade", async (req: any, socket: any, head: any) => {
     const reqUrl = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
     const normalizedPathname = reqUrl.pathname.replace(/\/+/g, '/');
+
+    const clientIp = extractNodeClientIp(req);
+    if (await isIpBlocked(clientIp)) {
+      socket.write("HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n");
+      socket.destroy();
+      return;
+    }
+
+    const rawCookie = req.headers?.cookie || "";
+    if (rawCookie) {
+      const parsedCookies = parseCookie(rawCookie);
+      const sessionToken = parsedCookies["admin_session"] || parsedCookies["user_session"];
+      const sessionPayload = sessionToken ? getSessionPayload(sessionToken) : null;
+      if (sessionPayload?.userId && (await isUserBlocked(sessionPayload.userId))) {
+        socket.write("HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n");
+        socket.destroy();
+        return;
+      }
+    }
 
     if (normalizedPathname !== "/api/ws/vnc") {
       upgradeHandler(req, socket, head);

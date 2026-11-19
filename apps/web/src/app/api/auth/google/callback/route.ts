@@ -132,7 +132,7 @@ export async function GET(req: Request) {
     }
 
     if (user.isSuspended) {
-      const suspRes = NextResponse.redirect(new URL('/login?error=AccountSuspended', normalizedBase));
+      const suspRes = NextResponse.redirect(new URL('/login?error=AccountBlocked', normalizedBase));
       suspRes.cookies.delete('google_oauth_state');
       return suspRes;
     }

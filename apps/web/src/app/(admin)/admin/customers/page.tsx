@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
@@ -53,9 +53,10 @@ export default function AdminCustomersPage() {
   const [newBalance, setNewBalance] = useState<string>("");
   const [isUpdatingBalance, setIsUpdatingBalance] = useState(false);
 
-  const [suspendUser, setSuspendUser] = useState<any>(null);
-  const [suspendReason, setSuspendReason] = useState("");
-  const [isSuspending, setIsSuspending] = useState(false);
+  const [blockUserTarget, setBlockUserTarget] = useState<any>(null);
+  const [blockReason, setBlockReason] = useState("");
+  const [blockIpSubnet, setBlockIpSubnet] = useState(true);
+  const [isBlocking, setIsBlocking] = useState(false);
 
   const [searchQuery, setSearchQuery] = useUrlString<string>("searchQuery", "");
 
@@ -69,12 +70,12 @@ export default function AdminCustomersPage() {
   const [isResettingReferrals, setIsResettingReferrals] = useState(false);
   const [showResetConfirmModal, setShowResetConfirmModal] = useState(false);
 
-  const [statusFilter, setStatusFilter] = useState<"all" | "online" | "active" | "suspended">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "online" | "active" | "blocked">("all");
   const [sortBy, setSortBy] = useState<"newest" | "last_seen" | "balance">("newest");
 
   const onlineCount = users.filter(u => isUserOnline(u.lastActive)).length;
   const activeCount = users.filter(u => !u.isSuspended).length;
-  const suspendedCount = users.filter(u => u.isSuspended).length;
+  const blockedCount = users.filter(u => u.isSuspended).length;
   const totalBalance = users.reduce((acc, u) => acc + (Number(u.balance) || 0), 0);
 
   // Filtering & Sorting
@@ -84,7 +85,7 @@ export default function AdminCustomersPage() {
         ? true
         : statusFilter === "online"
         ? isUserOnline(u.lastActive)
-        : statusFilter === "suspended"
+        : statusFilter === "blocked"
         ? u.isSuspended
         : !u.isSuspended;
       const matchesSearch = (u.name && u.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
@@ -255,35 +256,41 @@ export default function AdminCustomersPage() {
 
 
 
-  const handleSuspendToggle = async () => {
-    if (!suspendUser) return;
-    setIsSuspending(true);
-    const isCurrentlySuspended = suspendUser.isSuspended;
-    const action = isCurrentlySuspended ? "Unsuspending" : "Suspending";
+  const handleBlockToggle = async () => {
+    if (!blockUserTarget) return;
+    setIsBlocking(true);
+    const isCurrentlyBlocked = blockUserTarget.isSuspended;
+    const action = isCurrentlyBlocked ? "Unblocking" : "Blocking";
     const toastId = toast.loading(`${action} user...`);
     
     try {
-      const res = await fetch(`/api/admin/users/${suspendUser.id}/suspend`, {
+      const res = await fetch(`/api/admin/users/${blockUserTarget.id}/block`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          isSuspended: !isCurrentlySuspended,
-          suspendReason: !isCurrentlySuspended ? suspendReason : null
+          isBlocked: !isCurrentlyBlocked,
+          blockReason: !isCurrentlyBlocked ? blockReason : null,
+          blockIpSubnet: !isCurrentlyBlocked ? blockIpSubnet : undefined,
+          unblockIpSubnet: isCurrentlyBlocked ? true : undefined,
         })
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        toast.success(`User ${!isCurrentlySuspended ? 'suspended' : 'unsuspended'} successfully`, { id: toastId });
-        setSuspendUser(null);
-        setSuspendReason("");
+        const subnetNote = !isCurrentlyBlocked && data.data?.blockedSubnet
+          ? ` (Subnet ${data.data.blockedSubnet} also blocked)`
+          : "";
+        toast.success(`User ${!isCurrentlyBlocked ? 'blocked' : 'unblocked'} successfully${subnetNote}`, { id: toastId });
+        setBlockUserTarget(null);
+        setBlockReason("");
+        setBlockIpSubnet(true);
         fetchUsers();
       } else {
-        toast.error(data.error || `Failed to ${!isCurrentlySuspended ? 'suspend' : 'unsuspend'} user`, { id: toastId });
+        toast.error(data.error || `Failed to ${!isCurrentlyBlocked ? 'block' : 'unblock'} user`, { id: toastId });
       }
     } catch (err) {
-      toast.error(`Error ${!isCurrentlySuspended ? 'suspending' : 'unsuspending'} user`, { id: toastId });
+      toast.error(`Error ${!isCurrentlyBlocked ? 'blocking' : 'unblocking'} user`, { id: toastId });
     } finally {
-      setIsSuspending(false);
+      setIsBlocking(false);
     }
   };
 
@@ -415,14 +422,14 @@ export default function AdminCustomersPage() {
           </div>
         </div>
 
-        {/* Suspended Users */}
+        {/* Blocked Users */}
         <div className={cn(
           "relative overflow-hidden rounded-2xl border p-5 transition-colors",
           isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm"
         )}>
           <div className="flex items-center justify-between">
             <span className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-500")}>
-              Suspended
+              Blocked
             </span>
             <div className={cn(
               "w-9 h-9 rounded-xl border flex items-center justify-center",
@@ -433,7 +440,7 @@ export default function AdminCustomersPage() {
           </div>
           <div className="mt-4 flex items-baseline gap-2">
             <span className={cn("text-xl sm:text-2xl font-bold", isDark ? "text-white" : "text-slate-900")}>
-              {suspendedCount}
+              {blockedCount}
             </span>
             <span className={cn("text-xs font-medium", isDark ? "text-red-400" : "text-red-600")}>Restricted</span>
           </div>
@@ -477,7 +484,7 @@ export default function AdminCustomersPage() {
             { id: "all", label: "All Users", count: users.length },
             { id: "online", label: "Online Now", count: onlineCount },
             { id: "active", label: "Active", count: activeCount },
-            { id: "suspended", label: "Suspended", count: suspendedCount },
+            { id: "blocked", label: "Blocked", count: blockedCount },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -643,7 +650,7 @@ export default function AdminCustomersPage() {
                     <td className="px-3.5 py-2.5 text-center">
                       {u.isSuspended ? (
                         <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-500/10 border border-red-500/20", isDark ? "text-red-400" : "text-red-700")}>
-                          <Ban className="w-3.5 h-3.5" /> Suspended
+                          <Ban className="w-3.5 h-3.5" /> Blocked
                         </span>
                       ) : (
                         <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 border border-emerald-500/20", isDark ? "text-emerald-400" : "text-emerald-700")}>
@@ -672,10 +679,11 @@ export default function AdminCustomersPage() {
                            </Link>
                            <button 
                              onClick={() => {
-                               setSuspendUser(u);
+                               setBlockUserTarget(u);
+                               setBlockIpSubnet(true);
                              }} 
-                             className={`p-2 rounded-lg transition-colors ${u.isSuspended ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 hover:text-emerald-300' : 'bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 hover:text-orange-300'}`}
-                             title={u.isSuspended ? "Unsuspend User" : "Suspend User"}
+                             className={`p-2 rounded-lg transition-colors ${u.isSuspended ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 hover:text-emerald-300' : 'bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300'}`}
+                             title={u.isSuspended ? "Unblock User" : "Block User"}
                            >
                              {u.isSuspended ? <Play className="w-4 h-4" /> : <Ban className="w-4 h-4" />}
                            </button>
@@ -756,29 +764,44 @@ export default function AdminCustomersPage() {
         </div>
       )}
 
-      {suspendUser && (
+      {blockUserTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !isSuspending && setSuspendUser(null)} />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !isBlocking && setBlockUserTarget(null)} />
           <div className={cn("relative border rounded-2xl w-full max-w-sm overflow-hidden p-6 shadow-2xl", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")}>
-            <h2 className={cn("text-sm sm:text-base font-bold mb-4", isDark ? "text-white" : "text-slate-900")}>{suspendUser.isSuspended ? "Unsuspend User" : "Suspend User"}</h2>
-            <p className={cn("text-sm mb-4", isDark ? "text-zinc-400" : "text-slate-500")}>Customer: <span className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>{suspendUser.name}</span></p>
+            <h2 className={cn("text-sm sm:text-base font-bold mb-4", isDark ? "text-white" : "text-slate-900")}>{blockUserTarget.isSuspended ? "Unblock User" : "Block User"}</h2>
+            <p className={cn("text-sm mb-4", isDark ? "text-zinc-400" : "text-slate-500")}>Customer: <span className={cn("font-semibold", isDark ? "text-white" : "text-slate-900")}>{blockUserTarget.name}</span></p>
             
-            {!suspendUser.isSuspended ? (
-              <div className="mb-6">
-                <label className={cn("block text-sm font-medium mb-2", isDark ? "text-zinc-300" : "text-slate-600")}>Reason for Suspension</label>
-                <textarea
-                  value={suspendReason}
-                  onChange={(e) => setSuspendReason(e.target.value)}
-                  placeholder="e.g. Abuse of File CDN..."
-                  className={cn("w-full border rounded-xl px-3.5 py-2 focus:outline-none focus:border-orange-500 text-sm h-24 resize-none", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400")}
-                />
+            {!blockUserTarget.isSuspended ? (
+              <div className="mb-6 space-y-4">
+                <div>
+                  <label className={cn("block text-sm font-medium mb-2", isDark ? "text-zinc-300" : "text-slate-600")}>Reason for Blocking</label>
+                  <textarea
+                    value={blockReason}
+                    onChange={(e) => setBlockReason(e.target.value)}
+                    placeholder="e.g. Abuse of File CDN..."
+                    className={cn("w-full border rounded-xl px-3.5 py-2 focus:outline-none focus:border-red-500 text-sm h-24 resize-none", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400")}
+                  />
+                </div>
+                {blockUserTarget.lastSubnet && (
+                  <label className={cn("flex items-start gap-2.5 p-3 rounded-xl border text-xs cursor-pointer", isDark ? "bg-[#0a0a0c] border-white/[0.08] text-zinc-300" : "bg-slate-50 border-slate-200 text-slate-700")}>
+                    <input
+                      type="checkbox"
+                      checked={blockIpSubnet}
+                      onChange={(e) => setBlockIpSubnet(e.target.checked)}
+                      className="mt-0.5 rounded border-zinc-600 text-red-500 focus:ring-red-500"
+                    />
+                    <span>
+                      Also block IP subnet <code className="font-mono font-semibold text-red-400">{blockUserTarget.lastSubnet}</code> in real time across the entire website
+                    </span>
+                  </label>
+                )}
               </div>
             ) : (
               <div className="mb-6">
-                <p className={cn("text-sm", isDark ? "text-zinc-300" : "text-slate-600")}>Are you sure you want to unsuspend this user? They will regain access to their services.</p>
-                {suspendUser.suspendReason && (
+                <p className={cn("text-sm", isDark ? "text-zinc-300" : "text-slate-600")}>Are you sure you want to unblock this user? They will regain access to the website and their account.</p>
+                {blockUserTarget.suspendReason && (
                   <div className={cn("mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-xs", isDark ? "text-red-400" : "text-red-700")}>
-                    <strong className="block mb-1">Previous Reason:</strong> {suspendUser.suspendReason}
+                    <strong className="block mb-1">Previous Reason:</strong> {blockUserTarget.suspendReason}
                   </div>
                 )}
               </div>
@@ -787,20 +810,20 @@ export default function AdminCustomersPage() {
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => {
-                  setSuspendUser(null);
-                  setSuspendReason("");
+                  setBlockUserTarget(null);
+                  setBlockReason("");
                 }}
-                disabled={isSuspending}
+                disabled={isBlocking}
                 className={cn("px-4 py-2 rounded-xl transition-colors", isDark ? "text-zinc-300 hover:text-white hover:bg-slate-800" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100")}
               >
                 Cancel
               </button>
               <button
-                onClick={handleSuspendToggle}
-                disabled={isSuspending || (!suspendUser.isSuspended && !suspendReason.trim())}
-                className={`px-4 py-2 rounded-xl text-white font-semibold transition-colors disabled:opacity-50 ${suspendUser.isSuspended ? 'bg-emerald-500 hover:bg-emerald-400' : 'bg-orange-500 hover:bg-orange-400'}`}
+                onClick={handleBlockToggle}
+                disabled={isBlocking || (!blockUserTarget.isSuspended && !blockReason.trim())}
+                className={`px-4 py-2 rounded-xl text-white font-semibold transition-colors disabled:opacity-50 ${blockUserTarget.isSuspended ? 'bg-emerald-500 hover:bg-emerald-400' : 'bg-red-600 hover:bg-red-500'}`}
               >
-                {isSuspending ? "Saving..." : (suspendUser.isSuspended ? "Unsuspend" : "Suspend")}
+                {isBlocking ? "Saving..." : (blockUserTarget.isSuspended ? "Unblock" : "Block")}
               </button>
             </div>
           </div>

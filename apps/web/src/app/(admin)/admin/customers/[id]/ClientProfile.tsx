@@ -46,6 +46,13 @@ const StatusBadge = ({ status, reference }: { status: string; reference?: string
       </span>
     );
   }
+  if (upperStatus === 'BLOCKED') {
+    return (
+      <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold border", isDark ? "bg-red-500/10 border-red-500/20 text-red-400" : "bg-red-50 border-red-200 text-red-700")}>
+        <Ban className="w-3.5 h-3.5" /> {upperStatus}
+      </span>
+    );
+  }
   if (upperStatus === 'SUSPENDED') {
     return (
       <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold border", isDark ? "bg-orange-500/10 border-orange-500/20 text-orange-400" : "bg-orange-50 border-orange-200 text-orange-700")}>
@@ -810,7 +817,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
           <div className="min-w-0 flex-1">
             <h1 className={cn("text-base sm:text-xl md:text-xl sm:text-2xl font-bold tracking-tight flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
               <span className="truncate">{user.name}</span>
-              {user.isSuspended && <span className={cn("text-[10px] bg-red-500/20 px-2 py-0.5 rounded-md border border-red-500/20 font-bold shrink-0", isDark ? "text-red-400" : "text-red-700")}>SUSPENDED</span>}
+              {user.isSuspended && <span className={cn("text-[10px] bg-red-500/20 px-2 py-0.5 rounded-md border border-red-500/20 font-bold shrink-0", isDark ? "text-red-400" : "text-red-700")}>BLOCKED</span>}
             </h1>
             <div className="flex flex-wrap items-center gap-2 mt-0.5">
               <p className={cn("text-xs sm:text-sm truncate", isDark ? "text-zinc-400" : "text-slate-500")}>{user.email}</p>
@@ -937,7 +944,7 @@ export default function ClientProfile({ userId }: { userId: string }) {
                     <div>
                       <p className={cn("text-xs uppercase tracking-wider mb-1", isDark ? "text-zinc-500" : "text-slate-500")}>Account Status</p>
                       <div className="mt-1">
-                        <StatusBadge status={user.isSuspended ? 'SUSPENDED' : 'ACTIVE'} />
+                        <StatusBadge status={user.isSuspended ? 'BLOCKED' : 'ACTIVE'} />
                       </div>
                     </div>
                   </div>

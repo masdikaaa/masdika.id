@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth-middleware';
+import { invalidateSecurityBlockCache } from '@/lib/ip-check';
 
 export async function POST(req: Request) {
   const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
@@ -17,6 +18,7 @@ export async function POST(req: Request) {
         id: { in: ids }
       }
     });
+    await invalidateSecurityBlockCache();
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error bulk deleting blocked users:', error);

@@ -3,6 +3,7 @@ import { getClientIp } from '@/lib/get-ip';
 import OpenAI from 'openai';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { buildMemoryContext } from '@/lib/ai-memory';
+import { invalidateSecurityBlockCache } from '@/lib/ip-check';
 
 // ─── Cache static portfolio data (2 minutes TTL for freshness) ────────────────
 let cachedStaticDataStr: string | null = null;
@@ -235,6 +236,7 @@ export async function POST(req: Request): Promise<Response> {
                 reason: `Auto-blocked: ${injectionCount} prompt injection attempts detected within ${INJECTION_BAN_WINDOW_HOURS}h via AI Chat.`,
               },
             });
+            await invalidateSecurityBlockCache();
           }
           return jsonResponse(
             { error: 'Access denied due to repeated abuse attempts. Your IP has been blocked.' },

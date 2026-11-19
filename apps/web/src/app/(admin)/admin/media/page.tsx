@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useUpdateEffect, useUrlNumber, useUrlString } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
@@ -156,7 +156,7 @@ function PreviewModal({ item, onClose, onToggleVisibility }: { item: any; onClos
   return (
     <AnimatePresence>
       <div className={cn("fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm p-4", isDark ? "bg-black/80" : "bg-slate-900/40")} onClick={onClose}>
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className={cn("relative w-full max-w-5xl max-h-[92vh] border rounded-2xl overflow-hidden flex flex-col shadow-2xl", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")} onClick={(e) => e.stopPropagation()}>
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className={cn("relative w-full max-h-[92vh] border rounded-2xl overflow-hidden flex flex-col shadow-2xl", type === "video" ? "max-w-4xl" : "max-w-5xl", isDark ? "bg-[#0c0c0e] border-white/[0.08] text-white" : "bg-white border-slate-200 text-slate-900")} onClick={(e) => e.stopPropagation()}>
           <div className={cn("flex items-center justify-between px-5 py-4 border-b shrink-0", isDark ? "border-white/[0.08]" : "border-slate-200")}>
             <div className="flex items-center gap-3 min-w-0">
               <Eye className={cn("w-5 h-5 shrink-0", isDark ? "text-cyan-400" : "text-cyan-700")} />
@@ -188,7 +188,7 @@ function PreviewModal({ item, onClose, onToggleVisibility }: { item: any; onClos
         <div className={cn("flex-1 overflow-auto flex items-center justify-center min-h-0", isDark ? "bg-black/40" : "bg-slate-50")}>
           {type === "image" && <ImageViewer src={mediaUrl} alt={item.originalName} />}
           {type === "video" && (
-            <div className="w-full max-w-4xl p-2 sm:p-4 flex items-center justify-center">
+            <div className="w-full p-3 sm:p-4 flex items-center justify-center">
               <VideoPlayer
                 src={mediaUrl}
                 mimeType={item.mimeType}
