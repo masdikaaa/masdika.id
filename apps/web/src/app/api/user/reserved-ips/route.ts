@@ -4,6 +4,7 @@ import { requireAuth } from "@/lib/auth-middleware";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { assertSufficientCommitmentBalance } from "@/lib/billing-commitment";
+import { isServiceEnabled } from "@/lib/service-availability";
 import { Address6 } from "ip-address";
 
 const CANONICAL_IPV4_REGEX = /^(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/;
@@ -73,6 +74,14 @@ export async function POST(req: NextRequest) {
     const authResult = await requireAuth({ allowedRoles: ["USER", "ADMIN"] });
     if (authResult.error) return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     const user = authResult.user!;
+
+    const isReservedIpEnabled = await isServiceEnabled('reserved_ip_enabled');
+    if (!isReservedIpEnabled && user.role !== 'ADMIN') {
+      return NextResponse.json(
+        { error: "Reserved IP allocation is currently disabled. Coming soon!" },
+        { status: 403 }
+      );
+    }
 
     // Elastic IP model: client selects protocol version only (4 or 6).
     // Specific IP addresses cannot be hand-picked by the client.

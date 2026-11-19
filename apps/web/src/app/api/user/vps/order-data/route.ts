@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { ProxmoxClient } from "@/lib/proxmox";
 import { getBandwidthOptions } from "@/lib/vps-bandwidth";
 import { VPS_APPS } from "@/lib/vps-apps";
+import { isServiceEnabled } from "@/lib/service-availability";
 
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
@@ -153,8 +154,7 @@ export async function GET(req: Request) {
       hasIpv6Pool: ipv6PoolsCount > 0,
       maxSpecs,
       forcedBillingMode,
-      vpsEnabled: true,
-      k3sEnabled: true,
+      vpsEnabled: await isServiceEnabled('vps_enabled'),
       reservedIps: unattachedReservedIps,
       vpcs: userVpcs,
       apps: VPS_APPS

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { createVpcOnMikrotik, deleteVpcFromMikrotik } from "@/lib/mikrotik";
+import { isServiceEnabled } from "@/lib/service-availability";
 import { Address4 } from "ip-address";
 
 function isPrivateIp(cidr: string) {
@@ -61,6 +62,14 @@ export async function POST(req: NextRequest) {
 
     const auth = await requireAuth({ allowedRoles: ["USER", "ADMIN"] });
     if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
+
+    const isVpcEnabled = await isServiceEnabled('vpc_enabled');
+    if (!isVpcEnabled && auth.user!.role !== 'ADMIN') {
+      return NextResponse.json(
+        { error: "VPC Network creation is currently disabled. Coming soon!" },
+        { status: 403 }
+      );
+    }
 
     const body = await req.json();
     const { routerId, isNatEnabled } = body;

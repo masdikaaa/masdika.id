@@ -106,11 +106,13 @@ const APP_FAQS = [
 interface ManagedAppsClientProps {
   catalog?: ManagedAppDefinition[];
   plans?: ManagedAppPlanDefinition[];
+  isAppEnabled?: boolean;
 }
 
 export default function ManagedAppsClient({
   catalog = MANAGED_APPS_CATALOG,
   plans = MANAGED_APP_PLANS,
+  isAppEnabled = true,
 }: ManagedAppsClientProps) {
   // App Carousel state & drag logic
   const appScrollRef = useRef<HTMLDivElement>(null);
@@ -763,15 +765,26 @@ export default function ManagedAppsClient({
               </div>
 
               <div className="w-full md:w-auto">
-                <Button
-                  variant="primary"
-                  size="lg"
-                  href={`/dashboard/apps/new?app=${selectedAppId}&plan=${selectedPlanId}`}
-                  className="w-full md:w-auto justify-center font-bold px-7 sm:px-8 py-3.5 sm:py-4 text-sm sm:text-base rounded-xl shadow-lg shadow-cyan-400/10 hover:shadow-cyan-400/25 active:scale-[0.98] transition-all"
-                  rightIcon={<ArrowRight className="w-4 h-4" />}
-                >
-                  Deploy {activeApp.name} ({activePlan.planCode})
-                </Button>
+                {isAppEnabled ? (
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    href={`/dashboard/apps/new?app=${selectedAppId}&plan=${selectedPlanId}`}
+                    className="w-full md:w-auto justify-center font-bold px-7 sm:px-8 py-3.5 sm:py-4 text-sm sm:text-base rounded-xl shadow-lg shadow-cyan-400/10 hover:shadow-cyan-400/25 active:scale-[0.98] transition-all"
+                    rightIcon={<ArrowRight className="w-4 h-4" />}
+                  >
+                    Deploy {activeApp.name} ({activePlan.planCode})
+                  </Button>
+                ) : (
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    disabled
+                    className="w-full md:w-auto justify-center font-bold px-7 sm:px-8 py-3.5 sm:py-4 text-sm sm:text-base rounded-xl opacity-60 cursor-not-allowed"
+                  >
+                    Coming Soon
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -962,14 +975,25 @@ export default function ManagedAppsClient({
               </p>
 
               <div className="flex flex-wrap items-center justify-center gap-4">
-                <Button
-                  variant="primary"
-                  size="lg"
-                  href="/dashboard/apps"
-                  rightIcon={<ArrowRight className="w-4 h-4" />}
-                >
-                  Deploy Your Application
-                </Button>
+                {isAppEnabled ? (
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    href="/dashboard/apps"
+                    rightIcon={<ArrowRight className="w-4 h-4" />}
+                  >
+                    Deploy Your Application
+                  </Button>
+                ) : (
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    disabled
+                    className="opacity-60 cursor-not-allowed"
+                  >
+                    Coming Soon
+                  </Button>
+                )}
                 <Button
                   variant="secondary"
                   size="lg"

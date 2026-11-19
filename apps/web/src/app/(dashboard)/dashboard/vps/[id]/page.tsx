@@ -1523,13 +1523,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
         <>
           <div className="flex items-center">
             <button
-              onClick={() => {
-                if (vps.kubernetesClusterId) {
-                  router.push(`/dashboard/k3s/${vps.kubernetesClusterId}`);
-                } else {
-                  router.push("/dashboard/vps");
-                }
-              }}
+              onClick={() => router.push("/dashboard/vps")}
               className={cn(
                 "inline-flex items-center gap-2 text-xs sm:text-xs font-semibold px-3.5 py-2 rounded-xl transition-all border shadow-2xs cursor-pointer",
                 isDark 
@@ -1537,7 +1531,7 @@ export default function VpsDetailDashboard({ params }: { params: Promise<{ id: s
                   : "text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border-slate-200/90"
               )}
             >
-              <ChevronLeft className="w-4 h-4" /> Back to {vps.kubernetesClusterId ? "Cluster" : "VPS List"}
+              <ChevronLeft className="w-4 h-4" /> Back to VPS List
             </button>
           </div>
 

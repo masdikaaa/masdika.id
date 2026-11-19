@@ -634,7 +634,7 @@ function CheckoutContent() {
           <div key="managed-app-flow" className="w-full max-w-full min-w-0 transition-all duration-200">
             <AppCheckoutFlow />
           </div>
-        ) : selectedService === "VPS" || selectedService === "KUBERNETES" || selectedService === "APP_CATALOG" ? (
+        ) : selectedService === "VPS" || selectedService === "APP_CATALOG" ? (
           <div key={`vps-flow-${selectedService}`} className="w-full max-w-full min-w-0 transition-all duration-200">
             <VpsCheckoutFlow
               key={selectedService}

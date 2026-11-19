@@ -26,6 +26,10 @@ export async function POST(req: NextRequest) {
       useIpv4, useIpv6, isKubernetes, kubernetesVersion, action, kubernetesClusterId, billingCycle = 1, reservedIpId, firewallRules, vpcId, privateIpAddress, targetNode,
       appId, appVersion, appConfig
     } = await req.json();
+
+    if (isKubernetes) {
+      return NextResponse.json({ error: "Kubernetes K3s cluster creation is discontinued. Please deploy Managed Database or Managed Applications instead." }, { status: 400 });
+    }
     
     // Support both rootPassword and password for backward compatibility
     const finalPassword = rootPassword || password;

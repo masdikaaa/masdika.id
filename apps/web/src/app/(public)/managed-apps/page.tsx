@@ -3,6 +3,7 @@ import { Metadata } from "next";
 import ManagedAppsClient from "./ManagedAppsClient";
 import { MANAGED_APPS_CATALOG } from "@/lib/app-catalog";
 import { getDynamicAppPlans } from "@/lib/app-plans-server";
+import { isServiceEnabled } from "@/lib/service-availability";
 
 export const dynamic = 'force-dynamic';
 
@@ -139,7 +140,10 @@ export default async function ManagedAppsLandingPage() {
     ]
   };
 
-  const dynamicPlans = await getDynamicAppPlans();
+  const [dynamicPlans, isAppEnabled] = await Promise.all([
+    getDynamicAppPlans(),
+    isServiceEnabled('managed_app_enabled'),
+  ]);
 
   return (
     <>
@@ -150,6 +154,7 @@ export default async function ManagedAppsLandingPage() {
       <ManagedAppsClient
         catalog={MANAGED_APPS_CATALOG}
         plans={dynamicPlans}
+        isAppEnabled={isAppEnabled}
       />
     </>
   );

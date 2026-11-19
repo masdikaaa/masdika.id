@@ -198,7 +198,7 @@ export default function TermsPage() {
               </div>
               <div className="space-y-3 text-sm sm:text-base leading-relaxed text-[var(--text-secondary)] font-normal">
                 <p>
-                  <strong className="text-[var(--text-primary)] font-bold">All sales and payments are strictly final (No Refunds).</strong> We do not offer refunds, partial or in full, under any circumstances for any of our services (including but not limited to VPS, Managed K3s, Object Storage, and File CDN). Please ensure you have read the rules carefully and reviewed your order before making a payment.
+                  <strong className="text-[var(--text-primary)] font-bold">All sales and payments are strictly final (No Refunds).</strong> We do not offer refunds, partial or in full, under any circumstances for any of our services (including but not limited to VPS, Managed Database, Managed Applications, Object Storage, and File CDN). Please ensure you have read the rules carefully and reviewed your order before making a payment.
                 </p>
               </div>
             </div>
@@ -272,7 +272,7 @@ export default function TermsPage() {
                 <div className="space-y-1.5 pt-1">
                   <h3 className="text-sm sm:text-base font-bold text-[var(--text-primary)]">Resource Usage (CPU/RAM/Storage)</h3>
                   <p>
-                    Resource usage on VPS/K3s services must not be extremely excessive to the point of disrupting node stability (except for Dedicated packages). If usage exceeds reasonable limits and continuously disrupts other customers, the system reserves the right to throttle network speeds or temporarily shut down the instance.
+                    Resource usage on Cloud VPS and Managed Services must not be extremely excessive to the point of disrupting node stability (except for Dedicated packages). If usage exceeds reasonable limits and continuously disrupts other customers, the system reserves the right to throttle network speeds or temporarily shut down the instance.
                   </p>
                 </div>
               </div>

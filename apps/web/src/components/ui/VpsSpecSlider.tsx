@@ -20,7 +20,7 @@ interface Pricing {
 
 interface VpsSpecSliderProps {
   pricing: Pricing;
-  serviceType?: "VPS" | "K3S";
+  serviceType?: "VPS";
   isDisabled?: boolean;
 }
 
@@ -101,7 +101,7 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
 
   const handleDeploy = () => {
     const targetUrl = "/dashboard/checkout";
-    const serviceParam = serviceType === "K3S" ? "KUBERNETES" : "VPS";
+    const serviceParam = "VPS";
     const ipv4Param = includeIpv4 ? '1' : '0';
 
     if (session) {
@@ -317,7 +317,7 @@ export default function VpsSpecSlider({ pricing, serviceType = "VPS", isDisabled
                   Unlimited Traffic Quota Included
                 </h4>
                 <p className="text-xs md:text-sm leading-relaxed text-[var(--text-secondary)]">
-                  All port speeds include unmetered traffic data transfer for your {serviceType === "K3S" ? "Kubernetes" : "VPS"} workloads with zero bandwidth overage charges.
+                  All port speeds include unmetered traffic data transfer for your VPS workloads with zero bandwidth overage charges.
                 </p>
               </div>
             </div>

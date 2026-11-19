@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useUrlTab } from "@/lib/useUrlTab";
 import { cn } from "@/lib/utils";
 
@@ -123,8 +123,13 @@ export default function SettingsPage() {
     maintenance_message: "We are currently performing scheduled maintenance. Please check back soon.",
 
     vps_enabled: true,
-    k3s_enabled: true,
+    database_enabled: true,
+    managed_app_enabled: true,
     cdn_enabled: true,
+    object_storage_enabled: true,
+    ai_gateway_enabled: true,
+    reserved_ip_enabled: true,
+    vpc_enabled: true,
     tax_rate: "0",
 
     rustfs_endpoint: "",
@@ -143,7 +148,6 @@ export default function SettingsPage() {
     customer_rustfs_access_key: "",
     customer_rustfs_secret_key: "",
     customer_rustfs_cdn_bucket_prefix: "masdika-cdn-u",
-    object_storage_enabled: true,
     object_storage_rate_per_gb: "500",
 
     // Managed Database (Kubernetes API) Cluster Settings
@@ -213,8 +217,12 @@ export default function SettingsPage() {
             maintenance_message: data.settings?.maintenance_message || "We are currently performing scheduled maintenance. Please check back soon.",
 
             vps_enabled: data.settings?.vps_enabled !== "false",
-            k3s_enabled: data.settings?.k3s_enabled !== "false",
+            database_enabled: data.settings?.database_enabled !== "false",
+            managed_app_enabled: data.settings?.managed_app_enabled !== "false",
             cdn_enabled: data.settings?.cdn_enabled !== "false",
+            ai_gateway_enabled: data.settings?.ai_gateway_enabled !== "false",
+            reserved_ip_enabled: data.settings?.reserved_ip_enabled !== "false",
+            vpc_enabled: data.settings?.vpc_enabled !== "false",
             tax_rate: data.settings?.tax_rate || "0",
 
             rustfs_endpoint: data.settings?.rustfs_endpoint || "",
@@ -1470,62 +1478,82 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  <div className="space-y-6 relative z-20">
-                    <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-6 rounded-2xl border transition-colors group", isDark ? "bg-white/5 border-cyan-500/10 hover:border-cyan-500/30" : "bg-slate-50 border-slate-200 hover:border-cyan-500/30")}>
-                      <div className="pr-4">
-                        <h3 className={cn("font-bold flex items-center gap-2 text-base sm:text-lg", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                          <Settings className={cn("w-4 h-4 group-hover:rotate-45 transition-transform", isDark ? "text-cyan-400" : "text-cyan-700")} />
-                          Enable Cloud VPS
-                        </h3>
-                        <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>When disabled, customers cannot deploy new Cloud VPS instances. The frontend will display "Coming Soon".</p>
-                      </div>
+                  <div className="space-y-4 relative z-20">
+                    {[
+                      {
+                        key: "vps_enabled" as const,
+                        title: "Enable Cloud VPS",
+                        description: "When disabled, customers cannot deploy new Cloud VPS instances. The frontend will display \"Coming Soon\".",
+                      },
+                      {
+                        key: "database_enabled" as const,
+                        title: "Enable Managed Database",
+                        description: "When disabled, customers cannot deploy new Managed Database instances (MySQL, MariaDB, PostgreSQL, MongoDB, Redis).",
+                      },
+                      {
+                        key: "managed_app_enabled" as const,
+                        title: "Enable Managed Applications",
+                        description: "When disabled, customers cannot deploy new Managed Applications (n8n, OmniRoute, 9Router, Hermes Agent, etc.).",
+                      },
+                      {
+                        key: "cdn_enabled" as const,
+                        title: "Enable File CDN",
+                        description: "When disabled, customers cannot order new File CDN storage plans. The frontend will display \"Coming Soon\".",
+                      },
+                      {
+                        key: "object_storage_enabled" as const,
+                        title: "Enable Object Storage (S3)",
+                        description: "When disabled, customers cannot deploy new S3-Compatible Object Storage services.",
+                      },
+                      {
+                        key: "ai_gateway_enabled" as const,
+                        title: "Enable AI Gateway",
+                        description: "When disabled, customers cannot top up AI Gateway balance or create new AI Gateway API keys.",
+                      },
+                      {
+                        key: "reserved_ip_enabled" as const,
+                        title: "Enable Reserved IP",
+                        description: "When disabled, customers cannot allocate new standalone Reserved IPv4 or IPv6 addresses.",
+                      },
+                      {
+                        key: "vpc_enabled" as const,
+                        title: "Enable VPC Network",
+                        description: "When disabled, customers cannot create new private VPC networks.",
+                      },
+                    ].map((svc) => {
+                      const enabled = Boolean(formData[svc.key]);
+                      return (
+                        <div
+                          key={svc.key}
+                          className={cn(
+                            "flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl border transition-colors group",
+                            isDark
+                              ? "bg-white/5 border-cyan-500/10 hover:border-cyan-500/30"
+                              : "bg-slate-50 border-slate-200 hover:border-cyan-500/30"
+                          )}
+                        >
+                          <div className="pr-4">
+                            <h3 className={cn("font-bold flex items-center gap-2 text-sm sm:text-base", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                              <Settings className={cn("w-4 h-4 group-hover:rotate-45 transition-transform", isDark ? "text-cyan-400" : "text-cyan-700")} />
+                              {svc.title}
+                            </h3>
+                            <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>{svc.description}</p>
+                          </div>
 
-                      <button
-                        onClick={() => setFormData({ ...formData, vps_enabled: !formData.vps_enabled })}
-                        className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-black ${formData.vps_enabled ? 'bg-cyan-500' : 'bg-zinc-700'}`}
-                      >
-                        <span className="sr-only">Toggle Cloud VPS</span>
-                        <span aria-hidden="true" className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white ring-0 transition duration-200 ease-in-out ${formData.vps_enabled ? 'translate-x-3' : '-translate-x-3'}`} />
-                      </button>
-                    </div>
-
-                    <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-6 rounded-2xl border transition-colors group", isDark ? "bg-white/5 border-cyan-500/10 hover:border-cyan-500/30" : "bg-slate-50 border-slate-200 hover:border-cyan-500/30")}>
-                      <div className="pr-4">
-                        <h3 className={cn("font-bold flex items-center gap-2 text-base sm:text-lg", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                          <Rocket className={cn("w-4 h-4 group-hover:rotate-45 transition-transform", isDark ? "text-cyan-400" : "text-cyan-700")} />
-                          Enable 1-Click Apps
-                        </h3>
-                        <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>When disabled, customers cannot deploy new 1-Click Applications.</p>
-                      </div>
-
-                      <button
-                        onClick={() => setFormData({ ...formData, k3s_enabled: !formData.k3s_enabled })}
-                        className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-black ${formData.k3s_enabled ? 'bg-cyan-500' : 'bg-zinc-700'}`}
-                      >
-                        <span className="sr-only">Toggle 1-Click Apps</span>
-                        <span aria-hidden="true" className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white ring-0 transition duration-200 ease-in-out ${formData.k3s_enabled ? 'translate-x-3' : '-translate-x-3'}`} />
-                      </button>
-                    </div>
-
-
-
-                    <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-6 rounded-2xl border transition-colors group", isDark ? "bg-white/5 border-cyan-500/10 hover:border-cyan-500/30" : "bg-slate-50 border-slate-200 hover:border-cyan-500/30")}>
-                      <div className="pr-4">
-                        <h3 className={cn("font-bold flex items-center gap-2 text-base sm:text-lg", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                          <Settings className={cn("w-4 h-4 group-hover:rotate-45 transition-transform", isDark ? "text-cyan-400" : "text-cyan-700")} />
-                          Enable CDN
-                        </h3>
-                        <p className={cn("text-xs sm:text-sm mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>When disabled, customers cannot order new CDN plans. The frontend will display "Coming Soon".</p>
-                      </div>
-
-                      <button
-                        onClick={() => setFormData({ ...formData, cdn_enabled: !formData.cdn_enabled })}
-                        className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-black ${formData.cdn_enabled ? 'bg-cyan-500' : 'bg-zinc-700'}`}
-                      >
-                        <span className="sr-only">Toggle CDN</span>
-                        <span aria-hidden="true" className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white ring-0 transition duration-200 ease-in-out ${formData.cdn_enabled ? 'translate-x-3' : '-translate-x-3'}`} />
-                      </button>
-                    </div>
+                          <button
+                            type="button"
+                            onClick={() => setFormData({ ...formData, [svc.key]: !enabled })}
+                            className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-black ${enabled ? "bg-cyan-500" : "bg-zinc-700"}`}
+                          >
+                            <span className="sr-only">Toggle {svc.title}</span>
+                            <span
+                              aria-hidden="true"
+                              className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white ring-0 transition duration-200 ease-in-out ${enabled ? "translate-x-3" : "-translate-x-3"}`}
+                            />
+                          </button>
+                        </div>
+                      );
+                    })}
 
                     <div className={cn("space-y-3 mt-6 pt-6 border-t", isDark ? "border-white/[0.08]" : "border-slate-200")}>
                       <label className={labelClass}>Global PPN (Tax Rate %)</label>
@@ -2181,7 +2209,7 @@ export default function SettingsPage() {
 
             {activeTab === 'database' && (
               <motion.div key="database" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }} className="space-y-6">
-                {/* Managed Database K3s Cluster Configuration Card */}
+                {/* Managed Database Cluster Configuration Card */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
                   className={cn("rounded-2xl p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 relative overflow-hidden border", isDark ? "bg-[#0c0c0e] border-white/[0.08] shadow-md" : "bg-white border-slate-200 shadow-sm")}
@@ -2405,7 +2433,7 @@ export default function SettingsPage() {
               </motion.div>
             )}
 
-            {/* Managed Apps (K3s) Tab */}
+            {/* Managed Apps (Kubernetes) Tab */}
             {activeTab === 'apps' && (
               <motion.div
                 key="apps"

@@ -218,7 +218,7 @@ export default function PrivacyPolicyPage() {
               </div>
               <div className="space-y-3 text-sm sm:text-base leading-relaxed text-[var(--text-secondary)] font-normal">
                 <p>
-                  For your security, we do not store full credit card numbers or sensitive payment details on our servers. All transactions are handled by secure third-party gateways. <strong className="text-[var(--text-primary)] font-bold">Please note that all payments for our services (VPS, K3s, File CDN, etc.) are final and non-refundable.</strong>
+                  For your security, we do not store full credit card numbers or sensitive payment details on our servers. All transactions are handled by secure third-party gateways. <strong className="text-[var(--text-primary)] font-bold">Please note that all payments for our services (VPS, Managed Database, Managed Applications, File CDN, Object Storage, etc.) are final and non-refundable.</strong>
                 </p>
               </div>
             </div>

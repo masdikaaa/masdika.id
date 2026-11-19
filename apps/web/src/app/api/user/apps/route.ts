@@ -18,6 +18,7 @@ import { assertSufficientCommitmentBalance } from "@/lib/billing-commitment";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-ip";
 import { logClientActivity } from "@/lib/activity-log";
+import { isServiceEnabled } from "@/lib/service-availability";
 import crypto from "crypto";
 
 export async function GET(req: NextRequest) {
@@ -64,6 +65,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
     const authUser = authResult.user!;
+
+    const enabled = await isServiceEnabled('managed_app_enabled');
+    if (!enabled && authUser.role !== 'ADMIN') {
+      return NextResponse.json({ error: "Managed Applications deployment is currently disabled. Coming soon!" }, { status: 403 });
+    }
 
     // 1. Rate Limiting (5 requests per 30 seconds)
     const clientIp = getClientIp(req);

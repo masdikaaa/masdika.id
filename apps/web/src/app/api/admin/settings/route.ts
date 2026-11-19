@@ -10,6 +10,7 @@ import { invalidateRustFSCache } from '@/lib/rustfs';
 import { invalidateCustomerRustFSCache } from '@/lib/customer-rustfs';
 import { invalidateK8sClusterConfigCache, validateSafeKubeConfig } from '@/lib/k8s-database';
 import { invalidatePublicSettingsCache } from '@/lib/settings';
+import { SERVICE_SETTING_KEYS } from '@/lib/service-availability';
 import { revalidatePath } from 'next/cache';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { validateClusterOrStorageEndpoint } from '@/lib/ssrf';
@@ -53,7 +54,9 @@ export async function GET() {
     settingsObj['customer_rustfs_access_key'] = settingsObj['customer_rustfs_access_key'] || process.env.CUSTOMER_RUSTFS_ACCESS_KEY || '';
     settingsObj['customer_rustfs_secret_key'] = hasCustomerRustFsSecret ? MASKED_SECRET : '';
     settingsObj['customer_rustfs_cdn_bucket_prefix'] = settingsObj['customer_rustfs_cdn_bucket_prefix'] || 'masdika-cdn-u';
-    settingsObj['object_storage_enabled'] = settingsObj['object_storage_enabled'] ?? 'true';
+    for (const serviceKey of SERVICE_SETTING_KEYS) {
+      settingsObj[serviceKey] = settingsObj[serviceKey] ?? 'true';
+    }
     settingsObj['object_storage_rate_per_gb'] = settingsObj['object_storage_rate_per_gb'] || '500';
 
     // Managed Database (Kubernetes API) Cluster Settings
@@ -168,9 +171,11 @@ export async function PUT(req: Request) {
     if (cv_url !== undefined) settingsToUpdate.push({ key: 'cv_url', value: cv_url });
     if (maintenance_mode !== undefined) settingsToUpdate.push({ key: 'maintenance_mode', value: String(maintenance_mode) });
     if (maintenance_message !== undefined) settingsToUpdate.push({ key: 'maintenance_message', value: maintenance_message });
-    if (vps_enabled !== undefined) settingsToUpdate.push({ key: 'vps_enabled', value: String(vps_enabled) });
-    if (k3s_enabled !== undefined) settingsToUpdate.push({ key: 'k3s_enabled', value: String(k3s_enabled) });
-    if (cdn_enabled !== undefined) settingsToUpdate.push({ key: 'cdn_enabled', value: String(cdn_enabled) });
+    for (const serviceKey of SERVICE_SETTING_KEYS) {
+      if (body[serviceKey] !== undefined) {
+        settingsToUpdate.push({ key: serviceKey, value: String(body[serviceKey]) });
+      }
+    }
     if (promo_banner_image !== undefined) settingsToUpdate.push({ key: 'promo_banner_image', value: promo_banner_image });
     if (promo_banner_url !== undefined) settingsToUpdate.push({ key: 'promo_banner_url', value: promo_banner_url });
     if (promo_banner_active !== undefined) settingsToUpdate.push({ key: 'promo_banner_active', value: String(promo_banner_active) });

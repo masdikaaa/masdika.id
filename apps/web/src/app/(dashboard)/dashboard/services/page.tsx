@@ -17,7 +17,6 @@ export default function MyServicesPage() {
   const isDark = theme === 'dark';
   const [subscriptions, setSubscriptions] = useState<any[]>([]);
   const [vpsServices, setVpsServices] = useState<any[]>([]);
-  const [k3sServices, setK3sServices] = useState<any[]>([]);
   const [databaseServices, setDatabaseServices] = useState<any[]>([]);
   const [appServices, setAppServices] = useState<any[]>([]);
   const [plans, setPlans] = useState<any[]>([]);
@@ -30,10 +29,9 @@ export default function MyServicesPage() {
 
   const fetchServices = async () => {
     try {
-      const [billingRes, vpsRes, k3sRes, dbRes, appRes, plansRes] = await Promise.all([
+      const [billingRes, vpsRes, dbRes, appRes, plansRes] = await Promise.all([
         fetch("/api/user/billing"),
         fetch("/api/user/vps"),
-        fetch("/api/user/k3s"),
         fetch("/api/user/database"),
         fetch("/api/user/apps"),
         fetch("/api/public/plans")
@@ -47,11 +45,6 @@ export default function MyServicesPage() {
       if (vpsRes.ok) {
         const vpsData = await vpsRes.json();
         setVpsServices(Array.isArray(vpsData) ? vpsData : []);
-      }
-
-      if (k3sRes.ok) {
-        const k3sData = await k3sRes.json();
-        setK3sServices(Array.isArray(k3sData) ? k3sData : []);
       }
 
       if (dbRes.ok) {
@@ -142,7 +135,7 @@ export default function MyServicesPage() {
     return higherPlans.length > 0;
   };
 
-  const allServices = [...subscriptions, ...vpsServices, ...k3sServices, ...databaseServices, ...appServices];
+  const allServices = [...subscriptions, ...vpsServices, ...databaseServices, ...appServices];
 
   const totalHourlyBurnRate = allServices.reduce((sum, service) => {
     if (service.status === 'TERMINATED' || service.status === 'SUSPENDED') return sum;
@@ -151,9 +144,6 @@ export default function MyServicesPage() {
     if (service.billingMode === 'PAYG' || service.cycle === 'HOURLY') {
       if (service.hourlyRate) rate = Number(service.hourlyRate);
       if (service.plan?.hourlyPrice) rate = Number(service.plan.hourlyPrice);
-    }
-    if (service.nodeCount !== undefined && service.hourlyRate) {
-      rate = Number(service.hourlyRate);
     }
     return sum + rate;
   }, 0);
@@ -242,7 +232,7 @@ export default function MyServicesPage() {
         </div>
       </motion.div>
 
-      {subscriptions.length === 0 && vpsServices.length === 0 && k3sServices.length === 0 ? (
+      {subscriptions.length === 0 && vpsServices.length === 0 && databaseServices.length === 0 && appServices.length === 0 ? (
         <motion.div variants={itemVariants} className={cn("border rounded-2xl p-8 sm:p-12 text-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
           <div className="relative z-10">
             <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 border", isDark ? "bg-white/[0.03] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
@@ -371,83 +361,6 @@ export default function MyServicesPage() {
                           className="flex-1 h-10 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 px-4 rounded-xl text-xs font-bold flex items-center justify-center transition-all text-slate-950"
                         >
                           Manage Instance
-                        </Link>
-                      ) : (
-                        <div className="flex-1 h-10 bg-red-500/5 text-red-500/40 border border-red-500/10 px-4 rounded-xl text-xs font-bold flex items-center justify-center cursor-not-allowed">
-                          Terminated
-                        </div>
-                      )}
-                    </div>
-                  </motion.div>
-                );
-              } else if (item.nodeCount !== undefined) {
-                const k3s = item;
-                const colorClass = "from-cyan-500/20 text-cyan-400 border-cyan-500/30";
-                return (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ delay: idx * 0.05 }}
-                    key={`k3s-${k3s.id}`}
-                    className={cn(
-                      "group border rounded-2xl p-5 sm:p-6 transition-all flex flex-col h-full relative overflow-hidden",
-                      isDark ? "bg-[#111115] border-white/[0.08] hover:border-white/[0.16]" : "bg-white border-slate-200/90 shadow-2xs hover:border-slate-300",
-                      k3s.status === 'TERMINATED' && "opacity-75 grayscale-[30%]"
-                    )}
-                  >
-                    <div className="flex justify-between items-start mb-6 relative z-10">
-                      <div className="flex gap-3.5 items-center min-w-0">
-                        <div className={cn(
-                          "w-12 h-12 rounded-xl bg-gradient-to-br border flex items-center justify-center shrink-0",
-                          colorClass
-                        )}>
-                          {getServiceIcon('K3S')}
-                        </div>
-                        <div className="min-w-0">
-                          <h3 className={cn("text-base sm:text-lg font-bold group-hover:text-cyan-400 transition-colors leading-tight mb-1 truncate", isDark ? "text-white" : "text-slate-900")}>{k3s.name}</h3>
-                          <p className={cn("text-[10px] font-black uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-400")}>
-                            MANAGED KUBERNETES CLUSTER
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3 flex-1 relative z-10">
-                      <div className={cn("col-span-2 border p-3.5 rounded-xl flex justify-between items-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
-                        <span className={cn("text-[10px] font-black uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-400")}>Status</span>
-                        {getStatusBadge(k3s.status)}
-                      </div>
-
-                      <div className={cn("border p-3.5 rounded-xl flex flex-col justify-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
-                        <span className={cn("text-[10px] font-black uppercase tracking-widest mb-1", isDark ? "text-zinc-500" : "text-slate-400")}>Nodes</span>
-                        <span className={cn("text-xs font-bold tracking-wide", isDark ? "text-white" : "text-slate-900")}>{k3s.nodeCount}</span>
-                      </div>
-
-                      <div className={cn("border p-3.5 rounded-xl flex flex-col justify-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
-                        <span className={cn("text-[10px] font-black uppercase tracking-widest mb-1", isDark ? "text-zinc-500" : "text-slate-400")}>Cycle</span>
-                        <span className={cn("text-xs font-bold tracking-wide", isDark ? "text-white" : "text-slate-900")}>Pay-As-You-Go</span>
-                      </div>
-
-                      <div className={cn("col-span-2 border p-3.5 rounded-xl flex justify-between items-center", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
-                        <div className="flex flex-col">
-                          <span className={cn("text-[10px] font-black uppercase tracking-widest", isDark ? "text-zinc-500" : "text-slate-400")}>Usage Cost</span>
-                          <span className="text-xs text-cyan-400 font-bold mt-1">{formatRupiah(k3s.hourlyRate || (k3s.monthlyPrice ? k3s.monthlyPrice / 720 : 0))}/hr (PAYG)</span>
-                        </div>
-                        <span className={cn("text-lg font-black tracking-tight text-right", isDark ? "text-white" : "text-slate-900")}>
-                          {k3s.billingMode === "PAYG" ? formatRupiah(k3s.accumulatedCost || 0) : formatRupiah(k3s.monthlyPrice || ((k3s.hourlyRate || 0) * 720))}
-                          {k3s.billingMode !== "PAYG" && <span className={cn("text-xs font-bold ml-1", isDark ? "text-zinc-500" : "text-slate-400")}>/mo</span>}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="mt-5 pt-4 flex gap-3 relative z-10">
-                      {k3s.status !== 'TERMINATED' ? (
-                        <Link
-                          href={`/dashboard/k3s/${k3s.id}`}
-                          className="flex-1 h-10 bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 px-4 rounded-xl text-xs font-bold flex items-center justify-center transition-all text-slate-950"
-                        >
-                          Manage Cluster
                         </Link>
                       ) : (
                         <div className="flex-1 h-10 bg-red-500/5 text-red-500/40 border border-red-500/10 px-4 rounded-xl text-xs font-bold flex items-center justify-center cursor-not-allowed">

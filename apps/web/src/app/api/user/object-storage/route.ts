@@ -20,6 +20,7 @@ import {
 import { sendAdminNewOrderEmail, sendCustomerPaymentSuccessEmail } from '@/lib/email';
 import { decryptDeterministic, encryptDeterministic } from '@/lib/encryption';
 import { ensureObjectStoragePlansExist } from '@/lib/object-storage-plans-server';
+import { isServiceEnabled } from '@/lib/service-availability';
 
 function buildObjectStoragePlans(ratePerGbMonthly: number) {
   const sizes = [1, 5, 10, 25, 50, 100];
@@ -148,6 +149,14 @@ export async function POST(req: NextRequest) {
     const billingMode = typeof body.billingMode === 'string' && body.billingMode.toUpperCase() === 'MONTHLY'
       ? 'MONTHLY'
       : 'PAYG';
+
+    const isObjEnabled = await isServiceEnabled('object_storage_enabled');
+    if (!isObjEnabled && user.role !== 'ADMIN') {
+      return NextResponse.json(
+        { error: 'Object Storage deployment is currently disabled. Coming soon!' },
+        { status: 403 }
+      );
+    }
 
     // Pre-Flight Capacity & Cluster Health Check BEFORE touching DB
     const [health, capacity] = await Promise.all([

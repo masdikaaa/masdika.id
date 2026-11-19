@@ -19,6 +19,7 @@ import { assertSufficientCommitmentBalance } from "@/lib/billing-commitment";
 import { sendDatabaseProvisionedEmail } from "@/lib/email";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-ip";
+import { isServiceEnabled } from "@/lib/service-availability";
 import crypto from "crypto";
 
 export async function GET(req: NextRequest) {
@@ -54,6 +55,11 @@ export async function POST(req: NextRequest) {
     const authResult = await requireAuth({ allowedRoles: ["USER", "ADMIN"] });
     if (authResult.error) return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     const user = authResult.user!;
+
+    const enabled = await isServiceEnabled('database_enabled');
+    if (!enabled && user.role !== 'ADMIN') {
+      return NextResponse.json({ error: "Managed Database deployment is currently disabled. Coming soon!" }, { status: 403 });
+    }
 
     // Rate limiting (5 provisioning requests per 30 seconds per user/IP)
     const clientIp = getClientIp(req);

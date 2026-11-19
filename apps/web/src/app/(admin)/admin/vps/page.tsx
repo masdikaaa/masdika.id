@@ -648,7 +648,7 @@ export default function VpsManagementPage() {
   // Handle VPS fetching with debounce for Elasticsearch
   useEffect(() => {
     const handler = setTimeout(() => {
-      if (activeTab === "services" || activeTab === "apps" || activeTab === "k3s") {
+      if (activeTab === "services" || activeTab === "apps") {
         fetchVpsServices(searchQuery);
       }
     }, 300);
@@ -988,7 +988,7 @@ export default function VpsManagementPage() {
     );
   }
 
-  const isAppsTab = activeTab === "apps" || activeTab === "k3s";
+  const isAppsTab = activeTab === "apps";
   const displayedServices = vpsServices
     .filter(v => (activeTab === "services" ? (!v.appName || v.appName === "NONE") : (!!v.appName && v.appName !== "NONE")))
     .filter(v => {
@@ -1026,7 +1026,7 @@ export default function VpsManagementPage() {
               if (activeTab === "templates") fetchTemplates();
               if (activeTab === "pricing") fetchPricing();
               if (activeTab === "bandwidth") fetchBandwidth();
-              if (activeTab === "services" || activeTab === "apps" || activeTab === "k3s") fetchVpsServices();
+              if (activeTab === "services" || activeTab === "apps") fetchVpsServices();
               if (activeTab === "reserved-ips") fetchReservedIps();
               toast.success("Refreshed data");
             }}
@@ -2187,7 +2187,7 @@ export default function VpsManagementPage() {
       )}
 
       {/* Services and 1-Click Apps Tabs */}
-      {(activeTab === "services" || activeTab === "apps" || activeTab === "k3s") && (
+      {(activeTab === "services" || activeTab === "apps") && (
         <div className={cn("p-4 sm:p-5 rounded-2xl border w-full shadow-md", isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200")}>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>

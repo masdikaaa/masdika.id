@@ -499,11 +499,7 @@ export default function VpsCheckoutFlow({ serviceType = "VPS", onServiceChange }
         setHasIpv4Pool(data.hasIpv4Pool);
         setHasIpv6Pool(data.hasIpv6Pool);
 
-        if (serviceType === "KUBERNETES") {
-          setIsDisabled(!data.k3sEnabled);
-        } else {
-          setIsDisabled(!data.vpsEnabled);
-        }
+        setIsDisabled(!data.vpsEnabled);
 
         if (data.plans && data.plans.length > 0) {
           setSelectedPlanId(data.plans[0].id);
