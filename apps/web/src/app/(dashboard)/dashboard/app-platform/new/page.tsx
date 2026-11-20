@@ -1652,7 +1652,7 @@ export default function NewAppPlatformPage() {
                   <div className="flex items-center gap-2">
                     <Boxes className="w-4 h-4 text-purple-400" />
                     <span className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>
-                      Paketo Cloud Native Buildpacks (builder-jammy-base)
+                      Paketo Cloud Native Buildpacks (builder-jammy-full)
                     </span>
                   </div>
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/15 text-purple-400 border border-purple-500/30">

@@ -1091,11 +1091,14 @@ export async function triggerAppPlatformBuild(
             ? [
                 {
                   name: 'buildpack',
-                  image: 'paketobuildpacks/builder-jammy-base:latest',
+                  image: 'paketobuildpacks/builder-jammy-full:latest',
                   env: [
                     { name: 'CNB_INSECURE_REGISTRIES', value: '127.0.0.1:5000' },
                     { name: 'CNB_PLATFORM_API', value: '0.13' },
                     { name: 'PORT', value: String(app.appPort || 3000) },
+                    ...(app.buildType === 'LARAVEL'
+                      ? [{ name: 'BP_PHP_WEB_DIR', value: 'public' }]
+                      : []),
                   ],
                   command: ['/cnb/lifecycle/creator'],
                   args: [
