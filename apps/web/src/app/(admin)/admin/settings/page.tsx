@@ -839,15 +839,16 @@ export default function SettingsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(safePayload)
       });
+      const data = await res.json().catch(() => null);
 
       if (res.ok) {
         toast.success("Settings updated successfully!");
         window.dispatchEvent(new Event('profileUpdated'));
       } else {
-        toast.error("Failed to update settings");
+        toast.error(data?.error || "Failed to update settings");
       }
-    } catch (err) {
-      toast.error("Something went wrong");
+    } catch (err: any) {
+      toast.error(err?.message || "Something went wrong");
     } finally {
       setSaving(false);
     }
