@@ -1776,39 +1776,37 @@ export default function AppPlatformDetailPage({
                     <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
                       Framework Preset
                     </label>
-                    <select
+                    <Select
                       value={settingsBuildType}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setSettingsBuildType(val);
-                        if (["PHP", "LARAVEL", "WORDPRESS", "STATIC", "VITE"].includes(val)) setSettingsAppPort(80);
-                        else if (["GOLANG", "RUST"].includes(val)) setSettingsAppPort(8080);
-                        else if (["FASTAPI", "DJANGO"].includes(val)) setSettingsAppPort(8000);
+                      onChange={(val) => {
+                        const v = String(val);
+                        setSettingsBuildType(v);
+                        if (["PHP", "LARAVEL", "WORDPRESS", "STATIC", "VITE"].includes(v)) setSettingsAppPort(80);
+                        else if (["GOLANG", "RUST"].includes(v)) setSettingsAppPort(8080);
+                        else if (["FASTAPI", "DJANGO"].includes(v)) setSettingsAppPort(8000);
                         else setSettingsAppPort(3000);
                       }}
-                      className={cn(
-                        "w-full px-3.5 py-2.5 rounded-xl text-xs font-bold border transition-colors focus:outline-none focus:border-cyan-400 cursor-pointer",
-                        isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
-                      )}
-                    >
-                      <option value="LARAVEL">Laravel (PHP 8.2)</option>
-                      <option value="NEXTJS">Next.js (App Router)</option>
-                      <option value="NODEJS">Node.js / Express</option>
-                      <option value="FASTAPI">FastAPI (Python)</option>
-                      <option value="DJANGO">Django (Python)</option>
-                      <option value="PYTHON">Python (General)</option>
-                      <option value="GOLANG">Go (Golang)</option>
-                      <option value="PHP">PHP (Native Apache)</option>
-                      <option value="NESTJS">NestJS</option>
-                      <option value="VITE">Vite (React / Vue SPA)</option>
-                      <option value="ASTRO">Astro</option>
-                      <option value="SVELTE">Svelte / SvelteKit</option>
-                      <option value="REMIX">Remix</option>
-                      <option value="WORDPRESS">WordPress</option>
-                      <option value="RUST">Rust</option>
-                      <option value="RUBY">Ruby on Rails</option>
-                      <option value="STATIC">Static HTML</option>
-                    </select>
+                      className="h-[42px] px-3.5 py-0 text-xs font-bold"
+                      options={[
+                        { value: "LARAVEL", label: "Laravel (PHP 8.2)" },
+                        { value: "NEXTJS", label: "Next.js (App Router)" },
+                        { value: "NODEJS", label: "Node.js / Express" },
+                        { value: "FASTAPI", label: "FastAPI (Python)" },
+                        { value: "DJANGO", label: "Django (Python)" },
+                        { value: "PYTHON", label: "Python (General)" },
+                        { value: "GOLANG", label: "Go (Golang)" },
+                        { value: "PHP", label: "PHP (Native Apache)" },
+                        { value: "NESTJS", label: "NestJS" },
+                        { value: "VITE", label: "Vite (React / Vue SPA)" },
+                        { value: "ASTRO", label: "Astro" },
+                        { value: "SVELTE", label: "Svelte / SvelteKit" },
+                        { value: "REMIX", label: "Remix" },
+                        { value: "WORDPRESS", label: "WordPress" },
+                        { value: "RUST", label: "Rust" },
+                        { value: "RUBY", label: "Ruby on Rails" },
+                        { value: "STATIC", label: "Static HTML" },
+                      ]}
+                    />
                   </div>
 
                   <div>
@@ -1821,7 +1819,7 @@ export default function AppPlatformDetailPage({
                       onChange={(e) => setSettingsBuildCmd(e.target.value)}
                       placeholder={settingsBuildType === "LARAVEL" || settingsBuildType === "PHP" ? "composer install" : settingsBuildType === "FASTAPI" ? "pip install -r requirements.txt" : "npm run build"}
                       className={cn(
-                        "w-full px-3.5 py-2.5 rounded-xl text-xs font-mono border transition-colors focus:outline-none focus:border-cyan-400",
+                        "w-full h-[42px] px-3.5 rounded-xl text-xs font-mono border transition-colors focus:outline-none focus:border-cyan-400",
                         isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
                       )}
                     />
@@ -1837,7 +1835,7 @@ export default function AppPlatformDetailPage({
                       onChange={(e) => setSettingsStartCmd(e.target.value)}
                       placeholder={settingsBuildType === "FASTAPI" ? "uvicorn main:app --port 8000" : settingsBuildType === "LARAVEL" || settingsBuildType === "PHP" ? "apache2-foreground" : "npm start"}
                       className={cn(
-                        "w-full px-3.5 py-2.5 rounded-xl text-xs font-mono border transition-colors focus:outline-none focus:border-cyan-400",
+                        "w-full h-[42px] px-3.5 rounded-xl text-xs font-mono border transition-colors focus:outline-none focus:border-cyan-400",
                         isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
                       )}
                     />
