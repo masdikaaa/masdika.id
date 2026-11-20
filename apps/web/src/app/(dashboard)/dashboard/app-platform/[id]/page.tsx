@@ -63,6 +63,16 @@ import { toast } from "sonner";
 import { formatRupiah } from "@/lib/billing";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
+function cleanTerminalLogs(raw?: string | null): string {
+  if (!raw) return "";
+  return raw
+    .replace(/\u001b\[[0-9;]*[a-zA-Z]/g, "")
+    .replace(/\[\d{1,2}m/g, "")
+    .replace(/\[\[[0-9;]*m/g, "")
+    .replace(/\x1B\[[0-9;]*[a-zA-Z]/g, "")
+    .replace(/\[0m/g, "");
+}
+
 function getFrameworkBrandIcon(buildType: string) {
   const norm = (buildType || "DOCKERFILE").toUpperCase();
   switch (norm) {
@@ -884,13 +894,13 @@ export default function AppPlatformDetailPage({
       {/* TAB 2: BUILD LOGS */}
       {activeTab === "build-logs" && (
         <div className={cn(
-          "rounded-2xl border overflow-hidden shadow-md transition-all",
-          isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
+          "rounded-2xl border overflow-hidden shadow-sm transition-all",
+          isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200"
         )}>
           {/* macOS Title Bar */}
           <div className={cn(
             "px-4 py-3 border-b flex items-center justify-between gap-3 select-none",
-            isDark ? "bg-[#14161f] border-white/[0.08]" : "bg-slate-100 border-slate-200"
+            isDark ? "bg-[#14161f] border-white/[0.08]" : "bg-slate-50/90 border-slate-200"
           )}>
             {/* Traffic Light Dots + Window Title */}
             <div className="flex items-center gap-3 min-w-0">
@@ -930,7 +940,7 @@ export default function AppPlatformDetailPage({
                 <span>Refresh</span>
               </button>
               <button
-                onClick={() => copyToClipboard(buildLogs, "buildLogs")}
+                onClick={() => copyToClipboard(cleanTerminalLogs(buildLogs), "buildLogs")}
                 className={cn(
                   "p-1.5 rounded-lg border transition-all cursor-pointer",
                   isDark
@@ -944,16 +954,24 @@ export default function AppPlatformDetailPage({
             </div>
           </div>
 
-          {/* Terminal Console Screen (Solid deep black with high-contrast emerald text) */}
-          <div className="p-4 sm:p-5 bg-[#090d16] font-mono text-xs overflow-x-auto max-h-[550px] leading-relaxed whitespace-pre-wrap select-text text-emerald-400 selection:bg-cyan-500/30 selection:text-white">
-            <div className="flex items-center gap-2 text-zinc-500 text-[11px] pb-2 mb-3 border-b border-white/[0.08] select-none">
-              <Terminal className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-              <span className="text-zinc-400">Masdika Cloud App Engine • Kaniko In-Cluster Pipeline</span>
+          {/* Terminal Console Screen (Light in Light Mode like macOS window, dark in Dark Mode) */}
+          <div className={cn(
+            "p-4 sm:p-5 font-mono text-xs overflow-x-auto max-h-[550px] leading-relaxed whitespace-pre-wrap select-text transition-colors",
+            isDark
+              ? "bg-[#090d16] text-emerald-400 selection:bg-cyan-500/30 selection:text-white"
+              : "bg-white text-slate-800 selection:bg-cyan-100 selection:text-slate-900"
+          )}>
+            <div className={cn(
+              "flex items-center gap-2 text-[11px] pb-2 mb-3 border-b select-none",
+              isDark ? "text-zinc-500 border-white/[0.08]" : "text-slate-400 border-slate-100"
+            )}>
+              <Terminal className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
+              <span className={isDark ? "text-zinc-400" : "text-slate-600 font-medium"}>Masdika Cloud App Engine • Kaniko In-Cluster Pipeline</span>
               <span>•</span>
-              <span className="text-zinc-500 truncate">Target: {app.name} ({app.buildType})</span>
+              <span className={cn("truncate", isDark ? "text-zinc-500" : "text-slate-400")}>Target: {app.name} ({app.buildType})</span>
             </div>
-            <pre className="font-mono text-xs leading-relaxed text-emerald-400 whitespace-pre-wrap">
-              {buildLogs || app.lastBuildLog || "No build logs available yet. Trigger a rebuild to see pipeline execution."}
+            <pre className={cn("font-mono text-xs leading-relaxed whitespace-pre-wrap", isDark ? "text-emerald-400" : "text-slate-800")}>
+              {cleanTerminalLogs(buildLogs || app.lastBuildLog) || "No build logs available yet. Trigger a rebuild to see pipeline execution."}
             </pre>
           </div>
         </div>
@@ -962,13 +980,13 @@ export default function AppPlatformDetailPage({
       {/* TAB 3: RUNTIME LOGS */}
       {activeTab === "runtime-logs" && (
         <div className={cn(
-          "rounded-2xl border overflow-hidden shadow-md transition-all",
-          isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
+          "rounded-2xl border overflow-hidden shadow-sm transition-all",
+          isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200"
         )}>
           {/* macOS Title Bar */}
           <div className={cn(
             "px-4 py-3 border-b flex items-center justify-between gap-3 select-none",
-            isDark ? "bg-[#14161f] border-white/[0.08]" : "bg-slate-100 border-slate-200"
+            isDark ? "bg-[#14161f] border-white/[0.08]" : "bg-slate-50/90 border-slate-200"
           )}>
             {/* Traffic Light Dots + Window Title */}
             <div className="flex items-center gap-3 min-w-0">
@@ -1008,7 +1026,7 @@ export default function AppPlatformDetailPage({
                 <span>Refresh</span>
               </button>
               <button
-                onClick={() => copyToClipboard(runtimeLogs, "runtimeLogs")}
+                onClick={() => copyToClipboard(cleanTerminalLogs(runtimeLogs), "runtimeLogs")}
                 className={cn(
                   "p-1.5 rounded-lg border transition-all cursor-pointer",
                   isDark
@@ -1022,16 +1040,24 @@ export default function AppPlatformDetailPage({
             </div>
           </div>
 
-          {/* Terminal Console Screen (Solid deep black with high-contrast emerald text) */}
-          <div className="p-4 sm:p-5 bg-[#090d16] font-mono text-xs overflow-x-auto max-h-[550px] leading-relaxed whitespace-pre-wrap select-text text-emerald-400 selection:bg-cyan-500/30 selection:text-white">
-            <div className="flex items-center gap-2 text-zinc-500 text-[11px] pb-2 mb-3 border-b border-white/[0.08] select-none">
+          {/* Terminal Console Screen (Light in Light Mode like macOS window, dark in Dark Mode) */}
+          <div className={cn(
+            "p-4 sm:p-5 font-mono text-xs overflow-x-auto max-h-[550px] leading-relaxed whitespace-pre-wrap select-text transition-colors",
+            isDark
+              ? "bg-[#090d16] text-emerald-400 selection:bg-cyan-500/30 selection:text-white"
+              : "bg-white text-slate-800 selection:bg-cyan-100 selection:text-slate-900"
+          )}>
+            <div className={cn(
+              "flex items-center gap-2 text-[11px] pb-2 mb-3 border-b select-none",
+              isDark ? "text-zinc-500 border-white/[0.08]" : "text-slate-400 border-slate-100"
+            )}>
               <Terminal className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-              <span className="text-zinc-400">Kubernetes Pod Standard Output (STDOUT/STDERR)</span>
+              <span className={isDark ? "text-zinc-400" : "text-slate-600 font-medium"}>Kubernetes Pod Standard Output (STDOUT/STDERR)</span>
               <span>•</span>
-              <span className="text-zinc-500 truncate">Stream: Active</span>
+              <span className={cn("truncate", isDark ? "text-zinc-500" : "text-slate-400")}>Stream: Active</span>
             </div>
-            <pre className="font-mono text-xs leading-relaxed text-emerald-400 whitespace-pre-wrap">
-              {runtimeLogs || "Waiting for container logs..."}
+            <pre className={cn("font-mono text-xs leading-relaxed whitespace-pre-wrap", isDark ? "text-emerald-400" : "text-slate-800")}>
+              {cleanTerminalLogs(runtimeLogs) || "Waiting for container logs..."}
             </pre>
           </div>
         </div>
