@@ -766,7 +766,14 @@ export default function AppPlatformDetailPage({
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-white/[0.08] pb-1 overflow-x-auto">
+      <div
+        className={cn(
+          "rounded-2xl border p-1.5 shadow-2xs flex items-center gap-1.5 overflow-x-auto transition-colors",
+          isDark
+            ? "bg-[#111115] border-white/[0.08]"
+            : "bg-white border-slate-200/90"
+        )}
+      >
         {[
           { id: "overview", label: "Overview", icon: Layers },
           { id: "deployments", label: "Deployments", icon: History },
@@ -782,15 +789,17 @@ export default function AppPlatformDetailPage({
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
               className={cn(
-                "px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap",
+                "px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap border",
                 isActive
-                  ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"
+                  ? isDark
+                    ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/30 shadow-2xs"
+                    : "bg-cyan-50 text-cyan-700 border-cyan-200 shadow-2xs"
                   : isDark
-                  ? "text-zinc-400 hover:text-white hover:bg-white/5"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                  ? "border-transparent text-zinc-400 hover:text-white hover:bg-white/[0.05]"
+                  : "border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
               )}
             >
-              <Icon className="w-4 h-4" />
+              <Icon className="w-4 h-4 shrink-0" />
               <span>{tab.label}</span>
             </button>
           );
