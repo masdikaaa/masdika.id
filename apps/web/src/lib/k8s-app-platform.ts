@@ -9,6 +9,7 @@ export interface AppPlatformRecord {
   gitUrl: string;
   branch: string;
   buildType: string; // DOCKERFILE, NODEJS, PYTHON, GOLANG, PHP, STATIC
+  buildMode?: string | null; // DOCKERFILE, AUTO, BUILDPACK
   dockerfilePath?: string | null;
   rootDirectory?: string | null;
   buildCommand?: string | null;
@@ -934,10 +935,37 @@ export async function triggerAppPlatformBuild(
   // Also clean up any orphaned failed/completed build pods in namespace
   cleanOrphanedBuildResources().catch(() => {});
 
-  // Handle custom Dockerfile generation if needed
+  const isBuildpack = (app.buildMode || '').toUpperCase().trim() === 'BUILDPACK';
+
+  // Handle custom Dockerfile generation or inline Dockerfile (skipped when using Paketo Cloud Native Buildpacks)
   let configMapName: string | undefined = undefined;
-  const isCustomFramework = app.buildType !== 'DOCKERFILE';
-  if (isCustomFramework) {
+  const isInlineDockerfile = Boolean(
+    !isBuildpack &&
+    app.buildCommand &&
+    (app.buildCommand.includes('FROM ') ||
+     app.buildCommand.includes('# Dockerfile') ||
+     app.buildCommand.includes('ENTRYPOINT') ||
+     app.buildCommand.includes('CMD '))
+  );
+
+  if (isInlineDockerfile) {
+    configMapName = `cm-df-${jobName}`;
+    await (coreApi as any).createNamespacedConfigMap({
+      namespace,
+      body: {
+        metadata: {
+          name: configMapName,
+          labels: {
+            'build.app-platform/app': app.subdomain,
+            'app.kubernetes.io/managed-by': 'masdika-app-platform',
+          },
+        },
+        data: {
+          Dockerfile: app.buildCommand!.trim(),
+        },
+      },
+    });
+  } else if (!isBuildpack && app.buildType !== 'DOCKERFILE') {
     const generatedDockerfile = generateDockerfileForFramework(
       app.buildType,
       app.buildCommand,
@@ -967,10 +995,10 @@ export async function triggerAppPlatformBuild(
   const gitUrl = app.gitUrl.trim();
   const branch = (app.branch || 'main').trim();
 
-  // Kaniko Job Specification
-  // Uses hostNetwork to reach in-cluster registry at 127.0.0.1:5000
-  // Uses an init container with git to clone shallow repo into emptyDir /workspace
-  // Then Kaniko builds and pushes directly to local registry
+  const cleanRootDir = app.rootDirectory ? app.rootDirectory.trim().replace(/^\/+|\/+$/g, '') : '';
+  const workspaceAppDir = cleanRootDir ? `/workspace/${cleanRootDir}` : '/workspace';
+
+  // Job Specification: Paketo Cloud Native Buildpacks (BUILDPACK) or Kaniko (DOCKERFILE / AUTO)
   const jobManifest: k8s.V1Job = {
     apiVersion: 'batch/v1',
     kind: 'Job',
@@ -981,6 +1009,7 @@ export async function triggerAppPlatformBuild(
         'build.app-platform/app': app.subdomain,
         'app.kubernetes.io/managed-by': 'masdika-app-platform',
         'build.app-platform/image-tag': imageTag,
+        'build.app-platform/engine': isBuildpack ? 'paketo-cnb' : 'kaniko',
       },
     },
     spec: {
@@ -1002,6 +1031,12 @@ export async function triggerAppPlatformBuild(
               name: 'workspace',
               emptyDir: {},
             },
+            ...(isBuildpack
+              ? [
+                  { name: 'layers', emptyDir: {} },
+                  { name: 'platform', emptyDir: {} },
+                ]
+              : []),
             ...(configMapName
               ? [
                   {
@@ -1019,7 +1054,7 @@ export async function triggerAppPlatformBuild(
               image: 'alpine/git:latest',
               command: ['sh', '-c'],
               args: [
-                `echo "Cloning ${gitUrl} (branch: ${branch})..." && (git clone --depth=1 --branch ${branch} ${gitUrl} /workspace/src 2>/dev/null || git clone --depth=1 ${gitUrl} /workspace/src) && cp -rf /workspace/src/. /workspace/ && rm -rf /workspace/src && echo "Clone completed."`,
+                `echo "Cloning ${gitUrl} (branch: ${branch})..." && (git clone --depth=1 --branch ${branch} ${gitUrl} /workspace/src 2>/dev/null || git clone --depth=1 ${gitUrl} /workspace/src) && cp -rf /workspace/src/. /workspace/ && rm -rf /workspace/src && chmod -R 777 /workspace && echo "Clone completed."`,
               ],
               volumeMounts: [
                 {
@@ -1029,54 +1064,88 @@ export async function triggerAppPlatformBuild(
               ],
             },
           ],
-          containers: [
-            {
-              name: 'kaniko',
-              image: 'gcr.io/kaniko-project/executor:latest',
-              securityContext: {
-                runAsUser: 0,
-                privileged: true,
-              },
-              args: [
-                '--context=dir:///workspace',
-                ...(configMapName
-                  ? ['--dockerfile=/custom-dockerfile/Dockerfile']
-                  : [
-                      `--dockerfile=${
-                        app.dockerfilePath && app.dockerfilePath.trim() ? app.dockerfilePath.trim() : 'Dockerfile'
-                      }`,
-                    ]),
-                `--destination=${destinationImage}`,
-                '--insecure',
-                '--skip-tls-verify',
-                '--cache=false',
-              ],
-              volumeMounts: [
+          containers: isBuildpack
+            ? [
                 {
-                  name: 'workspace',
-                  mountPath: '/workspace',
+                  name: 'buildpack',
+                  image: 'paketobuildpacks/builder-jammy-base:latest',
+                  env: [
+                    { name: 'CNB_INSECURE_REGISTRIES', value: '127.0.0.1:5000' },
+                    { name: 'CNB_PLATFORM_API', value: '0.13' },
+                    { name: 'PORT', value: String(app.appPort || 3000) },
+                  ],
+                  command: ['/cnb/lifecycle/creator'],
+                  args: [
+                    `-app=${workspaceAppDir}`,
+                    '-layers=/layers',
+                    '-platform=/platform',
+                    destinationImage,
+                  ],
+                  volumeMounts: [
+                    { name: 'workspace', mountPath: '/workspace' },
+                    { name: 'layers', mountPath: '/layers' },
+                    { name: 'platform', mountPath: '/platform' },
+                  ],
+                  resources: {
+                    requests: {
+                      cpu: '500m',
+                      memory: '1024Mi',
+                    },
+                    limits: {
+                      cpu: '2000m',
+                      memory: '3072Mi',
+                    },
+                  },
                 },
-                ...(configMapName
-                  ? [
-                      {
-                        name: 'custom-dockerfile',
-                        mountPath: '/custom-dockerfile',
-                      },
-                    ]
-                  : []),
+              ]
+            : [
+                {
+                  name: 'kaniko',
+                  image: 'gcr.io/kaniko-project/executor:latest',
+                  securityContext: {
+                    runAsUser: 0,
+                    privileged: true,
+                  },
+                  args: [
+                    `--context=dir://${workspaceAppDir}`,
+                    ...(configMapName
+                      ? ['--dockerfile=/custom-dockerfile/Dockerfile']
+                      : [
+                          `--dockerfile=${
+                            app.dockerfilePath && app.dockerfilePath.trim() ? app.dockerfilePath.trim() : 'Dockerfile'
+                          }`,
+                        ]),
+                    `--destination=${destinationImage}`,
+                    '--insecure',
+                    '--skip-tls-verify',
+                    '--cache=false',
+                  ],
+                  volumeMounts: [
+                    {
+                      name: 'workspace',
+                      mountPath: '/workspace',
+                    },
+                    ...(configMapName
+                      ? [
+                          {
+                            name: 'custom-dockerfile',
+                            mountPath: '/custom-dockerfile',
+                          },
+                        ]
+                      : []),
+                  ],
+                  resources: {
+                    requests: {
+                      cpu: '500m',
+                      memory: '512Mi',
+                    },
+                    limits: {
+                      cpu: '2000m',
+                      memory: '2048Mi',
+                    },
+                  },
+                },
               ],
-              resources: {
-                requests: {
-                  cpu: '500m',
-                  memory: '512Mi',
-                },
-                limits: {
-                  cpu: '2000m',
-                  memory: '2048Mi',
-                },
-              },
-            },
-          ],
         },
       },
     },
@@ -1342,23 +1411,19 @@ export async function trackAppPlatformBuildAsync(
         if (pods.length > 0) {
           const podName = pods[0]?.metadata?.name;
           if (podName) {
-            // First try reading kaniko container log
-            try {
-              const logRes: any = await (coreApi as any).readNamespacedPodLog({
-                name: podName,
-                namespace,
-                container: 'kaniko',
-              });
-              podLogs = typeof logRes === 'string' ? logRes : (logRes?.body || String(logRes || ''));
-            } catch {
-              // If kaniko not started yet, check initContainer git-clone log
+            // Try reading main builder container log (kaniko or buildpack)
+            for (const cName of ['kaniko', 'buildpack', 'git-clone']) {
               try {
-                const initLogRes: any = await (coreApi as any).readNamespacedPodLog({
+                const logRes: any = await (coreApi as any).readNamespacedPodLog({
                   name: podName,
                   namespace,
-                  container: 'git-clone',
+                  container: cName,
                 });
-                podLogs = typeof initLogRes === 'string' ? initLogRes : (initLogRes?.body || String(initLogRes || ''));
+                const txt = typeof logRes === 'string' ? logRes : (logRes?.body || String(logRes || ''));
+                if (txt && txt.trim()) {
+                  podLogs = txt;
+                  break;
+                }
               } catch {}
             }
           }

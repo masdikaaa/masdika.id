@@ -1398,8 +1398,69 @@ export default function NewAppPlatformPage() {
               </div>
             )}
 
-            {/* MODE 2 & 3: AUTO DETECT OR BUILDPACK FRAMEWORK GRID */}
-            {buildMode !== "DOCKERFILE" && (
+            {/* MODE 3: CLOUD NATIVE BUILDPACKS (PAKETO) */}
+            {buildMode === "BUILDPACK" && (
+              <div
+                className={cn(
+                  "p-4 rounded-xl border space-y-3",
+                  isDark ? "bg-black/30 border-purple-500/20" : "bg-purple-50/50 border-purple-200"
+                )}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Boxes className="w-4 h-4 text-purple-400" />
+                    <span className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>
+                      Paketo Cloud Native Buildpacks (builder-jammy-base)
+                    </span>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/15 text-purple-400 border border-purple-500/30">
+                    Zero-Dockerfile
+                  </span>
+                </div>
+                <p className="text-[11px] text-zinc-400 leading-relaxed">
+                  Paketo CNB lifecycle automatically inspects your repository, detects Node.js, Python, Go, PHP, Ruby, Java, or .NET, installs dependencies, and exports an optimized OCI container image directly to the cluster registry without any Dockerfile.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-1.5">
+                      Container Exposed Port (PORT env)
+                    </label>
+                    <input
+                      type="number"
+                      value={appPort}
+                      onChange={(e) => setAppPort(Number(e.target.value))}
+                      placeholder="8080"
+                      className={cn(
+                        "w-full px-3 py-2 rounded-xl text-xs border font-mono transition-colors focus:outline-none focus:border-cyan-400",
+                        isDark
+                          ? "bg-black/30 border-white/10 text-white"
+                          : "bg-white border-slate-200 text-slate-900"
+                      )}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-1.5">
+                      Root Directory
+                    </label>
+                    <input
+                      type="text"
+                      value={rootDirectory}
+                      onChange={(e) => setRootDirectory(e.target.value)}
+                      placeholder="/"
+                      className={cn(
+                        "w-full px-3 py-2 rounded-xl text-xs border font-mono transition-colors focus:outline-none focus:border-cyan-400",
+                        isDark
+                          ? "bg-black/30 border-white/10 text-white"
+                          : "bg-white border-slate-200 text-slate-900"
+                      )}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* MODE 2: AUTO DETECT FRAMEWORK GRID */}
+            {buildMode === "AUTO" && (
               <>
             {/* Filter Categories and Live Search Bar */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
