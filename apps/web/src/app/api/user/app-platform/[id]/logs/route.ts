@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
-import { getAppPlatformRuntimeLogs } from "@/lib/k8s-app-platform";
+import {
+  getAppPlatformRuntimeLogs,
+  syncAppPlatformBuildProgress,
+} from "@/lib/k8s-app-platform";
 
 export async function GET(
   req: NextRequest,
@@ -19,7 +22,7 @@ export async function GET(
       return NextResponse.json({ error: "Invalid app ID" }, { status: 400 });
     }
 
-    const app = await prisma.appPlatformService.findUnique({
+    let app = await prisma.appPlatformService.findUnique({
       where: { id: appId },
     });
 
@@ -33,6 +36,18 @@ export async function GET(
 
     const { searchParams } = new URL(req.url);
     const logType = searchParams.get("type") || "runtime"; // "build" | "runtime"
+
+    if (
+      logType === "build" ||
+      app.lastBuildStatus === "BUILDING" ||
+      app.lastBuildStatus === "QUEUED" ||
+      app.status === "BUILDING" ||
+      app.status === "PROVISIONING"
+    ) {
+      await syncAppPlatformBuildProgress(app.id).catch(() => {});
+      const refreshed = await prisma.appPlatformService.findUnique({ where: { id: appId } });
+      if (refreshed) app = refreshed;
+    }
 
     if (logType === "build") {
       return NextResponse.json({

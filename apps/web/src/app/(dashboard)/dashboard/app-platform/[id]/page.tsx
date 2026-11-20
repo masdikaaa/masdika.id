@@ -284,15 +284,19 @@ export default function AppPlatformDetailPage({
     }
   }, [app?.name]);
 
-  // Poll app status every 8 seconds if building or provisioning
+  // Poll app status every 4 seconds if queued, building or provisioning
   useEffect(() => {
-    const shouldPoll = app?.lastBuildStatus === "BUILDING" || app?.status === "PROVISIONING";
+    const shouldPoll =
+      app?.lastBuildStatus === "BUILDING" ||
+      app?.lastBuildStatus === "QUEUED" ||
+      app?.status === "BUILDING" ||
+      app?.status === "PROVISIONING";
     if (!shouldPoll) return;
 
     const interval = setInterval(() => {
       fetchAppDetail();
       if (activeTab === "build-logs") fetchLogs("build");
-    }, 5000);
+    }, 4000);
     return () => clearInterval(interval);
   }, [app?.lastBuildStatus, app?.status, activeTab]);
 

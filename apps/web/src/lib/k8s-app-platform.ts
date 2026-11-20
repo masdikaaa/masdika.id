@@ -1333,7 +1333,7 @@ sh /tmp/autodetect.sh`
       },
     },
     spec: {
-      ttlSecondsAfterFinished: 60, // clean up quickly after completion
+      ttlSecondsAfterFinished: 600, // 10m safety net if server restarts; active sync deletes sooner
       backoffLimit: 0, // Fail fast without retrying failed build
       template: {
         metadata: {
@@ -1778,6 +1778,302 @@ export async function applyAppPlatformResources(
   return { ingressUrl, nodePortUrl };
 }
 
+const syncingBuildPromises = new Map<number, Promise<void>>();
+
+/**
+ * Self-healing reconciler: pulls live Kubernetes build logs (git-clone + kaniko + Pod init status)
+ * and syncs completion/failure state to PostgreSQL. Safe to call both from background watcher and HTTP polls.
+ */
+export async function syncAppPlatformBuildProgress(appId: number): Promise<void> {
+  const existing = syncingBuildPromises.get(appId);
+  if (existing) {
+    return existing;
+  }
+
+  const runPromise = (async () => {
+    const app = await prisma.appPlatformService.findUnique({ where: { id: appId } });
+    if (!app) return;
+
+    const isStillBuilding =
+      app.status === 'BUILDING' ||
+      app.status === 'PROVISIONING' ||
+      app.lastBuildStatus === 'BUILDING' ||
+      app.lastBuildStatus === 'QUEUED';
+    if (!isStillBuilding) return;
+
+    const latestDep = await prisma.appPlatformDeployment.findFirst({
+      where: { appId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const namespace = app.k8sNamespace || 'app-platform';
+    const { batchApi, coreApi } = await getAppPlatformK8sClients();
+
+    const byNewest = (a: any, b: any) =>
+      new Date(b?.metadata?.creationTimestamp || 0).getTime() -
+      new Date(a?.metadata?.creationTimestamp || 0).getTime();
+
+    const jobsRes: any = await (batchApi as any)
+      .listNamespacedJob({ namespace, labelSelector: `build.app-platform/app=${app.subdomain}` })
+      .catch(() => null);
+    const jobs = ((jobsRes?.items || jobsRes?.body?.items || []) as any[]).sort(byNewest);
+    const job = jobs[0];
+
+    const podsRes: any = await (coreApi as any)
+      .listNamespacedPod({ namespace, labelSelector: `build.app-platform/app=${app.subdomain}` })
+      .catch(() => null);
+    const pods = ((podsRes?.items || podsRes?.body?.items || []) as any[])
+      .filter((p) => (p?.metadata?.name || '').startsWith('build-'))
+      .sort(byNewest);
+    const buildPod = pods[0];
+
+    const jobName: string = job?.metadata?.name || buildPod?.metadata?.labels?.['job-name'] || '';
+    const resolvedImageTag: string =
+      job?.metadata?.labels?.['build.app-platform/image-tag'] ||
+      latestDep?.imageTag ||
+      'latest';
+
+    const startedAtMs = latestDep?.createdAt
+      ? new Date(latestDep.createdAt).getTime()
+      : job?.metadata?.creationTimestamp
+      ? new Date(job.metadata.creationTimestamp).getTime()
+      : Date.now();
+    const elapsedSec = Math.max(1, Math.round((Date.now() - startedAtMs) / 1000));
+
+    // Collect live container logs from build pod (initContainer git-clone + kaniko/buildpack)
+    let podLogs = '';
+    if (buildPod?.metadata?.name) {
+      const podName = buildPod.metadata.name;
+      const parts: string[] = [];
+
+      const readContainerLog = async (containerName: string): Promise<string> => {
+        try {
+          const logRes: any = await (coreApi as any).readNamespacedPodLog({
+            name: podName,
+            namespace,
+            container: containerName,
+          });
+          const txt = typeof logRes === 'string' ? logRes : logRes?.body || '';
+          return typeof txt === 'string' ? txt.trim() : '';
+        } catch {
+          return '';
+        }
+      };
+
+      const gitTxt = await readContainerLog('git-clone');
+      if (gitTxt) parts.push(gitTxt);
+
+      for (const builderName of ['kaniko', 'buildpack']) {
+        const bTxt = await readContainerLog(builderName);
+        if (bTxt) {
+          parts.push(bTxt);
+          break;
+        }
+      }
+
+      if (parts.length > 0) {
+        podLogs = parts.join('\n');
+      } else {
+        // Container still pulling images / initializing: surface live Pod status immediately
+        const baseQueueLine =
+          (app.lastBuildLog || '').split('\n')[0] ||
+          `Build job [${jobName || 'pending'}] queued for repository ${app.gitUrl}...`;
+        const phase = buildPod.status?.phase || 'Pending';
+        const statusSummary: string[] = [];
+
+        for (const cs of [
+          ...(buildPod.status?.initContainerStatuses || []),
+          ...(buildPod.status?.containerStatuses || []),
+        ]) {
+          if (cs?.state?.waiting?.reason) {
+            statusSummary.push(
+              `${cs.name}: ${cs.state.waiting.reason}${cs.state.waiting.message ? ` (${cs.state.waiting.message})` : ''}`
+            );
+          } else if (cs?.state?.running) {
+            statusSummary.push(`${cs.name}: Running`);
+          } else if (cs?.state?.terminated) {
+            statusSummary.push(`${cs.name}: ${cs.state.terminated.reason || 'Terminated'}`);
+          }
+        }
+
+        const podConds = (buildPod.status?.conditions || [])
+          .filter((c: any) => c.status === 'False' && c.message)
+          .map((c: any) => `${c.type}: ${c.message}`);
+
+        const detailText = statusSummary.join(' | ') || podConds.join(' | ') || 'Preparing container sandbox...';
+        podLogs = `${baseQueueLine}\n[Kubernetes Pod: ${podName}] Phase: ${phase} · ${detailText} (${elapsedSec}s)`;
+      }
+    }
+
+    if (podLogs) {
+      await prisma.appPlatformService
+        .update({
+          where: { id: appId },
+          data: { lastBuildLog: podLogs.slice(-25000) },
+        })
+        .catch(() => {});
+
+      if (latestDep) {
+        await prisma.appPlatformDeployment
+          .update({
+            where: { id: latestDep.id },
+            data: {
+              buildLogs: podLogs.slice(-50000),
+              durationSeconds: elapsedSec,
+            },
+          })
+          .catch(() => {});
+      }
+    }
+
+    const markSuccess = async (finalTag: string) => {
+      await applyAppPlatformResources(app as any, finalTag);
+
+      await prisma.appPlatformService
+        .update({
+          where: { id: appId },
+          data: {
+            status: 'RUNNING',
+            lastBuildStatus: 'SUCCESS',
+            lastDeployedAt: new Date(),
+            k8sDeployment: `app-${app.subdomain}`,
+            k8sService: `app-${app.subdomain}`,
+            k8sIngress: `app-${app.subdomain}`,
+          },
+        })
+        .catch(() => {});
+
+      if (latestDep) {
+        await prisma.appPlatformDeployment
+          .update({
+            where: { id: latestDep.id },
+            data: {
+              status: 'SUCCESS',
+              ...(podLogs ? { buildLogs: podLogs.slice(-50000) } : {}),
+              imageTag: finalTag,
+              durationSeconds: elapsedSec,
+            },
+          })
+          .catch(() => {});
+      }
+
+      if (jobName) {
+        await cleanupFinishedBuildJob(namespace, jobName).catch(() => {});
+      }
+      const successDeps = await prisma.appPlatformDeployment
+        .findMany({
+          where: { appId, status: 'SUCCESS', imageTag: { not: null } },
+          select: { imageTag: true },
+        })
+        .catch(() => [] as { imageTag: string | null }[]);
+      const keepTags = Array.from(
+        new Set([finalTag, ...successDeps.map((d) => d.imageTag || '').filter(Boolean)])
+      );
+      pruneAppPlatformRegistryImages(app.subdomain, keepTags, true).catch(() => {});
+    };
+
+    try {
+      // Case A: Job Succeeded
+      if (job?.status?.succeeded && job.status.succeeded > 0) {
+        await markSuccess(resolvedImageTag);
+        return;
+      }
+
+      // Case B: Job Failed
+      if (job?.status?.failed && job.status.failed > 0) {
+        await prisma.appPlatformService
+          .update({
+            where: { id: appId },
+            data: {
+              status: 'ERROR',
+              lastBuildStatus: 'FAILED',
+            },
+          })
+          .catch(() => {});
+
+        if (latestDep) {
+          await prisma.appPlatformDeployment
+            .update({
+              where: { id: latestDep.id },
+              data: {
+                status: 'FAILED',
+                ...(podLogs ? { buildLogs: podLogs.slice(-50000) } : {}),
+                durationSeconds: elapsedSec,
+              },
+            })
+            .catch(() => {});
+        }
+
+        if (jobName) {
+          await cleanupFinishedBuildJob(namespace, jobName).catch(() => {});
+        }
+        runRegistryGarbageCollect().catch(() => {});
+        return;
+      }
+
+      // Case C: Job & Pod disappeared (e.g., TTL cleaned up during Next.js restart)
+      if (!job && !buildPod) {
+        if (latestDep?.imageTag) {
+          const tagsRes = await fetch(`http://127.0.0.1:5000/v2/${app.subdomain}/tags/list`).catch(() => null);
+          if (tagsRes && tagsRes.ok) {
+            const tagData = (await tagsRes.json().catch(() => null)) as { tags?: string[] } | null;
+            if (Array.isArray(tagData?.tags) && tagData.tags.includes(latestDep.imageTag)) {
+              await markSuccess(latestDep.imageTag);
+              return;
+            }
+          }
+        }
+
+        if (elapsedSec > 900) {
+          await prisma.appPlatformService
+            .update({
+              where: { id: appId },
+              data: {
+                status: 'ERROR',
+                lastBuildStatus: 'FAILED',
+                lastBuildLog: `${app.lastBuildLog || ''}\n[Build timed out or job removed after 15 minutes]`.slice(-25000),
+              },
+            })
+            .catch(() => {});
+          if (latestDep) {
+            await prisma.appPlatformDeployment
+              .update({
+                where: { id: latestDep.id },
+                data: { status: 'FAILED', durationSeconds: elapsedSec },
+              })
+              .catch(() => {});
+          }
+        }
+      }
+    } catch (syncErr: any) {
+      const errMsg = syncErr?.body?.message || syncErr?.message || String(syncErr);
+      await prisma.appPlatformService
+        .update({
+          where: { id: appId },
+          data: {
+            status: 'ERROR',
+            lastBuildStatus: 'FAILED',
+            lastBuildLog: `${podLogs || app.lastBuildLog || ''}\n[Deploy/Tracking Error] ${errMsg}`.slice(-25000),
+          },
+        })
+        .catch(() => {});
+      if (latestDep) {
+        await prisma.appPlatformDeployment
+          .update({
+            where: { id: latestDep.id },
+            data: { status: 'FAILED', durationSeconds: elapsedSec },
+          })
+          .catch(() => {});
+      }
+    }
+  })().finally(() => {
+    syncingBuildPromises.delete(appId);
+  });
+
+  syncingBuildPromises.set(appId, runPromise);
+  return runPromise;
+}
+
 /**
  * Watch Kaniko build job in the background and update deployment upon completion
  */
@@ -1790,176 +2086,62 @@ export async function trackAppPlatformBuildAsync(
   const maxWaitMs = 15 * 60 * 1000; // 15 minutes timeout
   const pollIntervalMs = 4000; // poll every 4 seconds
   const startTime = Date.now();
+  const namespace = 'app-platform';
 
   try {
-    const { batchApi, coreApi } = await getAppPlatformK8sClients();
-    const namespace = 'app-platform';
+    // Immediate first sync so git-clone / PodInitializing state appears within 2 seconds
+    await new Promise((r) => setTimeout(r, 1500));
+    await syncAppPlatformBuildProgress(appId);
 
     while (Date.now() - startTime < maxWaitMs) {
+      const cur = await prisma.appPlatformService
+        .findUnique({
+          where: { id: appId },
+          select: { status: true, lastBuildStatus: true },
+        })
+        .catch(() => null);
+
+      if (
+        !cur ||
+        (cur.lastBuildStatus !== 'BUILDING' &&
+          cur.lastBuildStatus !== 'QUEUED' &&
+          cur.status !== 'BUILDING' &&
+          cur.status !== 'PROVISIONING')
+      ) {
+        return;
+      }
+
       await new Promise((r) => setTimeout(r, pollIntervalMs));
-
-      // 1. Fetch Job status
-      let jobStatus: any;
-      try {
-        const jobRes: any = await (batchApi as any).readNamespacedJob({ name: jobName, namespace });
-        jobStatus = jobRes?.status || jobRes?.body?.status;
-      } catch (err) {
-        console.warn(`[AppPlatform] Read job ${jobName} status error:`, err);
-        continue;
-      }
-
-      // 2. Fetch pod logs to update build log in DB
-      let podLogs = '';
-      try {
-        let podsRes: any = await (coreApi as any).listNamespacedPod({
-          namespace,
-          labelSelector: `job-name=${jobName}`,
-        });
-        let pods = podsRes?.items || podsRes?.body?.items || [];
-        if (pods.length === 0) {
-          podsRes = await (coreApi as any).listNamespacedPod({
-            namespace,
-            labelSelector: `job=${jobName}`,
-          });
-          pods = podsRes?.items || podsRes?.body?.items || [];
-        }
-        if (pods.length > 0) {
-          const podName = pods[0]?.metadata?.name;
-          if (podName) {
-            // Try reading main builder container log (kaniko or buildpack)
-            for (const cName of ['kaniko', 'buildpack', 'git-clone']) {
-              try {
-                const logRes: any = await (coreApi as any).readNamespacedPodLog({
-                  name: podName,
-                  namespace,
-                  container: cName,
-                });
-                const txt = typeof logRes === 'string' ? logRes : (logRes?.body || String(logRes || ''));
-                if (txt && txt.trim()) {
-                  podLogs = txt;
-                  break;
-                }
-              } catch {}
-            }
-          }
-        }
-      } catch {
-        // Logs might not be ready yet
-      }
-
-      const elapsedSec = Math.round((Date.now() - startTime) / 1000);
-
-      if (podLogs) {
-        await prisma.appPlatformService.update({
-          where: { id: appId },
-          data: {
-            lastBuildLog: podLogs.slice(-25000), // Keep last 25KB
-          },
-        }).catch(() => {});
-
-        if (deploymentId) {
-          await prisma.appPlatformDeployment.update({
-            where: { id: deploymentId },
-            data: {
-              buildLogs: podLogs.slice(-50000),
-              durationSeconds: elapsedSec,
-            },
-          }).catch(() => {});
-        }
-      }
-
-      // 3. Check if Job succeeded
-      if (jobStatus?.succeeded && jobStatus.succeeded > 0) {
-        console.log(`[AppPlatform] Build job ${jobName} succeeded! Deploying resources...`);
-        const app = await prisma.appPlatformService.findUnique({ where: { id: appId } });
-        if (!app) return;
-
-        await applyAppPlatformResources(app as any, imageTag);
-
-        await prisma.appPlatformService.update({
-          where: { id: appId },
-          data: {
-            status: 'RUNNING',
-            lastBuildStatus: 'SUCCESS',
-            lastDeployedAt: new Date(),
-            k8sDeployment: `app-${app.subdomain}`,
-            k8sService: `app-${app.subdomain}`,
-            k8sIngress: `app-${app.subdomain}`,
-          },
-        }).catch(() => {});
-
-        if (deploymentId) {
-          await prisma.appPlatformDeployment.update({
-            where: { id: deploymentId },
-            data: {
-              status: 'SUCCESS',
-              buildLogs: podLogs.slice(-50000),
-              imageTag,
-              durationSeconds: elapsedSec,
-            },
-          }).catch(() => {});
-        }
-
-        // Immediate cleanup: remove build job, pod, ConfigMap, intermediate cache layers & orphaned blobs
-        await cleanupFinishedBuildJob(namespace, jobName).catch(() => {});
-        const successDeps = await prisma.appPlatformDeployment.findMany({
-          where: { appId, status: 'SUCCESS', imageTag: { not: null } },
-          select: { imageTag: true },
-        }).catch(() => [] as { imageTag: string | null }[]);
-        const keepTags = Array.from(
-          new Set([imageTag, ...successDeps.map((d) => d.imageTag || '').filter(Boolean)])
-        );
-        pruneAppPlatformRegistryImages(app.subdomain, keepTags, true).catch(() => {});
-        return;
-      }
-
-      // 4. Check if Job failed
-      if (jobStatus?.failed && jobStatus.failed > 0) {
-        console.error(`[AppPlatform] Build job ${jobName} failed.`);
-        await prisma.appPlatformService.update({
-          where: { id: appId },
-          data: {
-            status: 'ERROR',
-            lastBuildStatus: 'FAILED',
-          },
-        }).catch(() => {});
-
-        if (deploymentId) {
-          await prisma.appPlatformDeployment.update({
-            where: { id: deploymentId },
-            data: {
-              status: 'FAILED',
-              buildLogs: podLogs.slice(-50000),
-              durationSeconds: elapsedSec,
-            },
-          }).catch(() => {});
-        }
-
-        await cleanupFinishedBuildJob(namespace, jobName).catch(() => {});
-        runRegistryGarbageCollect().catch(() => {});
-        return;
-      }
+      await syncAppPlatformBuildProgress(appId);
     }
 
-    // Timed out
+    // Timed out after 15 minutes
     const elapsedSec = Math.round((Date.now() - startTime) / 1000);
-    await prisma.appPlatformService.update({
-      where: { id: appId },
-      data: {
-        status: 'ERROR',
-        lastBuildStatus: 'FAILED',
-        lastBuildLog: (await prisma.appPlatformService.findUnique({ where: { id: appId } }))?.lastBuildLog + '\n[Build timed out after 15 minutes]',
-      },
-    }).catch(() => {});
+    const existingApp = await prisma.appPlatformService
+      .findUnique({ where: { id: appId }, select: { lastBuildLog: true } })
+      .catch(() => null);
+
+    await prisma.appPlatformService
+      .update({
+        where: { id: appId },
+        data: {
+          status: 'ERROR',
+          lastBuildStatus: 'FAILED',
+          lastBuildLog: `${existingApp?.lastBuildLog || ''}\n[Build timed out after 15 minutes]`.slice(-25000),
+        },
+      })
+      .catch(() => {});
 
     if (deploymentId) {
-      await prisma.appPlatformDeployment.update({
-        where: { id: deploymentId },
-        data: {
-          status: 'FAILED',
-          durationSeconds: elapsedSec,
-        },
-      }).catch(() => {});
+      await prisma.appPlatformDeployment
+        .update({
+          where: { id: deploymentId },
+          data: {
+            status: 'FAILED',
+            durationSeconds: elapsedSec,
+          },
+        })
+        .catch(() => {});
     }
 
     await cleanupFinishedBuildJob(namespace, jobName).catch(() => {});
@@ -1967,26 +2149,32 @@ export async function trackAppPlatformBuildAsync(
   } catch (err: any) {
     console.error(`[AppPlatform] Build tracking error for ${jobName}:`, err);
     const errMsg = err?.body?.message || err?.message || String(err);
-    const existingApp = await prisma.appPlatformService.findUnique({
-      where: { id: appId },
-      select: { lastBuildLog: true },
-    }).catch(() => null);
-    await prisma.appPlatformService.update({
-      where: { id: appId },
-      data: {
-        status: 'ERROR',
-        lastBuildStatus: 'FAILED',
-        lastBuildLog: `${existingApp?.lastBuildLog || ''}\n[Deploy/Tracking Error] ${errMsg}`.slice(-25000),
-      },
-    }).catch(() => {});
+    const existingApp = await prisma.appPlatformService
+      .findUnique({
+        where: { id: appId },
+        select: { lastBuildLog: true },
+      })
+      .catch(() => null);
+    await prisma.appPlatformService
+      .update({
+        where: { id: appId },
+        data: {
+          status: 'ERROR',
+          lastBuildStatus: 'FAILED',
+          lastBuildLog: `${existingApp?.lastBuildLog || ''}\n[Deploy/Tracking Error] ${errMsg}`.slice(-25000),
+        },
+      })
+      .catch(() => {});
 
     if (deploymentId) {
-      await prisma.appPlatformDeployment.update({
-        where: { id: deploymentId },
-        data: {
-          status: 'FAILED',
-        },
-      }).catch(() => {});
+      await prisma.appPlatformDeployment
+        .update({
+          where: { id: deploymentId },
+          data: {
+            status: 'FAILED',
+          },
+        })
+        .catch(() => {});
     }
   }
 }

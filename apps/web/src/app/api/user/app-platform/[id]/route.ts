@@ -5,6 +5,7 @@ import {
   deleteAppPlatformResources,
   getAppPlatformClusterConfig,
   applyAppPlatformResources,
+  syncAppPlatformBuildProgress,
 } from "@/lib/k8s-app-platform";
 import { getAppPlatformPlan } from "@/lib/app-platform-plans";
 import { logClientActivity } from "@/lib/activity-log";
@@ -25,7 +26,7 @@ export async function GET(
       return NextResponse.json({ error: "Invalid app ID" }, { status: 400 });
     }
 
-    const app = await prisma.appPlatformService.findUnique({
+    let app = await prisma.appPlatformService.findUnique({
       where: { id: appId },
       include: {
         deployments: {
@@ -41,6 +42,25 @@ export async function GET(
 
     if (user.role !== "ADMIN" && app.userId !== user.id) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
+    }
+
+    if (
+      app.lastBuildStatus === "BUILDING" ||
+      app.lastBuildStatus === "QUEUED" ||
+      app.status === "BUILDING" ||
+      app.status === "PROVISIONING"
+    ) {
+      await syncAppPlatformBuildProgress(app.id).catch(() => {});
+      const refreshed = await prisma.appPlatformService.findUnique({
+        where: { id: appId },
+        include: {
+          deployments: {
+            orderBy: { createdAt: "desc" },
+            take: 20,
+          },
+        },
+      });
+      if (refreshed) app = refreshed;
     }
 
     const clusterConfig = await getAppPlatformClusterConfig().catch(() => null);
