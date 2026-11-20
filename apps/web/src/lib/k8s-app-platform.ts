@@ -551,6 +551,54 @@ function parseEnvVarsToK8sEnv(envVarsString?: string | null): Array<{ name: stri
 }
 
 /**
+ * Dynamically apply multi-document Kubernetes YAML manifests using native K8s API
+ */
+export async function applyKubernetesManifests(kc: k8s.KubeConfig, manifestYaml: string): Promise<void> {
+  const objApi = k8s.KubernetesObjectApi.makeApiClient(kc);
+  const specs = k8s.loadAllYaml(manifestYaml) as k8s.KubernetesObject[];
+
+  for (const spec of specs) {
+    if (!spec || !spec.kind || !spec.metadata?.name) continue;
+
+    spec.metadata = spec.metadata || {};
+    spec.metadata.annotations = spec.metadata.annotations || {};
+    delete (spec.metadata.annotations as any)['kubectl.kubernetes.io/last-applied-configuration'];
+    spec.metadata.annotations['kubectl.kubernetes.io/last-applied-configuration'] = JSON.stringify(spec);
+
+    try {
+      await objApi.create(spec);
+    } catch (createErr: any) {
+      const status = createErr.statusCode || createErr.code || createErr.response?.statusCode || createErr.body?.code;
+      if (status === 409) {
+        try {
+          await objApi.patch(spec);
+        } catch {
+          if (spec.kind === 'Service' && spec.metadata?.name) {
+            const existing = (await objApi.read({
+              apiVersion: spec.apiVersion || 'v1',
+              kind: 'Service',
+              metadata: {
+                name: spec.metadata.name,
+                namespace: spec.metadata.namespace || 'default',
+              },
+            }).catch(() => null)) as any;
+            if (existing?.metadata?.resourceVersion) {
+              spec.metadata.resourceVersion = existing.metadata.resourceVersion;
+            }
+            if (existing?.spec?.clusterIP && (spec as any).spec) {
+              (spec as any).spec.clusterIP = existing.spec.clusterIP;
+            }
+          }
+          await objApi.replace(spec);
+        }
+      } else {
+        throw createErr;
+      }
+    }
+  }
+}
+
+/**
  * Create Kaniko build job in the cluster
  */
 export async function triggerAppPlatformBuild(
@@ -566,7 +614,7 @@ export async function triggerAppPlatformBuild(
   // Ensure namespace exists
   try {
     await (coreApi as any).createNamespace({
-      metadata: { name: namespace },
+      body: { metadata: { name: namespace } },
     });
   } catch (err: any) {
     if (err?.statusCode !== 409 && err?.response?.statusCode !== 409) {
@@ -586,16 +634,19 @@ export async function triggerAppPlatformBuild(
     );
     if (generatedDockerfile) {
       configMapName = `cm-df-${jobName}`;
-      await (coreApi as any).createNamespacedConfigMap(namespace, {
-        metadata: {
-          name: configMapName,
-          labels: {
-            app: app.subdomain,
-            'app.kubernetes.io/managed-by': 'masdika-app-platform',
+      await (coreApi as any).createNamespacedConfigMap({
+        namespace,
+        body: {
+          metadata: {
+            name: configMapName,
+            labels: {
+              app: app.subdomain,
+              'app.kubernetes.io/managed-by': 'masdika-app-platform',
+            },
           },
-        },
-        data: {
-          Dockerfile: generatedDockerfile,
+          data: {
+            Dockerfile: generatedDockerfile,
+          },
         },
       });
     }
@@ -713,7 +764,10 @@ export async function triggerAppPlatformBuild(
     },
   };
 
-  await (batchApi as any).createNamespacedJob(namespace, jobManifest);
+  await (batchApi as any).createNamespacedJob({
+    namespace,
+    body: jobManifest,
+  });
 
   // Update DB status to BUILDING
   await prisma.appPlatformService.update({
@@ -734,7 +788,7 @@ export async function applyAppPlatformResources(
   app: AppPlatformRecord,
   imageTag: string
 ): Promise<{ ingressUrl: string; nodePortUrl: string }> {
-  const { coreApi, appsApi, netApi } = await getAppPlatformK8sClients();
+  const { kc } = await getAppPlatformK8sClients();
   const config = await getAppPlatformClusterConfig();
   const namespace = app.k8sNamespace || 'app-platform';
   const name = `app-${app.subdomain}`;
@@ -823,17 +877,6 @@ export async function applyAppPlatformResources(
     },
   };
 
-  try {
-    await (appsApi as any).readNamespacedDeployment(name, namespace);
-    await (appsApi as any).replaceNamespacedDeployment(name, namespace, deploymentManifest);
-  } catch (err: any) {
-    if (err?.statusCode === 404 || err?.response?.statusCode === 404) {
-      await (appsApi as any).createNamespacedDeployment(namespace, deploymentManifest);
-    } else {
-      throw err;
-    }
-  }
-
   // 2. Create or Update Service (NodePort)
   const serviceManifest: k8s.V1Service = {
     apiVersion: 'v1',
@@ -863,17 +906,6 @@ export async function applyAppPlatformResources(
       ],
     },
   };
-
-  try {
-    await (coreApi as any).readNamespacedService(name, namespace);
-    await (coreApi as any).replaceNamespacedService(name, namespace, serviceManifest);
-  } catch (err: any) {
-    if (err?.statusCode === 404 || err?.response?.statusCode === 404) {
-      await (coreApi as any).createNamespacedService(namespace, serviceManifest);
-    } else {
-      throw err;
-    }
-  }
 
   // 3. Create or Update Ingress (Traefik + cert-manager auto SSL)
   const hosts = [appHost];
@@ -929,16 +961,13 @@ export async function applyAppPlatformResources(
     },
   };
 
-  try {
-    await (netApi as any).readNamespacedIngress(name, namespace);
-    await (netApi as any).replaceNamespacedIngress(name, namespace, ingressManifest);
-  } catch (err: any) {
-    if (err?.statusCode === 404 || err?.response?.statusCode === 404) {
-      await (netApi as any).createNamespacedIngress(namespace, ingressManifest);
-    } else {
-      throw err;
-    }
-  }
+  const manifestsYaml = [
+    k8s.dumpYaml(deploymentManifest),
+    k8s.dumpYaml(serviceManifest),
+    k8s.dumpYaml(ingressManifest),
+  ].join('\n---\n');
+
+  await applyKubernetesManifests(kc, manifestsYaml);
 
   const ingressUrl = `https://${appHost}`;
   const nodePortUrl = `http://${config.publicIp}:${app.port}`;
@@ -968,8 +997,8 @@ export async function trackAppPlatformBuildAsync(
       // 1. Fetch Job status
       let jobStatus: any;
       try {
-        const jobRes = await (batchApi as any).readNamespacedJob(jobName, namespace);
-        jobStatus = jobRes.status || jobRes.body?.status;
+        const jobRes: any = await (batchApi as any).readNamespacedJob({ name: jobName, namespace });
+        jobStatus = jobRes?.status || jobRes?.body?.status;
       } catch (err) {
         console.warn(`[AppPlatform] Read job ${jobName} status error:`, err);
         continue;
@@ -978,31 +1007,27 @@ export async function trackAppPlatformBuildAsync(
       // 2. Fetch pod logs to update build log in DB
       let podLogs = '';
       try {
-        let podsRes = await (coreApi as any).listNamespacedPod(
+        let podsRes: any = await (coreApi as any).listNamespacedPod({
           namespace,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          `job=${jobName}`
-        );
-        let pods = podsRes.items || podsRes.body?.items || [];
+          labelSelector: `job-name=${jobName}`,
+        });
+        let pods = podsRes?.items || podsRes?.body?.items || [];
         if (pods.length === 0) {
-          podsRes = await (coreApi as any).listNamespacedPod(
+          podsRes = await (coreApi as any).listNamespacedPod({
             namespace,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            `job-name=${jobName}`
-          );
-          pods = podsRes.items || podsRes.body?.items || [];
+            labelSelector: `job=${jobName}`,
+          });
+          pods = podsRes?.items || podsRes?.body?.items || [];
         }
         if (pods.length > 0) {
-          const podName = pods[0].metadata?.name;
+          const podName = pods[0]?.metadata?.name;
           if (podName) {
-            const logRes = await (coreApi as any).readNamespacedPodLog(podName, namespace);
-            podLogs = typeof logRes === 'string' ? logRes : logRes.body || '';
+            const logRes: any = await (coreApi as any).readNamespacedPodLog({
+              name: podName,
+              namespace,
+              container: 'kaniko',
+            });
+            podLogs = typeof logRes === 'string' ? logRes : (logRes?.body || String(logRes || ''));
           }
         }
       } catch {
@@ -1084,16 +1109,13 @@ export async function scaleAppPlatform(app: AppPlatformRecord, replicas: number)
   const name = app.k8sDeployment || `app-${app.subdomain}`;
 
   await (appsApi as any).patchNamespacedDeployment(
-    name,
-    namespace,
     {
-      spec: { replicas },
+      name,
+      namespace,
+      body: {
+        spec: { replicas },
+      },
     },
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
     { headers: { 'Content-Type': 'application/strategic-merge-patch+json' } }
   );
 
@@ -1115,24 +1137,21 @@ export async function restartAppPlatform(app: AppPlatformRecord): Promise<void> 
   const name = app.k8sDeployment || `app-${app.subdomain}`;
 
   await (appsApi as any).patchNamespacedDeployment(
-    name,
-    namespace,
     {
-      spec: {
-        template: {
-          metadata: {
-            annotations: {
-              'kubectl.kubernetes.io/restartedAt': new Date().toISOString(),
+      name,
+      namespace,
+      body: {
+        spec: {
+          template: {
+            metadata: {
+              annotations: {
+                'kubectl.kubernetes.io/restartedAt': new Date().toISOString(),
+              },
             },
           },
         },
       },
     },
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
     { headers: { 'Content-Type': 'application/strategic-merge-patch+json' } }
   );
 
@@ -1151,37 +1170,27 @@ export async function getAppPlatformRuntimeLogs(app: AppPlatformRecord, tailLine
   const { coreApi } = await getAppPlatformK8sClients();
   const namespace = app.k8sNamespace || 'app-platform';
 
-  const podsRes = await (coreApi as any).listNamespacedPod(
+  const podsRes: any = await (coreApi as any).listNamespacedPod({
     namespace,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    `app=${app.subdomain}`
-  );
-  const pods = podsRes.items || podsRes.body?.items || [];
+    labelSelector: `app=${app.subdomain}`,
+  });
+  const pods = podsRes?.items || podsRes?.body?.items || [];
   if (pods.length === 0) {
     return 'No active pods found for this application.';
   }
 
-  const runningPod = pods.find((p: any) => p.status?.phase === 'Running') || pods[0];
-  const podName = runningPod.metadata?.name;
+  const runningPod = pods.find((p: any) => p?.status?.phase === 'Running') || pods[0];
+  const podName = runningPod?.metadata?.name;
   if (!podName) return 'Pod name unavailable.';
 
   try {
-    const logRes = await (coreApi as any).readNamespacedPodLog(
-      podName,
+    const logRes: any = await (coreApi as any).readNamespacedPodLog({
+      name: podName,
       namespace,
-      'app',
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      tailLines
-    );
-    return typeof logRes === 'string' ? logRes : logRes.body || 'No log output produced.';
+      container: 'app',
+      tailLines,
+    });
+    return typeof logRes === 'string' ? logRes : (logRes?.body || 'No log output produced.');
   } catch (err: any) {
     return `Failed to fetch logs: ${err?.message || 'Unknown error'}`;
   }
@@ -1197,22 +1206,22 @@ export async function deleteAppPlatformResources(app: AppPlatformRecord): Promis
 
   // Delete Deployment
   try {
-    await (appsApi as any).deleteNamespacedDeployment(name, namespace);
+    await (appsApi as any).deleteNamespacedDeployment({ name, namespace });
   } catch {}
 
   // Delete Service
   try {
-    await (coreApi as any).deleteNamespacedService(name, namespace);
+    await (coreApi as any).deleteNamespacedService({ name, namespace });
   } catch {}
 
   // Delete Ingress
   try {
-    await (netApi as any).deleteNamespacedIngress(name, namespace);
+    await (netApi as any).deleteNamespacedIngress({ name, namespace });
   } catch {}
 
   // Delete TLS secret
   try {
-    await (coreApi as any).deleteNamespacedSecret(`tls-${app.subdomain}`, namespace);
+    await (coreApi as any).deleteNamespacedSecret({ name: `tls-${app.subdomain}`, namespace });
   } catch {}
 
   releaseReservedAppPlatformPort(app.port);
