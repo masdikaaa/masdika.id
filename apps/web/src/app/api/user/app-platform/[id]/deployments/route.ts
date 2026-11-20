@@ -157,16 +157,22 @@ export async function DELETE(
     const clearOld = req.nextUrl.searchParams.get("clearOld") === "true";
 
     if (clearOld) {
-      const latestDep = await prisma.appPlatformDeployment.findFirst({
-        where: { appId },
-        orderBy: { createdAt: "desc" },
-        select: { id: true },
-      });
+      const activeKeep =
+        (await prisma.appPlatformDeployment.findFirst({
+          where: { appId, status: "SUCCESS" },
+          orderBy: { createdAt: "desc" },
+          select: { id: true },
+        })) ||
+        (await prisma.appPlatformDeployment.findFirst({
+          where: { appId },
+          orderBy: { createdAt: "desc" },
+          select: { id: true },
+        }));
 
       const deleted = await prisma.appPlatformDeployment.deleteMany({
         where: {
           appId,
-          ...(latestDep ? { id: { not: latestDep.id } } : {}),
+          ...(activeKeep ? { id: { not: activeKeep.id } } : {}),
         },
       });
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, useRef, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/ThemeProvider";
@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import {
   Globe,
   ChevronLeft,
+  ChevronRight,
   ExternalLink,
   Copy,
   Check,
@@ -158,10 +159,15 @@ export default function AppPlatformDetailPage({
     deploymentNumber?: number;
   } | null>(null);
 
-  // Logs state
+  // Logs & pagination state
+  const [deploymentsPage, setDeploymentsPage] = useState(1);
+  const DEPLOYMENTS_PER_PAGE = 5;
   const [buildLogs, setBuildLogs] = useState("");
   const [runtimeLogs, setRuntimeLogs] = useState("");
   const [logsLoading, setLogsLoading] = useState(false);
+  const buildLogsContainerRef = useRef<HTMLDivElement>(null);
+  const runtimeLogsContainerRef = useRef<HTMLDivElement>(null);
+  const depLogsPreRef = useRef<HTMLPreElement>(null);
 
   // Settings edit state
   const [settingsGitUrl, setSettingsGitUrl] = useState("");
@@ -289,6 +295,25 @@ export default function AppPlatformDetailPage({
     if (activeTab === "build-logs") fetchLogs("build");
     if (activeTab === "runtime-logs") fetchLogs("runtime");
   }, [activeTab]);
+
+  // Auto-scroll Build Logs, Runtime Logs, and Selected Deployment Logs to the latest lines (bottom)
+  useEffect(() => {
+    if (activeTab === "build-logs" && buildLogsContainerRef.current) {
+      buildLogsContainerRef.current.scrollTop = buildLogsContainerRef.current.scrollHeight;
+    }
+  }, [activeTab, buildLogs, app?.lastBuildLog]);
+
+  useEffect(() => {
+    if (activeTab === "runtime-logs" && runtimeLogsContainerRef.current) {
+      runtimeLogsContainerRef.current.scrollTop = runtimeLogsContainerRef.current.scrollHeight;
+    }
+  }, [activeTab, runtimeLogs]);
+
+  useEffect(() => {
+    if (selectedDepLogs && depLogsPreRef.current) {
+      depLogsPreRef.current.scrollTop = depLogsPreRef.current.scrollHeight;
+    }
+  }, [selectedDepLogs]);
 
   // Realtime metrics polling without manual page refresh (Live: 5s, Hour: 15s, Day/Week: 60s)
   useEffect(() => {
@@ -1176,151 +1201,223 @@ export default function AppPlatformDetailPage({
               </div>
             </div>
 
-            {deployments.length > 0 ? (
-              <div className="space-y-3">
-                {deployments.map((dep, idx) => {
-                  const isSuccess = dep.status === "SUCCESS";
-                  const isFailed = dep.status === "FAILED";
-                  const isBuilding = dep.status === "BUILDING" || dep.status === "QUEUED";
-                  const isCurrentActive = idx === 0 && isSuccess;
-                  return (
-                    <div
-                      key={dep.id}
-                      className={cn(
-                        "p-4 rounded-xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4",
-                        isCurrentActive
-                          ? isDark
-                            ? "bg-emerald-500/[0.04] border-emerald-500/30"
-                            : "bg-emerald-50/70 border-emerald-200"
-                          : isDark
-                          ? "bg-[#0a0a0c] border-white/[0.06] hover:border-white/15"
-                          : "bg-slate-50 border-slate-200 hover:border-slate-300"
-                      )}
-                    >
-                      <div className="space-y-1.5 min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className={cn("font-mono text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>
-                            #deployment-{dep.deploymentNumber || dep.id}
-                          </span>
-                          <span
-                            className={cn(
-                              "px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border",
-                              isSuccess
-                                ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
-                                : isFailed
-                                ? "bg-red-500/15 text-red-400 border-red-500/30"
-                                : "bg-amber-500/15 text-amber-400 border-amber-500/30"
-                            )}
-                          >
-                            {isSuccess ? "Success" : isFailed ? "Failed" : dep.status}
-                          </span>
-                          {isCurrentActive && (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
-                              Active
+            {deployments.length > 0 ? (() => {
+              const totalDeploymentPages = Math.max(1, Math.ceil(deployments.length / DEPLOYMENTS_PER_PAGE));
+              const safeDeploymentsPage = Math.min(deploymentsPage, totalDeploymentPages);
+              const paginatedDeployments = deployments.slice(
+                (safeDeploymentsPage - 1) * DEPLOYMENTS_PER_PAGE,
+                safeDeploymentsPage * DEPLOYMENTS_PER_PAGE
+              );
+              const latestSuccessId = deployments.find((d) => d.status === "SUCCESS")?.id;
+
+              return (
+                <div className="space-y-3">
+                  {paginatedDeployments.map((dep, idx) => {
+                    const globalIdx = (safeDeploymentsPage - 1) * DEPLOYMENTS_PER_PAGE + idx;
+                    const isSuccess = dep.status === "SUCCESS";
+                    const isFailed = dep.status === "FAILED";
+                    const isBuilding = dep.status === "BUILDING" || dep.status === "QUEUED";
+                    const isStaleBuilding =
+                      isBuilding &&
+                      (globalIdx > 0 || Date.now() - new Date(dep.createdAt).getTime() > 15 * 60 * 1000);
+                    const canDelete = !isBuilding || isStaleBuilding;
+                    const isCurrentActive = dep.id === latestSuccessId && isSuccess;
+
+                    return (
+                      <div
+                        key={dep.id}
+                        className={cn(
+                          "p-4 rounded-xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4",
+                          isCurrentActive
+                            ? isDark
+                              ? "bg-emerald-500/[0.04] border-emerald-500/30"
+                              : "bg-emerald-50/70 border-emerald-200"
+                            : isDark
+                            ? "bg-[#0a0a0c] border-white/[0.06] hover:border-white/15"
+                            : "bg-slate-50 border-slate-200 hover:border-slate-300"
+                        )}
+                      >
+                        <div className="space-y-1.5 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className={cn("font-mono text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>
+                              #deployment-{dep.deploymentNumber || dep.id}
                             </span>
-                          )}
-                          <span className="text-[11px] font-mono text-zinc-500">
-                            {dep.trigger === "GIT_PUSH" ? "Git Push" : dep.trigger === "ROLLBACK" ? "Rollback" : "Manual"}
-                          </span>
-                        </div>
-
-                        <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-400 font-mono">
-                          <span className="flex items-center gap-1 text-cyan-400">
-                            <GitBranch className="w-3 h-3" />
-                            {dep.branch || app?.branch || "main"}
-                          </span>
-                          {dep.commitHash && (
-                            <>
-                              <span>·</span>
-                              <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-zinc-300">
-                                {dep.commitHash}
+                            <span
+                              className={cn(
+                                "px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border",
+                                isSuccess
+                                  ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+                                  : isFailed
+                                  ? "bg-red-500/15 text-red-400 border-red-500/30"
+                                  : "bg-amber-500/15 text-amber-400 border-amber-500/30"
+                              )}
+                            >
+                              {isSuccess ? "Success" : isFailed ? "Failed" : dep.status}
+                            </span>
+                            {isCurrentActive && (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
+                                Active
                               </span>
-                            </>
-                          )}
-                          <span>·</span>
-                          <span>{new Date(dep.createdAt).toLocaleString()}</span>
-                          {dep.durationSeconds ? (
-                            <>
-                              <span>·</span>
-                              <span>{dep.durationSeconds}s</span>
-                            </>
-                          ) : null}
+                            )}
+                            <span className="text-[11px] font-mono text-zinc-500">
+                              {dep.trigger === "GIT_PUSH" ? "Git Push" : dep.trigger === "ROLLBACK" ? "Rollback" : "Manual"}
+                            </span>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-400 font-mono">
+                            <span className="flex items-center gap-1 text-cyan-400">
+                              <GitBranch className="w-3 h-3" />
+                              {dep.branch || app?.branch || "main"}
+                            </span>
+                            {dep.commitHash && (
+                              <>
+                                <span>·</span>
+                                <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-zinc-300">
+                                  {dep.commitHash}
+                                </span>
+                              </>
+                            )}
+                            <span>·</span>
+                            <span>{new Date(dep.createdAt).toLocaleString()}</span>
+                            {dep.durationSeconds ? (
+                              <>
+                                <span>·</span>
+                                <span>{dep.durationSeconds}s</span>
+                              </>
+                            ) : null}
+                          </div>
+
+                          <p className={cn("text-xs truncate", isDark ? "text-zinc-300" : "text-slate-700")}>
+                            {dep.commitMessage || (isSuccess ? "Build completed · Deployment healthy" : isFailed ? "Build failed · Check build logs" : "Building image in cluster...")}
+                          </p>
                         </div>
 
-                        <p className={cn("text-xs truncate", isDark ? "text-zinc-300" : "text-slate-700")}>
-                          {dep.commitMessage || (isSuccess ? "Build completed · Deployment healthy" : isFailed ? "Build failed · Check build logs" : "Building image in cluster...")}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center gap-2 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (dep.buildLogs) {
-                              setSelectedDepLogs({
-                                num: dep.deploymentNumber || dep.id,
-                                logs: dep.buildLogs,
-                                status: dep.status,
-                              });
-                            } else {
-                              setActiveTab("build-logs");
-                            }
-                          }}
-                          className={cn(
-                            "px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors cursor-pointer flex items-center gap-1.5",
-                            isDark
-                              ? "bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
-                              : "bg-white border-slate-200 text-slate-700 hover:bg-slate-100"
-                          )}
-                        >
-                          <FileText className="w-3.5 h-3.5 text-cyan-400" />
-                          <span>Logs</span>
-                        </button>
-
-                        {isSuccess && dep.imageTag && idx > 0 && (
+                        <div className="flex items-center gap-2 shrink-0">
                           <button
                             type="button"
-                            disabled={rollingBackId === dep.id}
-                            onClick={() => handleRollback(dep.id, dep.deploymentNumber || dep.id)}
+                            onClick={() => {
+                              if (dep.buildLogs) {
+                                setSelectedDepLogs({
+                                  num: dep.deploymentNumber || dep.id,
+                                  logs: dep.buildLogs,
+                                  status: dep.status,
+                                });
+                              } else {
+                                setActiveTab("build-logs");
+                              }
+                            }}
                             className={cn(
                               "px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors cursor-pointer flex items-center gap-1.5",
                               isDark
-                                ? "bg-amber-500/10 border-amber-500/25 text-amber-400 hover:bg-amber-500/20"
-                                : "bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100"
+                                ? "bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
+                                : "bg-white border-slate-200 text-slate-700 hover:bg-slate-100"
                             )}
                           >
-                            <Undo2 className="w-3.5 h-3.5" />
-                            <span>{rollingBackId === dep.id ? "Rolling back..." : "Rollback"}</span>
+                            <FileText className="w-3.5 h-3.5 text-cyan-400" />
+                            <span>Logs</span>
                           </button>
-                        )}
 
-                        {!isBuilding && (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setConfirmModal({
-                                action: "delete-deployment",
-                                deploymentId: dep.id,
-                                deploymentNumber: dep.deploymentNumber || dep.id,
-                              })
-                            }
-                            className={cn(
-                              "p-1.5 rounded-lg border transition-colors cursor-pointer",
-                              isDark
-                                ? "bg-white/5 border-white/10 text-zinc-400 hover:text-rose-400 hover:border-rose-500/30"
-                                : "bg-white border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-300"
-                            )}
-                            title="Delete deployment record"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        )}
+                          {isSuccess && dep.imageTag && dep.id !== latestSuccessId && (
+                            <button
+                              type="button"
+                              disabled={rollingBackId === dep.id}
+                              onClick={() => handleRollback(dep.id, dep.deploymentNumber || dep.id)}
+                              className={cn(
+                                "px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors cursor-pointer flex items-center gap-1.5",
+                                isDark
+                                  ? "bg-amber-500/10 border-amber-500/25 text-amber-400 hover:bg-amber-500/20"
+                                  : "bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100"
+                              )}
+                            >
+                              <Undo2 className="w-3.5 h-3.5" />
+                              <span>{rollingBackId === dep.id ? "Rolling back..." : "Rollback"}</span>
+                            </button>
+                          )}
+
+                          {canDelete && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setConfirmModal({
+                                  action: "delete-deployment",
+                                  deploymentId: dep.id,
+                                  deploymentNumber: dep.deploymentNumber || dep.id,
+                                })
+                              }
+                              className={cn(
+                                "p-1.5 rounded-lg border transition-colors cursor-pointer",
+                                isDark
+                                  ? "bg-white/5 border-white/10 text-zinc-400 hover:text-rose-400 hover:border-rose-500/30"
+                                  : "bg-white border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-300"
+                              )}
+                              title="Delete deployment record"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {/* Consistent Pagination */}
+                  {totalDeploymentPages > 1 && (
+                    <div
+                      className={cn(
+                        "flex flex-wrap items-center justify-between gap-2 pt-3 border-t text-xs",
+                        isDark ? "border-white/[0.06]" : "border-slate-200/80"
+                      )}
+                    >
+                      <span className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>
+                        Showing {(safeDeploymentsPage - 1) * DEPLOYMENTS_PER_PAGE + 1} -{" "}
+                        {Math.min(safeDeploymentsPage * DEPLOYMENTS_PER_PAGE, deployments.length)} of{" "}
+                        {deployments.length}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          disabled={safeDeploymentsPage === 1}
+                          onClick={() => setDeploymentsPage((p) => Math.max(1, p - 1))}
+                          className={cn(
+                            "p-1.5 rounded-lg border text-xs font-bold transition-all disabled:opacity-30 disabled:pointer-events-none cursor-pointer",
+                            isDark
+                              ? "bg-white/[0.04] border-white/10 text-zinc-300 hover:text-white"
+                              : "bg-white border-slate-200 text-slate-700 hover:bg-slate-100"
+                          )}
+                          title="Previous page"
+                          aria-label="Previous page"
+                        >
+                          <ChevronLeft className="w-3.5 h-3.5" />
+                        </button>
+                        <span
+                          className={cn(
+                            "px-2 font-mono font-bold text-xs",
+                            isDark ? "text-cyan-400" : "text-cyan-700"
+                          )}
+                        >
+                          {safeDeploymentsPage} / {totalDeploymentPages}
+                        </span>
+                        <button
+                          type="button"
+                          disabled={safeDeploymentsPage === totalDeploymentPages}
+                          onClick={() => setDeploymentsPage((p) => Math.min(totalDeploymentPages, p + 1))}
+                          className={cn(
+                            "p-1.5 rounded-lg border text-xs font-bold transition-all disabled:opacity-30 disabled:pointer-events-none cursor-pointer",
+                            isDark
+                              ? "bg-white/[0.04] border-white/10 text-zinc-300 hover:text-white"
+                              : "bg-white border-slate-200 text-slate-700 hover:bg-slate-100"
+                          )}
+                          title="Next page"
+                          aria-label="Next page"
+                        >
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            ) : (
+                  )}
+                </div>
+              );
+            })() : (
               <div className="py-10 text-center space-y-2 border border-dashed rounded-xl border-white/10">
                 <History className="w-8 h-8 text-zinc-500 mx-auto" />
                 <p className="text-xs text-zinc-400">No deployment records yet. Trigger a Manual Deploy to start.</p>
@@ -1352,7 +1449,7 @@ export default function AppPlatformDetailPage({
                     Close
                   </button>
                 </div>
-                <pre className={cn("p-4 font-mono text-xs whitespace-pre-wrap max-h-80 overflow-y-auto leading-relaxed", isDark ? "text-emerald-400" : "text-slate-800")}>
+                <pre ref={depLogsPreRef} className={cn("p-4 font-mono text-xs whitespace-pre-wrap max-h-80 overflow-y-auto leading-relaxed", isDark ? "text-emerald-400" : "text-slate-800")}>
                   {cleanTerminalLogs(selectedDepLogs.logs)}
                 </pre>
               </div>
@@ -1425,12 +1522,15 @@ export default function AppPlatformDetailPage({
           </div>
 
           {/* Terminal Console Screen (Light in Light Mode like macOS window, dark in Dark Mode) */}
-          <div className={cn(
-            "p-4 sm:p-5 font-mono text-xs overflow-x-auto max-h-[550px] leading-relaxed whitespace-pre-wrap select-text transition-colors",
-            isDark
-              ? "bg-[#090d16] text-emerald-400 selection:bg-cyan-500/30 selection:text-white"
-              : "bg-white text-slate-800 selection:bg-cyan-100 selection:text-slate-900"
-          )}>
+          <div
+            ref={buildLogsContainerRef}
+            className={cn(
+              "p-4 sm:p-5 font-mono text-xs overflow-x-auto overflow-y-auto max-h-[550px] leading-relaxed whitespace-pre-wrap select-text transition-colors",
+              isDark
+                ? "bg-[#090d16] text-emerald-400 selection:bg-cyan-500/30 selection:text-white"
+                : "bg-white text-slate-800 selection:bg-cyan-100 selection:text-slate-900"
+            )}
+          >
             <div className={cn(
               "flex items-center gap-2 text-[11px] pb-2 mb-3 border-b select-none",
               isDark ? "text-zinc-500 border-white/[0.08]" : "text-slate-400 border-slate-100"
@@ -1511,12 +1611,15 @@ export default function AppPlatformDetailPage({
           </div>
 
           {/* Terminal Console Screen (Light in Light Mode like macOS window, dark in Dark Mode) */}
-          <div className={cn(
-            "p-4 sm:p-5 font-mono text-xs overflow-x-auto max-h-[550px] leading-relaxed whitespace-pre-wrap select-text transition-colors",
-            isDark
-              ? "bg-[#090d16] text-emerald-400 selection:bg-cyan-500/30 selection:text-white"
-              : "bg-white text-slate-800 selection:bg-cyan-100 selection:text-slate-900"
-          )}>
+          <div
+            ref={runtimeLogsContainerRef}
+            className={cn(
+              "p-4 sm:p-5 font-mono text-xs overflow-x-auto overflow-y-auto max-h-[550px] leading-relaxed whitespace-pre-wrap select-text transition-colors",
+              isDark
+                ? "bg-[#090d16] text-emerald-400 selection:bg-cyan-500/30 selection:text-white"
+                : "bg-white text-slate-800 selection:bg-cyan-100 selection:text-slate-900"
+            )}
+          >
             <div className={cn(
               "flex items-center gap-2 text-[11px] pb-2 mb-3 border-b select-none",
               isDark ? "text-zinc-500 border-white/[0.08]" : "text-slate-400 border-slate-100"
