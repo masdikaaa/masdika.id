@@ -582,68 +582,119 @@ export default function AppPlatformDetailPage({
       {/* TAB 1: OVERVIEW */}
       {activeTab === "overview" && (
         <div className="space-y-6">
-          {/* Connection & Endpoints Grid */}
+          {/* Domain & DNS Configuration Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Box 1: Public HTTPS Routing */}
-            <div className={cn("rounded-2xl border p-5 shadow-2xs space-y-3", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90")}>
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
-                  <Lock className="w-3.5 h-3.5 text-cyan-400" />
-                  PUBLIC HTTPS ENDPOINT
-                </span>
-                <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/25">
-                  SSL Active
-                </span>
+            {/* Box 1: Primary Application Domain */}
+            <div className={cn("rounded-2xl border p-5 shadow-2xs space-y-3 flex flex-col justify-between", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90")}>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                    <Globe className="w-3.5 h-3.5 text-cyan-400" />
+                    PRIMARY APPLICATION DOMAIN
+                  </span>
+                  <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    SSL ACTIVE
+                  </span>
+                </div>
+
+                <div className={cn(
+                  "p-3 rounded-xl border flex items-center justify-between gap-2 font-mono text-xs",
+                  isDark ? "bg-black/40 border-white/[0.06] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+                )}>
+                  <span className="truncate font-semibold text-cyan-400">{app.httpsUrl}</span>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <a
+                      href={app.httpsUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="p-1 rounded text-zinc-400 hover:text-cyan-400 cursor-pointer"
+                      title="Open in new tab"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                    <button
+                      onClick={() => copyToClipboard(app.httpsUrl, "httpsUrl")}
+                      className="p-1 rounded text-zinc-400 hover:text-cyan-400 cursor-pointer"
+                      title="Copy URL"
+                    >
+                      {copiedField === "httpsUrl" ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                </div>
+
+                <p className="text-[11px] text-zinc-500 leading-relaxed">
+                  Default zero-config HTTPS subdomain managed by Masdika Cloud with automated Traefik routing and Let&apos;s Encrypt certificate renewal.
+                </p>
               </div>
 
-              <div className={cn(
-                "p-3 rounded-xl border flex items-center justify-between gap-2 font-mono text-xs",
-                isDark ? "bg-black/40 border-white/[0.06] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
-              )}>
-                <span className="truncate">{app.httpsUrl}</span>
-                <button
-                  onClick={() => copyToClipboard(app.httpsUrl, "httpsUrl")}
-                  className="p-1 rounded text-zinc-400 hover:text-cyan-400 cursor-pointer"
-                  title="Copy URL"
-                >
-                  {copiedField === "httpsUrl" ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                </button>
+              <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-zinc-400">
+                <span>Subdomain Identifier:</span>
+                <span className="font-mono font-bold text-zinc-200">{app.subdomain}</span>
               </div>
-
-              <p className="text-[11px] text-zinc-500">
-                Routed via Traefik ingress controller with automated Let&apos;s Encrypt certificate renewal.
-              </p>
             </div>
 
-            {/* Box 2: Direct NodePort Access */}
-            <div className={cn("rounded-2xl border p-5 shadow-2xs space-y-3", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90")}>
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
-                  <Server className="w-3.5 h-3.5 text-cyan-400" />
-                  DIRECT NODEPORT
-                </span>
-                <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-white/5 text-zinc-400 border border-white/10">
-                  Port {app.port}
-                </span>
+            {/* Box 2: Custom Domain & DNS Pointing Instructions */}
+            <div className={cn("rounded-2xl border p-5 shadow-2xs space-y-3 flex flex-col justify-between", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90")}>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                    <Lock className="w-3.5 h-3.5 text-cyan-400" />
+                    CUSTOM DOMAIN &amp; DNS SETUP
+                  </span>
+                  {app.customDomain ? (
+                    <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-400 border border-cyan-500/25">
+                      Attached
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => setActiveTab("settings")}
+                      className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-cyan-400 border border-white/10 transition-colors cursor-pointer"
+                    >
+                      + Add Custom Domain
+                    </button>
+                  )}
+                </div>
+
+                {app.customDomain ? (
+                  <div className={cn(
+                    "p-3 rounded-xl border flex items-center justify-between gap-2 font-mono text-xs",
+                    isDark ? "bg-black/40 border-white/[0.06] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+                  )}>
+                    <span className="truncate font-semibold text-emerald-400">https://{app.customDomain}</span>
+                    <button
+                      onClick={() => copyToClipboard(`https://${app.customDomain}`, "customDomain")}
+                      className="p-1 rounded text-zinc-400 hover:text-cyan-400 cursor-pointer"
+                      title="Copy Custom Domain"
+                    >
+                      {copiedField === "customDomain" ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                ) : (
+                  <div className={cn(
+                    "p-2.5 rounded-xl border font-mono text-[11px] space-y-1.5",
+                    isDark ? "bg-black/30 border-white/[0.06]" : "bg-slate-50 border-slate-200"
+                  )}>
+                    <div className="flex items-center justify-between">
+                      <span className="text-zinc-500 font-sans font-semibold">CNAME (Recommended):</span>
+                      <span className="text-cyan-400 font-bold select-all">{app.subdomain}.app.masdikacloud.my.id</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-zinc-500 font-sans font-semibold">A Record (Apex/Root):</span>
+                      <span className="text-zinc-300 font-bold select-all">{app.publicIp || "206.237.98.230"}</span>
+                    </div>
+                  </div>
+                )}
+
+                <p className="text-[11px] text-zinc-500 leading-relaxed">
+                  To use your own domain, create a <strong>CNAME</strong> pointing to <code className="text-cyan-400 font-mono text-[10px]">{app.subdomain}.app.masdikacloud.my.id</code> (or an <strong>A Record</strong> to <code className="text-zinc-300 font-mono text-[10px]">{app.publicIp || "206.237.98.230"}</code>) in your DNS manager, then link it under Settings.
+                </p>
               </div>
 
-              <div className={cn(
-                "p-3 rounded-xl border flex items-center justify-between gap-2 font-mono text-xs",
-                isDark ? "bg-black/40 border-white/[0.06] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
-              )}>
-                <span className="truncate">{app.nodePortUrl}</span>
-                <button
-                  onClick={() => copyToClipboard(app.nodePortUrl, "nodePortUrl")}
-                  className="p-1 rounded text-zinc-400 hover:text-cyan-400 cursor-pointer"
-                  title="Copy URL"
-                >
-                  {copiedField === "nodePortUrl" ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                </button>
+              <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between text-[11px]">
+                <span className="text-zinc-400">Automatic SSL:</span>
+                <span className="text-zinc-300 font-medium">Auto Let&apos;s Encrypt TLS upon DNS propagation</span>
               </div>
-
-              <p className="text-[11px] text-zinc-500">
-                Direct raw port routing (TCP/HTTP) bypassing reverse proxy if needed for webhooks.
-              </p>
             </div>
           </div>
 
