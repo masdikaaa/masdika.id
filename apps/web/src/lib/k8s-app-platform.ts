@@ -1908,26 +1908,47 @@ export async function deleteAppPlatformResources(app: AppPlatformRecord): Promis
     }
   } catch {}
 
-  // 8. Clean up built images from in-cluster registry
+  // 8. Clean up built images AND layer cache repos from in-cluster registry
   try {
     const registryBaseUrl = 'http://127.0.0.1:5000';
-    const tagListRes = await fetch(`${registryBaseUrl}/v2/${subdomain}/tags/list`);
-    if (tagListRes.ok) {
-      const tagList = await tagListRes.json() as { tags?: string[] };
-      for (const tag of (tagList.tags || [])) {
-        // Get manifest digest
-        const manifestRes = await fetch(`${registryBaseUrl}/v2/${subdomain}/manifests/${tag}`, {
-          headers: { 'Accept': 'application/vnd.docker.distribution.manifest.v2+json' },
-        });
-        const digest = manifestRes.headers.get('Docker-Content-Digest');
-        if (digest) {
-          await fetch(`${registryBaseUrl}/v2/${subdomain}/manifests/${digest}`, { method: 'DELETE' }).catch(() => {});
+    for (const repoName of [subdomain, `${subdomain}-cache`]) {
+      const tagListRes = await fetch(`${registryBaseUrl}/v2/${repoName}/tags/list`).catch(() => null);
+      if (tagListRes && tagListRes.ok) {
+        const tagList = await tagListRes.json() as { tags?: string[] };
+        for (const tag of (tagList.tags || [])) {
+          const manifestRes = await fetch(`${registryBaseUrl}/v2/${repoName}/manifests/${tag}`, {
+            headers: { 'Accept': 'application/vnd.docker.distribution.manifest.v2+json' },
+          }).catch(() => null);
+          const digest = manifestRes?.headers?.get('Docker-Content-Digest');
+          if (digest) {
+            await fetch(`${registryBaseUrl}/v2/${repoName}/manifests/${digest}`, { method: 'DELETE' }).catch(() => {});
+          }
         }
       }
     }
   } catch {
     // Registry cleanup is best-effort, don't fail the delete
   }
+
+  // 8b. Clean up any lingering PR Preview Environments for this app
+  try {
+    const prDepsRes: any = await (appsApi as any).listNamespacedDeployment({
+      namespace,
+      labelSelector: `app-platform/pr-parent=${subdomain}`,
+    });
+    for (const d of (prDepsRes?.items || prDepsRes?.body?.items || [])) {
+      const prDepName = d?.metadata?.name;
+      const prSub = d?.metadata?.labels?.app;
+      if (prDepName) {
+        await (netApi as any).deleteNamespacedIngress({ name: prDepName, namespace }).catch(() => {});
+        await (coreApi as any).deleteNamespacedService({ name: prDepName, namespace }).catch(() => {});
+        await (appsApi as any).deleteNamespacedDeployment({ name: prDepName, namespace, propagationPolicy: 'Foreground' }).catch(() => {});
+        if (prSub) {
+          await (coreApi as any).deleteNamespacedSecret({ name: `tls-${prSub}`, namespace }).catch(() => {});
+        }
+      }
+    }
+  } catch {}
 
   // 9. Clean up PersistentVolumeClaim if exists
   await (coreApi as any).deleteNamespacedPersistentVolumeClaim({
