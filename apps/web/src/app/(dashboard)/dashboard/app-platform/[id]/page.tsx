@@ -35,6 +35,8 @@ import {
   Webhook,
   Undo2,
   TrendingUp,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { AppScaleModal } from "@/components/AppScaleModal";
 import {
@@ -156,6 +158,7 @@ export default function AppPlatformDetailPage({
   // Power actions & modal state
   const [actionLoading, setActionLoading] = useState(false);
   const [showScaleModal, setShowScaleModal] = useState(false);
+  const [showWebhookSecret, setShowWebhookSecret] = useState(false);
   const [confirmModal, setConfirmModal] = useState<{
     action: "start" | "stop" | "restart" | "rebuild" | "delete" | "delete-deployment" | "clear-old-deployments";
     deploymentId?: number;
@@ -2236,18 +2239,34 @@ export default function AppPlatformDetailPage({
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
                   Webhook Secret Token
                 </span>
-                <div className="flex items-center justify-between font-mono text-xs pt-0.5">
-                  <span className={cn("truncate mr-2", isDark ? "text-zinc-300" : "text-slate-700")}>
-                    {app?.webhookSecret || "Auto-generated"}
+                <div className="flex items-center justify-between font-mono text-xs pt-0.5 gap-2">
+                  <span className={cn("truncate", isDark ? "text-zinc-300" : "text-slate-700")}>
+                    {app?.webhookSecret
+                      ? showWebhookSecret
+                        ? app.webhookSecret
+                        : "*".repeat(Math.min(32, app.webhookSecret.length))
+                      : "Auto-generated"}
                   </span>
                   {app?.webhookSecret && (
-                    <button
-                      type="button"
-                      onClick={() => copyToClipboard(app.webhookSecret, "Webhook Secret")}
-                      className="text-zinc-400 hover:text-cyan-400 cursor-pointer shrink-0"
-                    >
-                      {copiedField === "Webhook Secret" ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-                    </button>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setShowWebhookSecret((prev) => !prev)}
+                        className="text-zinc-400 hover:text-cyan-400 cursor-pointer"
+                        title={showWebhookSecret ? "Hide secret" : "Show secret"}
+                        aria-label={showWebhookSecret ? "Hide secret" : "Show secret"}
+                      >
+                        {showWebhookSecret ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(app.webhookSecret, "Webhook Secret")}
+                        className="text-zinc-400 hover:text-cyan-400 cursor-pointer"
+                        title="Copy secret token"
+                      >
+                        {copiedField === "Webhook Secret" ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>

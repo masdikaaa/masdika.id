@@ -9,6 +9,55 @@ import {
 import crypto from "crypto";
 
 /**
+ * Health / Info Check for GitHub / GitLab Webhook URL
+ * GET /api/webhooks/app-platform/[id]
+ */
+export async function GET(
+  _req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await context.params;
+    const appId = parseInt(id, 10);
+    if (isNaN(appId)) {
+      return NextResponse.json({ error: "Invalid application ID" }, { status: 400 });
+    }
+
+    const app = await prisma.appPlatformService.findUnique({
+      where: { id: appId },
+      select: {
+        id: true,
+        subdomain: true,
+        branch: true,
+        status: true,
+        autoDeploy: true,
+        deployOnPush: true,
+      },
+    });
+
+    if (!app || app.status === "TERMINATED") {
+      return NextResponse.json({ error: "Application not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      status: "active",
+      endpoint: "Masdika Cloud Git Push Webhook",
+      appId: app.id,
+      subdomain: app.subdomain,
+      branch: app.branch,
+      autoDeploy: app.autoDeploy,
+      deployOnPush: app.deployOnPush,
+      method: "POST",
+      supportedProviders: ["GitHub", "GitLab"],
+      message: "Webhook listener is active. Configure this URL in GitHub or GitLab Webhooks (POST).",
+    });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
+  }
+}
+
+/**
  * GitHub / GitLab Push Webhook Endpoint for Automated CI/CD Deploy on Push
  * POST /api/webhooks/app-platform/[id]
  */
@@ -66,7 +115,14 @@ export async function POST(
 
     let payload: any = {};
     try {
-      payload = JSON.parse(rawBody || "{}");
+      const contentType = (req.headers.get("content-type") || "").toLowerCase();
+      if (contentType.includes("application/x-www-form-urlencoded")) {
+        const formParams = new URLSearchParams(rawBody);
+        const formPayload = formParams.get("payload");
+        payload = JSON.parse(formPayload || "{}");
+      } else {
+        payload = JSON.parse(rawBody || "{}");
+      }
     } catch {
       return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
     }
