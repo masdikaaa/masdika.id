@@ -956,33 +956,68 @@ export async function applyKubernetesManifests(kc: k8s.KubeConfig, manifestYaml:
     delete (spec.metadata.annotations as any)['kubectl.kubernetes.io/last-applied-configuration'];
     spec.metadata.annotations['kubectl.kubernetes.io/last-applied-configuration'] = JSON.stringify(spec);
 
-    try {
-      await objApi.create(spec);
-    } catch (createErr: any) {
-      const status = createErr.statusCode || createErr.code || createErr.response?.statusCode || createErr.body?.code;
-      if (status === 409) {
+    const readExisting = async (): Promise<any> => {
+      const res = (await objApi.read({
+        apiVersion: spec.apiVersion || 'v1',
+        kind: spec.kind!,
+        metadata: {
+          name: spec.metadata!.name!,
+          namespace: spec.metadata!.namespace || 'default',
+        },
+      }).catch(() => null)) as any;
+      return res?.body ?? res ?? null;
+    };
+
+    const applyUpdate = async (existing: any) => {
+      if (existing?.metadata?.resourceVersion) {
+        spec.metadata!.resourceVersion = existing.metadata.resourceVersion;
+      }
+      if (spec.kind === 'Service' && (spec as any).spec) {
+        if (existing?.spec?.clusterIP) {
+          (spec as any).spec.clusterIP = existing.spec.clusterIP;
+        }
+        if (Array.isArray(existing?.spec?.clusterIPs)) {
+          (spec as any).spec.clusterIPs = existing.spec.clusterIPs;
+        }
+      }
+      try {
+        await objApi.replace(spec);
+      } catch (replaceErr) {
         try {
           await objApi.patch(spec);
         } catch {
-          if (spec.metadata?.name) {
-            const existing = (await objApi.read({
-              apiVersion: spec.apiVersion || 'v1',
-              kind: spec.kind,
-              metadata: {
-                name: spec.metadata.name,
-                namespace: spec.metadata.namespace || 'default',
-              },
-            }).catch(() => null)) as any;
-            if (existing?.metadata?.resourceVersion) {
-              spec.metadata.resourceVersion = existing.metadata.resourceVersion;
-            }
-            if (spec.kind === 'Service' && existing?.spec?.clusterIP && (spec as any).spec) {
-              (spec as any).spec.clusterIP = existing.spec.clusterIP;
+          if (spec.kind === 'Service') {
+            const targetPort = (spec as any).spec?.ports?.[0];
+            const curPort = existing?.spec?.ports?.[0];
+            if (
+              targetPort &&
+              curPort &&
+              curPort.port === targetPort.port &&
+              curPort.nodePort === targetPort.nodePort
+            ) {
+              return;
             }
           }
-          await objApi.replace(spec);
+          throw replaceErr;
         }
-      } else {
+      }
+    };
+
+    const existing = await readExisting();
+    if (existing) {
+      await applyUpdate(existing);
+    } else {
+      try {
+        await objApi.create(spec);
+      } catch (createErr: any) {
+        const status = createErr.statusCode || createErr.code || createErr.response?.statusCode || createErr.body?.code;
+        if (status === 409 || status === 422) {
+          const retryExisting = await readExisting();
+          if (retryExisting) {
+            await applyUpdate(retryExisting);
+            continue;
+          }
+        }
         throw createErr;
       }
     }
