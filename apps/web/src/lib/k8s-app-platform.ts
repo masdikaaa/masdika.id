@@ -1005,6 +1005,20 @@ export async function triggerAppPlatformBuild(
   const cleanRootDir = app.rootDirectory ? app.rootDirectory.trim().replace(/^\/+|\/+$/g, '') : '';
   const workspaceAppDir = cleanRootDir ? `/workspace/${cleanRootDir}` : '/workspace';
 
+  // Ensure Paketo Buildpacks always has a default `web` process type when no Procfile exists
+  const paketoProcfileHook = isBuildpack
+    ? ` && if [ ! -f "${workspaceAppDir}/Procfile" ]; then ` +
+      (app.startCommand?.trim()
+        ? `printf 'web: %s\\n' '${app.startCommand.trim().replace(/'/g, "'\\''")}' > "${workspaceAppDir}/Procfile"; `
+        : `if [ -f "${workspaceAppDir}/artisan" ]; then ` +
+          `[ ! -f "${workspaceAppDir}/.env" ] && [ -f "${workspaceAppDir}/.env.example" ] && cp "${workspaceAppDir}/.env.example" "${workspaceAppDir}/.env" || true; ` +
+          `printf 'web: (grep -q "APP_KEY=base64:" .env 2>/dev/null || php artisan key:generate --force 2>/dev/null || true) && php artisan serve --host=0.0.0.0 --port=\${PORT:-${app.appPort || 8080}}\\n' > "${workspaceAppDir}/Procfile"; ` +
+          `elif [ -f "${workspaceAppDir}/composer.json" ]; then ` +
+          `printf 'web: php -S 0.0.0.0:\${PORT:-${app.appPort || 8080}}\\n' > "${workspaceAppDir}/Procfile"; ` +
+          `fi; `) +
+      `fi`
+    : '';
+
   // Job Specification: Paketo Cloud Native Buildpacks (BUILDPACK) or Kaniko (DOCKERFILE / AUTO)
   const jobManifest: k8s.V1Job = {
     apiVersion: 'batch/v1',
@@ -1062,8 +1076,8 @@ export async function triggerAppPlatformBuild(
               command: ['sh', '-c'],
               args: [
                 commitHash && /^[a-fA-F0-9]{4,40}$/.test(commitHash.trim())
-                  ? `echo "Cloning ${gitUrl} and checking out commit ${commitHash.trim()}..." && git clone ${gitUrl} /workspace/src && cd /workspace/src && git checkout ${commitHash.trim()} && cp -rf /workspace/src/. /workspace/ && rm -rf /workspace/src && chmod -R 777 /workspace && echo "Commit ${commitHash.trim()} checked out."`
-                  : `echo "Cloning ${gitUrl} (branch: ${branch})..." && (git clone --depth=1 --branch ${branch} ${gitUrl} /workspace/src 2>/dev/null || git clone --depth=1 ${gitUrl} /workspace/src) && cp -rf /workspace/src/. /workspace/ && rm -rf /workspace/src && chmod -R 777 /workspace && echo "Clone completed."`,
+                  ? `echo "Cloning ${gitUrl} and checking out commit ${commitHash.trim()}..." && git clone ${gitUrl} /workspace/src && cd /workspace/src && git checkout ${commitHash.trim()} && cp -rf /workspace/src/. /workspace/ && rm -rf /workspace/src${paketoProcfileHook} && chmod -R 777 /workspace && echo "Commit ${commitHash.trim()} checked out."`
+                  : `echo "Cloning ${gitUrl} (branch: ${branch})..." && (git clone --depth=1 --branch ${branch} ${gitUrl} /workspace/src 2>/dev/null || git clone --depth=1 ${gitUrl} /workspace/src) && cp -rf /workspace/src/. /workspace/${paketoProcfileHook} && rm -rf /workspace/src && chmod -R 777 /workspace && echo "Clone completed."`,
               ],
               volumeMounts: [
                 {
