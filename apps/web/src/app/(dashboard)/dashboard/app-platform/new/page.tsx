@@ -86,6 +86,18 @@ interface FrameworkItem {
 
 const FRAMEWORKS: FrameworkItem[] = [
   {
+    id: "DOCKERFILE",
+    name: "Native Dockerfile",
+    category: "CUSTOM",
+    desc: "Build directly from your repository Dockerfile or inline editor (Recommended)",
+    icon: SiDocker,
+    color: "text-[#2496ED]",
+    bgColor: "bg-[#2496ED]/10 border-[#2496ED]/25",
+    defaultPort: 80,
+    defaultBuild: "",
+    defaultStart: "",
+  },
+  {
     id: "LARAVEL",
     name: "Laravel",
     category: "FULLSTACK",
@@ -289,17 +301,80 @@ const FRAMEWORKS: FrameworkItem[] = [
     defaultBuild: "",
     defaultStart: "",
   },
+];
+
+const DOCKERFILE_TEMPLATES: { label: string; port: number; content: string }[] = [
   {
-    id: "DOCKERFILE",
-    name: "Dockerfile",
-    category: "CUSTOM",
-    desc: "Custom multi-stage Docker build directly from repository",
-    icon: SiDocker,
-    color: "text-[#2496ED]",
-    bgColor: "bg-[#2496ED]/10 border-[#2496ED]/25",
-    defaultPort: 3000,
-    defaultBuild: "",
-    defaultStart: "",
+    label: "Node.js / Next.js",
+    port: 3000,
+    content: `FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci || npm install
+COPY . .
+RUN npm run build || true
+
+FROM node:20-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=builder /app ./
+EXPOSE 3000
+CMD ["npm", "start"]`,
+  },
+  {
+    label: "PHP / Laravel",
+    port: 80,
+    content: `FROM php:8.2-apache
+WORKDIR /var/www/html
+ENV COMPOSER_ALLOW_SUPERUSER=1
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+COPY . /var/www/html/
+RUN if [ -f composer.json ]; then composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --ignore-platform-reqs; fi
+RUN if [ ! -f .env ] && [ -f .env.example ]; then cp .env.example .env && php artisan key:generate || true; fi
+RUN mkdir -p storage bootstrap/cache && chown -R www-data:www-data storage bootstrap/cache && chmod -R 775 storage bootstrap/cache || true
+RUN a2enmod rewrite
+ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+RUN sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!/var/www/html/public!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+EXPOSE 80
+CMD ["apache2-foreground"]`,
+  },
+  {
+    label: "Python / FastAPI",
+    port: 8000,
+    content: `FROM python:3.11-slim
+WORKDIR /app
+ENV PYTHONUNBUFFERED=1
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt || true
+COPY . .
+EXPOSE 8000
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]`,
+  },
+  {
+    label: "Go / Fiber",
+    port: 8080,
+    content: `FROM golang:1.22-alpine AS builder
+WORKDIR /app
+COPY go.mod go.sum* ./
+RUN go mod download || true
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -o server .
+
+FROM alpine:latest
+WORKDIR /app
+RUN apk --no-cache add ca-certificates
+COPY --from=builder /app/server .
+EXPOSE 8080
+CMD ["./server"]`,
+  },
+  {
+    label: "Static HTML / Nginx",
+    port: 80,
+    content: `FROM nginx:alpine
+COPY . /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]`,
   },
 ];
 
@@ -354,7 +429,10 @@ export default function NewAppPlatformPage() {
   const [gitToken, setGitToken] = useState("");
   const [gitUser, setGitUser] = useState("");
   const [branch, setBranch] = useState("main");
-  const [buildType, setBuildType] = useState("LARAVEL");
+  const [buildMode, setBuildMode] = useState<"DOCKERFILE" | "AUTO" | "BUILDPACK">("DOCKERFILE");
+  const [dockerfileSource, setDockerfileSource] = useState<"REPO" | "INLINE">("REPO");
+  const [inlineDockerfile, setInlineDockerfile] = useState(DOCKERFILE_TEMPLATES[0].content);
+  const [buildType, setBuildType] = useState("DOCKERFILE");
   const [dockerfilePath, setDockerfilePath] = useState("Dockerfile");
   const [rootDirectory, setRootDirectory] = useState("/");
   const [buildCommand, setBuildCommand] = useState("");
@@ -623,10 +701,14 @@ export default function NewAppPlatformPage() {
           name: name.trim(),
           gitUrl: effectiveGitUrl,
           branch: branch.trim() || "main",
-          buildType,
-          dockerfilePath: buildType === "DOCKERFILE" ? dockerfilePath : "Dockerfile",
+          buildMode,
+          buildType: buildMode === "DOCKERFILE" ? "DOCKERFILE" : buildType,
+          dockerfilePath: buildMode === "DOCKERFILE" ? (dockerfilePath.trim() || "Dockerfile") : "Dockerfile",
           rootDirectory: rootDirectory.trim() || "/",
-          buildCommand: buildCommand.trim() || null,
+          buildCommand:
+            buildMode === "DOCKERFILE" && dockerfileSource === "INLINE"
+              ? inlineDockerfile.trim() || null
+              : buildCommand.trim() || null,
           startCommand: startCommand.trim() || null,
           appPort: Number(appPort) || 80,
           envVars: envVars.trim() || null,
@@ -940,7 +1022,7 @@ export default function NewAppPlatformPage() {
             </div>
           </div>
 
-          {/* Section 2: Framework & Build Setup with Categories, Search & Pagination */}
+          {/* Section 2: Build Configuration (Dockerfile / Auto Detect / Buildpack) */}
           <div
             className={cn(
               "rounded-2xl border p-5 sm:p-6 shadow-2xs space-y-4",
@@ -957,7 +1039,7 @@ export default function NewAppPlatformPage() {
                     isDark ? "text-white" : "text-slate-900"
                   )}
                 >
-                  2. Framework &amp; Build Settings
+                  2. Build Configuration
                 </h2>
               </div>
 
@@ -965,16 +1047,283 @@ export default function NewAppPlatformPage() {
               <div
                 className={cn(
                   "inline-flex items-center gap-2 px-2.5 py-1 rounded-xl border text-xs font-semibold shrink-0 self-start sm:self-auto",
-                  activeFrameworkObj.bgColor
+                  buildMode === "DOCKERFILE"
+                    ? "bg-[#2496ED]/10 border-[#2496ED]/25 text-[#2496ED]"
+                    : buildMode === "BUILDPACK"
+                    ? "bg-purple-500/10 border-purple-500/25 text-purple-400"
+                    : activeFrameworkObj.bgColor
                 )}
               >
-                <ActiveFwIcon className={cn("w-3.5 h-3.5", activeFrameworkObj.color)} />
-                <span className={activeFrameworkObj.color}>
-                  Selected: <strong>{activeFrameworkObj.name}</strong>
-                </span>
+                {buildMode === "DOCKERFILE" ? (
+                  <>
+                    <SiDocker className="w-3.5 h-3.5" />
+                    <span>Mode: <strong>Native Dockerfile</strong></span>
+                  </>
+                ) : buildMode === "BUILDPACK" ? (
+                  <>
+                    <Boxes className="w-3.5 h-3.5" />
+                    <span>Mode: <strong>Cloud Buildpack</strong></span>
+                  </>
+                ) : (
+                  <>
+                    <ActiveFwIcon className={cn("w-3.5 h-3.5", activeFrameworkObj.color)} />
+                    <span className={activeFrameworkObj.color}>
+                      Auto Detect: <strong>{activeFrameworkObj.name}</strong>
+                    </span>
+                  </>
+                )}
               </div>
             </div>
 
+            {/* 3 Build Mode Cards (Dockerfile / Auto Detect / Buildpack) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setBuildMode("DOCKERFILE");
+                  setBuildType("DOCKERFILE");
+                }}
+                className={cn(
+                  "p-4 rounded-xl border text-left transition-all cursor-pointer relative",
+                  buildMode === "DOCKERFILE"
+                    ? "border-cyan-400 bg-cyan-500/10 ring-1 ring-cyan-400/40 shadow-sm"
+                    : isDark
+                    ? "border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]"
+                    : "border-slate-200 bg-slate-50 hover:border-slate-300"
+                )}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="w-8 h-8 rounded-lg bg-[#2496ED]/15 border border-[#2496ED]/30 flex items-center justify-center">
+                    <SiDocker className="w-4 h-4 text-[#2496ED]" />
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-cyan-400 text-slate-950">
+                    Recommended
+                  </span>
+                </div>
+                <div className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>
+                  Dockerfile
+                </div>
+                <p className="text-[11px] text-zinc-400 mt-1 leading-snug">
+                  Use your repository&apos;s Dockerfile or write your own custom Dockerfile inline.
+                </p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setBuildMode("AUTO");
+                  if (buildType === "DOCKERFILE") {
+                    handleFrameworkChange("LARAVEL");
+                  }
+                }}
+                className={cn(
+                  "p-4 rounded-xl border text-left transition-all cursor-pointer relative",
+                  buildMode === "AUTO"
+                    ? "border-cyan-400 bg-cyan-500/10 ring-1 ring-cyan-400/40 shadow-sm"
+                    : isDark
+                    ? "border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]"
+                    : "border-slate-200 bg-slate-50 hover:border-slate-300"
+                )}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center">
+                    <Sparkles className="w-4 h-4 text-emerald-400" />
+                  </div>
+                  <span className="text-[10px] font-mono text-zinc-500">18 Stacks</span>
+                </div>
+                <div className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>
+                  Auto Detect
+                </div>
+                <p className="text-[11px] text-zinc-400 mt-1 leading-snug">
+                  Pick a language/framework preset (Laravel, Next.js, Python, Go, Node.js, etc.).
+                </p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setBuildMode("BUILDPACK");
+                  if (buildType === "DOCKERFILE") {
+                    handleFrameworkChange("NODEJS");
+                  }
+                }}
+                className={cn(
+                  "p-4 rounded-xl border text-left transition-all cursor-pointer relative",
+                  buildMode === "BUILDPACK"
+                    ? "border-cyan-400 bg-cyan-500/10 ring-1 ring-cyan-400/40 shadow-sm"
+                    : isDark
+                    ? "border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]"
+                    : "border-slate-200 bg-slate-50 hover:border-slate-300"
+                )}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="w-8 h-8 rounded-lg bg-purple-500/15 border border-purple-500/30 flex items-center justify-center">
+                    <Boxes className="w-4 h-4 text-purple-400" />
+                  </div>
+                  <span className="text-[10px] font-mono text-zinc-500">Zero-Config</span>
+                </div>
+                <div className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>
+                  Buildpack
+                </div>
+                <p className="text-[11px] text-zinc-400 mt-1 leading-snug">
+                  Automated build without needing a Dockerfile in your repository.
+                </p>
+              </button>
+            </div>
+
+            {/* MODE 1: NATIVE DOCKERFILE (REPO OR INLINE EDITOR) */}
+            {buildMode === "DOCKERFILE" && (
+              <div
+                className={cn(
+                  "p-4 rounded-xl border space-y-4",
+                  isDark ? "bg-black/30 border-white/[0.06]" : "bg-slate-50 border-slate-200"
+                )}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+                    Dockerfile Source
+                  </span>
+                  <div className="inline-flex items-center gap-1 p-1 rounded-lg border border-white/10 bg-black/40">
+                    <button
+                      type="button"
+                      onClick={() => setDockerfileSource("REPO")}
+                      className={cn(
+                        "px-3 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer",
+                        dockerfileSource === "REPO"
+                          ? "bg-cyan-500 text-slate-950 font-bold"
+                          : "text-zinc-400 hover:text-white"
+                      )}
+                    >
+                      From Git Repository
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDockerfileSource("INLINE")}
+                      className={cn(
+                        "px-3 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer",
+                        dockerfileSource === "INLINE"
+                          ? "bg-cyan-500 text-slate-950 font-bold"
+                          : "text-zinc-400 hover:text-white"
+                      )}
+                    >
+                      Write / Edit Dockerfile
+                    </button>
+                  </div>
+                </div>
+
+                {dockerfileSource === "REPO" ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-1.5">
+                        Dockerfile Path in Repository
+                      </label>
+                      <input
+                        type="text"
+                        value={dockerfilePath}
+                        onChange={(e) => setDockerfilePath(e.target.value)}
+                        placeholder="Dockerfile"
+                        className={cn(
+                          "w-full px-3 py-2 rounded-xl text-xs border font-mono transition-colors focus:outline-none focus:border-cyan-400",
+                          isDark
+                            ? "bg-black/30 border-white/10 text-white"
+                            : "bg-white border-slate-200 text-slate-900"
+                        )}
+                      />
+                      <p className="text-[11px] text-zinc-500 mt-1">
+                        Auto-reads <code>Dockerfile</code> from your Git repository root or subfolder (e.g. <code>docker/Dockerfile</code>).
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-1.5">
+                        Container Exposed Port
+                      </label>
+                      <input
+                        type="number"
+                        value={appPort}
+                        onChange={(e) => setAppPort(Number(e.target.value))}
+                        placeholder="80"
+                        className={cn(
+                          "w-full px-3 py-2 rounded-xl text-xs border font-mono transition-colors focus:outline-none focus:border-cyan-400",
+                          isDark
+                            ? "bg-black/30 border-white/10 text-white"
+                            : "bg-white border-slate-200 text-slate-900"
+                        )}
+                      />
+                      <p className="text-[11px] text-zinc-500 mt-1">
+                        TCP port exposed by your Dockerfile (e.g. 80, 3000, 8080).
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="text-[11px] text-zinc-400 mr-1 font-medium">Quick Templates:</span>
+                      {DOCKERFILE_TEMPLATES.map((tpl) => (
+                        <button
+                          key={tpl.label}
+                          type="button"
+                          onClick={() => {
+                            setInlineDockerfile(tpl.content);
+                            setAppPort(tpl.port);
+                          }}
+                          className={cn(
+                            "px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-colors cursor-pointer",
+                            isDark
+                              ? "bg-white/5 border-white/10 text-zinc-300 hover:bg-cyan-500/15 hover:border-cyan-500/30 hover:text-cyan-400"
+                              : "bg-white border-slate-200 text-slate-700 hover:bg-slate-100"
+                          )}
+                        >
+                          {tpl.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    <textarea
+                      rows={11}
+                      value={inlineDockerfile}
+                      onChange={(e) => setInlineDockerfile(e.target.value)}
+                      placeholder="FROM node:20-alpine..."
+                      spellCheck={false}
+                      className={cn(
+                        "w-full p-3.5 rounded-xl text-xs font-mono border leading-relaxed transition-colors focus:outline-none focus:border-cyan-400",
+                        isDark
+                          ? "bg-[#09090b] border-white/10 text-emerald-300 placeholder-zinc-600"
+                          : "bg-slate-900 border-slate-700 text-emerald-300"
+                      )}
+                    />
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-1.5">
+                          Container Exposed Port
+                        </label>
+                        <input
+                          type="number"
+                          value={appPort}
+                          onChange={(e) => setAppPort(Number(e.target.value))}
+                          placeholder="3000"
+                          className={cn(
+                            "w-full px-3 py-2 rounded-xl text-xs border font-mono transition-colors focus:outline-none focus:border-cyan-400",
+                            isDark
+                              ? "bg-black/30 border-white/10 text-white"
+                              : "bg-white border-slate-200 text-slate-900"
+                          )}
+                        />
+                      </div>
+                      <div className="flex items-end pb-2">
+                        <p className="text-[11px] text-zinc-500">
+                          Your custom Dockerfile will be mounted directly into the Kaniko builder and packaged into your container image.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* MODE 2 & 3: AUTO DETECT OR BUILDPACK FRAMEWORK GRID */}
+            {buildMode !== "DOCKERFILE" && (
+              <>
             {/* Filter Categories and Live Search Bar */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
               {/* Category Pills */}
@@ -1318,6 +1667,8 @@ export default function NewAppPlatformPage() {
                 </div>
               )}
             </div>
+              </>
+            )}
           </div>
 
           {/* Section 3: Compute Plan Selection (Matching Managed App 100%) */}

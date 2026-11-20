@@ -276,6 +276,8 @@ export async function POST(req: NextRequest) {
           if (deducted.count === 0) throw new Error("INSUFFICIENT_BALANCE");
         }
 
+        const webhookSecret = crypto.randomBytes(24).toString("hex");
+
         const created = await tx.appPlatformService.create({
           data: {
             userId: user.id,
@@ -302,6 +304,10 @@ export async function POST(req: NextRequest) {
             accumulatedCost: normalizedBillingMode === "MONTHLY" ? monthlyPrice : 0,
             status: "PROVISIONING",
             lastBuildStatus: "QUEUED",
+            webhookSecret,
+            autoDeploy: true,
+            deployOnPush: true,
+            buildMode: (body.buildMode || "DOCKERFILE").toUpperCase().trim(),
             node: "cloudapps",
             k8sNamespace: "app-platform",
             k8sDeployment: `app-${resolvedSubdomain}`,
@@ -345,10 +351,10 @@ export async function POST(req: NextRequest) {
 
     // Trigger Kaniko build in cluster
     try {
-      const { jobName, imageTag } = await triggerAppPlatformBuild(appRecord);
+      const { jobName, imageTag, deploymentId } = await triggerAppPlatformBuild(appRecord);
 
       // Asynchronously track build and deploy resources when complete
-      trackAppPlatformBuildAsync(appRecord.id, jobName, imageTag).catch((err) => {
+      trackAppPlatformBuildAsync(appRecord.id, jobName, imageTag, deploymentId).catch((err) => {
         console.error("[AppPlatform] Async build tracking error:", err);
       });
     } catch (buildErr: any) {

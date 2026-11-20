@@ -1274,6 +1274,14 @@ model AppPlatformService {
   lastBuildStatus   String?   @default("QUEUED") // "QUEUED", "BUILDING", "SUCCESS", "FAILED"
   lastDeployedAt    DateTime?
 
+  // CI/CD & Automation Settings (Railway-style)
+  webhookSecret     String?
+  autoDeploy        Boolean   @default(true)
+  deployOnPush      Boolean   @default(true)
+  buildMode         String    @default("DOCKERFILE") // "AUTO", "DOCKERFILE", "BUILDPACK"
+
+  deployments       AppPlatformDeployment[]
+
   // Resource Specs (Mandatory per AGENTS.md)
   planName          String    @default("1C1G") // "0.5C512M", "1C1G", "1C2G", "2C2G", "2C4G", "4C4G"
   cpuShares         Float     @default(1.0)
@@ -1307,6 +1315,27 @@ model AppPlatformService {
   @@index([userId])
   @@index([status])
   @@index([port])
+  @@index([createdAt])
+}
+
+model AppPlatformDeployment {
+  id               Int                @id @default(autoincrement())
+  appId            Int
+  deploymentNumber Int                @default(1)
+  commitHash       String?
+  commitMessage    String?
+  branch           String             @default("main")
+  trigger          String             @default("INITIAL") // "INITIAL", "MANUAL", "WEBHOOK_PUSH", "ROLLBACK"
+  status           String             @default("QUEUED") // "QUEUED", "BUILDING", "SUCCESS", "FAILED", "CANCELLED"
+  buildLogs        String?            @db.Text
+  imageTag         String?
+  durationSeconds  Int?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  app              AppPlatformService @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+  @@index([appId])
+  @@index([status])
   @@index([createdAt])
 }
 

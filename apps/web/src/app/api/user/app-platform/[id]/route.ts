@@ -27,6 +27,12 @@ export async function GET(
 
     const app = await prisma.appPlatformService.findUnique({
       where: { id: appId },
+      include: {
+        deployments: {
+          orderBy: { createdAt: "desc" },
+          take: 20,
+        },
+      },
     });
 
     if (!app) {
@@ -78,6 +84,12 @@ export async function PATCH(
 
     const app = await prisma.appPlatformService.findUnique({
       where: { id: appId },
+      include: {
+        deployments: {
+          orderBy: { createdAt: "desc" },
+          take: 20,
+        },
+      },
     });
 
     if (!app) {
@@ -98,12 +110,16 @@ export async function PATCH(
       gitUrl,
       branch,
       buildType,
+      buildMode,
       dockerfilePath,
+      rootDirectory,
       buildCommand,
       startCommand,
       envVars,
       customDomain,
       appPort,
+      autoDeploy,
+      deployOnPush,
     } = body;
 
     const dataToUpdate: any = {};
@@ -111,22 +127,30 @@ export async function PATCH(
     if (gitUrl && typeof gitUrl === "string") dataToUpdate.gitUrl = gitUrl.trim();
     if (branch && typeof branch === "string") dataToUpdate.branch = branch.trim();
     if (buildType && typeof buildType === "string") dataToUpdate.buildType = buildType.trim().toUpperCase();
+    if (buildMode && typeof buildMode === "string") dataToUpdate.buildMode = buildMode.trim().toUpperCase();
     if (dockerfilePath !== undefined) dataToUpdate.dockerfilePath = dockerfilePath ? dockerfilePath.trim() : "Dockerfile";
+    if (rootDirectory !== undefined) dataToUpdate.rootDirectory = rootDirectory ? rootDirectory.trim() : "/";
     if (buildCommand !== undefined) dataToUpdate.buildCommand = buildCommand;
     if (startCommand !== undefined) dataToUpdate.startCommand = startCommand;
     if (envVars !== undefined) dataToUpdate.envVars = envVars;
     if (customDomain !== undefined) dataToUpdate.customDomain = customDomain ? customDomain.trim().toLowerCase() : null;
     if (appPort && !isNaN(parseInt(appPort, 10))) dataToUpdate.appPort = parseInt(appPort, 10);
+    if (typeof autoDeploy === "boolean") dataToUpdate.autoDeploy = autoDeploy;
+    if (typeof deployOnPush === "boolean") dataToUpdate.deployOnPush = deployOnPush;
 
     const updated = await prisma.appPlatformService.update({
       where: { id: appId },
       data: dataToUpdate,
     });
 
-    // If app is currently running, re-apply ingress and deployment env vars
+    // If app is currently running, re-apply ingress and deployment env vars with latest successful image tag
     if (updated.status === "RUNNING") {
       try {
-        await applyAppPlatformResources(updated as any, "latest");
+        const lastSuccess = await prisma.appPlatformDeployment.findFirst({
+          where: { appId, status: "SUCCESS", imageTag: { not: null } },
+          orderBy: { createdAt: "desc" },
+        });
+        await applyAppPlatformResources(updated as any, lastSuccess?.imageTag || "latest");
       } catch (applyErr) {
         console.warn("[AppPlatform] Re-apply resources warning on patch:", applyErr);
       }
@@ -163,6 +187,12 @@ export async function DELETE(
 
     const app = await prisma.appPlatformService.findUnique({
       where: { id: appId },
+      include: {
+        deployments: {
+          orderBy: { createdAt: "desc" },
+          take: 20,
+        },
+      },
     });
 
     if (!app) {

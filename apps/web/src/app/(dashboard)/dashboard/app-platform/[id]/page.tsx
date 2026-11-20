@@ -29,6 +29,10 @@ import {
   FileText,
   Settings,
   Layers,
+  Rocket,
+  History,
+  Webhook,
+  Undo2,
 } from "lucide-react";
 import {
   AreaChart,
@@ -131,7 +135,12 @@ export default function AppPlatformDetailPage({
   const [app, setApp] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [copiedField, setCopiedField] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"overview" | "build-logs" | "runtime-logs" | "settings">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "deployments" | "build-logs" | "runtime-logs" | "settings">("overview");
+  const [deployments, setDeployments] = useState<any[]>([]);
+  const [deployingManual, setDeployingManual] = useState(false);
+  const [rollingBackId, setRollingBackId] = useState<number | null>(null);
+  const [specificCommitHash, setSpecificCommitHash] = useState("");
+  const [selectedDepLogs, setSelectedDepLogs] = useState<{ num: number; logs: string; status: string } | null>(null);
 
   // Power actions & modal state
   const [actionLoading, setActionLoading] = useState(false);
@@ -154,6 +163,9 @@ export default function AppPlatformDetailPage({
   const [settingsStartCmd, setSettingsStartCmd] = useState("");
   const [settingsEnvVars, setSettingsEnvVars] = useState("");
   const [settingsCustomDomain, setSettingsCustomDomain] = useState("");
+  const [settingsAutoDeploy, setSettingsAutoDeploy] = useState(true);
+  const [settingsDeployOnPush, setSettingsDeployOnPush] = useState(true);
+  const [settingsBuildMode, setSettingsBuildMode] = useState("DOCKERFILE");
   const [savingSettings, setSavingSettings] = useState(false);
 
   // Dedicated Resource Monitoring States (CPU, RAM, Disk)
@@ -183,9 +195,13 @@ export default function AppPlatformDetailPage({
       const json = await res.json();
       if (res.ok && json.data) {
         setApp(json.data);
+        setDeployments(Array.isArray(json.data.deployments) ? json.data.deployments : []);
         setSettingsGitUrl(json.data.gitUrl || "");
         setSettingsBranch(json.data.branch || "main");
         setSettingsBuildType(json.data.buildType || "DOCKERFILE");
+        setSettingsBuildMode(json.data.buildMode || (json.data.buildType === "DOCKERFILE" ? "DOCKERFILE" : "AUTO"));
+        setSettingsAutoDeploy(json.data.autoDeploy !== false);
+        setSettingsDeployOnPush(json.data.deployOnPush !== false);
         setSettingsDockerfilePath(json.data.dockerfilePath || "Dockerfile");
         setSettingsAppPort(json.data.appPort || 3000);
         setSettingsBuildCmd(json.data.buildCommand || "");
@@ -317,6 +333,55 @@ export default function AppPlatformDetailPage({
     }
   };
 
+  const handleManualDeploy = async (commitHash?: string) => {
+    setDeployingManual(true);
+    const toastId = toast.loading(commitHash ? `Deploying commit ${commitHash}...` : "Triggering manual deployment...");
+    try {
+      const res = await fetch(`/api/user/app-platform/${id}/deployments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          commitHash: commitHash?.trim() || undefined,
+        }),
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        toast.success("Deployment triggered! Building container image...", { id: toastId });
+        setSpecificCommitHash("");
+        fetchAppDetail();
+      } else {
+        toast.error(json.error || "Failed to trigger deployment", { id: toastId });
+      }
+    } catch {
+      toast.error("Connection error while triggering deploy", { id: toastId });
+    } finally {
+      setDeployingManual(false);
+    }
+  };
+
+  const handleRollback = async (deploymentId: number, deploymentNumber: number) => {
+    setRollingBackId(deploymentId);
+    const toastId = toast.loading(`Rolling back to #deployment-${deploymentNumber}...`);
+    try {
+      const res = await fetch(`/api/user/app-platform/${id}/rollback`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deploymentId }),
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        toast.success(`Rolled back to #deployment-${deploymentNumber}`, { id: toastId });
+        fetchAppDetail();
+      } else {
+        toast.error(json.error || "Failed to rollback deployment", { id: toastId });
+      }
+    } catch {
+      toast.error("Connection error during rollback", { id: toastId });
+    } finally {
+      setRollingBackId(null);
+    }
+  };
+
   const handleSaveSettings = async (e?: React.FormEvent, triggerRebuild = false) => {
     if (e) e.preventDefault();
     setSavingSettings(true);
@@ -329,6 +394,9 @@ export default function AppPlatformDetailPage({
           gitUrl: settingsGitUrl.trim(),
           branch: settingsBranch.trim(),
           buildType: settingsBuildType,
+          buildMode: settingsBuildMode,
+          autoDeploy: settingsAutoDeploy,
+          deployOnPush: settingsDeployOnPush,
           dockerfilePath: settingsDockerfilePath.trim() || "Dockerfile",
           appPort: Number(settingsAppPort) || 3000,
           buildCommand: settingsBuildCmd.trim() || null,
@@ -575,6 +643,7 @@ export default function AppPlatformDetailPage({
       <div className="flex items-center gap-2 border-b border-white/[0.08] pb-1 overflow-x-auto">
         {[
           { id: "overview", label: "Overview", icon: Layers },
+          { id: "deployments", label: "Deployments", icon: History },
           { id: "build-logs", label: "Build Logs", icon: FileText },
           { id: "runtime-logs", label: "Runtime Logs", icon: Terminal },
           { id: "settings", label: "Settings & Environment", icon: Settings },
@@ -899,6 +968,204 @@ export default function AppPlatformDetailPage({
                 </AreaChart>
               </ResponsiveContainer>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB: DEPLOYMENTS HISTORY (RAILWAY STYLE) */}
+      {activeTab === "deployments" && (
+        <div className="space-y-4">
+          <div className={cn(
+            "rounded-2xl border p-5 sm:p-6 space-y-5 shadow-2xs",
+            isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90"
+          )}>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.06]">
+              <div>
+                <h3 className={cn("text-sm sm:text-base font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                  <History className="w-4 h-4 text-cyan-400" />
+                  <span>Deployments</span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/25">
+                    Production
+                  </span>
+                </h3>
+                <p className={cn("text-xs mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                  Automated CI/CD deployment history, build logs, and instant rollbacks.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-1.5">
+                  <input
+                    type="text"
+                    value={specificCommitHash}
+                    onChange={(e) => setSpecificCommitHash(e.target.value)}
+                    placeholder="Commit hash (optional)"
+                    className={cn(
+                      "px-3 py-2 rounded-xl text-xs font-mono border w-40 focus:outline-none focus:border-cyan-400",
+                      isDark ? "bg-[#0a0a0c] border-white/10 text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+                    )}
+                  />
+                  <button
+                    type="button"
+                    disabled={deployingManual || app?.status === "SUSPENDED"}
+                    onClick={() => handleManualDeploy(specificCommitHash)}
+                    className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all shadow-md shadow-cyan-400/20 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  >
+                    <Rocket className={cn("w-3.5 h-3.5", deployingManual && "animate-pulse")} />
+                    <span>{deployingManual ? "Deploying..." : "Manual Deploy"}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {deployments.length > 0 ? (
+              <div className="space-y-3">
+                {deployments.map((dep, idx) => {
+                  const isSuccess = dep.status === "SUCCESS";
+                  const isFailed = dep.status === "FAILED";
+                  const isBuilding = dep.status === "BUILDING" || dep.status === "QUEUED";
+                  const isCurrentActive = idx === 0 && isSuccess;
+                  return (
+                    <div
+                      key={dep.id}
+                      className={cn(
+                        "p-4 rounded-xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4",
+                        isCurrentActive
+                          ? isDark
+                            ? "bg-emerald-500/[0.04] border-emerald-500/30"
+                            : "bg-emerald-50/70 border-emerald-200"
+                          : isDark
+                          ? "bg-[#0a0a0c] border-white/[0.06] hover:border-white/15"
+                          : "bg-slate-50 border-slate-200 hover:border-slate-300"
+                      )}
+                    >
+                      <div className="space-y-1.5 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className={cn("font-mono text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>
+                            #deployment-{dep.deploymentNumber || dep.id}
+                          </span>
+                          <span
+                            className={cn(
+                              "px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border",
+                              isSuccess
+                                ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+                                : isFailed
+                                ? "bg-red-500/15 text-red-400 border-red-500/30"
+                                : "bg-amber-500/15 text-amber-400 border-amber-500/30"
+                            )}
+                          >
+                            {isSuccess ? "Success" : isFailed ? "Failed" : dep.status}
+                          </span>
+                          {isCurrentActive && (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
+                              Active
+                            </span>
+                          )}
+                          <span className="text-[11px] font-mono text-zinc-500">
+                            {dep.trigger === "GIT_PUSH" ? "Git Push" : dep.trigger === "ROLLBACK" ? "Rollback" : "Manual"}
+                          </span>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-400 font-mono">
+                          <span className="flex items-center gap-1 text-cyan-400">
+                            <GitBranch className="w-3 h-3" />
+                            {dep.branch || app?.branch || "main"}
+                          </span>
+                          {dep.commitHash && (
+                            <>
+                              <span>·</span>
+                              <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-zinc-300">
+                                {dep.commitHash}
+                              </span>
+                            </>
+                          )}
+                          <span>·</span>
+                          <span>{new Date(dep.createdAt).toLocaleString()}</span>
+                          {dep.durationSeconds ? (
+                            <>
+                              <span>·</span>
+                              <span>{dep.durationSeconds}s</span>
+                            </>
+                          ) : null}
+                        </div>
+
+                        <p className={cn("text-xs truncate", isDark ? "text-zinc-300" : "text-slate-700")}>
+                          {dep.commitMessage || (isSuccess ? "Build completed · Deployment healthy" : isFailed ? "Build failed · Check build logs" : "Building image in cluster...")}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (dep.buildLogs) {
+                              setSelectedDepLogs({
+                                num: dep.deploymentNumber || dep.id,
+                                logs: dep.buildLogs,
+                                status: dep.status,
+                              });
+                            } else {
+                              setActiveTab("build-logs");
+                            }
+                          }}
+                          className={cn(
+                            "px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors cursor-pointer flex items-center gap-1.5",
+                            isDark
+                              ? "bg-white/5 border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
+                              : "bg-white border-slate-200 text-slate-700 hover:bg-slate-100"
+                          )}
+                        >
+                          <FileText className="w-3.5 h-3.5 text-cyan-400" />
+                          <span>Logs</span>
+                        </button>
+
+                        {isSuccess && dep.imageTag && idx > 0 && (
+                          <button
+                            type="button"
+                            disabled={rollingBackId === dep.id}
+                            onClick={() => handleRollback(dep.id, dep.deploymentNumber || dep.id)}
+                            className={cn(
+                              "px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors cursor-pointer flex items-center gap-1.5",
+                              isDark
+                                ? "bg-amber-500/10 border-amber-500/25 text-amber-400 hover:bg-amber-500/20"
+                                : "bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100"
+                            )}
+                          >
+                            <Undo2 className="w-3.5 h-3.5" />
+                            <span>{rollingBackId === dep.id ? "Rolling back..." : "Rollback"}</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="py-10 text-center space-y-2 border border-dashed rounded-xl border-white/10">
+                <History className="w-8 h-8 text-zinc-500 mx-auto" />
+                <p className="text-xs text-zinc-400">No deployment records yet. Trigger a Manual Deploy to start.</p>
+              </div>
+            )}
+
+            {selectedDepLogs && (
+              <div className="mt-4 rounded-xl border border-white/10 bg-[#090b10] p-4 space-y-2">
+                <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                  <span className="text-xs font-mono font-bold text-cyan-400">
+                    #deployment-{selectedDepLogs.num} Build Logs ({selectedDepLogs.status})
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedDepLogs(null)}
+                    className="text-xs text-zinc-400 hover:text-white cursor-pointer"
+                  >
+                    Close
+                  </button>
+                </div>
+                <pre className="font-mono text-xs text-emerald-400 whitespace-pre-wrap max-h-80 overflow-y-auto">
+                  {cleanTerminalLogs(selectedDepLogs.logs)}
+                </pre>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -1386,6 +1653,104 @@ export default function AppPlatformDetailPage({
               <p className={cn("text-[11px] mt-1.5 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
                 To point your custom domain, create a <strong>CNAME</strong> record pointing to <code className="font-mono text-cyan-400">{app?.fullDomain}</code> (or an <strong>A</strong> record pointing to <code className="font-mono text-cyan-400">{app?.publicIp || "206.237.98.230"}</code>) in your DNS manager. SSL certificate will be issued automatically upon DNS resolution.
               </p>
+            </div>
+          </div>
+
+          {/* CARD: CI/CD AUTOMATION & GITHUB WEBHOOK */}
+          <div className={cn(
+            "rounded-2xl border p-5 sm:p-6 space-y-4 transition-all shadow-2xs",
+            isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
+          )}>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-white/[0.06]">
+              <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                <Webhook className="w-4 h-4 shrink-0" />
+                <span>CI/CD Automation &amp; Git Push Webhook</span>
+              </h3>
+              <span className={cn(
+                "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border",
+                settingsAutoDeploy && settingsDeployOnPush
+                  ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+                  : "bg-zinc-500/15 text-zinc-400 border-zinc-500/30"
+              )}>
+                {settingsAutoDeploy && settingsDeployOnPush ? "Auto Deploy Active" : "Manual Only"}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label className={cn(
+                "p-3.5 rounded-xl border flex items-center justify-between cursor-pointer",
+                isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200"
+              )}>
+                <div>
+                  <div className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>Auto Deploy</div>
+                  <div className="text-[11px] text-zinc-500">Automatically build &amp; deploy on trigger events</div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={settingsAutoDeploy}
+                  onChange={(e) => setSettingsAutoDeploy(e.target.checked)}
+                  className="w-4 h-4 accent-cyan-400 cursor-pointer"
+                />
+              </label>
+
+              <label className={cn(
+                "p-3.5 rounded-xl border flex items-center justify-between cursor-pointer",
+                isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200"
+              )}>
+                <div>
+                  <div className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>Deploy on Push</div>
+                  <div className="text-[11px] text-zinc-500">Trigger rebuild when pushing to branch {settingsBranch || "main"}</div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={settingsDeployOnPush}
+                  onChange={(e) => setSettingsDeployOnPush(e.target.checked)}
+                  className="w-4 h-4 accent-cyan-400 cursor-pointer"
+                />
+              </label>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className={cn("p-3.5 rounded-xl border space-y-1", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+                  GitHub / GitLab Payload Webhook URL
+                </span>
+                <div className="flex items-center justify-between font-mono text-xs pt-0.5">
+                  <span className={cn("truncate mr-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                    {typeof window !== "undefined" ? `${window.location.origin}/api/webhooks/app-platform/${id}` : `/api/webhooks/app-platform/${id}`}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(
+                      typeof window !== "undefined" ? `${window.location.origin}/api/webhooks/app-platform/${id}` : `/api/webhooks/app-platform/${id}`,
+                      "Webhook URL"
+                    )}
+                    className="text-zinc-400 hover:text-cyan-400 cursor-pointer shrink-0"
+                  >
+                    {copiedField === "Webhook URL" ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className={cn("p-3.5 rounded-xl border space-y-1", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+                  Webhook Secret Token
+                </span>
+                <div className="flex items-center justify-between font-mono text-xs pt-0.5">
+                  <span className={cn("truncate mr-2", isDark ? "text-zinc-300" : "text-slate-700")}>
+                    {app?.webhookSecret || "Auto-generated"}
+                  </span>
+                  {app?.webhookSecret && (
+                    <button
+                      type="button"
+                      onClick={() => copyToClipboard(app.webhookSecret, "Webhook Secret")}
+                      className="text-zinc-400 hover:text-cyan-400 cursor-pointer shrink-0"
+                    >
+                      {copiedField === "Webhook Secret" ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 

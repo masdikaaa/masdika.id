@@ -861,14 +861,43 @@ export async function applyKubernetesManifests(kc: k8s.KubeConfig, manifestYaml:
  * Create Kaniko build job in the cluster
  */
 export async function triggerAppPlatformBuild(
-  app: AppPlatformRecord
-): Promise<{ jobName: string; imageTag: string }> {
+  app: AppPlatformRecord,
+  deploymentId?: number
+): Promise<{ jobName: string; imageTag: string; deploymentId?: number }> {
   const { batchApi, coreApi } = await getAppPlatformK8sClients();
   const namespace = app.k8sNamespace || 'app-platform';
   const timestamp = Date.now();
   const imageTag = `b${timestamp.toString(36)}`;
   const jobName = `build-${app.subdomain}-${timestamp.toString(36)}`;
   const destinationImage = `127.0.0.1:5000/${app.subdomain}:${imageTag}`;
+
+  // Ensure deployment record exists
+  let activeDepId = deploymentId;
+  if (!activeDepId && app.id) {
+    try {
+      const depCount = await prisma.appPlatformDeployment.count({ where: { appId: app.id } });
+      const created = await prisma.appPlatformDeployment.create({
+        data: {
+          appId: app.id,
+          deploymentNumber: depCount + 1,
+          branch: app.branch || 'main',
+          trigger: 'INITIAL',
+          status: 'BUILDING',
+          imageTag,
+        },
+      });
+      activeDepId = created.id;
+    } catch (depErr) {
+      console.warn('[AppPlatform] Deployment record creation error:', depErr);
+    }
+  } else if (activeDepId) {
+    try {
+      await prisma.appPlatformDeployment.update({
+        where: { id: activeDepId },
+        data: { status: 'BUILDING', imageTag },
+      });
+    } catch {}
+  }
 
   // Ensure in-cluster private registry is running and wait for readiness
   await ensureAppPlatformRegistry();
@@ -1006,6 +1035,7 @@ export async function triggerAppPlatformBuild(
               image: 'gcr.io/kaniko-project/executor:latest',
               securityContext: {
                 runAsUser: 0,
+                privileged: true,
               },
               args: [
                 '--context=dir:///workspace',
@@ -1019,8 +1049,7 @@ export async function triggerAppPlatformBuild(
                 `--destination=${destinationImage}`,
                 '--insecure',
                 '--skip-tls-verify',
-                '--cache=true',
-                '--cache-dir=/workspace/cache',
+                '--cache=false',
               ],
               volumeMounts: [
                 {
@@ -1068,7 +1097,7 @@ export async function triggerAppPlatformBuild(
     },
   });
 
-  return { jobName, imageTag };
+  return { jobName, imageTag, deploymentId: activeDepId };
 }
 
 /**
@@ -1271,7 +1300,8 @@ export async function applyAppPlatformResources(
 export async function trackAppPlatformBuildAsync(
   appId: number,
   jobName: string,
-  imageTag: string
+  imageTag: string,
+  deploymentId?: number
 ): Promise<void> {
   const maxWaitMs = 15 * 60 * 1000; // 15 minutes timeout
   const pollIntervalMs = 4000; // poll every 4 seconds
@@ -1337,13 +1367,25 @@ export async function trackAppPlatformBuildAsync(
         // Logs might not be ready yet
       }
 
+      const elapsedSec = Math.round((Date.now() - startTime) / 1000);
+
       if (podLogs) {
         await prisma.appPlatformService.update({
           where: { id: appId },
           data: {
             lastBuildLog: podLogs.slice(-25000), // Keep last 25KB
           },
-        });
+        }).catch(() => {});
+
+        if (deploymentId) {
+          await prisma.appPlatformDeployment.update({
+            where: { id: deploymentId },
+            data: {
+              buildLogs: podLogs.slice(-50000),
+              durationSeconds: elapsedSec,
+            },
+          }).catch(() => {});
+        }
       }
 
       // 3. Check if Job succeeded
@@ -1364,7 +1406,19 @@ export async function trackAppPlatformBuildAsync(
             k8sService: `app-${app.subdomain}`,
             k8sIngress: `app-${app.subdomain}`,
           },
-        });
+        }).catch(() => {});
+
+        if (deploymentId) {
+          await prisma.appPlatformDeployment.update({
+            where: { id: deploymentId },
+            data: {
+              status: 'SUCCESS',
+              buildLogs: podLogs.slice(-50000),
+              imageTag,
+              durationSeconds: elapsedSec,
+            },
+          }).catch(() => {});
+        }
         return;
       }
 
@@ -1377,12 +1431,24 @@ export async function trackAppPlatformBuildAsync(
             status: 'ERROR',
             lastBuildStatus: 'FAILED',
           },
-        });
+        }).catch(() => {});
+
+        if (deploymentId) {
+          await prisma.appPlatformDeployment.update({
+            where: { id: deploymentId },
+            data: {
+              status: 'FAILED',
+              buildLogs: podLogs.slice(-50000),
+              durationSeconds: elapsedSec,
+            },
+          }).catch(() => {});
+        }
         return;
       }
     }
 
     // Timed out
+    const elapsedSec = Math.round((Date.now() - startTime) / 1000);
     await prisma.appPlatformService.update({
       where: { id: appId },
       data: {
@@ -1390,7 +1456,17 @@ export async function trackAppPlatformBuildAsync(
         lastBuildStatus: 'FAILED',
         lastBuildLog: (await prisma.appPlatformService.findUnique({ where: { id: appId } }))?.lastBuildLog + '\n[Build timed out after 15 minutes]',
       },
-    });
+    }).catch(() => {});
+
+    if (deploymentId) {
+      await prisma.appPlatformDeployment.update({
+        where: { id: deploymentId },
+        data: {
+          status: 'FAILED',
+          durationSeconds: elapsedSec,
+        },
+      }).catch(() => {});
+    }
   } catch (err: any) {
     console.error(`[AppPlatform] Build tracking error for ${jobName}:`, err);
     await prisma.appPlatformService.update({
@@ -1400,6 +1476,15 @@ export async function trackAppPlatformBuildAsync(
         lastBuildStatus: 'FAILED',
       },
     }).catch(() => {});
+
+    if (deploymentId) {
+      await prisma.appPlatformDeployment.update({
+        where: { id: deploymentId },
+        data: {
+          status: 'FAILED',
+        },
+      }).catch(() => {});
+    }
   }
 }
 
