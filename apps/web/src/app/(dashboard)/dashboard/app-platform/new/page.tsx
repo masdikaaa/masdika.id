@@ -2097,8 +2097,8 @@ export default function NewAppPlatformPage() {
                         onChange={(e) => setHealthCheckPath(e.target.value)}
                         placeholder="/health or /"
                         className={cn(
-                          "w-full px-3 py-2.5 rounded-xl text-xs border font-mono transition-colors focus:outline-none focus:border-cyan-400",
-                          isDark ? "bg-black/30 border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
+                          "w-full h-[42px] px-3.5 rounded-xl text-xs border font-mono transition-colors focus:outline-none focus:border-cyan-400",
+                          isDark ? "bg-black/40 border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
                         )}
                       />
                       <p className="text-[10px] text-zinc-500 mt-1">Zero-downtime readiness probe</p>
@@ -2114,8 +2114,8 @@ export default function NewAppPlatformPage() {
                         onChange={(e) => setPersistentVolumePath(e.target.value)}
                         placeholder="/var/www/html/storage"
                         className={cn(
-                          "w-full px-3 py-2.5 rounded-xl text-xs border font-mono transition-colors focus:outline-none focus:border-cyan-400",
-                          isDark ? "bg-black/30 border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
+                          "w-full h-[42px] px-3.5 rounded-xl text-xs border font-mono transition-colors focus:outline-none focus:border-cyan-400",
+                          isDark ? "bg-black/40 border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
                         )}
                       />
                       <p className="text-[10px] text-zinc-500 mt-1">Mount permanent disk across redeploys</p>
@@ -2128,6 +2128,7 @@ export default function NewAppPlatformPage() {
                       <Select
                         value={persistentVolumeGb}
                         onChange={(val) => setPersistentVolumeGb(Number(val))}
+                        className="h-[42px] px-3.5 py-0 text-xs font-mono"
                         options={[
                           { value: 0, label: "Disabled (Ephemeral)" },
                           { value: 1, label: "1 GB Persistent Disk" },

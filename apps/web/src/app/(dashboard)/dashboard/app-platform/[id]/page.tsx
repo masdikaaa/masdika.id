@@ -1934,7 +1934,7 @@ export default function AppPlatformDetailPage({
                   onChange={(e) => setSettingsHealthCheckPath(e.target.value)}
                   placeholder="/health or /"
                   className={cn(
-                    "w-full px-3.5 py-2.5 rounded-xl text-xs font-mono border transition-colors focus:outline-none focus:border-cyan-400",
+                    "w-full h-[42px] px-3.5 rounded-xl text-xs font-mono border transition-colors focus:outline-none focus:border-cyan-400",
                     isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
                   )}
                 />
@@ -1950,7 +1950,7 @@ export default function AppPlatformDetailPage({
                   onChange={(e) => setSettingsPvPath(e.target.value)}
                   placeholder="/var/www/html/storage"
                   className={cn(
-                    "w-full px-3.5 py-2.5 rounded-xl text-xs font-mono border transition-colors focus:outline-none focus:border-cyan-400",
+                    "w-full h-[42px] px-3.5 rounded-xl text-xs font-mono border transition-colors focus:outline-none focus:border-cyan-400",
                     isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
                   )}
                 />
@@ -1963,6 +1963,7 @@ export default function AppPlatformDetailPage({
                 <Select
                   value={settingsPvGb}
                   onChange={(val) => setSettingsPvGb(Number(val))}
+                  className="h-[42px] px-3.5 py-0 text-xs font-mono"
                   options={[
                     { value: 0, label: "Disabled (Ephemeral)" },
                     { value: 1, label: "1 GB Persistent Disk" },
