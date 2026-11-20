@@ -1333,7 +1333,7 @@ sh /tmp/autodetect.sh`
       },
     },
     spec: {
-      ttlSecondsAfterFinished: 3600, // clean up after 1 hour
+      ttlSecondsAfterFinished: 60, // clean up quickly after completion
       backoffLimit: 0, // Fail fast without retrying failed build
       template: {
         metadata: {
@@ -1408,7 +1408,7 @@ sh /tmp/autodetect.sh`
                   ? [
                       '--cache=true',
                       `--cache-repo=127.0.0.1:5000/${app.subdomain}-cache`,
-                      '--cache-ttl=168h',
+                      '--cache-ttl=1h',
                     ]
                   : ['--cache=false']),
               ],
@@ -1899,6 +1899,17 @@ export async function trackAppPlatformBuildAsync(
             },
           }).catch(() => {});
         }
+
+        // Immediate cleanup: remove build job, pod, ConfigMap, intermediate cache layers & orphaned blobs
+        await cleanupFinishedBuildJob(namespace, jobName).catch(() => {});
+        const successDeps = await prisma.appPlatformDeployment.findMany({
+          where: { appId, status: 'SUCCESS', imageTag: { not: null } },
+          select: { imageTag: true },
+        }).catch(() => [] as { imageTag: string | null }[]);
+        const keepTags = Array.from(
+          new Set([imageTag, ...successDeps.map((d) => d.imageTag || '').filter(Boolean)])
+        );
+        pruneAppPlatformRegistryImages(app.subdomain, keepTags, true).catch(() => {});
         return;
       }
 
@@ -1923,6 +1934,9 @@ export async function trackAppPlatformBuildAsync(
             },
           }).catch(() => {});
         }
+
+        await cleanupFinishedBuildJob(namespace, jobName).catch(() => {});
+        runRegistryGarbageCollect().catch(() => {});
         return;
       }
     }
@@ -1947,6 +1961,9 @@ export async function trackAppPlatformBuildAsync(
         },
       }).catch(() => {});
     }
+
+    await cleanupFinishedBuildJob(namespace, jobName).catch(() => {});
+    runRegistryGarbageCollect().catch(() => {});
   } catch (err: any) {
     console.error(`[AppPlatform] Build tracking error for ${jobName}:`, err);
     const errMsg = err?.body?.message || err?.message || String(err);
@@ -2086,24 +2103,64 @@ export async function getAppPlatformRuntimeLogs(app: AppPlatformRecord, tailLine
 }
 
 /**
- * Automatically clean up completed or failed build jobs/pods in the app-platform namespace
+ * Immediately delete a completed/failed Kaniko build Job, its Pods, and its temporary Dockerfile ConfigMap
+ */
+export async function cleanupFinishedBuildJob(
+  namespace: string,
+  jobName: string
+): Promise<void> {
+  try {
+    const { coreApi, batchApi } = await getAppPlatformK8sClients();
+
+    await (coreApi as any).deleteNamespacedConfigMap({
+      name: `cm-df-${jobName}`,
+      namespace,
+    }).catch(() => {});
+
+    await (batchApi as any).deleteNamespacedJob({
+      name: jobName,
+      namespace,
+      propagationPolicy: 'Background',
+    }).catch(() => {});
+
+    const podsRes: any = await (coreApi as any).listNamespacedPod({
+      namespace,
+      labelSelector: `job-name=${jobName}`,
+    }).catch(() => null);
+    for (const p of podsRes?.items || podsRes?.body?.items || []) {
+      if (p?.metadata?.name) {
+        await (coreApi as any).deleteNamespacedPod({
+          name: p.metadata.name,
+          namespace,
+        }).catch(() => {});
+      }
+    }
+  } catch {}
+}
+
+/**
+ * Automatically clean up completed or failed build jobs/pods and stale Dockerfile ConfigMaps
  */
 export async function cleanOrphanedBuildResources(): Promise<void> {
   try {
     const { coreApi, batchApi } = await getAppPlatformK8sClients();
     const namespace = 'app-platform';
+    const activeJobNames = new Set<string>();
 
     // 1. Clean completed/failed jobs
     const jobsRes: any = await (batchApi as any).listNamespacedJob({ namespace }).catch(() => null);
     const jobs = jobsRes?.items || jobsRes?.body?.items || [];
     for (const j of jobs) {
+      const jName = j?.metadata?.name;
       const isFinished = (j?.status?.succeeded || 0) > 0 || (j?.status?.failed || 0) > 0;
-      if (isFinished && j?.metadata?.name) {
+      if (isFinished && jName) {
         await (batchApi as any).deleteNamespacedJob({
-          name: j.metadata.name,
+          name: jName,
           namespace,
           propagationPolicy: 'Background',
         }).catch(() => {});
+      } else if (jName) {
+        activeJobNames.add(jName);
       }
     }
 
@@ -2117,6 +2174,124 @@ export async function cleanOrphanedBuildResources(): Promise<void> {
       if (pName.startsWith('build-') && (phase === 'Succeeded' || phase === 'Failed' || phase === 'Error' || isTerminated)) {
         await (coreApi as any).deleteNamespacedPod({ name: pName, namespace }).catch(() => {});
       }
+    }
+
+    // 3. Clean stale temporary Dockerfile ConfigMaps whose build job is no longer active
+    const cmsRes: any = await (coreApi as any).listNamespacedConfigMap({ namespace }).catch(() => null);
+    const cms = cmsRes?.items || cmsRes?.body?.items || [];
+    for (const cm of cms) {
+      const cmName = cm?.metadata?.name || '';
+      if (cmName.startsWith('cm-df-build-')) {
+        const linkedJobName = cmName.slice('cm-df-'.length);
+        if (!activeJobNames.has(linkedJobName)) {
+          await (coreApi as any).deleteNamespacedConfigMap({ name: cmName, namespace }).catch(() => {});
+        }
+      }
+    }
+  } catch {}
+}
+
+/**
+ * Run Docker Registry v2 garbage collection to physically free deleted manifests/blobs from disk immediately
+ */
+export async function runRegistryGarbageCollect(): Promise<void> {
+  try {
+    const { kc, coreApi } = await getAppPlatformK8sClients();
+    const namespace = 'app-platform';
+    const podsRes: any = await (coreApi as any).listNamespacedPod({
+      namespace,
+      labelSelector: 'app=app-platform-registry',
+    }).catch(() => null);
+    const pods = podsRes?.items || podsRes?.body?.items || [];
+    const runningPod = pods.find((p: any) => p?.status?.phase === 'Running') || pods[0];
+    const podName = runningPod?.metadata?.name;
+    if (!podName) return;
+
+    const exec = new k8s.Exec(kc);
+    const { PassThrough } = await import('stream');
+    const stdoutStream = new PassThrough();
+    const stderrStream = new PassThrough();
+    stdoutStream.resume();
+    stderrStream.resume();
+
+    await new Promise<void>((resolve) => {
+      const timer = setTimeout(resolve, 20000);
+      exec
+        .exec(
+          namespace,
+          podName,
+          'registry',
+          ['/bin/registry', 'garbage-collect', '/etc/docker/registry/config.yml', '--delete-untagged=true'],
+          stdoutStream,
+          stderrStream,
+          null,
+          false,
+          () => {
+            clearTimeout(timer);
+            resolve();
+          }
+        )
+        .catch(() => {
+          clearTimeout(timer);
+          resolve();
+        });
+    });
+  } catch {}
+}
+
+/**
+ * Immediately prune old/unreferenced image manifests and intermediate Kaniko cache layers for an app,
+ * then run Registry GC to reclaim disk space immediately instead of waiting 7 days.
+ */
+export async function pruneAppPlatformRegistryImages(
+  subdomain: string,
+  keepImageTags: string[],
+  clearBuildCache = true
+): Promise<void> {
+  try {
+    const registryBaseUrl = 'http://127.0.0.1:5000';
+    const keepSet = new Set(keepImageTags.filter(Boolean));
+    let deletedAny = false;
+
+    const deleteTagManifest = async (repoName: string, tag: string) => {
+      const manifestRes = await fetch(`${registryBaseUrl}/v2/${repoName}/manifests/${tag}`, {
+        headers: {
+          Accept:
+            'application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.manifest.v1+json, application/vnd.oci.image.index.v1+json',
+        },
+      }).catch(() => null);
+      const digest = manifestRes?.headers?.get('Docker-Content-Digest');
+      if (digest) {
+        const delRes = await fetch(`${registryBaseUrl}/v2/${repoName}/manifests/${digest}`, {
+          method: 'DELETE',
+        }).catch(() => null);
+        if (delRes && delRes.ok) deletedAny = true;
+      }
+    };
+
+    if (clearBuildCache) {
+      const cacheRepo = `${subdomain}-cache`;
+      const cacheTagsRes = await fetch(`${registryBaseUrl}/v2/${cacheRepo}/tags/list`).catch(() => null);
+      if (cacheTagsRes && cacheTagsRes.ok) {
+        const cacheTagList = (await cacheTagsRes.json()) as { tags?: string[] };
+        for (const tag of cacheTagList.tags || []) {
+          await deleteTagManifest(cacheRepo, tag);
+        }
+      }
+    }
+
+    const appTagsRes = await fetch(`${registryBaseUrl}/v2/${subdomain}/tags/list`).catch(() => null);
+    if (appTagsRes && appTagsRes.ok) {
+      const appTagList = (await appTagsRes.json()) as { tags?: string[] };
+      for (const tag of appTagList.tags || []) {
+        if (!keepSet.has(tag)) {
+          await deleteTagManifest(subdomain, tag);
+        }
+      }
+    }
+
+    if (deletedAny) {
+      await runRegistryGarbageCollect();
     }
   } catch {}
 }
@@ -2206,27 +2381,8 @@ export async function deleteAppPlatformResources(app: AppPlatformRecord): Promis
     }
   } catch {}
 
-  // 8. Clean up built images AND layer cache repos from in-cluster registry
-  try {
-    const registryBaseUrl = 'http://127.0.0.1:5000';
-    for (const repoName of [subdomain, `${subdomain}-cache`]) {
-      const tagListRes = await fetch(`${registryBaseUrl}/v2/${repoName}/tags/list`).catch(() => null);
-      if (tagListRes && tagListRes.ok) {
-        const tagList = await tagListRes.json() as { tags?: string[] };
-        for (const tag of (tagList.tags || [])) {
-          const manifestRes = await fetch(`${registryBaseUrl}/v2/${repoName}/manifests/${tag}`, {
-            headers: { 'Accept': 'application/vnd.docker.distribution.manifest.v2+json' },
-          }).catch(() => null);
-          const digest = manifestRes?.headers?.get('Docker-Content-Digest');
-          if (digest) {
-            await fetch(`${registryBaseUrl}/v2/${repoName}/manifests/${digest}`, { method: 'DELETE' }).catch(() => {});
-          }
-        }
-      }
-    }
-  } catch {
-    // Registry cleanup is best-effort, don't fail the delete
-  }
+  // 8. Clean up built images AND layer cache repos from in-cluster registry and run GC immediately
+  await pruneAppPlatformRegistryImages(subdomain, [], true).catch(() => {});
 
   // 8b. Clean up any lingering PR Preview Environments for this app
   try {

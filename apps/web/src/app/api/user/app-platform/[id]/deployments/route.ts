@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
-import { triggerAppPlatformBuild, trackAppPlatformBuildAsync } from "@/lib/k8s-app-platform";
+import {
+  triggerAppPlatformBuild,
+  trackAppPlatformBuildAsync,
+  pruneAppPlatformRegistryImages,
+} from "@/lib/k8s-app-platform";
 
 /**
  * GET /api/user/app-platform/[id]/deployments
@@ -143,7 +147,7 @@ export async function DELETE(
 
     const app = await prisma.appPlatformService.findUnique({
       where: { id: appId },
-      select: { id: true, userId: true },
+      select: { id: true, userId: true, subdomain: true },
     });
 
     if (!app) {
@@ -152,6 +156,15 @@ export async function DELETE(
     if (user.role !== "ADMIN" && app.userId !== user.id) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
+
+    const syncRegistryPrune = async () => {
+      const remainingDeps = await prisma.appPlatformDeployment.findMany({
+        where: { appId, imageTag: { not: null } },
+        select: { imageTag: true },
+      });
+      const keepTags = remainingDeps.map((d) => d.imageTag!).filter(Boolean);
+      pruneAppPlatformRegistryImages(app.subdomain, keepTags, true).catch(() => {});
+    };
 
     const deploymentIdParam = req.nextUrl.searchParams.get("deploymentId");
     const clearOld = req.nextUrl.searchParams.get("clearOld") === "true";
@@ -176,6 +189,8 @@ export async function DELETE(
         },
       });
 
+      await syncRegistryPrune();
+
       return NextResponse.json({
         success: true,
         message: `Cleaned up ${deleted.count} old deployment record(s).`,
@@ -196,6 +211,7 @@ export async function DELETE(
     }
 
     await prisma.appPlatformDeployment.delete({ where: { id: depId } });
+    await syncRegistryPrune();
 
     return NextResponse.json({
       success: true,
