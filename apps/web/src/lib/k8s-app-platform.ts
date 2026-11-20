@@ -1673,6 +1673,24 @@ export async function applyAppPlatformResources(
     },
   }));
 
+  const redirectMiddlewareManifest = {
+    apiVersion: 'traefik.io/v1alpha1',
+    kind: 'Middleware',
+    metadata: {
+      name: 'redirect-https',
+      namespace,
+      labels: {
+        'app.kubernetes.io/managed-by': 'masdika-app-platform',
+      },
+    },
+    spec: {
+      redirectScheme: {
+        scheme: 'https',
+        permanent: true,
+      },
+    },
+  };
+
   const ingressManifest: k8s.V1Ingress = {
     apiVersion: 'networking.k8s.io/v1',
     kind: 'Ingress',
@@ -1682,7 +1700,7 @@ export async function applyAppPlatformResources(
       annotations: {
         'cert-manager.io/cluster-issuer': 'letsencrypt-prod',
         'traefik.ingress.kubernetes.io/router.entrypoints': 'web,websecure',
-        'traefik.ingress.kubernetes.io/router.tls': 'true',
+        'traefik.ingress.kubernetes.io/router.middlewares': `${namespace}-redirect-https@kubernetescrd`,
       },
       labels: {
         app: app.subdomain,
@@ -1702,6 +1720,7 @@ export async function applyAppPlatformResources(
   };
 
   const manifestsYaml = [
+    k8s.dumpYaml(redirectMiddlewareManifest),
     k8s.dumpYaml(deploymentManifest),
     k8s.dumpYaml(serviceManifest),
     k8s.dumpYaml(ingressManifest),
