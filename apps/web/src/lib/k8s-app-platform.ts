@@ -369,8 +369,10 @@ export function generateDockerfileForFramework(
   const norm = (framework || 'DOCKERFILE').toUpperCase().trim();
   const phpHardeningLines = `RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" 2>/dev/null || true && \\
     printf "expose_php = Off\\ndisplay_errors = Off\\ndisplay_startup_errors = Off\\nlog_errors = On\\nallow_url_include = Off\\ncgi.fix_pathinfo = 0\\nsession.cookie_httponly = 1\\nsession.use_strict_mode = 1\\nsession.cookie_samesite = Lax\\n" > "$PHP_INI_DIR/conf.d/99-masdika-security.ini"
-RUN a2enmod rewrite headers && \\
+RUN a2enmod rewrite headers setenvif && \\
     printf '%s\\n' \\
+      'SetEnvIf X-Forwarded-Proto "^https$" HTTPS=on' \\
+      'SetEnvIf X-Forwarded-Proto "^https$" REQUEST_SCHEME=https' \\
       'ServerTokens Prod' \\
       'ServerSignature Off' \\
       'TraceEnable Off' \\
@@ -1446,6 +1448,7 @@ export async function applyAppPlatformResources(
     { name: 'NODE_ENV', value: 'production' },
     { name: 'APP_SUBDOMAIN', value: app.subdomain },
     { name: 'APP_DOMAIN', value: appHost },
+    { name: 'APP_URL', value: `https://${appHost}` },
   ];
 
   // Merge envs (user envs override defaults)
