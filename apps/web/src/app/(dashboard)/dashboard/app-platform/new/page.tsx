@@ -1582,19 +1582,40 @@ export default function NewAppPlatformPage() {
                       ))}
                     </div>
 
-                    <textarea
-                      rows={11}
-                      value={inlineDockerfile}
-                      onChange={(e) => setInlineDockerfile(e.target.value)}
-                      placeholder="FROM node:20-alpine..."
-                      spellCheck={false}
-                      className={cn(
-                        "w-full p-3.5 rounded-xl text-xs font-mono border leading-relaxed transition-colors focus:outline-none focus:border-cyan-400",
-                        isDark
-                          ? "bg-[#09090b] border-white/10 text-emerald-300 placeholder-zinc-600"
-                          : "bg-slate-900 border-slate-700 text-emerald-300"
-                      )}
-                    />
+                    <div className={cn(
+                      "rounded-2xl border overflow-hidden shadow-2xs transition-colors",
+                      isDark ? "bg-[#090d16] border-white/10" : "bg-white border-slate-200"
+                    )}>
+                      <div className={cn(
+                        "px-3.5 py-2 border-b flex items-center justify-between select-none",
+                        isDark ? "bg-[#14161f] border-white/[0.08]" : "bg-slate-50/90 border-slate-200"
+                      )}>
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f56] inline-block" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e] inline-block" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#27c93f] inline-block" />
+                          <span className={cn("text-[11px] font-mono font-bold ml-1.5", isDark ? "text-zinc-300" : "text-slate-700")}>
+                            Dockerfile
+                          </span>
+                        </div>
+                        <span className={cn("text-[10px] font-mono", isDark ? "text-zinc-500" : "text-slate-400")}>
+                          custom-container
+                        </span>
+                      </div>
+                      <textarea
+                        rows={11}
+                        value={inlineDockerfile}
+                        onChange={(e) => setInlineDockerfile(e.target.value)}
+                        placeholder="FROM node:20-alpine..."
+                        spellCheck={false}
+                        className={cn(
+                          "w-full p-3.5 text-xs font-mono leading-relaxed transition-colors focus:outline-none resize-y",
+                          isDark
+                            ? "bg-[#090d16] text-emerald-300 placeholder-zinc-600"
+                            : "bg-white text-slate-800 placeholder-slate-400"
+                        )}
+                      />
+                    </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
