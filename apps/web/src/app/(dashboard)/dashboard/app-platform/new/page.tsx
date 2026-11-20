@@ -441,6 +441,8 @@ export default function NewAppPlatformPage() {
   const [envVars, setEnvVars] = useState("");
   const [subdomain, setSubdomain] = useState("");
   const [mounted, setMounted] = useState(false);
+  const [detectingRepo, setDetectingRepo] = useState(false);
+  const [detectedBadge, setDetectedBadge] = useState<string | null>(null);
 
   // Framework UI Navigation (Category, Search, Pagination)
   const [frameworkCategory, setFrameworkCategory] = useState<string>("ALL");
@@ -616,15 +618,65 @@ export default function NewAppPlatformPage() {
   };
 
   // Quick Preset Selector
-  const handleApplyPreset = (preset: (typeof QUICK_STARTERS)[0]) => {
+  const handleApplyPreset = (preset: (typeof QUICK_STARTERS)[number]) => {
     setGitUrl(preset.gitUrl);
     setBranch(preset.branch);
+    setBuildMode("AUTO");
     handleFrameworkChange(preset.framework);
     if (!name) {
       setName(preset.name);
       setSubdomain(generateAutoSubdomain(preset.name));
     }
     toast.success(`Loaded ${preset.name} template`);
+  };
+
+  const handleAutoDetectRepo = async (overrideUrl?: string) => {
+    const targetUrl = (overrideUrl ?? gitUrl).trim();
+    if (!targetUrl) {
+      toast.error("Please enter a Git repository URL first");
+      return;
+    }
+    setDetectingRepo(true);
+    setDetectedBadge(null);
+    try {
+      const res = await fetch("/api/user/app-platform/detect-repo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          gitUrl: targetUrl,
+          branch: branch.trim() || undefined,
+          gitToken: isPrivateRepo ? gitToken.trim() : undefined,
+        }),
+      });
+      const json = await res.json();
+      if (res.ok && json.success && json.detected) {
+        const d = json.detected;
+        if (d.defaultBranch) setBranch(d.defaultBranch);
+        if (d.hasDockerfile) {
+          setBuildMode("DOCKERFILE");
+          setDockerfileSource("REPO");
+          setBuildType("DOCKERFILE");
+          setDockerfilePath("Dockerfile");
+          if (d.defaultPort) setAppPort(d.defaultPort);
+          setDetectedBadge(d.detectedLabel || "Dockerfile Detected");
+          toast.success(`Auto-detected: ${d.detectedLabel || "Dockerfile"}`);
+        } else if (d.detectedFramework && d.detectedFramework !== "DOCKERFILE") {
+          setBuildMode("AUTO");
+          handleFrameworkChange(d.detectedFramework);
+          if (d.defaultPort) setAppPort(d.defaultPort);
+          setDetectedBadge(d.detectedLabel || d.detectedFramework);
+          toast.success(`Auto-detected language/framework: ${d.detectedLabel || d.detectedFramework}`);
+        } else {
+          toast.info(d.message || "Could not auto-detect stack. You can choose Dockerfile or Preset manually.");
+        }
+      } else {
+        toast.error(json.error || "Failed to inspect repository");
+      }
+    } catch {
+      toast.error("Failed to inspect repository");
+    } finally {
+      setDetectingRepo(false);
+    }
   };
 
   // Commitment & Cost Calculations
@@ -877,15 +929,23 @@ export default function NewAppPlatformPage() {
 
             <div className="space-y-4 pt-1">
               <div>
-                <label
-                  className={cn(
-                    "block text-xs font-bold uppercase tracking-wider mb-2",
-                    isDark ? "text-zinc-300" : "text-slate-700"
+                <div className="flex items-center justify-between mb-2">
+                  <label
+                    className={cn(
+                      "block text-xs font-bold uppercase tracking-wider",
+                      isDark ? "text-zinc-300" : "text-slate-700"
+                    )}
+                  >
+                    Repository URL <span className="text-rose-400">*</span>
+                  </label>
+                  {detectedBadge && (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                      <Sparkles className="w-3 h-3" />
+                      Detected: {detectedBadge}
+                    </span>
                   )}
-                >
-                  Repository URL <span className="text-rose-400">*</span>
-                </label>
-                <div className="relative">
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="url"
                     required
@@ -893,12 +953,26 @@ export default function NewAppPlatformPage() {
                     onChange={(e) => setGitUrl(e.target.value)}
                     placeholder="https://github.com/username/repository.git"
                     className={cn(
-                      "w-full px-4 py-2.5 rounded-xl text-sm border font-mono transition-colors focus:outline-none focus:border-cyan-400",
+                      "flex-1 px-4 py-2.5 rounded-xl text-sm border font-mono transition-colors focus:outline-none focus:border-cyan-400",
                       isDark
                         ? "bg-black/30 border-white/10 text-white placeholder-zinc-500"
                         : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400"
                     )}
                   />
+                  <button
+                    type="button"
+                    disabled={detectingRepo || !gitUrl.trim()}
+                    onClick={() => handleAutoDetectRepo()}
+                    className={cn(
+                      "px-4 py-2.5 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-50",
+                      isDark
+                        ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20"
+                        : "bg-cyan-50 border-cyan-200 text-cyan-700 hover:bg-cyan-100"
+                    )}
+                  >
+                    <Sparkles className={cn("w-3.5 h-3.5", detectingRepo && "animate-spin")} />
+                    <span>{detectingRepo ? "Detecting..." : "Auto-Detect Stack"}</span>
+                  </button>
                 </div>
                 <p className="text-[11px] text-zinc-500 mt-1.5">
                   Public or private HTTPS repositories on GitHub, GitLab, Bitbucket, or Gitea.
