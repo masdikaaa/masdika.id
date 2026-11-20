@@ -325,18 +325,23 @@ CMD ["npm", "start"]`,
   {
     label: "PHP / Laravel",
     port: 80,
-    content: `FROM php:8.2-apache
+    content: `FROM composer:2 AS vendor
+WORKDIR /app
+COPY . /app
+RUN if [ -f composer.json ]; then composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-scripts --ignore-platform-reqs || true; composer dump-autoload --optimize --no-dev --no-scripts --ignore-platform-reqs || true; fi
+
+FROM node:20-alpine AS frontend
+WORKDIR /app
+COPY --from=vendor /app /app
+RUN if [ -f package.json ]; then (npm ci || npm install || true) && (npm run build || true); fi
+
+FROM php:8.2-apache
 WORKDIR /var/www/html
-ENV COMPOSER_ALLOW_SUPERUSER=1
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-COPY . /var/www/html/
-RUN if [ -f composer.json ]; then composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --ignore-platform-reqs; fi
-RUN if [ ! -f .env ] && [ -f .env.example ]; then cp .env.example .env && php artisan key:generate || true; fi
-RUN mkdir -p storage bootstrap/cache && chown -R www-data:www-data storage bootstrap/cache && chmod -R 775 storage bootstrap/cache || true
-RUN a2enmod rewrite
-ENV APACHE_DOCUMENT_ROOT /var/www/html/public
-RUN sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/*.conf
-RUN sed -ri -e 's!/var/www/!/var/www/html/public!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+RUN docker-php-ext-install pdo pdo_mysql bcmath opcache
+COPY --from=frontend /app /var/www/html/
+RUN ([ ! -f .env ] && [ -f .env.example ] && cp .env.example .env || true) && php artisan key:generate --force || true && mkdir -p database storage bootstrap/cache && touch database/database.sqlite && php artisan migrate --force || true && chown -R www-data:www-data storage bootstrap/cache database && chmod -R 775 storage bootstrap/cache database || true
+RUN a2enmod rewrite && sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/*.conf && sed -ri -e 's!/var/www/!/var/www/html/public!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 EXPOSE 80
 CMD ["apache2-foreground"]`,
   },
@@ -1441,9 +1446,6 @@ export default function NewAppPlatformPage() {
                 type="button"
                 onClick={() => {
                   setBuildMode("BUILDPACK");
-                  if (buildType === "DOCKERFILE") {
-                    handleFrameworkChange("NODEJS");
-                  }
                 }}
                 className={cn(
                   "p-4 rounded-xl border text-left transition-all cursor-pointer relative",
@@ -1652,7 +1654,7 @@ export default function NewAppPlatformPage() {
                   <div className="flex items-center gap-2">
                     <Boxes className="w-4 h-4 text-purple-400" />
                     <span className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>
-                      Paketo Cloud Native Buildpacks (builder-jammy-full)
+                      Cloud Buildpack Auto-Detector (Zero-Apt Multi-Stage)
                     </span>
                   </div>
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/15 text-purple-400 border border-purple-500/30">
@@ -1660,7 +1662,7 @@ export default function NewAppPlatformPage() {
                   </span>
                 </div>
                 <p className="text-[11px] text-zinc-400 leading-relaxed">
-                  Paketo CNB lifecycle automatically inspects your repository, detects Node.js, Python, Go, PHP, Ruby, Java, or .NET, installs dependencies, and exports an optimized OCI container image directly to the cluster registry without any Dockerfile.
+                  Automatically inspects your repository stack (Laravel, PHP, Node.js/Next.js, Python, Go, Rust, Static HTML) and builds an optimized zero-apt-get multi-stage container image without needing any Dockerfile.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                   <div>

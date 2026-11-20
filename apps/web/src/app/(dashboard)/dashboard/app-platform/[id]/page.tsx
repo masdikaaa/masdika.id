@@ -1375,7 +1375,7 @@ export default function AppPlatformDetailPage({
                 isDark ? "border-white/10 text-zinc-200" : "border-slate-300 text-slate-800"
               )}>
                 <FileText className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
-                <span className="truncate">{app?.buildMode === "BUILDPACK" ? "paketo-buildpack.log" : "kaniko-build.log"}</span>
+                <span className="truncate">{app?.buildMode === "BUILDPACK" ? "buildpack-kaniko.log" : "kaniko-build.log"}</span>
                 <span className={cn(
                   "hidden sm:inline-block text-[10px] px-2 py-0.5 rounded-md font-mono font-medium border shrink-0",
                   isDark ? "bg-white/5 border-white/10 text-zinc-400" : "bg-white border-slate-200 text-slate-600 shadow-2xs"
