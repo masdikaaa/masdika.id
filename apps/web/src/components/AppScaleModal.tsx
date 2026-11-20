@@ -38,6 +38,7 @@ interface AppScaleModalProps {
     hourlyRate: number;
     status: string;
   };
+  apiEndpoint?: string;
   onSuccess: () => void;
   isDark: boolean;
 }
@@ -46,6 +47,7 @@ export function AppScaleModal({
   isOpen,
   onClose,
   app,
+  apiEndpoint,
   onSuccess,
   isDark,
 }: AppScaleModalProps) {
@@ -154,7 +156,8 @@ export function AppScaleModal({
     );
 
     try {
-      const res = await fetch(`/api/user/apps/${app.id}/upgrade`, {
+      const targetUrl = apiEndpoint || `/api/user/apps/${app.id}/upgrade`;
+      const res = await fetch(targetUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

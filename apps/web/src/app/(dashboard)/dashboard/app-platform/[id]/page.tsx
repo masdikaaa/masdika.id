@@ -34,7 +34,9 @@ import {
   History,
   Webhook,
   Undo2,
+  TrendingUp,
 } from "lucide-react";
+import { AppScaleModal } from "@/components/AppScaleModal";
 import {
   AreaChart,
   Area,
@@ -153,6 +155,7 @@ export default function AppPlatformDetailPage({
 
   // Power actions & modal state
   const [actionLoading, setActionLoading] = useState(false);
+  const [showScaleModal, setShowScaleModal] = useState(false);
   const [confirmModal, setConfirmModal] = useState<{
     action: "start" | "stop" | "restart" | "rebuild" | "delete" | "delete-deployment" | "clear-old-deployments";
     deploymentId?: number;
@@ -720,6 +723,20 @@ export default function AppPlatformDetailPage({
             </a>
 
             {/* Rebuild Trigger */}
+            {/* Scale Compute Button (Managed App Style) */}
+            <button
+              type="button"
+              onClick={() => setShowScaleModal(true)}
+              className={cn(
+                "px-3 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer",
+                isDark ? "border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10" : "border-cyan-300 text-cyan-700 hover:bg-cyan-50"
+              )}
+              title="Scale Compute (Zero Data Loss)"
+            >
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span>Scale</span>
+            </button>
+
             <button
               onClick={() => setConfirmModal({ action: "rebuild" })}
               disabled={actionLoading}
@@ -2237,54 +2254,6 @@ export default function AppPlatformDetailPage({
             </div>
           </div>
 
-          {/* CARD: UPGRADE / RESIZE COMPUTE TIER */}
-          <div className={cn(
-            "rounded-2xl border p-5 sm:p-6 space-y-4 transition-all shadow-2xs",
-            isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
-          )}>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-white/[0.06]">
-              <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                <Cpu className="w-4 h-4 shrink-0" />
-                <span>Compute Tier &amp; Plan Scaling (Zero Data Loss)</span>
-              </h3>
-              <span className={cn(
-                "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border",
-                isDark ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200"
-              )}>
-                Current: {app?.planName} ({app?.cpuShares} vCPU / {app?.memoryMb} MB)
-              </span>
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
-              <div className="flex-1">
-                <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
-                  Select Target Compute Plan
-                </label>
-                <Select
-                  value={upgradePlanCode}
-                  onChange={(val) => setUpgradePlanCode(String(val))}
-                  className="h-[42px] px-3.5 py-0 text-xs font-mono"
-                  options={OFFICIAL_APP_PLATFORM_PLANS.map((p) => ({
-                    value: p.planCode,
-                    label: `${p.planCode} — ${p.cpuShares} vCPU • ${p.memoryMb >= 1024 ? `${p.memoryMb / 1024} GB` : `${p.memoryMb} MB`} RAM • Rp ${p.monthlyPrice.toLocaleString("id-ID")}/mo`,
-                  }))}
-                />
-              </div>
-
-              <button
-                type="button"
-                disabled={upgradingPlan || upgradePlanCode === app?.planName || app?.status === "BUILDING" || app?.status === "PROVISIONING"}
-                onClick={handleUpgradePlan}
-                className="h-[42px] px-5 rounded-xl font-bold text-xs bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all shadow-md shadow-cyan-400/20 cursor-pointer disabled:opacity-40 shrink-0"
-              >
-                {upgradingPlan ? "Resizing..." : "Apply Plan Resize"}
-              </button>
-            </div>
-            <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>
-              Scaling CPU &amp; RAM reuses your existing container image and keeps your Persistent Volume storage completely intact.
-            </p>
-          </div>
-
           {/* CARD 3: CONTAINER ENVIRONMENT VARIABLES */}
           <div className={cn(
             "rounded-2xl border p-5 sm:p-6 space-y-4 transition-all shadow-2xs",
@@ -2344,6 +2313,28 @@ export default function AppPlatformDetailPage({
             </button>
           </div>
         </form>
+      )}
+
+      {/* Zero Data Loss Scaling Modal (Managed App Style) */}
+      {showScaleModal && app && (
+        <AppScaleModal
+          isOpen={showScaleModal}
+          onClose={() => setShowScaleModal(false)}
+          app={{
+            id: app.id,
+            name: app.name,
+            appType: app.buildType || "APP",
+            planName: app.planName,
+            cpuShares: app.cpuShares,
+            memoryMb: app.memoryMb,
+            monthlyPrice: app.monthlyPrice,
+            hourlyRate: app.hourlyRate,
+            status: app.status,
+          }}
+          apiEndpoint={`/api/user/app-platform/${app.id}/upgrade`}
+          onSuccess={fetchAppDetail}
+          isDark={isDark}
+        />
       )}
 
       {/* Confirmation Modal */}

@@ -23,7 +23,9 @@ import {
   Cpu,
   Layers,
   Terminal,
+  TrendingUp,
 } from "lucide-react";
+import { AppScaleModal } from "@/components/AppScaleModal";
 import {
   SiNodedotjs,
   SiPython,
@@ -101,6 +103,7 @@ export default function AppPlatformPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState<number | null>(null);
+  const [scalingApp, setScalingApp] = useState<any | null>(null);
   const [confirmModal, setConfirmModal] = useState<{
     appId: number;
     action: "start" | "stop" | "restart" | "delete";
@@ -551,6 +554,20 @@ export default function AppPlatformPage() {
                   </div>
 
                   <div className="flex items-center gap-1.5">
+                    {/* Scale Button (Managed App Style) */}
+                    <button
+                      type="button"
+                      onClick={() => setScalingApp(app)}
+                      className={cn(
+                        "px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-all flex items-center gap-1 cursor-pointer",
+                        isDark ? "border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10" : "border-cyan-300 text-cyan-700 hover:bg-cyan-50"
+                      )}
+                      title="Scale Compute"
+                    >
+                      <TrendingUp className="w-3.5 h-3.5" />
+                      <span>Scale</span>
+                    </button>
+
                     {/* Power Controls */}
                     {isRunning && (
                       <>
@@ -597,6 +614,28 @@ export default function AppPlatformPage() {
             );
           })}
         </div>
+      )}
+
+      {/* Zero Data Loss Scaling Modal (Managed App Style) */}
+      {scalingApp && (
+        <AppScaleModal
+          isOpen={!!scalingApp}
+          onClose={() => setScalingApp(null)}
+          app={{
+            id: scalingApp.id,
+            name: scalingApp.name,
+            appType: scalingApp.buildType || "APP",
+            planName: scalingApp.planName,
+            cpuShares: scalingApp.cpuShares,
+            memoryMb: scalingApp.memoryMb,
+            monthlyPrice: scalingApp.monthlyPrice,
+            hourlyRate: scalingApp.hourlyRate,
+            status: scalingApp.status,
+          }}
+          apiEndpoint={`/api/user/app-platform/${scalingApp.id}/upgrade`}
+          onSuccess={fetchApps}
+          isDark={isDark}
+        />
       )}
 
       {/* Confirmation Modal */}
