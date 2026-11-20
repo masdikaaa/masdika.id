@@ -647,6 +647,21 @@ export async function ensureAppPlatformRegistry(): Promise<void> {
   }
 
   const registryYaml = `
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: app-platform-registry-pvc
+  namespace: ${namespace}
+  labels:
+    app: app-platform-registry
+    app.kubernetes.io/managed-by: masdika-app-platform
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -657,6 +672,8 @@ metadata:
     app.kubernetes.io/managed-by: masdika-app-platform
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: app-platform-registry
@@ -677,6 +694,38 @@ spec:
         env:
         - name: REGISTRY_HTTP_ADDR
           value: "0.0.0.0:5000"
+        - name: REGISTRY_STORAGE_DELETE_ENABLED
+          value: "true"
+        volumeMounts:
+        - name: registry-data
+          mountPath: /var/lib/registry
+        livenessProbe:
+          httpGet:
+            path: /v2/
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 15
+          timeoutSeconds: 3
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /v2/
+            port: 5000
+          initialDelaySeconds: 3
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 2
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+      volumes:
+      - name: registry-data
+        persistentVolumeClaim:
+          claimName: app-platform-registry-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -1450,6 +1499,27 @@ export async function deleteAppPlatformResources(app: AppPlatformRecord): Promis
   try {
     await (coreApi as any).deleteNamespacedSecret({ name: `tls-${app.subdomain}`, namespace });
   } catch {}
+
+  // Clean up built images from in-cluster registry to free PVC storage
+  try {
+    const registryBaseUrl = 'http://127.0.0.1:5000';
+    const tagListRes = await fetch(`${registryBaseUrl}/v2/${app.subdomain}/tags/list`);
+    if (tagListRes.ok) {
+      const tagList = await tagListRes.json() as { tags?: string[] };
+      for (const tag of (tagList.tags || [])) {
+        // Get manifest digest
+        const manifestRes = await fetch(`${registryBaseUrl}/v2/${app.subdomain}/manifests/${tag}`, {
+          headers: { 'Accept': 'application/vnd.docker.distribution.manifest.v2+json' },
+        });
+        const digest = manifestRes.headers.get('Docker-Content-Digest');
+        if (digest) {
+          await fetch(`${registryBaseUrl}/v2/${app.subdomain}/manifests/${digest}`, { method: 'DELETE' }).catch(() => {});
+        }
+      }
+    }
+  } catch {
+    // Registry cleanup is best-effort, don't fail the delete
+  }
 
   releaseReservedAppPlatformPort(app.port);
 }
