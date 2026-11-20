@@ -428,7 +428,7 @@ export default function AppPlatformPage() {
         </div>
       ) : (
         /* Applications Grid */
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {apps.map((app) => {
             const isSuspended = app.status === "SUSPENDED";
             const isRunning = app.status === "RUNNING";
@@ -441,8 +441,10 @@ export default function AppPlatformPage() {
               <div
                 key={app.id}
                 className={cn(
-                  "rounded-2xl border p-5 transition-all relative flex flex-col justify-between group",
-                  isDark ? "bg-[#111115] border-white/[0.08] hover:border-cyan-500/30" : "bg-white border-slate-200/90 hover:border-cyan-500/30 shadow-2xs"
+                  "rounded-2xl border p-5 transition-all relative flex flex-col justify-between group shadow-2xs",
+                  isDark
+                    ? "bg-[#111115] border-white/[0.08] hover:border-cyan-500/30"
+                    : "bg-white border-slate-200/90 hover:border-slate-300"
                 )}
               >
                 <div>
@@ -456,39 +458,47 @@ export default function AppPlatformPage() {
                         <FwIcon className={cn("w-6 h-6", fwMeta.color)} />
                       </div>
                       <div className="min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <Link
-                            href={`/dashboard/app-platform/${app.id}`}
-                            className={cn("text-base font-bold truncate hover:underline hover:text-cyan-400 transition-colors", isDark ? "text-white" : "text-slate-900")}
-                          >
-                            {app.name}
-                          </Link>
-                          <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-md border", isDark ? "bg-white/5 border-white/10 text-zinc-300" : "bg-slate-100 border-slate-200 text-slate-700")}>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className={cn(
+                            "text-[10px] font-bold px-2 py-0.5 rounded-md border",
+                            isDark ? "bg-cyan-500/15 border-cyan-500/30 text-cyan-300" : "bg-cyan-50 border-cyan-200 text-cyan-700"
+                          )}>
                             {app.buildType}
                           </span>
                         </div>
-                        <div className="flex items-center gap-1.5 text-xs text-zinc-400 mt-0.5 truncate">
-                          <GitBranch className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                          <span className="truncate">{app.gitUrl}</span>
-                          <span className="text-zinc-500">({app.branch})</span>
+                        <Link
+                          href={`/dashboard/app-platform/${app.id}`}
+                          className={cn(
+                            "block text-sm sm:text-base font-bold tracking-tight truncate mt-1 hover:underline transition-colors",
+                            isDark ? "text-white hover:text-cyan-400" : "text-slate-900 hover:text-cyan-700"
+                          )}
+                        >
+                          {app.name}
+                        </Link>
+                        <div className={cn("flex items-center gap-1 text-[11px] mt-0.5 truncate", isDark ? "text-zinc-400" : "text-slate-500")}>
+                          <GitBranch className="w-3 h-3 text-cyan-500 shrink-0" />
+                          <span className="truncate">{app.gitUrl.replace(/^https?:\/\/(www\.)?/, "").replace(/\.git$/, "")}</span>
+                          <span className="shrink-0">({app.branch})</span>
                         </div>
                       </div>
                     </div>
-                    {getStatusBadge(app.status, app.lastBuildStatus)}
+                    <div className="shrink-0">
+                      {getStatusBadge(app.status, app.lastBuildStatus)}
+                    </div>
                   </div>
 
                   {/* Public HTTPS URL Link */}
                   <div className={cn(
-                    "p-3 rounded-xl border mb-4 flex items-center justify-between gap-2",
-                    isDark ? "bg-white/[0.02] border-white/[0.06]" : "bg-slate-50 border-slate-200/70"
+                    "p-2.5 rounded-xl border mb-3 flex items-center justify-between gap-2",
+                    isDark ? "bg-white/[0.02] border-white/[0.06]" : "bg-slate-50 border-slate-200"
                   )}>
                     <div className="min-w-0 flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
+                      <Globe className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
                       <a
                         href={app.httpsUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className={cn("text-xs font-mono font-medium truncate hover:text-cyan-400 transition-colors", isDark ? "text-zinc-200" : "text-slate-800")}
+                        className={cn("text-[11px] font-mono font-medium truncate hover:text-cyan-400 transition-colors", isDark ? "text-zinc-200" : "text-slate-800")}
                       >
                         {app.fullDomain}
                       </a>
@@ -497,38 +507,46 @@ export default function AppPlatformPage() {
                       href={app.httpsUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="p-1.5 rounded-lg border text-zinc-400 hover:text-cyan-400 transition-colors shrink-0 bg-white/5 border-white/10"
+                      className={cn(
+                        "p-1.5 rounded-lg border transition-colors shrink-0",
+                        isDark
+                          ? "bg-white/5 border-white/10 text-zinc-400 hover:text-cyan-400"
+                          : "bg-white border-slate-200 text-slate-500 hover:text-cyan-700"
+                      )}
                       title="Open in new tab"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
                     </a>
                   </div>
 
-                  {/* Spec Chips */}
-                  <div className="grid grid-cols-3 gap-2 mb-4 text-xs font-medium">
-                    <div className={cn("p-2 rounded-xl border text-center", isDark ? "bg-white/[0.02] border-white/[0.06] text-zinc-300" : "bg-slate-50 border-slate-200/70 text-slate-700")}>
-                      <span className="text-[10px] uppercase font-bold text-zinc-500 block">CPU</span>
-                      <span>{app.cpuShares} vCPU</span>
+                  {/* Spec Chips (Managed App Style) */}
+                  <div className="grid grid-cols-2 gap-2 text-xs mb-4">
+                    <div className={cn("p-2 rounded-lg border", isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200")}>
+                      <span className={cn("text-[10px] font-bold uppercase tracking-wider block", isDark ? "text-zinc-500" : "text-slate-400")}>Compute</span>
+                      <span className={cn("font-semibold text-[11px] whitespace-nowrap", isDark ? "text-zinc-200" : "text-slate-800")}>
+                        {app.cpuShares} vCPU • {app.memoryMb >= 1024 ? `${app.memoryMb / 1024} GB` : `${app.memoryMb} MB`}
+                      </span>
                     </div>
-                    <div className={cn("p-2 rounded-xl border text-center", isDark ? "bg-white/[0.02] border-white/[0.06] text-zinc-300" : "bg-slate-50 border-slate-200/70 text-slate-700")}>
-                      <span className="text-[10px] uppercase font-bold text-zinc-500 block">RAM</span>
-                      <span>{app.memoryMb} MB</span>
-                    </div>
-                    <div className={cn("p-2 rounded-xl border text-center", isDark ? "bg-white/[0.02] border-white/[0.06] text-zinc-300" : "bg-slate-50 border-slate-200/70 text-slate-700")}>
-                      <span className="text-[10px] uppercase font-bold text-zinc-500 block">SSD</span>
-                      <span>{app.storageGb} GB</span>
+                    <div className={cn("p-2 rounded-lg border", isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200")}>
+                      <span className={cn("text-[10px] font-bold uppercase tracking-wider block", isDark ? "text-zinc-500" : "text-slate-400")}>Storage</span>
+                      <span className={cn("font-semibold text-[11px] whitespace-nowrap", isDark ? "text-zinc-200" : "text-slate-800")}>
+                        {app.storageGb || 10} GB SSD
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 {/* Bottom Action Footer */}
-                <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between gap-3">
+                <div className={cn("pt-3 border-t flex items-center justify-between gap-2", isDark ? "border-white/[0.06]" : "border-slate-100")}>
                   <div className="text-xs">
-                    <span className="font-bold text-cyan-400">
-                      {app.billingMode === "MONTHLY" ? `${formatRupiah(app.monthlyPrice)}/mo` : `${formatRupiah(app.hourlyRate)}/hr`}
+                    <span className={cn("text-[10px] block", isDark ? "text-zinc-500" : "text-slate-500")}>
+                      {app.billingMode === "MONTHLY" ? "Commitment" : "Pay-As-You-Go"}
                     </span>
-                    <span className="text-zinc-500 text-[10px] ml-1.5 uppercase font-semibold">
-                      ({app.billingMode})
+                    <span className={cn("font-mono font-bold text-xs sm:text-sm", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                      {app.billingMode === "MONTHLY" ? formatRupiah(app.monthlyPrice) : formatRupiah(app.hourlyRate)}
+                      <span className={cn("text-[10px] font-normal", isDark ? "text-zinc-500" : "text-slate-500")}>
+                        {app.billingMode === "MONTHLY" ? "/mo" : "/hr"}
+                      </span>
                     </span>
                   </div>
 
