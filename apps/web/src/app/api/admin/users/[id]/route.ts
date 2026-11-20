@@ -45,6 +45,7 @@ export async function GET(req: Request, props: { params: Promise<{ id: string }>
         kubernetesClusters: true,
         databaseServices: true,
         appServices: true,
+        appPlatformServices: true,
         objectStorageServices: true,
       }
     });
@@ -241,6 +242,17 @@ export async function DELETE(req: Request, props: { params: Promise<{ id: string
     await prisma.ticketMessage.deleteMany({ where: { userId: user.id } }); // Delete any messages they sent on other tickets
 
     // Remaining Services & AI Gateway cleanup
+    const userAppPlatforms = await prisma.appPlatformService.findMany({ where: { userId: user.id } });
+    for (const ap of userAppPlatforms) {
+      try {
+        const { deleteAppPlatformResources } = await import('@/lib/k8s-app-platform');
+        await deleteAppPlatformResources(ap as any);
+      } catch (err) {
+        console.warn(`[K8s-Cleanup] Failed to delete app-platform ${ap.id} during user deletion:`, err);
+      }
+    }
+    await prisma.appPlatformService.deleteMany({ where: { userId: user.id } });
+
     await prisma.vpcNetwork.deleteMany({ where: { userId: user.id } });
     await prisma.kubernetesCluster.deleteMany({ where: { userId: user.id } });
     await prisma.databaseService.deleteMany({ where: { userId: user.id } });

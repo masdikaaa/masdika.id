@@ -17,6 +17,7 @@ import {
   HardDrive,
   Gift,
   Box,
+  Globe,
   Sparkles,
 } from 'lucide-react';
 import { SiKubernetes } from 'react-icons/si';
@@ -53,6 +54,9 @@ export function getInvoiceServiceIcon(serviceOrInvoice?: any, className = "w-4 h
     if (t === 'MANAGED_APP') {
       return <Box className={cn(className, "text-cyan-400")} />;
     }
+    if (t === 'APP_PLATFORM') {
+      return <Globe className={cn(className, "text-cyan-400")} />;
+    }
     if (t === 'MANAGED_DATABASE') {
       return <Database className={cn(className, "text-cyan-400")} />;
     }
@@ -84,6 +88,9 @@ function getServiceIconByString(s: string, className = "w-4 h-4 shrink-0") {
   }
   if (s.includes('MANAGED_APP') || s.includes('APPS')) {
     return <Box className={cn(className, "text-cyan-400")} />;
+  }
+  if (s.includes('APP_PLATFORM')) {
+    return <Globe className={cn(className, "text-cyan-400")} />;
   }
   if (s.includes('STORAGE') || s.includes('CDN')) {
     return <UploadCloud className={cn(className, "text-cyan-400")} />;

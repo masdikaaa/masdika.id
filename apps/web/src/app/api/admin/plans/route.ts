@@ -3,11 +3,13 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
 import { ensureDatabasePlansExist } from "@/lib/database-plans-server";
 import { ensureAppPlansExist } from "@/lib/app-plans-server";
+import { ensureAppPlatformPlansExist } from "@/lib/app-platform-plans-server";
 import { ensureObjectStoragePlansExist } from "@/lib/object-storage-plans-server";
 
 export const VALID_SERVICES = [
   'DATABASE',
   'APP',
+  'APP_PLATFORM',
   'OBJECT_STORAGE',
   'CDN',
 ] as const;
@@ -17,10 +19,11 @@ export async function GET(req: NextRequest) {
     const auth = await requireAuth({ allowedRoles: ['ADMIN'] });
     if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
-    // Ensure all managed database, managed app & object storage plans exist
+    // Ensure all managed database, managed app, app platform & object storage plans exist
     await Promise.all([
       ensureDatabasePlansExist(),
       ensureAppPlansExist(),
+      ensureAppPlatformPlansExist(),
       ensureObjectStoragePlansExist(),
     ]);
 

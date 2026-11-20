@@ -57,6 +57,7 @@ export async function POST(req: NextRequest) {
       database: prisma.databaseService,
       apps: prisma.appService,
       app: prisma.appService,
+      'app-platform': prisma.appPlatformService,
       'object-storage': prisma.objectStorageService,
     };
     const model = modelMap[String(type)];

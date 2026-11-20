@@ -8,7 +8,7 @@ import {
   Plus, Edit2, Trash2, Server, Zap, Database, Boxes, Check, X, ShieldAlert,
   CheckCircle, FileText, FileVideo, Music, PlaySquare, Cloud, Activity,
   UploadCloud, RefreshCw, LayoutDashboard, Search, LayoutGrid, Table as TableIcon,
-  HardDrive, Cpu, Layers, Sparkles, SlidersHorizontal, ArrowUpDown, MapPin
+  HardDrive, Cpu, Layers, Sparkles, SlidersHorizontal, ArrowUpDown, MapPin, Globe
 } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { formatRupiah } from "@/lib/billing";
@@ -32,6 +32,7 @@ const VALID_SERVICES = [
   "ALL",
   "DATABASE",
   "APP",
+  "APP_PLATFORM",
   "OBJECT_STORAGE",
   "CDN",
 ] as const;
@@ -40,6 +41,7 @@ const SERVICE_LABELS: Record<string, string> = {
   ALL: "All Services",
   DATABASE: "Managed Database",
   APP: "Managed Apps",
+  APP_PLATFORM: "App Platform",
   OBJECT_STORAGE: "Object Storage (S3)",
   CDN: "File CDN",
 };
@@ -249,7 +251,7 @@ export default function AdminPlansPage() {
           shared: parsed.shared !== undefined ? Boolean(parsed.shared) : true,
           engines: Array.isArray(parsed.engines) ? parsed.engines : ["MySQL", "MariaDB", "PostgreSQL", "MongoDB"]
         });
-      } else if (plan.service === "APP") {
+      } else if (plan.service === "APP" || plan.service === "APP_PLATFORM") {
         setAppLimits({
           cpu: parsed.cpu || "1 CPU",
           ram: parsed.ram || "1.0 GB RAM",
@@ -314,7 +316,7 @@ export default function AdminPlansPage() {
       limitsJsonString = JSON.stringify(customObj);
     } else if (formData.service === "DATABASE") {
       limitsJsonString = JSON.stringify(dbLimits);
-    } else if (formData.service === "APP") {
+    } else if (formData.service === "APP" || formData.service === "APP_PLATFORM") {
       const cpuVal = parseFloat(appLimits.cpu) || 1.0;
       const ramVal = appLimits.ram.toUpperCase().includes("MB")
         ? parseInt(appLimits.ram, 10)
@@ -455,6 +457,7 @@ export default function AdminPlansPage() {
     switch (service) {
       case "DATABASE": return <Database className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />;
       case "APP": return <Boxes className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />;
+      case "APP_PLATFORM": return <Globe className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />;
       case "OBJECT_STORAGE": return <HardDrive className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />;
       case "CDN": return <UploadCloud className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />;
       case "TIKTOK": return <FileVideo className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-600")} />;
@@ -532,7 +535,7 @@ export default function AdminPlansPage() {
         );
       }
 
-      if (plan.service === "APP") {
+      if (plan.service === "APP" || plan.service === "APP_PLATFORM") {
         return (
           <div className="flex flex-wrap items-center gap-1.5 max-w-[340px]">
             {parsed.cpu && (
@@ -1158,6 +1161,7 @@ export default function AdminPlansPage() {
                     options={[
                       { value: "DATABASE", label: "Managed Database (Kubernetes)" },
                       { value: "APP", label: "Managed Apps (Kubernetes)" },
+                      { value: "APP_PLATFORM", label: "App Platform (Git PaaS)" },
                       { value: "OBJECT_STORAGE", label: "Object Storage (S3)" },
                       { value: "CDN", label: "File CDN" },
                     ]}
@@ -1402,8 +1406,8 @@ export default function AdminPlansPage() {
                       </div>
                     </div>
                   </div>
-                ) : formData.service === "APP" ? (
-                  /* Form for Managed Apps */
+                ) : (formData.service === "APP" || formData.service === "APP_PLATFORM") ? (
+                  /* Form for Managed Apps & App Platform */
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div>

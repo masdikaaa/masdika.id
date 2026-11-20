@@ -26,6 +26,8 @@ export default function CustomerBillingPage() {
           reservedIps: json.data.reservedIps || [],
           databases: json.data.databases || [],
           appServices: json.data.appServices || [],
+          appPlatformServices: json.data.appPlatformServices || [],
+          objectStorageServices: json.data.objectStorageServices || [],
           balance: json.data.balance || 0
         });
       }
@@ -43,6 +45,8 @@ export default function CustomerBillingPage() {
     reservedIps: any[];
     databases: any[];
     appServices: any[];
+    appPlatformServices: any[];
+    objectStorageServices: any[];
     balance: number;
   }>({
     subscriptions: [],
@@ -51,6 +55,8 @@ export default function CustomerBillingPage() {
     reservedIps: [],
     databases: [],
     appServices: [],
+    appPlatformServices: [],
+    objectStorageServices: [],
     balance: 0,
   });
   const [loading, setLoading] = useState(true);
@@ -136,15 +142,17 @@ export default function CustomerBillingPage() {
   const activeVps = data.vpsServices.filter(s => s.status === 'RUNNING' || s.status === 'STOPPED' || s.status === 'SUSPENDED');
   const activeDbs = (data.databases || []).filter(d => d.status === 'RUNNING' || d.status === 'STOPPED' || d.status === 'SUSPENDED');
   const activeApps = (data.appServices || []).filter(a => a.status === 'RUNNING' || a.status === 'STOPPED' || a.status === 'SUSPENDED');
+  const activeAppPlatforms = (data.appPlatformServices || []).filter(a => a.status === 'RUNNING' || a.status === 'STOPPED' || a.status === 'SUSPENDED');
   const activeObjStorages = ((data as any).objectStorageServices || []).filter((o: any) => o.status === 'RUNNING' || o.status === 'STOPPED' || o.status === 'SUSPENDED');
   const activeIps = data.reservedIps;
-  const totalActive = activeSubscriptions.length + activeVps.length + activeDbs.length + activeApps.length + activeObjStorages.length + activeIps.length;
+  const totalActive = activeSubscriptions.length + activeVps.length + activeDbs.length + activeApps.length + activeAppPlatforms.length + activeObjStorages.length + activeIps.length;
 
   const unifiedServices = [
     ...activeSubscriptions.map(s => ({ type: 'SUBSCRIPTION', data: s, key: `sub-${s.id}` })),
     ...activeVps.map(v => ({ type: 'VPS', data: v, key: `vps-${v.id}` })),
     ...activeDbs.map(db => ({ type: 'DATABASE', data: db, key: `db-${db.id}` })),
     ...activeApps.map(app => ({ type: 'APP', data: app, key: `app-${app.id}` })),
+    ...activeAppPlatforms.map(app => ({ type: 'APP_PLATFORM', data: app, key: `app-platform-${app.id}` })),
     ...activeObjStorages.map((obj: any) => ({ type: 'OBJECT_STORAGE', data: obj, key: `obj-${obj.id}` })),
     ...activeIps.map(ip => ({ type: 'RESERVED_IP', data: ip, key: `ip-${ip.id}` }))
   ];
@@ -361,6 +369,46 @@ export default function CustomerBillingPage() {
                           <div className="flex items-center gap-2 shrink-0 pl-2">
                             <Link
                               href={`/dashboard/apps/${app.id}`}
+                              className="px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-colors bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20"
+                            >
+                              Manage
+                            </Link>
+                          </div>
+                        </div>
+                      );
+
+                    } else if (type === 'APP_PLATFORM') {
+                      const app = item.data;
+                      const isSuspended = app.status === 'SUSPENDED';
+                      return (
+                        <div key={key} className={cn("flex items-center justify-between p-3 rounded-xl transition-colors border mb-1", isDark ? "hover:bg-white/[0.04] border-transparent hover:border-white/[0.08]" : "hover:bg-white border-transparent hover:border-slate-200/90")}>
+                          <div className="flex items-center gap-3 overflow-hidden">
+                            <Globe className="w-4 h-4 text-cyan-400 shrink-0" />
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className={cn("text-sm font-bold truncate", isDark ? "text-white" : "text-slate-900")}>{app.name}</span>
+                                {isSuspended && (
+                                  <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-rose-500/15 text-rose-400 border border-rose-500/30">
+                                    Suspended (3-Day Grace Period)
+                                  </span>
+                                )}
+                              </div>
+                              <div className={cn("text-xs truncate", isDark ? "text-zinc-500" : "text-slate-500")}>
+                                {app.buildType?.toUpperCase()} ({app.planName}) • {app.billingMode === 'MONTHLY' ? `${formatRupiah(app.monthlyPrice)}/mo` : `${formatRupiah(app.hourlyRate)}/hr (PAYG)`}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0 pl-2">
+                            {isSuspended && (
+                              <button
+                                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                                className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-400 text-slate-950"
+                              >
+                                Top Up
+                              </button>
+                            )}
+                            <Link
+                              href={`/dashboard/app-platform/${app.id}`}
                               className="px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-colors bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/20"
                             >
                               Manage

@@ -589,6 +589,39 @@ export default function ClientProfile({ userId }: { userId: string }) {
       createdAt: app.createdAt,
       rawData: app
     })) || []),
+    ...(user.appPlatformServices?.map((app: any) => ({
+      id: app.id,
+      category: 'App Platform',
+      type: 'app-platform',
+      name: app.name || `App #${app.id}`,
+      detail: (
+        <div className="flex flex-col gap-0.5 mt-0.5">
+          <div className="text-sm font-medium truncate">
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-2">
+                <span className={cn("font-semibold", isDark ? "text-zinc-300" : "text-slate-800")}>
+                  {app.billingMode === 'PAYG' ? 'Pay As You Go' : 'Monthly'}
+                </span>
+              </div>
+              <span className={cn(isDark ? "text-zinc-300" : "text-slate-600")}>
+                Expires: {app.terminationDate ? new Date(app.terminationDate).toLocaleDateString() : 'N/A'}
+              </span>
+              <span className={cn("text-[11px] font-normal font-mono", isDark ? "text-zinc-400" : "text-slate-500")}>
+                Registration Date: {app.createdAt ? new Date(app.createdAt).toLocaleDateString() : 'N/A'}
+              </span>
+            </div>
+          </div>
+          <div className={cn("text-[11px] font-mono truncate", isDark ? "text-zinc-500" : "text-slate-500")}>
+            {app.buildType} ({app.planName}) • {app.cpuShares} vCPU • {app.memoryMb} MB RAM • {app.storageGb} GB SSD • {app.subdomain}.{app.host}
+          </div>
+        </div>
+      ),
+      status: app.status,
+      suspendReason: app.suspendReason,
+      icon: <Globe className={cn("w-4 h-4", isDark ? "text-cyan-400" : "text-cyan-700")} />,
+      createdAt: app.createdAt,
+      rawData: app
+    })) || []),
     ...(user.objectStorageServices?.map((obj: any) => ({
       id: obj.id,
       category: 'Object Storage',

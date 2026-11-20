@@ -8,6 +8,7 @@ export type InvoiceDisplayCategory =
   | 'OBJECT_STORAGE'
   | 'MANAGED_APP'
   | 'MANAGED_DATABASE'
+  | 'APP_PLATFORM'
   | 'SUBSCRIPTION'
   | 'OTHER';
 
@@ -42,6 +43,7 @@ function formatServiceDisplayName(serviceCode?: string | null): string {
   if (s === 'CDN' || s === 'FILE_CDN') return 'File CDN';
   if (s === 'OBJECT_STORAGE' || s === 'S3') return 'Object Storage';
   if (s === 'MANAGED_APP' || s === 'APPS') return 'Managed App';
+  if (s === 'APP_PLATFORM') return 'App Platform';
   if (s === 'MANAGED_DATABASE' || s === 'DATABASE') return 'Managed Database';
   if (s === 'VPS') return 'Cloud VPS';
   return s
@@ -267,6 +269,34 @@ export function getInvoiceDisplayInfo(invoice: any): InvoiceDisplayInfo {
       title: `Managed App • ${pkgText}`,
       subtitle: payg ? 'Pay-As-You-Go' : 'Monthly Plan',
       description: `Managed application deployment ${appTitle}${planLabel ? ` (${planLabel} Plan)` : ''}${instanceName ? ` — instance "${instanceName}"` : ''}.`,
+      billingTypeLabel: payg ? 'Hourly Metered' : 'Monthly Cycle',
+      specs,
+      parsedDetails: details,
+    };
+  }
+
+  if (type === 'APP_PLATFORM') {
+    const buildType = details?.buildType || 'Web App';
+    const planLabel = details?.planName || '';
+    const instanceName = details?.name || '';
+    const pkgText = [
+      buildType,
+      planLabel ? `(${planLabel})` : '',
+      instanceName ? `- ${instanceName}` : '',
+    ].filter(Boolean).join(' ');
+
+    const specs: InvoiceSpecBadge[] = [];
+    if (details?.cpuShares) specs.push({ kind: 'cpu', label: `${details.cpuShares} vCPU` });
+    const ramLabel = formatMemoryLabel(details?.memoryMb, null);
+    if (ramLabel) specs.push({ kind: 'ram', label: ramLabel });
+    if (details?.storageGb) specs.push({ kind: 'disk', label: `${details.storageGb} GB SSD` });
+    if (planLabel) specs.push({ kind: 'plan', label: `Plan: ${planLabel}` });
+
+    return {
+      category: 'APP_PLATFORM',
+      title: `App Platform • ${pkgText}`,
+      subtitle: payg ? 'Pay-As-You-Go' : 'Monthly Plan',
+      description: `Git-to-Web PaaS deployment ${buildType}${planLabel ? ` (${planLabel} Plan)` : ''}${instanceName ? ` — app "${instanceName}"` : ''}.`,
       billingTypeLabel: payg ? 'Hourly Metered' : 'Monthly Cycle',
       specs,
       parsedDetails: details,

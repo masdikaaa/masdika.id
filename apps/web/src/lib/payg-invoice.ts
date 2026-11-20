@@ -8,12 +8,14 @@ function generateInvoiceNumber(prefix: string): string {
 export type PaygServiceInvoiceType =
   | 'MANAGED_APP'
   | 'MANAGED_DATABASE'
-  | 'OBJECT_STORAGE';
+  | 'OBJECT_STORAGE'
+  | 'APP_PLATFORM';
 
 export type ServiceIdField =
   | 'appServiceId'
   | 'databaseServiceId'
-  | 'objectStorageServiceId';
+  | 'objectStorageServiceId'
+  | 'appPlatformServiceId';
 
 function normalizeInvoiceNumberToPayg(invoiceNumber: string): string {
   if (invoiceNumber.startsWith('INV-S3-')) {
@@ -291,7 +293,7 @@ export async function reconcileUserPaygInvoices(userId: number): Promise<void> {
 
   const activeStatuses = ['PROVISIONING', 'RUNNING', 'STOPPED', 'SUSPENDED', 'ACTIVE'];
 
-  const [apps, dbs, s3s, reservedIps, vpsServices, subscriptions, existingInvoices] = await Promise.all([
+  const [apps, dbs, s3s, appPlatforms, reservedIps, vpsServices, subscriptions, existingInvoices] = await Promise.all([
     prisma.appService.findMany({
       where: { userId, billingMode: 'PAYG', status: { in: activeStatuses } },
     }),
@@ -299,6 +301,9 @@ export async function reconcileUserPaygInvoices(userId: number): Promise<void> {
       where: { userId, billingMode: 'PAYG', status: { in: activeStatuses } },
     }),
     prisma.objectStorageService.findMany({
+      where: { userId, billingMode: 'PAYG', status: { in: activeStatuses } },
+    }),
+    prisma.appPlatformService.findMany({
       where: { userId, billingMode: 'PAYG', status: { in: activeStatuses } },
     }),
     prisma.reservedIp.findMany({
@@ -320,7 +325,7 @@ export async function reconcileUserPaygInvoices(userId: number): Promise<void> {
       where: {
         userId,
         OR: [
-          { type: { in: ['MANAGED_APP', 'MANAGED_DATABASE', 'OBJECT_STORAGE', 'IP_RESERVATION'] } },
+          { type: { in: ['MANAGED_APP', 'MANAGED_DATABASE', 'OBJECT_STORAGE', 'APP_PLATFORM', 'IP_RESERVATION'] } },
           { invoiceNumber: { startsWith: 'INV-S3-' } },
           { reference: 'PAYG_RUNNING' },
           { status: 'PAYG_RUNNING' },
@@ -461,6 +466,27 @@ export async function reconcileUserPaygInvoices(userId: number): Promise<void> {
         planName: s3.planName,
         storageGb: s3.storageGb,
         billingMode: s3.billingMode,
+      },
+    });
+  }
+
+  for (const app of appPlatforms) {
+    await reconcileItem({
+      serviceIdField: 'appPlatformServiceId',
+      serviceId: app.id,
+      type: 'APP_PLATFORM',
+      serviceName: app.name,
+      accumulatedCost: app.accumulatedCost || 0,
+      paidAt: app.lastBilledAt || app.createdAt,
+      extraDetails: {
+        gitUrl: app.gitUrl,
+        branch: app.branch,
+        buildType: app.buildType,
+        planName: app.planName,
+        cpuShares: app.cpuShares,
+        memoryMb: app.memoryMb,
+        storageGb: app.storageGb,
+        billingMode: app.billingMode,
       },
     });
   }

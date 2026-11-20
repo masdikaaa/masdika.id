@@ -242,6 +242,49 @@ export async function PUT(req: Request, props: { params: Promise<{ type: string;
         break;
       }
 
+      case 'app-platform': {
+        const app = await prisma.appPlatformService.findUnique({
+          where: { id },
+          include: { user: true }
+        });
+        if (!app) return NextResponse.json({ error: 'App Platform service not found' }, { status: 404 });
+
+        try {
+          const { scaleAppPlatform } = await import('@/lib/k8s-app-platform');
+          await scaleAppPlatform(app as any, suspend ? 0 : 1);
+        } catch (k8sErr) {
+          console.error(`Failed to update K8s deployment for App Platform ${app.id}:`, k8sErr);
+        }
+
+        result = await prisma.appPlatformService.update({
+          where: { id },
+          data: {
+            status: suspend ? 'SUSPENDED' : 'RUNNING',
+            suspendReason: suspendReasonValue,
+            terminationDate: gracePeriodDeadline
+          }
+        });
+
+        if (app.user) {
+          if (suspend) {
+            sendAppSuspendedGracePeriodEmail({
+              email: app.user.email,
+              userName: app.user.name || 'Customer',
+              appName: app.name,
+              appType: `App Platform (${app.buildType})`,
+              terminationDate: gracePeriodDeadline!,
+              hourlyRate: app.hourlyRate,
+              reason: suspendReasonValue || 'Administrative suspension'
+            }).catch(console.error);
+            sendAdminServiceSuspendedEmail(app.user.name || 'Customer', app.user.email, app.name, 'App Platform').catch(console.error);
+          } else {
+            sendReactivatedEmail(app.user.email, app.user.name || 'Customer', app.planName, app.name).catch(console.error);
+            sendAdminServiceReactivatedEmail(app.user.name || 'Customer', app.user.email, app.name, 'App Platform').catch(console.error);
+          }
+        }
+        break;
+      }
+
       case 'object-storage': {
         const obj = await prisma.objectStorageService.findUnique({
           where: { id },

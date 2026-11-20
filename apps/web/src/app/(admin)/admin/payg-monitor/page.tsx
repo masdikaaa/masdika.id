@@ -157,6 +157,7 @@ export default function PaygMonitorPage() {
       case 'VPS': return <Terminal className={cn("w-4 h-4 sm:w-5 sm:h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />;
       case 'Reserved IP': return <Network className={cn("w-4 h-4 sm:w-5 sm:h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />;
       case 'Database': return <Database className={cn("w-4 h-4 sm:w-5 sm:h-5", isDark ? "text-emerald-400" : "text-emerald-700")} />;
+      case 'App Platform': return <Globe className={cn("w-4 h-4 sm:w-5 sm:h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />;
       default: return <Package className={cn("w-4 h-4 sm:w-5 sm:h-5", isDark ? "text-cyan-400" : "text-cyan-700")} />;
     }
   };

@@ -64,6 +64,7 @@ model User {
   sshKeys            UserSshKey[]
   databaseServices      DatabaseService[]
   appServices           AppService[]
+  appPlatformServices   AppPlatformService[]
   cdnBuckets            CdnBucket[]
   cdnApiKeys            CdnApiKey[]
   objectStorageServices ObjectStorageService[]
@@ -1243,6 +1244,65 @@ model AppService {
   updatedAt       DateTime  @updatedAt
 
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([port])
+  @@index([createdAt])
+}
+
+model AppPlatformService {
+  id                Int       @id @default(autoincrement())
+  userId            Int
+  name              String
+  gitUrl            String
+  branch            String    @default("main")
+  buildType         String    @default("DOCKERFILE") // "DOCKERFILE", "NODEJS", "PYTHON", "GOLANG", "PHP", "STATIC"
+  dockerfilePath    String    @default("Dockerfile")
+  rootDirectory     String    @default("/")
+  buildCommand      String?
+  startCommand      String?
+  envVars           String?
+  subdomain         String    @unique
+  customDomain      String?
+  host              String    @default("app.masdikacloud.my.id")
+  port              Int       // NodePort (30000..32767)
+  appPort           Int       @default(3000)
+  lastCommitHash    String?
+  lastCommitMessage String?
+  lastBuildLog      String?   @db.Text
+  lastBuildStatus   String?   @default("QUEUED") // "QUEUED", "BUILDING", "SUCCESS", "FAILED"
+  lastDeployedAt    DateTime?
+
+  // Resource Specs (Mandatory per AGENTS.md)
+  planName          String    @default("1C1G") // "0.5C512M", "1C1G", "1C2G", "2C2G", "2C4G", "4C4G"
+  cpuShares         Float     @default(1.0)
+  memoryMb          Int       @default(1024)
+  storageGb         Int       @default(10)
+
+  // Billing Fields (Mandatory per AGENTS.md)
+  billingMode       String    @default("PAYG") // "PAYG" | "MONTHLY"
+  monthlyPrice      Int       @default(20000)
+  hourlyRate        Int       @default(28)
+  accumulatedCost   Int       @default(0)
+  lastBilledAt      DateTime?
+
+  // Lifecycle Management (Mandatory per AGENTS.md)
+  status            String    @default("PROVISIONING") // "PROVISIONING", "RUNNING", "STOPPED", "SUSPENDED", "TERMINATED"
+  suspendReason     String?
+  terminationDate   DateTime?
+
+  // Physical / Infrastructure Reference (Mandatory per AGENTS.md)
+  node              String?   @default("cloudapps")
+  k8sNamespace      String?   @default("app-platform")
+  k8sDeployment     String?
+  k8sService        String?
+  k8sPvc            String?
+  k8sIngress        String?
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([status])

@@ -893,6 +893,136 @@ export async function GET(req: Request) {
     let objSuspended = 0;
     let objTerminated = 0;
 
+    // ----------------------------------------------------
+    // PROCESS APP PLATFORM HOURLY BILLING (PAYG + 3-DAY GRACE)
+    // ----------------------------------------------------
+    let appPlatformProcessed = 0;
+    let appPlatformSuspended = 0;
+    let appPlatformTerminated = 0;
+
+    const activeAppPlatforms = await prisma.appPlatformService.findMany({
+      where: {
+        status: { in: ['RUNNING', 'STOPPED'] },
+        hourlyRate: { gt: 0 }
+      },
+      include: { user: true }
+    });
+
+    for (const app of activeAppPlatforms) {
+      const costThisHour = app.hourlyRate;
+
+      try {
+        await prisma.$transaction(async (tx) => {
+          const updateResult = await tx.user.updateMany({
+            where: { id: app.userId, balance: { gte: costThisHour } },
+            data: { balance: { decrement: costThisHour } }
+          });
+          if (updateResult.count === 0) throw new Error("INSUFFICIENT_BALANCE");
+
+          await tx.appPlatformService.update({
+            where: { id: app.id },
+            data: {
+              accumulatedCost: { increment: costThisHour },
+              lastBilledAt: now
+            }
+          });
+
+          const { upsertPaygRunningInvoice } = await import('@/lib/payg-invoice');
+          await upsertPaygRunningInvoice(tx, {
+            userId: app.userId,
+            serviceIdField: 'appPlatformServiceId',
+            serviceId: app.id,
+            type: 'APP_PLATFORM',
+            amountToAdd: costThisHour,
+            serviceName: app.name,
+            fallbackAmount: (app.accumulatedCost || 0) + costThisHour,
+          });
+        });
+        appPlatformProcessed++;
+      } catch (e: any) {
+        if (e.message === "INSUFFICIENT_BALANCE") {
+          appPlatformSuspended++;
+          const defaultTermination = new Date(now);
+          defaultTermination.setDate(defaultTermination.getDate() + 3);
+
+          await prisma.appPlatformService.update({
+            where: { id: app.id },
+            data: {
+              status: 'SUSPENDED',
+              suspendReason: 'Insufficient balance for Pay as You Go hourly App Platform billing.',
+              terminationDate: defaultTermination
+            }
+          });
+
+          // Stop app pod on K8s (scale to 0)
+          try {
+            const { scaleAppPlatform } = await import('@/lib/k8s-app-platform');
+            await scaleAppPlatform(app as any, 0);
+          } catch (stopErr) {
+            console.error(`Failed to stop pod for App Platform ${app.id}:`, stopErr);
+          }
+
+          // Send 3-day grace period suspension email
+          try {
+            const { sendAppSuspendedGracePeriodEmail, sendAdminServiceSuspendedEmail } = await import('@/lib/email');
+            const email = decryptDeterministic(app.user.email) || app.user.email;
+            const name = decryptDeterministic(app.user.name) || app.user.name;
+            await sendAppSuspendedGracePeriodEmail({
+              email,
+              userName: name,
+              appName: app.name,
+              appType: app.buildType,
+              terminationDate: defaultTermination,
+              hourlyRate: app.hourlyRate,
+              reason: 'Insufficient balance for Pay as You Go hourly App Platform billing'
+            });
+            await sendAdminServiceSuspendedEmail(name, email, app.name, "App Platform").catch(e => console.error(e));
+          } catch (emailErr) {
+            console.error(`Failed to send app platform suspension email for ${app.id}:`, emailErr);
+          }
+        }
+      }
+    }
+
+    // Terminate suspended app platforms that reached 3-day grace period
+    const expiredAppPlatforms = await prisma.appPlatformService.findMany({
+      where: {
+        status: 'SUSPENDED',
+        terminationDate: { lte: now }
+      },
+      include: { user: true }
+    });
+
+    for (const expApp of expiredAppPlatforms) {
+      try {
+        const { deleteAppPlatformResources } = await import('@/lib/k8s-app-platform');
+        await deleteAppPlatformResources(expApp as any);
+        await prisma.appPlatformService.update({
+          where: { id: expApp.id },
+          data: { status: 'TERMINATED' }
+        });
+        await settleServicePaygInvoices(prisma, {
+          userId: expApp.userId,
+          serviceIdField: 'appPlatformServiceId',
+          serviceId: expApp.id,
+          serviceName: expApp.name,
+          type: 'APP_PLATFORM',
+        });
+        appPlatformTerminated++;
+
+        try {
+          const { sendTerminationEmail } = await import('@/lib/email');
+          const email = decryptDeterministic(expApp.user.email) || expApp.user.email;
+          const name = decryptDeterministic(expApp.user.name) || expApp.user.name;
+          await sendTerminationEmail(email, name, expApp.name, "App Platform");
+        } catch (emailErr) {
+          console.error(`Failed to send app platform termination email:`, emailErr);
+        }
+      } catch (termErr) {
+        console.error(`Failed to terminate expired app platform ${expApp.id}:`, termErr);
+      }
+    }
+
     const activeObjStorages = await prisma.objectStorageService.findMany({
       where: {
         status: { in: ['RUNNING', 'STOPPED'] },
@@ -1033,6 +1163,7 @@ export async function GET(req: Request) {
       reservedIps: { processed: ipProcessed, insufficientBalance: ipReleased },
       databases: { processed: dbProcessed, suspended: dbSuspended, terminated: dbTerminated },
       apps: { processed: appProcessed, suspended: appSuspended, terminated: appTerminated },
+      appPlatform: { processed: appPlatformProcessed, suspended: appPlatformSuspended, terminated: appPlatformTerminated },
       objectStorage: { processed: objProcessed, suspended: objSuspended, terminated: objTerminated },
       lowBalanceAlerts: lowBalanceSummary
     };

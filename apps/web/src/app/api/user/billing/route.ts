@@ -61,6 +61,11 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: "desc" },
     });
 
+    const appPlatformServices = await prisma.appPlatformService.findMany({
+      where: { userId, status: { not: "TERMINATED" } },
+      orderBy: { createdAt: "desc" },
+    });
+
     const objectStorageServices = await prisma.objectStorageService.findMany({
       where: { userId, status: { not: "TERMINATED" } },
       orderBy: { createdAt: "desc" },
@@ -81,6 +86,7 @@ export async function GET(req: NextRequest) {
         vpsServices,
         databases,
         appServices,
+        appPlatformServices,
         objectStorageServices,
         commitment,
         activeMonthlyCommitment: commitment.totalMonthly,

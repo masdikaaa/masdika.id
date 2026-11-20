@@ -86,6 +86,21 @@ export async function GET() {
     settingsObj['managed_app_public_domain'] = settingsObj['managed_app_public_domain'] || process.env.MANAGED_APP_PUBLIC_DOMAIN || '';
     settingsObj['managed_app_public_ip'] = settingsObj['managed_app_public_ip'] || process.env.MANAGED_APP_PUBLIC_IP || '';
 
+    // Cloud Apps / App Platform (Kubernetes API) Cluster Settings
+    const hasAppPlatformKubeconfig = Boolean(settingsObj['app_platform_kubeconfig'] || process.env.APP_PLATFORM_KUBECONFIG);
+    const hasAppPlatformServiceToken = Boolean(settingsObj['app_platform_service_token'] || process.env.APP_PLATFORM_SERVICE_TOKEN);
+    settingsObj['app_platform_auth_mode'] = settingsObj['app_platform_auth_mode'] || 'KUBECONFIG';
+    settingsObj['app_platform_api_server'] = settingsObj['app_platform_api_server'] || process.env.APP_PLATFORM_API_SERVER || 'https://192.168.79.20:6443';
+    settingsObj['app_platform_kubeconfig'] = hasAppPlatformKubeconfig ? MASKED_SECRET : '';
+    settingsObj['app_platform_service_token'] = hasAppPlatformServiceToken ? MASKED_SECRET : '';
+    settingsObj['app_platform_skip_tls'] = settingsObj['app_platform_skip_tls'] ?? 'true';
+    settingsObj['app_platform_public_domain'] = settingsObj['app_platform_public_domain'] || process.env.APP_PLATFORM_PUBLIC_DOMAIN || 'app.masdikacloud.my.id';
+    settingsObj['app_platform_public_ip'] = settingsObj['app_platform_public_ip'] || process.env.APP_PLATFORM_PUBLIC_IP || '206.237.98.230';
+    settingsObj['app_platform_max_instances'] = settingsObj['app_platform_max_instances'] || '50';
+    settingsObj['app_platform_max_cpu'] = settingsObj['app_platform_max_cpu'] || '8.0';
+    settingsObj['app_platform_max_ram_gb'] = settingsObj['app_platform_max_ram_gb'] || '16';
+    settingsObj['app_platform_max_disk_gb'] = settingsObj['app_platform_max_disk_gb'] || '96';
+
     return NextResponse.json({
       user: {
         name: decryptDeterministic(user?.name) || '',
@@ -109,7 +124,7 @@ export async function PUT(req: Request) {
 
   try {
     const body = await req.json();
-    const { name, email, bio, twoFactorEnabled, disable2FACode, profileImage, cv_url, setup2FA, verify2FA, social_facebook, social_twitter, social_linkedin, social_instagram, social_github, contact_email, contact_location, contact_phone, hero_title, hero_description, hero_typing_text, meta_description, meta_description_blog, meta_description_portfolio, meta_description_services, meta_description_opportunities, meta_description_resume, meta_description_contact, meta_description_community, meta_description_events, meta_description_vacancies, maintenance_mode, maintenance_message, vps_enabled, k3s_enabled, cdn_enabled, promo_banner_image, promo_banner_url, promo_banner_active, tax_rate, rustfs_endpoint, rustfs_access_key, rustfs_secret_key, rustfs_bucket, rustfs_media_bucket, rustfs_ticket_bucket, rustfs_enabled, managed_db_auth_mode, managed_db_api_server, managed_db_kubeconfig, managed_db_service_token, managed_db_skip_tls, managed_db_ca_cert, managed_db_public_domain, managed_db_public_ip, managed_db_pma_url, managed_db_pgadmin_url, managed_db_mongo_url, managed_app_auth_mode, managed_app_api_server, managed_app_kubeconfig, managed_app_service_token, managed_app_skip_tls, managed_app_ca_cert, managed_app_public_domain, managed_app_public_ip } = body;
+    const { name, email, bio, twoFactorEnabled, disable2FACode, profileImage, cv_url, setup2FA, verify2FA, social_facebook, social_twitter, social_linkedin, social_instagram, social_github, contact_email, contact_location, contact_phone, hero_title, hero_description, hero_typing_text, meta_description, meta_description_blog, meta_description_portfolio, meta_description_services, meta_description_opportunities, meta_description_resume, meta_description_contact, meta_description_community, meta_description_events, meta_description_vacancies, maintenance_mode, maintenance_message, vps_enabled, app_platform_enabled, cdn_enabled, promo_banner_image, promo_banner_url, promo_banner_active, tax_rate, rustfs_endpoint, rustfs_access_key, rustfs_secret_key, rustfs_bucket, rustfs_media_bucket, rustfs_ticket_bucket, rustfs_enabled, managed_db_auth_mode, managed_db_api_server, managed_db_kubeconfig, managed_db_service_token, managed_db_skip_tls, managed_db_ca_cert, managed_db_public_domain, managed_db_public_ip, managed_db_pma_url, managed_db_pgadmin_url, managed_db_mongo_url, managed_app_auth_mode, managed_app_api_server, managed_app_kubeconfig, managed_app_service_token, managed_app_skip_tls, managed_app_ca_cert, managed_app_public_domain, managed_app_public_ip } = body;
 
     if (tax_rate !== undefined) {
       const parsedTax = Number(tax_rate);
@@ -246,6 +261,37 @@ export async function PUT(req: Request) {
     if (managed_app_public_domain !== undefined) settingsToUpdate.push({ key: 'managed_app_public_domain', value: String(managed_app_public_domain).trim() });
     if (managed_app_public_ip !== undefined) settingsToUpdate.push({ key: 'managed_app_public_ip', value: String(managed_app_public_ip).trim() });
 
+    // Cloud Apps (Kubernetes API) Cluster Settings
+    const {
+      app_platform_auth_mode,
+      app_platform_api_server,
+      app_platform_kubeconfig,
+      app_platform_service_token,
+      app_platform_skip_tls,
+      app_platform_public_domain,
+      app_platform_public_ip,
+      app_platform_max_instances,
+      app_platform_max_cpu,
+      app_platform_max_ram_gb,
+      app_platform_max_disk_gb,
+    } = body;
+
+    if (app_platform_auth_mode !== undefined) settingsToUpdate.push({ key: 'app_platform_auth_mode', value: String(app_platform_auth_mode).trim() });
+    if (app_platform_api_server !== undefined) settingsToUpdate.push({ key: 'app_platform_api_server', value: String(app_platform_api_server).trim() });
+    if (app_platform_kubeconfig !== undefined && app_platform_kubeconfig !== MASKED_SECRET && String(app_platform_kubeconfig).trim() !== '') {
+      settingsToUpdate.push({ key: 'app_platform_kubeconfig', value: encryptDeterministic(String(app_platform_kubeconfig).trim()) });
+    }
+    if (app_platform_service_token !== undefined && app_platform_service_token !== MASKED_SECRET && String(app_platform_service_token).trim() !== '') {
+      settingsToUpdate.push({ key: 'app_platform_service_token', value: encryptDeterministic(String(app_platform_service_token).trim()) });
+    }
+    if (app_platform_skip_tls !== undefined) settingsToUpdate.push({ key: 'app_platform_skip_tls', value: String(app_platform_skip_tls) });
+    if (app_platform_public_domain !== undefined) settingsToUpdate.push({ key: 'app_platform_public_domain', value: String(app_platform_public_domain).trim() });
+    if (app_platform_public_ip !== undefined) settingsToUpdate.push({ key: 'app_platform_public_ip', value: String(app_platform_public_ip).trim() });
+    if (app_platform_max_instances !== undefined) settingsToUpdate.push({ key: 'app_platform_max_instances', value: String(app_platform_max_instances).trim() });
+    if (app_platform_max_cpu !== undefined) settingsToUpdate.push({ key: 'app_platform_max_cpu', value: String(app_platform_max_cpu).trim() });
+    if (app_platform_max_ram_gb !== undefined) settingsToUpdate.push({ key: 'app_platform_max_ram_gb', value: String(app_platform_max_ram_gb).trim() });
+    if (app_platform_max_disk_gb !== undefined) settingsToUpdate.push({ key: 'app_platform_max_disk_gb', value: String(app_platform_max_disk_gb).trim() });
+
     // SSRF & Kubeconfig exec-plugin pre-flight validation before persisting settings
     try {
       const endpointChecks: Array<[unknown, string]> = [
@@ -253,6 +299,7 @@ export async function PUT(req: Request) {
         [customer_rustfs_endpoint, 'Customer RustFS Endpoint'],
         [managed_db_api_server, 'Managed DB API Server'],
         [managed_app_api_server, 'Managed App API Server'],
+        [app_platform_api_server, 'Cloud Apps API Server'],
       ];
       for (const [val, label] of endpointChecks) {
         if (val !== undefined && String(val).trim() !== '') {
@@ -264,6 +311,9 @@ export async function PUT(req: Request) {
       }
       if (managed_app_kubeconfig !== undefined && managed_app_kubeconfig !== MASKED_SECRET && String(managed_app_kubeconfig).trim() !== '') {
         await validateSafeKubeConfig(String(managed_app_kubeconfig).trim(), 'Managed App Kubeconfig');
+      }
+      if (app_platform_kubeconfig !== undefined && app_platform_kubeconfig !== MASKED_SECRET && String(app_platform_kubeconfig).trim() !== '') {
+        await validateSafeKubeConfig(String(app_platform_kubeconfig).trim(), 'Cloud Apps Kubeconfig');
       }
     } catch (validationErr: any) {
       return NextResponse.json({ error: validationErr?.message || 'Invalid endpoint or kubeconfig configuration.' }, { status: 400 });

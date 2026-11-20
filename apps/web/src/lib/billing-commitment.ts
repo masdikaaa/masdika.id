@@ -7,10 +7,12 @@ export interface UserServicesCommitment {
   subMonthly: number;
   reservedIpMonthly: number;
   objectStorageMonthly: number;
+  appPlatformMonthly: number;
   totalMonthly: number;
   activeVpsCount: number;
   activeDbCount: number;
   activeAppCount: number;
+  activeAppPlatformCount: number;
   activeSubCount: number;
   activeIpCount: number;
   activeObjectStorageCount: number;
@@ -30,7 +32,7 @@ export async function getUserServicesCommitment(
   userId: number,
   tx: any = prisma
 ): Promise<UserServicesCommitment> {
-  const [activeVps, activeDb, activeApps, activeSubs, activeIps, activeObj] = await Promise.all([
+  const [activeVps, activeDb, activeApps, activeSubs, activeIps, activeObj, activeAppPlatforms] = await Promise.all([
     tx.vpsService.findMany({
       where: {
         userId,
@@ -77,6 +79,13 @@ export async function getUserServicesCommitment(
       },
       select: { monthlyPrice: true, hourlyRate: true, billingMode: true },
     }),
+    tx.appPlatformService.findMany({
+      where: {
+        userId,
+        status: { notIn: ["TERMINATED"] },
+      },
+      select: { monthlyPrice: true, hourlyRate: true, billingMode: true },
+    }),
   ]);
 
   const vpsMonthly = activeVps.reduce(
@@ -109,13 +118,19 @@ export async function getUserServicesCommitment(
     return sum + (cost || 0);
   }, 0);
 
-  const totalMonthly = vpsMonthly + dbMonthly + appMonthly + subMonthly + reservedIpMonthly + objectStorageMonthly;
-  const totalActiveCount = activeVps.length + activeDb.length + activeApps.length + activeSubs.length + activeIps.length + activeObj.length;
+  const appPlatformMonthly = activeAppPlatforms.reduce((sum: number, a: any) => {
+    const cost = a.monthlyPrice || Math.round((a.hourlyRate || 0) * 720);
+    return sum + (cost || 0);
+  }, 0);
+
+  const totalMonthly = vpsMonthly + dbMonthly + appMonthly + subMonthly + reservedIpMonthly + objectStorageMonthly + appPlatformMonthly;
+  const totalActiveCount = activeVps.length + activeDb.length + activeApps.length + activeSubs.length + activeIps.length + activeObj.length + activeAppPlatforms.length;
 
   return {
     vpsMonthly,
     dbMonthly,
     appMonthly,
+    appPlatformMonthly,
     subMonthly,
     reservedIpMonthly,
     objectStorageMonthly,
@@ -123,6 +138,7 @@ export async function getUserServicesCommitment(
     activeVpsCount: activeVps.length,
     activeDbCount: activeDb.length,
     activeAppCount: activeApps.length,
+    activeAppPlatformCount: activeAppPlatforms.length,
     activeSubCount: activeSubs.length,
     activeIpCount: activeIps.length,
     activeObjectStorageCount: activeObj.length,

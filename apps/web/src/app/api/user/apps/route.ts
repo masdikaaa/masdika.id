@@ -207,12 +207,16 @@ export async function POST(req: NextRequest) {
 
         let resolvedSubdomain = "";
         if (cleanSub) {
-          const existing = await tx.appService.findUnique({ where: { subdomain: cleanSub } });
+          const existing = (await tx.appService.findUnique({ where: { subdomain: cleanSub } })) ||
+            (await tx.appPlatformService.findUnique({ where: { subdomain: cleanSub } }));
           if (!existing) {
             resolvedSubdomain = cleanSub;
           } else {
             let candidate = `${cleanSub.slice(0, 24)}-${crypto.randomBytes(2).toString("hex")}`;
-            while (await tx.appService.findUnique({ where: { subdomain: candidate } })) {
+            while (
+              (await tx.appService.findUnique({ where: { subdomain: candidate } })) ||
+              (await tx.appPlatformService.findUnique({ where: { subdomain: candidate } }))
+            ) {
               candidate = `${cleanSub.slice(0, 24)}-${crypto.randomBytes(2).toString("hex")}`;
             }
             resolvedSubdomain = candidate;
@@ -220,7 +224,10 @@ export async function POST(req: NextRequest) {
         }
         if (!resolvedSubdomain) {
           let candidate = `${catalogItem.id}-${crypto.randomBytes(3).toString("hex")}`;
-          while (await tx.appService.findUnique({ where: { subdomain: candidate } })) {
+          while (
+            (await tx.appService.findUnique({ where: { subdomain: candidate } })) ||
+            (await tx.appPlatformService.findUnique({ where: { subdomain: candidate } }))
+          ) {
             candidate = `${catalogItem.id}-${crypto.randomBytes(3).toString("hex")}`;
           }
           resolvedSubdomain = candidate;

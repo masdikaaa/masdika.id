@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Key, Settings, LogOut, Bell, Menu, LayoutDashboard, BarChart3, Database, Receipt, HardDrive, Server, Layers, MessageSquare, Wallet, Ticket, Network, Terminal, UploadCloud, MapPin, Flame, Activity, Gift, Clock, Code2, Sun, Moon, ShieldAlert, Loader2, Plus, ChevronDown, Search, Rocket, Boxes, Sparkles, Bot } from "lucide-react";
+import { Key, Settings, LogOut, Bell, Menu, LayoutDashboard, BarChart3, Database, Receipt, HardDrive, Server, Layers, MessageSquare, Wallet, Ticket, Network, Terminal, UploadCloud, MapPin, Flame, Activity, Gift, Clock, Code2, Sun, Moon, ShieldAlert, Loader2, Plus, ChevronDown, Search, Rocket, Boxes, Globe, Sparkles, Bot } from "lucide-react";
 import { SiKubernetes, SiCloudflare } from "react-icons/si";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -78,6 +78,7 @@ const SIDEBAR_LINKS = [
   { name: "Cloud VPS", href: "/dashboard/vps", icon: Terminal, color: "text-cyan-400", group: "Compute" },
   { name: "App Catalog", href: "/dashboard/catalog-apps", icon: Rocket, color: "text-cyan-400", group: "Applications" },
   { name: "Managed Apps", href: "/dashboard/apps", icon: Boxes, color: "text-cyan-400", group: "Applications", badge: "New" },
+  { name: "App Platform", href: "/dashboard/app-platform", icon: Globe, color: "text-cyan-400", group: "Applications", badge: "New" },
   { name: "Metric & Alert", href: "/dashboard/alerts", icon: Activity, color: "text-cyan-400", group: "Service Configuration" },
   { name: "Incident Reports", href: "/dashboard/incidents", icon: ShieldAlert, color: "text-cyan-400", group: "Service Configuration" },
   { name: "Auto Scheduler", href: "/dashboard/scheduler", icon: Clock, color: "text-cyan-400", group: "Service Configuration" },

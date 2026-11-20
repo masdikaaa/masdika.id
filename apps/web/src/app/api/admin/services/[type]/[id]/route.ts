@@ -35,6 +35,15 @@ async function settleAdminTerminatedInvoice(type: string, id: number, record: an
         type: 'MANAGED_APP',
       });
       break;
+    case 'app-platform':
+      await settleServicePaygInvoices(prisma, {
+        userId,
+        serviceIdField: 'appPlatformServiceId',
+        serviceId: id,
+        serviceName: record?.name,
+        type: 'APP_PLATFORM',
+      });
+      break;
     case 'object-storage':
       await settleServicePaygInvoices(prisma, {
         userId,
@@ -130,6 +139,19 @@ export async function DELETE(req: Request, props: { params: Promise<{ type: stri
             }
           }
           result = await prisma.appService.delete({ where: { id } });
+          break;
+        }
+        case 'app-platform': {
+          const appHard = await prisma.appPlatformService.findUnique({ where: { id } });
+          if (appHard) {
+            try {
+              const { deleteAppPlatformResources } = await import('@/lib/k8s-app-platform');
+              await deleteAppPlatformResources(appHard as any);
+            } catch (k8sErr) {
+              console.warn(`[K8s-Cleanup] Failed to delete app-platform ${id} resources:`, k8sErr);
+            }
+          }
+          result = await prisma.appPlatformService.delete({ where: { id } });
           break;
         }
         case 'object-storage': {
@@ -267,6 +289,33 @@ export async function DELETE(req: Request, props: { params: Promise<{ type: stri
           }
         }
         result = await prisma.appService.update({
+          where: { id },
+          data: { status: statusValue, terminationDate: new Date() }
+        });
+        if (appSoft?.user) {
+          sendTerminationEmail(
+            appSoft.user.email,
+            appSoft.user.name || 'Customer',
+            appSoft.planName,
+            appSoft.name
+          ).catch(console.error);
+        }
+        break;
+      }
+      case 'app-platform': {
+        const appSoft = await prisma.appPlatformService.findUnique({
+          where: { id },
+          include: { user: true }
+        });
+        if (appSoft) {
+          try {
+            const { deleteAppPlatformResources } = await import('@/lib/k8s-app-platform');
+            await deleteAppPlatformResources(appSoft as any);
+          } catch (k8sErr) {
+            console.warn(`[K8s-Cleanup] Failed to delete app-platform ${id} resources:`, k8sErr);
+          }
+        }
+        result = await prisma.appPlatformService.update({
           where: { id },
           data: { status: statusValue, terminationDate: new Date() }
         });

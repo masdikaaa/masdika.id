@@ -622,12 +622,77 @@ export async function attemptAutoUnsuspendObjectStorage(serviceId: number) {
   }
 }
 
+/**
+ * Attempts to unsuspend an App Platform service if user has sufficient balance.
+ */
+export async function attemptAutoUnsuspendAppPlatform(appId: number) {
+  try {
+    const app = await prisma.appPlatformService.findUnique({
+      where: { id: appId },
+      include: { user: true }
+    });
+
+    if (!app) return { success: false, message: 'App Platform service not found' };
+    if (app.status !== 'SUSPENDED') return { success: false, message: 'App Platform is not suspended' };
+
+    if (!isBillingSuspension(app.suspendReason)) {
+      return { success: false, unsuspended: false, reason: 'NON_BILLING_SUSPENSION' };
+    }
+
+    const hourlyRate = app.hourlyRate || 35;
+    if (app.user.balance < hourlyRate) {
+      return { success: false, unsuspended: false, reason: 'INSUFFICIENT_BALANCE' };
+    }
+
+    await prisma.$transaction(async (tx) => {
+      const lockApp = await tx.appPlatformService.updateMany({
+        where: { id: app.id, status: 'SUSPENDED' },
+        data: {
+          status: 'RUNNING',
+          suspendReason: null,
+          terminationDate: null,
+          accumulatedCost: { increment: hourlyRate },
+          lastBilledAt: new Date()
+        }
+      });
+      if (lockApp.count === 0) throw new Error("ALREADY_UNSUSPENDED");
+
+      const updateResult = await tx.user.updateMany({
+        where: { id: app.userId, balance: { gte: hourlyRate } },
+        data: { balance: { decrement: hourlyRate } }
+      });
+      if (updateResult.count === 0) throw new Error("INSUFFICIENT_BALANCE");
+    });
+
+    // Scale up K8s pod to 1 replica
+    try {
+      const { scaleAppPlatform } = await import('@/lib/k8s-app-platform');
+      await scaleAppPlatform(app as any, 1);
+    } catch (startErr) {
+      console.error(`[Auto-Unsuspend] Failed to start pod for App Platform ${app.id}:`, startErr);
+    }
+
+    // Send notifications
+    const email = decryptDeterministic(app.user.email) || app.user.email;
+    const name = decryptDeterministic(app.user.name) || app.user.name;
+    if (email) {
+      sendReactivatedEmail(email, name, app.name, 'App Platform').catch(console.error);
+      sendAdminServiceReactivatedEmail(name, email, app.name, 'App Platform').catch(console.error);
+    }
+
+    return { success: true, unsuspended: true };
+  } catch (err: any) {
+    return { success: false, message: err.message };
+  }
+}
+
 export async function attemptAutoUnsuspendAllForUser(userId: number) {
   let vpsCount = 0;
   let subCount = 0;
   let dbCount = 0;
   let appCount = 0;
   let objCount = 0;
+  let appPlatformCount = 0;
   const errors: any[] = [];
 
   try {
@@ -703,12 +768,25 @@ export async function attemptAutoUnsuspendAllForUser(userId: number) {
       const res = await attemptAutoUnsuspendObjectStorage(obj.id);
       if (res.unsuspended) objCount++;
     }
+
+    const suspendedAppPlatforms = await prisma.appPlatformService.findMany({
+      where: {
+        userId,
+        status: 'SUSPENDED',
+      },
+      select: { id: true },
+    });
+
+    for (const app of suspendedAppPlatforms) {
+      const res = await attemptAutoUnsuspendAppPlatform(app.id);
+      if (res.unsuspended) appPlatformCount++;
+    }
   } catch (err) {
     console.error(`[Auto-Unsuspend] Failed to auto-unsuspend all for user ${userId}:`, err);
     errors.push(err);
   }
 
-  return { vpsCount, subCount, dbCount, appCount, objCount, errors };
+  return { vpsCount, subCount, dbCount, appCount, objCount, appPlatformCount, errors };
 }
 
 /**
@@ -720,6 +798,8 @@ export async function attemptAutoUnsuspendAll() {
   let subCount = 0;
   let dbCount = 0;
   let appCount = 0;
+  let objCount = 0;
+  let appPlatformCount = 0;
   const errors: any[] = [];
 
   try {
@@ -780,10 +860,19 @@ export async function attemptAutoUnsuspendAll() {
       const res = await attemptAutoUnsuspendObjectStorage(obj.id);
       if (res.unsuspended) objCount++;
     }
+
+    const suspendedAppPlatforms = await prisma.appPlatformService.findMany({
+      where: { status: 'SUSPENDED' },
+      select: { id: true },
+    });
+    for (const app of suspendedAppPlatforms) {
+      const res = await attemptAutoUnsuspendAppPlatform(app.id);
+      if (res.unsuspended) appPlatformCount++;
+    }
   } catch (err) {
     console.error('[Auto-Unsuspend] Global auto-unsuspend batch failed:', err);
     errors.push(err);
   }
 
-  return { vpsCount, subCount, dbCount, appCount, errors };
+  return { vpsCount, subCount, dbCount, appCount, objCount, appPlatformCount, errors };
 }

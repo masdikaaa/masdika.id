@@ -8,7 +8,8 @@ export type ServiceSettingKey =
   | 'object_storage_enabled'
   | 'ai_gateway_enabled'
   | 'reserved_ip_enabled'
-  | 'vpc_enabled';
+  | 'vpc_enabled'
+  | 'app_platform_enabled';
 
 export const SERVICE_SETTING_KEYS: readonly ServiceSettingKey[] = [
   'vps_enabled',
@@ -19,6 +20,7 @@ export const SERVICE_SETTING_KEYS: readonly ServiceSettingKey[] = [
   'ai_gateway_enabled',
   'reserved_ip_enabled',
   'vpc_enabled',
+  'app_platform_enabled',
 ] as const;
 
 export async function isServiceEnabled(key: ServiceSettingKey): Promise<boolean> {
