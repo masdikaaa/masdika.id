@@ -632,7 +632,7 @@ function parseEnvVarsToK8sEnv(envVarsString?: string | null): Array<{ name: stri
  * Ensure in-cluster private Docker Registry (registry:2) is deployed and running
  */
 export async function ensureAppPlatformRegistry(): Promise<void> {
-  const { kc, coreApi } = await getAppPlatformK8sClients();
+  const { kc, coreApi, appsApi } = await getAppPlatformK8sClients();
   const namespace = 'app-platform';
 
   // Ensure namespace exists
@@ -646,22 +646,41 @@ export async function ensureAppPlatformRegistry(): Promise<void> {
     }
   }
 
+  // Clean up any old broken PVC if it exists to avoid blocking
+  try {
+    await (coreApi as any).deleteNamespacedPersistentVolumeClaim({
+      name: 'app-platform-registry-pvc',
+      namespace,
+    });
+  } catch {}
+
+  // Check if existing deployment is stuck with old PVC and recreate if needed
+  try {
+    const existingDep = await (appsApi as any).readNamespacedDeployment({
+      name: 'app-platform-registry',
+      namespace,
+    });
+    const depObj = existingDep?.body || existingDep;
+    const vols = depObj?.spec?.template?.spec?.volumes || [];
+    const hasPvc = vols.some((v: any) => v.persistentVolumeClaim);
+    if (hasPvc) {
+      await (appsApi as any).deleteNamespacedDeployment({
+        name: 'app-platform-registry',
+        namespace,
+      });
+      const podsRes: any = await (coreApi as any).listNamespacedPod({
+        namespace,
+        labelSelector: 'app=app-platform-registry',
+      });
+      for (const p of podsRes?.items || podsRes?.body?.items || []) {
+        if (p?.metadata?.name) {
+          await (coreApi as any).deleteNamespacedPod({ name: p.metadata.name, namespace }).catch(() => {});
+        }
+      }
+    }
+  } catch {}
+
   const registryYaml = `
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: app-platform-registry-pvc
-  namespace: ${namespace}
-  labels:
-    app: app-platform-registry
-    app.kubernetes.io/managed-by: masdika-app-platform
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -699,22 +718,12 @@ spec:
         volumeMounts:
         - name: registry-data
           mountPath: /var/lib/registry
-        livenessProbe:
-          httpGet:
-            path: /v2/
-            port: 5000
-          initialDelaySeconds: 5
-          periodSeconds: 15
-          timeoutSeconds: 3
-          failureThreshold: 3
         readinessProbe:
-          httpGet:
-            path: /v2/
+          tcpSocket:
             port: 5000
-          initialDelaySeconds: 3
-          periodSeconds: 5
-          timeoutSeconds: 2
-          failureThreshold: 2
+          initialDelaySeconds: 2
+          periodSeconds: 3
+          failureThreshold: 20
         resources:
           requests:
             cpu: 100m
@@ -724,8 +733,9 @@ spec:
             memory: 512Mi
       volumes:
       - name: registry-data
-        persistentVolumeClaim:
-          claimName: app-platform-registry-pvc
+        hostPath:
+          path: /var/lib/masdika/registry
+          type: DirectoryOrCreate
 ---
 apiVersion: v1
 kind: Service
@@ -750,12 +760,13 @@ spec:
 
 /**
  * Wait for the in-cluster Docker registry pod to be Ready before triggering Kaniko build.
- * Polls every 2s for up to 60s. If the registry doesn't become ready, throws an error.
+ * Polls every 2s for up to 60s. Throws if the registry does not become ready.
  */
 async function waitForRegistryReady(coreApi: k8s.CoreV1Api, maxWaitMs = 60000): Promise<void> {
   const namespace = 'app-platform';
   const startTime = Date.now();
 
+  let lastPodState = 'Initializing';
   while (Date.now() - startTime < maxWaitMs) {
     try {
       const podsRes: any = await (coreApi as any).listNamespacedPod({
@@ -763,20 +774,25 @@ async function waitForRegistryReady(coreApi: k8s.CoreV1Api, maxWaitMs = 60000): 
         labelSelector: 'app=app-platform-registry',
       });
       const pods = podsRes?.items || podsRes?.body?.items || [];
-      const readyPod = pods.find((p: any) => {
-        const conditions = p?.status?.conditions || [];
-        return conditions.some((c: any) => c.type === 'Ready' && c.status === 'True');
-      });
-      if (readyPod) return; // Registry is ready
+      if (pods.length > 0) {
+        const pod = pods[0];
+        const phase = pod?.status?.phase || 'Unknown';
+        const conditions = pod?.status?.conditions || [];
+        const isReady = conditions.some((c: any) => c.type === 'Ready' && c.status === 'True');
+        const containerWaiting = pod?.status?.containerStatuses?.[0]?.state?.waiting?.reason;
+        lastPodState = `Phase: ${phase}, Ready: ${isReady}, Reason: ${containerWaiting || 'none'}`;
+
+        if (isReady) {
+          return; // Registry is ready and accepting traffic
+        }
+      }
     } catch {
       // ignore transient API errors during polling
     }
     await new Promise((r) => setTimeout(r, 2000));
   }
 
-  // If we reach here, registry never became ready — log warning but don't block
-  // (the build will fail with connection refused, which is better than hanging forever)
-  console.warn('[AppPlatform] Registry pod did not become ready within timeout, proceeding anyway');
+  throw new Error(`In-cluster Docker registry did not become ready within ${maxWaitMs / 1000}s. Last state: [${lastPodState}].`);
 }
 
 /**
