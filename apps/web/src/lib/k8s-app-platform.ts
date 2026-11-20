@@ -1691,6 +1691,14 @@ export async function applyAppPlatformResources(
     },
   };
 
+  let redirectMiddlewareReady = false;
+  try {
+    await applyKubernetesManifests(kc, k8s.dumpYaml(redirectMiddlewareManifest));
+    redirectMiddlewareReady = true;
+  } catch (mwErr: any) {
+    console.warn('[AppPlatform] Traefik redirect-https Middleware warning:', mwErr?.body?.message || mwErr?.message || mwErr);
+  }
+
   const ingressManifest: k8s.V1Ingress = {
     apiVersion: 'networking.k8s.io/v1',
     kind: 'Ingress',
@@ -1700,7 +1708,9 @@ export async function applyAppPlatformResources(
       annotations: {
         'cert-manager.io/cluster-issuer': 'letsencrypt-prod',
         'traefik.ingress.kubernetes.io/router.entrypoints': 'web,websecure',
-        'traefik.ingress.kubernetes.io/router.middlewares': `${namespace}-redirect-https@kubernetescrd`,
+        ...(redirectMiddlewareReady
+          ? { 'traefik.ingress.kubernetes.io/router.middlewares': `${namespace}-redirect-https@kubernetescrd` }
+          : { 'traefik.ingress.kubernetes.io/router.tls': 'true' }),
       },
       labels: {
         app: app.subdomain,
@@ -1720,7 +1730,6 @@ export async function applyAppPlatformResources(
   };
 
   const manifestsYaml = [
-    k8s.dumpYaml(redirectMiddlewareManifest),
     k8s.dumpYaml(deploymentManifest),
     k8s.dumpYaml(serviceManifest),
     k8s.dumpYaml(ingressManifest),
@@ -1905,11 +1914,17 @@ export async function trackAppPlatformBuildAsync(
     }
   } catch (err: any) {
     console.error(`[AppPlatform] Build tracking error for ${jobName}:`, err);
+    const errMsg = err?.body?.message || err?.message || String(err);
+    const existingApp = await prisma.appPlatformService.findUnique({
+      where: { id: appId },
+      select: { lastBuildLog: true },
+    }).catch(() => null);
     await prisma.appPlatformService.update({
       where: { id: appId },
       data: {
         status: 'ERROR',
         lastBuildStatus: 'FAILED',
+        lastBuildLog: `${existingApp?.lastBuildLog || ''}\n[Deploy/Tracking Error] ${errMsg}`.slice(-25000),
       },
     }).catch(() => {});
 
