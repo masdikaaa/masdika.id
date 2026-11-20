@@ -66,6 +66,8 @@ import {
 import { toast } from "sonner";
 import { formatRupiah } from "@/lib/billing";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { AdminCheckbox } from "@/components/ui/AdminCheckbox";
+import { Select } from "@/components/ui/Select";
 
 function cleanTerminalLogs(raw?: string | null): string {
   if (!raw) return "";
@@ -1856,69 +1858,69 @@ export default function AppPlatformDetailPage({
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <label className={cn(
-                "p-3.5 rounded-xl border flex items-center justify-between cursor-pointer",
+              <div className={cn(
+                "p-3.5 rounded-xl border",
                 isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200"
               )}>
-                <div>
-                  <div className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>Auto Deploy</div>
-                  <div className="text-[11px] text-zinc-500">Automatically build &amp; deploy on trigger events</div>
-                </div>
-                <input
-                  type="checkbox"
+                <AdminCheckbox
                   checked={settingsAutoDeploy}
-                  onChange={(e) => setSettingsAutoDeploy(e.target.checked)}
-                  className="w-4 h-4 accent-cyan-400 cursor-pointer"
+                  onChange={setSettingsAutoDeploy}
+                  label={
+                    <div>
+                      <div className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>Auto Deploy</div>
+                      <div className="text-[11px] text-zinc-500 font-normal">Automatically build &amp; deploy on trigger events</div>
+                    </div>
+                  }
                 />
-              </label>
+              </div>
 
-              <label className={cn(
-                "p-3.5 rounded-xl border flex items-center justify-between cursor-pointer",
+              <div className={cn(
+                "p-3.5 rounded-xl border",
                 isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200"
               )}>
-                <div>
-                  <div className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>Deploy on Push</div>
-                  <div className="text-[11px] text-zinc-500">Trigger rebuild when pushing to branch {settingsBranch || "main"}</div>
-                </div>
-                <input
-                  type="checkbox"
+                <AdminCheckbox
                   checked={settingsDeployOnPush}
-                  onChange={(e) => setSettingsDeployOnPush(e.target.checked)}
-                  className="w-4 h-4 accent-cyan-400 cursor-pointer"
+                  onChange={setSettingsDeployOnPush}
+                  label={
+                    <div>
+                      <div className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>Deploy on Push</div>
+                      <div className="text-[11px] text-zinc-500 font-normal">Trigger rebuild when pushing to branch {settingsBranch || "main"}</div>
+                    </div>
+                  }
                 />
-              </label>
+              </div>
 
-              <label className={cn(
-                "p-3.5 rounded-xl border flex items-center justify-between cursor-pointer",
+              <div className={cn(
+                "p-3.5 rounded-xl border",
                 isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200"
               )}>
-                <div>
-                  <div className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>Registry Layer Build Cache</div>
-                  <div className="text-[11px] text-zinc-500">Cache Docker layers in cluster registry for faster rebuilds</div>
-                </div>
-                <input
-                  type="checkbox"
+                <AdminCheckbox
                   checked={settingsBuildCache}
-                  onChange={(e) => setSettingsBuildCache(e.target.checked)}
-                  className="w-4 h-4 accent-cyan-400 cursor-pointer"
+                  onChange={setSettingsBuildCache}
+                  label={
+                    <div>
+                      <div className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>Registry Layer Build Cache</div>
+                      <div className="text-[11px] text-zinc-500 font-normal">Cache Docker layers in cluster registry for faster rebuilds</div>
+                    </div>
+                  }
                 />
-              </label>
+              </div>
 
-              <label className={cn(
-                "p-3.5 rounded-xl border flex items-center justify-between cursor-pointer",
+              <div className={cn(
+                "p-3.5 rounded-xl border",
                 isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200"
               )}>
-                <div>
-                  <div className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>PR Preview Environments</div>
-                  <div className="text-[11px] text-zinc-500">Auto-deploy ephemeral preview URLs on Pull Requests</div>
-                </div>
-                <input
-                  type="checkbox"
+                <AdminCheckbox
                   checked={settingsPrPreview}
-                  onChange={(e) => setSettingsPrPreview(e.target.checked)}
-                  className="w-4 h-4 accent-cyan-400 cursor-pointer"
+                  onChange={setSettingsPrPreview}
+                  label={
+                    <div>
+                      <div className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>PR Preview Environments</div>
+                      <div className="text-[11px] text-zinc-500 font-normal">Auto-deploy ephemeral preview URLs on Pull Requests</div>
+                    </div>
+                  }
                 />
-              </label>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -1958,19 +1960,16 @@ export default function AppPlatformDetailPage({
                 <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
                   Persistent Disk Size (GB)
                 </label>
-                <select
+                <Select
                   value={settingsPvGb}
-                  onChange={(e) => setSettingsPvGb(Number(e.target.value))}
-                  className={cn(
-                    "w-full px-3.5 py-2.5 rounded-xl text-xs font-mono border transition-colors focus:outline-none focus:border-cyan-400 cursor-pointer",
-                    isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
-                  )}
-                >
-                  <option value={0}>Disabled (Ephemeral)</option>
-                  <option value={1}>1 GB</option>
-                  <option value={5}>5 GB</option>
-                  <option value={10}>10 GB</option>
-                </select>
+                  onChange={(val) => setSettingsPvGb(Number(val))}
+                  options={[
+                    { value: 0, label: "Disabled (Ephemeral)" },
+                    { value: 1, label: "1 GB Persistent Disk" },
+                    { value: 5, label: "5 GB Persistent Disk" },
+                    { value: 10, label: "10 GB Persistent Disk" },
+                  ]}
+                />
               </div>
             </div>
 
