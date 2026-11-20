@@ -594,6 +594,9 @@ export default function NewAppPlatformPage() {
   // Update defaults when framework changes
   const handleFrameworkChange = (fwId: string) => {
     setBuildType(fwId);
+    if (fwId === "DOCKERFILE") {
+      setBuildMode("DOCKERFILE");
+    }
     const fw = FRAMEWORKS.find((f) => f.id === fwId);
     if (fw) {
       setAppPort(fw.defaultPort);
@@ -1642,7 +1645,17 @@ export default function NewAppPlatformPage() {
                 <span className="font-bold uppercase tracking-wider text-zinc-400">
                   Build &amp; Run Overrides ({activeFrameworkObj.name})
                 </span>
-                <span className="text-[11px] text-zinc-500">Optional overrides</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBuildMode("DOCKERFILE");
+                    setDockerfileSource("INLINE");
+                    setBuildType("DOCKERFILE");
+                  }}
+                  className="text-[11px] font-bold text-cyan-400 hover:underline cursor-pointer"
+                >
+                  Use Custom Dockerfile Instead →
+                </button>
               </div>
 
               {buildType !== "DOCKERFILE" ? (
