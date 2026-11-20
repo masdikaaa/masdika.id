@@ -327,13 +327,15 @@ CMD ["npm", "start"]`,
     port: 80,
     content: `FROM composer:2 AS vendor
 WORKDIR /app
+ENV COMPOSER_NO_BLOCKING=1
+ENV COMPOSER_NO_SECURITY_BLOCKING=1
 COPY . /app
-RUN if [ -f composer.json ]; then composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-scripts --ignore-platform-reqs || true; composer dump-autoload --optimize --no-dev --no-scripts --ignore-platform-reqs || true; fi
+RUN if [ -f composer.json ]; then composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-scripts --ignore-platform-reqs --no-audit || composer update --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-scripts --ignore-platform-reqs --no-audit; composer dump-autoload --optimize --no-dev --no-scripts --ignore-platform-reqs; fi
 
 FROM node:20-alpine AS frontend
 WORKDIR /app
 COPY --from=vendor /app /app
-RUN if [ -f package.json ]; then (npm ci || npm install || true) && (npm run build || true); fi
+RUN if [ -f package.json ]; then (if [ -f package-lock.json ]; then npm ci; else npm install; fi || true) && (npm run build || true); fi
 
 FROM php:8.3-apache
 WORKDIR /var/www/html
