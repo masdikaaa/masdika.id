@@ -69,10 +69,11 @@ describe('App Platform Engine & Capabilities', () => {
       expect(df).toContain('EXPOSE 8080');
     });
 
-    it('generates PHP Apache Dockerfile with install-php-extensions for Kaniko', () => {
+    it('generates PHP Apache Dockerfile with docker-php-ext-install for Kaniko compatibility', () => {
       const df = generateDockerfileForFramework('PHP', null, null, 80);
       expect(df).toContain('FROM php:8.2-apache');
-      expect(df).toContain('install-php-extensions');
+      expect(df).toContain('docker-php-ext-install');
+      expect(df).toContain('getcomposer.org');
       expect(df).toContain('EXPOSE 80');
     });
 
