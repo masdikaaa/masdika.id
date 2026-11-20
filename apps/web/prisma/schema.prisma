@@ -38,6 +38,8 @@ model User {
   postalCode         String?
   state              String?
   isReseller         Boolean               @default(false)
+  githubUsername     String?
+  githubAccessToken  String?
   affiliateEarnings  AffiliateEarning[]
   apiKeys            ApiKey[]
   posts              BlogPost[]
@@ -1279,6 +1281,11 @@ model AppPlatformService {
   autoDeploy        Boolean   @default(true)
   deployOnPush      Boolean   @default(true)
   buildMode         String    @default("DOCKERFILE") // "AUTO", "DOCKERFILE", "BUILDPACK"
+  healthCheckPath   String?
+  persistentVolumePath String?
+  persistentVolumeGb   Int    @default(0)
+  enableBuildCache  Boolean   @default(true)
+  prPreviewEnabled  Boolean   @default(false)
 
   deployments       AppPlatformDeployment[]
 

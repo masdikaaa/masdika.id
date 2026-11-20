@@ -120,6 +120,11 @@ export async function PATCH(
       appPort,
       autoDeploy,
       deployOnPush,
+      healthCheckPath,
+      persistentVolumePath,
+      persistentVolumeGb,
+      enableBuildCache,
+      prPreviewEnabled,
     } = body;
 
     const dataToUpdate: any = {};
@@ -137,6 +142,11 @@ export async function PATCH(
     if (appPort && !isNaN(parseInt(appPort, 10))) dataToUpdate.appPort = parseInt(appPort, 10);
     if (typeof autoDeploy === "boolean") dataToUpdate.autoDeploy = autoDeploy;
     if (typeof deployOnPush === "boolean") dataToUpdate.deployOnPush = deployOnPush;
+    if (healthCheckPath !== undefined) dataToUpdate.healthCheckPath = healthCheckPath ? String(healthCheckPath).trim() : null;
+    if (persistentVolumePath !== undefined) dataToUpdate.persistentVolumePath = persistentVolumePath ? String(persistentVolumePath).trim() : null;
+    if (persistentVolumeGb !== undefined) dataToUpdate.persistentVolumeGb = Math.max(0, Math.min(50, parseInt(persistentVolumeGb, 10) || 0));
+    if (typeof enableBuildCache === "boolean") dataToUpdate.enableBuildCache = enableBuildCache;
+    if (typeof prPreviewEnabled === "boolean") dataToUpdate.prPreviewEnabled = prPreviewEnabled;
 
     const updated = await prisma.appPlatformService.update({
       where: { id: appId },

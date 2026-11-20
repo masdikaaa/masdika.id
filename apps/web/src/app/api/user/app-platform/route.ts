@@ -16,6 +16,7 @@ import { getClientIp } from "@/lib/get-ip";
 import { logClientActivity } from "@/lib/activity-log";
 import { isServiceEnabled } from "@/lib/service-availability";
 import { createServiceOrderInvoice } from "@/lib/payg-invoice";
+import { decryptDeterministic } from "@/lib/encryption";
 import crypto from "crypto";
 
 export async function GET(req: NextRequest) {
@@ -89,7 +90,7 @@ export async function POST(req: NextRequest) {
     // Fresh User Balance & Suspension Check
     const user = await prisma.user.findUnique({
       where: { id: authUser.id },
-      select: { id: true, email: true, name: true, role: true, balance: true, isSuspended: true, suspendReason: true },
+      select: { id: true, email: true, name: true, role: true, balance: true, isSuspended: true, suspendReason: true, githubAccessToken: true },
     });
 
     if (!user) {
@@ -136,9 +137,26 @@ export async function POST(req: NextRequest) {
     }
 
     // Git URL Validation (public git repos: https:// or git://)
-    const cleanGitUrl = typeof gitUrl === "string" ? gitUrl.trim() : "";
+    let cleanGitUrl = typeof gitUrl === "string" ? gitUrl.trim() : "";
     if (!cleanGitUrl || !/^(https?|git):\/\/[^\s$.?#].[^\s]*$/.test(cleanGitUrl)) {
       return NextResponse.json({ error: "Please enter a valid Git repository URL (e.g. https://github.com/username/repository.git)." }, { status: 400 });
+    }
+
+    // Automatically inject connected GitHub token for GitHub repos if no inline token is already present
+    if (
+      user.githubAccessToken &&
+      cleanGitUrl.startsWith("https://github.com/") &&
+      !cleanGitUrl.includes("@github.com")
+    ) {
+      try {
+        const decryptedGhToken = decryptDeterministic(user.githubAccessToken);
+        if (decryptedGhToken) {
+          cleanGitUrl = cleanGitUrl.replace(
+            "https://github.com/",
+            `https://x-access-token:${encodeURIComponent(decryptedGhToken)}@github.com/`
+          );
+        }
+      } catch {}
     }
 
     const cleanBranch = typeof branch === "string" && branch.trim() ? branch.trim() : "main";
@@ -308,6 +326,11 @@ export async function POST(req: NextRequest) {
             autoDeploy: true,
             deployOnPush: true,
             buildMode: (body.buildMode || "DOCKERFILE").toUpperCase().trim(),
+            healthCheckPath: typeof body.healthCheckPath === "string" && body.healthCheckPath.trim() ? body.healthCheckPath.trim() : null,
+            persistentVolumePath: typeof body.persistentVolumePath === "string" && body.persistentVolumePath.trim() ? body.persistentVolumePath.trim() : null,
+            persistentVolumeGb: Number(body.persistentVolumeGb) > 0 ? Math.min(50, Math.round(Number(body.persistentVolumeGb))) : 0,
+            enableBuildCache: body.enableBuildCache !== false,
+            prPreviewEnabled: Boolean(body.prPreviewEnabled),
             node: "cloudapps",
             k8sNamespace: "app-platform",
             k8sDeployment: `app-${resolvedSubdomain}`,

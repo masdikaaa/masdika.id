@@ -83,12 +83,13 @@ export async function POST(
     }
 
     const body = await req.json().catch(() => ({}));
-    const commitHash = typeof body?.commitHash === "string" && body.commitHash.trim()
+    const requestedCommit = typeof body?.commitHash === "string" && body.commitHash.trim()
       ? body.commitHash.trim().slice(0, 40)
-      : app.lastCommitHash || null;
+      : null;
+    const commitHash = requestedCommit || app.lastCommitHash || null;
     const commitMessage = typeof body?.commitMessage === "string" && body.commitMessage.trim()
       ? body.commitMessage.trim().slice(0, 200)
-      : (commitHash ? `Manual deploy (${commitHash.slice(0, 7)})` : "Manual deployment triggered");
+      : (requestedCommit ? `Deploy commit ${requestedCommit.slice(0, 7)}` : "Manual deployment triggered");
 
     const depCount = await prisma.appPlatformDeployment.count({ where: { appId } });
     const deployment = await prisma.appPlatformDeployment.create({
@@ -103,7 +104,7 @@ export async function POST(
       },
     });
 
-    const { jobName, imageTag } = await triggerAppPlatformBuild(app as any, deployment.id);
+    const { jobName, imageTag } = await triggerAppPlatformBuild(app as any, deployment.id, requestedCommit);
 
     trackAppPlatformBuildAsync(app.id, jobName, imageTag, deployment.id).catch((err) => {
       console.error("[AppPlatform] Manual deploy async tracking error:", err);

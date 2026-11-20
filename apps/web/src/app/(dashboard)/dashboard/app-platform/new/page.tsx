@@ -444,6 +444,23 @@ export default function NewAppPlatformPage() {
   const [detectingRepo, setDetectingRepo] = useState(false);
   const [detectedBadge, setDetectedBadge] = useState<string | null>(null);
 
+  // GitHub Integration & Repo Picker State
+  const [ghConnected, setGhConnected] = useState(false);
+  const [ghOauthConfigured, setGhOauthConfigured] = useState(false);
+  const [ghUsername, setGhUsername] = useState<string | null>(null);
+  const [ghRepos, setGhRepos] = useState<any[]>([]);
+  const [ghBranches, setGhBranches] = useState<string[]>([]);
+  const [ghPatInput, setGhPatInput] = useState("");
+  const [showGhPatBox, setShowGhPatBox] = useState(false);
+  const [ghLoading, setGhLoading] = useState(false);
+
+  // Advanced PaaS Options (Health Check, Persistent Volume, Cache, PR Previews)
+  const [healthCheckPath, setHealthCheckPath] = useState("");
+  const [persistentVolumePath, setPersistentVolumePath] = useState("");
+  const [persistentVolumeGb, setPersistentVolumeGb] = useState(0);
+  const [enableBuildCache, setEnableBuildCache] = useState(true);
+  const [prPreviewEnabled, setPrPreviewEnabled] = useState(false);
+
   // Framework UI Navigation (Category, Search, Pagination)
   const [frameworkCategory, setFrameworkCategory] = useState<string>("ALL");
   const [frameworkSearch, setFrameworkSearch] = useState<string>("");
@@ -488,6 +505,19 @@ export default function NewAppPlatformPage() {
       .then((json) => {
         if (json.success && json.data) {
           setClusterCapacity(json.data);
+        }
+      })
+      .catch(() => {});
+
+    // Fetch GitHub Connection & Repositories
+    fetch("/api/user/app-platform/github")
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success) {
+          setGhConnected(Boolean(json.connected));
+          setGhOauthConfigured(Boolean(json.oauthConfigured));
+          setGhUsername(json.githubUsername || null);
+          setGhRepos(Array.isArray(json.repos) ? json.repos : []);
         }
       })
       .catch(() => {});
@@ -633,6 +663,71 @@ export default function NewAppPlatformPage() {
     toast.success(`Loaded ${preset.name} template`);
   };
 
+  const handleConnectGithubPat = async () => {
+    if (!ghPatInput.trim()) {
+      toast.error("Please enter a GitHub Personal Access Token");
+      return;
+    }
+    setGhLoading(true);
+    try {
+      const res = await fetch("/api/user/app-platform/github", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: ghPatInput.trim() }),
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        toast.success(`Connected GitHub as @${json.githubUsername}`);
+        setShowGhPatBox(false);
+        setGhPatInput("");
+        const listRes = await fetch("/api/user/app-platform/github");
+        const listJson = await listRes.json();
+        if (listJson.success) {
+          setGhConnected(Boolean(listJson.connected));
+          setGhUsername(listJson.githubUsername || null);
+          setGhRepos(Array.isArray(listJson.repos) ? listJson.repos : []);
+        }
+      } else {
+        toast.error(json.error || "Failed to connect GitHub");
+      }
+    } catch {
+      toast.error("Connection error");
+    } finally {
+      setGhLoading(false);
+    }
+  };
+
+  const handleDisconnectGithub = async () => {
+    await fetch("/api/user/app-platform/github", { method: "DELETE" });
+    setGhConnected(false);
+    setGhUsername(null);
+    setGhRepos([]);
+    setGhBranches([]);
+    toast.success("GitHub account disconnected");
+  };
+
+  const handleSelectGithubRepo = async (fullName: string) => {
+    const repoObj = ghRepos.find((r) => r.fullName === fullName);
+    if (!repoObj) return;
+    setGitUrl(repoObj.cloneUrl);
+    setBranch(repoObj.defaultBranch || "main");
+    if (!name) {
+      setName(repoObj.name);
+      setSubdomain(generateAutoSubdomain(repoObj.name));
+    }
+    // Fetch branches for dropdown
+    fetch(`/api/user/app-platform/github?repo=${encodeURIComponent(fullName)}`)
+      .then((res) => res.json())
+      .then((j) => {
+        if (j.success && Array.isArray(j.branches)) {
+          setGhBranches(j.branches);
+        }
+      })
+      .catch(() => {});
+    // Automatically run stack detection
+    handleAutoDetectRepo(repoObj.cloneUrl);
+  };
+
   const handleAutoDetectRepo = async (overrideUrl?: string) => {
     const targetUrl = (overrideUrl ?? gitUrl).trim();
     if (!targetUrl) {
@@ -770,6 +865,11 @@ export default function NewAppPlatformPage() {
           subdomain: subdomain.trim().toLowerCase(),
           planCode: selectedPlan.planCode,
           billingMode: "PAYG",
+          healthCheckPath: healthCheckPath.trim() || null,
+          persistentVolumePath: persistentVolumePath.trim() || null,
+          persistentVolumeGb: Number(persistentVolumeGb) || 0,
+          enableBuildCache,
+          prPreviewEnabled,
         }),
       });
 
@@ -902,6 +1002,133 @@ export default function NewAppPlatformPage() {
 
             {/* Quick Starter Templates */}
             <div>
+              {/* GitHub Account Connection & Repository Picker */}
+              <div
+                className={cn(
+                  "p-3.5 rounded-xl border space-y-3 mb-3",
+                  isDark ? "bg-black/30 border-white/[0.08]" : "bg-slate-50 border-slate-200"
+                )}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <GitBranch className="w-4 h-4 text-cyan-400" />
+                    <span className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>
+                      GitHub Account Integration
+                    </span>
+                    {ghConnected && ghUsername && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                        @{ghUsername}
+                      </span>
+                    )}
+                  </div>
+
+                  {!ghConnected ? (
+                    <div className="flex flex-wrap items-center gap-2">
+                      {ghOauthConfigured && (
+                        <a
+                          href="/api/auth/github/login?returnTo=/dashboard/app-platform/new"
+                          className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-950 hover:bg-zinc-200 transition-colors cursor-pointer"
+                        >
+                          Connect GitHub OAuth
+                        </a>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setShowGhPatBox(!showGhPatBox)}
+                        className={cn(
+                          "px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors cursor-pointer",
+                          isDark
+                            ? "bg-white/5 border-white/10 text-zinc-300 hover:text-white"
+                            : "bg-white border-slate-200 text-slate-700"
+                        )}
+                      >
+                        {showGhPatBox ? "Cancel" : "Connect via GitHub Token"}
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleDisconnectGithub}
+                      className="text-[11px] font-semibold text-rose-400 hover:underline cursor-pointer"
+                    >
+                      Disconnect GitHub
+                    </button>
+                  )}
+                </div>
+
+                {showGhPatBox && !ghConnected && (
+                  <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                    <input
+                      type="password"
+                      value={ghPatInput}
+                      onChange={(e) => setGhPatInput(e.target.value)}
+                      placeholder="ghp_xxxxxxxxxxxxxxxxxxxx (repo scope)"
+                      className={cn(
+                        "flex-1 px-3 py-2 rounded-lg text-xs font-mono border focus:outline-none focus:border-cyan-400",
+                        isDark ? "bg-[#09090b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
+                      )}
+                    />
+                    <button
+                      type="button"
+                      disabled={ghLoading}
+                      onClick={handleConnectGithubPat}
+                      className="px-4 py-2 rounded-lg text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 cursor-pointer disabled:opacity-50"
+                    >
+                      {ghLoading ? "Connecting..." : "Save & Load Repos"}
+                    </button>
+                  </div>
+                )}
+
+                {ghConnected && ghRepos.length > 0 && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-1">
+                        Select Repository ({ghRepos.length})
+                      </label>
+                      <select
+                        onChange={(e) => handleSelectGithubRepo(e.target.value)}
+                        defaultValue=""
+                        className={cn(
+                          "w-full px-3 py-2 rounded-lg text-xs font-mono border focus:outline-none focus:border-cyan-400 cursor-pointer",
+                          isDark ? "bg-[#09090b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
+                        )}
+                      >
+                        <option value="" disabled>
+                          -- Choose a GitHub repository --
+                        </option>
+                        {ghRepos.map((r) => (
+                          <option key={r.id} value={r.fullName}>
+                            {r.fullName} {r.private ? "(Private)" : "(Public)"} {r.language ? `• ${r.language}` : ""}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {ghBranches.length > 0 && (
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-1">
+                          Select Branch
+                        </label>
+                        <select
+                          value={branch}
+                          onChange={(e) => setBranch(e.target.value)}
+                          className={cn(
+                            "w-full px-3 py-2 rounded-lg text-xs font-mono border focus:outline-none focus:border-cyan-400 cursor-pointer",
+                            isDark ? "bg-[#09090b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
+                          )}
+                        >
+                          {ghBranches.map((b) => (
+                            <option key={b} value={b}>
+                              {b}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
               <label
                 className={cn(
                   "block text-xs font-bold uppercase tracking-wider mb-2",
@@ -1817,6 +2044,93 @@ export default function NewAppPlatformPage() {
             </div>
               </>
             )}
+            {/* Advanced PaaS Production Features (Health Check, Persistent Storage, Cache, PR Previews) */}
+            <div
+              className={cn(
+                "p-4 rounded-xl border space-y-3 pt-4 border-t",
+                isDark ? "bg-black/20 border-white/[0.06]" : "bg-slate-50/70 border-slate-200"
+              )}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+                  Production &amp; Zero-Downtime Options (Optional)
+                </span>
+                <span className="text-[11px] text-cyan-400 font-semibold">Railway / PaaS Pro</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-1.5">
+                    Health Check Path
+                  </label>
+                  <input
+                    type="text"
+                    value={healthCheckPath}
+                    onChange={(e) => setHealthCheckPath(e.target.value)}
+                    placeholder="/health or /"
+                    className={cn(
+                      "w-full px-3 py-2 rounded-xl text-xs border font-mono transition-colors focus:outline-none focus:border-cyan-400",
+                      isDark ? "bg-black/30 border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
+                    )}
+                  />
+                  <p className="text-[10px] text-zinc-500 mt-1">Zero-downtime readiness probe</p>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-1.5">
+                    Persistent Volume Path
+                  </label>
+                  <input
+                    type="text"
+                    value={persistentVolumePath}
+                    onChange={(e) => setPersistentVolumePath(e.target.value)}
+                    placeholder="/var/www/html/storage"
+                    className={cn(
+                      "w-full px-3 py-2 rounded-xl text-xs border font-mono transition-colors focus:outline-none focus:border-cyan-400",
+                      isDark ? "bg-black/30 border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
+                    )}
+                  />
+                  <p className="text-[10px] text-zinc-500 mt-1">Mount permanent disk across redeploys</p>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-1.5">
+                    Volume Size (GB)
+                  </label>
+                  <select
+                    value={persistentVolumeGb}
+                    onChange={(e) => setPersistentVolumeGb(Number(e.target.value))}
+                    className={cn(
+                      "w-full px-3 py-2 rounded-xl text-xs border font-mono transition-colors focus:outline-none focus:border-cyan-400 cursor-pointer",
+                      isDark ? "bg-black/30 border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
+                    )}
+                  >
+                    <option value={0}>Disabled (Ephemeral)</option>
+                    <option value={1}>1 GB Persistent Disk</option>
+                    <option value={5}>5 GB Persistent Disk</option>
+                    <option value={10}>10 GB Persistent Disk</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <label className={cn("p-2.5 rounded-xl border flex items-center justify-between cursor-pointer", isDark ? "bg-black/30 border-white/[0.06]" : "bg-white border-slate-200")}>
+                  <div>
+                    <div className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>Registry Layer Build Cache</div>
+                    <div className="text-[10px] text-zinc-500">Cache Docker layers in cluster registry for faster rebuilds</div>
+                  </div>
+                  <input type="checkbox" checked={enableBuildCache} onChange={(e) => setEnableBuildCache(e.target.checked)} className="w-4 h-4 accent-cyan-400 cursor-pointer" />
+                </label>
+
+                <label className={cn("p-2.5 rounded-xl border flex items-center justify-between cursor-pointer", isDark ? "bg-black/30 border-white/[0.06]" : "bg-white border-slate-200")}>
+                  <div>
+                    <div className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>PR Preview Environments</div>
+                    <div className="text-[10px] text-zinc-500">Auto-deploy temporary preview URLs on Pull Requests</div>
+                  </div>
+                  <input type="checkbox" checked={prPreviewEnabled} onChange={(e) => setPrPreviewEnabled(e.target.checked)} className="w-4 h-4 accent-cyan-400 cursor-pointer" />
+                </label>
+              </div>
+            </div>
           </div>
 
           {/* Section 3: Compute Plan Selection (Matching Managed App 100%) */}

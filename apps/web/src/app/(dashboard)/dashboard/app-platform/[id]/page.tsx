@@ -135,12 +135,17 @@ export default function AppPlatformDetailPage({
   const [app, setApp] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [copiedField, setCopiedField] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"overview" | "deployments" | "build-logs" | "runtime-logs" | "settings">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "deployments" | "build-logs" | "runtime-logs" | "terminal" | "settings">("overview");
   const [deployments, setDeployments] = useState<any[]>([]);
   const [deployingManual, setDeployingManual] = useState(false);
   const [rollingBackId, setRollingBackId] = useState<number | null>(null);
   const [specificCommitHash, setSpecificCommitHash] = useState("");
   const [selectedDepLogs, setSelectedDepLogs] = useState<{ num: number; logs: string; status: string } | null>(null);
+
+  // Web Terminal (Exec) State
+  const [termCommand, setTermCommand] = useState("");
+  const [termRunning, setTermRunning] = useState(false);
+  const [termHistory, setTermHistory] = useState<{ cmd: string; stdout: string; stderr: string; exitCode: number }[]>([]);
 
   // Power actions & modal state
   const [actionLoading, setActionLoading] = useState(false);
@@ -166,6 +171,11 @@ export default function AppPlatformDetailPage({
   const [settingsAutoDeploy, setSettingsAutoDeploy] = useState(true);
   const [settingsDeployOnPush, setSettingsDeployOnPush] = useState(true);
   const [settingsBuildMode, setSettingsBuildMode] = useState("DOCKERFILE");
+  const [settingsHealthCheckPath, setSettingsHealthCheckPath] = useState("");
+  const [settingsPvPath, setSettingsPvPath] = useState("");
+  const [settingsPvGb, setSettingsPvGb] = useState(0);
+  const [settingsBuildCache, setSettingsBuildCache] = useState(true);
+  const [settingsPrPreview, setSettingsPrPreview] = useState(false);
   const [savingSettings, setSavingSettings] = useState(false);
 
   // Dedicated Resource Monitoring States (CPU, RAM, Disk)
@@ -208,6 +218,11 @@ export default function AppPlatformDetailPage({
         setSettingsStartCmd(json.data.startCommand || "");
         setSettingsEnvVars(json.data.envVars || "");
         setSettingsCustomDomain(json.data.customDomain || "");
+        setSettingsHealthCheckPath(json.data.healthCheckPath || "");
+        setSettingsPvPath(json.data.persistentVolumePath || "");
+        setSettingsPvGb(json.data.persistentVolumeGb || 0);
+        setSettingsBuildCache(json.data.enableBuildCache !== false);
+        setSettingsPrPreview(Boolean(json.data.prPreviewEnabled));
       } else {
         toast.error(json.error || "Failed to load application details");
       }
@@ -382,6 +397,45 @@ export default function AppPlatformDetailPage({
     }
   };
 
+  const handleRunTerminalCmd = async (e?: React.FormEvent, presetCmd?: string) => {
+    if (e) e.preventDefault();
+    const cmdToRun = (presetCmd ?? termCommand).trim();
+    if (!cmdToRun) return;
+    setTermRunning(true);
+    if (!presetCmd) setTermCommand("");
+    try {
+      const res = await fetch(`/api/user/app-platform/${id}/exec`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ command: cmdToRun }),
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        setTermHistory((prev) => [
+          ...prev,
+          {
+            cmd: cmdToRun,
+            stdout: json.data?.stdout || "",
+            stderr: json.data?.stderr || "",
+            exitCode: json.data?.exitCode ?? 0,
+          },
+        ]);
+      } else {
+        setTermHistory((prev) => [
+          ...prev,
+          { cmd: cmdToRun, stdout: "", stderr: json.error || "Execution failed", exitCode: 1 },
+        ]);
+      }
+    } catch {
+      setTermHistory((prev) => [
+        ...prev,
+        { cmd: cmdToRun, stdout: "", stderr: "Connection error", exitCode: 1 },
+      ]);
+    } finally {
+      setTermRunning(false);
+    }
+  };
+
   const handleSaveSettings = async (e?: React.FormEvent, triggerRebuild = false) => {
     if (e) e.preventDefault();
     setSavingSettings(true);
@@ -403,6 +457,11 @@ export default function AppPlatformDetailPage({
           startCommand: settingsStartCmd.trim() || null,
           envVars: settingsEnvVars.trim() || null,
           customDomain: settingsCustomDomain.trim() || null,
+          healthCheckPath: settingsHealthCheckPath.trim() || null,
+          persistentVolumePath: settingsPvPath.trim() || null,
+          persistentVolumeGb: Number(settingsPvGb) || 0,
+          enableBuildCache: settingsBuildCache,
+          prPreviewEnabled: settingsPrPreview,
         }),
       });
       const data = await res.json();
@@ -646,6 +705,7 @@ export default function AppPlatformDetailPage({
           { id: "deployments", label: "Deployments", icon: History },
           { id: "build-logs", label: "Build Logs", icon: FileText },
           { id: "runtime-logs", label: "Runtime Logs", icon: Terminal },
+          { id: "terminal", label: "Shell", icon: Code2 },
           { id: "settings", label: "Settings & Environment", icon: Settings },
         ].map((tab) => {
           const Icon = tab.icon;
@@ -1342,6 +1402,102 @@ export default function AppPlatformDetailPage({
         </div>
       )}
 
+      {/* TAB: WEB TERMINAL (EXEC SHELL) */}
+      {activeTab === "terminal" && (
+        <div className={cn(
+          "rounded-2xl border overflow-hidden shadow-sm transition-all",
+          isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200"
+        )}>
+          <div className={cn(
+            "px-4 py-3 border-b flex flex-wrap items-center justify-between gap-3 select-none",
+            isDark ? "bg-[#14161f] border-white/[0.08]" : "bg-slate-50/90 border-slate-200"
+          )}>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="w-3 h-3 rounded-full bg-[#ff5f56] inline-block" />
+                <span className="w-3 h-3 rounded-full bg-[#ffbd2e] inline-block" />
+                <span className="w-3 h-3 rounded-full bg-[#27c93f] inline-block" />
+              </div>
+              <div className="flex items-center gap-2 pl-2 border-l border-white/10 font-mono text-xs font-bold">
+                <Terminal className="w-3.5 h-3.5 text-cyan-400" />
+                <span>pod-shell — sh</span>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-1.5">
+              {["ls -la", "env", "df -h", "php artisan migrate --force", "npx prisma migrate deploy"].map((preset) => (
+                <button
+                  key={preset}
+                  type="button"
+                  disabled={termRunning || app?.status !== "RUNNING"}
+                  onClick={() => handleRunTerminalCmd(undefined, preset)}
+                  className={cn(
+                    "px-2.5 py-1 rounded-lg text-[11px] font-mono border transition-colors cursor-pointer disabled:opacity-40",
+                    isDark ? "bg-white/5 border-white/10 text-zinc-300 hover:text-cyan-400" : "bg-white border-slate-200 text-slate-700"
+                  )}
+                >
+                  {preset}
+                </button>
+              ))}
+              {termHistory.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setTermHistory([])}
+                  className="px-2.5 py-1 rounded-lg text-[11px] font-semibold text-zinc-400 hover:text-white cursor-pointer"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="p-4 sm:p-5 bg-[#090d16] font-mono text-xs min-h-[340px] max-h-[500px] overflow-y-auto space-y-3">
+            {app?.status !== "RUNNING" ? (
+              <div className="text-amber-400">
+                Container must be RUNNING to open an interactive shell session. Current status: {app?.status}.
+              </div>
+            ) : termHistory.length === 0 ? (
+              <div className="text-zinc-500">
+                Connected to container pod ({app?.subdomain}). Run any shell command below (e.g. <code>ls -la</code>, <code>php artisan migrate</code>).
+              </div>
+            ) : (
+              termHistory.map((item, i) => (
+                <div key={i} className="space-y-1">
+                  <div className="text-cyan-400 font-bold">
+                    $ {item.cmd}
+                  </div>
+                  {item.stdout && (
+                    <pre className="text-emerald-400 whitespace-pre-wrap break-words leading-relaxed">{item.stdout}</pre>
+                  )}
+                  {item.stderr && (
+                    <pre className="text-rose-400 whitespace-pre-wrap break-words leading-relaxed">{item.stderr}</pre>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+
+          <form onSubmit={(e) => handleRunTerminalCmd(e)} className="p-3 border-t border-white/[0.08] bg-[#0d111a] flex items-center gap-2">
+            <span className="font-mono text-xs text-cyan-400 font-bold pl-1">$</span>
+            <input
+              type="text"
+              value={termCommand}
+              onChange={(e) => setTermCommand(e.target.value)}
+              disabled={termRunning || app?.status !== "RUNNING"}
+              placeholder="Enter shell command (e.g. php artisan migrate --force)..."
+              className="flex-1 bg-transparent text-xs font-mono text-white placeholder-zinc-500 focus:outline-none"
+            />
+            <button
+              type="submit"
+              disabled={termRunning || !termCommand.trim() || app?.status !== "RUNNING"}
+              className="px-4 py-1.5 rounded-lg text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 cursor-pointer disabled:opacity-40"
+            >
+              {termRunning ? "Running..." : "Run"}
+            </button>
+          </form>
+        </div>
+      )}
+
       {/* TAB 4: SETTINGS & ENVIRONMENT */}
       {activeTab === "settings" && (
         <form onSubmit={(e) => handleSaveSettings(e, false)} className="space-y-6">
@@ -1708,6 +1864,91 @@ export default function AppPlatformDetailPage({
                   className="w-4 h-4 accent-cyan-400 cursor-pointer"
                 />
               </label>
+
+              <label className={cn(
+                "p-3.5 rounded-xl border flex items-center justify-between cursor-pointer",
+                isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200"
+              )}>
+                <div>
+                  <div className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>Registry Layer Build Cache</div>
+                  <div className="text-[11px] text-zinc-500">Cache Docker layers in cluster registry for faster rebuilds</div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={settingsBuildCache}
+                  onChange={(e) => setSettingsBuildCache(e.target.checked)}
+                  className="w-4 h-4 accent-cyan-400 cursor-pointer"
+                />
+              </label>
+
+              <label className={cn(
+                "p-3.5 rounded-xl border flex items-center justify-between cursor-pointer",
+                isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200"
+              )}>
+                <div>
+                  <div className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>PR Preview Environments</div>
+                  <div className="text-[11px] text-zinc-500">Auto-deploy ephemeral preview URLs on Pull Requests</div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={settingsPrPreview}
+                  onChange={(e) => setSettingsPrPreview(e.target.checked)}
+                  className="w-4 h-4 accent-cyan-400 cursor-pointer"
+                />
+              </label>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
+                  Health Check Path (Zero-Downtime)
+                </label>
+                <input
+                  type="text"
+                  value={settingsHealthCheckPath}
+                  onChange={(e) => setSettingsHealthCheckPath(e.target.value)}
+                  placeholder="/health or /"
+                  className={cn(
+                    "w-full px-3.5 py-2.5 rounded-xl text-xs font-mono border transition-colors focus:outline-none focus:border-cyan-400",
+                    isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+                  )}
+                />
+              </div>
+
+              <div>
+                <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
+                  Persistent Volume Mount Path
+                </label>
+                <input
+                  type="text"
+                  value={settingsPvPath}
+                  onChange={(e) => setSettingsPvPath(e.target.value)}
+                  placeholder="/var/www/html/storage"
+                  className={cn(
+                    "w-full px-3.5 py-2.5 rounded-xl text-xs font-mono border transition-colors focus:outline-none focus:border-cyan-400",
+                    isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+                  )}
+                />
+              </div>
+
+              <div>
+                <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
+                  Persistent Disk Size (GB)
+                </label>
+                <select
+                  value={settingsPvGb}
+                  onChange={(e) => setSettingsPvGb(Number(e.target.value))}
+                  className={cn(
+                    "w-full px-3.5 py-2.5 rounded-xl text-xs font-mono border transition-colors focus:outline-none focus:border-cyan-400 cursor-pointer",
+                    isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+                  )}
+                >
+                  <option value={0}>Disabled (Ephemeral)</option>
+                  <option value={1}>1 GB</option>
+                  <option value={5}>5 GB</option>
+                  <option value={10}>10 GB</option>
+                </select>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

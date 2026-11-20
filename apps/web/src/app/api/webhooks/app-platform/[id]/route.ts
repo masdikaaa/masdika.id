@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { triggerAppPlatformBuild, trackAppPlatformBuildAsync } from "@/lib/k8s-app-platform";
+import {
+  triggerAppPlatformBuild,
+  trackAppPlatformBuildAsync,
+  applyPrPreviewResources,
+  deletePrPreviewResources,
+} from "@/lib/k8s-app-platform";
 import crypto from "crypto";
 
 /**
@@ -70,6 +75,42 @@ export async function POST(
     const ghEvent = req.headers.get("x-github-event");
     if (ghEvent === "ping") {
       return NextResponse.json({ success: true, message: "Webhook connected successfully (pong)" });
+    }
+
+    // Handle GitHub Pull Request events for PR Preview Environments
+    if (ghEvent === "pull_request" && app.prPreviewEnabled) {
+      const prAction = payload.action;
+      const prNumber = Number(payload.number || payload.pull_request?.number);
+      const prHeadSha = payload.pull_request?.head?.sha ? String(payload.pull_request.head.sha) : null;
+      const prBranch = payload.pull_request?.head?.ref ? String(payload.pull_request.head.ref) : app.branch;
+
+      if (!prNumber || isNaN(prNumber)) {
+        return NextResponse.json({ success: true, ignored: true, message: "Missing PR number" });
+      }
+
+      if (prAction === "closed") {
+        await deletePrPreviewResources(app as any, prNumber).catch(() => {});
+        return NextResponse.json({ success: true, message: `PR #${prNumber} preview environment cleaned up.` });
+      }
+
+      if (["opened", "reopened", "synchronize"].includes(prAction)) {
+        const prTag = `pr-${prNumber}-${Date.now().toString(36)}`;
+        const { jobName } = await triggerAppPlatformBuild(
+          { ...app, branch: prBranch } as any,
+          undefined,
+          prHeadSha,
+          prTag
+        );
+        // Deploy ephemeral preview after short build watch
+        applyPrPreviewResources(app as any, prNumber, prTag).catch(() => {});
+        return NextResponse.json({
+          success: true,
+          message: `PR #${prNumber} preview build (${jobName}) triggered.`,
+          previewDomain: `pr-${prNumber}-${app.subdomain}.app.masdikacloud.my.id`,
+        });
+      }
+
+      return NextResponse.json({ success: true, ignored: true, message: `PR action '${prAction}' ignored.` });
     }
 
     if (!app.autoDeploy || !app.deployOnPush) {

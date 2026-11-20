@@ -15,6 +15,11 @@ export interface AppPlatformRecord {
   buildCommand?: string | null;
   startCommand?: string | null;
   envVars?: string | null;
+  healthCheckPath?: string | null;
+  persistentVolumePath?: string | null;
+  persistentVolumeGb?: number | null;
+  enableBuildCache?: boolean | null;
+  prPreviewEnabled?: boolean | null;
   subdomain: string;
   customDomain?: string | null;
   host: string;
@@ -863,12 +868,14 @@ export async function applyKubernetesManifests(kc: k8s.KubeConfig, manifestYaml:
  */
 export async function triggerAppPlatformBuild(
   app: AppPlatformRecord,
-  deploymentId?: number
+  deploymentId?: number,
+  commitHash?: string | null,
+  imageTagOverride?: string | null
 ): Promise<{ jobName: string; imageTag: string; deploymentId?: number }> {
   const { batchApi, coreApi } = await getAppPlatformK8sClients();
   const namespace = app.k8sNamespace || 'app-platform';
   const timestamp = Date.now();
-  const imageTag = `b${timestamp.toString(36)}`;
+  const imageTag = imageTagOverride || `b${timestamp.toString(36)}`;
   const jobName = `build-${app.subdomain}-${timestamp.toString(36)}`;
   const destinationImage = `127.0.0.1:5000/${app.subdomain}:${imageTag}`;
 
@@ -1054,7 +1061,9 @@ export async function triggerAppPlatformBuild(
               image: 'alpine/git:latest',
               command: ['sh', '-c'],
               args: [
-                `echo "Cloning ${gitUrl} (branch: ${branch})..." && (git clone --depth=1 --branch ${branch} ${gitUrl} /workspace/src 2>/dev/null || git clone --depth=1 ${gitUrl} /workspace/src) && cp -rf /workspace/src/. /workspace/ && rm -rf /workspace/src && chmod -R 777 /workspace && echo "Clone completed."`,
+                commitHash && /^[a-fA-F0-9]{4,40}$/.test(commitHash.trim())
+                  ? `echo "Cloning ${gitUrl} and checking out commit ${commitHash.trim()}..." && git clone ${gitUrl} /workspace/src && cd /workspace/src && git checkout ${commitHash.trim()} && cp -rf /workspace/src/. /workspace/ && rm -rf /workspace/src && chmod -R 777 /workspace && echo "Commit ${commitHash.trim()} checked out."`
+                  : `echo "Cloning ${gitUrl} (branch: ${branch})..." && (git clone --depth=1 --branch ${branch} ${gitUrl} /workspace/src 2>/dev/null || git clone --depth=1 ${gitUrl} /workspace/src) && cp -rf /workspace/src/. /workspace/ && rm -rf /workspace/src && chmod -R 777 /workspace && echo "Clone completed."`,
               ],
               volumeMounts: [
                 {
@@ -1118,7 +1127,13 @@ export async function triggerAppPlatformBuild(
                     `--destination=${destinationImage}`,
                     '--insecure',
                     '--skip-tls-verify',
-                    '--cache=false',
+                    ...(app.enableBuildCache !== false
+                      ? [
+                          '--cache=true',
+                          `--cache-repo=127.0.0.1:5000/${app.subdomain}-cache`,
+                          '--cache-ttl=168h',
+                        ]
+                      : ['--cache=false']),
                   ],
                   volumeMounts: [
                     {
@@ -1199,6 +1214,73 @@ export async function applyAppPlatformResources(
   for (const e of userEnvs) envMap.set(e.name, e.value);
   const finalEnvs = Array.from(envMap.entries()).map(([k, v]) => ({ name: k, value: v }));
 
+  // 0. Create or verify PersistentVolumeClaim if Persistent Storage is enabled
+  const hasPersistentVolume = Boolean(
+    app.persistentVolumePath &&
+    app.persistentVolumePath.trim().startsWith('/') &&
+    app.persistentVolumeGb &&
+    app.persistentVolumeGb > 0
+  );
+  const pvcName = `pvc-${app.subdomain}`;
+
+  if (hasPersistentVolume) {
+    const { coreApi } = await getAppPlatformK8sClients();
+    try {
+      await (coreApi as any).readNamespacedPersistentVolumeClaim({ name: pvcName, namespace });
+    } catch {
+      await (coreApi as any).createNamespacedPersistentVolumeClaim({
+        namespace,
+        body: {
+          apiVersion: 'v1',
+          kind: 'PersistentVolumeClaim',
+          metadata: {
+            name: pvcName,
+            namespace,
+            labels: {
+              app: app.subdomain,
+              'app.kubernetes.io/managed-by': 'masdika-app-platform',
+            },
+          },
+          spec: {
+            accessModes: ['ReadWriteOnce'],
+            storageClassName: 'local-path',
+            resources: {
+              requests: {
+                storage: `${app.persistentVolumeGb}Gi`,
+              },
+            },
+          },
+        },
+      }).catch((pvcErr: any) => {
+        console.warn('[AppPlatform] PVC creation warning:', pvcErr?.message || pvcErr);
+      });
+    }
+  }
+
+  // Health Check Probes for Zero-Downtime Rolling Updates
+  const cleanHealthPath = app.healthCheckPath && app.healthCheckPath.trim()
+    ? (app.healthCheckPath.trim().startsWith('/') ? app.healthCheckPath.trim() : `/${app.healthCheckPath.trim()}`)
+    : null;
+
+  const probes = cleanHealthPath
+    ? {
+        readinessProbe: {
+          httpGet: { path: cleanHealthPath, port: app.appPort || 3000 },
+          initialDelaySeconds: 5,
+          periodSeconds: 5,
+          timeoutSeconds: 3,
+          failureThreshold: 6,
+        },
+        livenessProbe: {
+          httpGet: { path: cleanHealthPath, port: app.appPort || 3000 },
+          initialDelaySeconds: 25,
+          periodSeconds: 15,
+          timeoutSeconds: 5,
+          failureThreshold: 4,
+        },
+      }
+    : {};
+
   // 1. Create or Update Deployment
   const replicas = app.status === 'STOPPED' || app.status === 'SUSPENDED' ? 0 : 1;
   const cpuReqM = Math.max(100, Math.round(app.cpuShares * 500));
@@ -1220,6 +1302,12 @@ export async function applyAppPlatformResources(
     },
     spec: {
       replicas,
+      strategy: hasPersistentVolume
+        ? { type: 'Recreate' }
+        : {
+            type: 'RollingUpdate',
+            rollingUpdate: { maxUnavailable: 0, maxSurge: 1 },
+          },
       selector: {
         matchLabels: {
           app: app.subdomain,
@@ -1236,6 +1324,16 @@ export async function applyAppPlatformResources(
           },
         },
         spec: {
+          ...(hasPersistentVolume
+            ? {
+                volumes: [
+                  {
+                    name: 'app-data',
+                    persistentVolumeClaim: { claimName: pvcName },
+                  },
+                ],
+              }
+            : {}),
           containers: [
             {
               name: 'app',
@@ -1248,6 +1346,17 @@ export async function applyAppPlatformResources(
                 },
               ],
               env: finalEnvs,
+              ...probes,
+              ...(hasPersistentVolume
+                ? {
+                    volumeMounts: [
+                      {
+                        name: 'app-data',
+                        mountPath: app.persistentVolumePath!.trim(),
+                      },
+                    ],
+                  }
+                : {}),
               resources: {
                 requests: {
                   cpu: `${cpuReqM}m`,
@@ -1806,10 +1915,237 @@ export async function deleteAppPlatformResources(app: AppPlatformRecord): Promis
     // Registry cleanup is best-effort, don't fail the delete
   }
 
-  // 9. Clean up any general orphaned build pods
+  // 9. Clean up PersistentVolumeClaim if exists
+  await (coreApi as any).deleteNamespacedPersistentVolumeClaim({
+    name: `pvc-${subdomain}`,
+    namespace,
+  }).catch(() => {});
+
+  // 10. Clean up any general orphaned build pods
   cleanOrphanedBuildResources().catch(() => {});
 
   releaseReservedAppPlatformPort(app.port);
+}
+
+/**
+ * Execute a shell command inside the running App Platform Pod (Web Terminal)
+ */
+export async function execAppPlatformCommand(
+  app: AppPlatformRecord,
+  command: string
+): Promise<{ stdout: string; stderr: string; exitCode: number }> {
+  const { kc, coreApi } = await getAppPlatformK8sClients();
+  const namespace = app.k8sNamespace || 'app-platform';
+  const podsRes: any = await (coreApi as any).listNamespacedPod({
+    namespace,
+    labelSelector: `app=${app.subdomain}`,
+  });
+  const pods = podsRes?.items || podsRes?.body?.items || [];
+  const runningPod = pods.find((p: any) => p?.status?.phase === 'Running') || pods[0];
+
+  if (!runningPod?.metadata?.name) {
+    throw new Error('No running container pod found for this application.');
+  }
+
+  const podName = runningPod.metadata.name;
+  const containerName = runningPod.spec?.containers?.[0]?.name || 'app';
+
+  const exec = new k8s.Exec(kc);
+  const { PassThrough } = await import('stream');
+
+  const stdoutStream = new PassThrough();
+  const stderrStream = new PassThrough();
+  let stdout = '';
+  let stderr = '';
+
+  stdoutStream.on('data', (chunk: Buffer) => {
+    if (stdout.length < 64000) stdout += chunk.toString('utf8');
+  });
+  stderrStream.on('data', (chunk: Buffer) => {
+    if (stderr.length < 32000) stderr += chunk.toString('utf8');
+  });
+
+  return await new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      resolve({
+        stdout,
+        stderr: stderr + '\n[Command timed out after 30s]',
+        exitCode: 124,
+      });
+    }, 30000);
+
+    exec
+      .exec(
+        namespace,
+        podName,
+        containerName,
+        ['sh', '-c', command],
+        stdoutStream,
+        stderrStream,
+        null,
+        false,
+        (status: any) => {
+          clearTimeout(timer);
+          const isSuccess = status?.status === 'Success';
+          resolve({
+            stdout,
+            stderr: isSuccess ? stderr : (stderr || status?.message || ''),
+            exitCode: isSuccess ? 0 : 1,
+          });
+        }
+      )
+      .catch((err: any) => {
+        clearTimeout(timer);
+        reject(err);
+      });
+  });
+}
+
+/**
+ * Deploy an ephemeral PR Preview Environment (pr-<number>-<subdomain>)
+ */
+export async function applyPrPreviewResources(
+  app: AppPlatformRecord,
+  prNumber: number,
+  imageTag: string
+): Promise<{ previewUrl: string }> {
+  const { kc } = await getAppPlatformK8sClients();
+  const config = await getAppPlatformClusterConfig();
+  const namespace = app.k8sNamespace || 'app-platform';
+  const previewSubdomain = `pr-${prNumber}-${app.subdomain}`;
+  const name = `app-${previewSubdomain}`;
+  const clusterImage = `127.0.0.1:5000/${app.subdomain}:${imageTag}`;
+  const publicDomain = config.publicDomain || 'app.masdikacloud.my.id';
+  const previewHost = `${previewSubdomain}.${publicDomain}`;
+
+  const appsApi = kc.makeApiClient(k8s.AppsV1Api);
+  const coreApi = kc.makeApiClient(k8s.CoreV1Api);
+  const networkingApi = kc.makeApiClient(k8s.NetworkingV1Api);
+
+  const userEnvs = parseEnvVarsToK8sEnv(app.envVars);
+  const finalEnvs = [
+    { name: 'PORT', value: String(app.appPort || 3000) },
+    { name: 'NODE_ENV', value: 'production' },
+    { name: 'PR_NUMBER', value: String(prNumber) },
+    ...userEnvs,
+  ];
+
+  const deploymentManifest: k8s.V1Deployment = {
+    apiVersion: 'apps/v1',
+    kind: 'Deployment',
+    metadata: {
+      name,
+      namespace,
+      labels: {
+        app: previewSubdomain,
+        'app-platform/pr-parent': app.subdomain,
+        'app-platform/pr-number': String(prNumber),
+      },
+    },
+    spec: {
+      replicas: 1,
+      selector: { matchLabels: { app: previewSubdomain } },
+      template: {
+        metadata: { labels: { app: previewSubdomain } },
+        spec: {
+          containers: [
+            {
+              name: 'app',
+              image: clusterImage,
+              imagePullPolicy: 'Always',
+              ports: [{ containerPort: app.appPort || 3000, name: 'http' }],
+              env: finalEnvs,
+              resources: {
+                requests: { cpu: '100m', memory: '128Mi' },
+                limits: { cpu: '500m', memory: '512Mi' },
+              },
+            },
+          ],
+        },
+      },
+    },
+  };
+
+  try {
+    await (appsApi as any).replaceNamespacedDeployment({ name, namespace, body: deploymentManifest });
+  } catch {
+    await (appsApi as any).createNamespacedDeployment({ namespace, body: deploymentManifest });
+  }
+
+  const serviceManifest: k8s.V1Service = {
+    apiVersion: 'v1',
+    kind: 'Service',
+    metadata: { name, namespace, labels: { app: previewSubdomain, 'app-platform/pr-parent': app.subdomain } },
+    spec: {
+      type: 'ClusterIP',
+      selector: { app: previewSubdomain },
+      ports: [{ port: app.appPort || 3000, targetPort: app.appPort || 3000, name: 'http' }],
+    },
+  };
+
+  try {
+    await (coreApi as any).replaceNamespacedService({ name, namespace, body: serviceManifest });
+  } catch {
+    await (coreApi as any).createNamespacedService({ namespace, body: serviceManifest });
+  }
+
+  const ingressManifest: k8s.V1Ingress = {
+    apiVersion: 'networking.k8s.io/v1',
+    kind: 'Ingress',
+    metadata: {
+      name,
+      namespace,
+      annotations: {
+        'cert-manager.io/cluster-issuer': 'letsencrypt-production',
+        'traefik.ingress.kubernetes.io/router.entrypoints': 'websecure',
+        'traefik.ingress.kubernetes.io/router.tls': 'true',
+      },
+    },
+    spec: {
+      ingressClassName: 'traefik',
+      rules: [
+        {
+          host: previewHost,
+          http: {
+            paths: [
+              {
+                path: '/',
+                pathType: 'Prefix',
+                backend: { service: { name, port: { number: app.appPort || 3000 } } },
+              },
+            ],
+          },
+        },
+      ],
+      tls: [{ hosts: [previewHost], secretName: `tls-${previewSubdomain}` }],
+    },
+  };
+
+  try {
+    await (networkingApi as any).replaceNamespacedIngress({ name, namespace, body: ingressManifest });
+  } catch {
+    await (networkingApi as any).createNamespacedIngress({ namespace, body: ingressManifest });
+  }
+
+  return { previewUrl: `https://${previewHost}` };
+}
+
+/**
+ * Clean up an ephemeral PR Preview Environment when PR is closed or merged
+ */
+export async function deletePrPreviewResources(
+  app: AppPlatformRecord,
+  prNumber: number
+): Promise<void> {
+  const { appsApi, coreApi, netApi } = await getAppPlatformK8sClients();
+  const namespace = app.k8sNamespace || 'app-platform';
+  const previewSubdomain = `pr-${prNumber}-${app.subdomain}`;
+  const name = `app-${previewSubdomain}`;
+
+  await (netApi as any).deleteNamespacedIngress({ name, namespace }).catch(() => {});
+  await (coreApi as any).deleteNamespacedService({ name, namespace }).catch(() => {});
+  await (appsApi as any).deleteNamespacedDeployment({ name, namespace, propagationPolicy: 'Foreground' }).catch(() => {});
+  await (coreApi as any).deleteNamespacedSecret({ name: `tls-${previewSubdomain}`, namespace }).catch(() => {});
 }
 
 /**
