@@ -756,6 +756,9 @@ spec:
 `;
 
   await applyKubernetesManifests(kc, registryYaml);
+
+  // Sweep any lingering completed/failed build pods in background
+  cleanOrphanedBuildResources().catch(() => {});
 }
 
 /**
@@ -860,7 +863,7 @@ export async function triggerAppPlatformBuild(
   await ensureAppPlatformRegistry();
   await waitForRegistryReady(coreApi);
 
-  // Clean up any old completed/failed build jobs for this app to avoid clutter
+  // Clean up any old completed/failed build jobs and pods for this app to avoid clutter
   try {
     const prevJobsRes: any = await (batchApi as any).listNamespacedJob({
       namespace,
@@ -875,9 +878,21 @@ export async function triggerAppPlatformBuild(
           namespace,
           propagationPolicy: 'Background',
         }).catch(() => {});
+        const oldPods: any = await (coreApi as any).listNamespacedPod({
+          namespace,
+          labelSelector: `job-name=${jName}`,
+        }).catch(() => null);
+        for (const op of oldPods?.items || oldPods?.body?.items || []) {
+          if (op?.metadata?.name) {
+            await (coreApi as any).deleteNamespacedPod({ name: op.metadata.name, namespace }).catch(() => {});
+          }
+        }
       }
     }
   } catch {}
+
+  // Also clean up any orphaned failed/completed build pods in namespace
+  cleanOrphanedBuildResources().catch(() => {});
 
   // Handle custom Dockerfile generation if needed
   let configMapName: string | undefined = undefined;
@@ -1489,53 +1504,149 @@ export async function getAppPlatformRuntimeLogs(app: AppPlatformRecord, tailLine
 }
 
 /**
+ * Automatically clean up completed or failed build jobs/pods in the app-platform namespace
+ */
+export async function cleanOrphanedBuildResources(): Promise<void> {
+  try {
+    const { coreApi, batchApi } = await getAppPlatformK8sClients();
+    const namespace = 'app-platform';
+
+    // 1. Clean completed/failed jobs
+    const jobsRes: any = await (batchApi as any).listNamespacedJob({ namespace }).catch(() => null);
+    const jobs = jobsRes?.items || jobsRes?.body?.items || [];
+    for (const j of jobs) {
+      const isFinished = (j?.status?.succeeded || 0) > 0 || (j?.status?.failed || 0) > 0;
+      if (isFinished && j?.metadata?.name) {
+        await (batchApi as any).deleteNamespacedJob({
+          name: j.metadata.name,
+          namespace,
+          propagationPolicy: 'Background',
+        }).catch(() => {});
+      }
+    }
+
+    // 2. Clean Error/Completed/Failed pods in app-platform namespace
+    const podsRes: any = await (coreApi as any).listNamespacedPod({ namespace }).catch(() => null);
+    const pods = podsRes?.items || podsRes?.body?.items || [];
+    for (const p of pods) {
+      const pName = p?.metadata?.name || '';
+      const phase = p?.status?.phase;
+      const isTerminated = p?.status?.containerStatuses?.some((c: any) => c?.state?.terminated !== undefined);
+      if (pName.startsWith('build-') && (phase === 'Succeeded' || phase === 'Failed' || phase === 'Error' || isTerminated)) {
+        await (coreApi as any).deleteNamespacedPod({ name: pName, namespace }).catch(() => {});
+      }
+    }
+  } catch {}
+}
+
+/**
  * Delete deployment, service, ingress, and clean up resources
  */
 export async function deleteAppPlatformResources(app: AppPlatformRecord): Promise<void> {
-  const { appsApi, coreApi, netApi } = await getAppPlatformK8sClients();
+  const { appsApi, coreApi, netApi, batchApi } = await getAppPlatformK8sClients();
   const namespace = app.k8sNamespace || 'app-platform';
   const name = `app-${app.subdomain}`;
+  const subdomain = app.subdomain;
 
-  // Delete Deployment
+  // 1. Delete Deployment
   try {
     await (appsApi as any).deleteNamespacedDeployment({ name, namespace });
   } catch {}
 
-  // Delete Service
+  // 2. Delete Service
   try {
     await (coreApi as any).deleteNamespacedService({ name, namespace });
   } catch {}
 
-  // Delete Ingress
+  // 3. Delete Ingress
   try {
     await (netApi as any).deleteNamespacedIngress({ name, namespace });
   } catch {}
 
-  // Delete TLS secret
+  // 4. Delete TLS secret
   try {
-    await (coreApi as any).deleteNamespacedSecret({ name: `tls-${app.subdomain}`, namespace });
+    await (coreApi as any).deleteNamespacedSecret({ name: `tls-${subdomain}`, namespace });
   } catch {}
 
-  // Clean up built images from in-cluster registry to free PVC storage
+  // 5. Delete all Build Jobs for this app
+  try {
+    const jobsRes: any = await (batchApi as any).listNamespacedJob({ namespace });
+    const jobs = jobsRes?.items || jobsRes?.body?.items || [];
+    for (const j of jobs) {
+      const jName = j?.metadata?.name || '';
+      const isMatch = jName.startsWith(`build-${subdomain}-`) || j?.metadata?.labels?.['build.app-platform/app'] === subdomain;
+      if (isMatch) {
+        await (batchApi as any).deleteNamespacedJob({
+          name: jName,
+          namespace,
+          propagationPolicy: 'Background',
+        }).catch(() => {});
+      }
+    }
+  } catch {}
+
+  // 6. Delete all Pods for this app (both runtime and build pods)
+  try {
+    const podsRes: any = await (coreApi as any).listNamespacedPod({ namespace });
+    const pods = podsRes?.items || podsRes?.body?.items || [];
+    for (const p of pods) {
+      const pName = p?.metadata?.name || '';
+      const labels = p?.metadata?.labels || {};
+      const isMatch =
+        pName.startsWith(`build-${subdomain}-`) ||
+        pName.startsWith(`app-${subdomain}-`) ||
+        labels['build.app-platform/app'] === subdomain ||
+        labels['app'] === `app-${subdomain}` ||
+        labels['app'] === subdomain;
+      if (isMatch) {
+        await (coreApi as any).deleteNamespacedPod({
+          name: pName,
+          namespace,
+        }).catch(() => {});
+      }
+    }
+  } catch {}
+
+  // 7. Delete all ConfigMaps for this app
+  try {
+    const cmsRes: any = await (coreApi as any).listNamespacedConfigMap({ namespace });
+    const cms = cmsRes?.items || cmsRes?.body?.items || [];
+    for (const cm of cms) {
+      const cmName = cm?.metadata?.name || '';
+      const labels = cm?.metadata?.labels || {};
+      const isMatch = cmName.startsWith(`cm-df-build-${subdomain}-`) || labels['build.app-platform/app'] === subdomain;
+      if (isMatch) {
+        await (coreApi as any).deleteNamespacedConfigMap({
+          name: cmName,
+          namespace,
+        }).catch(() => {});
+      }
+    }
+  } catch {}
+
+  // 8. Clean up built images from in-cluster registry
   try {
     const registryBaseUrl = 'http://127.0.0.1:5000';
-    const tagListRes = await fetch(`${registryBaseUrl}/v2/${app.subdomain}/tags/list`);
+    const tagListRes = await fetch(`${registryBaseUrl}/v2/${subdomain}/tags/list`);
     if (tagListRes.ok) {
       const tagList = await tagListRes.json() as { tags?: string[] };
       for (const tag of (tagList.tags || [])) {
         // Get manifest digest
-        const manifestRes = await fetch(`${registryBaseUrl}/v2/${app.subdomain}/manifests/${tag}`, {
+        const manifestRes = await fetch(`${registryBaseUrl}/v2/${subdomain}/manifests/${tag}`, {
           headers: { 'Accept': 'application/vnd.docker.distribution.manifest.v2+json' },
         });
         const digest = manifestRes.headers.get('Docker-Content-Digest');
         if (digest) {
-          await fetch(`${registryBaseUrl}/v2/${app.subdomain}/manifests/${digest}`, { method: 'DELETE' }).catch(() => {});
+          await fetch(`${registryBaseUrl}/v2/${subdomain}/manifests/${digest}`, { method: 'DELETE' }).catch(() => {});
         }
       }
     }
   } catch {
     // Registry cleanup is best-effort, don't fail the delete
   }
+
+  // 9. Clean up any general orphaned build pods
+  cleanOrphanedBuildResources().catch(() => {});
 
   releaseReservedAppPlatformPort(app.port);
 }
