@@ -1026,7 +1026,7 @@ export default function NewAppPlatformPage() {
                       )}
                     </div>
                     <p className="text-[11px] text-zinc-500 mt-0.5">
-                      Connect GitHub to pick from a dropdown, or paste any GitHub, GitLab, Bitbucket, or Gitea HTTPS URL below.
+                      Connect GitHub or GitLab to pick from a dropdown, or paste any Git HTTPS URL below.
                     </p>
                   </div>
 
@@ -1037,7 +1037,7 @@ export default function NewAppPlatformPage() {
                           href="/api/auth/github/login?returnTo=/dashboard/app-platform/new"
                           className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-950 hover:bg-zinc-200 transition-colors cursor-pointer"
                         >
-                          Connect GitHub OAuth
+                          Connect via OAuth
                         </a>
                       )}
                       <button
@@ -1050,7 +1050,7 @@ export default function NewAppPlatformPage() {
                             : "bg-white border-slate-200 text-slate-700"
                         )}
                       >
-                        {showGhPatBox ? "Cancel" : "Connect GitHub Account"}
+                        {showGhPatBox ? "Cancel" : "Connect Git Account"}
                       </button>
                     </div>
                   ) : (
@@ -1070,7 +1070,7 @@ export default function NewAppPlatformPage() {
                       type="password"
                       value={ghPatInput}
                       onChange={(e) => setGhPatInput(e.target.value)}
-                      placeholder="ghp_xxxxxxxxxxxxxxxxxxxx (repo scope)"
+                      placeholder="ghp_... (GitHub) or glpat-... (GitLab)"
                       className={cn(
                         "flex-1 px-3 py-2 rounded-lg text-xs font-mono border focus:outline-none focus:border-cyan-400",
                         isDark ? "bg-[#09090b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
