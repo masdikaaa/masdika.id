@@ -551,6 +551,77 @@ function parseEnvVarsToK8sEnv(envVarsString?: string | null): Array<{ name: stri
 }
 
 /**
+ * Ensure in-cluster private Docker Registry (registry:2) is deployed and running
+ */
+export async function ensureAppPlatformRegistry(): Promise<void> {
+  const { kc, coreApi } = await getAppPlatformK8sClients();
+  const namespace = 'app-platform';
+
+  // Ensure namespace exists
+  try {
+    await (coreApi as any).createNamespace({
+      body: { metadata: { name: namespace } },
+    });
+  } catch (err: any) {
+    if (err?.statusCode !== 409 && err?.response?.statusCode !== 409) {
+      // ignore
+    }
+  }
+
+  const registryYaml = `
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-platform-registry
+  namespace: ${namespace}
+  labels:
+    app: app-platform-registry
+    app.kubernetes.io/managed-by: masdika-app-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-platform-registry
+  template:
+    metadata:
+      labels:
+        app: app-platform-registry
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+      - name: registry
+        image: registry:2
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5000
+          hostPort: 5000
+        env:
+        - name: REGISTRY_HTTP_ADDR
+          value: "0.0.0.0:5000"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: registry
+  namespace: ${namespace}
+  labels:
+    app: app-platform-registry
+    app.kubernetes.io/managed-by: masdika-app-platform
+spec:
+  type: ClusterIP
+  selector:
+    app: app-platform-registry
+  ports:
+  - port: 5000
+    targetPort: 5000
+    name: http
+`;
+
+  await applyKubernetesManifests(kc, registryYaml);
+}
+
+/**
  * Dynamically apply multi-document Kubernetes YAML manifests using native K8s API
  */
 export async function applyKubernetesManifests(kc: k8s.KubeConfig, manifestYaml: string): Promise<void> {
@@ -611,16 +682,27 @@ export async function triggerAppPlatformBuild(
   const jobName = `build-${app.subdomain}-${timestamp.toString(36)}`;
   const destinationImage = `127.0.0.1:5000/${app.subdomain}:${imageTag}`;
 
-  // Ensure namespace exists
+  // Ensure in-cluster private registry is running
+  await ensureAppPlatformRegistry();
+
+  // Clean up any old completed/failed build jobs for this app to avoid clutter
   try {
-    await (coreApi as any).createNamespace({
-      body: { metadata: { name: namespace } },
+    const prevJobsRes: any = await (batchApi as any).listNamespacedJob({
+      namespace,
+      labelSelector: `build.app-platform/app=${app.subdomain}`,
     });
-  } catch (err: any) {
-    if (err?.statusCode !== 409 && err?.response?.statusCode !== 409) {
-      // Ignore if exists
+    const prevJobs = prevJobsRes?.items || prevJobsRes?.body?.items || [];
+    for (const j of prevJobs) {
+      const jName = j?.metadata?.name;
+      if (jName && jName !== jobName) {
+        await (batchApi as any).deleteNamespacedJob({
+          name: jName,
+          namespace,
+          propagationPolicy: 'Background',
+        }).catch(() => {});
+      }
     }
-  }
+  } catch {}
 
   // Handle custom Dockerfile generation if needed
   let configMapName: string | undefined = undefined;
@@ -640,7 +722,7 @@ export async function triggerAppPlatformBuild(
           metadata: {
             name: configMapName,
             labels: {
-              app: app.subdomain,
+              'build.app-platform/app': app.subdomain,
               'app.kubernetes.io/managed-by': 'masdika-app-platform',
             },
           },
@@ -656,8 +738,9 @@ export async function triggerAppPlatformBuild(
   const branch = (app.branch || 'main').trim();
 
   // Kaniko Job Specification
+  // Uses hostNetwork to reach in-cluster registry at 127.0.0.1:5000
   // Uses an init container with git to clone shallow repo into emptyDir /workspace
-  // Then Kaniko builds and pushes directly to in-cluster registry
+  // Then Kaniko builds and pushes directly to local registry
   const jobManifest: k8s.V1Job = {
     apiVersion: 'batch/v1',
     kind: 'Job',
@@ -665,22 +748,24 @@ export async function triggerAppPlatformBuild(
       name: jobName,
       namespace,
       labels: {
-        app: app.subdomain,
+        'build.app-platform/app': app.subdomain,
         'app.kubernetes.io/managed-by': 'masdika-app-platform',
         'build.app-platform/image-tag': imageTag,
       },
     },
     spec: {
       ttlSecondsAfterFinished: 3600, // clean up after 1 hour
-      backoffLimit: 1,
+      backoffLimit: 0, // Fail fast without retrying failed build
       template: {
         metadata: {
           labels: {
-            app: app.subdomain,
+            'build.app-platform/app': app.subdomain,
             job: jobName,
           },
         },
         spec: {
+          hostNetwork: true,
+          dnsPolicy: 'ClusterFirstWithHostNet',
           restartPolicy: 'Never',
           volumes: [
             {
@@ -773,6 +858,7 @@ export async function triggerAppPlatformBuild(
   await prisma.appPlatformService.update({
     where: { id: app.id },
     data: {
+      status: 'BUILDING',
       lastBuildStatus: 'BUILDING',
       lastBuildLog: `Build job [${jobName}] queued for repository ${app.gitUrl} on branch ${branch}...\n`,
     },
@@ -792,7 +878,7 @@ export async function applyAppPlatformResources(
   const config = await getAppPlatformClusterConfig();
   const namespace = app.k8sNamespace || 'app-platform';
   const name = `app-${app.subdomain}`;
-  const clusterImage = `registry.app-platform.svc.cluster.local:5000/${app.subdomain}:${imageTag}`;
+  const clusterImage = `127.0.0.1:5000/${app.subdomain}:${imageTag}`;
   const publicDomain = config.publicDomain || 'app.masdikacloud.my.id';
   const appHost = `${app.subdomain}.${publicDomain}`;
 
@@ -1022,12 +1108,25 @@ export async function trackAppPlatformBuildAsync(
         if (pods.length > 0) {
           const podName = pods[0]?.metadata?.name;
           if (podName) {
-            const logRes: any = await (coreApi as any).readNamespacedPodLog({
-              name: podName,
-              namespace,
-              container: 'kaniko',
-            });
-            podLogs = typeof logRes === 'string' ? logRes : (logRes?.body || String(logRes || ''));
+            // First try reading kaniko container log
+            try {
+              const logRes: any = await (coreApi as any).readNamespacedPodLog({
+                name: podName,
+                namespace,
+                container: 'kaniko',
+              });
+              podLogs = typeof logRes === 'string' ? logRes : (logRes?.body || String(logRes || ''));
+            } catch {
+              // If kaniko not started yet, check initContainer git-clone log
+              try {
+                const initLogRes: any = await (coreApi as any).readNamespacedPodLog({
+                  name: podName,
+                  namespace,
+                  container: 'git-clone',
+                });
+                podLogs = typeof initLogRes === 'string' ? initLogRes : (initLogRes?.body || String(initLogRes || ''));
+              } catch {}
+            }
           }
         }
       } catch {
@@ -1167,6 +1266,15 @@ export async function restartAppPlatform(app: AppPlatformRecord): Promise<void> 
  * Fetch live runtime logs from the active deployment pod
  */
 export async function getAppPlatformRuntimeLogs(app: AppPlatformRecord, tailLines = 200): Promise<string> {
+  if (app.status === 'PROVISIONING' || app.status === 'BUILDING' || app.status === 'ERROR') {
+    if (app.lastBuildStatus === 'BUILDING') {
+      return 'Application is currently building. Please check the Build Logs tab.';
+    }
+    if (app.lastBuildStatus === 'FAILED') {
+      return 'Application build failed. Please check the Build Logs tab for build error details.';
+    }
+  }
+
   const { coreApi } = await getAppPlatformK8sClients();
   const namespace = app.k8sNamespace || 'app-platform';
 
@@ -1174,12 +1282,18 @@ export async function getAppPlatformRuntimeLogs(app: AppPlatformRecord, tailLine
     namespace,
     labelSelector: `app=${app.subdomain}`,
   });
-  const pods = podsRes?.items || podsRes?.body?.items || [];
-  if (pods.length === 0) {
-    return 'No active pods found for this application.';
+  const allPods = podsRes?.items || podsRes?.body?.items || [];
+
+  // Only select runtime deployment pods that contain container 'app'
+  const appPods = allPods.filter((p: any) =>
+    p.spec?.containers?.some((c: any) => c.name === 'app')
+  );
+
+  if (appPods.length === 0) {
+    return 'No active runtime pods found for this application. If you just deployed, please check the Build Logs tab.';
   }
 
-  const runningPod = pods.find((p: any) => p?.status?.phase === 'Running') || pods[0];
+  const runningPod = appPods.find((p: any) => p?.status?.phase === 'Running') || appPods[0];
   const podName = runningPod?.metadata?.name;
   if (!podName) return 'Pod name unavailable.';
 
@@ -1192,7 +1306,7 @@ export async function getAppPlatformRuntimeLogs(app: AppPlatformRecord, tailLine
     });
     return typeof logRes === 'string' ? logRes : (logRes?.body || 'No log output produced.');
   } catch (err: any) {
-    return `Failed to fetch logs: ${err?.message || 'Unknown error'}`;
+    return `Runtime logs unavailable: ${err?.message || 'Pod is initializing'}`;
   }
 }
 
@@ -1321,6 +1435,9 @@ export async function testAppPlatformClusterConnection(customConfig?: {
     const items = (nodeRes as any).items || (nodeRes as any).body?.items || [];
     const latencyMs = Date.now() - startTime;
     const nodes = items.map((n: any) => n.metadata?.name || 'unknown');
+
+    // Pre-warm / ensure private registry is running in background
+    ensureAppPlatformRegistry().catch(() => {});
 
     return {
       success: true,
