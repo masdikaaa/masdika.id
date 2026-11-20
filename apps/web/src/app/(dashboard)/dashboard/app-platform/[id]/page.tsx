@@ -582,120 +582,53 @@ export default function AppPlatformDetailPage({
       {/* TAB 1: OVERVIEW */}
       {activeTab === "overview" && (
         <div className="space-y-6">
-          {/* Domain & DNS Configuration Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Box 1: Primary Application Domain */}
-            <div className={cn("rounded-2xl border p-5 shadow-2xs space-y-3 flex flex-col justify-between", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90")}>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
-                    <Globe className="w-3.5 h-3.5 text-cyan-400" />
-                    PRIMARY APPLICATION DOMAIN
-                  </span>
-                  <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    SSL ACTIVE
-                  </span>
-                </div>
-
-                <div className={cn(
-                  "p-3 rounded-xl border flex items-center justify-between gap-2 font-mono text-xs",
-                  isDark ? "bg-black/40 border-white/[0.06] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
-                )}>
-                  <span className="truncate font-semibold text-cyan-400">{app.httpsUrl}</span>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <a
-                      href={app.httpsUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="p-1 rounded text-zinc-400 hover:text-cyan-400 cursor-pointer"
-                      title="Open in new tab"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                    <button
-                      onClick={() => copyToClipboard(app.httpsUrl, "httpsUrl")}
-                      className="p-1 rounded text-zinc-400 hover:text-cyan-400 cursor-pointer"
-                      title="Copy URL"
-                    >
-                      {copiedField === "httpsUrl" ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                    </button>
-                  </div>
-                </div>
-
-                <p className="text-[11px] text-zinc-500 leading-relaxed">
-                  Default zero-config HTTPS subdomain managed by Masdika Cloud with automated Traefik routing and Let&apos;s Encrypt certificate renewal.
-                </p>
+          {/* Primary Application Domain */}
+          <div className={cn("rounded-2xl border p-5 sm:p-6 shadow-2xs space-y-4", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90")}>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <span className={cn("text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
+                  <Globe className="w-4 h-4 text-cyan-500" />
+                  Primary Application Domain
+                </span>
+                <span className="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  SSL ACTIVE
+                </span>
               </div>
-
-              <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-zinc-400">
-                <span>Subdomain Identifier:</span>
-                <span className="font-mono font-bold text-zinc-200">{app.subdomain}</span>
+              <div className={cn("text-xs flex items-center gap-1.5 font-mono", isDark ? "text-zinc-400" : "text-slate-500")}>
+                <span>Subdomain:</span>
+                <span className="font-bold text-cyan-500">{app.subdomain}</span>
               </div>
             </div>
 
-            {/* Box 2: Custom Domain & DNS Pointing Instructions */}
-            <div className={cn("rounded-2xl border p-5 shadow-2xs space-y-3 flex flex-col justify-between", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90")}>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
-                    <Lock className="w-3.5 h-3.5 text-cyan-400" />
-                    CUSTOM DOMAIN &amp; DNS SETUP
-                  </span>
-                  {app.customDomain ? (
-                    <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-400 border border-cyan-500/25">
-                      Attached
-                    </span>
-                  ) : (
-                    <button
-                      onClick={() => setActiveTab("settings")}
-                      className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-cyan-400 border border-white/10 transition-colors cursor-pointer"
-                    >
-                      + Add Custom Domain
-                    </button>
-                  )}
-                </div>
-
-                {app.customDomain ? (
-                  <div className={cn(
-                    "p-3 rounded-xl border flex items-center justify-between gap-2 font-mono text-xs",
-                    isDark ? "bg-black/40 border-white/[0.06] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
-                  )}>
-                    <span className="truncate font-semibold text-emerald-400">https://{app.customDomain}</span>
-                    <button
-                      onClick={() => copyToClipboard(`https://${app.customDomain}`, "customDomain")}
-                      className="p-1 rounded text-zinc-400 hover:text-cyan-400 cursor-pointer"
-                      title="Copy Custom Domain"
-                    >
-                      {copiedField === "customDomain" ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                    </button>
-                  </div>
-                ) : (
-                  <div className={cn(
-                    "p-2.5 rounded-xl border font-mono text-[11px] space-y-1.5",
-                    isDark ? "bg-black/30 border-white/[0.06]" : "bg-slate-50 border-slate-200"
-                  )}>
-                    <div className="flex items-center justify-between">
-                      <span className="text-zinc-500 font-sans font-semibold">CNAME (Recommended):</span>
-                      <span className="text-cyan-400 font-bold select-all">{app.subdomain}.app.masdikacloud.my.id</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-zinc-500 font-sans font-semibold">A Record (Apex/Root):</span>
-                      <span className="text-zinc-300 font-bold select-all">{app.publicIp || "206.237.98.230"}</span>
-                    </div>
-                  </div>
-                )}
-
-                <p className="text-[11px] text-zinc-500 leading-relaxed">
-                  To use your own domain, create a <strong>CNAME</strong> pointing to <code className="text-cyan-400 font-mono text-[10px]">{app.subdomain}.app.masdikacloud.my.id</code> (or an <strong>A Record</strong> to <code className="text-zinc-300 font-mono text-[10px]">{app.publicIp || "206.237.98.230"}</code>) in your DNS manager, then link it under Settings.
-                </p>
-              </div>
-
-              <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between text-[11px]">
-                <span className="text-zinc-400">Automatic SSL:</span>
-                <span className="text-zinc-300 font-medium">Auto Let&apos;s Encrypt TLS upon DNS propagation</span>
+            <div className={cn(
+              "p-3.5 rounded-xl border flex items-center justify-between gap-3 font-mono text-xs sm:text-sm",
+              isDark ? "bg-black/40 border-white/[0.06] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+            )}>
+              <span className="truncate font-semibold text-cyan-500">{app.httpsUrl}</span>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <a
+                  href={app.httpsUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={cn("p-1.5 rounded-lg border transition-all cursor-pointer", isDark ? "border-white/10 text-zinc-400 hover:text-white hover:bg-white/5" : "border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100")}
+                  title="Open in new tab"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+                <button
+                  onClick={() => copyToClipboard(app.httpsUrl, "httpsUrl")}
+                  className={cn("p-1.5 rounded-lg border transition-all cursor-pointer", isDark ? "border-white/10 text-zinc-400 hover:text-white hover:bg-white/5" : "border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100")}
+                  title="Copy URL"
+                >
+                  {copiedField === "httpsUrl" ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                </button>
               </div>
             </div>
+
+            <p className={cn("text-xs leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
+              Default zero-config HTTPS domain managed by Masdika Cloud with automated Traefik reverse proxy routing and Let&apos;s Encrypt automated SSL certificate renewal.
+            </p>
           </div>
 
           {/* Details Bento Grid */}
@@ -950,71 +883,157 @@ export default function AppPlatformDetailPage({
 
       {/* TAB 2: BUILD LOGS */}
       {activeTab === "build-logs" && (
-        <div className={cn("rounded-2xl border p-5 shadow-2xs space-y-4", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90")}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <FileText className="w-5 h-5 text-cyan-400" />
-              <h2 className={cn("text-base font-bold", isDark ? "text-white" : "text-slate-900")}>
-                Kaniko Build Logs
-              </h2>
+        <div className={cn(
+          "rounded-2xl border overflow-hidden shadow-md transition-all",
+          isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
+        )}>
+          {/* macOS Title Bar */}
+          <div className={cn(
+            "px-4 py-3 border-b flex items-center justify-between gap-3 select-none",
+            isDark ? "bg-[#14161f] border-white/[0.08]" : "bg-slate-100 border-slate-200"
+          )}>
+            {/* Traffic Light Dots + Window Title */}
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e] inline-block shadow-2xs" />
+                <span className="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123] inline-block shadow-2xs" />
+                <span className="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29] inline-block shadow-2xs" />
+              </div>
+              <div className={cn(
+                "flex items-center gap-2 pl-2 border-l min-w-0 font-mono text-xs font-bold",
+                isDark ? "border-white/10 text-zinc-200" : "border-slate-300 text-slate-800"
+              )}>
+                <FileText className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
+                <span className="truncate">kaniko-build.log</span>
+                <span className={cn(
+                  "hidden sm:inline-block text-[10px] px-2 py-0.5 rounded-md font-mono font-medium border shrink-0",
+                  isDark ? "bg-white/5 border-white/10 text-zinc-400" : "bg-white border-slate-200 text-slate-600 shadow-2xs"
+                )}>
+                  pipeline - 80x24
+                </span>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={() => fetchLogs("build")}
                 disabled={logsLoading}
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold border flex items-center gap-1.5 cursor-pointer bg-white/5 border-white/10 text-zinc-300 hover:text-white"
+                className={cn(
+                  "px-2.5 py-1.5 rounded-lg text-xs font-semibold border flex items-center gap-1.5 transition-all cursor-pointer",
+                  isDark
+                    ? "bg-white/5 hover:bg-white/10 border-white/10 text-zinc-300 hover:text-white"
+                    : "bg-white hover:bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 shadow-2xs"
+                )}
               >
-                <RefreshCw className={cn("w-3.5 h-3.5", logsLoading && "animate-spin")} />
-                <span>Refresh Logs</span>
+                <RefreshCw className={cn("w-3 h-3 text-cyan-500", logsLoading && "animate-spin")} />
+                <span>Refresh</span>
               </button>
               <button
                 onClick={() => copyToClipboard(buildLogs, "buildLogs")}
-                className="p-1.5 rounded-lg border text-zinc-400 hover:text-white bg-white/5 border-white/10 cursor-pointer"
-                title="Copy all logs"
+                className={cn(
+                  "p-1.5 rounded-lg border transition-all cursor-pointer",
+                  isDark
+                    ? "bg-white/5 hover:bg-white/10 border-white/10 text-zinc-300 hover:text-white"
+                    : "bg-white hover:bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 shadow-2xs"
+                )}
+                title="Copy build logs"
               >
-                <Copy className="w-4 h-4" />
+                {copiedField === "buildLogs" ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
             </div>
           </div>
 
-          <pre className="p-4 rounded-xl bg-black/70 border border-white/10 text-zinc-300 font-mono text-xs overflow-x-auto max-h-[500px] leading-relaxed whitespace-pre-wrap">
-            {buildLogs || app.lastBuildLog || "No build logs available yet. Trigger a rebuild to see pipeline execution."}
-          </pre>
+          {/* Terminal Console Screen (Solid deep black with high-contrast emerald text) */}
+          <div className="p-4 sm:p-5 bg-[#090d16] font-mono text-xs overflow-x-auto max-h-[550px] leading-relaxed whitespace-pre-wrap select-text text-emerald-400 selection:bg-cyan-500/30 selection:text-white">
+            <div className="flex items-center gap-2 text-zinc-500 text-[11px] pb-2 mb-3 border-b border-white/[0.08] select-none">
+              <Terminal className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+              <span className="text-zinc-400">Masdika Cloud App Engine • Kaniko In-Cluster Pipeline</span>
+              <span>•</span>
+              <span className="text-zinc-500 truncate">Target: {app.name} ({app.buildType})</span>
+            </div>
+            <pre className="font-mono text-xs leading-relaxed text-emerald-400 whitespace-pre-wrap">
+              {buildLogs || app.lastBuildLog || "No build logs available yet. Trigger a rebuild to see pipeline execution."}
+            </pre>
+          </div>
         </div>
       )}
 
       {/* TAB 3: RUNTIME LOGS */}
       {activeTab === "runtime-logs" && (
-        <div className={cn("rounded-2xl border p-5 shadow-2xs space-y-4", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90")}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Terminal className="w-5 h-5 text-cyan-400" />
-              <h2 className={cn("text-base font-bold", isDark ? "text-white" : "text-slate-900")}>
-                Live Runtime Console Output
-              </h2>
+        <div className={cn(
+          "rounded-2xl border overflow-hidden shadow-md transition-all",
+          isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
+        )}>
+          {/* macOS Title Bar */}
+          <div className={cn(
+            "px-4 py-3 border-b flex items-center justify-between gap-3 select-none",
+            isDark ? "bg-[#14161f] border-white/[0.08]" : "bg-slate-100 border-slate-200"
+          )}>
+            {/* Traffic Light Dots + Window Title */}
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e] inline-block shadow-2xs" />
+                <span className="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123] inline-block shadow-2xs" />
+                <span className="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29] inline-block shadow-2xs" />
+              </div>
+              <div className={cn(
+                "flex items-center gap-2 pl-2 border-l min-w-0 font-mono text-xs font-bold",
+                isDark ? "border-white/10 text-zinc-200" : "border-slate-300 text-slate-800"
+              )}>
+                <Terminal className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
+                <span className="truncate">runtime-stdout.log</span>
+                <span className={cn(
+                  "hidden sm:inline-block text-[10px] px-2 py-0.5 rounded-md font-mono font-medium border shrink-0",
+                  isDark ? "bg-white/5 border-white/10 text-zinc-400" : "bg-white border-slate-200 text-slate-600 shadow-2xs"
+                )}>
+                  container-stream
+                </span>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={() => fetchLogs("runtime")}
                 disabled={logsLoading}
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold border flex items-center gap-1.5 cursor-pointer bg-white/5 border-white/10 text-zinc-300 hover:text-white"
+                className={cn(
+                  "px-2.5 py-1.5 rounded-lg text-xs font-semibold border flex items-center gap-1.5 transition-all cursor-pointer",
+                  isDark
+                    ? "bg-white/5 hover:bg-white/10 border-white/10 text-zinc-300 hover:text-white"
+                    : "bg-white hover:bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 shadow-2xs"
+                )}
               >
-                <RefreshCw className={cn("w-3.5 h-3.5", logsLoading && "animate-spin")} />
-                <span>Refresh Console</span>
+                <RefreshCw className={cn("w-3 h-3 text-cyan-500", logsLoading && "animate-spin")} />
+                <span>Refresh</span>
               </button>
               <button
                 onClick={() => copyToClipboard(runtimeLogs, "runtimeLogs")}
-                className="p-1.5 rounded-lg border text-zinc-400 hover:text-white bg-white/5 border-white/10 cursor-pointer"
-                title="Copy all logs"
+                className={cn(
+                  "p-1.5 rounded-lg border transition-all cursor-pointer",
+                  isDark
+                    ? "bg-white/5 hover:bg-white/10 border-white/10 text-zinc-300 hover:text-white"
+                    : "bg-white hover:bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 shadow-2xs"
+                )}
+                title="Copy runtime logs"
               >
-                <Copy className="w-4 h-4" />
+                {copiedField === "runtimeLogs" ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
             </div>
           </div>
 
-          <pre className="p-4 rounded-xl bg-black/70 border border-white/10 text-emerald-400 font-mono text-xs overflow-x-auto max-h-[500px] leading-relaxed whitespace-pre-wrap">
-            {runtimeLogs || "Waiting for container logs..."}
-          </pre>
+          {/* Terminal Console Screen (Solid deep black with high-contrast emerald text) */}
+          <div className="p-4 sm:p-5 bg-[#090d16] font-mono text-xs overflow-x-auto max-h-[550px] leading-relaxed whitespace-pre-wrap select-text text-emerald-400 selection:bg-cyan-500/30 selection:text-white">
+            <div className="flex items-center gap-2 text-zinc-500 text-[11px] pb-2 mb-3 border-b border-white/[0.08] select-none">
+              <Terminal className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+              <span className="text-zinc-400">Kubernetes Pod Standard Output (STDOUT/STDERR)</span>
+              <span>•</span>
+              <span className="text-zinc-500 truncate">Stream: Active</span>
+            </div>
+            <pre className="font-mono text-xs leading-relaxed text-emerald-400 whitespace-pre-wrap">
+              {runtimeLogs || "Waiting for container logs..."}
+            </pre>
+          </div>
         </div>
       )}
 
