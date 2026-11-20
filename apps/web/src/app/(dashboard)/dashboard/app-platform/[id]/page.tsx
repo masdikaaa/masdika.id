@@ -153,7 +153,9 @@ export default function AppPlatformDetailPage({
   // Power actions & modal state
   const [actionLoading, setActionLoading] = useState(false);
   const [confirmModal, setConfirmModal] = useState<{
-    action: "start" | "stop" | "restart" | "rebuild" | "delete";
+    action: "start" | "stop" | "restart" | "rebuild" | "delete" | "delete-deployment" | "clear-old-deployments";
+    deploymentId?: number;
+    deploymentNumber?: number;
   } | null>(null);
 
   // Logs state
@@ -1118,44 +1120,50 @@ export default function AppPlatformDetailPage({
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2">
-                {deployments.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={handleClearOldDeployments}
-                    className={cn(
-                      "px-3 py-2 rounded-xl text-xs font-semibold border transition-colors flex items-center gap-1.5 cursor-pointer",
-                      isDark
-                        ? "bg-white/5 border-white/10 text-zinc-300 hover:text-rose-400 hover:border-rose-500/30"
-                        : "bg-white border-slate-200 text-slate-600 hover:text-rose-600 hover:border-rose-300"
-                    )}
-                    title="Clear all older deployment records (keeps latest)"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span>Clear Old</span>
-                  </button>
-                )}
-                <div className="flex items-center gap-1.5">
-                  <input
-                    type="text"
-                    value={specificCommitHash}
-                    onChange={(e) => setSpecificCommitHash(e.target.value)}
-                    placeholder="Commit hash (optional)"
-                    className={cn(
-                      "px-3 py-2 rounded-xl text-xs font-mono border w-40 focus:outline-none focus:border-cyan-400",
-                      isDark ? "bg-[#0a0a0c] border-white/10 text-white" : "bg-slate-50 border-slate-200 text-slate-900"
-                    )}
-                  />
-                  <button
-                    type="button"
-                    disabled={deployingManual || app?.status === "SUSPENDED"}
-                    onClick={() => handleManualDeploy(specificCommitHash)}
-                    className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all shadow-md shadow-cyan-400/20 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                  >
-                    <Rocket className={cn("w-3.5 h-3.5", deployingManual && "animate-pulse")} />
-                    <span>{deployingManual ? "Deploying..." : "Manual Deploy"}</span>
-                  </button>
+              <div className="flex flex-col items-end gap-1.5">
+                <div className="flex flex-wrap items-center gap-2">
+                  {deployments.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => setConfirmModal({ action: "clear-old-deployments" })}
+                      className={cn(
+                        "px-3 py-2 rounded-xl text-xs font-semibold border transition-colors flex items-center gap-1.5 cursor-pointer",
+                        isDark
+                          ? "bg-white/5 border-white/10 text-zinc-300 hover:text-rose-400 hover:border-rose-500/30"
+                          : "bg-white border-slate-200 text-slate-600 hover:text-rose-600 hover:border-rose-300"
+                      )}
+                      title="Clear all older deployment records (keeps latest)"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Clear Old</span>
+                    </button>
+                  )}
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      type="text"
+                      value={specificCommitHash}
+                      onChange={(e) => setSpecificCommitHash(e.target.value)}
+                      placeholder="Commit SHA e.g. a81c2f9 (optional)"
+                      title="Optional: Enter a Git commit SHA to build a specific commit instead of latest HEAD"
+                      className={cn(
+                        "px-3 py-2 rounded-xl text-xs font-mono border w-56 sm:w-64 focus:outline-none focus:border-cyan-400",
+                        isDark ? "bg-[#0a0a0c] border-white/10 text-white placeholder-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400"
+                      )}
+                    />
+                    <button
+                      type="button"
+                      disabled={deployingManual || app?.status === "SUSPENDED"}
+                      onClick={() => handleManualDeploy(specificCommitHash)}
+                      className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all shadow-md shadow-cyan-400/20 flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shrink-0"
+                    >
+                      <Rocket className={cn("w-3.5 h-3.5", deployingManual && "animate-pulse")} />
+                      <span>{deployingManual ? "Deploying..." : "Manual Deploy"}</span>
+                    </button>
+                  </div>
                 </div>
+                <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>
+                  Leave Commit SHA empty to deploy latest branch HEAD, or enter a commit hash (e.g. <code className="font-mono text-cyan-400">a81c2f9</code>) to deploy a specific commit.
+                </p>
               </div>
             </div>
 
@@ -1280,7 +1288,13 @@ export default function AppPlatformDetailPage({
                         {!isBuilding && (
                           <button
                             type="button"
-                            onClick={() => handleDeleteDeployment(dep.id, dep.deploymentNumber || dep.id)}
+                            onClick={() =>
+                              setConfirmModal({
+                                action: "delete-deployment",
+                                deploymentId: dep.id,
+                                deploymentNumber: dep.deploymentNumber || dep.id,
+                              })
+                            }
                             className={cn(
                               "p-1.5 rounded-lg border transition-colors cursor-pointer",
                               isDark
@@ -2226,10 +2240,16 @@ export default function AppPlatformDetailPage({
           isOpen={true}
           onClose={() => setConfirmModal(null)}
           onConfirm={() => {
-            const { action } = confirmModal;
+            const { action, deploymentId, deploymentNumber } = confirmModal;
             setConfirmModal(null);
             if (action === "delete") {
               handleDelete();
+            } else if (action === "delete-deployment") {
+              if (deploymentId) {
+                handleDeleteDeployment(deploymentId, deploymentNumber || deploymentId);
+              }
+            } else if (action === "clear-old-deployments") {
+              handleClearOldDeployments();
             } else {
               handlePowerAction(action);
             }
@@ -2237,6 +2257,10 @@ export default function AppPlatformDetailPage({
           title={
             confirmModal.action === "delete"
               ? "Terminate Application"
+              : confirmModal.action === "delete-deployment"
+              ? `Delete #deployment-${confirmModal.deploymentNumber}`
+              : confirmModal.action === "clear-old-deployments"
+              ? "Clear Old Deployment History"
               : confirmModal.action === "rebuild"
               ? "Trigger Rebuild"
               : `${confirmModal.action.toUpperCase()} Application`
@@ -2244,12 +2268,28 @@ export default function AppPlatformDetailPage({
           description={
             confirmModal.action === "delete"
               ? `WARNING: This will permanently delete ${app.name} and clean up all Kubernetes deployments, services, and SSL certs.`
+              : confirmModal.action === "delete-deployment"
+              ? `Are you sure you want to remove #deployment-${confirmModal.deploymentNumber} from deployment history?`
+              : confirmModal.action === "clear-old-deployments"
+              ? `This will remove all older deployment history records for ${app.name}, keeping only the latest deployment.`
               : confirmModal.action === "rebuild"
-              ? `A new Kaniko build job will clone ${app.gitUrl} (${app.branch}) and deploy a fresh image upon completion.`
+              ? `A new build job will clone ${app.gitUrl} (${app.branch}) and deploy a fresh image upon completion.`
               : `Are you sure you want to execute ${confirmModal.action} on ${app.name}?`
           }
-          confirmText={confirmModal.action === "delete" ? "Delete Permanently" : "Confirm"}
-          variant={confirmModal.action === "delete" ? "danger" : "warning"}
+          confirmText={
+            confirmModal.action === "delete"
+              ? "Delete Permanently"
+              : confirmModal.action === "delete-deployment" || confirmModal.action === "clear-old-deployments"
+              ? "Delete"
+              : "Confirm"
+          }
+          variant={
+            confirmModal.action === "delete" ||
+            confirmModal.action === "delete-deployment" ||
+            confirmModal.action === "clear-old-deployments"
+              ? "danger"
+              : "warning"
+          }
         />
       )}
     </div>
