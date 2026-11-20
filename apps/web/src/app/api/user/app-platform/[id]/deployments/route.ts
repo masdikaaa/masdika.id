@@ -120,3 +120,83 @@ export async function POST(
     return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
   }
 }
+
+/**
+ * DELETE /api/user/app-platform/[id]/deployments?deploymentId=123 OR ?clearOld=true
+ * Delete a specific deployment record or clean up old non-active deployment history
+ */
+export async function DELETE(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const authResult = await requireAuth({ allowedRoles: ["USER", "ADMIN"] });
+    if (authResult.error) {
+      return NextResponse.json({ error: authResult.error }, { status: authResult.status });
+    }
+    const user = authResult.user!;
+    const { id } = await context.params;
+    const appId = parseInt(id, 10);
+    if (isNaN(appId)) {
+      return NextResponse.json({ error: "Invalid app ID" }, { status: 400 });
+    }
+
+    const app = await prisma.appPlatformService.findUnique({
+      where: { id: appId },
+      select: { id: true, userId: true },
+    });
+
+    if (!app) {
+      return NextResponse.json({ error: "Application not found" }, { status: 404 });
+    }
+    if (user.role !== "ADMIN" && app.userId !== user.id) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
+    }
+
+    const deploymentIdParam = req.nextUrl.searchParams.get("deploymentId");
+    const clearOld = req.nextUrl.searchParams.get("clearOld") === "true";
+
+    if (clearOld) {
+      const latestDep = await prisma.appPlatformDeployment.findFirst({
+        where: { appId },
+        orderBy: { createdAt: "desc" },
+        select: { id: true },
+      });
+
+      const deleted = await prisma.appPlatformDeployment.deleteMany({
+        where: {
+          appId,
+          ...(latestDep ? { id: { not: latestDep.id } } : {}),
+        },
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: `Cleaned up ${deleted.count} old deployment record(s).`,
+        deletedCount: deleted.count,
+      });
+    }
+
+    const depId = parseInt(deploymentIdParam || "", 10);
+    if (isNaN(depId)) {
+      return NextResponse.json({ error: "deploymentId or clearOld=true is required" }, { status: 400 });
+    }
+
+    const target = await prisma.appPlatformDeployment.findFirst({
+      where: { id: depId, appId },
+    });
+    if (!target) {
+      return NextResponse.json({ error: "Deployment record not found" }, { status: 404 });
+    }
+
+    await prisma.appPlatformDeployment.delete({ where: { id: depId } });
+
+    return NextResponse.json({
+      success: true,
+      message: `Deleted #deployment-${target.deploymentNumber}`,
+    });
+  } catch (error: any) {
+    console.error("[AppPlatform] Delete deployment error:", error);
+    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
+  }
+}

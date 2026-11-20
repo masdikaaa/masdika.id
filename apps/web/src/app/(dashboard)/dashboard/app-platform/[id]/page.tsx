@@ -466,6 +466,41 @@ export default function AppPlatformDetailPage({
     }
   };
 
+  const handleDeleteDeployment = async (deploymentId: number, deploymentNumber: number) => {
+    try {
+      const res = await fetch(`/api/user/app-platform/${id}/deployments?deploymentId=${deploymentId}`, {
+        method: "DELETE",
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        toast.success(`Removed #deployment-${deploymentNumber}`);
+        setDeployments((prev) => prev.filter((d) => d.id !== deploymentId));
+      } else {
+        toast.error(json.error || "Failed to remove deployment record");
+      }
+    } catch {
+      toast.error("Connection error");
+    }
+  };
+
+  const handleClearOldDeployments = async () => {
+    const toastId = toast.loading("Cleaning old deployment history...");
+    try {
+      const res = await fetch(`/api/user/app-platform/${id}/deployments?clearOld=true`, {
+        method: "DELETE",
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        toast.success(json.message || "Old deployment history cleared", { id: toastId });
+        fetchAppDetail();
+      } else {
+        toast.error(json.error || "Failed to clear history", { id: toastId });
+      }
+    } catch {
+      toast.error("Connection error", { id: toastId });
+    }
+  };
+
   const handleSaveSettings = async (e?: React.FormEvent, triggerRebuild = false) => {
     if (e) e.preventDefault();
     setSavingSettings(true);
@@ -1084,6 +1119,22 @@ export default function AppPlatformDetailPage({
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
+                {deployments.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={handleClearOldDeployments}
+                    className={cn(
+                      "px-3 py-2 rounded-xl text-xs font-semibold border transition-colors flex items-center gap-1.5 cursor-pointer",
+                      isDark
+                        ? "bg-white/5 border-white/10 text-zinc-300 hover:text-rose-400 hover:border-rose-500/30"
+                        : "bg-white border-slate-200 text-slate-600 hover:text-rose-600 hover:border-rose-300"
+                    )}
+                    title="Clear all older deployment records (keeps latest)"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Clear Old</span>
+                  </button>
+                )}
                 <div className="flex items-center gap-1.5">
                   <input
                     type="text"
@@ -1223,6 +1274,22 @@ export default function AppPlatformDetailPage({
                           >
                             <Undo2 className="w-3.5 h-3.5" />
                             <span>{rollingBackId === dep.id ? "Rolling back..." : "Rollback"}</span>
+                          </button>
+                        )}
+
+                        {!isBuilding && (
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteDeployment(dep.id, dep.deploymentNumber || dep.id)}
+                            className={cn(
+                              "p-1.5 rounded-lg border transition-colors cursor-pointer",
+                              isDark
+                                ? "bg-white/5 border-white/10 text-zinc-400 hover:text-rose-400 hover:border-rose-500/30"
+                                : "bg-white border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-300"
+                            )}
+                            title="Delete deployment record"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         )}
                       </div>
