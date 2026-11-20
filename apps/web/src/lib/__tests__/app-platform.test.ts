@@ -101,6 +101,34 @@ describe('App Platform Engine & Capabilities', () => {
       const df = generateDockerfileForFramework('DOCKERFILE');
       expect(df).toBe('');
     });
+
+    it('never uses apt-get in any generated framework Dockerfile to prevent Kaniko libc-bin permission errors', () => {
+      const frameworks = [
+        'LARAVEL',
+        'PHP',
+        'WORDPRESS',
+        'NODEJS',
+        'NEXTJS',
+        'NESTJS',
+        'REMIX',
+        'SVELTE',
+        'ASTRO',
+        'PYTHON',
+        'FASTAPI',
+        'DJANGO',
+        'GOLANG',
+        'RUST',
+        'RUBY',
+        'RAILS',
+        'JAVA',
+        'VITE',
+        'STATIC',
+      ];
+      for (const fw of frameworks) {
+        const df = generateDockerfileForFramework(fw, null, null, 8080);
+        expect(df.toLowerCase()).not.toContain('apt-get');
+      }
+    });
   });
 
   describe('Invoice & Unified Billing Display', () => {

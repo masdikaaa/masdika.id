@@ -29,10 +29,10 @@ export async function POST(req: NextRequest) {
         detected: {
           supported: false,
           hasDockerfile: false,
-          buildMode: "DOCKERFILE",
+          buildMode: "BUILDPACK",
           buildType: "DOCKERFILE",
           defaultPort: 80,
-          message: "Auto-detection via API currently supports GitHub URLs. You can still deploy any Git URL using Dockerfile or manual preset.",
+          message: "Stack will be automatically detected and built during deployment.",
         },
       });
     }
@@ -75,11 +75,11 @@ export async function POST(req: NextRequest) {
         detected: {
           supported: true,
           hasDockerfile: false,
-          buildMode: "DOCKERFILE",
+          buildMode: "BUILDPACK",
           buildType: "DOCKERFILE",
           defaultPort: 80,
           defaultBranch: targetBranch,
-          message: "Could not inspect repository files (private repo without token or invalid branch).",
+          message: "Stack will be automatically detected and built during deployment (GitHub inspection skipped or private repo).",
         },
       });
     }
@@ -97,7 +97,16 @@ export async function POST(req: NextRequest) {
     let defaultPort = 80;
     let detectedLabel = "Custom Container";
 
-    if (fileNames.has("artisan") || fileNames.has("composer.json")) {
+    if (
+      fileNames.has("wp-config.php") ||
+      fileNames.has("wp-config-sample.php") ||
+      fileNames.has("wp-content") ||
+      fileNames.has("wp-includes")
+    ) {
+      detectedFramework = "WORDPRESS";
+      detectedLabel = "WordPress";
+      defaultPort = 80;
+    } else if (fileNames.has("artisan") || fileNames.has("composer.json") || fileNames.has("index.php")) {
       detectedFramework = "PHP";
       detectedLabel = "PHP";
       defaultPort = 80;
@@ -159,7 +168,7 @@ export async function POST(req: NextRequest) {
           }
         }
       } catch {}
-    } else if (fileNames.has("go.mod")) {
+    } else if (fileNames.has("go.mod") || fileNames.has("main.go")) {
       detectedFramework = "GOLANG";
       detectedLabel = "Go (Golang)";
       defaultPort = 8080;
@@ -167,11 +176,27 @@ export async function POST(req: NextRequest) {
       detectedFramework = "RUST";
       detectedLabel = "Rust";
       defaultPort = 8080;
-    } else if (fileNames.has("Gemfile")) {
+    } else if (fileNames.has("Gemfile") || fileNames.has("config.ru")) {
       detectedFramework = "RUBY";
       detectedLabel = "Ruby on Rails";
       defaultPort = 3000;
-    } else if (fileNames.has("requirements.txt") || fileNames.has("pyproject.toml")) {
+    } else if (
+      fileNames.has("pom.xml") ||
+      fileNames.has("build.gradle") ||
+      fileNames.has("build.gradle.kts")
+    ) {
+      detectedFramework = "JAVA";
+      detectedLabel = "Java (Spring Boot)";
+      defaultPort = 8080;
+    } else if (
+      fileNames.has("manage.py") ||
+      fileNames.has("requirements.txt") ||
+      fileNames.has("pyproject.toml") ||
+      fileNames.has("Pipfile") ||
+      fileNames.has("main.py") ||
+      fileNames.has("app.py") ||
+      fileNames.has("server.py")
+    ) {
       detectedFramework = "PYTHON";
       detectedLabel = "Python";
       defaultPort = 8000;
@@ -196,10 +221,6 @@ export async function POST(req: NextRequest) {
           }
         } catch {}
       }
-    } else if (fileNames.has("wp-config.php") || fileNames.has("wp-content")) {
-      detectedFramework = "WORDPRESS";
-      detectedLabel = "WordPress";
-      defaultPort = 80;
     } else if (fileNames.has("index.html")) {
       detectedFramework = "STATIC";
       detectedLabel = "Static HTML / Nginx";
