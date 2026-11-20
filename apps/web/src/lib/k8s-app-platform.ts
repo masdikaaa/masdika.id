@@ -962,10 +962,10 @@ export async function applyKubernetesManifests(kc: k8s.KubeConfig, manifestYaml:
         try {
           await objApi.patch(spec);
         } catch {
-          if (spec.kind === 'Service' && spec.metadata?.name) {
+          if (spec.metadata?.name) {
             const existing = (await objApi.read({
               apiVersion: spec.apiVersion || 'v1',
-              kind: 'Service',
+              kind: spec.kind,
               metadata: {
                 name: spec.metadata.name,
                 namespace: spec.metadata.namespace || 'default',
@@ -974,7 +974,7 @@ export async function applyKubernetesManifests(kc: k8s.KubeConfig, manifestYaml:
             if (existing?.metadata?.resourceVersion) {
               spec.metadata.resourceVersion = existing.metadata.resourceVersion;
             }
-            if (existing?.spec?.clusterIP && (spec as any).spec) {
+            if (spec.kind === 'Service' && existing?.spec?.clusterIP && (spec as any).spec) {
               (spec as any).spec.clusterIP = existing.spec.clusterIP;
             }
           }
