@@ -69,10 +69,24 @@ describe('App Platform Engine & Capabilities', () => {
       expect(df).toContain('EXPOSE 8080');
     });
 
-    it('generates PHP Apache Dockerfile', () => {
+    it('generates PHP Apache Dockerfile with install-php-extensions for Kaniko', () => {
       const df = generateDockerfileForFramework('PHP', null, null, 80);
       expect(df).toContain('FROM php:8.2-apache');
-      expect(df).toContain('docker-php-ext-install pdo pdo_mysql');
+      expect(df).toContain('install-php-extensions');
+      expect(df).toContain('EXPOSE 80');
+    });
+
+    it('generates Vite SPA Dockerfile with Nginx fallback routing', () => {
+      const df = generateDockerfileForFramework('VITE', 'npm run build', null, 80);
+      expect(df).toContain('FROM node:20-alpine AS builder');
+      expect(df).toContain('FROM nginx:alpine');
+      expect(df).toContain('try_files $uri $uri/ /index.html');
+      expect(df).toContain('EXPOSE 80');
+    });
+
+    it('generates WordPress Apache Dockerfile', () => {
+      const df = generateDockerfileForFramework('WORDPRESS', null, null, 80);
+      expect(df).toContain('FROM wordpress:php8.2-apache');
       expect(df).toContain('EXPOSE 80');
     });
 
