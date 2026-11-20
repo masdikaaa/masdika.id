@@ -97,6 +97,8 @@ export async function PATCH(
       name,
       gitUrl,
       branch,
+      buildType,
+      dockerfilePath,
       buildCommand,
       startCommand,
       envVars,
@@ -108,6 +110,8 @@ export async function PATCH(
     if (name && typeof name === "string") dataToUpdate.name = name.trim();
     if (gitUrl && typeof gitUrl === "string") dataToUpdate.gitUrl = gitUrl.trim();
     if (branch && typeof branch === "string") dataToUpdate.branch = branch.trim();
+    if (buildType && typeof buildType === "string") dataToUpdate.buildType = buildType.trim().toUpperCase();
+    if (dockerfilePath !== undefined) dataToUpdate.dockerfilePath = dockerfilePath ? dockerfilePath.trim() : "Dockerfile";
     if (buildCommand !== undefined) dataToUpdate.buildCommand = buildCommand;
     if (startCommand !== undefined) dataToUpdate.startCommand = startCommand;
     if (envVars !== undefined) dataToUpdate.envVars = envVars;

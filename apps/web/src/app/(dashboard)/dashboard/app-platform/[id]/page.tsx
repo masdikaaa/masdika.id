@@ -147,6 +147,9 @@ export default function AppPlatformDetailPage({
   // Settings edit state
   const [settingsGitUrl, setSettingsGitUrl] = useState("");
   const [settingsBranch, setSettingsBranch] = useState("");
+  const [settingsBuildType, setSettingsBuildType] = useState("DOCKERFILE");
+  const [settingsDockerfilePath, setSettingsDockerfilePath] = useState("Dockerfile");
+  const [settingsAppPort, setSettingsAppPort] = useState(3000);
   const [settingsBuildCmd, setSettingsBuildCmd] = useState("");
   const [settingsStartCmd, setSettingsStartCmd] = useState("");
   const [settingsEnvVars, setSettingsEnvVars] = useState("");
@@ -182,6 +185,9 @@ export default function AppPlatformDetailPage({
         setApp(json.data);
         setSettingsGitUrl(json.data.gitUrl || "");
         setSettingsBranch(json.data.branch || "main");
+        setSettingsBuildType(json.data.buildType || "DOCKERFILE");
+        setSettingsDockerfilePath(json.data.dockerfilePath || "Dockerfile");
+        setSettingsAppPort(json.data.appPort || 3000);
         setSettingsBuildCmd(json.data.buildCommand || "");
         setSettingsStartCmd(json.data.startCommand || "");
         setSettingsEnvVars(json.data.envVars || "");
@@ -311,10 +317,10 @@ export default function AppPlatformDetailPage({
     }
   };
 
-  const handleSaveSettings = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSaveSettings = async (e?: React.FormEvent, triggerRebuild = false) => {
+    if (e) e.preventDefault();
     setSavingSettings(true);
-    const toastId = toast.loading("Updating app configuration...");
+    const toastId = toast.loading(triggerRebuild ? "Saving and queuing rebuild..." : "Updating app configuration...");
     try {
       const res = await fetch(`/api/user/app-platform/${id}`, {
         method: "PATCH",
@@ -322,6 +328,9 @@ export default function AppPlatformDetailPage({
         body: JSON.stringify({
           gitUrl: settingsGitUrl.trim(),
           branch: settingsBranch.trim(),
+          buildType: settingsBuildType,
+          dockerfilePath: settingsDockerfilePath.trim() || "Dockerfile",
+          appPort: Number(settingsAppPort) || 3000,
           buildCommand: settingsBuildCmd.trim() || null,
           startCommand: settingsStartCmd.trim() || null,
           envVars: settingsEnvVars.trim() || null,
@@ -332,6 +341,9 @@ export default function AppPlatformDetailPage({
       if (res.ok) {
         toast.success("Configuration saved successfully", { id: toastId });
         fetchAppDetail();
+        if (triggerRebuild) {
+          handlePowerAction("rebuild");
+        }
       } else {
         toast.error(data.error || "Failed to save configuration", { id: toastId });
       }
@@ -1065,128 +1077,374 @@ export default function AppPlatformDetailPage({
 
       {/* TAB 4: SETTINGS & ENVIRONMENT */}
       {activeTab === "settings" && (
-        <form onSubmit={handleSaveSettings} className="space-y-6">
-          <div className={cn("rounded-2xl border p-5 sm:p-6 shadow-2xs space-y-4", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90")}>
-            <div className="flex items-center gap-2.5 border-b pb-3 border-white/[0.06]">
-              <Settings className="w-5 h-5 text-cyan-400" />
-              <h2 className={cn("text-base font-bold", isDark ? "text-white" : "text-slate-900")}>
-                Git Source & Build Configuration
-              </h2>
+        <form onSubmit={(e) => handleSaveSettings(e, false)} className="space-y-6">
+          {/* CARD 1: BUILD STRATEGY & REPOSITORY CONFIGURATION */}
+          <div className={cn(
+            "rounded-2xl border p-5 sm:p-6 space-y-5 transition-all shadow-2xs",
+            isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
+          )}>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-white/[0.06]">
+              <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                <Settings className="w-4 h-4 shrink-0" />
+                <span>Build Strategy &amp; Source Repository</span>
+              </h3>
+              <span className={cn(
+                "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold self-start sm:self-auto shrink-0 border",
+                settingsBuildType === "DOCKERFILE"
+                  ? isDark ? "bg-blue-500/15 text-blue-400 border-blue-500/25" : "bg-blue-50 text-blue-700 border-blue-200"
+                  : isDark ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/25" : "bg-cyan-50 text-cyan-700 border-cyan-200"
+              )}>
+                <span>{settingsBuildType === "DOCKERFILE" ? "Native Dockerfile" : `Auto Framework (${settingsBuildType})`}</span>
+              </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-2">
-                  Repository URL
+            {/* Build Mode Selector Toggle */}
+            <div>
+              <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-2", isDark ? "text-zinc-400" : "text-slate-600")}>
+                Build Mode
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setSettingsBuildType(settingsBuildType === "DOCKERFILE" ? (app?.buildType && app.buildType !== "DOCKERFILE" ? app.buildType : "LARAVEL") : settingsBuildType)}
+                  className={cn(
+                    "p-3.5 rounded-xl border text-left transition-all cursor-pointer flex items-start gap-3",
+                    settingsBuildType !== "DOCKERFILE"
+                      ? "border-cyan-500 bg-cyan-500/10 ring-1 ring-cyan-500/30"
+                      : isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/20" : "bg-slate-50 border-slate-200 hover:border-slate-300"
+                  )}
+                >
+                  <Code2 className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                  <div>
+                    <div className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>Automated Framework Engine</div>
+                    <div className={cn("text-[11px] mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                      Masdika Cloud automatically provisions Dockerfile and dependencies for your stack.
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSettingsBuildType("DOCKERFILE")}
+                  className={cn(
+                    "p-3.5 rounded-xl border text-left transition-all cursor-pointer flex items-start gap-3",
+                    settingsBuildType === "DOCKERFILE"
+                      ? "border-cyan-500 bg-cyan-500/10 ring-1 ring-cyan-500/30"
+                      : isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/20" : "bg-slate-50 border-slate-200 hover:border-slate-300"
+                  )}
+                >
+                  <SiDocker className="w-4 h-4 text-[#2496ED] shrink-0 mt-0.5" />
+                  <div>
+                    <div className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>Native Custom Dockerfile</div>
+                    <div className={cn("text-[11px] mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
+                      Kaniko directly builds from your repository&apos;s Dockerfile. Zero automatic overrides.
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            {/* Git URL & Branch Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="sm:col-span-2">
+                <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
+                  Git Repository URL
                 </label>
                 <input
                   type="url"
                   required
                   value={settingsGitUrl}
                   onChange={(e) => setSettingsGitUrl(e.target.value)}
+                  placeholder="https://github.com/username/repository.git"
                   className={cn(
-                    "w-full px-4 py-2.5 rounded-xl text-sm border font-mono transition-colors focus:outline-none focus:border-cyan-400",
-                    isDark ? "bg-black/30 border-white/10 text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+                    "w-full px-3.5 py-2.5 rounded-xl text-xs font-mono border transition-colors focus:outline-none focus:border-cyan-400",
+                    isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
                   )}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-2">
-                  Branch
+                <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
+                  Git Branch
                 </label>
                 <input
                   type="text"
                   required
                   value={settingsBranch}
                   onChange={(e) => setSettingsBranch(e.target.value)}
+                  placeholder="main"
                   className={cn(
-                    "w-full px-4 py-2.5 rounded-xl text-sm border font-mono transition-colors focus:outline-none focus:border-cyan-400",
-                    isDark ? "bg-black/30 border-white/10 text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+                    "w-full px-3.5 py-2.5 rounded-xl text-xs font-mono border transition-colors focus:outline-none focus:border-cyan-400",
+                    isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
                   )}
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-2">
-                  Build Command
-                </label>
-                <input
-                  type="text"
-                  value={settingsBuildCmd}
-                  onChange={(e) => setSettingsBuildCmd(e.target.value)}
-                  placeholder="npm run build"
-                  className={cn(
-                    "w-full px-4 py-2.5 rounded-xl text-sm border font-mono transition-colors focus:outline-none focus:border-cyan-400",
-                    isDark ? "bg-black/30 border-white/10 text-white" : "bg-slate-50 border-slate-200 text-slate-900"
-                  )}
-                />
+            {/* Framework or Dockerfile Fields */}
+            {settingsBuildType === "DOCKERFILE" ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div>
+                  <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
+                    Dockerfile Path in Repository
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={settingsDockerfilePath}
+                    onChange={(e) => setSettingsDockerfilePath(e.target.value)}
+                    placeholder="Dockerfile"
+                    className={cn(
+                      "w-full px-3.5 py-2.5 rounded-xl text-xs font-mono border transition-colors focus:outline-none focus:border-cyan-400",
+                      isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+                    )}
+                  />
+                  <p className={cn("text-[11px] mt-1", isDark ? "text-zinc-500" : "text-slate-500")}>
+                    Relative path to Dockerfile inside repo (e.g. <code>Dockerfile</code> or <code>docker/Dockerfile.prod</code>).
+                  </p>
+                </div>
+
+                <div>
+                  <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
+                    Container Exposed Port
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min={1}
+                    max={65535}
+                    value={settingsAppPort}
+                    onChange={(e) => setSettingsAppPort(parseInt(e.target.value, 10) || 3000)}
+                    placeholder="3000"
+                    className={cn(
+                      "w-full px-3.5 py-2.5 rounded-xl text-xs font-mono border transition-colors focus:outline-none focus:border-cyan-400",
+                      isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+                    )}
+                  />
+                  <p className={cn("text-[11px] mt-1", isDark ? "text-zinc-500" : "text-slate-500")}>
+                    The internal TCP port exposed by your Dockerfile (e.g. 3000, 80, 8080).
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3 pt-1">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
+                      Framework Preset
+                    </label>
+                    <select
+                      value={settingsBuildType}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setSettingsBuildType(val);
+                        if (["PHP", "LARAVEL", "WORDPRESS", "STATIC", "VITE"].includes(val)) setSettingsAppPort(80);
+                        else if (["GOLANG", "RUST"].includes(val)) setSettingsAppPort(8080);
+                        else if (["FASTAPI", "DJANGO"].includes(val)) setSettingsAppPort(8000);
+                        else setSettingsAppPort(3000);
+                      }}
+                      className={cn(
+                        "w-full px-3.5 py-2.5 rounded-xl text-xs font-bold border transition-colors focus:outline-none focus:border-cyan-400 cursor-pointer",
+                        isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+                      )}
+                    >
+                      <option value="LARAVEL">Laravel (PHP 8.2)</option>
+                      <option value="NEXTJS">Next.js (App Router)</option>
+                      <option value="NODEJS">Node.js / Express</option>
+                      <option value="FASTAPI">FastAPI (Python)</option>
+                      <option value="DJANGO">Django (Python)</option>
+                      <option value="PYTHON">Python (General)</option>
+                      <option value="GOLANG">Go (Golang)</option>
+                      <option value="PHP">PHP (Native Apache)</option>
+                      <option value="NESTJS">NestJS</option>
+                      <option value="VITE">Vite (React / Vue SPA)</option>
+                      <option value="ASTRO">Astro</option>
+                      <option value="SVELTE">Svelte / SvelteKit</option>
+                      <option value="REMIX">Remix</option>
+                      <option value="WORDPRESS">WordPress</option>
+                      <option value="RUST">Rust</option>
+                      <option value="RUBY">Ruby on Rails</option>
+                      <option value="STATIC">Static HTML</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
+                      Build Command (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={settingsBuildCmd}
+                      onChange={(e) => setSettingsBuildCmd(e.target.value)}
+                      placeholder={settingsBuildType === "LARAVEL" || settingsBuildType === "PHP" ? "composer install" : settingsBuildType === "FASTAPI" ? "pip install -r requirements.txt" : "npm run build"}
+                      className={cn(
+                        "w-full px-3.5 py-2.5 rounded-xl text-xs font-mono border transition-colors focus:outline-none focus:border-cyan-400",
+                        isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+                      )}
+                    />
+                  </div>
+
+                  <div>
+                    <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
+                      Start Command (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={settingsStartCmd}
+                      onChange={(e) => setSettingsStartCmd(e.target.value)}
+                      placeholder={settingsBuildType === "FASTAPI" ? "uvicorn main:app --port 8000" : settingsBuildType === "LARAVEL" || settingsBuildType === "PHP" ? "apache2-foreground" : "npm start"}
+                      className={cn(
+                        "w-full px-3.5 py-2.5 rounded-xl text-xs font-mono border transition-colors focus:outline-none focus:border-cyan-400",
+                        isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+                      )}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* CARD 2: CUSTOM DOMAIN & SSL ROUTING */}
+          <div className={cn(
+            "rounded-2xl border p-5 sm:p-6 space-y-4 transition-all shadow-2xs",
+            isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
+          )}>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-white/[0.06]">
+              <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                <Globe className="w-4 h-4 shrink-0" />
+                <span>Custom Domain &amp; SSL Routing</span>
+              </h3>
+              <span className={cn(
+                "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold self-start sm:self-auto shrink-0 border",
+                isDark ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/25" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+              )}>
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>Automatic Let&apos;s Encrypt TLS</span>
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className={cn(
+                "p-3.5 rounded-xl border space-y-1 text-xs",
+                isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200/90 shadow-2xs"
+              )}>
+                <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-500")}>
+                  Primary Ingress Domain (CNAME Target)
+                </span>
+                <div className="flex items-center justify-between font-mono font-bold text-xs pt-0.5">
+                  <span className={cn("truncate mr-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                    {app?.fullDomain}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(app?.fullDomain || "", "Primary Domain")}
+                    className={cn("cursor-pointer transition-colors shrink-0", isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-500 hover:text-cyan-700")}
+                    title="Copy CNAME Target"
+                  >
+                    {copiedField === "Primary Domain" ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-2">
-                  Start Command
-                </label>
-                <input
-                  type="text"
-                  value={settingsStartCmd}
-                  onChange={(e) => setSettingsStartCmd(e.target.value)}
-                  placeholder="npm start"
-                  className={cn(
-                    "w-full px-4 py-2.5 rounded-xl text-sm border font-mono transition-colors focus:outline-none focus:border-cyan-400",
-                    isDark ? "bg-black/30 border-white/10 text-white" : "bg-slate-50 border-slate-200 text-slate-900"
-                  )}
-                />
+              <div className={cn(
+                "p-3.5 rounded-xl border space-y-1 text-xs",
+                isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200/90 shadow-2xs"
+              )}>
+                <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-500" : "text-slate-500")}>
+                  Server IP (A Record Target)
+                </span>
+                <div className="flex items-center justify-between font-mono font-bold text-xs pt-0.5">
+                  <span className={cn("truncate mr-2", isDark ? "text-white" : "text-slate-900")}>
+                    {app?.publicIp || "206.237.98.230"}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(app?.publicIp || "206.237.98.230", "Server IP")}
+                    className={cn("cursor-pointer transition-colors shrink-0", isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-500 hover:text-cyan-700")}
+                    title="Copy Server IP"
+                  >
+                    {copiedField === "Server IP" ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-2">
-                Custom Domain (Optional)
+              <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
+                Custom Domain (Apex or Subdomain)
               </label>
               <input
                 type="text"
                 value={settingsCustomDomain}
-                onChange={(e) => setSettingsCustomDomain(e.target.value.toLowerCase())}
-                placeholder="example.com"
+                onChange={(e) => setSettingsCustomDomain(e.target.value.toLowerCase().trim())}
+                placeholder="app.mycompany.com"
                 className={cn(
-                  "w-full px-4 py-2.5 rounded-xl text-sm border font-mono transition-colors focus:outline-none focus:border-cyan-400",
-                  isDark ? "bg-black/30 border-white/10 text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+                  "w-full px-3.5 py-2.5 rounded-xl text-xs font-mono border transition-colors focus:outline-none focus:border-cyan-400",
+                  isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
                 )}
               />
-              <p className="text-[11px] text-zinc-500 mt-1">
-                Point a CNAME record from your domain to <code>{app.fullDomain}</code>, and Let&apos;s Encrypt will automatically issue an SSL certificate.
+              <p className={cn("text-[11px] mt-1.5 leading-relaxed", isDark ? "text-zinc-400" : "text-slate-600")}>
+                To point your custom domain, create a <strong>CNAME</strong> record pointing to <code className="font-mono text-cyan-400">{app?.fullDomain}</code> (or an <strong>A</strong> record pointing to <code className="font-mono text-cyan-400">{app?.publicIp || "206.237.98.230"}</code>) in your DNS manager. SSL certificate will be issued automatically upon DNS resolution.
               </p>
             </div>
           </div>
 
-          <div className={cn("rounded-2xl border p-5 sm:p-6 shadow-2xs space-y-4", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90")}>
-            <div className="flex items-center gap-2.5 border-b pb-3 border-white/[0.06]">
-              <Terminal className="w-5 h-5 text-cyan-400" />
-              <h2 className={cn("text-base font-bold", isDark ? "text-white" : "text-slate-900")}>
-                Environment Variables
-              </h2>
+          {/* CARD 3: CONTAINER ENVIRONMENT VARIABLES */}
+          <div className={cn(
+            "rounded-2xl border p-5 sm:p-6 space-y-4 transition-all shadow-2xs",
+            isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
+          )}>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-white/[0.06]">
+              <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                <Terminal className="w-4 h-4 shrink-0" />
+                <span>Container Environment Variables</span>
+              </h3>
+              <span className={cn(
+                "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold self-start sm:self-auto shrink-0 border",
+                isDark ? "bg-white/5 text-zinc-300 border-white/10" : "bg-slate-100 text-slate-700 border-slate-200"
+              )}>
+                KEY=VALUE per line
+              </span>
             </div>
 
             <textarea
-              rows={5}
+              rows={6}
               value={settingsEnvVars}
               onChange={(e) => setSettingsEnvVars(e.target.value)}
-              placeholder="KEY=VALUE"
+              placeholder={"APP_ENV=production\nAPP_DEBUG=false\nDATABASE_URL=mysql://user:pass@host:3306/db\nAPI_SECRET=my-secret-key"}
               className={cn(
-                "w-full px-4 py-3 rounded-xl text-xs font-mono border transition-colors focus:outline-none focus:border-cyan-400 resize-y",
-                isDark ? "bg-black/30 border-white/10 text-white placeholder-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900"
+                "w-full px-4 py-3 rounded-xl text-xs font-mono border transition-colors focus:outline-none focus:border-cyan-400 resize-y leading-relaxed",
+                isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400"
               )}
             />
+            <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>
+              Variables are securely mounted into the Kubernetes Pod container environment.
+            </p>
+          </div>
 
+          {/* ACTION BUTTONS (MANAGED APP STYLE) */}
+          <div className="flex flex-wrap items-center gap-3 pt-1">
             <button
               type="submit"
               disabled={savingSettings}
-              className="px-5 py-2.5 rounded-xl font-bold text-xs bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all shadow-md cursor-pointer disabled:opacity-50"
+              className="px-5 py-2.5 rounded-xl font-bold text-xs bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all shadow-md shadow-cyan-400/20 cursor-pointer disabled:opacity-50 active:scale-95"
             >
               {savingSettings ? "Saving Settings..." : "Save Configuration"}
+            </button>
+
+            <button
+              type="button"
+              disabled={savingSettings || actionLoading}
+              onClick={() => handleSaveSettings(undefined, true)}
+              className={cn(
+                "px-5 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2 cursor-pointer border disabled:opacity-50 active:scale-95",
+                isDark
+                  ? "bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border-cyan-500/30"
+                  : "bg-cyan-50 text-cyan-800 hover:bg-cyan-100 border-cyan-300"
+              )}
+            >
+              <RotateCw className={cn("w-3.5 h-3.5", (savingSettings || actionLoading) && "animate-spin")} />
+              <span>Save &amp; Trigger Rebuild</span>
             </button>
           </div>
         </form>
