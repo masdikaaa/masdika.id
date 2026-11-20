@@ -39,7 +39,7 @@ describe('App Platform Engine & Capabilities', () => {
   describe('Automated Dockerfile Generator', () => {
     it('generates production Laravel Apache Dockerfile with mod_rewrite & public docroot', () => {
       const df = generateDockerfileForFramework('LARAVEL', null, null, 80);
-      expect(df).toContain('FROM php:8.2-apache');
+      expect(df).toContain('FROM php:8.3-apache');
       expect(df).toContain('composer install');
       expect(df).toContain('a2enmod rewrite');
       expect(df).toContain('/var/www/html/public');
@@ -71,7 +71,7 @@ describe('App Platform Engine & Capabilities', () => {
 
     it('generates PHP Apache Dockerfile with docker-php-ext-install for Kaniko compatibility', () => {
       const df = generateDockerfileForFramework('PHP', null, null, 80);
-      expect(df).toContain('FROM php:8.2-apache');
+      expect(df).toContain('FROM php:8.3-apache');
       expect(df).toContain('docker-php-ext-install');
       expect(df).toContain('getcomposer.org');
       expect(df).toContain('EXPOSE 80');
@@ -87,8 +87,27 @@ describe('App Platform Engine & Capabilities', () => {
 
     it('generates WordPress Apache Dockerfile', () => {
       const df = generateDockerfileForFramework('WORDPRESS', null, null, 80);
-      expect(df).toContain('FROM wordpress:php8.2-apache');
+      expect(df).toContain('FROM wordpress:php8.3-apache');
       expect(df).toContain('EXPOSE 80');
+    });
+
+    it('hardens PHP, Laravel, and WordPress Dockerfiles against PHP CVEs, debug leaks, and webshells', () => {
+      const laravelDf = generateDockerfileForFramework('LARAVEL', null, null, 80);
+      const phpDf = generateDockerfileForFramework('PHP', null, null, 80);
+      const wpDf = generateDockerfileForFramework('WORDPRESS', null, null, 80);
+
+      for (const df of [laravelDf, phpDf, wpDf]) {
+        expect(df).toContain('php.ini-production');
+        expect(df).toContain('expose_php = Off');
+        expect(df).toContain('cgi.fix_pathinfo = 0');
+        expect(df).toContain('allow_url_include = Off');
+        expect(df).toContain('ServerTokens Prod');
+        expect(df).toContain('X-Content-Type-Options');
+        expect(df).toContain('php_admin_flag engine off');
+      }
+
+      expect(laravelDf).toContain('APP_DEBUG=false');
+      expect(laravelDf).toContain('APP_ENV=production');
     });
 
     it('generates Static Nginx Dockerfile', () => {

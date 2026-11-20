@@ -1802,7 +1802,7 @@ export default function AppPlatformDetailPage({
                       }}
                       className="h-[42px] px-3.5 py-0 text-xs font-bold"
                       options={[
-                        { value: "LARAVEL", label: "Laravel (PHP 8.2)" },
+                        { value: "LARAVEL", label: "Laravel (PHP 8.3)" },
                         { value: "NEXTJS", label: "Next.js (App Router)" },
                         { value: "NODEJS", label: "Node.js / Express" },
                         { value: "FASTAPI", label: "FastAPI (Python)" },

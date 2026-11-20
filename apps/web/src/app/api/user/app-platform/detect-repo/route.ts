@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
       defaultPort = 80;
       if (fileNames.has("artisan")) {
         detectedFramework = "LARAVEL";
-        detectedLabel = "Laravel (PHP 8.2)";
+        detectedLabel = "Laravel (PHP 8.3)";
       } else {
         // Inspect composer.json briefly
         try {
@@ -124,7 +124,7 @@ export async function POST(req: NextRequest) {
             const compText = await compRes.text();
             if (compText.includes("laravel/framework")) {
               detectedFramework = "LARAVEL";
-              detectedLabel = "Laravel (PHP 8.2)";
+              detectedLabel = "Laravel (PHP 8.3)";
             }
           }
         } catch {}

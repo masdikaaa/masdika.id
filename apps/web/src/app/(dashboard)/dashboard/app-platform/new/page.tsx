@@ -102,7 +102,7 @@ const FRAMEWORKS: FrameworkItem[] = [
     id: "LARAVEL",
     name: "Laravel",
     category: "FULLSTACK",
-    desc: "Artisan, Blade, Eloquent, PHP 8.2 & Apache mod_rewrite",
+    desc: "Artisan, Blade, Eloquent, PHP 8.3 (Patched) & Apache mod_rewrite",
     icon: SiLaravel,
     color: "text-[#FF2D20]",
     bgColor: "bg-[#FF2D20]/10 border-[#FF2D20]/25",
@@ -186,7 +186,7 @@ const FRAMEWORKS: FrameworkItem[] = [
     id: "PHP",
     name: "PHP / Apache",
     category: "BACKEND",
-    desc: "Modern PHP 8.2 runtime with Apache rewrite module",
+    desc: "Hardened PHP 8.3 runtime with Apache rewrite & security headers",
     icon: SiPhp,
     color: "text-[#777BB4]",
     bgColor: "bg-[#777BB4]/10 border-[#777BB4]/25",
@@ -335,13 +335,13 @@ WORKDIR /app
 COPY --from=vendor /app /app
 RUN if [ -f package.json ]; then (npm ci || npm install || true) && (npm run build || true); fi
 
-FROM php:8.2-apache
+FROM php:8.3-apache
 WORKDIR /var/www/html
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN docker-php-ext-install pdo pdo_mysql bcmath opcache
 COPY --from=frontend /app /var/www/html/
-RUN ([ ! -f .env ] && [ -f .env.example ] && cp .env.example .env || true) && php artisan key:generate --force || true && mkdir -p database storage bootstrap/cache && touch database/database.sqlite && php artisan migrate --force || true && chown -R www-data:www-data storage bootstrap/cache database && chmod -R 775 storage bootstrap/cache database || true
-RUN a2enmod rewrite && sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/*.conf && sed -ri -e 's!/var/www/!/var/www/html/public!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+RUN ([ ! -f .env ] && [ -f .env.example ] && cp .env.example .env || true) && ([ ! -f .env ] || sed -ri -e 's/^APP_DEBUG=.*/APP_DEBUG=false/g' -e 's/^APP_ENV=.*/APP_ENV=production/g' .env || true) && php artisan key:generate --force || true && mkdir -p database storage bootstrap/cache && touch database/database.sqlite && php artisan migrate --force || true && chown -R root:www-data /var/www/html && chmod -R u=rwX,go=rX /var/www/html && (chmod 640 /var/www/html/.env 2>/dev/null || true) && chown -R www-data:www-data storage bootstrap/cache database && chmod -R 775 storage bootstrap/cache database || true
+RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" 2>/dev/null || true && a2enmod rewrite headers && sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/*.conf && sed -ri -e 's!/var/www/!/var/www/html/public!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 EXPOSE 80
 CMD ["apache2-foreground"]`,
   },
