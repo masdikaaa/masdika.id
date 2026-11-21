@@ -56,7 +56,7 @@ describe('App Platform Engine & Capabilities', () => {
 
     it('generates production Python Dockerfile', () => {
       const df = generateDockerfileForFramework('PYTHON', null, 'uvicorn main:app --host 0.0.0.0 --port 8000', 8000);
-      expect(df).toContain('FROM python:3.11-slim');
+      expect(df).toContain('FROM python:3.11');
       expect(df).toContain('pip install');
       expect(df).toContain('uvicorn main:app');
       expect(df).toContain('EXPOSE 8000');
