@@ -403,7 +403,7 @@ WORKDIR /app
 ENV COMPOSER_NO_BLOCKING=1
 ENV COMPOSER_NO_SECURITY_BLOCKING=1
 COPY . /app
-RUN if [ -f composer.json ]; then \\
+RUN rm -rf .git && if [ -f composer.json ]; then \\
       composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-scripts --ignore-platform-reqs --no-audit || \\
       composer update --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-scripts --ignore-platform-reqs --no-audit; \\
       composer dump-autoload --optimize --no-dev --no-scripts --ignore-platform-reqs; \\
@@ -414,7 +414,8 @@ WORKDIR /app
 COPY --from=vendor /app /app
 RUN if [ -f package.json ]; then \\
       (if [ -f package-lock.json ]; then npm ci; else npm install; fi || true) && \\
-      (npm run build || true); \\
+      (npm run build || true) && \\
+      rm -rf node_modules; \\
     fi
 
 FROM php:8.3-apache
@@ -1410,7 +1411,7 @@ sh /tmp/autodetect.sh`
                   ? [
                       '--cache=true',
                       `--cache-repo=127.0.0.1:5000/${app.subdomain}-cache`,
-                      '--cache-ttl=1h',
+                      '--cache-ttl=24h',
                     ]
                   : ['--cache=false']),
               ],
@@ -1971,7 +1972,7 @@ export async function syncAppPlatformBuildProgress(appId: number): Promise<void>
       const keepTags = Array.from(
         new Set([finalTag, ...successDeps.map((d) => d.imageTag || '').filter(Boolean)])
       );
-      pruneAppPlatformRegistryImages(app.subdomain, keepTags, true).catch(() => {});
+      pruneAppPlatformRegistryImages(app.subdomain, keepTags, false).catch(() => {});
     };
 
     try {
