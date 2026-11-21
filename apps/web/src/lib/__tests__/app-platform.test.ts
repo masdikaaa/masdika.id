@@ -40,7 +40,7 @@ describe('App Platform Engine & Capabilities', () => {
   describe('Automated Dockerfile Generator', () => {
     it('generates production Laravel Apache Dockerfile with mod_rewrite & public docroot', () => {
       const df = generateDockerfileForFramework('LARAVEL', null, null, 80);
-      expect(df).toContain('FROM php:8.3-apache');
+      expect(df).toContain('FROM php:8.4-apache');
       expect(df).toContain('composer install');
       expect(df).toContain('a2enmod rewrite');
       expect(df).toContain('/var/www/html/public');
@@ -72,7 +72,7 @@ describe('App Platform Engine & Capabilities', () => {
 
     it('generates PHP Apache Dockerfile with docker-php-ext-install for Kaniko compatibility', () => {
       const df = generateDockerfileForFramework('PHP', null, null, 80);
-      expect(df).toContain('FROM php:8.3-apache');
+      expect(df).toContain('FROM php:8.4-apache');
       expect(df).toContain('docker-php-ext-install');
       expect(df).toContain('getcomposer.org');
       expect(df).toContain('EXPOSE 80');
