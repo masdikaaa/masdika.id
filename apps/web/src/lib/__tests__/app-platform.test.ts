@@ -65,7 +65,7 @@ describe('App Platform Engine & Capabilities', () => {
 
     it('generates multi-stage Go build Dockerfile', () => {
       const df = generateDockerfileForFramework('GOLANG', null, null, 8080);
-      expect(df).toContain('FROM golang:1.22-alpine AS builder');
+      expect(df).toContain('FROM golang:alpine AS builder');
       expect(df).toContain('FROM alpine:latest');
       expect(df).toContain('EXPOSE 8080');
     });
