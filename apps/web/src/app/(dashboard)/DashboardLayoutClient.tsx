@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Key, Settings, LogOut, Bell, Menu, LayoutDashboard, BarChart3, Database, Receipt, HardDrive, Server, Layers, MessageSquare, Wallet, Ticket, Network, Terminal, UploadCloud, MapPin, Flame, Activity, Gift, Clock, Code2, Sun, Moon, ShieldAlert, Loader2, Plus, ChevronDown, Search, Rocket, Boxes, Globe, Sparkles, Bot } from "lucide-react";
+import { Key, Settings, LogOut, Bell, Menu, LayoutDashboard, BarChart3, Database, Receipt, HardDrive, Server, Layers, MessageSquare, Wallet, Ticket, Network, Terminal, UploadCloud, MapPin, Flame, Activity, Gift, Clock, Code2, Sun, Moon, ShieldAlert, Loader2, Plus, ChevronDown, Search, Rocket, Boxes, AppWindow, Sparkles, Bot } from "lucide-react";
 import { SiKubernetes, SiCloudflare } from "react-icons/si";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -87,7 +87,7 @@ const SIDEBAR_LINKS = [
   { name: "Cloudflared", href: "/dashboard/cloudflared", icon: SiCloudflare, color: "text-[#F38020]", group: "IaaS Configuration" },
   { name: "Firewalls", href: "/dashboard/firewalls", icon: FirewallIcon, color: "text-orange-500", group: "IaaS Configuration" },
 
-  { name: "App Platform", href: "/dashboard/app-platform", icon: Globe, color: "text-cyan-400", group: "Platform (PaaS)", badge: "New" },
+  { name: "App Platform", href: "/dashboard/app-platform", icon: AppWindow, color: "text-cyan-400", group: "Platform (PaaS)", badge: "New" },
   { name: "Managed Apps", href: "/dashboard/apps", icon: Boxes, color: "text-cyan-400", group: "Platform (PaaS)", badge: "New" },
   { name: "Managed Database", href: "/dashboard/database", icon: Database, color: "text-cyan-400", group: "Platform (PaaS)" },
 
