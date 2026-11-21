@@ -75,23 +75,30 @@ const TunnelIcon = ({ className }: { className?: string }) => (
 const SIDEBAR_LINKS = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, color: "text-cyan-400", group: "Main" },
   { name: "My Services", href: "/dashboard/services", icon: Layers, color: "text-cyan-400", group: "Main" },
-  { name: "Cloud VPS", href: "/dashboard/vps", icon: Terminal, color: "text-cyan-400", group: "Compute" },
-  { name: "App Catalog", href: "/dashboard/catalog-apps", icon: Rocket, color: "text-cyan-400", group: "Applications" },
-  { name: "Managed Apps", href: "/dashboard/apps", icon: Boxes, color: "text-cyan-400", group: "Applications", badge: "New" },
-  { name: "App Platform", href: "/dashboard/app-platform", icon: Globe, color: "text-cyan-400", group: "Applications", badge: "New" },
-  { name: "Metric & Alert", href: "/dashboard/alerts", icon: Activity, color: "text-cyan-400", group: "Service Configuration" },
-  { name: "Incident Reports", href: "/dashboard/incidents", icon: ShieldAlert, color: "text-cyan-400", group: "Service Configuration" },
-  { name: "Auto Scheduler", href: "/dashboard/scheduler", icon: Clock, color: "text-cyan-400", group: "Service Configuration" },
-  { name: "Elastic Static IPs", href: "/dashboard/reserved-ips", icon: Network, color: "text-cyan-400", group: "Service Configuration" },
-  { name: "Virtual Private Cloud", href: "/dashboard/vpc", icon: VpcIcon, color: "text-cyan-400", group: "Service Configuration" },
-  { name: "Cloudflared", href: "/dashboard/cloudflared", icon: SiCloudflare, color: "text-[#F38020]", group: "Service Configuration" },
-  { name: "Firewalls", href: "/dashboard/firewalls", icon: FirewallIcon, color: "text-orange-500", group: "Service Configuration" },
-  { name: "Managed Database", href: "/dashboard/database", icon: Database, color: "text-cyan-400", group: "Storage & Data" },
-  { name: "Object Storage", href: "/dashboard/object-storage", icon: HardDrive, color: "text-cyan-400", group: "Storage & Data", badge: "New" },
-  { name: "File CDN", href: "/dashboard/cdn", icon: UploadCloud, color: "text-cyan-400", group: "Storage & Data" },
-  { name: "AI Gateway", href: "/dashboard/ai-gateway", icon: Sparkles, color: "text-cyan-400", group: "Artificial intelligence", badge: "New" },
-  { name: "API VPS", href: "/dashboard/api-vps", icon: Code2, color: "text-cyan-400", group: "Tools" },
-  { name: "Masdika MCP", href: "/dashboard/mcp", icon: Bot, color: "text-cyan-400", group: "Tools", badge: "New" },
+
+  { name: "Cloud VPS", href: "/dashboard/vps", icon: Terminal, color: "text-cyan-400", group: "Infrastructure (IaaS)" },
+  { name: "App Catalog", href: "/dashboard/catalog-apps", icon: Rocket, color: "text-cyan-400", group: "Infrastructure (IaaS)" },
+
+  { name: "Metric & Alert", href: "/dashboard/alerts", icon: Activity, color: "text-cyan-400", group: "IaaS Configuration" },
+  { name: "Incident Reports", href: "/dashboard/incidents", icon: ShieldAlert, color: "text-cyan-400", group: "IaaS Configuration" },
+  { name: "Auto Scheduler", href: "/dashboard/scheduler", icon: Clock, color: "text-cyan-400", group: "IaaS Configuration" },
+  { name: "Elastic Static IPs", href: "/dashboard/reserved-ips", icon: Network, color: "text-cyan-400", group: "IaaS Configuration" },
+  { name: "Virtual Private Cloud", href: "/dashboard/vpc", icon: VpcIcon, color: "text-cyan-400", group: "IaaS Configuration" },
+  { name: "Cloudflared", href: "/dashboard/cloudflared", icon: SiCloudflare, color: "text-[#F38020]", group: "IaaS Configuration" },
+  { name: "Firewalls", href: "/dashboard/firewalls", icon: FirewallIcon, color: "text-orange-500", group: "IaaS Configuration" },
+
+  { name: "App Platform", href: "/dashboard/app-platform", icon: Globe, color: "text-cyan-400", group: "Platform (PaaS)", badge: "New" },
+  { name: "Managed Apps", href: "/dashboard/apps", icon: Boxes, color: "text-cyan-400", group: "Platform (PaaS)", badge: "New" },
+  { name: "Managed Database", href: "/dashboard/database", icon: Database, color: "text-cyan-400", group: "Platform (PaaS)" },
+
+  { name: "Object Storage", href: "/dashboard/object-storage", icon: HardDrive, color: "text-cyan-400", group: "Storage & CDN", badge: "New" },
+  { name: "File CDN", href: "/dashboard/cdn", icon: UploadCloud, color: "text-cyan-400", group: "Storage & CDN" },
+
+  { name: "AI Gateway", href: "/dashboard/ai-gateway", icon: Sparkles, color: "text-cyan-400", group: "Artificial Intelligence", badge: "New" },
+
+  { name: "Masdika MCP", href: "/dashboard/mcp", icon: Bot, color: "text-cyan-400", group: "Developer Tools", badge: "New" },
+  { name: "API VPS", href: "/dashboard/api-vps", icon: Code2, color: "text-cyan-400", group: "Developer Tools" },
+
   { name: "Support Tickets", href: "/dashboard/tickets", icon: MessageSquare, color: "text-cyan-400", group: "Support" },
   { name: "Affiliate Program", href: "/dashboard/affiliate", icon: Gift, color: "text-cyan-400", group: "Affiliate" },
   { name: "Promo & Rewards", href: "/dashboard/promos", icon: Ticket, color: "text-cyan-400", group: "Promotions" },
