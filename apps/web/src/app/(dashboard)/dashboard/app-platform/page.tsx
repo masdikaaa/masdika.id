@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
 import {
-  Globe,
+  AppWindow,
   Plus,
   ExternalLink,
   ChevronRight,
@@ -287,12 +287,12 @@ export default function AppPlatformPage() {
               App Platform
             </h1>
             <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-semibold border whitespace-nowrap shrink-0", isDark ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-cyan-50 text-cyan-700 border-cyan-200")}>
-              <Globe className="w-3 h-3 shrink-0" />
+              <AppWindow className="w-3 h-3 shrink-0" />
               Git-to-Web PaaS
             </span>
           </div>
           <p className={cn("text-xs sm:text-sm font-medium mt-1.5 max-w-2xl leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
-            Deploy web apps from any Git repository in seconds. Automated Kaniko container builds, instant Let&apos;s Encrypt SSL, and continuous deployment.
+            Deploy web apps from any Git repository in seconds. Automated BuildKit container builds, instant Let&apos;s Encrypt SSL, and continuous deployment.
           </p>
         </div>
 
@@ -327,7 +327,7 @@ export default function AppPlatformPage() {
               WEB APPS
             </span>
             <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center", isDark ? "bg-cyan-500/15 border-cyan-500/25 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
-              <Globe className="w-4 h-4" />
+              <AppWindow className="w-4 h-4" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
@@ -413,7 +413,7 @@ export default function AppPlatformPage() {
         /* Empty State */
         <div className={cn("rounded-2xl border p-10 sm:p-14 text-center shadow-2xs", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs")}>
           <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 border", isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-50 border-cyan-200 text-cyan-700")}>
-            <Globe className="w-8 h-8" />
+            <AppWindow className="w-8 h-8" />
           </div>
           <h2 className={cn("text-lg font-bold mb-1.5", isDark ? "text-white" : "text-slate-900")}>
             No Web Applications Deployed
@@ -496,7 +496,7 @@ export default function AppPlatformPage() {
                     isDark ? "bg-white/[0.02] border-white/[0.06]" : "bg-slate-50 border-slate-200"
                   )}>
                     <div className="min-w-0 flex items-center gap-2">
-                      <Globe className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
+                      <AppWindow className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
                       <a
                         href={app.httpsUrl}
                         target="_blank"
