@@ -331,7 +331,7 @@ WORKDIR /app
 ENV COMPOSER_NO_BLOCKING=1
 ENV COMPOSER_NO_SECURITY_BLOCKING=1
 COPY . /app
-RUN if [ -f composer.json ]; then composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-scripts --ignore-platform-reqs --no-audit || composer update --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-scripts --ignore-platform-reqs --no-audit; composer dump-autoload --optimize --no-dev --no-scripts --ignore-platform-reqs; fi
+RUN if [ -f composer.json ]; then composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-scripts --ignore-platform-reqs --no-security-blocking || composer update --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-scripts --ignore-platform-reqs --no-security-blocking; composer dump-autoload --optimize --no-dev --no-scripts --ignore-platform-reqs; fi
 
 FROM node:20-alpine AS frontend
 WORKDIR /app
