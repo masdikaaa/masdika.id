@@ -1764,6 +1764,7 @@ export default function AppPlatformDetailPage({
                 isRunning={app?.status === "RUNNING"}
                 isDark={isDark}
                 quickCommand={ptyQuickCmd}
+                onSwitchToOneShot={() => setTermMode("exec")}
               />
               <div className={cn(
                 "px-4 py-2 border-t text-[11px] font-mono flex flex-wrap items-center justify-between gap-2",

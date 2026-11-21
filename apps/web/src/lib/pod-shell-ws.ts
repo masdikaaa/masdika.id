@@ -42,11 +42,19 @@ function isAllowedOrigin(req: any): boolean {
       allowedHosts.add(appUrlHost.split(":")[0]);
     } catch {}
   }
+  if (process.env.APP_URL) {
+    try {
+      const appUrlHost = new URL(process.env.APP_URL).host.toLowerCase();
+      allowedHosts.add(appUrlHost);
+      allowedHosts.add(appUrlHost.split(":")[0]);
+    } catch {}
+  }
 
   return (
     allowedHosts.has(originHost) ||
     allowedHosts.has(originDomain) ||
-    originDomain.endsWith(".masdika.id")
+    originDomain.endsWith(".masdika.id") ||
+    originDomain.endsWith(".masdikacloud.my.id")
   );
 }
 
@@ -56,6 +64,7 @@ function isAllowedOrigin(req: any): boolean {
 export async function handlePodShellUpgrade(req: any, socket: any, head: any): Promise<void> {
   try {
     if (!isAllowedOrigin(req)) {
+      console.warn("[PodShell WS] Origin rejected:", req.headers?.origin, "host:", req.headers?.host);
       socket.write("HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n");
       socket.destroy();
       return;
@@ -70,9 +79,13 @@ export async function handlePodShellUpgrade(req: any, socket: any, head: any): P
     }
 
     const cookies = parseCookie(req.headers?.cookie || "");
-    const sessionToken = cookies["admin_session"] || cookies["user_session"];
+    const candidateTokens = [cookies["user_session"], cookies["admin_session"]].filter(
+      (t): t is string => Boolean(t)
+    );
+    const sessionToken = candidateTokens.find((t) => Boolean(verifySessionToken(t))) || "";
     const payload = sessionToken ? getSessionPayload(sessionToken) : null;
-    if (!payload?.userId || !verifySessionToken(sessionToken)) {
+    if (!payload?.userId) {
+      console.warn("[PodShell WS] Unauthorized: missing or invalid session cookie");
       socket.write("HTTP/1.1 401 Unauthorized\r\nConnection: close\r\n\r\n");
       socket.destroy();
       return;
