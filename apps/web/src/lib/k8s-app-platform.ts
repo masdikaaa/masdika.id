@@ -570,6 +570,17 @@ COPY . .
 RUN if [ -f requirements.txt ]; then pip install --no-cache-dir --prefer-binary -r requirements.txt; \\
     elif [ -f pyproject.toml ]; then pip install --no-cache-dir --prefer-binary .; \\
     elif [ -f Pipfile ]; then pip install --no-cache-dir --prefer-binary pipenv && pipenv install --system --deploy --ignore-pipfile; fi
+RUN if [ -f scripts/build_neonize_spr.py ]; then \\
+      ARCH="$(dpkg --print-architecture)"; \\
+      curl -fsSL "https://go.dev/dl/go1.26.0.linux-\${ARCH}.tar.gz" | tar -C /usr/local -xz && \\
+      PATH="/usr/local/go/bin:$PATH" python scripts/build_neonize_spr.py && \\
+      rm -rf /usr/local/go /root/go; \\
+    fi
+RUN if [ -f frontend/package.json ] && [ ! -d frontend/dist ]; then \\
+      curl -fsSL "https://nodejs.org/dist/v20.18.1/node-v20.18.1-linux-x64.tar.xz" | tar -xJ -C /tmp && \\
+      PATH="/tmp/node-v20.18.1-linux-x64/bin:$PATH" sh -c "npm --prefix frontend ci || npm --prefix frontend install; npm --prefix frontend run build" && \\
+      rm -rf /tmp/node-v20.18.1-linux-x64 frontend/node_modules; \\
+    fi
 ${build ? `RUN ${build} || true` : ''}
 ENV PORT=${appPort}
 EXPOSE ${appPort}
