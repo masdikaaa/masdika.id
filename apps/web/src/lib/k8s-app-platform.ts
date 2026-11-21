@@ -1112,8 +1112,8 @@ export async function triggerAppPlatformBuild(
     app.dockerfilePath && app.dockerfilePath.trim() ? app.dockerfilePath.trim() : 'Dockerfile'
   ).replace(/['"`$\\;\r\n]/g, '') || 'Dockerfile';
 
-  // Handle custom Dockerfile generation, inline Dockerfile, or preset ConfigMap (never static ConfigMap for BUILDPACK)
-  let configMapName: string | undefined = undefined;
+  // Handle custom Dockerfile generation, inline Dockerfile, or preset Dockerfile (passed via env to avoid ConfigMap FailedMount races)
+  let presetDockerfile = '';
   const isInlineDockerfile = Boolean(
     !isBuildpack &&
     app.buildCommand &&
@@ -1124,48 +1124,17 @@ export async function triggerAppPlatformBuild(
   );
 
   if (isInlineDockerfile) {
-    configMapName = `cm-df-${jobName}`;
-    await (coreApi as any).createNamespacedConfigMap({
-      namespace,
-      body: {
-        metadata: {
-          name: configMapName,
-          labels: {
-            'build.app-platform/app': app.subdomain,
-            'app.kubernetes.io/managed-by': 'masdika-app-platform',
-          },
-        },
-        data: {
-          Dockerfile: app.buildCommand!.trim(),
-        },
-      },
-    });
+    presetDockerfile = app.buildCommand!.trim();
   } else if (!isBuildpack && app.buildType && app.buildType !== 'DOCKERFILE') {
-    const generatedDockerfile = generateDockerfileForFramework(
+    presetDockerfile = generateDockerfileForFramework(
       app.buildType,
       app.buildCommand,
       app.startCommand,
       app.appPort
     );
-    if (generatedDockerfile) {
-      configMapName = `cm-df-${jobName}`;
-      await (coreApi as any).createNamespacedConfigMap({
-        namespace,
-        body: {
-          metadata: {
-            name: configMapName,
-            labels: {
-              'build.app-platform/app': app.subdomain,
-              'app.kubernetes.io/managed-by': 'masdika-app-platform',
-            },
-          },
-          data: {
-            Dockerfile: generatedDockerfile,
-          },
-        },
-      });
-    }
   }
+
+  const presetDfB64 = presetDockerfile ? Buffer.from(presetDockerfile, 'utf8').toString('base64') : '';
 
   const gitUrl = app.gitUrl.trim();
   const branch = (app.branch || 'main').trim();
@@ -1176,18 +1145,19 @@ export async function triggerAppPlatformBuild(
   // Universal Smart Stack Inspector & Self-Healing Hook inside git-clone
   const buildpackPort = app.appPort || 80;
   const dfTpl = (fw: string) => generateDockerfileForFramework(fw, null, null, buildpackPort);
-  const smartEngineHook = !isInlineDockerfile
-    ? ` && cd /workspace && cat <<'MASDIKA_BP_EOF' > /tmp/autodetect.sh
+  const smartEngineHook = isInlineDockerfile
+    ? ` && mkdir -p "${workspaceAppDir}" && echo "$MASDIKA_PRESET_DF_B64" | base64 -d > "${workspaceAppDir}/.masdika.Dockerfile"`
+    : ` && cd /workspace && cat <<'MASDIKA_BP_EOF' > /tmp/autodetect.sh
 APP_DIR="${workspaceAppDir}"
 OUT_DF="${workspaceAppDir}/.masdika.Dockerfile"
 BUILD_MODE="${normalizedBuildMode}"
 PRESET="${normalizedPreset}"
 REQ_DF="${requestedDockerfilePath}"
-HAS_CM="${configMapName ? '1' : '0'}"
+HAS_PRESET="${presetDfB64 ? '1' : '0'}"
 NEED_AUTODETECT=0
 
-if [ "$HAS_CM" = "1" ] && [ -f /custom-dockerfile/Dockerfile ]; then
-  cp /custom-dockerfile/Dockerfile "$OUT_DF"
+if [ "$HAS_PRESET" = "1" ] && [ -n "$MASDIKA_PRESET_DF_B64" ]; then
+  echo "$MASDIKA_PRESET_DF_B64" | base64 -d > "$OUT_DF"
   case "$PRESET" in
     LARAVEL|PHP|WORDPRESS)
       if [ ! -f "$APP_DIR/artisan" ] && [ ! -f "$APP_DIR/composer.json" ] && [ ! -f "$APP_DIR/index.php" ] && [ ! -f "$APP_DIR/public/index.php" ] && [ ! -f "$APP_DIR/wp-config.php" ] && [ ! -f "$APP_DIR/wp-config-sample.php" ] && [ ! -d "$APP_DIR/wp-includes" ]; then
@@ -1316,8 +1286,7 @@ MASDIKA_DF_EOF
   fi
 fi
 MASDIKA_BP_EOF
-sh /tmp/autodetect.sh`
-    : '';
+sh /tmp/autodetect.sh`;
 
   // Job Specification: Kaniko Builder (supports DOCKERFILE, AUTO, and Zero-Config BUILDPACK auto-detection)
   const jobManifest: k8s.V1Job = {
@@ -1352,22 +1321,22 @@ sh /tmp/autodetect.sh`
               name: 'workspace',
               emptyDir: {},
             },
-            ...(configMapName
-              ? [
-                  {
-                    name: 'custom-dockerfile',
-                    configMap: {
-                      name: configMapName,
-                    },
-                  },
-                ]
-              : []),
           ],
           initContainers: [
             {
               name: 'git-clone',
               image: 'alpine/git:latest',
               imagePullPolicy: 'IfNotPresent',
+              ...(presetDfB64
+                ? {
+                    env: [
+                      {
+                        name: 'MASDIKA_PRESET_DF_B64',
+                        value: presetDfB64,
+                      },
+                    ],
+                  }
+                : {}),
               command: ['sh', '-c'],
               args: [
                 commitHash && /^[a-fA-F0-9]{4,40}$/.test(commitHash.trim())
@@ -1379,14 +1348,6 @@ sh /tmp/autodetect.sh`
                   name: 'workspace',
                   mountPath: '/workspace',
                 },
-                ...(configMapName
-                  ? [
-                      {
-                        name: 'custom-dockerfile',
-                        mountPath: '/custom-dockerfile',
-                      },
-                    ]
-                  : []),
               ],
             },
           ],
@@ -1401,9 +1362,7 @@ sh /tmp/autodetect.sh`
               },
               args: [
                 `--context=dir://${workspaceAppDir}`,
-                ...(isInlineDockerfile
-                  ? ['--dockerfile=/custom-dockerfile/Dockerfile']
-                  : [`--dockerfile=${workspaceAppDir}/.masdika.Dockerfile`]),
+                `--dockerfile=${workspaceAppDir}/.masdika.Dockerfile`,
                 `--destination=${destinationImage}`,
                 '--insecure',
                 '--skip-tls-verify',
@@ -1420,14 +1379,6 @@ sh /tmp/autodetect.sh`
                       name: 'workspace',
                       mountPath: '/workspace',
                     },
-                    ...(configMapName
-                      ? [
-                          {
-                            name: 'custom-dockerfile',
-                            mountPath: '/custom-dockerfile',
-                          },
-                        ]
-                      : []),
                   ],
                   resources: {
                     requests: {
