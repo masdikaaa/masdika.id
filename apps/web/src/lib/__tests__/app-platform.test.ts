@@ -40,7 +40,7 @@ describe('App Platform Engine & Capabilities', () => {
   describe('Automated Dockerfile Generator', () => {
     it('generates production Laravel Apache Dockerfile with mod_rewrite & public docroot', () => {
       const df = generateDockerfileForFramework('LARAVEL', null, null, 80);
-      expect(df).toContain('FROM php:8.6-apache');
+      expect(df).toContain('FROM php:8.4-apache');
       expect(df).toContain('composer install');
       expect(df).toContain('a2enmod rewrite');
       expect(df).toContain('/var/www/html/public');
@@ -72,7 +72,7 @@ describe('App Platform Engine & Capabilities', () => {
 
     it('generates PHP Apache Dockerfile with docker-php-ext-install for Kaniko compatibility', () => {
       const df = generateDockerfileForFramework('PHP', null, null, 80);
-      expect(df).toContain('FROM php:8.6-apache');
+      expect(df).toContain('FROM php:8.4-apache');
       expect(df).toContain('docker-php-ext-install');
       expect(df).toContain('getcomposer.org');
       expect(df).toContain('EXPOSE 80');
@@ -257,8 +257,9 @@ describe('App Platform Engine & Capabilities', () => {
       expect(javaRes.dependencies).toContain('spring-boot-starter-web');
     });
 
-    it('auto-selects latest patched PHP 8.6 and rejects EOL language versions', () => {
-      expect(evaluateRuntimeVersionPolicy('php', '^8.2').resolvedTag).toBe('php:8.6-apache');
+    it('auto-selects stable patched PHP 8.4 (and 8.6 when requested) while rejecting EOL language versions', () => {
+      expect(evaluateRuntimeVersionPolicy('php', '^8.2').resolvedTag).toBe('php:8.4-apache');
+      expect(evaluateRuntimeVersionPolicy('php', '^8.6').resolvedTag).toBe('php:8.6-apache');
       expect(evaluateRuntimeVersionPolicy('php', '^8.2').isEol).toBe(false);
       expect(evaluateRuntimeVersionPolicy('php', '~8.3.0').resolvedTag).toBe('php:8.3-apache');
 

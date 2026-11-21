@@ -418,7 +418,7 @@ RUN if [ -f package.json ]; then \\
       rm -rf node_modules; \\
     fi
 
-FROM php:8.6-apache
+FROM php:8.4-apache
 WORKDIR /var/www/html
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN docker-php-ext-install pdo pdo_mysql bcmath pcntl exif && \\
@@ -460,7 +460,7 @@ RUN if [ -f composer.json ]; then \\
       composer dump-autoload --optimize --no-dev --no-scripts --ignore-platform-reqs; \\
     fi
 
-FROM php:8.6-apache
+FROM php:8.4-apache
 WORKDIR /var/www/html
 RUN docker-php-ext-install pdo pdo_mysql mysqli pcntl exif && \\
     (php -m | grep -qi 'opcache' || docker-php-ext-install opcache)
@@ -1337,12 +1337,18 @@ if [ -f "$APP_DIR/.php-version" ] || [ -f "$APP_DIR/composer.json" ]; then
       echo "[Masdika Security Policy] REJECTED: PHP version ($PHP_REQ) is End-of-Life (EOL). Minimum supported PHP is 8.2."
       exit 1
     fi
-    PHP_TAG="8.6"
-    for v in 8.2 8.3 8.4 8.5 8.6; do
-      if echo "$PHP_REQ" | grep -qE "(^|[=~ ])$v(\\.\\*|\\.[0-9]+)?($| )" && ! echo "$PHP_REQ" | grep -qE '(\\^|>=)'; then
-        PHP_TAG="$v"
-      fi
-    done
+    PHP_TAG="8.4"
+    if echo "$PHP_REQ" | grep -qE '8\\.6'; then
+      PHP_TAG="8.6"
+    elif echo "$PHP_REQ" | grep -qE '8\\.5'; then
+      PHP_TAG="8.5"
+    else
+      for v in 8.2 8.3 8.4; do
+        if echo "$PHP_REQ" | grep -qE "(^|[=~ ])$v(\\.\\*|\\.[0-9]+)?($| )" && ! echo "$PHP_REQ" | grep -qE '(\\^|>=)'; then
+          PHP_TAG="$v"
+        fi
+      done
+    fi
     if [ -f "$OUT_DF" ]; then
       sed -i "s|FROM php:[^ ]*|FROM php:$PHP_TAG-apache|g" "$OUT_DF"
       echo "[Masdika Runtime Policy] Selected patched PHP runtime: php:$PHP_TAG-apache (constraint: $PHP_REQ)"

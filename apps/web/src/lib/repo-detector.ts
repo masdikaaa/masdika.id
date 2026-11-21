@@ -129,7 +129,7 @@ export function evaluateRuntimeVersionPolicy(
   const raw = (constraint || "").trim();
 
   if (lang === "php") {
-    const defaultTag = "php:8.6-apache";
+    const defaultTag = "php:8.4-apache";
     if (!raw) return { resolvedTag: defaultTag, isEol: false };
 
     // Split OR constraints (e.g. "^7.4 || ^8.2" or "^8.1|^8.2")
@@ -144,7 +144,7 @@ export function evaluateRuntimeVersionPolicy(
       return {
         resolvedTag: defaultTag,
         isEol: true,
-        eolReason: `PHP constraint "${raw}" targets an End-of-Life (EOL) version. Minimum supported PHP is 8.2 (recommended 8.4–8.6).`,
+        eolReason: `PHP constraint "${raw}" targets an End-of-Life (EOL) version. Minimum supported PHP is 8.2 (recommended 8.4).`,
       };
     }
 
@@ -155,7 +155,7 @@ export function evaluateRuntimeVersionPolicy(
         return { resolvedTag: `php:${ver}-apache`, isEol: false };
       }
     }
-    // Check explicit ^8.x minimum when higher than 8.4
+    // Check explicit ^8.5 / ^8.6 requests
     if (/\b8\.6\b/.test(raw)) return { resolvedTag: "php:8.6-apache", isEol: false };
     if (/\b8\.5\b/.test(raw)) return { resolvedTag: "php:8.5-apache", isEol: false };
     return { resolvedTag: defaultTag, isEol: false };
@@ -299,10 +299,10 @@ export function detectStackFromManifests(input: RepoManifestInputs): DetectedRep
     fileNames.has("public/index.php")
   ) {
     detectedFramework = "PHP";
-    detectedLabel = "PHP 8.6";
+    detectedLabel = "PHP 8.4";
     language = "PHP";
-    runtimeVersion = "8.6";
-    resolvedRuntimeTag = "php:8.6-apache";
+    runtimeVersion = "8.4";
+    resolvedRuntimeTag = "php:8.4-apache";
     defaultPort = 80;
     if (fileNames.has("composer.json")) {
       packageManager = "composer";
