@@ -21,6 +21,9 @@ export interface DetectedRepoStack {
   detectedLabel: string;
   language: string;
   runtimeVersion?: string;
+  resolvedRuntimeTag?: string;
+  isEol?: boolean;
+  eolReason?: string;
   packageManager?: string;
   manifestFile?: string;
   dependencies: string[];
@@ -109,6 +112,141 @@ function parsePipfile(text: string): { deps: string[]; hasGit: boolean; pythonVe
   return { deps: Array.from(new Set(deps)), hasGit, pythonVersion: pyMatch?.[1] };
 }
 
+export interface RuntimePolicyResult {
+  resolvedTag: string;
+  isEol: boolean;
+  eolReason?: string;
+}
+
+/**
+ * Evaluate a language version constraint against Masdika's non-EOL runtime policy
+ * and resolve the latest patched container image tag that satisfies the constraint.
+ */
+export function evaluateRuntimeVersionPolicy(
+  lang: "php" | "node" | "python" | "go" | "ruby" | "java",
+  constraint?: string | null
+): RuntimePolicyResult {
+  const raw = (constraint || "").trim();
+
+  if (lang === "php") {
+    const defaultTag = "php:8.6-apache";
+    if (!raw) return { resolvedTag: defaultTag, isEol: false };
+
+    // Split OR constraints (e.g. "^7.4 || ^8.2" or "^8.1|^8.2")
+    const branches = raw.split(/\|\||\|/).map((b) => b.trim()).filter(Boolean);
+    const hasModernBranch = branches.some((b) => {
+      if (/\b8\.[2-9]\b/.test(b) || /\b9\./.test(b) || /^>=?\s*8\.[2-9]/.test(b)) return true;
+      if (/^\^8\.[01]\b/.test(b) && !/<\s*8\.[0-2]/.test(b)) return true;
+      return false;
+    });
+
+    if (!hasModernBranch && /\b(5\.|7\.|8\.0|8\.1)\b/.test(raw)) {
+      return {
+        resolvedTag: defaultTag,
+        isEol: true,
+        eolReason: `PHP constraint "${raw}" targets an End-of-Life (EOL) version. Minimum supported PHP is 8.2 (recommended 8.4–8.6).`,
+      };
+    }
+
+    // If explicitly pinned to a specific non-EOL minor (e.g. ~8.3.0, 8.3.*, 8.4.*)
+    for (const ver of ["8.6", "8.5", "8.4", "8.3", "8.2"]) {
+      const pinRe = new RegExp(`(^|[=~\\s])${ver.replace(".", "\\.")}(\\.\\*|\\.\\d+)?($|\\s|,)`);
+      if (branches.some((b) => pinRe.test(b) && !b.startsWith("^") && !b.startsWith(">="))) {
+        return { resolvedTag: `php:${ver}-apache`, isEol: false };
+      }
+    }
+    // Check explicit ^8.x minimum when higher than 8.4
+    if (/\b8\.6\b/.test(raw)) return { resolvedTag: "php:8.6-apache", isEol: false };
+    if (/\b8\.5\b/.test(raw)) return { resolvedTag: "php:8.5-apache", isEol: false };
+    return { resolvedTag: defaultTag, isEol: false };
+  }
+
+  if (lang === "node") {
+    const defaultTag = "node:22-alpine";
+    if (!raw) return { resolvedTag: defaultTag, isEol: false };
+    const majors = Array.from(raw.matchAll(/(\d{1,2})(?:\.\d+)?/g)).map((m) => parseInt(m[1], 10));
+    if (majors.length > 0 && Math.max(...majors) < 20 && !/>=/.test(raw)) {
+      return {
+        resolvedTag: defaultTag,
+        isEol: true,
+        eolReason: `Node.js constraint "${raw}" targets an End-of-Life (EOL) version. Minimum supported LTS is Node.js 20.`,
+      };
+    }
+    if (/\b24\b/.test(raw)) return { resolvedTag: "node:24-alpine", isEol: false };
+    if (/\b22\b/.test(raw)) return { resolvedTag: "node:22-alpine", isEol: false };
+    if (/\b20\b/.test(raw) && !/\b2[24]\b/.test(raw) && !/>=/.test(raw)) return { resolvedTag: "node:20-alpine", isEol: false };
+    return { resolvedTag: defaultTag, isEol: false };
+  }
+
+  if (lang === "python") {
+    const defaultTag = "python:3.12";
+    if (!raw) return { resolvedTag: defaultTag, isEol: false };
+    const branches = raw.split(/,/).map((b) => b.trim()).filter(Boolean);
+    const hasModern = branches.some((b) => /\b3\.1[0-9]\b/.test(b) && !/^<\s*3\.10\b/.test(b));
+    if (!hasModern && /\b(2\.\d+|3\.[0-9])\b/.test(raw)) {
+      return {
+        resolvedTag: defaultTag,
+        isEol: true,
+        eolReason: `Python constraint "${raw}" targets an End-of-Life (EOL) version. Minimum supported Python is 3.10.`,
+      };
+    }
+    for (const ver of ["3.14", "3.13", "3.12", "3.11", "3.10"]) {
+      if (raw.includes(ver) && !raw.includes(">=")) {
+        return { resolvedTag: `python:${ver}`, isEol: false };
+      }
+    }
+    return { resolvedTag: defaultTag, isEol: false };
+  }
+
+  if (lang === "go") {
+    const defaultTag = "golang:alpine";
+    if (!raw) return { resolvedTag: defaultTag, isEol: false };
+    const m = raw.match(/1\.(\d+)/);
+    if (m && parseInt(m[1], 10) < 22) {
+      return {
+        resolvedTag: defaultTag,
+        isEol: true,
+        eolReason: `Go ${raw} is End-of-Life (EOL). Minimum supported Go version is 1.22.`,
+      };
+    }
+    return { resolvedTag: defaultTag, isEol: false };
+  }
+
+  if (lang === "ruby") {
+    const defaultTag = "ruby:3.3-alpine";
+    if (!raw) return { resolvedTag: defaultTag, isEol: false };
+    const m = raw.match(/(\d+)\.(\d+)/);
+    if (m) {
+      const maj = parseInt(m[1], 10);
+      const min = parseInt(m[2], 10);
+      if (maj < 3 || (maj === 3 && min < 1)) {
+        return {
+          resolvedTag: defaultTag,
+          isEol: true,
+          eolReason: `Ruby ${raw} is End-of-Life (EOL). Minimum supported Ruby version is 3.1.`,
+        };
+      }
+      if (maj === 3 && min >= 1 && min <= 4) {
+        return { resolvedTag: `ruby:3.${min}-alpine`, isEol: false };
+      }
+    }
+    return { resolvedTag: defaultTag, isEol: false };
+  }
+
+  // java
+  const defaultTag = "eclipse-temurin:21-jre-alpine";
+  if (!raw) return { resolvedTag: defaultTag, isEol: false };
+  const jMatch = raw.match(/(\d+)/);
+  if (jMatch && parseInt(jMatch[1], 10) < 17) {
+    return {
+      resolvedTag: defaultTag,
+      isEol: true,
+      eolReason: `Java ${raw} is End-of-Life (EOL) for modern Spring Boot / LTS builds. Minimum supported Java LTS is 17.`,
+    };
+  }
+  return { resolvedTag: defaultTag, isEol: false };
+}
+
 /**
  * Inspect repository file list and manifest contents to detect language, framework,
  * dependencies/requirements, package manager, suggested port, and build/start commands.
@@ -122,6 +260,9 @@ export function detectStackFromManifests(input: RepoManifestInputs): DetectedRep
   let detectedLabel = "Custom Container";
   let language = "Docker";
   let runtimeVersion: string | undefined;
+  let resolvedRuntimeTag: string | undefined;
+  let isEol = false;
+  let eolReason: string | undefined;
   let packageManager: string | undefined;
   let manifestFile: string | undefined;
   let dependencies: string[] = [];
@@ -158,9 +299,10 @@ export function detectStackFromManifests(input: RepoManifestInputs): DetectedRep
     fileNames.has("public/index.php")
   ) {
     detectedFramework = "PHP";
-    detectedLabel = "PHP 8.3";
+    detectedLabel = "PHP 8.6";
     language = "PHP";
-    runtimeVersion = "8.3";
+    runtimeVersion = "8.6";
+    resolvedRuntimeTag = "php:8.6-apache";
     defaultPort = 80;
     if (fileNames.has("composer.json")) {
       packageManager = "composer";
@@ -172,29 +314,36 @@ export function detectStackFromManifests(input: RepoManifestInputs): DetectedRep
         const req = comp.require || {};
         if (typeof req.php === "string") {
           runtimeVersion = req.php;
+          const policy = evaluateRuntimeVersionPolicy("php", req.php);
+          resolvedRuntimeTag = policy.resolvedTag;
+          isEol = policy.isEol;
+          eolReason = policy.eolReason;
         }
+        const tagVer = resolvedRuntimeTag.replace("php:", "").replace("-apache", "");
         dependencies = Object.keys(req)
           .filter((k) => k !== "php" && !k.startsWith("ext-"))
           .slice(0, 15);
         if (req["laravel/framework"] || fileNames.has("artisan")) {
           detectedFramework = "LARAVEL";
-          detectedLabel = "Laravel (PHP 8.3)";
+          detectedLabel = `Laravel (PHP ${tagVer})`;
         } else if (req["symfony/framework-bundle"]) {
-          detectedLabel = "Symfony (PHP 8.3)";
+          detectedLabel = `Symfony (PHP ${tagVer})`;
         } else if (req["codeigniter4/framework"]) {
-          detectedLabel = "CodeIgniter 4 (PHP 8.3)";
+          detectedLabel = `CodeIgniter 4 (PHP ${tagVer})`;
         } else if (req["slim/slim"]) {
-          detectedLabel = "Slim (PHP 8.3)";
+          detectedLabel = `Slim (PHP ${tagVer})`;
+        } else {
+          detectedLabel = `PHP ${tagVer}`;
         }
       } catch {
         if (input.composerJson.includes("laravel/framework")) {
           detectedFramework = "LARAVEL";
-          detectedLabel = "Laravel (PHP 8.3)";
+          detectedLabel = "Laravel (PHP 8.6)";
         }
       }
     } else if (fileNames.has("artisan")) {
       detectedFramework = "LARAVEL";
-      detectedLabel = "Laravel (PHP 8.3)";
+      detectedLabel = "Laravel (PHP 8.6)";
     }
   } else if (fileNames.has("package.json")) {
     detectedFramework = "NODEJS";
@@ -220,6 +369,12 @@ export function detectStackFromManifests(input: RepoManifestInputs): DetectedRep
         }
         if (typeof pkg.engines?.node === "string") {
           runtimeVersion = pkg.engines.node;
+          const policy = evaluateRuntimeVersionPolicy("node", pkg.engines.node);
+          resolvedRuntimeTag = policy.resolvedTag;
+          isEol = policy.isEol;
+          eolReason = policy.eolReason;
+        } else {
+          resolvedRuntimeTag = "node:22-alpine";
         }
         if (typeof pkg.scripts?.build === "string") {
           suggestedBuildCommand = `${packageManager === "npm" ? "npm run" : packageManager} build`;
@@ -281,7 +436,13 @@ export function detectStackFromManifests(input: RepoManifestInputs): DetectedRep
 
     if (input.goMod) {
       const goVer = input.goMod.match(/^go\s+([\d.]+)/m);
-      if (goVer) runtimeVersion = goVer[1];
+      if (goVer) {
+        runtimeVersion = goVer[1];
+        const policy = evaluateRuntimeVersionPolicy("go", goVer[1]);
+        resolvedRuntimeTag = policy.resolvedTag;
+        isEol = policy.isEol;
+        eolReason = policy.eolReason;
+      }
       const modDeps: string[] = [];
       for (const line of input.goMod.split(/\r?\n/)) {
         const m = line.trim().match(/^([a-zA-Z0-9._-]+\/[a-zA-Z0-9._/-]+)\s+v[\d.]+/);
@@ -341,7 +502,13 @@ export function detectStackFromManifests(input: RepoManifestInputs): DetectedRep
 
     if (input.gemfile) {
       const rubyMatch = input.gemfile.match(/ruby\s+["']([^"']+)["']/);
-      if (rubyMatch) runtimeVersion = rubyMatch[1];
+      if (rubyMatch) {
+        runtimeVersion = rubyMatch[1];
+        const policy = evaluateRuntimeVersionPolicy("ruby", rubyMatch[1]);
+        resolvedRuntimeTag = policy.resolvedTag;
+        isEol = policy.isEol;
+        eolReason = policy.eolReason;
+      }
       const gems: string[] = [];
       for (const line of input.gemfile.split(/\r?\n/)) {
         const m = line.match(/^\s*gem\s+["']([^"']+)["']/);
@@ -373,7 +540,13 @@ export function detectStackFromManifests(input: RepoManifestInputs): DetectedRep
       suggestedBuildCommand = "mvn clean package -DskipTests";
       if (input.pomXml) {
         const javaVer = input.pomXml.match(/<java\.version>([^<]+)<\/java\.version>/);
-        if (javaVer) runtimeVersion = `Java ${javaVer[1]}`;
+        if (javaVer) {
+          runtimeVersion = `Java ${javaVer[1]}`;
+          const policy = evaluateRuntimeVersionPolicy("java", javaVer[1]);
+          resolvedRuntimeTag = policy.resolvedTag;
+          isEol = policy.isEol;
+          eolReason = policy.eolReason;
+        }
         const artifacts = Array.from(input.pomXml.matchAll(/<artifactId>([^<]+)<\/artifactId>/g))
           .map((m) => m[1])
           .filter((a) => !a.includes("maven-"));
@@ -406,7 +579,8 @@ export function detectStackFromManifests(input: RepoManifestInputs): DetectedRep
     detectedFramework = "PYTHON";
     detectedLabel = "Python";
     language = "Python";
-    runtimeVersion = "3.11";
+    runtimeVersion = "3.12";
+    resolvedRuntimeTag = "python:3.12";
     defaultPort = 8000;
 
     if (fileNames.has("requirements.txt")) {
@@ -421,6 +595,7 @@ export function detectStackFromManifests(input: RepoManifestInputs): DetectedRep
     }
 
     const collectedDeps: string[] = [];
+    let pyConstraint: string | undefined;
     if (input.requirementsTxt) {
       const parsed = parseRequirementsTxt(input.requirementsTxt);
       collectedDeps.push(...parsed.deps);
@@ -430,13 +605,20 @@ export function detectStackFromManifests(input: RepoManifestInputs): DetectedRep
       const parsed = parsePyprojectToml(input.pyprojectToml);
       collectedDeps.push(...parsed.deps);
       if (parsed.hasGit) hasGitDependencies = true;
-      if (parsed.pythonVersion) runtimeVersion = parsed.pythonVersion;
+      if (parsed.pythonVersion) pyConstraint = parsed.pythonVersion;
     }
     if (input.pipfile) {
       const parsed = parsePipfile(input.pipfile);
       collectedDeps.push(...parsed.deps);
       if (parsed.hasGit) hasGitDependencies = true;
-      if (parsed.pythonVersion) runtimeVersion = parsed.pythonVersion;
+      if (parsed.pythonVersion) pyConstraint = parsed.pythonVersion;
+    }
+    if (pyConstraint) {
+      runtimeVersion = pyConstraint;
+      const policy = evaluateRuntimeVersionPolicy("python", pyConstraint);
+      resolvedRuntimeTag = policy.resolvedTag;
+      isEol = policy.isEol;
+      eolReason = policy.eolReason;
     }
 
     dependencies = Array.from(new Set(collectedDeps)).slice(0, 15);
@@ -499,6 +681,9 @@ export function detectStackFromManifests(input: RepoManifestInputs): DetectedRep
     detectedLabel: hasDockerfile ? `Dockerfile (${detectedLabel})` : detectedLabel,
     language,
     runtimeVersion,
+    resolvedRuntimeTag,
+    isEol,
+    eolReason,
     packageManager,
     manifestFile,
     dependencies,

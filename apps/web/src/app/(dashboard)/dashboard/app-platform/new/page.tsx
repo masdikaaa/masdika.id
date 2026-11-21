@@ -455,6 +455,9 @@ export default function NewAppPlatformPage() {
   const [detectedDetails, setDetectedDetails] = useState<{
     language?: string;
     runtimeVersion?: string;
+    resolvedRuntimeTag?: string;
+    isEol?: boolean;
+    eolReason?: string;
     packageManager?: string;
     manifestFile?: string;
     dependencies?: string[];
@@ -786,6 +789,9 @@ export default function NewAppPlatformPage() {
         setDetectedDetails({
           language: d.language,
           runtimeVersion: d.runtimeVersion,
+          resolvedRuntimeTag: d.resolvedRuntimeTag,
+          isEol: Boolean(d.isEol),
+          eolReason: d.eolReason,
           packageManager: d.packageManager,
           manifestFile: d.manifestFile,
           dependencies: Array.isArray(d.dependencies) ? d.dependencies : [],
@@ -794,6 +800,9 @@ export default function NewAppPlatformPage() {
           suggestedBuildCommand: d.suggestedBuildCommand,
           suggestedStartCommand: d.suggestedStartCommand,
         });
+        if (d.isEol && d.eolReason) {
+          toast.error(`EOL Runtime Rejected: ${d.eolReason}`);
+        }
         if (d.hasDockerfile) {
           setBuildMode("DOCKERFILE");
           setDockerfileSource("REPO");
@@ -855,6 +864,10 @@ export default function NewAppPlatformPage() {
     }
     if (!gitUrl.trim()) {
       toast.error("Please enter a valid Git repository URL");
+      return;
+    }
+    if (detectedDetails?.isEol) {
+      toast.error(detectedDetails.eolReason || "End-of-Life (EOL) language version is rejected by security policy.");
       return;
     }
     if (isServiceDisabled) {
@@ -1472,6 +1485,12 @@ export default function NewAppPlatformPage() {
                     <p className="text-[11px] text-amber-400 font-medium">
                       Git-based package dependency detected (`git+https://`) — full toolchain with Git enabled automatically.
                     </p>
+                  )}
+
+                  {detectedDetails.isEol && (
+                    <div className="p-2.5 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-400 text-xs font-semibold">
+                      EOL Security Policy: {detectedDetails.eolReason}
+                    </div>
                   )}
                 </div>
               )}

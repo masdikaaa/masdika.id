@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { generateDockerfileForFramework } from '../k8s-app-platform';
 import { APP_PLATFORM_PLANS, getAppPlatformPlan } from '../app-platform-plans';
 import { getInvoiceDisplayInfo } from '../invoice-display';
-import { detectStackFromManifests } from '../repo-detector';
+import { detectStackFromManifests, evaluateRuntimeVersionPolicy } from '../repo-detector';
 
 describe('App Platform Engine & Capabilities', () => {
   describe('Plans & Pricing Specifications', () => {
@@ -40,7 +40,7 @@ describe('App Platform Engine & Capabilities', () => {
   describe('Automated Dockerfile Generator', () => {
     it('generates production Laravel Apache Dockerfile with mod_rewrite & public docroot', () => {
       const df = generateDockerfileForFramework('LARAVEL', null, null, 80);
-      expect(df).toContain('FROM php:8.4-apache');
+      expect(df).toContain('FROM php:8.6-apache');
       expect(df).toContain('composer install');
       expect(df).toContain('a2enmod rewrite');
       expect(df).toContain('/var/www/html/public');
@@ -72,7 +72,7 @@ describe('App Platform Engine & Capabilities', () => {
 
     it('generates PHP Apache Dockerfile with docker-php-ext-install for Kaniko compatibility', () => {
       const df = generateDockerfileForFramework('PHP', null, null, 80);
-      expect(df).toContain('FROM php:8.4-apache');
+      expect(df).toContain('FROM php:8.6-apache');
       expect(df).toContain('docker-php-ext-install');
       expect(df).toContain('getcomposer.org');
       expect(df).toContain('EXPOSE 80');
@@ -255,6 +255,26 @@ describe('App Platform Engine & Capabilities', () => {
       expect(javaRes.detectedFramework).toBe('SPRINGBOOT');
       expect(javaRes.runtimeVersion).toBe('Java 21');
       expect(javaRes.dependencies).toContain('spring-boot-starter-web');
+    });
+
+    it('auto-selects latest patched PHP 8.6 and rejects EOL language versions', () => {
+      expect(evaluateRuntimeVersionPolicy('php', '^8.2').resolvedTag).toBe('php:8.6-apache');
+      expect(evaluateRuntimeVersionPolicy('php', '^8.2').isEol).toBe(false);
+      expect(evaluateRuntimeVersionPolicy('php', '~8.3.0').resolvedTag).toBe('php:8.3-apache');
+
+      const eolPhp = detectStackFromManifests({
+        fileNames: ['artisan', 'composer.json'],
+        composerJson: JSON.stringify({ require: { php: '^7.4', 'laravel/framework': '^8.0' } }),
+      });
+      expect(eolPhp.isEol).toBe(true);
+      expect(eolPhp.eolReason).toContain('End-of-Life');
+
+      expect(evaluateRuntimeVersionPolicy('node', '18.x').isEol).toBe(true);
+      expect(evaluateRuntimeVersionPolicy('node', '>=20').isEol).toBe(false);
+      expect(evaluateRuntimeVersionPolicy('python', '==3.8.*').isEol).toBe(true);
+      expect(evaluateRuntimeVersionPolicy('python', '>=3.11').isEol).toBe(false);
+      expect(evaluateRuntimeVersionPolicy('go', '1.20').isEol).toBe(true);
+      expect(evaluateRuntimeVersionPolicy('ruby', '3.0.6').isEol).toBe(true);
     });
   });
 });
