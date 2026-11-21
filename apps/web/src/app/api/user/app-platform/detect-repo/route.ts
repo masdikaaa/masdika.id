@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { execFile } from "child_process";
 import { promisify } from "util";
 import { requireAuth } from "@/lib/auth-middleware";
-import { detectStackFromManifests } from "@/lib/repo-detector";
+import { prisma } from "@/lib/prisma";
+import { decryptDeterministic } from "@/lib/encryption";
+import { detectStackFromManifests, sortBranchesNewestFirst } from "@/lib/repo-detector";
 
 const execFileAsync = promisify(execFile);
 
@@ -47,7 +49,10 @@ async function discoverBranchesViaGitLsRemote(
       const m = line.match(/refs\/heads\/([^\s]+)$/);
       if (m) branches.push(m[1]);
     }
-    return { defaultBranch: defaultBranch || branches[0], branches: branches.slice(0, 30) };
+    return {
+      defaultBranch: defaultBranch || branches[0],
+      branches: sortBranchesNewestFirst(branches, defaultBranch || branches[0]).slice(0, 100),
+    };
   } catch {
     return { branches: [] };
   }
@@ -69,12 +74,38 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => null);
     const gitUrl = typeof body?.gitUrl === "string" ? body.gitUrl.trim() : "";
     const branchInput = typeof body?.branch === "string" ? body.branch.trim() : "";
-    const gitToken = typeof body?.gitToken === "string" ? body.gitToken.trim() : "";
+    let gitToken = typeof body?.gitToken === "string" ? body.gitToken.trim() : "";
     const rawRootDir = typeof body?.rootDirectory === "string" ? body.rootDirectory.trim() : "";
     const subDir = rawRootDir.replace(/^\/+|\/+$/g, "");
 
     if (!gitUrl) {
       return NextResponse.json({ error: "Git URL is required" }, { status: 400 });
+    }
+
+    // Use saved provider token only when gitUrl matches the connected provider host
+    if (!gitToken) {
+      const dbUser = await prisma.user
+        .findUnique({
+          where: { id: authResult.user!.id },
+          select: { githubAccessToken: true },
+        })
+        .catch(() => null);
+      if (dbUser?.githubAccessToken) {
+        try {
+          const decrypted = decryptDeterministic(dbUser.githubAccessToken);
+          if (decrypted.startsWith("gitlab:") && /gitlab\.com[/:]/i.test(gitUrl)) {
+            gitToken = decrypted.slice("gitlab:".length);
+          } else if (decrypted.startsWith("bitbucket:") && /bitbucket\.org[/:]/i.test(gitUrl)) {
+            gitToken = decrypted.slice("bitbucket:".length);
+          } else if (
+            !decrypted.startsWith("gitlab:") &&
+            !decrypted.startsWith("bitbucket:") &&
+            /github\.com[/:]/i.test(gitUrl)
+          ) {
+            gitToken = decrypted;
+          }
+        } catch {}
+      }
     }
 
     // 1. GitHub Inspector
@@ -97,7 +128,7 @@ export async function POST(req: NextRequest) {
           headers,
           signal: AbortSignal.timeout(6000),
         }).catch(() => null),
-        fetch(`https://api.github.com/repos/${owner}/${repo}/branches?per_page=30`, {
+        fetch(`https://api.github.com/repos/${owner}/${repo}/branches?per_page=100`, {
           headers,
           signal: AbortSignal.timeout(6000),
         }).catch(() => null),
@@ -123,6 +154,7 @@ export async function POST(req: NextRequest) {
         if (lsRemote.branches.length > 0) branches = lsRemote.branches;
       }
 
+      branches = sortBranchesNewestFirst(branches, defaultBranch);
       if (branches.length > 0 && !branches.includes(defaultBranch)) {
         defaultBranch = branches[0];
       }
@@ -236,7 +268,7 @@ export async function POST(req: NextRequest) {
           headers: glHeaders,
           signal: AbortSignal.timeout(6000),
         }).catch(() => null),
-        fetch(`https://gitlab.com/api/v4/projects/${projectPath}/repository/branches?per_page=30`, {
+        fetch(`https://gitlab.com/api/v4/projects/${projectPath}/repository/branches?per_page=100`, {
           headers: glHeaders,
           signal: AbortSignal.timeout(6000),
         }).catch(() => null),
@@ -252,6 +284,7 @@ export async function POST(req: NextRequest) {
           branches = brList.map((b: any) => String(b.name || "")).filter(Boolean);
         }
       }
+      branches = sortBranchesNewestFirst(branches, defaultBranch);
 
       const targetBranch =
         branchInput && (branches.length === 0 || branches.includes(branchInput))

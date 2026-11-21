@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
 import { decryptDeterministic, encryptDeterministic } from "@/lib/encryption";
+import { sortBranchesNewestFirst } from "@/lib/repo-detector";
 
 /**
  * GET /api/user/app-platform/github
- * Lists connected GitHub status, user repositories, or branches for a specific repo (?repo=owner/name)
+ * Lists connected Git provider status, user repositories, or branches for a specific repo (?repo=owner/name)
  */
 export async function GET(req: NextRequest) {
   try {
@@ -24,6 +25,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({
         success: true,
         connected: false,
+        provider: null,
         oauthConfigured,
         githubUsername: null,
         repos: [],
@@ -37,18 +39,26 @@ export async function GET(req: NextRequest) {
 
     const repoParam = req.nextUrl.searchParams.get("repo");
     const isGitLab = token.startsWith("gitlab:");
-    const rawToken = isGitLab ? token.slice("gitlab:".length) : token;
+    const isBitbucket = token.startsWith("bitbucket:");
+    const provider = isGitLab ? "gitlab" : isBitbucket ? "bitbucket" : "github";
+    const rawToken = isGitLab
+      ? token.slice("gitlab:".length)
+      : isBitbucket
+      ? token.slice("bitbucket:".length)
+      : token;
 
     if (isGitLab) {
       const glHeaders = { "PRIVATE-TOKEN": rawToken };
-      if (repoParam && /^[^/]+\/[^/]+$/.test(repoParam)) {
+      if (repoParam && /^[^/\s]+(\/[^/\s]+)+$/.test(repoParam)) {
         const brRes = await fetch(
           `https://gitlab.com/api/v4/projects/${encodeURIComponent(repoParam)}/repository/branches?per_page=100`,
           { headers: glHeaders, signal: AbortSignal.timeout(7000) }
         );
         if (!brRes.ok) return NextResponse.json({ success: true, branches: ["main", "master"] });
         const branchesData = await brRes.json();
-        const branches = Array.isArray(branchesData) ? branchesData.map((b: any) => b.name) : ["main"];
+        const branches = sortBranchesNewestFirst(
+          Array.isArray(branchesData) ? branchesData.map((b: any) => String(b.name || "")) : ["main"]
+        );
         return NextResponse.json({ success: true, branches });
       }
 
@@ -60,6 +70,7 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({
           success: true,
           connected: false,
+          provider: null,
           oauthConfigured,
           githubUsername: null,
           repos: [],
@@ -80,6 +91,63 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({
         success: true,
         connected: true,
+        provider,
+        oauthConfigured,
+        githubUsername: user.githubUsername,
+        repos,
+      });
+    }
+
+    if (isBitbucket) {
+      const bbHeaders = { Authorization: `Bearer ${rawToken}` };
+      if (repoParam && /^[^/\s]+\/[^/\s]+$/.test(repoParam)) {
+        const brRes = await fetch(
+          `https://api.bitbucket.org/2.0/repositories/${repoParam}/refs/branches?pagelen=100`,
+          { headers: bbHeaders, signal: AbortSignal.timeout(7000) }
+        );
+        if (!brRes.ok) return NextResponse.json({ success: true, branches: ["main", "master"] });
+        const branchesData = await brRes.json();
+        const rawBranches = Array.isArray(branchesData?.values)
+          ? branchesData.values.map((b: any) => String(b.name || ""))
+          : ["main"];
+        return NextResponse.json({ success: true, branches: sortBranchesNewestFirst(rawBranches) });
+      }
+
+      const reposRes = await fetch(
+        "https://api.bitbucket.org/2.0/repositories?role=member&sort=-updated_on&pagelen=50",
+        { headers: bbHeaders, signal: AbortSignal.timeout(8000) }
+      );
+      if (!reposRes.ok) {
+        return NextResponse.json({
+          success: true,
+          connected: false,
+          provider: null,
+          oauthConfigured,
+          githubUsername: null,
+          repos: [],
+          error: "Bitbucket token expired or invalid. Please reconnect.",
+        });
+      }
+      const reposData = await reposRes.json();
+      const repos = (Array.isArray(reposData?.values) ? reposData.values : []).map((r: any) => {
+        const httpsLink = Array.isArray(r.links?.clone)
+          ? r.links.clone.find((l: any) => l.name === "https")?.href
+          : null;
+        return {
+          id: r.uuid || r.full_name,
+          fullName: r.full_name,
+          name: r.slug || r.name,
+          cloneUrl: httpsLink || `https://bitbucket.org/${r.full_name}.git`,
+          defaultBranch: r.mainbranch?.name || "main",
+          private: Boolean(r.is_private),
+          language: r.language || "Bitbucket",
+          pushedAt: r.updated_on,
+        };
+      });
+      return NextResponse.json({
+        success: true,
+        connected: true,
+        provider,
         oauthConfigured,
         githubUsername: user.githubUsername,
         repos,
@@ -93,7 +161,7 @@ export async function GET(req: NextRequest) {
     };
 
     // If ?repo=owner/name is provided, fetch branches for that repository
-    if (repoParam && /^[^/]+\/[^/]+$/.test(repoParam)) {
+    if (repoParam && /^[^/\s]+\/[^/\s]+$/.test(repoParam)) {
       const brRes = await fetch(
         `https://api.github.com/repos/${repoParam}/branches?per_page=100`,
         { headers: ghHeaders, signal: AbortSignal.timeout(7000) }
@@ -102,7 +170,9 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ success: true, branches: ["main", "master"] });
       }
       const branchesData = await brRes.json();
-      const branches = Array.isArray(branchesData) ? branchesData.map((b: any) => b.name) : ["main"];
+      const branches = sortBranchesNewestFirst(
+        Array.isArray(branchesData) ? branchesData.map((b: any) => String(b.name || "")) : ["main"]
+      );
       return NextResponse.json({ success: true, branches });
     }
 
@@ -116,6 +186,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({
         success: true,
         connected: false,
+        provider: null,
         oauthConfigured,
         githubUsername: null,
         repos: [],
@@ -138,6 +209,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       success: true,
       connected: true,
+      provider,
       oauthConfigured,
       githubUsername: user.githubUsername,
       repos,
@@ -150,7 +222,7 @@ export async function GET(req: NextRequest) {
 
 /**
  * POST /api/user/app-platform/github
- * Connect GitHub account using a Personal Access Token (PAT)
+ * Connect GitHub, GitLab, or Bitbucket account using a Personal Access Token (PAT)
  */
 export async function POST(req: NextRequest) {
   try {
@@ -161,17 +233,28 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json().catch(() => null);
     const token = typeof body?.token === "string" ? body.token.trim() : "";
+    const requestedProvider = typeof body?.provider === "string" ? body.provider.trim().toLowerCase() : "auto";
     if (!token) {
       return NextResponse.json({ error: "Git Personal Access Token is required" }, { status: 400 });
     }
 
-    if (token.startsWith("glpat-")) {
+    const resolvedProvider =
+      requestedProvider === "gitlab" || (requestedProvider === "auto" && token.startsWith("glpat-"))
+        ? "gitlab"
+        : requestedProvider === "bitbucket"
+        ? "bitbucket"
+        : "github";
+
+    if (resolvedProvider === "gitlab") {
       const glRes = await fetch("https://gitlab.com/api/v4/user", {
         headers: { "PRIVATE-TOKEN": token },
         signal: AbortSignal.timeout(6000),
       });
       if (!glRes.ok) {
-        return NextResponse.json({ error: "Invalid GitLab token. Please check permissions (read_api / read_repository)." }, { status: 400 });
+        return NextResponse.json(
+          { error: "Invalid GitLab token. Please check permissions (read_api / read_repository)." },
+          { status: 400 }
+        );
       }
       const glUser = await glRes.json();
       await prisma.user.update({
@@ -183,7 +266,35 @@ export async function POST(req: NextRequest) {
       });
       return NextResponse.json({
         success: true,
+        provider: "gitlab",
         githubUsername: glUser.username,
+      });
+    }
+
+    if (resolvedProvider === "bitbucket") {
+      const bbRes = await fetch("https://api.bitbucket.org/2.0/user", {
+        headers: { Authorization: `Bearer ${token}` },
+        signal: AbortSignal.timeout(6000),
+      });
+      if (!bbRes.ok) {
+        return NextResponse.json(
+          { error: "Invalid Bitbucket token. Please use a Repository/Workspace Access Token with repository:read scope." },
+          { status: 400 }
+        );
+      }
+      const bbUser = await bbRes.json();
+      const bbUsername = bbUser.username || bbUser.nickname || bbUser.display_name || "bitbucket-user";
+      await prisma.user.update({
+        where: { id: authResult.user!.id },
+        data: {
+          githubUsername: bbUsername,
+          githubAccessToken: encryptDeterministic(`bitbucket:${token}`),
+        },
+      });
+      return NextResponse.json({
+        success: true,
+        provider: "bitbucket",
+        githubUsername: bbUsername,
       });
     }
 
@@ -211,6 +322,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      provider: "github",
       githubUsername: ghUser.login,
     });
   } catch (error: any) {

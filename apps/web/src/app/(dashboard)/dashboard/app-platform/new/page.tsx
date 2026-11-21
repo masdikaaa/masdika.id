@@ -468,12 +468,16 @@ export default function NewAppPlatformPage() {
     suggestedStartCommand?: string;
   } | null>(null);
 
-  // GitHub Integration & Repo Picker State
+  // Git Provider Integration & Repo Picker State
   const [ghConnected, setGhConnected] = useState(false);
+  const [ghProvider, setGhProvider] = useState<string | null>(null);
   const [ghOauthConfigured, setGhOauthConfigured] = useState(false);
   const [ghUsername, setGhUsername] = useState<string | null>(null);
   const [ghRepos, setGhRepos] = useState<any[]>([]);
   const [ghBranches, setGhBranches] = useState<string[]>([]);
+  const [branchPage, setBranchPage] = useState(1);
+  const BRANCHES_PER_PAGE = 12;
+  const [ghPatProvider, setGhPatProvider] = useState<"auto" | "github" | "gitlab" | "bitbucket">("auto");
   const [ghPatInput, setGhPatInput] = useState("");
   const [showGhPatBox, setShowGhPatBox] = useState(false);
   const [ghLoading, setGhLoading] = useState(false);
@@ -691,7 +695,7 @@ export default function NewAppPlatformPage() {
 
   const handleConnectGithubPat = async () => {
     if (!ghPatInput.trim()) {
-      toast.error("Please enter a GitHub Personal Access Token");
+      toast.error("Please enter a Git Personal Access Token");
       return;
     }
     setGhLoading(true);
@@ -699,22 +703,25 @@ export default function NewAppPlatformPage() {
       const res = await fetch("/api/user/app-platform/github", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: ghPatInput.trim() }),
+        body: JSON.stringify({ token: ghPatInput.trim(), provider: ghPatProvider }),
       });
       const json = await res.json();
       if (res.ok && json.success) {
-        toast.success(`Connected GitHub as @${json.githubUsername}`);
+        const providerLabel =
+          json.provider === "gitlab" ? "GitLab" : json.provider === "bitbucket" ? "Bitbucket" : "GitHub";
+        toast.success(`Connected ${providerLabel} as @${json.githubUsername}`);
         setShowGhPatBox(false);
         setGhPatInput("");
         const listRes = await fetch("/api/user/app-platform/github");
         const listJson = await listRes.json();
         if (listJson.success) {
           setGhConnected(Boolean(listJson.connected));
+          setGhProvider(listJson.provider || json.provider || null);
           setGhUsername(listJson.githubUsername || null);
           setGhRepos(Array.isArray(listJson.repos) ? listJson.repos : []);
         }
       } else {
-        toast.error(json.error || "Failed to connect GitHub");
+        toast.error(json.error || "Failed to connect Git account");
       }
     } catch {
       toast.error("Connection error");
@@ -726,10 +733,12 @@ export default function NewAppPlatformPage() {
   const handleDisconnectGithub = async () => {
     await fetch("/api/user/app-platform/github", { method: "DELETE" });
     setGhConnected(false);
+    setGhProvider(null);
     setGhUsername(null);
     setGhRepos([]);
     setGhBranches([]);
-    toast.success("GitHub account disconnected");
+    setBranchPage(1);
+    toast.success("Git account disconnected");
   };
 
   const handleSelectGithubRepo = async (fullName: string) => {
@@ -748,6 +757,7 @@ export default function NewAppPlatformPage() {
       .then((j) => {
         if (j.success && Array.isArray(j.branches)) {
           setGhBranches(j.branches);
+          setBranchPage(1);
         }
       })
       .catch(() => {});
@@ -786,6 +796,7 @@ export default function NewAppPlatformPage() {
         if (d.defaultBranch) setBranch(d.defaultBranch);
         if (Array.isArray(d.branches) && d.branches.length > 0) {
           setGhBranches(d.branches);
+          setBranchPage(1);
         }
         setDetectedDetails({
           language: d.language,
@@ -817,7 +828,7 @@ export default function NewAppPlatformPage() {
           setDockerfileSource("INLINE");
           setBuildType("DOCKERFILE");
           if (d.defaultPort) setAppPort(d.defaultPort);
-          setDetectedBadge("No Dockerfile — Use Inline Editor");
+          setDetectedBadge("No Dockerfile - Use Inline Editor");
           toast.info("No Dockerfile found in repository. Switched to Inline Dockerfile Editor.");
         }
       } else {
@@ -1120,11 +1131,31 @@ export default function NewAppPlatformPage() {
 
                 {showGhPatBox && !ghConnected && (
                   <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                    <select
+                      value={ghPatProvider}
+                      onChange={(e) => setGhPatProvider(e.target.value as any)}
+                      className={cn(
+                        "px-3 py-2 rounded-lg text-xs font-semibold border focus:outline-none focus:border-cyan-400 sm:w-32 shrink-0",
+                        isDark ? "bg-[#09090b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
+                      )}
+                    >
+                      <option value="auto">Auto Detect</option>
+                      <option value="github">GitHub</option>
+                      <option value="gitlab">GitLab</option>
+                      <option value="bitbucket">Bitbucket</option>
+                    </select>
                     <input
                       type="password"
+                      autoComplete="off"
                       value={ghPatInput}
                       onChange={(e) => setGhPatInput(e.target.value)}
-                      placeholder="ghp_... (GitHub) or glpat-... (GitLab)"
+                      placeholder={
+                        ghPatProvider === "gitlab"
+                          ? "glpat-... or GitLab Access Token"
+                          : ghPatProvider === "bitbucket"
+                          ? "Bitbucket Access Token"
+                          : "ghp_... (GitHub) or glpat-... (GitLab)"
+                      }
                       className={cn(
                         "flex-1 px-3 py-2 rounded-lg text-xs font-mono border focus:outline-none focus:border-cyan-400",
                         isDark ? "bg-[#09090b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
@@ -1134,7 +1165,7 @@ export default function NewAppPlatformPage() {
                       type="button"
                       disabled={ghLoading}
                       onClick={handleConnectGithubPat}
-                      className="px-4 py-2 rounded-lg text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 cursor-pointer disabled:opacity-50"
+                      className="px-4 py-2 rounded-lg text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 cursor-pointer disabled:opacity-50 shrink-0"
                     >
                       {ghLoading ? "Connecting..." : "Save & Load Repos"}
                     </button>
@@ -1268,33 +1299,81 @@ export default function NewAppPlatformPage() {
                         : "bg-slate-50 border-slate-200 text-slate-900"
                     )}
                   />
-                  {ghBranches.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mt-2">
-                      {ghBranches.slice(0, 8).map((bName) => (
-                        <button
-                          key={bName}
-                          type="button"
-                          onClick={() => {
-                            setBranch(bName);
-                            setBranchManuallyEdited(true);
-                            if (gitUrl.trim()) {
-                              handleAutoDetectRepo(gitUrl, true, bName);
-                            }
-                          }}
-                          className={cn(
-                            "px-2 py-0.5 rounded-md text-[11px] font-mono font-semibold border transition-colors cursor-pointer",
-                            branch === bName
-                              ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/40"
-                              : isDark
-                              ? "bg-white/[0.03] text-zinc-400 border-white/10 hover:text-white hover:border-white/20"
-                              : "bg-slate-100 text-slate-600 border-slate-200 hover:text-slate-900"
-                          )}
-                        >
-                          {bName}
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                  {ghBranches.length > 0 && (() => {
+                    const totalBranchPages = Math.max(1, Math.ceil(ghBranches.length / BRANCHES_PER_PAGE));
+                    const safePage = Math.min(branchPage, totalBranchPages);
+                    const visibleBranches = ghBranches.slice(
+                      (safePage - 1) * BRANCHES_PER_PAGE,
+                      safePage * BRANCHES_PER_PAGE
+                    );
+                    return (
+                      <div className="mt-2 space-y-2">
+                        <div className="flex flex-wrap gap-1.5">
+                          {visibleBranches.map((bName) => (
+                            <button
+                              key={bName}
+                              type="button"
+                              onClick={() => {
+                                setBranch(bName);
+                                setBranchManuallyEdited(true);
+                                if (gitUrl.trim()) {
+                                  handleAutoDetectRepo(gitUrl, true, bName);
+                                }
+                              }}
+                              className={cn(
+                                "px-2 py-0.5 rounded-md text-[11px] font-mono font-semibold border transition-colors cursor-pointer",
+                                branch === bName
+                                  ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/40"
+                                  : isDark
+                                  ? "bg-white/[0.03] text-zinc-400 border-white/10 hover:text-white hover:border-white/20"
+                                  : "bg-slate-100 text-slate-600 border-slate-200 hover:text-slate-900"
+                              )}
+                            >
+                              {bName}
+                            </button>
+                          ))}
+                        </div>
+                        {totalBranchPages > 1 && (
+                          <div className="flex items-center justify-between pt-0.5">
+                            <span className="text-[10px] text-zinc-500 font-mono">
+                              Showing {(safePage - 1) * BRANCHES_PER_PAGE + 1}-{Math.min(safePage * BRANCHES_PER_PAGE, ghBranches.length)} of {ghBranches.length}
+                            </span>
+                            <div className="flex items-center gap-1">
+                              <button
+                                type="button"
+                                disabled={safePage <= 1}
+                                onClick={() => setBranchPage((p) => Math.max(1, p - 1))}
+                                className={cn(
+                                  "px-2 py-0.5 rounded text-[11px] font-semibold border transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed",
+                                  isDark
+                                    ? "bg-white/5 border-white/10 text-zinc-300 hover:bg-white/10"
+                                    : "bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200"
+                                )}
+                              >
+                                Prev
+                              </button>
+                              <span className="px-1.5 text-[10px] font-mono text-zinc-400">
+                                {safePage}/{totalBranchPages}
+                              </span>
+                              <button
+                                type="button"
+                                disabled={safePage >= totalBranchPages}
+                                onClick={() => setBranchPage((p) => Math.min(totalBranchPages, p + 1))}
+                                className={cn(
+                                  "px-2 py-0.5 rounded text-[11px] font-semibold border transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed",
+                                  isDark
+                                    ? "bg-white/5 border-white/10 text-zinc-300 hover:bg-white/10"
+                                    : "bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200"
+                                )}
+                              >
+                                Next
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 <div>
@@ -1387,7 +1466,7 @@ export default function NewAppPlatformPage() {
 
                   {detectedDetails.hasGitDependencies && (
                     <p className="text-[11px] text-amber-400 font-medium">
-                      Git-based package dependency detected (`git+https://`) — full toolchain with Git enabled automatically.
+                      Git-based package dependency detected (`git+https://`) - full toolchain with Git enabled automatically.
                     </p>
                   )}
 

@@ -694,3 +694,24 @@ export function detectStackFromManifests(input: RepoManifestInputs): DetectedRep
     detectedFiles: input.fileNames.slice(0, 20),
   };
 }
+
+const PRIMARY_BRANCH_ORDER = ["main", "master", "develop", "dev", "staging", "production"];
+
+/**
+ * Sort repository branches so the default/main branch and newest version/feature branches appear first.
+ */
+export function sortBranchesNewestFirst(branches: string[], defaultBranch?: string): string[] {
+  const unique = Array.from(new Set(branches.map((b) => b.trim()).filter(Boolean)));
+  return unique.sort((a, b) => {
+    if (defaultBranch) {
+      if (a === defaultBranch && b !== defaultBranch) return -1;
+      if (b === defaultBranch && a !== defaultBranch) return 1;
+    }
+    const idxA = PRIMARY_BRANCH_ORDER.indexOf(a.toLowerCase());
+    const idxB = PRIMARY_BRANCH_ORDER.indexOf(b.toLowerCase());
+    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+    if (idxA !== -1) return -1;
+    if (idxB !== -1) return 1;
+    return b.localeCompare(a, undefined, { numeric: true, sensitivity: "base" });
+  });
+}

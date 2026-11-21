@@ -142,7 +142,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Please enter a valid Git repository URL (e.g. https://github.com/username/repository.git)." }, { status: 400 });
     }
 
-    // Automatically inject connected GitHub/GitLab token if no inline credentials are already present
+    // Automatically inject connected GitHub/GitLab/Bitbucket token if no inline credentials are already present
     if (user.githubAccessToken && !cleanGitUrl.includes("@")) {
       try {
         const decryptedToken = decryptDeterministic(user.githubAccessToken);
@@ -152,7 +152,17 @@ export async function POST(req: NextRequest) {
             "https://gitlab.com/",
             `https://oauth2:${encodeURIComponent(glTok)}@gitlab.com/`
           );
-        } else if (!decryptedToken.startsWith("gitlab:") && cleanGitUrl.startsWith("https://github.com/")) {
+        } else if (decryptedToken.startsWith("bitbucket:") && cleanGitUrl.startsWith("https://bitbucket.org/")) {
+          const bbTok = decryptedToken.slice("bitbucket:".length);
+          cleanGitUrl = cleanGitUrl.replace(
+            "https://bitbucket.org/",
+            `https://x-token-auth:${encodeURIComponent(bbTok)}@bitbucket.org/`
+          );
+        } else if (
+          !decryptedToken.startsWith("gitlab:") &&
+          !decryptedToken.startsWith("bitbucket:") &&
+          cleanGitUrl.startsWith("https://github.com/")
+        ) {
           cleanGitUrl = cleanGitUrl.replace(
             "https://github.com/",
             `https://x-access-token:${encodeURIComponent(decryptedToken)}@github.com/`
