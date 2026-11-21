@@ -1677,16 +1677,17 @@ export async function scaleAppPlatform(app: AppPlatformRecord, replicas: number)
   const namespace = app.k8sNamespace || 'app-platform';
   const name = app.k8sDeployment || `app-${app.subdomain}`;
 
-  await (appsApi as any).patchNamespacedDeployment(
-    {
-      name,
-      namespace,
-      body: {
-        spec: { replicas },
+  await (appsApi as any).patchNamespacedDeployment({
+    name,
+    namespace,
+    body: [
+      {
+        op: 'replace',
+        path: '/spec/replicas',
+        value: replicas,
       },
-    },
-    { headers: { 'Content-Type': 'application/strategic-merge-patch+json' } }
-  );
+    ],
+  });
 
   await prisma.appPlatformService.update({
     where: { id: app.id },
@@ -1704,25 +1705,33 @@ export async function restartAppPlatform(app: AppPlatformRecord): Promise<void> 
   const { appsApi } = await getAppPlatformK8sClients();
   const namespace = app.k8sNamespace || 'app-platform';
   const name = app.k8sDeployment || `app-${app.subdomain}`;
+  const restartedAt = new Date().toISOString();
 
-  await (appsApi as any).patchNamespacedDeployment(
-    {
-      name,
-      namespace,
-      body: {
-        spec: {
-          template: {
-            metadata: {
-              annotations: {
-                'kubectl.kubernetes.io/restartedAt': new Date().toISOString(),
-              },
+  const existingRes: any = await (appsApi as any)
+    .readNamespacedDeployment({ name, namespace })
+    .catch(() => null);
+  const existing = existingRes?.body ?? existingRes;
+  const hasAnnotations = Boolean(existing?.spec?.template?.metadata?.annotations);
+
+  await (appsApi as any).patchNamespacedDeployment({
+    name,
+    namespace,
+    body: [
+      hasAnnotations
+        ? {
+            op: 'add',
+            path: '/spec/template/metadata/annotations/kubectl.kubernetes.io~1restartedAt',
+            value: restartedAt,
+          }
+        : {
+            op: 'add',
+            path: '/spec/template/metadata/annotations',
+            value: {
+              'kubectl.kubernetes.io/restartedAt': restartedAt,
             },
           },
-        },
-      },
-    },
-    { headers: { 'Content-Type': 'application/strategic-merge-patch+json' } }
-  );
+    ],
+  });
 
   await prisma.appPlatformService.update({
     where: { id: app.id },
