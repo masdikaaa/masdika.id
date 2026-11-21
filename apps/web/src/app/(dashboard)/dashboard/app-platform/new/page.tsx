@@ -1131,19 +1131,18 @@ export default function NewAppPlatformPage() {
 
                 {showGhPatBox && !ghConnected && (
                   <div className="flex flex-col sm:flex-row gap-2 pt-1">
-                    <select
-                      value={ghPatProvider}
-                      onChange={(e) => setGhPatProvider(e.target.value as any)}
-                      className={cn(
-                        "px-3 py-2 rounded-lg text-xs font-semibold border focus:outline-none focus:border-cyan-400 sm:w-32 shrink-0",
-                        isDark ? "bg-[#09090b] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
-                      )}
-                    >
-                      <option value="auto">Auto Detect</option>
-                      <option value="github">GitHub</option>
-                      <option value="gitlab">GitLab</option>
-                      <option value="bitbucket">Bitbucket</option>
-                    </select>
+                    <div className="sm:w-36 shrink-0">
+                      <Select
+                        value={ghPatProvider}
+                        onChange={(val) => setGhPatProvider(val as any)}
+                        options={[
+                          { value: "auto", label: "Auto Detect" },
+                          { value: "github", label: "GitHub" },
+                          { value: "gitlab", label: "GitLab" },
+                          { value: "bitbucket", label: "Bitbucket" },
+                        ]}
+                      />
+                    </div>
                     <input
                       type="password"
                       autoComplete="off"
