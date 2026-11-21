@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { generateDockerfileForFramework } from '../k8s-app-platform';
 import { APP_PLATFORM_PLANS, getAppPlatformPlan } from '../app-platform-plans';
 import { getInvoiceDisplayInfo } from '../invoice-display';
+import { detectStackFromManifests } from '../repo-detector';
 
 describe('App Platform Engine & Capabilities', () => {
   describe('Plans & Pricing Specifications', () => {
@@ -175,6 +176,85 @@ describe('App Platform Engine & Capabilities', () => {
       expect(info.specs.some(s => s.kind === 'cpu' && s.label === '1 vCPU')).toBe(true);
       expect(info.specs.some(s => s.kind === 'ram' && s.label === '1 GB RAM')).toBe(true);
       expect(info.specs.some(s => s.kind === 'disk' && s.label === '10 GB SSD')).toBe(true);
+    });
+  });
+
+  describe('Smart Multi-Language Repository Stack & Requirements Detector', () => {
+    it('detects Python FastAPI, git+ dependencies, and entrypoint from requirements.txt', () => {
+      const res = detectStackFromManifests({
+        fileNames: ['main.py', 'requirements.txt', 'README.md'],
+        requirementsTxt: [
+          'fastapi==0.115.0',
+          'uvicorn[standard]',
+          'pydantic>=2.0',
+          'neonize @ git+https://github.com/Nauvalunesa/neonize.git@596d5ac',
+        ].join('\n'),
+      });
+      expect(res.detectedFramework).toBe('FASTAPI');
+      expect(res.language).toBe('Python');
+      expect(res.packageManager).toBe('pip');
+      expect(res.manifestFile).toBe('requirements.txt');
+      expect(res.hasGitDependencies).toBe(true);
+      expect(res.dependencies).toEqual(['fastapi', 'uvicorn', 'pydantic', 'neonize']);
+      expect(res.defaultPort).toBe(8000);
+      expect(res.suggestedStartCommand).toContain('uvicorn main:app');
+    });
+
+    it('detects Next.js, pnpm package manager, and dependencies from package.json', () => {
+      const res = detectStackFromManifests({
+        fileNames: ['package.json', 'pnpm-lock.yaml', 'next.config.ts'],
+        packageJson: JSON.stringify({
+          engines: { node: '>=20' },
+          scripts: { build: 'next build', start: 'next start -p 3000' },
+          dependencies: { next: '15.0.0', react: '19.0.0', tailwindcss: '4.0.0' },
+        }),
+      });
+      expect(res.detectedFramework).toBe('NEXTJS');
+      expect(res.packageManager).toBe('pnpm');
+      expect(res.runtimeVersion).toBe('>=20');
+      expect(res.dependencies).toEqual(['next', 'react', 'tailwindcss']);
+      expect(res.suggestedBuildCommand).toBe('pnpm build');
+      expect(res.suggestedStartCommand).toBe('pnpm start');
+    });
+
+    it('detects Laravel PHP version and Composer dependencies', () => {
+      const res = detectStackFromManifests({
+        fileNames: ['artisan', 'composer.json', 'public'],
+        composerJson: JSON.stringify({
+          require: { php: '^8.2', 'laravel/framework': '^11.0', 'guzzlehttp/guzzle': '^7.8' },
+        }),
+      });
+      expect(res.detectedFramework).toBe('LARAVEL');
+      expect(res.packageManager).toBe('composer');
+      expect(res.runtimeVersion).toBe('^8.2');
+      expect(res.dependencies).toEqual(['laravel/framework', 'guzzlehttp/guzzle']);
+    });
+
+    it('detects Go Gin, Rust Axum, and Java Spring Boot manifests', () => {
+      const goRes = detectStackFromManifests({
+        fileNames: ['go.mod', 'main.go'],
+        goMod: 'module app\ngo 1.22\nrequire (\n\tgithub.com/gin-gonic/gin v1.10.0\n)',
+      });
+      expect(goRes.detectedFramework).toBe('GOLANG');
+      expect(goRes.detectedLabel).toBe('Go (Gin)');
+      expect(goRes.runtimeVersion).toBe('1.22');
+      expect(goRes.dependencies).toContain('github.com/gin-gonic/gin');
+
+      const rustRes = detectStackFromManifests({
+        fileNames: ['Cargo.toml'],
+        cargoToml: '[package]\nname = "api"\nedition = "2021"\n[dependencies]\naxum = "0.7"\ntokio = "1.0"\n',
+      });
+      expect(rustRes.detectedFramework).toBe('RUST');
+      expect(rustRes.detectedLabel).toBe('Rust (Axum)');
+      expect(rustRes.dependencies).toEqual(['axum', 'tokio']);
+
+      const javaRes = detectStackFromManifests({
+        fileNames: ['pom.xml'],
+        pomXml: '<project><properties><java.version>21</java.version></properties><dependencies><dependency><artifactId>spring-boot-starter-web</artifactId></dependency></dependencies></project>',
+      });
+      expect(javaRes.detectedFramework).toBe('SPRINGBOOT');
+      expect(javaRes.runtimeVersion).toBe('Java 21');
+      expect(javaRes.dependencies).toContain('spring-boot-starter-web');
     });
   });
 });

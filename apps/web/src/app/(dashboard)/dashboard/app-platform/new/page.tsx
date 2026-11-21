@@ -451,6 +451,18 @@ export default function NewAppPlatformPage() {
   const [mounted, setMounted] = useState(false);
   const [detectingRepo, setDetectingRepo] = useState(false);
   const [detectedBadge, setDetectedBadge] = useState<string | null>(null);
+  const [branchManuallyEdited, setBranchManuallyEdited] = useState(false);
+  const [detectedDetails, setDetectedDetails] = useState<{
+    language?: string;
+    runtimeVersion?: string;
+    packageManager?: string;
+    manifestFile?: string;
+    dependencies?: string[];
+    hasGitDependencies?: boolean;
+    defaultPort?: number;
+    suggestedBuildCommand?: string;
+    suggestedStartCommand?: string;
+  } | null>(null);
 
   // GitHub Integration & Repo Picker State
   const [ghConnected, setGhConnected] = useState(false);
@@ -721,6 +733,7 @@ export default function NewAppPlatformPage() {
     if (!repoObj) return;
     setGitUrl(repoObj.cloneUrl);
     setBranch(repoObj.defaultBranch || "main");
+    setBranchManuallyEdited(false);
     if (!name) {
       setName(repoObj.name);
       setSubdomain(generateAutoSubdomain(repoObj.name));
@@ -735,10 +748,10 @@ export default function NewAppPlatformPage() {
       })
       .catch(() => {});
     // Automatically run stack detection
-    handleAutoDetectRepo(repoObj.cloneUrl);
+    handleAutoDetectRepo(repoObj.cloneUrl, false);
   };
 
-  const handleAutoDetectRepo = async (overrideUrl?: string) => {
+  const handleAutoDetectRepo = async (overrideUrl?: string, useCurrentBranch = branchManuallyEdited, overrideBranch?: string) => {
     const targetUrl = (overrideUrl ?? gitUrl).trim();
     if (!targetUrl) {
       toast.error("Please enter a Git repository URL first");
@@ -746,13 +759,20 @@ export default function NewAppPlatformPage() {
     }
     setDetectingRepo(true);
     setDetectedBadge(null);
+    setDetectedDetails(null);
     try {
+      const requestedBranch = overrideBranch
+        ? overrideBranch.trim()
+        : useCurrentBranch && branch.trim()
+        ? branch.trim()
+        : undefined;
       const res = await fetch("/api/user/app-platform/detect-repo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           gitUrl: targetUrl,
-          branch: branch.trim() || undefined,
+          branch: requestedBranch,
+          rootDirectory: rootDirectory.trim() || "/",
           gitToken: isPrivateRepo ? gitToken.trim() : undefined,
         }),
       });
@@ -760,6 +780,20 @@ export default function NewAppPlatformPage() {
       if (res.ok && json.success && json.detected) {
         const d = json.detected;
         if (d.defaultBranch) setBranch(d.defaultBranch);
+        if (Array.isArray(d.branches) && d.branches.length > 0) {
+          setGhBranches(d.branches);
+        }
+        setDetectedDetails({
+          language: d.language,
+          runtimeVersion: d.runtimeVersion,
+          packageManager: d.packageManager,
+          manifestFile: d.manifestFile,
+          dependencies: Array.isArray(d.dependencies) ? d.dependencies : [],
+          hasGitDependencies: Boolean(d.hasGitDependencies),
+          defaultPort: d.defaultPort,
+          suggestedBuildCommand: d.suggestedBuildCommand,
+          suggestedStartCommand: d.suggestedStartCommand,
+        });
         if (d.hasDockerfile) {
           setBuildMode("DOCKERFILE");
           setDockerfileSource("REPO");
@@ -767,13 +801,15 @@ export default function NewAppPlatformPage() {
           setDockerfilePath("Dockerfile");
           if (d.defaultPort) setAppPort(d.defaultPort);
           setDetectedBadge(d.detectedLabel || "Dockerfile Detected");
-          toast.success(`Auto-detected: ${d.detectedLabel || "Dockerfile"}`);
+          toast.success(`Auto-detected: ${d.detectedLabel || "Dockerfile"} (branch: ${d.defaultBranch || branch})`);
         } else if (d.detectedFramework && d.detectedFramework !== "DOCKERFILE") {
           setBuildMode("AUTO");
           handleFrameworkChange(d.detectedFramework);
           if (d.defaultPort) setAppPort(d.defaultPort);
+          if (d.suggestedBuildCommand) setBuildCommand(d.suggestedBuildCommand);
+          if (d.suggestedStartCommand) setStartCommand(d.suggestedStartCommand);
           setDetectedBadge(d.detectedLabel || d.detectedFramework);
-          toast.success(`Auto-detected language/framework: ${d.detectedLabel || d.detectedFramework}`);
+          toast.success(`Auto-detected: ${d.detectedLabel || d.detectedFramework} (branch: ${d.defaultBranch || branch})`);
         } else {
           toast.info(d.message || "Could not auto-detect stack. You can choose Dockerfile or Preset manually.");
         }
@@ -1181,7 +1217,13 @@ export default function NewAppPlatformPage() {
                     type="url"
                     required
                     value={gitUrl}
-                    onChange={(e) => setGitUrl(e.target.value)}
+                    onChange={(e) => {
+                      setGitUrl(e.target.value);
+                      setBranchManuallyEdited(false);
+                      setDetectedBadge(null);
+                      setDetectedDetails(null);
+                      setGhBranches([]);
+                    }}
                     placeholder="https://github.com/username/repository.git"
                     className={cn(
                       "flex-1 px-4 py-2.5 rounded-xl text-sm border font-mono transition-colors focus:outline-none focus:border-cyan-400",
@@ -1279,18 +1321,28 @@ export default function NewAppPlatformPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label
-                    className={cn(
-                      "block text-xs font-bold uppercase tracking-wider mb-2",
-                      isDark ? "text-zinc-300" : "text-slate-700"
+                  <div className="flex items-center justify-between mb-2">
+                    <label
+                      className={cn(
+                        "block text-xs font-bold uppercase tracking-wider",
+                        isDark ? "text-zinc-300" : "text-slate-700"
+                      )}
+                    >
+                      Branch
+                    </label>
+                    {ghBranches.length > 0 && (
+                      <span className="text-[10px] font-semibold text-cyan-400">
+                        {ghBranches.length} branches found
+                      </span>
                     )}
-                  >
-                    Branch
-                  </label>
+                  </div>
                   <input
                     type="text"
                     value={branch}
-                    onChange={(e) => setBranch(e.target.value)}
+                    onChange={(e) => {
+                      setBranch(e.target.value);
+                      setBranchManuallyEdited(true);
+                    }}
                     placeholder="main"
                     className={cn(
                       "w-full px-4 py-2.5 rounded-xl text-sm border font-mono transition-colors focus:outline-none focus:border-cyan-400",
@@ -1299,6 +1351,33 @@ export default function NewAppPlatformPage() {
                         : "bg-slate-50 border-slate-200 text-slate-900"
                     )}
                   />
+                  {ghBranches.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {ghBranches.slice(0, 8).map((bName) => (
+                        <button
+                          key={bName}
+                          type="button"
+                          onClick={() => {
+                            setBranch(bName);
+                            setBranchManuallyEdited(true);
+                            if (gitUrl.trim()) {
+                              handleAutoDetectRepo(gitUrl, true, bName);
+                            }
+                          }}
+                          className={cn(
+                            "px-2 py-0.5 rounded-md text-[11px] font-mono font-semibold border transition-colors cursor-pointer",
+                            branch === bName
+                              ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/40"
+                              : isDark
+                              ? "bg-white/[0.03] text-zinc-400 border-white/10 hover:text-white hover:border-white/20"
+                              : "bg-slate-100 text-slate-600 border-slate-200 hover:text-slate-900"
+                          )}
+                        >
+                          {bName}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -1324,6 +1403,78 @@ export default function NewAppPlatformPage() {
                   />
                 </div>
               </div>
+
+              {detectedDetails && (detectedDetails.language || (detectedDetails.dependencies && detectedDetails.dependencies.length > 0)) && (
+                <div
+                  className={cn(
+                    "p-3.5 rounded-xl border space-y-2.5 transition-all",
+                    isDark
+                      ? "bg-emerald-500/[0.04] border-emerald-500/20"
+                      : "bg-emerald-50/60 border-emerald-200"
+                  )}
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 text-xs font-bold text-emerald-500">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>
+                        Smart Inspection: {detectedBadge || detectedDetails.language}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-mono">
+                      {detectedDetails.runtimeVersion && (
+                        <span className={cn("px-2 py-0.5 rounded border", isDark ? "bg-black/30 border-white/10 text-zinc-300" : "bg-white border-slate-200 text-slate-700")}>
+                          Runtime: {detectedDetails.runtimeVersion}
+                        </span>
+                      )}
+                      {detectedDetails.packageManager && (
+                        <span className={cn("px-2 py-0.5 rounded border", isDark ? "bg-black/30 border-white/10 text-zinc-300" : "bg-white border-slate-200 text-slate-700")}>
+                          {detectedDetails.packageManager}
+                          {detectedDetails.manifestFile ? ` (${detectedDetails.manifestFile})` : ""}
+                        </span>
+                      )}
+                      {detectedDetails.defaultPort && (
+                        <span className={cn("px-2 py-0.5 rounded border", isDark ? "bg-black/30 border-white/10 text-cyan-400" : "bg-white border-slate-200 text-cyan-700")}>
+                          Port {detectedDetails.defaultPort}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {detectedDetails.dependencies && detectedDetails.dependencies.length > 0 && (
+                    <div className="space-y-1">
+                      <div className="text-[11px] font-semibold text-zinc-400">
+                        Detected Dependencies / Requirements ({detectedDetails.dependencies.length}):
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {detectedDetails.dependencies.slice(0, 12).map((dep) => (
+                          <span
+                            key={dep}
+                            className={cn(
+                              "px-2 py-0.5 rounded-md text-[11px] font-mono border",
+                              isDark
+                                ? "bg-black/40 border-white/10 text-zinc-300"
+                                : "bg-white border-slate-200 text-slate-700"
+                            )}
+                          >
+                            {dep}
+                          </span>
+                        ))}
+                        {detectedDetails.dependencies.length > 12 && (
+                          <span className="text-[11px] text-zinc-400 self-center">
+                            +{detectedDetails.dependencies.length - 12} more
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {detectedDetails.hasGitDependencies && (
+                    <p className="text-[11px] text-amber-400 font-medium">
+                      Git-based package dependency detected (`git+https://`) — full toolchain with Git enabled automatically.
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
