@@ -91,13 +91,13 @@ const SIDEBAR_LINKS = [
   { name: "Managed Apps", href: "/dashboard/apps", icon: Boxes, color: "text-cyan-400", group: "Platform (PaaS)", badge: "New" },
   { name: "Managed Database", href: "/dashboard/database", icon: Database, color: "text-cyan-400", group: "Platform (PaaS)" },
 
-  { name: "Object Storage", href: "/dashboard/object-storage", icon: HardDrive, color: "text-cyan-400", group: "Storage & CDN", badge: "New" },
-  { name: "File CDN", href: "/dashboard/cdn", icon: UploadCloud, color: "text-cyan-400", group: "Storage & CDN" },
+  { name: "Object Storage", href: "/dashboard/object-storage", icon: HardDrive, color: "text-cyan-400", group: "Storage & CDN (IaaS)", badge: "New" },
+  { name: "File CDN", href: "/dashboard/cdn", icon: UploadCloud, color: "text-cyan-400", group: "Storage & CDN (IaaS)" },
 
-  { name: "AI Gateway", href: "/dashboard/ai-gateway", icon: Sparkles, color: "text-cyan-400", group: "Artificial Intelligence", badge: "New" },
+  { name: "AI Gateway", href: "/dashboard/ai-gateway", icon: Sparkles, color: "text-cyan-400", group: "AI & Automation (SaaS)", badge: "New" },
+  { name: "Masdika MCP", href: "/dashboard/mcp", icon: Bot, color: "text-cyan-400", group: "AI & Automation (SaaS)", badge: "New" },
 
-  { name: "Masdika MCP", href: "/dashboard/mcp", icon: Bot, color: "text-cyan-400", group: "Developer Tools", badge: "New" },
-  { name: "API VPS", href: "/dashboard/api-vps", icon: Code2, color: "text-cyan-400", group: "Developer Tools" },
+  { name: "API VPS", href: "/dashboard/api-vps", icon: Code2, color: "text-cyan-400", group: "Developer Tools (IaaS)" },
 
   { name: "Support Tickets", href: "/dashboard/tickets", icon: MessageSquare, color: "text-cyan-400", group: "Support" },
   { name: "Affiliate Program", href: "/dashboard/affiliate", icon: Gift, color: "text-cyan-400", group: "Affiliate" },
