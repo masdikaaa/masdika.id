@@ -1228,79 +1228,12 @@ export default function NewAppPlatformPage() {
                     )}
                   >
                     <Sparkles className={cn("w-3.5 h-3.5", detectingRepo && "animate-spin")} />
-                    <span>{detectingRepo ? "Detecting..." : "Auto-Detect Stack"}</span>
+                    <span>{detectingRepo ? "Inspecting..." : "Inspect Repo"}</span>
                   </button>
                 </div>
                 <p className="text-[11px] text-zinc-500 mt-1.5">
-                  Public or private HTTPS repositories on GitHub, GitLab, Bitbucket, or Gitea.
+                  Paste any Git HTTPS URL (use <strong>Connect Git Account</strong> above for private GitHub/GitLab repositories).
                 </p>
-
-                {/* Private Repository Toggle & Token Input */}
-                <div className="pt-2">
-                  <AdminCheckbox
-                    checked={isPrivateRepo}
-                    onChange={setIsPrivateRepo}
-                    label={
-                      <span className="font-semibold text-xs">
-                        Private Repository (GitHub, GitLab, Bitbucket, Gitea)
-                      </span>
-                    }
-                  />
-
-                  {isPrivateRepo && (
-                    <div
-                      className={cn(
-                        "mt-3 p-3.5 rounded-xl border grid grid-cols-1 sm:grid-cols-2 gap-3 transition-all",
-                        isDark
-                          ? "bg-white/[0.02] border-white/10"
-                          : "bg-slate-50 border-slate-200"
-                      )}
-                    >
-                      <div className="space-y-1.5">
-                        <label className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400">
-                          Access Token / Deploy Token <span className="text-rose-400">*</span>
-                        </label>
-                        <input
-                          type="password"
-                          required={isPrivateRepo}
-                          value={gitToken}
-                          onChange={(e) => setGitToken(e.target.value)}
-                          placeholder="ghp_... or glpat-..."
-                          className={cn(
-                            "w-full px-3 py-2 rounded-lg text-xs border font-mono transition-colors focus:outline-none focus:border-cyan-400",
-                            isDark
-                              ? "bg-black/30 border-white/10 text-white"
-                              : "bg-white border-slate-200 text-slate-900"
-                          )}
-                        />
-                        <p className="text-[10px] text-zinc-500">
-                          Token will be encrypted at rest and masked in all build logs.
-                        </p>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400">
-                          Git Username (Optional)
-                        </label>
-                        <input
-                          type="text"
-                          value={gitUser}
-                          onChange={(e) => setGitUser(e.target.value)}
-                          placeholder="e.g. git (GitHub) or oauth2 (GitLab)"
-                          className={cn(
-                            "w-full px-3 py-2 rounded-lg text-xs border font-mono transition-colors focus:outline-none focus:border-cyan-400",
-                            isDark
-                              ? "bg-black/30 border-white/10 text-white"
-                              : "bg-white border-slate-200 text-slate-900"
-                          )}
-                        />
-                        <p className="text-[10px] text-zinc-500">
-                          Defaults to &apos;git&apos; for GitHub/Bitbucket or &apos;oauth2&apos; for GitLab.
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
