@@ -1176,33 +1176,6 @@ export default function NewAppPlatformPage() {
                   </div>
                 )}
               </div>
-
-              <label
-                className={cn(
-                  "block text-xs font-bold uppercase tracking-wider mb-2",
-                  isDark ? "text-zinc-400" : "text-slate-600"
-                )}
-              >
-                Quick Starter Templates (Optional)
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {QUICK_STARTERS.map((starter) => (
-                  <button
-                    key={starter.name}
-                    type="button"
-                    onClick={() => handleApplyPreset(starter)}
-                    className={cn(
-                      "p-2.5 rounded-xl border text-left text-xs font-semibold transition-all cursor-pointer flex items-center justify-between group",
-                      isDark
-                        ? "bg-white/[0.02] border-white/[0.08] hover:border-cyan-500/40 hover:bg-white/[0.04] text-zinc-300"
-                        : "bg-slate-50 border-slate-200 hover:border-cyan-400 hover:bg-slate-100 text-slate-700"
-                    )}
-                  >
-                    <span className="truncate">{starter.name}</span>
-                    <Sparkles className="w-3 h-3 text-cyan-400 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity" />
-                  </button>
-                ))}
-              </div>
             </div>
 
             <div className="space-y-4 pt-1">

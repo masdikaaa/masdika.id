@@ -738,30 +738,42 @@ export async function triggerAppPlatformBuild(
   // Also clean up any orphaned failed/completed build pods BEFORE creating new ConfigMap/Job
   await cleanOrphanedBuildResources().catch(() => {});
 
-  const requestedDockerfilePath = (
+  const rawDfPath = (
     app.dockerfilePath && app.dockerfilePath.trim() ? app.dockerfilePath.trim() : 'Dockerfile'
-  ).replace(/['"`$\\;\r\n]/g, '') || 'Dockerfile';
+  ).replace(/['"`$\\;\r\n]/g, '');
+  const requestedDockerfilePath =
+    rawDfPath
+      .split('/')
+      .filter((seg) => seg && seg !== '.' && seg !== '..')
+      .join('/') || 'Dockerfile';
 
   // Pure Dockerfile-only build: inline Dockerfile (in buildCommand) or repository Dockerfile
   const isInlineDockerfile = Boolean(
     app.buildCommand &&
-    (app.buildCommand.includes('FROM ') ||
+    (/^\s*FROM\s+/im.test(app.buildCommand) ||
      app.buildCommand.includes('# Dockerfile') ||
-     app.buildCommand.includes('ENTRYPOINT') ||
-     app.buildCommand.includes('CMD '))
+     /^\s*(ENTRYPOINT|CMD)\s+/im.test(app.buildCommand))
   );
   const inlineDockerfile = isInlineDockerfile ? app.buildCommand!.trim() : '';
   const presetDfB64 = inlineDockerfile ? Buffer.from(inlineDockerfile, 'utf8').toString('base64') : '';
 
   const gitUrl = app.gitUrl.trim();
-  const branch = (app.branch || 'main').trim();
+  const safeDisplayUrl = gitUrl.replace(/\/\/[^/@]+@/, '//***@');
+  const branch = (app.branch || 'main').trim() || 'main';
 
-  const cleanRootDir = app.rootDirectory ? app.rootDirectory.trim().replace(/^\/+|\/+$/g, '') : '';
+  const cleanRootDir = app.rootDirectory
+    ? app.rootDirectory
+        .trim()
+        .replace(/['"`$\\;\r\n]/g, '')
+        .split('/')
+        .filter((seg) => seg && seg !== '.' && seg !== '..')
+        .join('/')
+    : '';
   const workspaceAppDir = cleanRootDir ? `/workspace/${cleanRootDir}` : '/workspace';
 
   const dockerfilePrepHook = isInlineDockerfile
-    ? ` && mkdir -p "${workspaceAppDir}" && echo "$MASDIKA_PRESET_DF_B64" | base64 -d > "${workspaceAppDir}/.masdika.Dockerfile" && echo "[Masdika BuildKit] Using Inline Dockerfile."`
-    : ` && cd "${workspaceAppDir}" && REQ_DF="${requestedDockerfilePath}" && case "$REQ_DF" in /*) DF_SRC="$REQ_DF" ;; *) DF_SRC="${workspaceAppDir}/$REQ_DF" ;; esac && if [ ! -f "$DF_SRC" ]; then echo "ERROR: Dockerfile not found at '$REQ_DF'. Please add a Dockerfile to your repository or use the Inline Dockerfile editor."; exit 1; fi && cp "$DF_SRC" "${workspaceAppDir}/.masdika.Dockerfile" && echo "[Masdika BuildKit] Using repository Dockerfile: $REQ_DF"`;
+    ? ` && mkdir -p "${workspaceAppDir}" && printf '%s' "$MASDIKA_PRESET_DF_B64" | base64 -d > "${workspaceAppDir}/.masdika.Dockerfile" && echo "[Masdika BuildKit] Using Inline Dockerfile."`
+    : ` && cd "${workspaceAppDir}" && DF_SRC="${workspaceAppDir}/$MASDIKA_DOCKERFILE_PATH" && if [ ! -f "$DF_SRC" ]; then echo "ERROR: Dockerfile not found at '$MASDIKA_DOCKERFILE_PATH'. Please add a Dockerfile to your repository or use the Inline Dockerfile editor."; exit 1; fi && cp "$DF_SRC" "${workspaceAppDir}/.masdika.Dockerfile" && echo "[Masdika BuildKit] Using repository Dockerfile: $MASDIKA_DOCKERFILE_PATH"`;
 
   // Job Specification: BuildKit Builder (Dockerfile-only)
   const jobManifest: k8s.V1Job = {
@@ -802,21 +814,18 @@ export async function triggerAppPlatformBuild(
               name: 'git-clone',
               image: 'alpine/git:latest',
               imagePullPolicy: 'IfNotPresent',
-              ...(presetDfB64
-                ? {
-                    env: [
-                      {
-                        name: 'MASDIKA_PRESET_DF_B64',
-                        value: presetDfB64,
-                      },
-                    ],
-                  }
-                : {}),
+              env: [
+                { name: 'MASDIKA_GIT_URL', value: gitUrl },
+                { name: 'MASDIKA_SAFE_URL', value: safeDisplayUrl },
+                { name: 'MASDIKA_GIT_BRANCH', value: branch },
+                { name: 'MASDIKA_DOCKERFILE_PATH', value: requestedDockerfilePath },
+                ...(presetDfB64 ? [{ name: 'MASDIKA_PRESET_DF_B64', value: presetDfB64 }] : []),
+              ],
               command: ['sh', '-c'],
               args: [
                 commitHash && /^[a-fA-F0-9]{4,40}$/.test(commitHash.trim())
-                  ? `echo "Cloning ${gitUrl} and checking out commit ${commitHash.trim()}..." && git clone ${gitUrl} /workspace/src && cd /workspace/src && git checkout ${commitHash.trim()} && cp -rf /workspace/src/. /workspace/ && cd /workspace && rm -rf /workspace/src${dockerfilePrepHook} && chmod -R 777 /workspace && echo "Commit ${commitHash.trim()} checked out. Handing off to BuildKit..."`
-                  : `echo "Cloning ${gitUrl} (branch: ${branch})..." && (git clone --depth=1 --branch ${branch} ${gitUrl} /workspace/src 2>/dev/null || git clone --depth=1 ${gitUrl} /workspace/src) && cp -rf /workspace/src/. /workspace/ && cd /workspace && rm -rf /workspace/src${dockerfilePrepHook} && chmod -R 777 /workspace && echo "Clone completed. Handing off to BuildKit..."`,
+                  ? `echo "Cloning $MASDIKA_SAFE_URL and checking out commit ${commitHash.trim()}..." && git clone "$MASDIKA_GIT_URL" /workspace/src && cd /workspace/src && git checkout "${commitHash.trim()}" && cp -rf /workspace/src/. /workspace/ && cd /workspace && rm -rf /workspace/src${dockerfilePrepHook} && chmod -R 777 /workspace && echo "Commit ${commitHash.trim()} checked out. Handing off to BuildKit..."`
+                  : `echo "Cloning $MASDIKA_SAFE_URL (branch: $MASDIKA_GIT_BRANCH)..." && (git clone --depth=1 --branch "$MASDIKA_GIT_BRANCH" "$MASDIKA_GIT_URL" /workspace/src 2>/dev/null || git clone --depth=1 "$MASDIKA_GIT_URL" /workspace/src) && cp -rf /workspace/src/. /workspace/ && cd /workspace && rm -rf /workspace/src${dockerfilePrepHook} && chmod -R 777 /workspace && echo "Clone completed. Handing off to BuildKit..."`,
               ],
               volumeMounts: [
                 {
