@@ -93,6 +93,7 @@ export default function PodInteractiveTerminal({
       setStatus("connected");
       setStatusMsg(podLabel ? `PTY: ${podLabel}` : "Live PTY");
       sendResize();
+      requestAnimationFrame(() => sendResize());
       term.focus();
     };
 
@@ -216,14 +217,14 @@ export default function PodInteractiveTerminal({
         </button>
       </div>
 
-      <div className="relative w-full h-[420px] overflow-hidden">
+      <div className="relative w-full h-[430px] p-3 overflow-hidden bg-[#090d16]">
         <div
           ref={containerRef}
           onClick={() => {
             if (status === "connected") termRef.current?.focus();
           }}
           className={cn(
-            "w-full h-full p-2.5 transition-opacity duration-200",
+            "w-full h-full transition-opacity duration-200",
             status === "connected" ? "opacity-100" : "opacity-0 pointer-events-none select-none"
           )}
         />
