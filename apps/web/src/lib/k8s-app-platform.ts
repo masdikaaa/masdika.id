@@ -1101,8 +1101,8 @@ export async function triggerAppPlatformBuild(
     }
   } catch {}
 
-  // Also clean up any orphaned failed/completed build pods in namespace
-  cleanOrphanedBuildResources().catch(() => {});
+  // Also clean up any orphaned failed/completed build pods BEFORE creating new ConfigMap/Job
+  await cleanOrphanedBuildResources().catch(() => {});
 
   const normalizedBuildMode = (app.buildMode || 'DOCKERFILE').toUpperCase().trim();
   const isBuildpack = normalizedBuildMode === 'BUILDPACK';
@@ -2367,14 +2367,17 @@ export async function cleanOrphanedBuildResources(): Promise<void> {
       }
     }
 
-    // 3. Clean stale temporary Dockerfile ConfigMaps whose build job is no longer active
+    // 3. Clean stale temporary Dockerfile ConfigMaps (>5m old) whose build job is no longer active
     const cmsRes: any = await (coreApi as any).listNamespacedConfigMap({ namespace }).catch(() => null);
     const cms = cmsRes?.items || cmsRes?.body?.items || [];
+    const nowMs = Date.now();
     for (const cm of cms) {
       const cmName = cm?.metadata?.name || '';
       if (cmName.startsWith('cm-df-build-')) {
         const linkedJobName = cmName.slice('cm-df-'.length);
-        if (!activeJobNames.has(linkedJobName)) {
+        const createdMs = cm?.metadata?.creationTimestamp ? new Date(cm.metadata.creationTimestamp).getTime() : 0;
+        const isOldEnough = createdMs > 0 && nowMs - createdMs > 5 * 60 * 1000;
+        if (isOldEnough && !activeJobNames.has(linkedJobName)) {
           await (coreApi as any).deleteNamespacedConfigMap({ name: cmName, namespace }).catch(() => {});
         }
       }
