@@ -453,6 +453,7 @@ export default function NewAppPlatformPage() {
   const [detectingRepo, setDetectingRepo] = useState(false);
   const [detectedBadge, setDetectedBadge] = useState<string | null>(null);
   const [branchManuallyEdited, setBranchManuallyEdited] = useState(false);
+  const [dockerfileManuallyEdited, setDockerfileManuallyEdited] = useState(false);
   const [detectedDetails, setDetectedDetails] = useState<{
     language?: string;
     runtimeVersion?: string;
@@ -827,9 +828,41 @@ export default function NewAppPlatformPage() {
           setBuildMode("DOCKERFILE");
           setDockerfileSource("INLINE");
           setBuildType("DOCKERFILE");
-          if (d.defaultPort) setAppPort(d.defaultPort);
-          setDetectedBadge("No Dockerfile - Use Inline Editor");
-          toast.info("No Dockerfile found in repository. Switched to Inline Dockerfile Editor.");
+
+          const fw = String(d.detectedFramework || "").toUpperCase();
+          const lang = String(d.language || "").toUpperCase();
+          let matchedLabel: string | null = null;
+          if (fw === "LARAVEL" || fw === "PHP" || fw === "WORDPRESS" || lang.includes("PHP")) {
+            matchedLabel = "PHP / Laravel";
+          } else if (fw === "PYTHON" || fw === "FASTAPI" || fw === "DJANGO" || lang.includes("PYTHON")) {
+            matchedLabel = "Python / FastAPI";
+          } else if (fw === "GOLANG" || lang.includes("GO")) {
+            matchedLabel = "Go / Fiber";
+          } else if (fw === "STATIC" || lang.includes("HTML")) {
+            matchedLabel = "Static HTML / Nginx";
+          } else if (
+            ["NODEJS", "NEXTJS", "NESTJS", "VITE", "ASTRO", "SVELTE", "REMIX"].includes(fw) ||
+            lang.includes("NODE") ||
+            lang.includes("JAVASCRIPT") ||
+            lang.includes("TYPESCRIPT")
+          ) {
+            matchedLabel = "Node.js / Next.js";
+          }
+
+          const matchedTpl = matchedLabel
+            ? DOCKERFILE_TEMPLATES.find((t) => t.label === matchedLabel)
+            : undefined;
+
+          if (matchedTpl && !dockerfileManuallyEdited) {
+            setInlineDockerfile(matchedTpl.content);
+            setAppPort(d.defaultPort || matchedTpl.port);
+            setDetectedBadge(`Auto-Filled ${matchedTpl.label} Dockerfile`);
+            toast.success(`No Dockerfile in repo - auto-filled ${matchedTpl.label} Dockerfile!`);
+          } else {
+            if (d.defaultPort) setAppPort(d.defaultPort);
+            setDetectedBadge("No Dockerfile - Use Inline Editor");
+            toast.info("No Dockerfile found in repository. Switched to Inline Dockerfile Editor.");
+          }
         }
       } else {
         toast.error(json.error || "Failed to inspect repository");
@@ -1234,6 +1267,7 @@ export default function NewAppPlatformPage() {
                     onChange={(e) => {
                       setGitUrl(e.target.value);
                       setBranchManuallyEdited(false);
+                      setDockerfileManuallyEdited(false);
                       setDetectedBadge(null);
                       setDetectedDetails(null);
                       setGhBranches([]);
@@ -1611,6 +1645,7 @@ export default function NewAppPlatformPage() {
                             onClick={() => {
                               setInlineDockerfile(tpl.content);
                               setAppPort(tpl.port);
+                              setDockerfileManuallyEdited(false);
                             }}
                             className={cn(
                               "px-2.5 py-1.5 sm:py-1 rounded-lg text-[11px] font-semibold border transition-colors cursor-pointer text-center truncate",
@@ -1627,7 +1662,10 @@ export default function NewAppPlatformPage() {
 
                     <MacCodeEditor
                       value={inlineDockerfile}
-                      onChange={setInlineDockerfile}
+                      onChange={(val) => {
+                        setInlineDockerfile(val);
+                        setDockerfileManuallyEdited(true);
+                      }}
                       filename="Dockerfile"
                       badge="custom-container"
                       placeholder="FROM node:22-alpine..."
