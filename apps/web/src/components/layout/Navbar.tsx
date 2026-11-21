@@ -157,6 +157,13 @@ const DEV_MENU_ITEMS: MenuItem[] = [
     badge: "New",
   },
   {
+    title: "App Platform",
+    description: "Git-to-Container PaaS with BuildKit, CI/CD webhooks & live Linux PTY.",
+    href: "/app-platform",
+    icon: Boxes,
+    badge: "New",
+  },
+  {
     title: "Managed Apps",
     description: "Production Kubernetes hosting for Hermes Agent, 9Router, n8n, OpenCode, OpenClaw & OmniRoute.",
     href: "/managed-apps",

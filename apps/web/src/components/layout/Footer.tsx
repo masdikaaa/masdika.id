@@ -116,6 +116,7 @@ export function Footer({ socialLinks }: { socialLinks?: any }) {
               <ul className="space-y-2.5">
                 {[
                   { name: 'Cloud VPS', path: '/vps' },
+                  { name: 'App Platform', path: '/app-platform' },
                   { name: 'Managed Database', path: '/managed-db' },
                   { name: 'Managed Apps', path: '/managed-apps' },
                   { name: 'App Catalog', path: '/app-catalog' },

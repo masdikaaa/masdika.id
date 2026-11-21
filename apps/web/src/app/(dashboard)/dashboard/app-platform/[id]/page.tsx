@@ -160,7 +160,6 @@ export default function AppPlatformDetailPage({
   // Web Terminal (Exec) State
   const [termCommand, setTermCommand] = useState("");
   const [termMode, setTermMode] = useState<"pty" | "exec">("pty");
-  const [ptyQuickCmd, setPtyQuickCmd] = useState<{ cmd: string; nonce: number } | null>(null);
   const [termRunning, setTermRunning] = useState(false);
   const [termHistory, setTermHistory] = useState<{ cmd: string; stdout: string; stderr: string; exitCode: number }[]>([]);
 
@@ -826,7 +825,7 @@ export default function AppPlatformDetailPage({
       {/* Navigation Tabs */}
       <div
         className={cn(
-          "rounded-2xl border p-1.5 shadow-2xs flex items-center gap-1.5 overflow-x-auto transition-colors",
+          "rounded-2xl border p-1.5 shadow-2xs flex items-center gap-1.5 overflow-x-auto transition-colors [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]",
           isDark
             ? "bg-[#111115] border-white/[0.08]"
             : "bg-white border-slate-200/90"
@@ -870,12 +869,12 @@ export default function AppPlatformDetailPage({
           {/* Primary Application Domain */}
           <div className={cn("rounded-2xl border p-5 sm:p-6 shadow-2xs space-y-4", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90")}>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center justify-between sm:justify-start gap-2">
                 <span className={cn("text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
-                  <Globe className="w-4 h-4 text-cyan-500" />
-                  Primary Application Domain
+                  <Globe className="w-4 h-4 text-cyan-500 shrink-0" />
+                  <span>Primary Application Domain</span>
                 </span>
-                <span className="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 flex items-center gap-1.5">
+                <span className="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 inline-flex items-center gap-1.5 whitespace-nowrap shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   SSL ACTIVE
                 </span>
@@ -954,13 +953,13 @@ export default function AppPlatformDetailPage({
           )}>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center justify-between sm:justify-start gap-2">
                   <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
                     <Activity className="w-4 h-4 shrink-0" />
-                    Resource Monitoring (vCPU, RAM, SSD)
+                    <span>Resource Monitoring (vCPU, RAM, SSD)</span>
                   </h3>
                   <span className={cn(
-                    "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase",
+                    "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase whitespace-nowrap shrink-0",
                     isRunning
                       ? isDark ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border border-emerald-200"
                       : isDark ? "bg-zinc-800 text-zinc-400 border border-zinc-700" : "bg-slate-100 text-slate-500 border border-slate-200"
@@ -1086,7 +1085,7 @@ export default function AppPlatformDetailPage({
             </div>
 
             {/* Chart Filter Tabs */}
-            <div className="flex items-center justify-between gap-2 mb-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
               <span className={cn("text-xs font-bold", isDark ? "text-zinc-300" : "text-slate-700")}>
                 {activeMetricTab === "ALL" && "All Resource Metrics Combined (%)"}
                 {activeMetricTab === "CPU" && `CPU Load Over Time (${app.cpuShares} vCPU Dedicated)`}
@@ -1205,7 +1204,7 @@ export default function AppPlatformDetailPage({
                       <span>Clear Old</span>
                     </button>
                   )}
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                     <input
                       type="text"
                       value={specificCommitHash}
@@ -1213,7 +1212,7 @@ export default function AppPlatformDetailPage({
                       placeholder="Commit SHA e.g. a81c2f9 (optional)"
                       title="Optional: Enter a Git commit SHA to build a specific commit instead of latest HEAD"
                       className={cn(
-                        "px-3 py-2 rounded-xl text-xs font-mono border w-56 sm:w-64 focus:outline-none focus:border-cyan-400",
+                        "px-3 py-2 rounded-xl text-xs font-mono border w-full sm:w-60 min-w-0 focus:outline-none focus:border-cyan-400",
                         isDark ? "bg-[#0a0a0c] border-white/10 text-white placeholder-zinc-500" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400"
                       )}
                     />
@@ -1221,7 +1220,7 @@ export default function AppPlatformDetailPage({
                       type="button"
                       disabled={deployingManual || app?.status === "SUSPENDED"}
                       onClick={() => handleManualDeploy(specificCommitHash)}
-                      className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all shadow-md shadow-cyan-400/20 flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shrink-0"
+                      className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 transition-all shadow-md shadow-cyan-400/20 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 shrink-0"
                     >
                       <Rocket className={cn("w-3.5 h-3.5", deployingManual && "animate-pulse")} />
                       <span>{deployingManual ? "Deploying..." : "Manual Deploy"}</span>
@@ -1696,14 +1695,14 @@ export default function AppPlatformDetailPage({
 
             <div className="flex flex-wrap items-center gap-1.5">
               <div className={cn(
-                "inline-flex rounded-lg p-0.5 border mr-1",
+                "inline-flex rounded-lg p-0.5 border",
                 isDark ? "bg-black/40 border-white/10" : "bg-slate-200/70 border-slate-300"
               )}>
                 <button
                   type="button"
                   onClick={() => setTermMode("pty")}
                   className={cn(
-                    "px-2 py-0.5 rounded-md text-[10px] font-semibold cursor-pointer transition-colors",
+                    "px-2.5 py-0.5 rounded-md text-[11px] font-semibold cursor-pointer transition-colors",
                     termMode === "pty"
                       ? "bg-cyan-400 text-slate-950"
                       : isDark ? "text-zinc-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
@@ -1715,7 +1714,7 @@ export default function AppPlatformDetailPage({
                   type="button"
                   onClick={() => setTermMode("exec")}
                   className={cn(
-                    "px-2 py-0.5 rounded-md text-[10px] font-semibold cursor-pointer transition-colors",
+                    "px-2.5 py-0.5 rounded-md text-[11px] font-semibold cursor-pointer transition-colors",
                     termMode === "exec"
                       ? "bg-cyan-400 text-slate-950"
                       : isDark ? "text-zinc-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
@@ -1724,26 +1723,6 @@ export default function AppPlatformDetailPage({
                   One-Shot
                 </button>
               </div>
-              {["ls -la", "env", "df -h", "php artisan migrate --force", "npx prisma migrate deploy"].map((preset) => (
-                <button
-                  key={preset}
-                  type="button"
-                  disabled={(termMode === "exec" && termRunning) || app?.status !== "RUNNING"}
-                  onClick={() => {
-                    if (termMode === "pty") {
-                      setPtyQuickCmd({ cmd: preset, nonce: Date.now() });
-                    } else {
-                      handleRunTerminalCmd(undefined, preset);
-                    }
-                  }}
-                  className={cn(
-                    "px-2.5 py-1 rounded-lg text-[11px] font-mono border transition-colors cursor-pointer disabled:opacity-40",
-                    isDark ? "bg-white/5 border-white/10 text-zinc-300 hover:text-cyan-400" : "bg-white border-slate-200 text-slate-700 hover:text-cyan-700 shadow-2xs"
-                  )}
-                >
-                  {preset}
-                </button>
-              ))}
               {termMode === "exec" && termHistory.length > 0 && (
                 <button
                   type="button"
@@ -1763,7 +1742,6 @@ export default function AppPlatformDetailPage({
                 subdomain={app?.subdomain || "app"}
                 isRunning={app?.status === "RUNNING"}
                 isDark={isDark}
-                quickCommand={ptyQuickCmd}
                 onSwitchToOneShot={() => setTermMode("exec")}
               />
               <div className={cn(
@@ -2158,7 +2136,7 @@ export default function AppPlatformDetailPage({
                 <span>CI/CD Automation &amp; Git Push Webhook</span>
               </h3>
               <span className={cn(
-                "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border",
+                "w-fit self-start sm:self-auto inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border whitespace-nowrap shrink-0",
                 settingsAutoDeploy && settingsDeployOnPush
                   ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
                   : "bg-zinc-500/15 text-zinc-400 border-zinc-500/30"

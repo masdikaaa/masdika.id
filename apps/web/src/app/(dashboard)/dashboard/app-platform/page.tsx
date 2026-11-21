@@ -540,8 +540,8 @@ export default function AppPlatformPage() {
                 </div>
 
                 {/* Bottom Action Footer */}
-                <div className={cn("pt-3 border-t flex items-center justify-between gap-2", isDark ? "border-white/[0.06]" : "border-slate-100")}>
-                  <div className="text-xs">
+                <div className={cn("pt-3 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-3", isDark ? "border-white/[0.06]" : "border-slate-100")}>
+                  <div className="text-xs whitespace-nowrap shrink-0">
                     <span className={cn("text-[10px] block", isDark ? "text-zinc-500" : "text-slate-500")}>
                       {app.billingMode === "MONTHLY" ? "Commitment" : "Pay-As-You-Go"}
                     </span>
@@ -553,7 +553,7 @@ export default function AppPlatformPage() {
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex flex-wrap items-center gap-1.5 sm:justify-end">
                     {/* Scale Button (Managed App Style) */}
                     <button
                       type="button"
