@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
+import { MacCodeEditor } from "@/components/ui/MacCodeEditor";
 import {
   ChevronLeft,
   ChevronRight,
@@ -1750,40 +1751,16 @@ export default function NewAppPlatformPage() {
                       ))}
                     </div>
 
-                    <div className={cn(
-                      "rounded-2xl border overflow-hidden shadow-2xs transition-colors",
-                      isDark ? "bg-[#090d16] border-white/10" : "bg-white border-slate-200"
-                    )}>
-                      <div className={cn(
-                        "px-3.5 py-2 border-b flex items-center justify-between select-none",
-                        isDark ? "bg-[#14161f] border-white/[0.08]" : "bg-slate-50/90 border-slate-200"
-                      )}>
-                        <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f56] inline-block" />
-                          <span className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e] inline-block" />
-                          <span className="w-2.5 h-2.5 rounded-full bg-[#27c93f] inline-block" />
-                          <span className={cn("text-[11px] font-mono font-bold ml-1.5", isDark ? "text-zinc-300" : "text-slate-700")}>
-                            Dockerfile
-                          </span>
-                        </div>
-                        <span className={cn("text-[10px] font-mono", isDark ? "text-zinc-500" : "text-slate-400")}>
-                          custom-container
-                        </span>
-                      </div>
-                      <textarea
-                        rows={11}
-                        value={inlineDockerfile}
-                        onChange={(e) => setInlineDockerfile(e.target.value)}
-                        placeholder="FROM node:20-alpine..."
-                        spellCheck={false}
-                        className={cn(
-                          "w-full p-3.5 text-xs font-mono leading-relaxed transition-colors focus:outline-none resize-y",
-                          isDark
-                            ? "bg-[#090d16] text-emerald-300 placeholder-zinc-600"
-                            : "bg-white text-slate-800 placeholder-slate-400"
-                        )}
-                      />
-                    </div>
+                    <MacCodeEditor
+                      value={inlineDockerfile}
+                      onChange={setInlineDockerfile}
+                      filename="Dockerfile"
+                      badge="custom-container"
+                      placeholder="FROM node:22-alpine..."
+                      rows={11}
+                      isDark={isDark}
+                      textColorClassName={isDark ? "text-emerald-300 placeholder-zinc-600" : "text-slate-800 placeholder-slate-400"}
+                    />
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
@@ -2644,17 +2621,14 @@ export default function NewAppPlatformPage() {
                 <span className="text-[11px] text-zinc-500 font-mono">Optional</span>
               </div>
 
-              <textarea
-                rows={3}
+              <MacCodeEditor
                 value={envVars}
-                onChange={(e) => setEnvVars(e.target.value)}
-                placeholder="APP_KEY=base64:...&#10;DB_CONNECTION=mysql&#10;DB_HOST=192.168.79.20"
-                className={cn(
-                  "w-full px-4 py-2.5 rounded-xl text-xs font-mono border transition-colors focus:outline-none focus:border-cyan-400 resize-y",
-                  isDark
-                    ? "bg-black/30 border-white/10 text-white placeholder-zinc-500"
-                    : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400"
-                )}
+                onChange={setEnvVars}
+                filename=".env"
+                badge="KEY=VALUE per line"
+                placeholder={"APP_KEY=base64:...\nDB_CONNECTION=mysql\nDB_HOST=192.168.79.20"}
+                rows={4}
+                isDark={isDark}
               />
             </div>
           </div>

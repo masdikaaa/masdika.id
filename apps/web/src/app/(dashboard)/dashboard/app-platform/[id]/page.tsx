@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
+import { MacCodeEditor } from "@/components/ui/MacCodeEditor";
 import {
   Globe,
   ChevronLeft,
@@ -2295,15 +2296,14 @@ export default function AppPlatformDetailPage({
               </span>
             </div>
 
-            <textarea
-              rows={6}
+            <MacCodeEditor
               value={settingsEnvVars}
-              onChange={(e) => setSettingsEnvVars(e.target.value)}
+              onChange={setSettingsEnvVars}
+              filename=".env"
+              badge="KEY=VALUE per line"
               placeholder={"APP_ENV=production\nAPP_DEBUG=false\nDATABASE_URL=mysql://user:pass@host:3306/db\nAPI_SECRET=my-secret-key"}
-              className={cn(
-                "w-full px-4 py-3 rounded-xl text-xs font-mono border transition-colors focus:outline-none focus:border-cyan-400 resize-y leading-relaxed",
-                isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white placeholder-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400"
-              )}
+              rows={6}
+              isDark={isDark}
             />
             <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>
               Variables are securely mounted into the Kubernetes Pod container environment.
