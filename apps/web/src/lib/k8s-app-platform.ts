@@ -1366,11 +1366,12 @@ sh /tmp/autodetect.sh`
             {
               name: 'git-clone',
               image: 'alpine/git:latest',
+              imagePullPolicy: 'IfNotPresent',
               command: ['sh', '-c'],
               args: [
                 commitHash && /^[a-fA-F0-9]{4,40}$/.test(commitHash.trim())
-                  ? `echo "Cloning ${gitUrl} and checking out commit ${commitHash.trim()}..." && git clone ${gitUrl} /workspace/src && cd /workspace/src && git checkout ${commitHash.trim()} && cp -rf /workspace/src/. /workspace/ && cd /workspace && rm -rf /workspace/src${smartEngineHook} && chmod -R 777 /workspace && echo "Commit ${commitHash.trim()} checked out."`
-                  : `echo "Cloning ${gitUrl} (branch: ${branch})..." && (git clone --depth=1 --branch ${branch} ${gitUrl} /workspace/src 2>/dev/null || git clone --depth=1 ${gitUrl} /workspace/src) && cp -rf /workspace/src/. /workspace/ && cd /workspace && rm -rf /workspace/src${smartEngineHook} && chmod -R 777 /workspace && echo "Clone completed."`,
+                  ? `echo "Cloning ${gitUrl} and checking out commit ${commitHash.trim()}..." && git clone ${gitUrl} /workspace/src && cd /workspace/src && git checkout ${commitHash.trim()} && cp -rf /workspace/src/. /workspace/ && cd /workspace && rm -rf /workspace/src${smartEngineHook} && chmod -R 777 /workspace && echo "Commit ${commitHash.trim()} checked out. Handing off to Kaniko..."`
+                  : `echo "Cloning ${gitUrl} (branch: ${branch})..." && (git clone --depth=1 --branch ${branch} ${gitUrl} /workspace/src 2>/dev/null || git clone --depth=1 ${gitUrl} /workspace/src) && cp -rf /workspace/src/. /workspace/ && cd /workspace && rm -rf /workspace/src${smartEngineHook} && chmod -R 777 /workspace && echo "Clone completed. Handing off to Kaniko..."`,
               ],
               volumeMounts: [
                 {
@@ -1392,6 +1393,7 @@ sh /tmp/autodetect.sh`
             {
               name: 'kaniko',
               image: 'gcr.io/kaniko-project/executor:latest',
+              imagePullPolicy: 'IfNotPresent',
               securityContext: {
                 runAsUser: 0,
                 privileged: true,
