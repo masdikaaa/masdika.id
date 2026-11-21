@@ -369,7 +369,10 @@ app.prepare().then(async () => {
       return;
     }
 
-    if (normalizedPathname === "/api/ws/app-platform/shell") {
+    if (
+      normalizedPathname === "/api/app-platform-shell" ||
+      normalizedPathname === "/api/ws/app-platform/shell"
+    ) {
       handlePodShellUpgrade(req, socket, head);
       return;
     }

@@ -75,7 +75,7 @@ export default function PodInteractiveTerminal({
     setStatusMsg(`Connecting to ${subdomain} Linux PTY...`);
 
     const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const wsUrl = `${proto}//${window.location.host}/api/ws/app-platform/shell?appId=${encodeURIComponent(String(appId))}`;
+    const wsUrl = `${proto}//${window.location.host}/api/app-platform-shell?appId=${encodeURIComponent(String(appId))}`;
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
