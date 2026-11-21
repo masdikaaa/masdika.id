@@ -1234,6 +1234,28 @@ else
 fi
 
 if [ "$NEED_AUTODETECT" = "1" ]; then
+  USE_NIXPACKS=1
+  if [ -f "$APP_DIR/artisan" ] || [ -f "$APP_DIR/wp-config.php" ] || [ -f "$APP_DIR/wp-config-sample.php" ] || [ -d "$APP_DIR/wp-includes" ] || [ -f "$APP_DIR/composer.json" ] || [ -f "$APP_DIR/index.php" ] || [ -f "$APP_DIR/public/index.php" ] || [ -f "$APP_DIR/scripts/build_neonize_spr.py" ] || [ -f "$APP_DIR/frontend/package.json" ]; then
+    USE_NIXPACKS=0
+  fi
+
+  if [ "$USE_NIXPACKS" = "1" ]; then
+    echo "[Masdika Build Engine] Running Nixpacks multi-language analyzer..."
+    if wget -qO /tmp/nixpacks.tar.gz "https://github.com/railwayapp/nixpacks/releases/download/v1.41.0/nixpacks-v1.41.0-x86_64-unknown-linux-musl.tar.gz" 2>/dev/null || curl -fsSL "https://github.com/railwayapp/nixpacks/releases/download/v1.41.0/nixpacks-v1.41.0-x86_64-unknown-linux-musl.tar.gz" -o /tmp/nixpacks.tar.gz 2>/dev/null; then
+      tar -xzf /tmp/nixpacks.tar.gz -C /tmp && chmod +x /tmp/nixpacks || true
+      if [ -x /tmp/nixpacks ] && /tmp/nixpacks build "$APP_DIR" -o "$APP_DIR" --env "PORT=${buildpackPort}" ${app.buildCommand?.trim() && !isInlineDockerfile ? `--build-cmd "${app.buildCommand.trim().replace(/"/g, '\\"')}"` : ''} ${app.startCommand?.trim() ? `--start-cmd "${app.startCommand.trim().replace(/"/g, '\\"')}"` : ''}; then
+        if [ -f "$APP_DIR/.nixpacks/Dockerfile" ]; then
+          cp "$APP_DIR/.nixpacks/Dockerfile" "$OUT_DF"
+          printf "\\nENV PORT=${buildpackPort}\\nEXPOSE ${buildpackPort}\\n" >> "$OUT_DF"
+          echo "[Masdika Build Engine] Nixpacks build plan generated successfully."
+        fi
+      else
+        echo "[Masdika Build Engine] Nixpacks did not match a plan; falling back to Masdika Smart Engine..."
+      fi
+    fi
+  fi
+
+  if [ ! -f "$OUT_DF" ]; then
   if [ -f "$APP_DIR/artisan" ]; then
     echo "[Masdika Smart Engine] Detected Stack: Laravel (PHP 8.3 Hardened)"
     cat <<'MASDIKA_DF_EOF' > "$OUT_DF"
@@ -1262,27 +1284,27 @@ ${dfTpl('NODEJS')}
 MASDIKA_DF_EOF
     fi
   elif [ -f "$APP_DIR/manage.py" ]; then
-    echo "[Masdika Smart Engine] Detected Stack: Django (Python 3.11 Zero-Apt)"
+    echo "[Masdika Smart Engine] Detected Stack: Django (Python 3.11 Full Toolchain)"
     cat <<'MASDIKA_DF_EOF' > "$OUT_DF"
 ${dfTpl('DJANGO')}
 MASDIKA_DF_EOF
   elif [ -f "$APP_DIR/requirements.txt" ] || [ -f "$APP_DIR/pyproject.toml" ] || [ -f "$APP_DIR/Pipfile" ] || [ -f "$APP_DIR/main.py" ] || [ -f "$APP_DIR/app.py" ] || [ -f "$APP_DIR/server.py" ] || ls "$APP_DIR"/*.py >/dev/null 2>&1; then
-    echo "[Masdika Smart Engine] Detected Stack: Python (3.11 Zero-Apt)"
+    echo "[Masdika Smart Engine] Detected Stack: Python (3.11 Full Toolchain)"
     cat <<'MASDIKA_DF_EOF' > "$OUT_DF"
 ${dfTpl('PYTHON')}
 MASDIKA_DF_EOF
   elif [ -f "$APP_DIR/go.mod" ] || [ -f "$APP_DIR/main.go" ] || ls "$APP_DIR"/*.go >/dev/null 2>&1; then
-    echo "[Masdika Smart Engine] Detected Stack: Go (Golang 1.22)"
+    echo "[Masdika Smart Engine] Detected Stack: Go (Golang)"
     cat <<'MASDIKA_DF_EOF' > "$OUT_DF"
 ${dfTpl('GOLANG')}
 MASDIKA_DF_EOF
   elif [ -f "$APP_DIR/Cargo.toml" ]; then
-    echo "[Masdika Smart Engine] Detected Stack: Rust (1.75)"
+    echo "[Masdika Smart Engine] Detected Stack: Rust"
     cat <<'MASDIKA_DF_EOF' > "$OUT_DF"
 ${dfTpl('RUST')}
 MASDIKA_DF_EOF
   elif [ -f "$APP_DIR/Gemfile" ] || [ -f "$APP_DIR/config.ru" ]; then
-    echo "[Masdika Smart Engine] Detected Stack: Ruby / Rails (Alpine Zero-Apt)"
+    echo "[Masdika Smart Engine] Detected Stack: Ruby / Rails"
     cat <<'MASDIKA_DF_EOF' > "$OUT_DF"
 ${dfTpl('RUBY')}
 MASDIKA_DF_EOF
@@ -1296,6 +1318,7 @@ MASDIKA_DF_EOF
     cat <<'MASDIKA_DF_EOF' > "$OUT_DF"
 ${dfTpl('STATIC')}
 MASDIKA_DF_EOF
+  fi
   fi
 fi
 MASDIKA_BP_EOF
@@ -1312,7 +1335,7 @@ sh /tmp/autodetect.sh`;
         'build.app-platform/app': app.subdomain,
         'app.kubernetes.io/managed-by': 'masdika-app-platform',
         'build.app-platform/image-tag': imageTag,
-        'build.app-platform/engine': isBuildpack ? 'buildpack-kaniko' : 'kaniko',
+        'build.app-platform/engine': isBuildpack ? 'nixpacks-buildkit' : 'buildkit',
       },
     },
     spec: {
@@ -1353,8 +1376,8 @@ sh /tmp/autodetect.sh`;
               command: ['sh', '-c'],
               args: [
                 commitHash && /^[a-fA-F0-9]{4,40}$/.test(commitHash.trim())
-                  ? `echo "Cloning ${gitUrl} and checking out commit ${commitHash.trim()}..." && git clone ${gitUrl} /workspace/src && cd /workspace/src && git checkout ${commitHash.trim()} && cp -rf /workspace/src/. /workspace/ && cd /workspace && rm -rf /workspace/src${smartEngineHook} && chmod -R 777 /workspace && echo "Commit ${commitHash.trim()} checked out. Handing off to Kaniko..."`
-                  : `echo "Cloning ${gitUrl} (branch: ${branch})..." && (git clone --depth=1 --branch ${branch} ${gitUrl} /workspace/src 2>/dev/null || git clone --depth=1 ${gitUrl} /workspace/src) && cp -rf /workspace/src/. /workspace/ && cd /workspace && rm -rf /workspace/src${smartEngineHook} && chmod -R 777 /workspace && echo "Clone completed. Handing off to Kaniko..."`,
+                  ? `echo "Cloning ${gitUrl} and checking out commit ${commitHash.trim()}..." && git clone ${gitUrl} /workspace/src && cd /workspace/src && git checkout ${commitHash.trim()} && cp -rf /workspace/src/. /workspace/ && cd /workspace && rm -rf /workspace/src${smartEngineHook} && chmod -R 777 /workspace && echo "Commit ${commitHash.trim()} checked out. Handing off to BuildKit..."`
+                  : `echo "Cloning ${gitUrl} (branch: ${branch})..." && (git clone --depth=1 --branch ${branch} ${gitUrl} /workspace/src 2>/dev/null || git clone --depth=1 ${gitUrl} /workspace/src) && cp -rf /workspace/src/. /workspace/ && cd /workspace && rm -rf /workspace/src${smartEngineHook} && chmod -R 777 /workspace && echo "Clone completed. Handing off to BuildKit..."`,
               ],
               volumeMounts: [
                 {
@@ -1366,26 +1389,34 @@ sh /tmp/autodetect.sh`;
           ],
           containers: [
             {
-              name: 'kaniko',
-              image: 'gcr.io/kaniko-project/executor:latest',
+              name: 'buildkit',
+              image: 'moby/buildkit:latest',
               imagePullPolicy: 'IfNotPresent',
               securityContext: {
                 runAsUser: 0,
                 privileged: true,
               },
+              command: ['buildctl-daemonless.sh'],
               args: [
-                `--context=dir://${workspaceAppDir}`,
-                `--dockerfile=${workspaceAppDir}/.masdika.Dockerfile`,
-                `--destination=${destinationImage}`,
-                '--insecure',
-                '--skip-tls-verify',
+                'build',
+                '--frontend',
+                'dockerfile.v0',
+                '--local',
+                `context=${workspaceAppDir}`,
+                '--local',
+                `dockerfile=${workspaceAppDir}`,
+                '--opt',
+                'filename=.masdika.Dockerfile',
+                '--output',
+                `type=image,name=${destinationImage},push=true,registry.insecure=true`,
                 ...(app.enableBuildCache !== false
                   ? [
-                      '--cache=true',
-                      `--cache-repo=127.0.0.1:5000/${app.subdomain}-cache`,
-                      '--cache-ttl=24h',
+                      '--import-cache',
+                      `type=registry,ref=127.0.0.1:5000/${app.subdomain}-cache,registry.insecure=true`,
+                      '--export-cache',
+                      `type=registry,ref=127.0.0.1:5000/${app.subdomain}-cache,mode=max,registry.insecure=true`,
                     ]
-                  : ['--cache=false']),
+                  : []),
               ],
                   volumeMounts: [
                     {
@@ -1830,7 +1861,7 @@ export async function syncAppPlatformBuildProgress(appId: number): Promise<void>
       const gitTxt = await readContainerLog('git-clone');
       if (gitTxt) parts.push(gitTxt);
 
-      for (const builderName of ['kaniko', 'buildpack']) {
+      for (const builderName of ['buildkit', 'kaniko', 'buildpack']) {
         const bTxt = await readContainerLog(builderName);
         if (bTxt) {
           parts.push(bTxt);
