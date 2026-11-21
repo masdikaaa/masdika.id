@@ -7,6 +7,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const routes = [
     { path: '', priority: 1.0, changeFrequency: 'daily' },
     { path: '/vps', priority: 0.95, changeFrequency: 'daily' },
+    { path: '/app-platform', priority: 0.95, changeFrequency: 'daily' },
     { path: '/managed-db', priority: 0.95, changeFrequency: 'daily' },
     { path: '/managed-apps', priority: 0.95, changeFrequency: 'daily' },
     { path: '/app-catalog', priority: 0.95, changeFrequency: 'daily' },

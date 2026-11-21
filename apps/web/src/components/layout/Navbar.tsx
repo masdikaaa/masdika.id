@@ -27,6 +27,7 @@ import {
   Moon,
   Database,
   Boxes,
+  AppWindow,
   HardDrive,
   Sparkles,
 } from "lucide-react";
@@ -160,7 +161,7 @@ const DEV_MENU_ITEMS: MenuItem[] = [
     title: "App Platform",
     description: "Git-to-Container PaaS with BuildKit, CI/CD webhooks & live Linux PTY.",
     href: "/app-platform",
-    icon: Boxes,
+    icon: AppWindow,
     badge: "New",
   },
   {
