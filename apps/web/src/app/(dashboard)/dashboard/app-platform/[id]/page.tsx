@@ -2,10 +2,16 @@
 
 import { useState, useEffect, useRef, use } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
 import { MacCodeEditor } from "@/components/ui/MacCodeEditor";
+
+const PodInteractiveTerminal = dynamic(
+  () => import("@/components/app-platform/PodInteractiveTerminal"),
+  { ssr: false }
+);
 import {
   Globe,
   ChevronLeft,
@@ -153,6 +159,8 @@ export default function AppPlatformDetailPage({
 
   // Web Terminal (Exec) State
   const [termCommand, setTermCommand] = useState("");
+  const [termMode, setTermMode] = useState<"pty" | "exec">("pty");
+  const [ptyQuickCmd, setPtyQuickCmd] = useState<{ cmd: string; nonce: number } | null>(null);
   const [termRunning, setTermRunning] = useState(false);
   const [termHistory, setTermHistory] = useState<{ cmd: string; stdout: string; stderr: string; exitCode: number }[]>([]);
 
@@ -1682,17 +1690,52 @@ export default function AppPlatformDetailPage({
                 isDark ? "border-white/10 text-zinc-200" : "border-slate-300 text-slate-800"
               )}>
                 <Terminal className="w-3.5 h-3.5 text-cyan-500" />
-                <span>pod-shell — sh</span>
+                <span>pod-shell - bash / sh</span>
               </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-1.5">
+              <div className={cn(
+                "inline-flex rounded-lg p-0.5 border mr-1",
+                isDark ? "bg-black/40 border-white/10" : "bg-slate-200/70 border-slate-300"
+              )}>
+                <button
+                  type="button"
+                  onClick={() => setTermMode("pty")}
+                  className={cn(
+                    "px-2 py-0.5 rounded-md text-[10px] font-semibold cursor-pointer transition-colors",
+                    termMode === "pty"
+                      ? "bg-cyan-400 text-slate-950"
+                      : isDark ? "text-zinc-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
+                  )}
+                >
+                  Live PTY
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTermMode("exec")}
+                  className={cn(
+                    "px-2 py-0.5 rounded-md text-[10px] font-semibold cursor-pointer transition-colors",
+                    termMode === "exec"
+                      ? "bg-cyan-400 text-slate-950"
+                      : isDark ? "text-zinc-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
+                  )}
+                >
+                  One-Shot
+                </button>
+              </div>
               {["ls -la", "env", "df -h", "php artisan migrate --force", "npx prisma migrate deploy"].map((preset) => (
                 <button
                   key={preset}
                   type="button"
-                  disabled={termRunning || app?.status !== "RUNNING"}
-                  onClick={() => handleRunTerminalCmd(undefined, preset)}
+                  disabled={(termMode === "exec" && termRunning) || app?.status !== "RUNNING"}
+                  onClick={() => {
+                    if (termMode === "pty") {
+                      setPtyQuickCmd({ cmd: preset, nonce: Date.now() });
+                    } else {
+                      handleRunTerminalCmd(undefined, preset);
+                    }
+                  }}
                   className={cn(
                     "px-2.5 py-1 rounded-lg text-[11px] font-mono border transition-colors cursor-pointer disabled:opacity-40",
                     isDark ? "bg-white/5 border-white/10 text-zinc-300 hover:text-cyan-400" : "bg-white border-slate-200 text-slate-700 hover:text-cyan-700 shadow-2xs"
@@ -1701,7 +1744,7 @@ export default function AppPlatformDetailPage({
                   {preset}
                 </button>
               ))}
-              {termHistory.length > 0 && (
+              {termMode === "exec" && termHistory.length > 0 && (
                 <button
                   type="button"
                   onClick={() => setTermHistory([])}
@@ -1713,59 +1756,81 @@ export default function AppPlatformDetailPage({
             </div>
           </div>
 
-          <div className={cn(
-            "p-4 sm:p-5 font-mono text-xs min-h-[340px] max-h-[500px] overflow-y-auto space-y-3 transition-colors",
-            isDark ? "bg-[#090d16] text-emerald-400" : "bg-white text-slate-800"
-          )}>
-            {app?.status !== "RUNNING" ? (
-              <div className={isDark ? "text-amber-400" : "text-amber-700 font-medium"}>
-                Container must be RUNNING to open an interactive shell session. Current status: {app?.status}.
+          {termMode === "pty" ? (
+            <>
+              <PodInteractiveTerminal
+                appId={id}
+                subdomain={app?.subdomain || "app"}
+                isRunning={app?.status === "RUNNING"}
+                isDark={isDark}
+                quickCommand={ptyQuickCmd}
+              />
+              <div className={cn(
+                "px-4 py-2 border-t text-[11px] font-mono flex flex-wrap items-center justify-between gap-2",
+                isDark ? "border-white/[0.08] bg-[#0d111a] text-zinc-400" : "border-slate-200 bg-slate-50 text-slate-600"
+              )}>
+                <span>
+                  Tip: Run <code className="text-cyan-400">env</code> to inspect mounted Kubernetes variables (they override any static <code className="text-cyan-400">.env</code> file baked in the image).
+                </span>
               </div>
-            ) : termHistory.length === 0 ? (
-              <div className={isDark ? "text-zinc-500" : "text-slate-500"}>
-                Connected to container pod ({app?.subdomain}). Run any shell command below (e.g. <code>ls -la</code>, <code>php artisan migrate</code>).
-              </div>
-            ) : (
-              termHistory.map((item, i) => (
-                <div key={i} className="space-y-1">
-                  <div className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                    $ {item.cmd}
+            </>
+          ) : (
+            <>
+              <div className={cn(
+                "p-4 sm:p-5 font-mono text-xs min-h-[340px] max-h-[500px] overflow-y-auto space-y-3 transition-colors",
+                isDark ? "bg-[#090d16] text-emerald-400" : "bg-white text-slate-800"
+              )}>
+                {app?.status !== "RUNNING" ? (
+                  <div className={isDark ? "text-amber-400" : "text-amber-700 font-medium"}>
+                    Container must be RUNNING to open an interactive shell session. Current status: {app?.status}.
                   </div>
-                  {item.stdout && (
-                    <pre className={cn("whitespace-pre-wrap break-words leading-relaxed", isDark ? "text-emerald-400" : "text-slate-800")}>{item.stdout}</pre>
-                  )}
-                  {item.stderr && (
-                    <pre className={cn("whitespace-pre-wrap break-words leading-relaxed", isDark ? "text-rose-400" : "text-rose-600")}>{item.stderr}</pre>
-                  )}
-                </div>
-              ))
-            )}
-          </div>
+                ) : termHistory.length === 0 ? (
+                  <div className={isDark ? "text-zinc-500" : "text-slate-500"}>
+                    Connected to container pod ({app?.subdomain}). Run any shell command below (e.g. <code>ls -la</code>, <code>php artisan migrate</code>).
+                  </div>
+                ) : (
+                  termHistory.map((item, i) => (
+                    <div key={i} className="space-y-1">
+                      <div className={cn("font-bold", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                        $ {item.cmd}
+                      </div>
+                      {item.stdout && (
+                        <pre className={cn("whitespace-pre-wrap break-words leading-relaxed", isDark ? "text-emerald-400" : "text-slate-800")}>{item.stdout}</pre>
+                      )}
+                      {item.stderr && (
+                        <pre className={cn("whitespace-pre-wrap break-words leading-relaxed", isDark ? "text-rose-400" : "text-rose-600")}>{item.stderr}</pre>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
 
-          <form onSubmit={(e) => handleRunTerminalCmd(e)} className={cn(
-            "p-3 border-t flex items-center gap-2 transition-colors",
-            isDark ? "border-white/[0.08] bg-[#0d111a]" : "border-slate-200 bg-slate-50/90"
-          )}>
-            <span className={cn("font-mono text-xs font-bold pl-1", isDark ? "text-cyan-400" : "text-cyan-700")}>$</span>
-            <input
-              type="text"
-              value={termCommand}
-              onChange={(e) => setTermCommand(e.target.value)}
-              disabled={termRunning || app?.status !== "RUNNING"}
-              placeholder="Enter shell command (e.g. php artisan migrate --force)..."
-              className={cn(
-                "flex-1 bg-transparent text-xs font-mono focus:outline-none",
-                isDark ? "text-white placeholder-zinc-500" : "text-slate-900 placeholder-slate-400"
-              )}
-            />
-            <button
-              type="submit"
-              disabled={termRunning || !termCommand.trim() || app?.status !== "RUNNING"}
-              className="px-4 py-1.5 rounded-lg text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 cursor-pointer disabled:opacity-40"
-            >
-              {termRunning ? "Running..." : "Run"}
-            </button>
-          </form>
+              <form onSubmit={(e) => handleRunTerminalCmd(e)} className={cn(
+                "p-3 border-t flex items-center gap-2 transition-colors",
+                isDark ? "border-white/[0.08] bg-[#0d111a]" : "border-slate-200 bg-slate-50/90"
+              )}>
+                <span className={cn("font-mono text-xs font-bold pl-1", isDark ? "text-cyan-400" : "text-cyan-700")}>$</span>
+                <input
+                  type="text"
+                  value={termCommand}
+                  onChange={(e) => setTermCommand(e.target.value)}
+                  disabled={termRunning || app?.status !== "RUNNING"}
+                  placeholder="Enter shell command (e.g. php artisan migrate --force)..."
+                  className={cn(
+                    "flex-1 bg-transparent text-xs font-mono focus:outline-none",
+                    isDark ? "text-white placeholder-zinc-500" : "text-slate-900 placeholder-slate-400"
+                  )}
+                />
+                <button
+                  type="submit"
+                  disabled={termRunning || !termCommand.trim() || app?.status !== "RUNNING"}
+                  className="px-4 py-1.5 rounded-lg text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 cursor-pointer disabled:opacity-40"
+                >
+                  {termRunning ? "Running..." : "Run"}
+                </button>
+              </form>
+            </>
+          )}
         </div>
       )}
 

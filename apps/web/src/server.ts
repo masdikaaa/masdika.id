@@ -19,6 +19,7 @@ import next from "next";
 import { WebSocketServer, WebSocket } from "ws";
 import https from "https";
 import { handleVncUpgrade } from "./lib/vnc-proxy-handler";
+import { handlePodShellUpgrade } from "./lib/pod-shell-ws";
 
 const parseCookie = (str: string) => {
   if (!str) return {};
@@ -363,12 +364,17 @@ app.prepare().then(async () => {
       }
     }
 
-    if (normalizedPathname !== "/api/ws/vnc") {
-      upgradeHandler(req, socket, head);
+    if (normalizedPathname === "/api/ws/vnc") {
+      handleVncUpgrade(req, socket, head);
       return;
     }
 
-    handleVncUpgrade(req, socket, head);
+    if (normalizedPathname === "/api/ws/app-platform/shell") {
+      handlePodShellUpgrade(req, socket, head);
+      return;
+    }
+
+    upgradeHandler(req, socket, head);
   });
 
   server.listen(port, () => {

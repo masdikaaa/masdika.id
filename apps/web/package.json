@@ -31,6 +31,8 @@
     "@types/sshpk": "^1.17.5",
     "@types/ws": "^8.18.1",
     "@videojs/react": "^10.5.0",
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/xterm": "^6.0.0",
     "clsx": "^2.1.1",
     "cookie": "^2.0.1",
     "crypto": "^1.0.1",
