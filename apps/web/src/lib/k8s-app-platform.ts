@@ -421,7 +421,8 @@ RUN if [ -f package.json ]; then \\
 FROM php:8.6-apache
 WORKDIR /var/www/html
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
-RUN docker-php-ext-install pdo pdo_mysql bcmath opcache pcntl exif
+RUN docker-php-ext-install pdo pdo_mysql bcmath pcntl exif && \\
+    (php -m | grep -qi 'opcache' || docker-php-ext-install opcache)
 COPY --from=frontend /app /var/www/html/
 RUN if [ ! -f .env ] && [ -f .env.example ]; then cp .env.example .env; fi && \\
     if [ -f .env ]; then \\
@@ -461,7 +462,8 @@ RUN if [ -f composer.json ]; then \\
 
 FROM php:8.6-apache
 WORKDIR /var/www/html
-RUN docker-php-ext-install pdo pdo_mysql mysqli opcache pcntl exif
+RUN docker-php-ext-install pdo pdo_mysql mysqli pcntl exif && \\
+    (php -m | grep -qi 'opcache' || docker-php-ext-install opcache)
 COPY --from=vendor /app /var/www/html/
 RUN chown -R root:www-data /var/www/html && \\
     chmod -R u=rwX,go=rX /var/www/html && \\
