@@ -27,6 +27,10 @@ import {
   X,
   Rocket,
   ShieldCheck,
+  Plus,
+  Trash2,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import {
   SiNodedotjs,
@@ -448,6 +452,8 @@ export default function NewAppPlatformPage() {
   const [startCommand, setStartCommand] = useState("");
   const [appPort, setAppPort] = useState(80);
   const [envVars, setEnvVars] = useState("");
+  const [envEditorMode, setEnvEditorMode] = useState<"kv" | "raw">("kv");
+  const [revealedEnvRows, setRevealedEnvRows] = useState<Record<number, boolean>>({});
   const [subdomain, setSubdomain] = useState("");
   const [mounted, setMounted] = useState(false);
   const [detectingRepo, setDetectingRepo] = useState(false);
@@ -1072,6 +1078,61 @@ export default function NewAppPlatformPage() {
         </div>
       </div>
 
+      {/* Guided 3-Step Quick Navigation Bar */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        {[
+          {
+            id: "step-source",
+            num: "1",
+            title: "Git Source & Branch",
+            desc: gitUrl.trim() ? gitUrl.replace(/^https?:\/\//, "").slice(0, 34) : "Connect GitHub/GitLab or paste URL",
+            done: Boolean(gitUrl.trim()),
+          },
+          {
+            id: "step-build",
+            num: "2",
+            title: "Dockerfile & Port",
+            desc: dockerfileSource === "REPO" ? `Repo (${dockerfilePath || "Dockerfile"}) :${appPort}` : `Inline Dockerfile :${appPort}`,
+            done: dockerfileSource === "REPO" ? Boolean(dockerfilePath.trim()) : Boolean(inlineDockerfile.trim()),
+          },
+          {
+            id: "step-deploy",
+            num: "3",
+            title: "Identity, Env & Plan",
+            desc: name.trim() ? `${name} (${selectedPlan.planCode})` : `Plan ${selectedPlan.planCode}`,
+            done: Boolean(name.trim() && subdomain.trim()),
+          },
+        ].map((step) => (
+          <a
+            key={step.id}
+            href={`#${step.id}`}
+            className={cn(
+              "rounded-xl border px-3.5 py-2.5 flex items-center gap-3 transition-all",
+              isDark
+                ? "bg-[#111115] border-white/[0.08] hover:border-cyan-500/40"
+                : "bg-white border-slate-200/90 hover:border-cyan-400 shadow-2xs"
+            )}
+          >
+            <div
+              className={cn(
+                "w-6 h-6 rounded-full text-[11px] font-bold flex items-center justify-center shrink-0",
+                step.done
+                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
+                  : "bg-cyan-500/15 text-cyan-400 border border-cyan-500/30"
+              )}
+            >
+              {step.done ? <Check className="w-3.5 h-3.5" /> : step.num}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className={cn("text-xs font-bold truncate", isDark ? "text-white" : "text-slate-900")}>
+                {step.title}
+              </div>
+              <div className="text-[11px] text-zinc-500 truncate font-mono">{step.desc}</div>
+            </div>
+          </a>
+        ))}
+      </div>
+
       {/* 2-Column Layout */}
       <form
         onSubmit={handleSubmit}
@@ -1081,8 +1142,9 @@ export default function NewAppPlatformPage() {
         <div className="lg:col-span-2 space-y-6">
           {/* Section 1: Git Repository & Starters */}
           <div
+            id="step-source"
             className={cn(
-              "rounded-2xl border p-5 sm:p-6 shadow-2xs space-y-4",
+              "scroll-mt-24 rounded-2xl border p-5 sm:p-6 shadow-2xs space-y-4",
               isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90"
             )}
           >
@@ -1515,8 +1577,9 @@ export default function NewAppPlatformPage() {
 
           {/* Section 2: Build Configuration (Dockerfile / Auto Detect / Buildpack) */}
           <div
+            id="step-build"
             className={cn(
-              "rounded-2xl border p-5 sm:p-6 shadow-2xs space-y-4",
+              "scroll-mt-24 rounded-2xl border p-5 sm:p-6 shadow-2xs space-y-4",
               isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90"
             )}
           >
@@ -1638,27 +1701,35 @@ export default function NewAppPlatformPage() {
                         Quick Templates:
                       </span>
                       <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-1.5">
-                        {DOCKERFILE_TEMPLATES.map((tpl) => (
-                          <button
-                            key={tpl.label}
-                            type="button"
-                            onClick={() => {
-                              setInlineDockerfile(tpl.content);
-                              setAppPort(tpl.port);
-                              setDockerfileManuallyEdited(false);
-                            }}
-                            className={cn(
-                              "px-2.5 py-1.5 sm:py-1 rounded-lg text-[11px] font-semibold border transition-colors cursor-pointer text-center truncate",
-                              isDark
-                                ? "bg-white/5 border-white/10 text-zinc-300 hover:bg-cyan-500/15 hover:border-cyan-500/30 hover:text-cyan-400"
-                                : "bg-white border-slate-200 text-slate-700 hover:bg-slate-100"
-                            )}
-                          >
-                            {tpl.label}
-                          </button>
-                        ))}
+                        {DOCKERFILE_TEMPLATES.map((tpl) => {
+                          const isSelectedTpl = inlineDockerfile.trim() === tpl.content.trim();
+                          return (
+                            <button
+                              key={tpl.label}
+                              type="button"
+                              onClick={() => {
+                                setInlineDockerfile(tpl.content);
+                                setAppPort(tpl.port);
+                                setDockerfileManuallyEdited(false);
+                              }}
+                              className={cn(
+                                "px-2.5 py-1.5 sm:py-1 rounded-lg text-[11px] font-semibold border transition-colors cursor-pointer text-center truncate",
+                                isSelectedTpl
+                                  ? "bg-cyan-500/20 border-cyan-500/50 text-cyan-400"
+                                  : isDark
+                                  ? "bg-white/5 border-white/10 text-zinc-300 hover:bg-cyan-500/15 hover:border-cyan-500/30 hover:text-cyan-400"
+                                  : "bg-white border-slate-200 text-slate-700 hover:bg-slate-100"
+                              )}
+                            >
+                              {tpl.label}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
+                    <p className="text-[11px] text-zinc-500">
+                      Tip: BuildKit builds this Dockerfile directly. Make sure <code className="text-cyan-400 font-mono">COPY . .</code> runs before any build command (e.g. <code className="text-cyan-400 font-mono">npm run build</code>).
+                    </p>
 
                     <MacCodeEditor
                       value={inlineDockerfile}
@@ -1988,9 +2059,11 @@ export default function NewAppPlatformPage() {
           </div>
 
           {/* Section 4: App Identity & Configuration */}
+          {/* Section 3: App Identity & Environment Variables */}
           <div
+            id="step-deploy"
             className={cn(
-              "rounded-2xl border p-5 sm:p-6 shadow-2xs space-y-4",
+              "scroll-mt-24 rounded-2xl border p-5 sm:p-6 shadow-2xs space-y-4",
               isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90"
             )}
           >
@@ -2002,7 +2075,7 @@ export default function NewAppPlatformPage() {
                   isDark ? "text-white" : "text-slate-900"
                 )}
               >
-                4. App Identity &amp; Auto Subdomain
+                3. App Identity &amp; Environment Variables
               </h2>
             </div>
 
@@ -2104,25 +2177,167 @@ export default function NewAppPlatformPage() {
               </div>
             </div>
 
-            {/* Environment Variables */}
-            <div className="pt-2 border-t border-white/[0.06] space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
-                  <Terminal className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Environment Variables</span>
-                </label>
-                <span className="text-[11px] text-zinc-500 font-mono">Optional</span>
+            {/* Environment Variables (Key-Value Builder + Raw .env Paste) */}
+            <div className="pt-3 border-t border-white/[0.06] space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                    <Terminal className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>Environment Variables</span>
+                  </label>
+                  <p className="text-[11px] text-zinc-500 mt-0.5">
+                    Mounted into Kubernetes Pod OS env at runtime (overrides any static <code className="font-mono text-cyan-400">.env</code> baked in the image).
+                  </p>
+                </div>
+
+                <div className={cn(
+                  "inline-flex p-0.5 rounded-lg border self-start sm:self-auto shrink-0",
+                  isDark ? "bg-black/40 border-white/10" : "bg-slate-100 border-slate-200"
+                )}>
+                  <button
+                    type="button"
+                    onClick={() => setEnvEditorMode("kv")}
+                    className={cn(
+                      "px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors cursor-pointer",
+                      envEditorMode === "kv"
+                        ? "bg-cyan-400 text-slate-950 font-bold"
+                        : isDark ? "text-zinc-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
+                    )}
+                  >
+                    Key-Value
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEnvEditorMode("raw")}
+                    className={cn(
+                      "px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors cursor-pointer",
+                      envEditorMode === "raw"
+                        ? "bg-cyan-400 text-slate-950 font-bold"
+                        : isDark ? "text-zinc-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
+                    )}
+                  >
+                    Raw .env
+                  </button>
+                </div>
               </div>
 
-              <MacCodeEditor
-                value={envVars}
-                onChange={setEnvVars}
-                filename=".env"
-                badge="KEY=VALUE per line"
-                placeholder={"APP_KEY=base64:...\nDB_CONNECTION=mysql\nDB_HOST=192.168.79.20"}
-                rows={4}
-                isDark={isDark}
-              />
+              {envEditorMode === "kv" ? (() => {
+                const parsedRows = envVars
+                  .split(/\r?\n/)
+                  .filter((line) => line.trim() && !line.trim().startsWith("#"))
+                  .map((line) => {
+                    const eqIdx = line.indexOf("=");
+                    if (eqIdx === -1) return { key: line.trim(), value: "" };
+                    return {
+                      key: line.slice(0, eqIdx).trim(),
+                      value: line.slice(eqIdx + 1),
+                    };
+                  });
+                const rowsToRender = parsedRows.length > 0 ? parsedRows : [{ key: "", value: "" }];
+
+                const commitRows = (nextRows: { key: string; value: string }[]) => {
+                  const serialized = nextRows
+                    .filter((r) => r.key.trim() !== "" || r.value !== "")
+                    .map((r) => `${r.key.trim()}=${r.value}`)
+                    .join("\n");
+                  setEnvVars(serialized);
+                };
+
+                return (
+                  <div className="space-y-2">
+                    {rowsToRender.map((row, idx) => {
+                      const isRevealed = Boolean(revealedEnvRows[idx]);
+                      return (
+                        <div key={idx} className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
+                          <input
+                            type="text"
+                            value={row.key}
+                            onChange={(e) => {
+                              const next = [...rowsToRender];
+                              next[idx] = { ...next[idx], key: e.target.value.replace(/\s+/g, "_") };
+                              commitRows(next);
+                            }}
+                            placeholder="APP_ENV"
+                            className={cn(
+                              "sm:col-span-5 px-3 py-2 rounded-xl border text-xs font-mono focus:outline-none focus:border-cyan-400",
+                              isDark ? "bg-black/30 border-white/10 text-cyan-300 placeholder-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900"
+                            )}
+                          />
+                          <div className="sm:col-span-6 relative flex items-center">
+                            <input
+                              type={isRevealed ? "text" : "password"}
+                              autoComplete="off"
+                              value={row.value}
+                              onChange={(e) => {
+                                const next = [...rowsToRender];
+                                next[idx] = { ...next[idx], value: e.target.value };
+                                commitRows(next);
+                              }}
+                              placeholder="value"
+                              className={cn(
+                                "w-full pl-3 pr-9 py-2 rounded-xl border text-xs font-mono focus:outline-none focus:border-cyan-400",
+                                isDark ? "bg-black/30 border-white/10 text-white placeholder-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900"
+                              )}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setRevealedEnvRows((prev) => ({ ...prev, [idx]: !prev[idx] }))}
+                              className="absolute right-2.5 text-zinc-500 hover:text-zinc-300 cursor-pointer"
+                              title={isRevealed ? "Hide value" : "Show value"}
+                            >
+                              {isRevealed ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                            </button>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const next = rowsToRender.filter((_, rIdx) => rIdx !== idx);
+                              commitRows(next);
+                            }}
+                            className={cn(
+                              "sm:col-span-1 p-2 rounded-xl border flex items-center justify-center cursor-pointer transition-colors",
+                              isDark ? "border-white/10 text-zinc-400 hover:text-rose-400 hover:border-rose-500/30" : "border-slate-200 text-slate-500 hover:text-rose-600"
+                            )}
+                            title="Remove variable"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      );
+                    })}
+
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const base = parsedRows.length > 0 ? parsedRows : [];
+                          setEnvVars([...base.map((r) => `${r.key}=${r.value}`), "NEW_KEY="].join("\n"));
+                        }}
+                        className={cn(
+                          "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border cursor-pointer transition-colors",
+                          isDark ? "bg-white/5 border-white/10 text-cyan-400 hover:bg-cyan-500/10" : "bg-slate-100 border-slate-200 text-cyan-700 hover:bg-cyan-50"
+                        )}
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add Variable</span>
+                      </button>
+                      <span className="text-[11px] text-zinc-500">
+                        Tip: Switch to <strong>Raw .env</strong> to paste a full <code className="font-mono">.env</code> file at once.
+                      </span>
+                    </div>
+                  </div>
+                );
+              })() : (
+                <MacCodeEditor
+                  value={envVars}
+                  onChange={setEnvVars}
+                  filename=".env"
+                  badge="KEY=VALUE per line"
+                  placeholder={"APP_KEY=base64:...\nDB_CONNECTION=mysql\nDB_HOST=192.168.79.20"}
+                  rows={5}
+                  isDark={isDark}
+                />
+              )}
             </div>
           </div>
         </div>
