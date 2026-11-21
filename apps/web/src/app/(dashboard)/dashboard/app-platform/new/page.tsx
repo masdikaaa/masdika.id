@@ -1078,61 +1078,6 @@ export default function NewAppPlatformPage() {
         </div>
       </div>
 
-      {/* Guided 3-Step Quick Navigation Bar */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-        {[
-          {
-            id: "step-source",
-            num: "1",
-            title: "Git Source & Branch",
-            desc: gitUrl.trim() ? gitUrl.replace(/^https?:\/\//, "").slice(0, 34) : "Connect GitHub/GitLab or paste URL",
-            done: Boolean(gitUrl.trim()),
-          },
-          {
-            id: "step-build",
-            num: "2",
-            title: "Dockerfile & Port",
-            desc: dockerfileSource === "REPO" ? `Repo (${dockerfilePath || "Dockerfile"}) :${appPort}` : `Inline Dockerfile :${appPort}`,
-            done: dockerfileSource === "REPO" ? Boolean(dockerfilePath.trim()) : Boolean(inlineDockerfile.trim()),
-          },
-          {
-            id: "step-deploy",
-            num: "3",
-            title: "Identity, Env & Plan",
-            desc: name.trim() ? `${name} (${selectedPlan.planCode})` : `Plan ${selectedPlan.planCode}`,
-            done: Boolean(name.trim() && subdomain.trim()),
-          },
-        ].map((step) => (
-          <a
-            key={step.id}
-            href={`#${step.id}`}
-            className={cn(
-              "rounded-xl border px-3.5 py-2.5 flex items-center gap-3 transition-all",
-              isDark
-                ? "bg-[#111115] border-white/[0.08] hover:border-cyan-500/40"
-                : "bg-white border-slate-200/90 hover:border-cyan-400 shadow-2xs"
-            )}
-          >
-            <div
-              className={cn(
-                "w-6 h-6 rounded-full text-[11px] font-bold flex items-center justify-center shrink-0",
-                step.done
-                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
-                  : "bg-cyan-500/15 text-cyan-400 border border-cyan-500/30"
-              )}
-            >
-              {step.done ? <Check className="w-3.5 h-3.5" /> : step.num}
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className={cn("text-xs font-bold truncate", isDark ? "text-white" : "text-slate-900")}>
-                {step.title}
-              </div>
-              <div className="text-[11px] text-zinc-500 truncate font-mono">{step.desc}</div>
-            </div>
-          </a>
-        ))}
-      </div>
-
       {/* 2-Column Layout */}
       <form
         onSubmit={handleSubmit}

@@ -189,6 +189,7 @@ export default function AppPlatformDetailPage({
   const [settingsBuildType, setSettingsBuildType] = useState("DOCKERFILE");
   const [settingsDockerfilePath, setSettingsDockerfilePath] = useState("Dockerfile");
   const [settingsAppPort, setSettingsAppPort] = useState(3000);
+  const [settingsDockerfileSource, setSettingsDockerfileSource] = useState<"REPO" | "INLINE">("REPO");
   const [settingsBuildCmd, setSettingsBuildCmd] = useState("");
   const [settingsStartCmd, setSettingsStartCmd] = useState("");
   const [settingsEnvVars, setSettingsEnvVars] = useState("");
@@ -242,6 +243,13 @@ export default function AppPlatformDetailPage({
         setSettingsDockerfilePath(json.data.dockerfilePath || "Dockerfile");
         setSettingsAppPort(json.data.appPort || 3000);
         setSettingsBuildCmd(json.data.buildCommand || "");
+        const rawBuildCmd = json.data.buildCommand || "";
+        const isInlineDf = Boolean(
+          rawBuildCmd &&
+          (/^\s*FROM\s+/im.test(rawBuildCmd) || rawBuildCmd.includes("# Dockerfile"))
+        );
+        setSettingsDockerfileSource(isInlineDf ? "INLINE" : "REPO");
+        setSettingsBuildCmd(rawBuildCmd);
         setSettingsStartCmd(json.data.startCommand || "");
         setSettingsEnvVars(json.data.envVars || "");
         setSettingsCustomDomain(json.data.customDomain || "");
@@ -557,14 +565,14 @@ export default function AppPlatformDetailPage({
         body: JSON.stringify({
           gitUrl: settingsGitUrl.trim(),
           branch: settingsBranch.trim(),
-          buildType: settingsBuildType,
-          buildMode: settingsBuildMode,
+          buildType: "DOCKERFILE",
+          buildMode: "DOCKERFILE",
           autoDeploy: settingsAutoDeploy,
           deployOnPush: settingsDeployOnPush,
-          dockerfilePath: settingsDockerfilePath.trim() || "Dockerfile",
+          dockerfilePath: settingsDockerfileSource === "REPO" ? (settingsDockerfilePath.trim() || "Dockerfile") : "Dockerfile",
           appPort: Number(settingsAppPort) || 3000,
-          buildCommand: settingsBuildCmd.trim() || null,
-          startCommand: settingsStartCmd.trim() || null,
+          buildCommand: settingsDockerfileSource === "INLINE" ? (settingsBuildCmd.trim() || null) : null,
+          startCommand: null,
           envVars: settingsEnvVars.trim() || null,
           customDomain: settingsCustomDomain.trim() || null,
           healthCheckPath: settingsHealthCheckPath.trim() || null,
@@ -1826,58 +1834,44 @@ export default function AppPlatformDetailPage({
                 <Settings className="w-4 h-4 shrink-0" />
                 <span>Build Strategy &amp; Source Repository</span>
               </h3>
-              <span className={cn(
-                "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold self-start sm:self-auto shrink-0 border",
-                settingsBuildType === "DOCKERFILE"
-                  ? isDark ? "bg-blue-500/15 text-blue-400 border-blue-500/25" : "bg-blue-50 text-blue-700 border-blue-200"
-                  : isDark ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/25" : "bg-cyan-50 text-cyan-700 border-cyan-200"
-              )}>
-                <span>{settingsBuildType === "DOCKERFILE" ? "Native Dockerfile" : `Auto Framework (${settingsBuildType})`}</span>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold self-start sm:self-auto shrink-0 border bg-[#2496ED]/15 text-[#2496ED] border-[#2496ED]/30">
+                <SiDocker className="w-3.5 h-3.5" />
+                <span>Dockerfile (BuildKit)</span>
               </span>
             </div>
 
-            {/* Build Mode Selector Toggle */}
-            <div>
-              <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-2", isDark ? "text-zinc-400" : "text-slate-600")}>
-                Build Mode
-              </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Dockerfile Source Toggle */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-600")}>
+                Dockerfile Source
+              </span>
+              <div className={cn(
+                "grid grid-cols-2 sm:inline-flex items-center gap-1 p-1 rounded-xl border w-full sm:w-auto",
+                isDark ? "border-white/10 bg-[#0a0a0c]" : "border-slate-200 bg-slate-50"
+              )}>
                 <button
                   type="button"
-                  onClick={() => setSettingsBuildType(settingsBuildType === "DOCKERFILE" ? (app?.buildType && app.buildType !== "DOCKERFILE" ? app.buildType : "LARAVEL") : settingsBuildType)}
+                  onClick={() => setSettingsDockerfileSource("REPO")}
                   className={cn(
-                    "p-3.5 rounded-xl border text-left transition-all cursor-pointer flex items-start gap-3",
-                    settingsBuildType !== "DOCKERFILE"
-                      ? "border-cyan-500 bg-cyan-500/10 ring-1 ring-cyan-500/30"
-                      : isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/20" : "bg-slate-50 border-slate-200 hover:border-slate-300"
+                    "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer text-center whitespace-nowrap",
+                    settingsDockerfileSource === "REPO"
+                      ? "bg-cyan-500 text-slate-950 font-bold shadow-xs"
+                      : isDark ? "text-zinc-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
                   )}
                 >
-                  <Code2 className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-                  <div>
-                    <div className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>Automated Framework Engine</div>
-                    <div className={cn("text-[11px] mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
-                      Masdika Cloud automatically provisions Dockerfile and dependencies for your stack.
-                    </div>
-                  </div>
+                  From Git Repo
                 </button>
-
                 <button
                   type="button"
-                  onClick={() => setSettingsBuildType("DOCKERFILE")}
+                  onClick={() => setSettingsDockerfileSource("INLINE")}
                   className={cn(
-                    "p-3.5 rounded-xl border text-left transition-all cursor-pointer flex items-start gap-3",
-                    settingsBuildType === "DOCKERFILE"
-                      ? "border-cyan-500 bg-cyan-500/10 ring-1 ring-cyan-500/30"
-                      : isDark ? "bg-[#0a0a0c] border-white/[0.08] hover:border-white/20" : "bg-slate-50 border-slate-200 hover:border-slate-300"
+                    "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer text-center whitespace-nowrap",
+                    settingsDockerfileSource === "INLINE"
+                      ? "bg-cyan-500 text-slate-950 font-bold shadow-xs"
+                      : isDark ? "text-zinc-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
                   )}
                 >
-                  <SiDocker className="w-4 h-4 text-[#2496ED] shrink-0 mt-0.5" />
-                  <div>
-                    <div className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>Native Custom Dockerfile</div>
-                    <div className={cn("text-[11px] mt-0.5", isDark ? "text-zinc-400" : "text-slate-500")}>
-                      Kaniko directly builds from your repository&apos;s Dockerfile. Zero automatic overrides.
-                    </div>
-                  </div>
+                  Write / Edit Inline
                 </button>
               </div>
             </div>
@@ -1919,8 +1913,8 @@ export default function AppPlatformDetailPage({
               </div>
             </div>
 
-            {/* Framework or Dockerfile Fields */}
-            {settingsBuildType === "DOCKERFILE" ? (
+            {/* Dockerfile Repo Path or Inline Editor + Port */}
+            {settingsDockerfileSource === "REPO" ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                 <div>
                   <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
@@ -1966,75 +1960,33 @@ export default function AppPlatformDetailPage({
               </div>
             ) : (
               <div className="space-y-3 pt-1">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div>
-                    <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
-                      Framework Preset
-                    </label>
-                    <Select
-                      value={settingsBuildType}
-                      onChange={(val) => {
-                        const v = String(val);
-                        setSettingsBuildType(v);
-                        if (["PHP", "LARAVEL", "WORDPRESS", "STATIC", "VITE"].includes(v)) setSettingsAppPort(80);
-                        else if (["GOLANG", "RUST"].includes(v)) setSettingsAppPort(8080);
-                        else if (["FASTAPI", "DJANGO"].includes(v)) setSettingsAppPort(8000);
-                        else setSettingsAppPort(3000);
-                      }}
-                      className="h-[42px] px-3.5 py-0 text-xs font-bold"
-                      options={[
-                        { value: "LARAVEL", label: "Laravel (PHP 8.3)" },
-                        { value: "NEXTJS", label: "Next.js (App Router)" },
-                        { value: "NODEJS", label: "Node.js / Express" },
-                        { value: "FASTAPI", label: "FastAPI (Python)" },
-                        { value: "DJANGO", label: "Django (Python)" },
-                        { value: "PYTHON", label: "Python (General)" },
-                        { value: "GOLANG", label: "Go (Golang)" },
-                        { value: "PHP", label: "PHP (Native Apache)" },
-                        { value: "NESTJS", label: "NestJS" },
-                        { value: "VITE", label: "Vite (React / Vue SPA)" },
-                        { value: "ASTRO", label: "Astro" },
-                        { value: "SVELTE", label: "Svelte / SvelteKit" },
-                        { value: "REMIX", label: "Remix" },
-                        { value: "WORDPRESS", label: "WordPress" },
-                        { value: "RUST", label: "Rust" },
-                        { value: "RUBY", label: "Ruby on Rails" },
-                        { value: "STATIC", label: "Static HTML" },
-                      ]}
-                    />
-                  </div>
-
-                  <div>
-                    <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
-                      Build Command (Optional)
-                    </label>
-                    <input
-                      type="text"
-                      value={settingsBuildCmd}
-                      onChange={(e) => setSettingsBuildCmd(e.target.value)}
-                      placeholder={settingsBuildType === "LARAVEL" || settingsBuildType === "PHP" ? "composer install" : settingsBuildType === "FASTAPI" ? "pip install -r requirements.txt" : "npm run build"}
-                      className={cn(
-                        "w-full h-[42px] px-3.5 rounded-xl text-xs font-mono border transition-colors focus:outline-none focus:border-cyan-400",
-                        isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
-                      )}
-                    />
-                  </div>
-
-                  <div>
-                    <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
-                      Start Command (Optional)
-                    </label>
-                    <input
-                      type="text"
-                      value={settingsStartCmd}
-                      onChange={(e) => setSettingsStartCmd(e.target.value)}
-                      placeholder={settingsBuildType === "FASTAPI" ? "uvicorn main:app --port 8000" : settingsBuildType === "LARAVEL" || settingsBuildType === "PHP" ? "apache2-foreground" : "npm start"}
-                      className={cn(
-                        "w-full h-[42px] px-3.5 rounded-xl text-xs font-mono border transition-colors focus:outline-none focus:border-cyan-400",
-                        isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
-                      )}
-                    />
-                  </div>
+                <MacCodeEditor
+                  value={settingsBuildCmd}
+                  onChange={setSettingsBuildCmd}
+                  filename="Dockerfile"
+                  badge="BuildKit"
+                  placeholder={"FROM node:20-alpine\nWORKDIR /app\nCOPY . .\nRUN npm ci && npm run build\nEXPOSE 3000\nCMD [\"npm\", \"start\"]"}
+                  rows={10}
+                  isDark={isDark}
+                  textColorClassName={isDark ? "text-emerald-300 placeholder-zinc-600" : "text-slate-800 placeholder-slate-400"}
+                />
+                <div className="sm:w-1/2">
+                  <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
+                    Container Exposed Port
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min={1}
+                    max={65535}
+                    value={settingsAppPort}
+                    onChange={(e) => setSettingsAppPort(parseInt(e.target.value, 10) || 3000)}
+                    placeholder="3000"
+                    className={cn(
+                      "w-full px-3.5 py-2.5 rounded-xl text-xs font-mono border transition-colors focus:outline-none focus:border-cyan-400",
+                      isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+                    )}
+                  />
                 </div>
               </div>
             )}

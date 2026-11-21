@@ -816,8 +816,8 @@ export async function triggerAppPlatformBuild(
   const workspaceAppDir = cleanRootDir ? `/workspace/${cleanRootDir}` : '/workspace';
 
   const dockerfilePrepHook = isInlineDockerfile
-    ? ` && mkdir -p "${workspaceAppDir}" && printf '%s' "$MASDIKA_PRESET_DF_B64" | base64 -d > "${workspaceAppDir}/.masdika.Dockerfile" && echo "[Masdika BuildKit] Using Inline Dockerfile."`
-    : ` && cd "${workspaceAppDir}" && DF_SRC="${workspaceAppDir}/$MASDIKA_DOCKERFILE_PATH" && if [ ! -f "$DF_SRC" ]; then echo "ERROR: Dockerfile not found at '$MASDIKA_DOCKERFILE_PATH'. Please add a Dockerfile to your repository or use the Inline Dockerfile editor."; exit 1; fi && cp "$DF_SRC" "${workspaceAppDir}/.masdika.Dockerfile" && echo "[Masdika BuildKit] Using repository Dockerfile: $MASDIKA_DOCKERFILE_PATH"`;
+    ? ` && mkdir -p /workspace/.masdika-df && printf '%s' "$MASDIKA_PRESET_DF_B64" | base64 -d > /workspace/.masdika-df/Dockerfile && echo "[Masdika BuildKit] Using Inline Dockerfile."`
+    : ` && cd "${workspaceAppDir}" && DF_SRC="${workspaceAppDir}/$MASDIKA_DOCKERFILE_PATH" && if [ ! -f "$DF_SRC" ]; then echo "ERROR: Dockerfile not found at '$MASDIKA_DOCKERFILE_PATH'. Please add a Dockerfile to your repository or use the Inline Dockerfile editor."; exit 1; fi && mkdir -p /workspace/.masdika-df && cp "$DF_SRC" /workspace/.masdika-df/Dockerfile && echo "[Masdika BuildKit] Using repository Dockerfile: $MASDIKA_DOCKERFILE_PATH"`;
 
   // Job Specification: BuildKit Builder (Dockerfile-only)
   const jobManifest: k8s.V1Job = {
@@ -896,9 +896,9 @@ export async function triggerAppPlatformBuild(
                 '--local',
                 `context=${workspaceAppDir}`,
                 '--local',
-                `dockerfile=${workspaceAppDir}`,
+                'dockerfile=/workspace/.masdika-df',
                 '--opt',
-                'filename=.masdika.Dockerfile',
+                'filename=Dockerfile',
                 '--output',
                 `type=image,name=${destinationImage},push=true,registry.insecure=true`,
                 ...(app.enableBuildCache !== false
