@@ -603,37 +603,81 @@ export async function applyKubernetesManifests(kc: k8s.KubeConfig, manifestYaml:
       return res?.body ?? res ?? null;
     };
 
-    const applyUpdate = async (existing: any) => {
-      if (existing?.metadata?.resourceVersion) {
-        spec.metadata!.resourceVersion = existing.metadata.resourceVersion;
-      }
-      if (spec.kind === 'Service' && (spec as any).spec) {
-        if (existing?.spec?.clusterIP) {
-          (spec as any).spec.clusterIP = existing.spec.clusterIP;
+    const isConflictError = (err: any): boolean => {
+      const status = err?.statusCode || err?.code || err?.response?.statusCode || err?.body?.code;
+      if (Number(status) === 409) return true;
+      const msg = String(err?.body?.message || err?.message || '');
+      return msg.includes('409') || msg.includes('the object has been modified');
+    };
+
+    const applyUpdate = async (initialExisting: any) => {
+      let currentExisting = initialExisting;
+      const maxAttempts = 5;
+
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        if (currentExisting?.metadata?.resourceVersion) {
+          spec.metadata!.resourceVersion = currentExisting.metadata.resourceVersion;
+        } else {
+          delete spec.metadata!.resourceVersion;
         }
-        if (Array.isArray(existing?.spec?.clusterIPs)) {
-          (spec as any).spec.clusterIPs = existing.spec.clusterIPs;
+
+        if (spec.kind === 'Service' && (spec as any).spec) {
+          if (currentExisting?.spec?.clusterIP) {
+            (spec as any).spec.clusterIP = currentExisting.spec.clusterIP;
+          }
+          if (Array.isArray(currentExisting?.spec?.clusterIPs)) {
+            (spec as any).spec.clusterIPs = currentExisting.spec.clusterIPs;
+          }
         }
-      }
-      try {
-        await objApi.replace(spec);
-      } catch (replaceErr) {
+
         try {
-          await objApi.patch(spec);
-        } catch {
-          if (spec.kind === 'Service') {
-            const targetPort = (spec as any).spec?.ports?.[0];
-            const curPort = existing?.spec?.ports?.[0];
-            if (
-              targetPort &&
-              curPort &&
-              curPort.port === targetPort.port &&
-              curPort.nodePort === targetPort.nodePort
-            ) {
-              return;
+          await objApi.replace(spec);
+          return;
+        } catch (replaceErr: any) {
+          if (isConflictError(replaceErr) && attempt < maxAttempts) {
+            await new Promise((r) => setTimeout(r, 150 * attempt));
+            const refreshed = await readExisting();
+            if (refreshed) {
+              currentExisting = refreshed;
+              continue;
             }
           }
-          throw replaceErr;
+
+          // Strip resourceVersion before patch so Kubernetes does not reject on stale optimistic lock
+          const patchSpec: k8s.KubernetesObject = {
+            ...spec,
+            metadata: {
+              ...spec.metadata,
+            },
+          };
+          delete patchSpec.metadata!.resourceVersion;
+
+          try {
+            await objApi.patch(patchSpec);
+            return;
+          } catch (patchErr: any) {
+            if (isConflictError(patchErr) && attempt < maxAttempts) {
+              await new Promise((r) => setTimeout(r, 150 * attempt));
+              const refreshed = await readExisting();
+              if (refreshed) {
+                currentExisting = refreshed;
+                continue;
+              }
+            }
+            if (spec.kind === 'Service') {
+              const targetPort = (spec as any).spec?.ports?.[0];
+              const curPort = currentExisting?.spec?.ports?.[0];
+              if (
+                targetPort &&
+                curPort &&
+                curPort.port === targetPort.port &&
+                curPort.nodePort === targetPort.nodePort
+              ) {
+                return;
+              }
+            }
+            throw replaceErr;
+          }
         }
       }
     };
