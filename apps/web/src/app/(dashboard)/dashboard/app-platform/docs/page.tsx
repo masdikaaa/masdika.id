@@ -54,11 +54,6 @@ export default function AppPlatformDocsPage() {
     isDark ? "bg-black/30 border-white/[0.06]" : "bg-slate-50 border-slate-200"
   );
 
-  const codeBlockClass = cn(
-    "rounded-xl border p-3.5 font-mono text-xs overflow-x-auto leading-relaxed",
-    isDark ? "bg-[#090d16] border-white/10 text-zinc-200" : "bg-slate-900 border-slate-800 text-slate-100"
-  );
-
   return (
     <div className="space-y-6 max-w-full pb-16">
       {/* Back Navigation */}
@@ -266,16 +261,59 @@ export default function AppPlatformDocsPage() {
             <p className={cn("text-xs sm:text-sm leading-relaxed", isDark ? "text-zinc-300" : "text-slate-600")}>
               Set an optional command to run inside an isolated Kubernetes Job using your newly built/pulled image and environment variables <strong>before</strong> traffic switches to the new Pod. If the command exits with a non-zero code, the rollout is <strong>automatically aborted</strong> and your previous healthy Pod stays online.
             </p>
-            <pre className={codeBlockClass}>
-{`# Laravel
+            <div className={cn(
+              "rounded-xl border overflow-hidden",
+              isDark ? "border-white/10 bg-[#090d16]" : "border-slate-800 bg-[#0f172a]"
+            )}>
+              <div className="px-4 py-2.5 border-b border-white/[0.08] bg-[#0d111a] flex items-center justify-between gap-2">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#27c93f]" />
+                  </div>
+                  <div className="flex items-center gap-1.5 pl-2 border-l border-white/10 font-mono text-[11px] font-semibold text-zinc-300">
+                    <Terminal className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>pre-deploy-examples.sh</span>
+                  </div>
+                </div>
+                <span className="text-[10px] font-mono text-zinc-400">Any Language / Container</span>
+              </div>
+              <pre className="p-4 font-mono text-xs overflow-x-auto leading-relaxed text-zinc-200">
+{`# PHP / Laravel
 php artisan migrate --force
 
-# Prisma (Node.js / Next.js)
+# PHP / Symfony
+php bin/console doctrine:migrations:migrate --no-interaction
+
+# Node.js / Next.js / NestJS (Prisma)
 npx prisma migrate deploy
 
-# Django / Python
-python manage.py migrate --noinput`}
-            </pre>
+# Node.js (Drizzle / TypeORM)
+npx drizzle-kit push
+npx typeorm migration:run
+
+# Python / Django
+python manage.py migrate --noinput
+
+# Python / FastAPI (Alembic)
+alembic upgrade head
+
+# Go (Golang-Migrate / Goose)
+./migrate up
+goose up
+
+# Ruby on Rails
+bundle exec rails db:migrate
+
+# Rust (Diesel / SQLx)
+diesel migration run
+sqlx migrate run
+
+# Java / Spring Boot (Flyway)
+./mvnw flyway:migrate`}
+              </pre>
+            </div>
           </section>
 
           {/* 5. Dashboard Menus Guide */}
