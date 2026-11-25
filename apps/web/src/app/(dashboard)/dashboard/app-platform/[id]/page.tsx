@@ -44,6 +44,7 @@ import {
   TrendingUp,
   Eye,
   EyeOff,
+  Plus,
 } from "lucide-react";
 import { AppScaleModal } from "@/components/AppScaleModal";
 import {
@@ -193,6 +194,8 @@ export default function AppPlatformDetailPage({
   const [settingsBuildCmd, setSettingsBuildCmd] = useState("");
   const [settingsStartCmd, setSettingsStartCmd] = useState("");
   const [settingsEnvVars, setSettingsEnvVars] = useState("");
+  const [settingsEnvMode, setSettingsEnvMode] = useState<"kv" | "raw">("kv");
+  const [revealedSettingsEnvRows, setRevealedSettingsEnvRows] = useState<Record<number, boolean>>({});
   const [settingsCustomDomain, setSettingsCustomDomain] = useState("");
   const [settingsAutoDeploy, setSettingsAutoDeploy] = useState(true);
   const [settingsDeployOnPush, setSettingsDeployOnPush] = useState(true);
@@ -2280,30 +2283,163 @@ export default function AppPlatformDetailPage({
             isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90 shadow-2xs"
           )}>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-white/[0.06]">
-              <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                <Terminal className="w-4 h-4 shrink-0" />
-                <span>Container Environment Variables</span>
-              </h3>
-              <span className={cn(
-                "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold self-start sm:self-auto shrink-0 border",
-                isDark ? "bg-white/5 text-zinc-300 border-white/10" : "bg-slate-100 text-slate-700 border-slate-200"
+              <div>
+                <h3 className={cn("text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                  <Terminal className="w-4 h-4 shrink-0" />
+                  <span>Container Environment Variables</span>
+                </h3>
+                <p className={cn("text-[11px] mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+                  Injected into BuildKit (<code className="font-mono text-cyan-400">ARG</code> &amp; <code className="font-mono text-cyan-400">.env</code>) and mounted into the Kubernetes Pod OS environment.
+                </p>
+              </div>
+              <div className={cn(
+                "inline-flex p-0.5 rounded-lg border self-start sm:self-auto shrink-0",
+                isDark ? "bg-black/40 border-white/10" : "bg-slate-100 border-slate-200"
               )}>
-                KEY=VALUE per line
-              </span>
+                <button
+                  type="button"
+                  onClick={() => setSettingsEnvMode("kv")}
+                  className={cn(
+                    "px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors cursor-pointer",
+                    settingsEnvMode === "kv"
+                      ? "bg-cyan-400 text-slate-950 font-bold"
+                      : isDark ? "text-zinc-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
+                  )}
+                >
+                  Key-Value
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSettingsEnvMode("raw")}
+                  className={cn(
+                    "px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors cursor-pointer",
+                    settingsEnvMode === "raw"
+                      ? "bg-cyan-400 text-slate-950 font-bold"
+                      : isDark ? "text-zinc-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
+                  )}
+                >
+                  Raw .env
+                </button>
+              </div>
             </div>
 
-            <MacCodeEditor
-              value={settingsEnvVars}
-              onChange={setSettingsEnvVars}
-              filename=".env"
-              badge="KEY=VALUE per line"
-              placeholder={"APP_ENV=production\nAPP_DEBUG=false\nDATABASE_URL=mysql://user:pass@host:3306/db\nAPI_SECRET=my-secret-key"}
-              rows={6}
-              isDark={isDark}
-            />
-            <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>
-              Variables are securely mounted into the Kubernetes Pod container environment.
-            </p>
+            {settingsEnvMode === "kv" ? (() => {
+              const parsedRows = settingsEnvVars
+                .split(/\r?\n/)
+                .filter((line) => line.trim() && !line.trim().startsWith("#"))
+                .map((line) => {
+                  const eqIdx = line.indexOf("=");
+                  if (eqIdx === -1) return { key: line.trim(), value: "" };
+                  return {
+                    key: line.slice(0, eqIdx).trim(),
+                    value: line.slice(eqIdx + 1),
+                  };
+                });
+              const rowsToRender = parsedRows.length > 0 ? parsedRows : [{ key: "", value: "" }];
+
+              const commitRows = (nextRows: { key: string; value: string }[]) => {
+                const serialized = nextRows
+                  .filter((r) => r.key.trim() !== "" || r.value !== "")
+                  .map((r) => `${r.key.trim()}=${r.value}`)
+                  .join("\n");
+                setSettingsEnvVars(serialized);
+              };
+
+              return (
+                <div className="space-y-2">
+                  {rowsToRender.map((row, idx) => {
+                    const isRevealed = Boolean(revealedSettingsEnvRows[idx]);
+                    return (
+                      <div key={idx} className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
+                        <input
+                          type="text"
+                          value={row.key}
+                          onChange={(e) => {
+                            const next = [...rowsToRender];
+                            next[idx] = { ...next[idx], key: e.target.value.replace(/\s+/g, "_") };
+                            commitRows(next);
+                          }}
+                          placeholder="APP_ENV"
+                          className={cn(
+                            "sm:col-span-5 px-3 py-2 rounded-xl border text-xs font-mono focus:outline-none focus:border-cyan-400",
+                            isDark ? "bg-[#0a0a0c] border-white/10 text-cyan-300 placeholder-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900"
+                          )}
+                        />
+                        <div className="sm:col-span-6 relative flex items-center">
+                          <input
+                            type={isRevealed ? "text" : "password"}
+                            autoComplete="off"
+                            value={row.value}
+                            onChange={(e) => {
+                              const next = [...rowsToRender];
+                              next[idx] = { ...next[idx], value: e.target.value };
+                              commitRows(next);
+                            }}
+                            placeholder="value"
+                            className={cn(
+                              "w-full pl-3 pr-9 py-2 rounded-xl border text-xs font-mono focus:outline-none focus:border-cyan-400",
+                              isDark ? "bg-[#0a0a0c] border-white/10 text-white placeholder-zinc-600" : "bg-slate-50 border-slate-200 text-slate-900"
+                            )}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setRevealedSettingsEnvRows((prev) => ({ ...prev, [idx]: !prev[idx] }))}
+                            className="absolute right-2.5 text-zinc-500 hover:text-zinc-300 cursor-pointer"
+                            title={isRevealed ? "Hide value" : "Show value"}
+                          >
+                            {isRevealed ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                          </button>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const next = rowsToRender.filter((_, rIdx) => rIdx !== idx);
+                            commitRows(next);
+                          }}
+                          className={cn(
+                            "sm:col-span-1 p-2 rounded-xl border flex items-center justify-center cursor-pointer transition-colors",
+                            isDark ? "border-white/10 text-zinc-400 hover:text-rose-400 hover:border-rose-500/30" : "border-slate-200 text-slate-500 hover:text-rose-600"
+                          )}
+                          title="Remove variable"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    );
+                  })}
+
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const base = parsedRows.length > 0 ? parsedRows : [];
+                        setSettingsEnvVars([...base.map((r) => `${r.key}=${r.value}`), "NEW_KEY="].join("\n"));
+                      }}
+                      className={cn(
+                        "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border cursor-pointer transition-colors",
+                        isDark ? "bg-white/5 border-white/10 text-cyan-400 hover:bg-cyan-500/10" : "bg-slate-100 border-slate-200 text-cyan-700 hover:bg-cyan-50"
+                      )}
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add Variable</span>
+                    </button>
+                    <span className="text-[11px] text-zinc-500">
+                      Save Configuration updates runtime Pod env immediately; Save &amp; Trigger Rebuild also updates build-time ARGs &amp; .env file.
+                    </span>
+                  </div>
+                </div>
+              );
+            })() : (
+              <MacCodeEditor
+                value={settingsEnvVars}
+                onChange={setSettingsEnvVars}
+                filename=".env"
+                badge="KEY=VALUE per line"
+                placeholder={"APP_ENV=production\nAPP_DEBUG=false\nDB_HOST=192.168.79.16\nAPI_SECRET=my-secret-key"}
+                rows={6}
+                isDark={isDark}
+              />
+            )}
           </div>
 
           {/* ACTION BUTTONS (MANAGED APP STYLE) */}

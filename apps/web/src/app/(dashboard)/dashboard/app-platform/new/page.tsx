@@ -315,10 +315,13 @@ const DOCKERFILE_TEMPLATES: { label: string; port: number; content: string }[] =
     port: 3000,
     content: `FROM node:20-alpine AS builder
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci || npm install
+COPY package*.json yarn.lock* pnpm-lock.yaml* ./
+RUN if [ -f pnpm-lock.yaml ]; then corepack enable && pnpm install --frozen-lockfile; \\
+    elif [ -f yarn.lock ]; then corepack enable && yarn install --frozen-lockfile; \\
+    elif [ -f package-lock.json ]; then npm ci; \\
+    else npm install; fi
 COPY . .
-RUN npm run build || true
+RUN if node -e "const p=require('./package.json'); process.exit(p.scripts&&p.scripts.build?0:1)" 2>/dev/null; then npm run build; fi
 
 FROM node:20-alpine AS runner
 WORKDIR /app
@@ -335,42 +338,50 @@ WORKDIR /app
 ENV COMPOSER_NO_BLOCKING=1
 ENV COMPOSER_NO_SECURITY_BLOCKING=1
 COPY . /app
-RUN if [ -f composer.json ]; then composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-scripts --ignore-platform-reqs --no-security-blocking || composer update --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-scripts --ignore-platform-reqs --no-security-blocking; composer dump-autoload --optimize --no-dev --no-scripts --ignore-platform-reqs; fi
+RUN if [ -f composer.json ]; then composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-scripts --ignore-platform-reqs --no-security-blocking && composer dump-autoload --optimize --no-dev --no-scripts --ignore-platform-reqs; fi
 
 FROM node:20-alpine AS frontend
 WORKDIR /app
 COPY --from=vendor /app /app
-RUN if [ -f package.json ]; then (if [ -f package-lock.json ]; then npm ci; else npm install; fi || true) && (npm run build || true); fi
+RUN if [ -f package.json ]; then (if [ -f package-lock.json ]; then npm ci; else npm install; fi) && if node -e "const p=require('./package.json'); process.exit(p.scripts&&p.scripts.build?0:1)" 2>/dev/null; then npm run build; fi; fi
 
-FROM php:8.3-apache
+FROM php:8.4-apache
 WORKDIR /var/www/html
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
-RUN docker-php-ext-install pdo pdo_mysql bcmath opcache
+RUN apt-get update && apt-get install -y --no-install-recommends libpq-dev libzip-dev libicu-dev libpng-dev libjpeg-dev libfreetype6-dev libsqlite3-dev \\
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \\
+    && docker-php-ext-install -j$(nproc) pdo pdo_mysql pdo_pgsql pgsql pdo_sqlite bcmath intl zip gd opcache \\
+    && rm -rf /var/lib/apt/lists/*
 COPY --from=frontend /app /var/www/html/
-RUN ([ ! -f .env ] && [ -f .env.example ] && cp .env.example .env || true) && ([ ! -f .env ] || sed -ri -e 's/^APP_DEBUG=.*/APP_DEBUG=false/g' -e 's/^APP_ENV=.*/APP_ENV=production/g' .env || true) && php artisan key:generate --force || true && mkdir -p database storage bootstrap/cache && touch database/database.sqlite && php artisan migrate --force || true && chown -R root:www-data /var/www/html && chmod -R u=rwX,go=rX /var/www/html && (chmod 640 /var/www/html/.env 2>/dev/null || true) && chown -R www-data:www-data storage bootstrap/cache database && chmod -R 775 storage bootstrap/cache database || true
-RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" 2>/dev/null || true && a2enmod rewrite headers && sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/*.conf && sed -ri -e 's!/var/www/!/var/www/html/public!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+RUN rm -f /var/www/html/.env.example && mkdir -p database storage/framework/sessions storage/framework/views storage/framework/cache storage/logs bootstrap/cache \\
+    && touch database/database.sqlite \\
+    && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database \\
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
+RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" 2>/dev/null || true \\
+    && a2enmod rewrite headers \\
+    && sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/*.conf \\
+    && sed -ri -e 's!/var/www/!/var/www/html/public!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 EXPOSE 80
-CMD ["apache2-foreground"]`,
+CMD ["sh", "-c", "if [ -z \\"$APP_KEY\\" ] && ! grep -q '^APP_KEY=base64:' .env 2>/dev/null; then export APP_KEY=\\"base64:$(head -c 32 /dev/urandom | base64)\\"; fi && exec apache2-foreground"]`,
   },
   {
     label: "Python / FastAPI",
     port: 8000,
-    content: `FROM python:3.11-slim
+    content: `FROM python:3.12-slim
 WORKDIR /app
 ENV PYTHONUNBUFFERED=1
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt || true
 COPY . .
+RUN if [ -f requirements.txt ]; then pip install --no-cache-dir -r requirements.txt; fi
 EXPOSE 8000
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]`,
   },
   {
     label: "Go / Fiber",
     port: 8080,
-    content: `FROM golang:1.22-alpine AS builder
+    content: `FROM golang:1.23-alpine AS builder
 WORKDIR /app
 COPY go.mod go.sum* ./
-RUN go mod download || true
+RUN if [ -f go.mod ]; then go mod download; fi
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o server .
 

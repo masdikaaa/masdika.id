@@ -815,9 +815,51 @@ export async function triggerAppPlatformBuild(
     : '';
   const workspaceAppDir = cleanRootDir ? `/workspace/${cleanRootDir}` : '/workspace';
 
+  // Prepare Masdika Environment Variables for BOTH BuildKit (--opt build-arg) and .env file (replacing any stale repo .env)
+  const config = await getAppPlatformClusterConfig();
+  const publicDomain = config.publicDomain || 'app.masdikacloud.my.id';
+  const appHost = `${app.subdomain}.${publicDomain}`;
+  const userEnvs = parseEnvVarsToK8sEnv(app.envVars);
+  const buildEnvMap = new Map<string, string>([
+    ['PORT', String(app.appPort)],
+    ['NODE_ENV', 'production'],
+    ['APP_SUBDOMAIN', app.subdomain],
+    ['APP_DOMAIN', appHost],
+    ['APP_URL', `https://${appHost}`],
+  ]);
+  for (const e of userEnvs) {
+    buildEnvMap.set(e.name, e.value);
+  }
+
+  // Format clean .env file from user's configured Masdika envVars (if provided) so repo's .env.example / stale .env is never used
+  const formatDotEnvValue = (val: string): string => {
+    if (/^[A-Za-z0-9_./:@+-]*$/.test(val)) return val;
+    return `"${val.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')}"`;
+  };
+  const dotEnvContent =
+    userEnvs.length > 0
+      ? userEnvs.map((e) => `${e.name}=${formatDotEnvValue(e.value)}`).join('\n') + '\n'
+      : '';
+  const dotEnvB64 = dotEnvContent ? Buffer.from(dotEnvContent, 'utf8').toString('base64') : '';
+
+  const shQuote = (s: string): string => `'${s.replace(/'/g, `'\\''`)}'`;
+  const buildArgFlags = Array.from(buildEnvMap.entries())
+    .map(([k, v]) => `--opt ${shQuote(`build-arg:${k}=${v}`)}`)
+    .join(' ');
+  const cacheFlags =
+    app.enableBuildCache !== false
+      ? `--import-cache ${shQuote(`type=registry,ref=127.0.0.1:5000/${app.subdomain}-cache,registry.insecure=true`)} --export-cache ${shQuote(`type=registry,ref=127.0.0.1:5000/${app.subdomain}-cache,mode=max,registry.insecure=true`)}`
+      : '';
+  const buildctlScript = `#!/bin/sh\nset -e\nexec buildctl-daemonless.sh build --frontend dockerfile.v0 --local ${shQuote(`context=${workspaceAppDir}`)} --local dockerfile=/masdika-df --opt filename=Dockerfile --output ${shQuote(`type=image,name=${destinationImage},push=true,registry.insecure=true`)} ${buildArgFlags} ${cacheFlags}\n`;
+  const buildctlScriptB64 = Buffer.from(buildctlScript, 'utf8').toString('base64');
+
+  const envPrepHook = dotEnvB64
+    ? ` && printf '%s' "$MASDIKA_DOTENV_B64" | base64 -d > "${workspaceAppDir}/.env" && echo "[Masdika BuildKit] Injected ${userEnvs.length} configured environment variables."`
+    : ` && rm -f "${workspaceAppDir}/.env.local"`;
+
   const dockerfilePrepHook = isInlineDockerfile
-    ? ` && mkdir -p /workspace/.masdika-df && printf '%s' "$MASDIKA_PRESET_DF_B64" | base64 -d > /workspace/.masdika-df/Dockerfile && echo "[Masdika BuildKit] Using Inline Dockerfile."`
-    : ` && cd "${workspaceAppDir}" && DF_SRC="${workspaceAppDir}/$MASDIKA_DOCKERFILE_PATH" && if [ ! -f "$DF_SRC" ]; then echo "ERROR: Dockerfile not found at '$MASDIKA_DOCKERFILE_PATH'. Please add a Dockerfile to your repository or use the Inline Dockerfile editor."; exit 1; fi && mkdir -p /workspace/.masdika-df && cp "$DF_SRC" /workspace/.masdika-df/Dockerfile && echo "[Masdika BuildKit] Using repository Dockerfile: $MASDIKA_DOCKERFILE_PATH"`;
+    ? ` && mkdir -p "${workspaceAppDir}" /masdika-df && printf '%s' "$MASDIKA_PRESET_DF_B64" | base64 -d > /masdika-df/Dockerfile && printf '%s' "$MASDIKA_BUILDCTL_SH_B64" | base64 -d > /masdika-df/run-build.sh && chmod +x /masdika-df/run-build.sh${envPrepHook} && echo "[Masdika BuildKit] Using Inline Dockerfile."`
+    : ` && cd "${workspaceAppDir}" && DF_SRC="${workspaceAppDir}/$MASDIKA_DOCKERFILE_PATH" && if [ ! -f "$DF_SRC" ]; then echo "ERROR: Dockerfile not found at '$MASDIKA_DOCKERFILE_PATH'. Please add a Dockerfile to your repository or use the Inline Dockerfile editor."; exit 1; fi && mkdir -p /masdika-df && cp "$DF_SRC" /masdika-df/Dockerfile && printf '%s' "$MASDIKA_BUILDCTL_SH_B64" | base64 -d > /masdika-df/run-build.sh && chmod +x /masdika-df/run-build.sh${envPrepHook} && echo "[Masdika BuildKit] Using repository Dockerfile: $MASDIKA_DOCKERFILE_PATH"`;
 
   // Job Specification: BuildKit Builder (Dockerfile-only)
   const jobManifest: k8s.V1Job = {
@@ -852,6 +894,10 @@ export async function triggerAppPlatformBuild(
               name: 'workspace',
               emptyDir: {},
             },
+            {
+              name: 'dockerfile-dir',
+              emptyDir: {},
+            },
           ],
           initContainers: [
             {
@@ -863,18 +909,24 @@ export async function triggerAppPlatformBuild(
                 { name: 'MASDIKA_SAFE_URL', value: safeDisplayUrl },
                 { name: 'MASDIKA_GIT_BRANCH', value: branch },
                 { name: 'MASDIKA_DOCKERFILE_PATH', value: requestedDockerfilePath },
+                { name: 'MASDIKA_BUILDCTL_SH_B64', value: buildctlScriptB64 },
                 ...(presetDfB64 ? [{ name: 'MASDIKA_PRESET_DF_B64', value: presetDfB64 }] : []),
+                ...(dotEnvB64 ? [{ name: 'MASDIKA_DOTENV_B64', value: dotEnvB64 }] : []),
               ],
               command: ['sh', '-c'],
               args: [
                 commitHash && /^[a-fA-F0-9]{4,40}$/.test(commitHash.trim())
-                  ? `echo "Cloning $MASDIKA_SAFE_URL and checking out commit ${commitHash.trim()}..." && git clone "$MASDIKA_GIT_URL" /workspace/src && cd /workspace/src && git checkout "${commitHash.trim()}" && cp -rf /workspace/src/. /workspace/ && cd /workspace && rm -rf /workspace/src${dockerfilePrepHook} && chmod -R 777 /workspace && echo "Commit ${commitHash.trim()} checked out. Handing off to BuildKit..."`
-                  : `echo "Cloning $MASDIKA_SAFE_URL (branch: $MASDIKA_GIT_BRANCH)..." && (git clone --depth=1 --branch "$MASDIKA_GIT_BRANCH" "$MASDIKA_GIT_URL" /workspace/src 2>/dev/null || git clone --depth=1 "$MASDIKA_GIT_URL" /workspace/src) && cp -rf /workspace/src/. /workspace/ && cd /workspace && rm -rf /workspace/src${dockerfilePrepHook} && chmod -R 777 /workspace && echo "Clone completed. Handing off to BuildKit..."`,
+                  ? `echo "Cloning $MASDIKA_SAFE_URL and checking out commit ${commitHash.trim()}..." && git clone "$MASDIKA_GIT_URL" /workspace/src && cd /workspace/src && git checkout "${commitHash.trim()}" && cp -rf /workspace/src/. /workspace/ && cd /workspace && rm -rf /workspace/src${dockerfilePrepHook} && chmod -R 777 /workspace /masdika-df && echo "Commit ${commitHash.trim()} checked out. Handing off to BuildKit..."`
+                  : `echo "Cloning $MASDIKA_SAFE_URL (branch: $MASDIKA_GIT_BRANCH)..." && (git clone --depth=1 --branch "$MASDIKA_GIT_BRANCH" "$MASDIKA_GIT_URL" /workspace/src || git clone --depth=1 "$MASDIKA_GIT_URL" /workspace/src) && cp -rf /workspace/src/. /workspace/ && cd /workspace && rm -rf /workspace/src${dockerfilePrepHook} && chmod -R 777 /workspace /masdika-df && echo "Clone completed. Handing off to BuildKit..."`,
               ],
               volumeMounts: [
                 {
                   name: 'workspace',
                   mountPath: '/workspace',
+                },
+                {
+                  name: 'dockerfile-dir',
+                  mountPath: '/masdika-df',
                 },
               ],
             },
@@ -888,46 +940,29 @@ export async function triggerAppPlatformBuild(
                 runAsUser: 0,
                 privileged: true,
               },
-              command: ['buildctl-daemonless.sh'],
-              args: [
-                'build',
-                '--frontend',
-                'dockerfile.v0',
-                '--local',
-                `context=${workspaceAppDir}`,
-                '--local',
-                'dockerfile=/workspace/.masdika-df',
-                '--opt',
-                'filename=Dockerfile',
-                '--output',
-                `type=image,name=${destinationImage},push=true,registry.insecure=true`,
-                ...(app.enableBuildCache !== false
-                  ? [
-                      '--import-cache',
-                      `type=registry,ref=127.0.0.1:5000/${app.subdomain}-cache,registry.insecure=true`,
-                      '--export-cache',
-                      `type=registry,ref=127.0.0.1:5000/${app.subdomain}-cache,mode=max,registry.insecure=true`,
-                    ]
-                  : []),
-              ],
-                  volumeMounts: [
-                    {
-                      name: 'workspace',
-                      mountPath: '/workspace',
-                    },
-                  ],
-                  resources: {
-                    requests: {
-                      cpu: '500m',
-                      memory: '512Mi',
-                    },
-                    limits: {
-                      cpu: '2000m',
-                      memory: '2048Mi',
-                    },
-                  },
+              command: ['/bin/sh', '/masdika-df/run-build.sh'],
+              volumeMounts: [
+                {
+                  name: 'workspace',
+                  mountPath: '/workspace',
+                },
+                {
+                  name: 'dockerfile-dir',
+                  mountPath: '/masdika-df',
                 },
               ],
+              resources: {
+                requests: {
+                  cpu: '500m',
+                  memory: '512Mi',
+                },
+                limits: {
+                  cpu: '3000m',
+                  memory: '4096Mi',
+                },
+              },
+            },
+          ],
         },
       },
     },
@@ -944,7 +979,7 @@ export async function triggerAppPlatformBuild(
     data: {
       status: 'BUILDING',
       lastBuildStatus: 'BUILDING',
-      lastBuildLog: `Build job [${jobName}] queued for repository ${app.gitUrl} on branch ${branch}...\n`,
+      lastBuildLog: `Build job [${jobName}] queued for repository ${safeDisplayUrl} on branch ${branch}...\n`,
     },
   });
 

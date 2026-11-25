@@ -9,6 +9,11 @@ import {
 } from "@/lib/k8s-app-platform";
 import { getAppPlatformPlan } from "@/lib/app-platform-plans";
 import { logClientActivity } from "@/lib/activity-log";
+import { decryptDeterministic } from "@/lib/encryption";
+
+function stripGitUrlCredentials(url: string): string {
+  return (url || "").replace(/\/\/[^/@]+@/, "//");
+}
 
 export async function GET(
   req: NextRequest,
@@ -73,6 +78,7 @@ export async function GET(
       success: true,
       data: {
         ...app,
+        gitUrl: stripGitUrlCredentials(app.gitUrl),
         fullDomain,
         publicIp,
         httpsUrl: `https://${fullDomain}`,
@@ -149,7 +155,48 @@ export async function PATCH(
 
     const dataToUpdate: any = {};
     if (name && typeof name === "string") dataToUpdate.name = name.trim();
-    if (gitUrl && typeof gitUrl === "string") dataToUpdate.gitUrl = gitUrl.trim();
+    if (gitUrl && typeof gitUrl === "string") {
+      let cleanGitUrl = gitUrl.trim();
+      if (!cleanGitUrl.includes("@")) {
+        // Preserve existing embedded credentials if repository URL did not change
+        if (stripGitUrlCredentials(app.gitUrl) === cleanGitUrl && app.gitUrl.includes("@")) {
+          cleanGitUrl = app.gitUrl;
+        } else {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: app.userId },
+            select: { githubAccessToken: true },
+          });
+          if (dbUser?.githubAccessToken) {
+            try {
+              const decryptedToken = decryptDeterministic(dbUser.githubAccessToken);
+              if (decryptedToken.startsWith("gitlab:") && cleanGitUrl.startsWith("https://gitlab.com/")) {
+                const glTok = decryptedToken.slice("gitlab:".length);
+                cleanGitUrl = cleanGitUrl.replace(
+                  "https://gitlab.com/",
+                  `https://oauth2:${encodeURIComponent(glTok)}@gitlab.com/`
+                );
+              } else if (decryptedToken.startsWith("bitbucket:") && cleanGitUrl.startsWith("https://bitbucket.org/")) {
+                const bbTok = decryptedToken.slice("bitbucket:".length);
+                cleanGitUrl = cleanGitUrl.replace(
+                  "https://bitbucket.org/",
+                  `https://x-token-auth:${encodeURIComponent(bbTok)}@bitbucket.org/`
+                );
+              } else if (
+                !decryptedToken.startsWith("gitlab:") &&
+                !decryptedToken.startsWith("bitbucket:") &&
+                cleanGitUrl.startsWith("https://github.com/")
+              ) {
+                cleanGitUrl = cleanGitUrl.replace(
+                  "https://github.com/",
+                  `https://x-access-token:${encodeURIComponent(decryptedToken)}@github.com/`
+                );
+              }
+            } catch {}
+          }
+        }
+      }
+      dataToUpdate.gitUrl = cleanGitUrl;
+    }
     if (branch && typeof branch === "string") dataToUpdate.branch = branch.trim();
     if (buildType && typeof buildType === "string") dataToUpdate.buildType = buildType.trim().toUpperCase();
     if (buildMode && typeof buildMode === "string") dataToUpdate.buildMode = buildMode.trim().toUpperCase();
