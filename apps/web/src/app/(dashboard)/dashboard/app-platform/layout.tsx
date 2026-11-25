@@ -3,11 +3,11 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "App Platform",
   description:
-    "Deploy web applications and APIs directly from Git repositories with automated SSL, CI/CD, and persistent storage on Masdika Cloud.",
+    "Deploy and manage containerized web apps & APIs from Git repositories or Docker Registries with Pre-Deploy release migrations, automated SSL, CI/CD, and persistent storage on Masdika Cloud.",
   openGraph: {
     title: "App Platform",
     description:
-      "Deploy web applications and APIs directly from Git repositories with automated SSL, CI/CD, and persistent storage on Masdika Cloud.",
+      "Deploy and manage containerized web apps & APIs from Git repositories or Docker Registries with Pre-Deploy release migrations, automated SSL, CI/CD, and persistent storage on Masdika Cloud.",
     url: "https://masdika.id/dashboard/app-platform",
   },
 };

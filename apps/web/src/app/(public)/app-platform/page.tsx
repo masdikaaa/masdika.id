@@ -8,16 +8,17 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: {
-    absolute: "App Platform - Git-to-Container PaaS & BuildKit Kubernetes Hosting",
+    absolute: "App Platform - Git & Docker Container PaaS on Kubernetes | Masdika",
   },
   description:
-    "Deploy Laravel, Next.js, Node.js, Python, Go, or any Dockerfile directly from GitHub, GitLab, and Bitbucket. Powered by BuildKit, automated Let's Encrypt SSL, CI/CD webhooks, and live Linux PTY web shell.",
+    "Deploy web apps and APIs from Git repositories (BuildKit Dockerfile) or directly from Docker Registries (Docker Hub, GHCR). Includes Pre-Deploy release migrations, CI/CD webhooks, automated Let's Encrypt SSL, persistent storage, and live Linux PTY web shell.",
   keywords: [
     "App Platform Indonesia",
     "Git to Container PaaS",
-    "Docker Hosting Indonesia",
-    "Laravel Kubernetes Hosting",
-    "Next.js PaaS Hosting",
+    "Docker Registry Hosting",
+    "GHCR Container Deploy",
+    "Pre-Deploy Database Migration",
+    "Kubernetes PaaS Indonesia",
     "BuildKit Container Build",
     "CI CD Auto Deploy",
     "Masdika App Platform",
@@ -26,9 +27,9 @@ export const metadata: Metadata = {
     canonical: "https://www.masdika.id/app-platform",
   },
   openGraph: {
-    title: "App Platform - Git-to-Container PaaS & BuildKit Kubernetes Hosting",
+    title: "App Platform - Git & Docker Container PaaS on Kubernetes | Masdika",
     description:
-      "Deploy any Git repository with Dockerfile via BuildKit in seconds. Automated CI/CD webhooks, Let's Encrypt SSL, and live Linux PTY terminal.",
+      "Deploy from Git (BuildKit Dockerfile) or directly from Docker Registries (Docker Hub, GHCR) with Pre-Deploy migrations, CI/CD webhooks, Let's Encrypt SSL, and live Linux PTY terminal.",
     url: "https://www.masdika.id/app-platform",
     siteName: "Masdika",
     images: [
@@ -36,7 +37,7 @@ export const metadata: Metadata = {
         url: OG_IMAGE_PATH,
         width: 1200,
         height: 630,
-        alt: "Masdika App Platform - Git-to-Container PaaS",
+        alt: "Masdika App Platform - Git & Docker Container PaaS",
       },
     ],
     locale: "en_US",
@@ -44,9 +45,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "App Platform - Git-to-Container PaaS & BuildKit Kubernetes Hosting",
+    title: "App Platform - Git & Docker Container PaaS on Kubernetes | Masdika",
     description:
-      "Deploy any Git repository with Dockerfile via BuildKit in seconds. Automated CI/CD webhooks, Let's Encrypt SSL, and live Linux PTY terminal.",
+      "Deploy from Git (BuildKit Dockerfile) or directly from Docker Registries (Docker Hub, GHCR) with Pre-Deploy migrations, CI/CD webhooks, Let's Encrypt SSL, and live Linux PTY terminal.",
     images: [OG_IMAGE_PATH],
   },
 };
@@ -67,10 +68,10 @@ export default async function AppPlatformLandingPage() {
       {
         "@type": "Product",
         "@id": "https://www.masdika.id/app-platform#product",
-        name: "Masdika App Platform - Git-to-Container PaaS",
+        name: "Masdika App Platform - Git & Docker Container PaaS",
         sku: "MASDIKA-PAAS-ID",
         description:
-          "Git-to-Container PaaS powered by BuildKit and Kubernetes. Deploy from GitHub, GitLab, or Bitbucket with automated SSL, CI/CD webhooks, and live Linux PTY terminal.",
+          "Kubernetes Container PaaS powered by BuildKit and direct Docker Registry pulls. Deploy from GitHub, GitLab, Bitbucket, Docker Hub, or GHCR with Pre-Deploy release migrations, automated SSL, CI/CD webhooks, and live Linux PTY terminal.",
         category: "Cloud Computing > Platform as a Service",
         image: `https://www.masdika.id${OG_IMAGE_PATH}`,
         brand: { "@type": "Brand", name: "Masdika" },
