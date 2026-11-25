@@ -437,34 +437,39 @@ export default function AdminAppPlatformPage() {
       {/* Filters & Search */}
       <div
         className={cn(
-          "rounded-2xl border p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4",
+          "rounded-2xl border p-3.5 sm:p-4 transition-all flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3",
           isDark ? "bg-[#0c0c0e] border-white/[0.08]" : "bg-white border-slate-200 shadow-xs"
         )}
       >
-        <div className="relative flex-1 min-w-0">
+        <div className="relative w-full lg:w-80 shrink-0">
           <Search
             className={cn(
-              "w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2",
-              isDark ? "text-zinc-500" : "text-slate-400"
+              "w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none",
+              isDark ? "text-zinc-400" : "text-slate-400"
             )}
           />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search app name, customer email, domain, repo or image..."
+            placeholder="Search app, customer, domain, or image..."
             className={cn(
-              "w-full pl-10 pr-4 py-2 rounded-xl border text-xs sm:text-sm outline-none transition-colors",
+              "w-full pl-9 pr-3 py-2 rounded-xl border text-xs transition-all focus:outline-none focus:ring-2 focus:ring-cyan-400/20 focus:border-cyan-400",
               isDark
-                ? "bg-white/[0.03] border-white/[0.08] text-white placeholder:text-zinc-500 focus:border-cyan-500/50"
-                : "bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-cyan-500"
+                ? "bg-white/[0.03] border-white/10 text-white placeholder-zinc-500"
+                : "bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400"
             )}
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Source Filter */}
-          <div className={cn("flex items-center gap-1 p-1 rounded-xl border", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full lg:w-auto overflow-hidden">
+          {/* Source Pill Filters */}
+          <div
+            className={cn(
+              "flex items-center gap-1 p-1 rounded-xl border overflow-x-auto scrollbar-none no-scrollbar max-w-full shrink-0",
+              isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50 border-slate-200"
+            )}
+          >
             {(
               [
                 { id: "ALL", label: "All Sources" },
@@ -477,11 +482,9 @@ export default function AdminAppPlatformPage() {
                 type="button"
                 onClick={() => setSelectedSource(opt.id)}
                 className={cn(
-                  "px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer",
+                  "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0",
                   selectedSource === opt.id
-                    ? isDark
-                      ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
-                      : "bg-white text-cyan-700 border border-cyan-200 shadow-2xs"
+                    ? "bg-cyan-400 text-slate-950 font-bold shadow-xs"
                     : isDark
                       ? "text-zinc-400 hover:text-white"
                       : "text-slate-600 hover:text-slate-900"
@@ -492,25 +495,28 @@ export default function AdminAppPlatformPage() {
             ))}
           </div>
 
-          {/* Status Filter */}
-          <div className={cn("flex flex-wrap items-center gap-1 p-1 rounded-xl border", isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
+          {/* Status Pill Filters */}
+          <div
+            className={cn(
+              "flex items-center gap-1 p-1 rounded-xl border overflow-x-auto scrollbar-none no-scrollbar max-w-full shrink-0",
+              isDark ? "bg-white/[0.02] border-white/[0.08]" : "bg-slate-50 border-slate-200"
+            )}
+          >
             {["ALL", "RUNNING", "BUILDING", "STOPPED", "SUSPENDED"].map((st) => (
               <button
                 key={st}
                 type="button"
                 onClick={() => setSelectedStatus(st)}
                 className={cn(
-                  "px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer",
+                  "px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0",
                   selectedStatus === st
-                    ? isDark
-                      ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
-                      : "bg-white text-cyan-700 border border-cyan-200 shadow-2xs"
+                    ? "bg-cyan-400 text-slate-950 font-bold shadow-xs"
                     : isDark
                       ? "text-zinc-400 hover:text-white"
                       : "text-slate-600 hover:text-slate-900"
                 )}
               >
-                {st}
+                {st === "ALL" ? "All Status" : st}
               </button>
             ))}
           </div>
