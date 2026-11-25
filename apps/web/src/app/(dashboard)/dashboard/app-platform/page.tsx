@@ -24,6 +24,7 @@ import {
   Layers,
   Terminal,
   TrendingUp,
+  BookOpen,
 } from "lucide-react";
 import { AppScaleModal } from "@/components/AppScaleModal";
 import {
@@ -297,6 +298,16 @@ export default function AppPlatformPage() {
         </div>
 
         <div className="flex items-center gap-2.5 flex-wrap">
+          <Link
+            href="/dashboard/app-platform/docs"
+            className={cn(
+              "px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 border cursor-pointer",
+              isDark ? "border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white" : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-2xs"
+            )}
+          >
+            <BookOpen className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Documentation</span>
+          </Link>
           <button
             onClick={fetchApps}
             disabled={refreshing || loading}
