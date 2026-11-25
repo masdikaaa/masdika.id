@@ -480,8 +480,14 @@ export default function AppPlatformPage() {
                         </Link>
                         <div className={cn("flex items-center gap-1 text-[11px] mt-0.5 truncate", isDark ? "text-zinc-400" : "text-slate-500")}>
                           <GitBranch className="w-3 h-3 text-cyan-500 shrink-0" />
-                          <span className="truncate">{app.gitUrl.replace(/^https?:\/\/(www\.)?/, "").replace(/\.git$/, "")}</span>
-                          <span className="shrink-0">({app.branch})</span>
+                          {app.buildType === "IMAGE" || app.gitUrl.startsWith("docker://") ? (
+                            <span className="truncate font-mono">{app.dockerImage || app.gitUrl.replace(/^docker:\/\//i, "")}</span>
+                          ) : (
+                            <>
+                              <span className="truncate">{app.gitUrl.replace(/^https?:\/\/(www\.)?/, "").replace(/\.git$/, "")}</span>
+                              <span className="shrink-0">({app.branch})</span>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>

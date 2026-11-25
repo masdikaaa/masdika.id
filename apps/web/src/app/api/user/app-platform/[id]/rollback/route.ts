@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-middleware";
-import { applyAppPlatformResources } from "@/lib/k8s-app-platform";
+import { applyAppPlatformResources, isDirectImageApp } from "@/lib/k8s-app-platform";
 import { logClientActivity } from "@/lib/activity-log";
 
 /**
@@ -70,7 +70,9 @@ export async function POST(
         status: "SUCCESS",
         imageTag: targetDep.imageTag,
         durationSeconds: 1,
-        buildLogs: `Instant Rollback executed.\nRestored container image tag: 127.0.0.1:5000/${app.subdomain}:${targetDep.imageTag}\nDeployment healthy.`,
+        buildLogs: `Instant Rollback executed.\nRestored container image: ${
+          isDirectImageApp(app as any) ? targetDep.imageTag : `127.0.0.1:5000/${app.subdomain}:${targetDep.imageTag}`
+        }\nDeployment healthy.`,
       },
     });
 

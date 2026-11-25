@@ -191,6 +191,14 @@ export default function AppPlatformDetailPage({
   const [settingsDockerfilePath, setSettingsDockerfilePath] = useState("Dockerfile");
   const [settingsAppPort, setSettingsAppPort] = useState(3000);
   const [settingsDockerfileSource, setSettingsDockerfileSource] = useState<"REPO" | "INLINE">("REPO");
+  const [settingsSourceType, setSettingsSourceType] = useState<"GIT" | "IMAGE">("GIT");
+  const [settingsDockerImage, setSettingsDockerImage] = useState("");
+  const [settingsRegistryUsername, setSettingsRegistryUsername] = useState("");
+  const [settingsRegistryPassword, setSettingsRegistryPassword] = useState("");
+  const [hasSavedRegistryPwd, setHasSavedRegistryPwd] = useState(false);
+  const [clearSavedRegAuth, setClearSavedRegAuth] = useState(false);
+  const [showSettingsRegPwd, setShowSettingsRegPwd] = useState(false);
+  const [settingsPreDeployCmd, setSettingsPreDeployCmd] = useState("");
   const [settingsBuildCmd, setSettingsBuildCmd] = useState("");
   const [settingsStartCmd, setSettingsStartCmd] = useState("");
   const [settingsEnvVars, setSettingsEnvVars] = useState("");
@@ -246,6 +254,24 @@ export default function AppPlatformDetailPage({
         setSettingsDockerfilePath(json.data.dockerfilePath || "Dockerfile");
         setSettingsAppPort(json.data.appPort || 3000);
         setSettingsBuildCmd(json.data.buildCommand || "");
+        const isImgMode =
+          json.data.buildMode === "IMAGE" ||
+          json.data.buildType === "IMAGE" ||
+          Boolean(json.data.dockerImage) ||
+          String(json.data.gitUrl || "").startsWith("docker://");
+        setSettingsSourceType(isImgMode ? "IMAGE" : "GIT");
+        setSettingsDockerImage(
+          json.data.dockerImage ||
+            (String(json.data.gitUrl || "").startsWith("docker://")
+              ? String(json.data.gitUrl).replace(/^docker:\/\//i, "")
+              : "")
+        );
+        setSettingsRegistryUsername(json.data.registryUsername || "");
+        setSettingsRegistryPassword("");
+        setHasSavedRegistryPwd(Boolean(json.data.hasRegistryPassword));
+        setClearSavedRegAuth(false);
+        setSettingsPreDeployCmd(json.data.preDeployCommand || "");
+
         const rawBuildCmd = json.data.buildCommand || "";
         const isInlineDf = Boolean(
           rawBuildCmd &&
@@ -566,16 +592,21 @@ export default function AppPlatformDetailPage({
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          gitUrl: settingsGitUrl.trim(),
-          branch: settingsBranch.trim(),
-          buildType: "DOCKERFILE",
-          buildMode: "DOCKERFILE",
-          autoDeploy: settingsAutoDeploy,
-          deployOnPush: settingsDeployOnPush,
+          gitUrl: settingsSourceType === "IMAGE" ? `docker://${settingsDockerImage.trim()}` : settingsGitUrl.trim(),
+          dockerImage: settingsSourceType === "IMAGE" ? settingsDockerImage.trim() : "",
+          registryUsername: settingsSourceType === "IMAGE" ? settingsRegistryUsername.trim() : "",
+          registryPassword: settingsSourceType === "IMAGE" && settingsRegistryPassword.trim() ? settingsRegistryPassword.trim() : undefined,
+          clearRegistryAuth: settingsSourceType !== "IMAGE" || clearSavedRegAuth,
+          branch: settingsSourceType === "IMAGE" ? "registry" : settingsBranch.trim(),
+          buildType: settingsSourceType === "IMAGE" ? "IMAGE" : "DOCKERFILE",
+          buildMode: settingsSourceType === "IMAGE" ? "IMAGE" : "DOCKERFILE",
+          autoDeploy: settingsSourceType === "IMAGE" ? false : settingsAutoDeploy,
+          deployOnPush: settingsSourceType === "IMAGE" ? false : settingsDeployOnPush,
           dockerfilePath: settingsDockerfileSource === "REPO" ? (settingsDockerfilePath.trim() || "Dockerfile") : "Dockerfile",
           appPort: Number(settingsAppPort) || 3000,
-          buildCommand: settingsDockerfileSource === "INLINE" ? (settingsBuildCmd.trim() || null) : null,
+          buildCommand: settingsSourceType === "GIT" && settingsDockerfileSource === "INLINE" ? (settingsBuildCmd.trim() || null) : null,
           startCommand: null,
+          preDeployCommand: settingsPreDeployCmd.trim() || null,
           envVars: settingsEnvVars.trim() || null,
           customDomain: settingsCustomDomain.trim() || null,
           healthCheckPath: settingsHealthCheckPath.trim() || null,
@@ -725,9 +756,20 @@ export default function AppPlatformDetailPage({
 
               <div className="flex items-center gap-3 text-xs text-zinc-400 mt-1.5 flex-wrap">
                 <div className="flex items-center gap-1.5 truncate">
-                  <GitBranch className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                  <span className="font-mono text-zinc-300 truncate">{app.gitUrl}</span>
-                  <span className="text-zinc-500 font-mono">({app.branch})</span>
+                  {app.buildType === "IMAGE" || String(app.gitUrl || "").startsWith("docker://") ? (
+                    <>
+                      <SiDocker className="w-3.5 h-3.5 text-[#2496ED] shrink-0" />
+                      <span className="font-mono text-zinc-300 truncate">
+                        {app.dockerImage || String(app.gitUrl || "").replace(/^docker:\/\//i, "")}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <GitBranch className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                      <span className="font-mono text-zinc-300 truncate">{app.gitUrl}</span>
+                      <span className="text-zinc-500 font-mono">({app.branch})</span>
+                    </>
+                  )}
                 </div>
                 <span>•</span>
                 <span className="text-zinc-400">{app.planName} Plan ({app.cpuShares} vCPU / {app.memoryMb} MB)</span>
@@ -1837,12 +1879,147 @@ export default function AppPlatformDetailPage({
                 <Settings className="w-4 h-4 shrink-0" />
                 <span>Build Strategy &amp; Source Repository</span>
               </h3>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold self-start sm:self-auto shrink-0 border bg-[#2496ED]/15 text-[#2496ED] border-[#2496ED]/30">
-                <SiDocker className="w-3.5 h-3.5" />
-                <span>Dockerfile (BuildKit)</span>
-              </span>
+              <div className={cn(
+                "grid grid-cols-2 sm:inline-flex items-center gap-1 p-1 rounded-xl border w-full sm:w-auto",
+                isDark ? "border-white/10 bg-[#0a0a0c]" : "border-slate-200 bg-slate-50"
+              )}>
+                <button
+                  type="button"
+                  onClick={() => setSettingsSourceType("GIT")}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer text-center whitespace-nowrap",
+                    settingsSourceType === "GIT"
+                      ? "bg-cyan-500 text-slate-950 font-bold shadow-xs"
+                      : isDark ? "text-zinc-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
+                  )}
+                >
+                  Git Repository
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSettingsSourceType("IMAGE")}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer text-center whitespace-nowrap",
+                    settingsSourceType === "IMAGE"
+                      ? "bg-cyan-500 text-slate-950 font-bold shadow-xs"
+                      : isDark ? "text-zinc-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
+                  )}
+                >
+                  Docker Registry
+                </button>
+              </div>
             </div>
 
+            {settingsSourceType === "IMAGE" ? (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="sm:col-span-2">
+                    <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
+                      Docker Image Reference
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={settingsDockerImage}
+                      onChange={(e) => setSettingsDockerImage(e.target.value)}
+                      placeholder="ghcr.io/username/api:v1 or nginx:alpine"
+                      className={cn(
+                        "w-full px-3.5 py-2.5 rounded-xl text-xs font-mono border transition-colors focus:outline-none focus:border-cyan-400",
+                        isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+                      )}
+                    />
+                  </div>
+                  <div>
+                    <label className={cn("text-[11px] font-semibold uppercase tracking-wider block mb-1.5", isDark ? "text-zinc-400" : "text-slate-600")}>
+                      Container Exposed Port
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      min={1}
+                      max={65535}
+                      value={settingsAppPort}
+                      onChange={(e) => setSettingsAppPort(parseInt(e.target.value, 10) || 80)}
+                      className={cn(
+                        "w-full px-3.5 py-2.5 rounded-xl text-xs font-mono border transition-colors focus:outline-none focus:border-cyan-400",
+                        isDark ? "bg-[#0a0a0c] border-white/[0.08] text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+                      )}
+                    />
+                  </div>
+                </div>
+
+                <div className={cn("p-3.5 rounded-xl border space-y-3", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={cn("text-xs font-bold", isDark ? "text-white" : "text-slate-900")}>
+                      Private Registry Credentials (Optional)
+                    </span>
+                    {hasSavedRegistryPwd && !clearSavedRegAuth && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setClearSavedRegAuth(true);
+                          setSettingsRegistryUsername("");
+                          setSettingsRegistryPassword("");
+                        }}
+                        className="text-[11px] font-semibold text-rose-400 hover:underline cursor-pointer"
+                      >
+                        Clear Saved Auth
+                      </button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-1">
+                        Registry Username
+                      </label>
+                      <input
+                        type="text"
+                        autoComplete="off"
+                        value={settingsRegistryUsername}
+                        onChange={(e) => {
+                          setSettingsRegistryUsername(e.target.value);
+                          setClearSavedRegAuth(false);
+                        }}
+                        placeholder="username"
+                        className={cn(
+                          "w-full px-3 py-2 rounded-lg text-xs font-mono border focus:outline-none focus:border-cyan-400",
+                          isDark ? "bg-[#111115] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
+                        )}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-1">
+                        Password / Access Token
+                      </label>
+                      <div className="relative flex items-center">
+                        <input
+                          type={showSettingsRegPwd ? "text" : "password"}
+                          autoComplete="off"
+                          value={settingsRegistryPassword}
+                          onChange={(e) => {
+                            setSettingsRegistryPassword(e.target.value);
+                            setClearSavedRegAuth(false);
+                          }}
+                          placeholder={hasSavedRegistryPwd && !clearSavedRegAuth ? "•••••••• (leave blank to keep)" : "ghp_... / dckr_pat_..."}
+                          className={cn(
+                            "w-full pl-3 pr-9 py-2 rounded-lg text-xs font-mono border focus:outline-none focus:border-cyan-400",
+                            isDark ? "bg-[#111115] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
+                          )}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowSettingsRegPwd((v) => !v)}
+                          className="absolute right-2.5 text-zinc-500 hover:text-zinc-300 cursor-pointer"
+                        >
+                          {showSettingsRegPwd ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+            <>
             {/* Dockerfile Source Toggle */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
               <span className={cn("text-[11px] font-semibold uppercase tracking-wider", isDark ? "text-zinc-400" : "text-slate-600")}>
@@ -1993,6 +2170,34 @@ export default function AppPlatformDetailPage({
                 </div>
               </div>
             )}
+            </>
+            )}
+
+            {/* Pre-Deploy / Release Command (Database Migration) */}
+            <div className={cn("p-4 rounded-xl border space-y-2", isDark ? "bg-[#0a0a0c] border-white/[0.08]" : "bg-slate-50 border-slate-200")}>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <label className={cn("text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5", isDark ? "text-zinc-300" : "text-slate-700")}>
+                  <Rocket className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Pre-Deploy / Release Command (Optional)</span>
+                </label>
+                <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/25">
+                  Auto Abort on Failure
+                </span>
+              </div>
+              <input
+                type="text"
+                value={settingsPreDeployCmd}
+                onChange={(e) => setSettingsPreDeployCmd(e.target.value)}
+                placeholder="e.g. php artisan migrate --force or npx prisma migrate deploy"
+                className={cn(
+                  "w-full px-3.5 py-2.5 rounded-xl text-xs font-mono border transition-colors focus:outline-none focus:border-cyan-400",
+                  isDark ? "bg-[#111115] border-white/10 text-white placeholder-zinc-500" : "bg-white border-slate-200 text-slate-900 placeholder-slate-400"
+                )}
+              />
+              <p className="text-[11px] text-zinc-500">
+                Executed inside an isolated Kubernetes Job before rolling out the new Pod. If this command fails, rollout is aborted so your running app stays online.
+              </p>
+            </div>
           </div>
 
           {/* CARD 2: CUSTOM DOMAIN & SSL ROUTING */}

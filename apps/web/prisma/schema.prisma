@@ -1280,7 +1280,11 @@ model AppPlatformService {
   webhookSecret     String?
   autoDeploy        Boolean   @default(true)
   deployOnPush      Boolean   @default(true)
-  buildMode         String    @default("DOCKERFILE") // "AUTO", "DOCKERFILE", "BUILDPACK"
+  buildMode         String    @default("DOCKERFILE") // "AUTO", "DOCKERFILE", "BUILDPACK", "IMAGE"
+  preDeployCommand  String?
+  dockerImage       String?
+  registryUsername  String?
+  registryPassword  String?
   healthCheckPath   String?
   persistentVolumePath String?
   persistentVolumeGb   Int    @default(0)

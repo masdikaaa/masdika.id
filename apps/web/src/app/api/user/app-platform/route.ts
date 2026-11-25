@@ -8,6 +8,7 @@ import {
   getAppPlatformClusterConfig,
   triggerAppPlatformBuild,
   trackAppPlatformBuildAsync,
+  validateExternalDockerImage,
 } from "@/lib/k8s-app-platform";
 import { APP_PLATFORM_PLANS, getAppPlatformPlan } from "@/lib/app-platform-plans";
 import { assertSufficientCommitmentBalance } from "@/lib/billing-commitment";
@@ -16,7 +17,7 @@ import { getClientIp } from "@/lib/get-ip";
 import { logClientActivity } from "@/lib/activity-log";
 import { isServiceEnabled } from "@/lib/service-availability";
 import { createServiceOrderInvoice } from "@/lib/payg-invoice";
-import { decryptDeterministic } from "@/lib/encryption";
+import { decryptDeterministic, encryptDeterministic } from "@/lib/encryption";
 import crypto from "crypto";
 
 export async function GET(req: NextRequest) {
@@ -39,8 +40,11 @@ export async function GET(req: NextRequest) {
     const enriched = apps.map((app) => {
       const fullDomain = `${app.subdomain}.${baseDomain}`;
       const plan = getAppPlatformPlan(app.planName);
+      const { registryPassword: _regPwd, ...safeApp } = app as any;
       return {
-        ...app,
+        ...safeApp,
+        hasRegistryPassword: Boolean((app as any).registryPassword),
+        gitUrl: (app.gitUrl || "").replace(/\/\/[^/@]+@/, "//"),
         fullDomain,
         publicIp,
         httpsUrl: `https://${fullDomain}`,
@@ -118,6 +122,10 @@ export async function POST(req: NextRequest) {
       rootDirectory = "/",
       buildCommand = "",
       startCommand = "",
+      preDeployCommand = "",
+      dockerImage = "",
+      registryUsername = "",
+      registryPassword = "",
       envVars = "",
       subdomain: customSubdomain = "",
       planCode = "1C1G",
@@ -136,43 +144,75 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "App name must be between 2 and 50 characters." }, { status: 400 });
     }
 
-    // Git URL Validation (public git repos: https:// or git://)
+    const cleanPreDeployCmd = typeof preDeployCommand === "string" ? preDeployCommand.trim() : "";
+    if (cleanPreDeployCmd.length > 1000) {
+      return NextResponse.json({ error: "Pre-deploy command cannot exceed 1000 characters." }, { status: 400 });
+    }
+
+    const requestedBuildMode = typeof body.buildMode === "string" ? body.buildMode.trim().toUpperCase() : "DOCKERFILE";
+    const isImageDeploy =
+      requestedBuildMode === "IMAGE" ||
+      String(buildType || "").trim().toUpperCase() === "IMAGE" ||
+      Boolean(typeof dockerImage === "string" && dockerImage.trim());
+
     let cleanGitUrl = typeof gitUrl === "string" ? gitUrl.trim() : "";
-    if (!cleanGitUrl || !/^(https?|git):\/\/[^\s$.?#].[^\s]*$/.test(cleanGitUrl)) {
-      return NextResponse.json({ error: "Please enter a valid Git repository URL (e.g. https://github.com/username/repository.git)." }, { status: 400 });
+    let cleanDockerImage: string | null = null;
+    let cleanRegistryUsername: string | null = null;
+    let encryptedRegistryPassword: string | null = null;
+
+    if (isImageDeploy) {
+      const rawImage = (typeof dockerImage === "string" && dockerImage.trim()) ? dockerImage.trim() : cleanGitUrl;
+      const validatedImg = validateExternalDockerImage(rawImage);
+      if (!validatedImg.valid || !validatedImg.normalized) {
+        return NextResponse.json({ error: validatedImg.error || "Please enter a valid Docker image reference." }, { status: 400 });
+      }
+      cleanDockerImage = validatedImg.normalized;
+      cleanGitUrl = `docker://${cleanDockerImage}`;
+      if (typeof registryUsername === "string" && registryUsername.trim()) {
+        cleanRegistryUsername = registryUsername.trim();
+      }
+      if (typeof registryPassword === "string" && registryPassword.trim()) {
+        encryptedRegistryPassword = encryptDeterministic(registryPassword.trim());
+      }
+    } else {
+      // Git URL Validation (public git repos: https:// or git://)
+      if (!cleanGitUrl || !/^(https?|git):\/\/[^\s$.?#].[^\s]*$/.test(cleanGitUrl)) {
+        return NextResponse.json({ error: "Please enter a valid Git repository URL (e.g. https://github.com/username/repository.git)." }, { status: 400 });
+      }
+
+      // Automatically inject connected GitHub/GitLab/Bitbucket token if no inline credentials are already present
+      if (user.githubAccessToken && !cleanGitUrl.includes("@")) {
+        try {
+          const decryptedToken = decryptDeterministic(user.githubAccessToken);
+          if (decryptedToken.startsWith("gitlab:") && cleanGitUrl.startsWith("https://gitlab.com/")) {
+            const glTok = decryptedToken.slice("gitlab:".length);
+            cleanGitUrl = cleanGitUrl.replace(
+              "https://gitlab.com/",
+              `https://oauth2:${encodeURIComponent(glTok)}@gitlab.com/`
+            );
+          } else if (decryptedToken.startsWith("bitbucket:") && cleanGitUrl.startsWith("https://bitbucket.org/")) {
+            const bbTok = decryptedToken.slice("bitbucket:".length);
+            cleanGitUrl = cleanGitUrl.replace(
+              "https://bitbucket.org/",
+              `https://x-token-auth:${encodeURIComponent(bbTok)}@bitbucket.org/`
+            );
+          } else if (
+            !decryptedToken.startsWith("gitlab:") &&
+            !decryptedToken.startsWith("bitbucket:") &&
+            cleanGitUrl.startsWith("https://github.com/")
+          ) {
+            cleanGitUrl = cleanGitUrl.replace(
+              "https://github.com/",
+              `https://x-access-token:${encodeURIComponent(decryptedToken)}@github.com/`
+            );
+          }
+        } catch {}
+      }
     }
 
-    // Automatically inject connected GitHub/GitLab/Bitbucket token if no inline credentials are already present
-    if (user.githubAccessToken && !cleanGitUrl.includes("@")) {
-      try {
-        const decryptedToken = decryptDeterministic(user.githubAccessToken);
-        if (decryptedToken.startsWith("gitlab:") && cleanGitUrl.startsWith("https://gitlab.com/")) {
-          const glTok = decryptedToken.slice("gitlab:".length);
-          cleanGitUrl = cleanGitUrl.replace(
-            "https://gitlab.com/",
-            `https://oauth2:${encodeURIComponent(glTok)}@gitlab.com/`
-          );
-        } else if (decryptedToken.startsWith("bitbucket:") && cleanGitUrl.startsWith("https://bitbucket.org/")) {
-          const bbTok = decryptedToken.slice("bitbucket:".length);
-          cleanGitUrl = cleanGitUrl.replace(
-            "https://bitbucket.org/",
-            `https://x-token-auth:${encodeURIComponent(bbTok)}@bitbucket.org/`
-          );
-        } else if (
-          !decryptedToken.startsWith("gitlab:") &&
-          !decryptedToken.startsWith("bitbucket:") &&
-          cleanGitUrl.startsWith("https://github.com/")
-        ) {
-          cleanGitUrl = cleanGitUrl.replace(
-            "https://github.com/",
-            `https://x-access-token:${encodeURIComponent(decryptedToken)}@github.com/`
-          );
-        }
-      } catch {}
-    }
-
-    const cleanBranch = typeof branch === "string" && branch.trim() ? branch.trim() : "main";
+    const cleanBranch = isImageDeploy ? "registry" : (typeof branch === "string" && branch.trim() ? branch.trim() : "main");
     const allowedBuildTypes = [
+      "IMAGE",
       "DOCKERFILE",
       "NODEJS",
       "NEXTJS",
@@ -314,11 +354,15 @@ export async function POST(req: NextRequest) {
             name: cleanName,
             gitUrl: cleanGitUrl,
             branch: cleanBranch,
-            buildType: normalizedBuildType,
+            buildType: isImageDeploy ? "IMAGE" : normalizedBuildType,
             dockerfilePath: dockerfilePath || "Dockerfile",
             rootDirectory: rootDirectory || "/",
-            buildCommand: buildCommand || null,
+            buildCommand: isImageDeploy ? null : (buildCommand || null),
             startCommand: startCommand || null,
+            preDeployCommand: cleanPreDeployCmd || null,
+            dockerImage: cleanDockerImage,
+            registryUsername: cleanRegistryUsername,
+            registryPassword: encryptedRegistryPassword,
             envVars: envVars || null,
             subdomain: resolvedSubdomain,
             host: "app.masdikacloud.my.id",
@@ -335,9 +379,9 @@ export async function POST(req: NextRequest) {
             status: "PROVISIONING",
             lastBuildStatus: "QUEUED",
             webhookSecret,
-            autoDeploy: true,
-            deployOnPush: true,
-            buildMode: (body.buildMode || "DOCKERFILE").toUpperCase().trim(),
+            autoDeploy: !isImageDeploy,
+            deployOnPush: !isImageDeploy,
+            buildMode: isImageDeploy ? "IMAGE" : (body.buildMode || "DOCKERFILE").toUpperCase().trim(),
             healthCheckPath: typeof body.healthCheckPath === "string" && body.healthCheckPath.trim() ? body.healthCheckPath.trim() : null,
             persistentVolumePath: typeof body.persistentVolumePath === "string" && body.persistentVolumePath.trim() ? body.persistentVolumePath.trim() : null,
             persistentVolumeGb: Number(body.persistentVolumeGb) > 0 ? Math.min(50, Math.round(Number(body.persistentVolumeGb))) : 0,
@@ -413,10 +457,13 @@ export async function POST(req: NextRequest) {
     const baseDomain = "app.masdikacloud.my.id";
     const fullDomain = `${resolvedSubdomain}.${baseDomain}`;
 
+    const { registryPassword: _rawRegPwd, ...safeAppRecord } = appRecord as any;
     return NextResponse.json({
       success: true,
       data: {
-        ...appRecord,
+        ...safeAppRecord,
+        hasRegistryPassword: Boolean(appRecord?.registryPassword),
+        gitUrl: (appRecord?.gitUrl || "").replace(/\/\/[^/@]+@/, "//"),
         fullDomain,
         httpsUrl: `https://${fullDomain}`,
         nodePortUrl: `http://206.237.98.230:${port}`,

@@ -14,6 +14,10 @@ export interface AppPlatformRecord {
   rootDirectory?: string | null;
   buildCommand?: string | null;
   startCommand?: string | null;
+  preDeployCommand?: string | null;
+  dockerImage?: string | null;
+  registryUsername?: string | null;
+  registryPassword?: string | null;
   envVars?: string | null;
   healthCheckPath?: string | null;
   persistentVolumePath?: string | null;
@@ -704,7 +708,345 @@ export async function applyKubernetesManifests(kc: k8s.KubeConfig, manifestYaml:
 }
 
 /**
- * Create Kaniko build job in the cluster
+ * Validate external Docker Registry image reference and block internal/loopback/RFC1918 registries (prevents SSRF & cross-tenant registry access).
+ */
+export function validateExternalDockerImage(rawRef: string | null | undefined): {
+  valid: boolean;
+  normalized?: string;
+  registryServer?: string;
+  isDockerHub?: boolean;
+  error?: string;
+} {
+  const cleaned = String(rawRef || '')
+    .trim()
+    .replace(/^docker:\/\//i, '');
+
+  if (!cleaned) {
+    return { valid: false, error: 'Docker image reference is required (e.g. nginx:alpine or ghcr.io/org/app:1.0.0).' };
+  }
+  if (cleaned.length > 255 || /\s/.test(cleaned) || /^https?:\/\//i.test(cleaned)) {
+    return {
+      valid: false,
+      error: 'Invalid Docker image format. Do not include http:// or spaces (example: ghcr.io/org/app:latest).',
+    };
+  }
+  if (!/^[a-zA-Z0-9][a-zA-Z0-9._/-]{0,200}(:[a-zA-Z0-9._-]{1,128}|@sha256:[a-fA-F0-9]{64})?$/.test(cleaned)) {
+    return {
+      valid: false,
+      error: 'Invalid OCI Docker image reference. Allowed format: [registry/]repo[:tag|@sha256:digest].',
+    };
+  }
+  if (cleaned.includes('..') || cleaned.includes('//')) {
+    return { valid: false, error: 'Invalid path traversal in Docker image reference.' };
+  }
+
+  const slashIdx = cleaned.indexOf('/');
+  let registryHost = '';
+  if (slashIdx !== -1) {
+    const firstSeg = cleaned.slice(0, slashIdx).toLowerCase();
+    if (firstSeg.includes('.') || firstSeg.includes(':') || firstSeg === 'localhost') {
+      registryHost = firstSeg;
+    }
+  }
+
+  if (registryHost) {
+    const hostOnly = registryHost.split(':')[0];
+    const isForbiddenHost =
+      hostOnly === 'localhost' ||
+      hostOnly === '0.0.0.0' ||
+      hostOnly === '::1' ||
+      hostOnly.startsWith('127.') ||
+      hostOnly.startsWith('10.') ||
+      hostOnly.startsWith('192.168.') ||
+      hostOnly.startsWith('169.254.') ||
+      /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostOnly) ||
+      hostOnly.endsWith('.local') ||
+      hostOnly.endsWith('.internal') ||
+      hostOnly.endsWith('.svc') ||
+      hostOnly.endsWith('.cluster.local');
+
+    if (isForbiddenHost) {
+      return {
+        valid: false,
+        error: 'Internal, private, or cluster-local registry addresses are not permitted.',
+      };
+    }
+  }
+
+  const isDockerHub = !registryHost || registryHost === 'docker.io' || registryHost === 'index.docker.io' || registryHost === 'registry-1.docker.io';
+  return {
+    valid: true,
+    normalized: cleaned,
+    registryServer: isDockerHub ? 'https://index.docker.io/v1/' : registryHost,
+    isDockerHub,
+  };
+}
+
+export function isDirectImageApp(app: Pick<AppPlatformRecord, 'buildMode' | 'buildType' | 'dockerImage' | 'gitUrl'>): boolean {
+  return (
+    app.buildMode === 'IMAGE' ||
+    app.buildType === 'IMAGE' ||
+    Boolean(app.dockerImage && app.dockerImage.trim()) ||
+    Boolean(app.gitUrl && app.gitUrl.trim().toLowerCase().startsWith('docker://'))
+  );
+}
+
+export function resolveAppPlatformContainerImage(app: AppPlatformRecord, imageTag: string): string {
+  if (isDirectImageApp(app)) {
+    const tagCandidate = validateExternalDockerImage(imageTag);
+    if (tagCandidate.valid && tagCandidate.normalized && imageTag !== 'latest') {
+      return tagCandidate.normalized;
+    }
+    const primary = app.dockerImage?.trim() || app.gitUrl.replace(/^docker:\/\//i, '').trim();
+    const validated = validateExternalDockerImage(primary);
+    if (!validated.valid || !validated.normalized) {
+      throw new Error(validated.error || 'Invalid external Docker image.');
+    }
+    return validated.normalized;
+  }
+  return `127.0.0.1:5000/${app.subdomain}:${imageTag}`;
+}
+
+/**
+ * Create, update, or remove Kubernetes imagePullSecret (regcred-<subdomain>) for private registries
+ */
+export async function ensureAppPlatformRegistryPullSecret(app: AppPlatformRecord): Promise<string | null> {
+  const { coreApi } = await getAppPlatformK8sClients();
+  const namespace = app.k8sNamespace || 'app-platform';
+  const secretName = `regcred-${app.subdomain}`;
+
+  if (!isDirectImageApp(app) || !app.registryUsername?.trim() || !app.registryPassword?.trim()) {
+    await (coreApi as any).deleteNamespacedSecret({ name: secretName, namespace }).catch(() => {});
+    return null;
+  }
+
+  let plainPassword = app.registryPassword.trim();
+  try {
+    plainPassword = decryptDeterministic(plainPassword);
+  } catch {}
+
+  const imgRef = app.dockerImage?.trim() || app.gitUrl.replace(/^docker:\/\//i, '').trim();
+  const validated = validateExternalDockerImage(imgRef);
+  if (!validated.valid || !validated.registryServer) {
+    throw new Error(validated.error || 'Invalid Docker image for registry credentials.');
+  }
+
+  const username = app.registryUsername.trim();
+  const authB64 = Buffer.from(`${username}:${plainPassword}`, 'utf8').toString('base64');
+  const authEntry = { username, password: plainPassword, auth: authB64 };
+  const auths: Record<string, typeof authEntry> = {
+    [validated.registryServer]: authEntry,
+  };
+  if (validated.isDockerHub) {
+    auths['docker.io'] = authEntry;
+    auths['registry-1.docker.io'] = authEntry;
+  }
+
+  const dockerConfigB64 = Buffer.from(JSON.stringify({ auths }), 'utf8').toString('base64');
+  const secretBody: k8s.V1Secret = {
+    apiVersion: 'v1',
+    kind: 'Secret',
+    type: 'kubernetes.io/dockerconfigjson',
+    metadata: {
+      name: secretName,
+      namespace,
+      labels: {
+        app: app.subdomain,
+        'app.kubernetes.io/managed-by': 'masdika-app-platform',
+      },
+    },
+    data: {
+      '.dockerconfigjson': dockerConfigB64,
+    },
+  };
+
+  try {
+    const existingRes: any = await (coreApi as any).readNamespacedSecret({ name: secretName, namespace });
+    const existing = existingRes?.body ?? existingRes;
+    if (existing?.metadata?.resourceVersion) {
+      secretBody.metadata!.resourceVersion = existing.metadata.resourceVersion;
+    }
+    await (coreApi as any).replaceNamespacedSecret({ name: secretName, namespace, body: secretBody });
+  } catch {
+    await (coreApi as any).createNamespacedSecret({ namespace, body: secretBody });
+  }
+
+  return secretName;
+}
+
+function buildAppPlatformRuntimeEnvs(app: AppPlatformRecord, publicDomain: string): { name: string; value: string }[] {
+  const appHost = `${app.subdomain}.${publicDomain}`;
+  const userEnvs = parseEnvVarsToK8sEnv(app.envVars);
+  const envMap = new Map<string, string>([
+    ['PORT', String(app.appPort)],
+    ['NODE_ENV', 'production'],
+    ['APP_SUBDOMAIN', app.subdomain],
+    ['APP_DOMAIN', appHost],
+    ['APP_URL', `https://${appHost}`],
+  ]);
+  for (const e of userEnvs) envMap.set(e.name, e.value);
+  return Array.from(envMap.entries()).map(([name, value]) => ({ name, value }));
+}
+
+/**
+ * Execute Pre-Deploy / Release Command (e.g. php artisan migrate --force, npx prisma migrate deploy)
+ * in a short-lived Kubernetes Job BEFORE rolling out the new Pod. If exitCode != 0, rollout is aborted!
+ */
+export async function runAppPlatformPreDeployJob(
+  app: AppPlatformRecord,
+  imageTag: string,
+  deploymentId?: number,
+  existingLogs = ''
+): Promise<{ ok: boolean; combinedLogs: string }> {
+  const preCmd = (app.preDeployCommand || '').trim();
+  if (!preCmd) {
+    return { ok: true, combinedLogs: existingLogs };
+  }
+
+  const { batchApi, coreApi } = await getAppPlatformK8sClients();
+  const config = await getAppPlatformClusterConfig();
+  const publicDomain = config.publicDomain || 'app.masdikacloud.my.id';
+  const namespace = app.k8sNamespace || 'app-platform';
+  const containerImage = resolveAppPlatformContainerImage(app, imageTag);
+  const pullSecretName = await ensureAppPlatformRegistryPullSecret(app);
+  const finalEnvs = buildAppPlatformRuntimeEnvs(app, publicDomain);
+
+  const jobName = `predeploy-${app.subdomain}-${Date.now().toString(36)}`.slice(0, 62);
+  const headerLine = `\n[Pre-Deploy Release Command] Running: ${preCmd}\n`;
+  let combinedLogs = `${existingLogs}${headerLine}`;
+
+  const flushLogs = async (txt: string) => {
+    await prisma.appPlatformService
+      .update({
+        where: { id: app.id },
+        data: { lastBuildLog: txt.slice(-25000) },
+      })
+      .catch(() => {});
+    if (deploymentId) {
+      await prisma.appPlatformDeployment
+        .update({
+          where: { id: deploymentId },
+          data: { buildLogs: txt.slice(-50000) },
+        })
+        .catch(() => {});
+    }
+  };
+
+  await flushLogs(combinedLogs);
+
+  const cpuLimM = Math.max(500, Math.round(app.cpuShares * 1000));
+  const memLimMi = Math.max(512, app.memoryMb);
+
+  const jobManifest: k8s.V1Job = {
+    apiVersion: 'batch/v1',
+    kind: 'Job',
+    metadata: {
+      name: jobName,
+      namespace,
+      labels: {
+        'build.app-platform/app': app.subdomain,
+        'app.kubernetes.io/managed-by': 'masdika-app-platform',
+        'build.app-platform/phase': 'pre-deploy',
+      },
+    },
+    spec: {
+      ttlSecondsAfterFinished: 120,
+      backoffLimit: 0,
+      activeDeadlineSeconds: 180,
+      template: {
+        metadata: {
+          labels: {
+            'build.app-platform/app': app.subdomain,
+            job: jobName,
+          },
+        },
+        spec: {
+          restartPolicy: 'Never',
+          ...(pullSecretName ? { imagePullSecrets: [{ name: pullSecretName }] } : {}),
+          containers: [
+            {
+              name: 'pre-deploy',
+              image: containerImage,
+              imagePullPolicy: 'Always',
+              command: ['sh', '-c', preCmd],
+              env: finalEnvs,
+              resources: {
+                requests: { cpu: '100m', memory: '128Mi' },
+                limits: { cpu: `${cpuLimM}m`, memory: `${memLimMi}Mi` },
+              },
+            },
+          ],
+        },
+      },
+    },
+  };
+
+  await (batchApi as any).createNamespacedJob({ namespace, body: jobManifest });
+
+  const startMs = Date.now();
+  const maxWaitMs = 185 * 1000;
+  let lastContainerOut = '';
+
+  try {
+    while (Date.now() - startMs < maxWaitMs) {
+      await new Promise((r) => setTimeout(r, 2000));
+
+      const jobRes: any = await (batchApi as any).readNamespacedJob({ name: jobName, namespace }).catch(() => null);
+      const jobObj = jobRes?.body ?? jobRes;
+
+      const podsRes: any = await (coreApi as any)
+        .listNamespacedPod({ namespace, labelSelector: `job-name=${jobName}` })
+        .catch(() => null);
+      const pod = (podsRes?.items || podsRes?.body?.items || [])[0];
+
+      if (pod?.metadata?.name) {
+        try {
+          const logRes: any = await (coreApi as any).readNamespacedPodLog({
+            name: pod.metadata.name,
+            namespace,
+            container: 'pre-deploy',
+          });
+          const txt = typeof logRes === 'string' ? logRes : logRes?.body || '';
+          if (txt && txt !== lastContainerOut) {
+            lastContainerOut = txt;
+            combinedLogs = `${existingLogs}${headerLine}${txt.trim()}\n`;
+            await flushLogs(combinedLogs);
+          }
+        } catch {}
+
+        // Detect ImagePullBackOff / ErrImagePull fast so user doesn't wait 3 minutes
+        const waitingReason = pod.status?.containerStatuses?.[0]?.state?.waiting?.reason || '';
+        const waitingMsg = pod.status?.containerStatuses?.[0]?.state?.waiting?.message || '';
+        if (waitingReason === 'ImagePullBackOff' || waitingReason === 'ErrImagePull' || waitingReason === 'InvalidImageName') {
+          combinedLogs = `${combinedLogs}\n[Pre-Deploy Error] Failed to pull container image (${waitingReason}): ${waitingMsg}\n`;
+          await flushLogs(combinedLogs);
+          return { ok: false, combinedLogs };
+        }
+      }
+
+      if (jobObj?.status?.succeeded && jobObj.status.succeeded > 0) {
+        combinedLogs = `${combinedLogs}[Pre-Deploy Release Command] Succeeded. Proceeding with rollout...\n`;
+        await flushLogs(combinedLogs);
+        return { ok: true, combinedLogs };
+      }
+
+      if (jobObj?.status?.failed && jobObj.status.failed > 0) {
+        combinedLogs = `${combinedLogs}\n[Pre-Deploy Release Failed] Command exited with non-zero status. Rollout aborted to protect active service!\n`;
+        await flushLogs(combinedLogs);
+        return { ok: false, combinedLogs };
+      }
+    }
+
+    combinedLogs = `${combinedLogs}\n[Pre-Deploy Release Timeout] Command exceeded 180s limit. Rollout aborted!\n`;
+    await flushLogs(combinedLogs);
+    return { ok: false, combinedLogs };
+  } finally {
+    await cleanupFinishedBuildJob(namespace, jobName).catch(() => {});
+  }
+}
+
+/**
+ * Create BuildKit build job in the cluster (or prepare Direct Registry Image deployment)
  */
 export async function triggerAppPlatformBuild(
   app: AppPlatformRecord,
@@ -712,6 +1054,52 @@ export async function triggerAppPlatformBuild(
   commitHash?: string | null,
   imageTagOverride?: string | null
 ): Promise<{ jobName: string; imageTag: string; deploymentId?: number }> {
+  // Direct Docker Registry Image Mode (No Git Clone / No BuildKit needed)
+  if (isDirectImageApp(app)) {
+    const rawImg = app.dockerImage?.trim() || app.gitUrl.replace(/^docker:\/\//i, '').trim();
+    const validated = validateExternalDockerImage(rawImg);
+    if (!validated.valid || !validated.normalized) {
+      throw new Error(validated.error || 'Invalid Docker image reference.');
+    }
+    const resolvedImage = validated.normalized;
+    let activeDepId = deploymentId;
+    if (!activeDepId && app.id) {
+      try {
+        const depCount = await prisma.appPlatformDeployment.count({ where: { appId: app.id } });
+        const created = await prisma.appPlatformDeployment.create({
+          data: {
+            appId: app.id,
+            deploymentNumber: depCount + 1,
+            branch: 'registry',
+            trigger: 'INITIAL',
+            status: 'BUILDING',
+            imageTag: resolvedImage,
+            commitMessage: `Deploy image ${resolvedImage}`,
+          },
+        });
+        activeDepId = created.id;
+      } catch {}
+    } else if (activeDepId) {
+      await prisma.appPlatformDeployment
+        .update({
+          where: { id: activeDepId },
+          data: { status: 'BUILDING', imageTag: resolvedImage },
+        })
+        .catch(() => {});
+    }
+
+    await prisma.appPlatformService.update({
+      where: { id: app.id },
+      data: {
+        status: app.status === 'RUNNING' ? 'RUNNING' : 'BUILDING',
+        lastBuildStatus: 'BUILDING',
+        lastBuildLog: `[Direct Registry Deploy] Preparing container image ${resolvedImage}...\n`,
+      },
+    });
+
+    return { jobName: 'direct-image', imageTag: resolvedImage, deploymentId: activeDepId };
+  }
+
   const { batchApi, coreApi } = await getAppPlatformK8sClients();
   const namespace = app.k8sNamespace || 'app-platform';
   const timestamp = Date.now();
@@ -997,7 +1385,8 @@ export async function applyAppPlatformResources(
   const config = await getAppPlatformClusterConfig();
   const namespace = app.k8sNamespace || 'app-platform';
   const name = `app-${app.subdomain}`;
-  const clusterImage = `127.0.0.1:5000/${app.subdomain}:${imageTag}`;
+  const clusterImage = resolveAppPlatformContainerImage(app, imageTag);
+  const pullSecretName = await ensureAppPlatformRegistryPullSecret(app);
   const publicDomain = config.publicDomain || 'app.masdikacloud.my.id';
   const appHost = `${app.subdomain}.${publicDomain}`;
 
@@ -1127,6 +1516,7 @@ export async function applyAppPlatformResources(
           },
         },
         spec: {
+          ...(pullSecretName ? { imagePullSecrets: [{ name: pullSecretName }] } : {}),
           ...(hasPersistentVolume
             ? {
                 volumes: [
@@ -1317,7 +1707,7 @@ export async function syncAppPlatformBuildProgress(appId: number): Promise<void>
 
   const runPromise = (async () => {
     const app = await prisma.appPlatformService.findUnique({ where: { id: appId } });
-    if (!app) return;
+    if (!app || isDirectImageApp(app as any)) return;
 
     const isStillBuilding =
       app.status === 'BUILDING' ||
@@ -1452,6 +1842,58 @@ export async function syncAppPlatformBuildProgress(appId: number): Promise<void>
     }
 
     const markSuccess = async (finalTag: string) => {
+      let finalLogs = podLogs;
+
+      // Run Pre-Deploy / Release Command BEFORE updating active Deployment
+      if (app.preDeployCommand && app.preDeployCommand.trim()) {
+        const preRes = await runAppPlatformPreDeployJob(
+          app as any,
+          finalTag,
+          latestDep?.id,
+          podLogs || app.lastBuildLog || ''
+        );
+        finalLogs = preRes.combinedLogs;
+        if (!preRes.ok) {
+          if (jobName) {
+            await cleanupFinishedBuildJob(namespace, jobName).catch(() => {});
+          }
+          const hasPriorRunningDep = await prisma.appPlatformDeployment
+            .count({
+              where: {
+                appId,
+                status: 'SUCCESS',
+                ...(latestDep ? { id: { not: latestDep.id } } : {}),
+              },
+            })
+            .catch(() => 0);
+
+          await prisma.appPlatformService
+            .update({
+              where: { id: appId },
+              data: {
+                status: hasPriorRunningDep > 0 ? 'RUNNING' : 'ERROR',
+                lastBuildStatus: 'FAILED',
+                lastBuildLog: finalLogs.slice(-25000),
+              },
+            })
+            .catch(() => {});
+
+          if (latestDep) {
+            await prisma.appPlatformDeployment
+              .update({
+                where: { id: latestDep.id },
+                data: {
+                  status: 'FAILED',
+                  buildLogs: finalLogs.slice(-50000),
+                  durationSeconds: elapsedSec,
+                },
+              })
+              .catch(() => {});
+          }
+          return;
+        }
+      }
+
       await applyAppPlatformResources(app as any, finalTag);
 
       await prisma.appPlatformService
@@ -1461,6 +1903,7 @@ export async function syncAppPlatformBuildProgress(appId: number): Promise<void>
             status: 'RUNNING',
             lastBuildStatus: 'SUCCESS',
             lastDeployedAt: new Date(),
+            ...(finalLogs ? { lastBuildLog: finalLogs.slice(-25000) } : {}),
             k8sDeployment: `app-${app.subdomain}`,
             k8sService: `app-${app.subdomain}`,
             k8sIngress: `app-${app.subdomain}`,
@@ -1474,7 +1917,7 @@ export async function syncAppPlatformBuildProgress(appId: number): Promise<void>
             where: { id: latestDep.id },
             data: {
               status: 'SUCCESS',
-              ...(podLogs ? { buildLogs: podLogs.slice(-50000) } : {}),
+              ...(finalLogs ? { buildLogs: finalLogs.slice(-50000) } : {}),
               imageTag: finalTag,
               durationSeconds: elapsedSec,
             },
@@ -1612,6 +2055,117 @@ export async function trackAppPlatformBuildAsync(
   const pollIntervalMs = 4000; // poll every 4 seconds
   const startTime = Date.now();
   const namespace = 'app-platform';
+
+  // Direct Docker Registry Image rollout (no BuildKit Job)
+  if (jobName === 'direct-image') {
+    const app = await prisma.appPlatformService.findUnique({ where: { id: appId } });
+    if (!app) return;
+
+    const baseLog = `[Direct Registry Deploy] Target image: ${imageTag}\n`;
+    try {
+      let combinedLogs = baseLog;
+      if (app.preDeployCommand && app.preDeployCommand.trim()) {
+        const preRes = await runAppPlatformPreDeployJob(app as any, imageTag, deploymentId, baseLog);
+        combinedLogs = preRes.combinedLogs;
+        if (!preRes.ok) {
+          const hasPriorRunningDep = await prisma.appPlatformDeployment
+            .count({
+              where: {
+                appId,
+                status: 'SUCCESS',
+                ...(deploymentId ? { id: { not: deploymentId } } : {}),
+              },
+            })
+            .catch(() => 0);
+
+          await prisma.appPlatformService.update({
+            where: { id: appId },
+            data: {
+              status: hasPriorRunningDep > 0 ? 'RUNNING' : 'ERROR',
+              lastBuildStatus: 'FAILED',
+              lastBuildLog: combinedLogs.slice(-25000),
+            },
+          });
+          if (deploymentId) {
+            await prisma.appPlatformDeployment
+              .update({
+                where: { id: deploymentId },
+                data: {
+                  status: 'FAILED',
+                  buildLogs: combinedLogs.slice(-50000),
+                  durationSeconds: Math.max(1, Math.round((Date.now() - startTime) / 1000)),
+                },
+              })
+              .catch(() => {});
+          }
+          return;
+        }
+      }
+
+      const { ingressUrl } = await applyAppPlatformResources(app as any, imageTag);
+      const finalLogs = `${combinedLogs}[Direct Registry Deploy] Container deployed and routed to ${ingressUrl}\n`;
+      const elapsedSec = Math.max(1, Math.round((Date.now() - startTime) / 1000));
+
+      await prisma.appPlatformService.update({
+        where: { id: appId },
+        data: {
+          status: 'RUNNING',
+          lastBuildStatus: 'SUCCESS',
+          lastDeployedAt: new Date(),
+          lastBuildLog: finalLogs.slice(-25000),
+          k8sDeployment: `app-${app.subdomain}`,
+          k8sService: `app-${app.subdomain}`,
+          k8sIngress: `app-${app.subdomain}`,
+        },
+      });
+
+      if (deploymentId) {
+        await prisma.appPlatformDeployment
+          .update({
+            where: { id: deploymentId },
+            data: {
+              status: 'SUCCESS',
+              imageTag,
+              buildLogs: finalLogs.slice(-50000),
+              durationSeconds: elapsedSec,
+            },
+          })
+          .catch(() => {});
+      }
+    } catch (directErr: any) {
+      const errMsg = directErr?.body?.message || directErr?.message || String(directErr);
+      const failLogs = `${baseLog}[Deploy Error] ${errMsg}\n`;
+      const hasPriorRunningDep = await prisma.appPlatformDeployment
+        .count({
+          where: {
+            appId,
+            status: 'SUCCESS',
+            ...(deploymentId ? { id: { not: deploymentId } } : {}),
+          },
+        })
+        .catch(() => 0);
+
+      await prisma.appPlatformService
+        .update({
+          where: { id: appId },
+          data: {
+            status: hasPriorRunningDep > 0 ? 'RUNNING' : 'ERROR',
+            lastBuildStatus: 'FAILED',
+            lastBuildLog: failLogs.slice(-25000),
+          },
+        })
+        .catch(() => {});
+      if (deploymentId) {
+        await prisma.appPlatformDeployment
+          .update({
+            where: { id: deploymentId },
+            data: { status: 'FAILED', buildLogs: failLogs.slice(-50000) },
+          })
+          .catch(() => {});
+      }
+    }
+    return;
+  }
 
   try {
     // Immediate first sync so git-clone / PodInitializing state appears within 2 seconds
@@ -2045,18 +2599,24 @@ export async function deleteAppPlatformResources(app: AppPlatformRecord): Promis
     await (netApi as any).deleteNamespacedIngress({ name, namespace });
   } catch {}
 
-  // 4. Delete TLS secret
+  // 4. Delete TLS & private registry pull secrets
   try {
     await (coreApi as any).deleteNamespacedSecret({ name: `tls-${subdomain}`, namespace });
   } catch {}
+  try {
+    await (coreApi as any).deleteNamespacedSecret({ name: `regcred-${subdomain}`, namespace });
+  } catch {}
 
-  // 5. Delete all Build Jobs for this app
+  // 5. Delete all Build & Pre-Deploy Jobs for this app
   try {
     const jobsRes: any = await (batchApi as any).listNamespacedJob({ namespace });
     const jobs = jobsRes?.items || jobsRes?.body?.items || [];
     for (const j of jobs) {
       const jName = j?.metadata?.name || '';
-      const isMatch = jName.startsWith(`build-${subdomain}-`) || j?.metadata?.labels?.['build.app-platform/app'] === subdomain;
+      const isMatch =
+        jName.startsWith(`build-${subdomain}-`) ||
+        jName.startsWith(`predeploy-${subdomain}-`) ||
+        j?.metadata?.labels?.['build.app-platform/app'] === subdomain;
       if (isMatch) {
         await (batchApi as any).deleteNamespacedJob({
           name: jName,

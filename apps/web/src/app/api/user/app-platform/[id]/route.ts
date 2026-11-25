@@ -6,10 +6,11 @@ import {
   getAppPlatformClusterConfig,
   applyAppPlatformResources,
   syncAppPlatformBuildProgress,
+  validateExternalDockerImage,
 } from "@/lib/k8s-app-platform";
 import { getAppPlatformPlan } from "@/lib/app-platform-plans";
 import { logClientActivity } from "@/lib/activity-log";
-import { decryptDeterministic } from "@/lib/encryption";
+import { decryptDeterministic, encryptDeterministic } from "@/lib/encryption";
 
 function stripGitUrlCredentials(url: string): string {
   return (url || "").replace(/\/\/[^/@]+@/, "//");
@@ -74,10 +75,12 @@ export async function GET(
     const fullDomain = `${app.subdomain}.${baseDomain}`;
     const plan = getAppPlatformPlan(app.planName);
 
+    const { registryPassword: _rawRegPwd, ...safeApp } = app as any;
     return NextResponse.json({
       success: true,
       data: {
-        ...app,
+        ...safeApp,
+        hasRegistryPassword: Boolean(app.registryPassword),
         gitUrl: stripGitUrlCredentials(app.gitUrl),
         fullDomain,
         publicIp,
@@ -141,6 +144,11 @@ export async function PATCH(
       rootDirectory,
       buildCommand,
       startCommand,
+      preDeployCommand,
+      dockerImage,
+      registryUsername,
+      registryPassword,
+      clearRegistryAuth,
       envVars,
       customDomain,
       appPort,
@@ -204,6 +212,39 @@ export async function PATCH(
     if (rootDirectory !== undefined) dataToUpdate.rootDirectory = rootDirectory ? rootDirectory.trim() : "/";
     if (buildCommand !== undefined) dataToUpdate.buildCommand = buildCommand;
     if (startCommand !== undefined) dataToUpdate.startCommand = startCommand;
+    if (preDeployCommand !== undefined) {
+      const cleanPre = preDeployCommand ? String(preDeployCommand).trim() : "";
+      if (cleanPre.length > 1000) {
+        return NextResponse.json({ error: "Pre-deploy command cannot exceed 1000 characters." }, { status: 400 });
+      }
+      dataToUpdate.preDeployCommand = cleanPre || null;
+    }
+    if (dockerImage !== undefined) {
+      const rawImg = dockerImage ? String(dockerImage).trim() : "";
+      if (rawImg) {
+        const validated = validateExternalDockerImage(rawImg);
+        if (!validated.valid || !validated.normalized) {
+          return NextResponse.json({ error: validated.error || "Invalid Docker image." }, { status: 400 });
+        }
+        dataToUpdate.dockerImage = validated.normalized;
+        dataToUpdate.gitUrl = `docker://${validated.normalized}`;
+        dataToUpdate.buildMode = "IMAGE";
+        dataToUpdate.buildType = "IMAGE";
+      } else {
+        dataToUpdate.dockerImage = null;
+      }
+    }
+    if (clearRegistryAuth === true) {
+      dataToUpdate.registryUsername = null;
+      dataToUpdate.registryPassword = null;
+    } else {
+      if (registryUsername !== undefined) {
+        dataToUpdate.registryUsername = registryUsername ? String(registryUsername).trim() : null;
+      }
+      if (typeof registryPassword === "string" && registryPassword.trim()) {
+        dataToUpdate.registryPassword = encryptDeterministic(registryPassword.trim());
+      }
+    }
     if (envVars !== undefined) dataToUpdate.envVars = envVars;
     if (customDomain !== undefined) dataToUpdate.customDomain = customDomain ? customDomain.trim().toLowerCase() : null;
     if (appPort && !isNaN(parseInt(appPort, 10))) dataToUpdate.appPort = parseInt(appPort, 10);

@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { parseEnvVarsToK8sEnv } from '../k8s-app-platform';
+import {
+  parseEnvVarsToK8sEnv,
+  validateExternalDockerImage,
+  isDirectImageApp,
+  resolveAppPlatformContainerImage,
+} from '../k8s-app-platform';
 import { APP_PLATFORM_PLANS, getAppPlatformPlan } from '../app-platform-plans';
 import { getInvoiceDisplayInfo } from '../invoice-display';
 
@@ -94,6 +99,67 @@ describe('App Platform Engine & Capabilities', () => {
       expect(info.specs.some(s => s.kind === 'cpu' && s.label === '1 vCPU')).toBe(true);
       expect(info.specs.some(s => s.kind === 'ram' && s.label === '1 GB RAM')).toBe(true);
       expect(info.specs.some(s => s.kind === 'disk' && s.label === '10 GB SSD')).toBe(true);
+    });
+  });
+
+  describe('Direct Docker Registry Validation & Multi-Tenant Security', () => {
+    it('accepts valid public and custom OCI registry image references', () => {
+      expect(validateExternalDockerImage('nginx:alpine')).toEqual({
+        valid: true,
+        normalized: 'nginx:alpine',
+        registryServer: 'https://index.docker.io/v1/',
+        isDockerHub: true,
+      });
+
+      expect(validateExternalDockerImage('docker://ghcr.io/masdika/api-service:v1.2.3')).toEqual({
+        valid: true,
+        normalized: 'ghcr.io/masdika/api-service:v1.2.3',
+        registryServer: 'ghcr.io',
+        isDockerHub: false,
+      });
+
+      const digestRef = 'registry.gitlab.com/group/sub/app@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+      expect(validateExternalDockerImage(digestRef)).toEqual({
+        valid: true,
+        normalized: digestRef,
+        registryServer: 'registry.gitlab.com',
+        isDockerHub: false,
+      });
+    });
+
+    it('blocks internal cluster registry, loopback, RFC1918 IPs, and invalid URLs', () => {
+      expect(validateExternalDockerImage('127.0.0.1:5000/other-tenant:latest').valid).toBe(false);
+      expect(validateExternalDockerImage('localhost:5000/secret-app:v1').valid).toBe(false);
+      expect(validateExternalDockerImage('192.168.79.20:5000/app:latest').valid).toBe(false);
+      expect(validateExternalDockerImage('10.0.0.12/internal:latest').valid).toBe(false);
+      expect(validateExternalDockerImage('172.16.5.4/internal:latest').valid).toBe(false);
+      expect(validateExternalDockerImage('registry.app-platform.svc.cluster.local/app:1').valid).toBe(false);
+      expect(validateExternalDockerImage('https://hub.docker.com/_/nginx').valid).toBe(false);
+      expect(validateExternalDockerImage('nginx:alpine; rm -rf /').valid).toBe(false);
+    });
+
+    it('resolves container image accurately for both Direct Registry and BuildKit apps', () => {
+      const directApp: any = {
+        id: 1,
+        subdomain: 'demo-reg',
+        buildMode: 'IMAGE',
+        buildType: 'IMAGE',
+        dockerImage: 'ghcr.io/org/web:1.0.0',
+        gitUrl: 'docker://ghcr.io/org/web:1.0.0',
+      };
+      expect(isDirectImageApp(directApp)).toBe(true);
+      expect(resolveAppPlatformContainerImage(directApp, 'latest')).toBe('ghcr.io/org/web:1.0.0');
+      expect(resolveAppPlatformContainerImage(directApp, 'ghcr.io/org/web:0.9.0')).toBe('ghcr.io/org/web:0.9.0');
+
+      const gitApp: any = {
+        id: 2,
+        subdomain: 'demo-git',
+        buildMode: 'DOCKERFILE',
+        buildType: 'DOCKERFILE',
+        gitUrl: 'https://github.com/laravel/laravel.git',
+      };
+      expect(isDirectImageApp(gitApp)).toBe(false);
+      expect(resolveAppPlatformContainerImage(gitApp, 'b12345')).toBe('127.0.0.1:5000/demo-git:b12345');
     });
   });
 });
