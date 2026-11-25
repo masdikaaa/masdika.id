@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: {
-    absolute: "App Platform - Git & Docker Container PaaS on Kubernetes | Masdika",
+    absolute: "App Platform - Git & Docker Container PaaS on Kubernetes",
   },
   description:
     "Deploy web apps and APIs from Git repositories (BuildKit Dockerfile) or directly from Docker Registries (Docker Hub, GHCR). Includes Pre-Deploy release migrations, CI/CD webhooks, automated Let's Encrypt SSL, persistent storage, and live Linux PTY web shell.",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     canonical: "https://www.masdika.id/app-platform",
   },
   openGraph: {
-    title: "App Platform - Git & Docker Container PaaS on Kubernetes | Masdika",
+    title: "App Platform - Git & Docker Container PaaS on Kubernetes",
     description:
       "Deploy from Git (BuildKit Dockerfile) or directly from Docker Registries (Docker Hub, GHCR) with Pre-Deploy migrations, CI/CD webhooks, Let's Encrypt SSL, and live Linux PTY terminal.",
     url: "https://www.masdika.id/app-platform",
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "App Platform - Git & Docker Container PaaS on Kubernetes | Masdika",
+    title: "App Platform - Git & Docker Container PaaS on Kubernetes",
     description:
       "Deploy from Git (BuildKit Dockerfile) or directly from Docker Registries (Docker Hub, GHCR) with Pre-Deploy migrations, CI/CD webhooks, Let's Encrypt SSL, and live Linux PTY terminal.",
     images: [OG_IMAGE_PATH],
