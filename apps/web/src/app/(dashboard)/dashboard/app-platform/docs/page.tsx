@@ -61,19 +61,25 @@ export default function AppPlatformDocsPage() {
 
   return (
     <div className="space-y-6 max-w-full pb-16">
+      {/* Back Navigation */}
+      <div>
+        <Link
+          href="/dashboard/app-platform"
+          className={cn(
+            "inline-flex items-center gap-2 text-xs font-medium px-3.5 py-2 rounded-xl transition-all border w-fit cursor-pointer",
+            isDark
+              ? "text-zinc-400 hover:text-white bg-[#0a0a0c] hover:bg-white/[0.04] border-white/[0.08] hover:border-cyan-500/40"
+              : "text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border-slate-200/90 shadow-2xs"
+          )}
+        >
+          <ChevronLeft className="w-4 h-4" />
+          Back to App Platform
+        </Link>
+      </div>
+
       {/* Top Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1.5 min-w-0">
-          <Link
-            href="/dashboard/app-platform"
-            className={cn(
-              "inline-flex items-center gap-1.5 text-xs font-semibold transition-colors",
-              isDark ? "text-zinc-400 hover:text-cyan-400" : "text-slate-600 hover:text-cyan-700"
-            )}
-          >
-            <ChevronLeft className="w-3.5 h-3.5" />
-            <span>Back to App Platform</span>
-          </Link>
 
           <div className="flex flex-wrap items-center gap-2.5">
             <h1 className={cn("text-xl sm:text-2xl font-bold tracking-tight", isDark ? "text-white" : "text-slate-900")}>

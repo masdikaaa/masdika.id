@@ -1072,8 +1072,8 @@ export default function NewAppPlatformPage() {
                   : "bg-cyan-50 text-cyan-700 border-cyan-200"
               )}
             >
-              <Globe className="w-3 h-3 shrink-0" />
-              Automated Kaniko Build
+              <SiDocker className="w-3 h-3 shrink-0" />
+              BuildKit Container Build
             </span>
           </div>
           <p
