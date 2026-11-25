@@ -56,7 +56,7 @@ export default function AppPlatformDocsPage() {
 
   const codeBlockClass = cn(
     "rounded-xl border p-3.5 font-mono text-xs overflow-x-auto leading-relaxed",
-    isDark ? "bg-[#090d16] border-white/10 text-emerald-300" : "bg-slate-900 border-slate-800 text-emerald-300"
+    isDark ? "bg-[#090d16] border-white/10 text-zinc-200" : "bg-slate-900 border-slate-800 text-slate-100"
   );
 
   return (
@@ -104,15 +104,15 @@ export default function AppPlatformDocsPage() {
       {/* Main Responsive Grid: Sidebar TOC + Content */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Sticky Table of Contents */}
-        <aside className="lg:col-span-3 lg:sticky lg:top-24">
+        <aside className="lg:col-span-3 lg:sticky lg:top-24 min-w-0">
           <div className={cn(
-            "rounded-2xl border p-3 space-y-1",
+            "rounded-2xl border p-3 space-y-1.5",
             isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90"
           )}>
-            <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+            <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-zinc-500">
               On This Page
             </div>
-            <div className="flex lg:flex-col gap-1 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-col gap-1.5">
               {DOC_SECTIONS.map((sec) => {
                 const Icon = sec.icon;
                 const active = activeNav === sec.id;
@@ -122,7 +122,7 @@ export default function AppPlatformDocsPage() {
                     href={`#${sec.id}`}
                     onClick={() => setActiveNav(sec.id)}
                     className={cn(
-                      "px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-colors whitespace-nowrap shrink-0",
+                      "px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-colors min-w-0",
                       active
                         ? isDark
                           ? "bg-cyan-500/15 text-cyan-400 border border-cyan-500/30"
@@ -133,7 +133,7 @@ export default function AppPlatformDocsPage() {
                     )}
                   >
                     <Icon className="w-3.5 h-3.5 shrink-0" />
-                    <span>{sec.label}</span>
+                    <span className="truncate">{sec.label}</span>
                   </a>
                 );
               })}
@@ -142,7 +142,7 @@ export default function AppPlatformDocsPage() {
         </aside>
 
         {/* Documentation Body */}
-        <div className="lg:col-span-9 space-y-6">
+        <div className="lg:col-span-9 space-y-6 min-w-0">
           {/* 1. Overview */}
           <section id="overview" className={cardClass}>
             <div className="flex items-center gap-2.5 border-b pb-3 border-white/[0.06]">
@@ -165,7 +165,7 @@ export default function AppPlatformDocsPage() {
                 </p>
               </div>
               <div className={subCardClass}>
-                <div className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                <div className="text-xs font-bold text-cyan-400 flex items-center gap-1.5">
                   <ShieldCheck className="w-4 h-4" />
                   <span>Zero-Downtime Rollouts</span>
                 </div>
@@ -174,7 +174,7 @@ export default function AppPlatformDocsPage() {
                 </p>
               </div>
               <div className={subCardClass}>
-                <div className="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+                <div className="text-xs font-bold text-cyan-400 flex items-center gap-1.5">
                   <Cpu className="w-4 h-4" />
                   <span>Flexible Hourly PAYG</span>
                 </div>
@@ -210,7 +210,7 @@ export default function AppPlatformDocsPage() {
 
               <div className={subCardClass}>
                 <h3 className={cn("text-sm font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
-                  <Server className="w-4 h-4 text-[#2496ED]" />
+                  <Server className="w-4 h-4 text-cyan-400" />
                   <span>Option B: Docker Registry (No Git Needed)</span>
                 </h3>
                 <ul className="space-y-1.5 text-xs text-zinc-400 list-disc pl-4">
@@ -341,7 +341,7 @@ python manage.py migrate --noinput`}
           {/* 6. Troubleshooting */}
           <section id="troubleshooting" className={cardClass}>
             <div className="flex items-center gap-2.5 border-b pb-3 border-white/[0.06]">
-              <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />
+              <AlertTriangle className="w-5 h-5 text-cyan-400 shrink-0" />
               <h2 className={cn("text-base sm:text-lg font-bold", isDark ? "text-white" : "text-slate-900")}>
                 6. Best Practices &amp; Troubleshooting
               </h2>
@@ -364,7 +364,7 @@ python manage.py migrate --noinput`}
               ].map((faq) => (
                 <div key={faq.q} className={subCardClass}>
                   <div className={cn("text-xs sm:text-sm font-bold flex items-start gap-2", isDark ? "text-white" : "text-slate-900")}>
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
                     <span>{faq.q}</span>
                   </div>
                   <p className="text-xs text-zinc-400 leading-relaxed pl-6">{faq.a}</p>
