@@ -33,6 +33,11 @@ const ROOT_REPOS: MirrorIndexEntry[] = [
   { name: "debian/", href: "/debian/", isDir: true, size: "-", lastSync: "Active Cache" },
   { name: "debian-cd/", href: "/debian-cd/", isDir: true, size: "-", lastSync: "ISO Releases" },
   { name: "debian-security/", href: "/debian-security/", isDir: true, size: "-", lastSync: "Active Cache" },
+  { name: "kali/", href: "/kali/", isDir: true, size: "-", lastSync: "Kali Rolling" },
+  { name: "kali-images/", href: "/kali-images/", isDir: true, size: "-", lastSync: "Kali ISO Releases" },
+  { name: "parrot/", href: "/parrot/", isDir: true, size: "-", lastSync: "Packages & ISO" },
+  { name: "linuxmint/", href: "/linuxmint/", isDir: true, size: "-", lastSync: "Active Cache" },
+  { name: "linuxmint-iso/", href: "/linuxmint-iso/", isDir: true, size: "-", lastSync: "Mint ISO Releases" },
   { name: "almalinux/", href: "/almalinux/", isDir: true, size: "-", lastSync: "Packages & ISO" },
   { name: "rocky/", href: "/rocky/", isDir: true, size: "-", lastSync: "Packages & ISO" },
   { name: "centos-stream/", href: "/centos-stream/", isDir: true, size: "-", lastSync: "Stream 9 & 10" },
@@ -44,6 +49,8 @@ const ROOT_REPOS: MirrorIndexEntry[] = [
   { name: "openbsd/", href: "/openbsd/", isDir: true, size: "-", lastSync: "Packages & ISO" },
 ];
 
+const PAGE_SIZE = 50;
+
 export default function MirrorBrowsePage() {
   const params = useParams<{ slug?: string[] }>();
   const slug = params?.slug || [];
@@ -54,9 +61,11 @@ export default function MirrorBrowsePage() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     setSearch("");
+    setPage(1);
     if (slug.length === 0) {
       setEntries(ROOT_REPOS);
       setLoading(false);
@@ -96,6 +105,13 @@ export default function MirrorBrowsePage() {
     if (!q) return entries;
     return entries.filter((e) => e.name.toLowerCase().includes(q));
   }, [entries, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const pagedEntries = useMemo(
+    () => filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE),
+    [filtered, safePage]
+  );
 
   const parentHref =
     slug.length > 1 ? `/mirror/browse/${slug.slice(0, -1).join("/")}` : slug.length === 1 ? "/mirror/browse" : null;
@@ -209,14 +225,14 @@ export default function MirrorBrowsePage() {
                     </tr>
                   )}
 
-                  {filtered.length === 0 ? (
+                  {pagedEntries.length === 0 ? (
                     <tr>
                       <td colSpan={3} className="py-12 text-center text-slate-500 dark:text-zinc-500 text-xs">
                         No files or directories match your search.
                       </td>
                     </tr>
                   ) : (
-                    filtered.map((entry) => (
+                    pagedEntries.map((entry) => (
                       <tr
                         key={entry.href}
                         className="hover:bg-slate-50 dark:hover:bg-cyan-500/[0.06] transition-colors"
@@ -255,7 +271,7 @@ export default function MirrorBrowsePage() {
             </div>
           ) : (
             <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {filtered.map((entry) =>
+              {pagedEntries.map((entry) =>
                 entry.isDir ? (
                   <Link
                     key={entry.href}
@@ -291,6 +307,35 @@ export default function MirrorBrowsePage() {
                   </a>
                 )
               )}
+            </div>
+          )}
+
+          {!loading && !error && totalPages > 1 && (
+            <div className="px-4 sm:px-6 py-3 border-t border-[var(--border-primary)] bg-[var(--surface-secondary)] flex flex-wrap items-center justify-between gap-3 text-xs">
+              <span className="text-[var(--text-secondary)]">
+                Showing {(safePage - 1) * PAGE_SIZE + 1}-{Math.min(safePage * PAGE_SIZE, filtered.length)} of {filtered.length} items
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={safePage === 1}
+                  className="px-3 py-1.5 rounded-lg border border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-primary)] font-semibold disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+                >
+                  Prev
+                </button>
+                <span className="font-mono text-[var(--text-secondary)]">
+                  Page {safePage} / {totalPages}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={safePage === totalPages}
+                  className="px-3 py-1.5 rounded-lg border border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-primary)] font-semibold disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
             </div>
           )}
         </div>
