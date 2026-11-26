@@ -1074,123 +1074,144 @@ export default function DnsPublicClient({
           </div>
         </section>
 
-        {/* 4. ARCHITECTURE */}
-        <section className="relative z-10 space-y-8">
-          <div className="text-center max-w-2xl mx-auto">
-            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-2 block">
-              ROUTING ARCHITECTURE
-            </span>
-            <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] leading-tight">
-              Built for Low Latency &amp; Protection
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {[
-              {
-                step: "01",
-                icon: ShieldCheck,
-                title: "dnsdist Edge Router",
-                desc: "Inspects incoming UDP/TCP 53 and DoH queries, enforces per-IP rate limits, drops ANY/AXFR abuse, and serves hot responses directly from packet cache.",
-              },
-              {
-                step: "02",
-                icon: Activity,
-                title: "SafeDNS Recursor",
-                desc: "Resolves uncached recursive lookups with DNSSEC validation and filters blocked or malicious hostnames in real time.",
-              },
-              {
-                step: "03",
-                icon: Globe,
-                title: "LMDB Authoritative Backend",
-                desc: "Serves your custom domain zones from a zero-copy LMDB memory-mapped backend with instant API updates, automatic SOA serial increments, and DNSSEC signing.",
-              },
-            ].map((s) => (
-              <div
-                key={s.step}
-                className="p-6 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] space-y-3 shadow-sm"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-xs font-bold text-cyan-600 dark:text-cyan-400">STEP {s.step}</span>
-                  <s.icon className="w-4 h-4 text-cyan-500" />
-                </div>
-                <h3 className="text-base font-bold text-[var(--text-primary)]">{s.title}</h3>
-                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{s.desc}</p>
+        {/* 4. ARCHITECTURE & KEY ADVANTAGES (No repetitive card grids) */}
+        <section className="relative z-10 space-y-16 sm:space-y-20">
+          {/* 4A. Connected Packet Flow Pipeline */}
+          <div className="space-y-8">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+              <div>
+                <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-2 block">
+                  ROUTING ARCHITECTURE
+                </span>
+                <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] leading-tight">
+                  Built for Low Latency &amp; Protection
+                </h2>
               </div>
-            ))}
-          </div>
-        </section>
+              <p className="text-sm text-[var(--text-secondary)] max-w-md">
+                Every DNS packet passes through three specialized layers before leaving our edge.
+              </p>
+            </div>
 
-        {/* 4.5 KEY ADVANTAGES & FAST PROPAGATION */}
-        <section className="relative z-10 space-y-8">
-          <div className="text-center max-w-2xl mx-auto">
-            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-2 block">
-              WHY MASDIKA DNS
-            </span>
-            <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] leading-tight">
-              Instant Propagation &amp; Carrier-Grade Stack
-            </h2>
-            <p className="text-sm sm:text-base text-[var(--text-secondary)] mt-2">
-              Engineered for rapid global DNS propagation, sub-millisecond cached lookups, and automated security at
-              every layer.
-            </p>
+            <div className="rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)]/70 divide-y md:divide-y-0 md:divide-x divide-[var(--border-subtle)] grid grid-cols-1 md:grid-cols-3">
+              {[
+                {
+                  step: "01",
+                  icon: ShieldCheck,
+                  title: "dnsdist Edge Router",
+                  desc: "Inspects incoming UDP/TCP 53 and DoH queries, enforces per-IP rate limits, drops ANY/AXFR abuse, and serves hot responses directly from RAM packet cache.",
+                },
+                {
+                  step: "02",
+                  icon: Activity,
+                  title: "SafeDNS Recursor",
+                  desc: "Resolves uncached recursive lookups with DNSSEC validation and blocks 637K+ phishing, malware, and restricted hostnames in real time.",
+                },
+                {
+                  step: "03",
+                  icon: Globe,
+                  title: "LMDB Authoritative Backend",
+                  desc: "Serves custom domain zones from a zero-copy LMDB memory-mapped backend with 0s API updates, automatic SOA serials, and ECDSA DNSSEC.",
+                },
+              ].map((s) => (
+                <div key={s.step} className="p-6 sm:p-8 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs font-bold text-cyan-600 dark:text-cyan-400">
+                      LAYER {s.step}
+                    </span>
+                    <s.icon className="w-4 h-4 text-cyan-500" />
+                  </div>
+                  <h3 className="text-base font-bold text-[var(--text-primary)]">{s.title}</h3>
+                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{s.desc}</p>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {[
-              {
-                icon: Zap,
-                badge: "0s Sync",
-                title: "Instant Record Propagation",
-                desc: "Every A, AAAA, CNAME, MX, or TXT change pushed via the Masdika DNS Console activates immediately on ns1/ns2 with 60s default TTL and automatic SOA serial updates.",
-              },
-              {
-                icon: Server,
-                badge: "LMDB Engine",
-                title: "Zero-Copy Memory-Mapped Storage",
-                desc: "Authoritative zones run on PowerDNS LMDB shards, eliminating SQL lock contention so thousands of domains and concurrent writes resolve at memory speed.",
-              },
-              {
-                icon: Activity,
-                badge: "Serve-Stale",
-                title: "500K RAM Packet Cache",
-                desc: "Repeated queries hit dnsdist's C++ in-memory packet cache in under 1 ms, while serve-stale keeps responses flowing even if an upstream domain slows down.",
-              },
-              {
-                icon: ShieldCheck,
-                badge: "637K+ Rules",
-                title: "Daily-Synced SafeDNS Filtering",
-                desc: "Blocks phishing, malware, and restricted hostnames at the edge using a daily-updated SQLite WITHOUT ROWID blocklist index.",
-              },
-              {
-                icon: Lock,
-                badge: "ECDSA P-256",
-                title: "1-Click DNSSEC & Encrypted DoH",
-                desc: "Protect domain integrity with modern ECDSAP256SHA256 DNSSEC signing and route client lookups over TLS via RFC 8484 DNS-over-HTTPS.",
-              },
-              {
-                icon: Shield,
-                badge: "Anti-DDoS",
-                title: "Reflection & Zone-Leak Shield",
-                desc: "Enforces ANY-to-TCP shunting, blocks unauthorized AXFR/IXFR zone transfers, and applies per-IP QPS rate limiting directly at the edge.",
-              },
-            ].map((feat) => (
-              <div
-                key={feat.title}
-                className="p-6 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] space-y-3 shadow-sm hover:border-cyan-500/35 transition-colors"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-500 shrink-0">
+          {/* 4B. Editorial Asymmetric Advantages & Fast Propagation */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+            <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-28">
+              <div>
+                <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-2 block">
+                  WHY MASDIKA DNS
+                </span>
+                <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] leading-tight">
+                  Instant Propagation &amp; Carrier-Grade Stack
+                </h2>
+                <p className="text-sm sm:text-base text-[var(--text-secondary)] mt-3 leading-relaxed">
+                  Engineered for rapid global DNS propagation, sub-millisecond cached lookups, and automated security
+                  without SQL bottlenecks.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 pt-2 border-t border-[var(--border-subtle)]">
+                <div>
+                  <div className="text-2xl sm:text-3xl font-black font-mono text-cyan-500">0s</div>
+                  <div className="text-xs text-[var(--text-secondary)] mt-0.5">Zone &amp; record API sync</div>
+                </div>
+                <div>
+                  <div className="text-2xl sm:text-3xl font-black font-mono text-[var(--text-primary)]">&lt;1 ms</div>
+                  <div className="text-xs text-[var(--text-secondary)] mt-0.5">500K RAM packet cache</div>
+                </div>
+                <div>
+                  <div className="text-2xl sm:text-3xl font-black font-mono text-[var(--text-primary)]">60s</div>
+                  <div className="text-xs text-[var(--text-secondary)] mt-0.5">Fast default record TTL</div>
+                </div>
+                <div>
+                  <div className="text-2xl sm:text-3xl font-black font-mono text-cyan-500">637K+</div>
+                  <div className="text-xs text-[var(--text-secondary)] mt-0.5">Daily-synced blocklist</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="lg:col-span-7 divide-y divide-[var(--border-subtle)] border-y border-[var(--border-subtle)]">
+              {[
+                {
+                  icon: Zap,
+                  tag: "0s Sync",
+                  title: "Instant Record Propagation",
+                  desc: "Every A, AAAA, CNAME, MX, or TXT change pushed from the DNS Console activates immediately on ns1/ns2 with automatic SOA serial increments.",
+                },
+                {
+                  icon: Server,
+                  tag: "LMDB Engine",
+                  title: "Zero-Copy Memory-Mapped Storage",
+                  desc: "Authoritative zones run on PowerDNS LMDB shards, eliminating SQL lock contention at high concurrent write and read loads.",
+                },
+                {
+                  icon: Activity,
+                  tag: "Serve-Stale",
+                  title: "Resilient In-Memory Packet Cache",
+                  desc: "Repeated queries hit dnsdist's C++ packet cache in under 1 ms, while serve-stale keeps responses flowing if an upstream slows down.",
+                },
+                {
+                  icon: Lock,
+                  tag: "ECDSA P-256",
+                  title: "1-Click DNSSEC & Encrypted DoH",
+                  desc: "Sign zones with modern ECDSAP256SHA256 keys and route client lookups over TLS via RFC 8484 DNS-over-HTTPS.",
+                },
+                {
+                  icon: Shield,
+                  tag: "Anti-DDoS",
+                  title: "Reflection & Zone-Leak Shield",
+                  desc: "Enforces ANY-to-TCP shunting, refuses unauthorized AXFR/IXFR transfers, and applies per-IP QPS rate limiting at the edge.",
+                },
+              ].map((feat) => (
+                <div key={feat.title} className="py-5 flex items-start gap-4">
+                  <div className="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-500 shrink-0 mt-0.5">
                     <feat.icon className="w-4 h-4" />
                   </div>
-                  <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 font-mono text-[10px] font-semibold text-cyan-600 dark:text-cyan-400 whitespace-nowrap">
-                    {feat.badge}
-                  </span>
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <h3 className="text-sm sm:text-base font-bold text-[var(--text-primary)]">{feat.title}</h3>
+                      <span className="font-mono text-[11px] font-semibold text-cyan-600 dark:text-cyan-400">
+                        {feat.tag}
+                      </span>
+                    </div>
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{feat.desc}</p>
+                  </div>
                 </div>
-                <h3 className="text-base font-bold text-[var(--text-primary)]">{feat.title}</h3>
-                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{feat.desc}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </section>
 
