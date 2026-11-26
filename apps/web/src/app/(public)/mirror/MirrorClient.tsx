@@ -11,9 +11,9 @@ import {
   HardDrive,
   RefreshCw,
   ShieldCheck,
-  Terminal,
 } from "lucide-react";
-import { SectionOrnaments, PageOrnaments } from "@/components/ui/PremiumBackground";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
 import { HeroAvatarFrame } from "@/components/ui/HeroAvatarFrame";
 
 const MIRROR_BASE = "https://mirror.masdika.id";
@@ -187,95 +187,99 @@ export default function MirrorClient() {
   const activeSnippet = DISTROS.find((d) => d.id === activeTab)?.snippet || DISTROS[0].snippet;
 
   return (
-    <div className="relative overflow-hidden">
-      <PageOrnaments />
+    <div className="flex flex-col min-h-screen pt-28 sm:pt-36 md:pt-40 pb-10 sm:pb-14 overflow-x-hidden bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300 relative">
+      {/* Background Glow (identical to AppPlatformClient) */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div
+          className="absolute -top-[10%] left-1/2 -translate-x-1/2 w-[900px] h-[520px] rounded-full opacity-[0.12] dark:opacity-[0.18] blur-[140px]"
+          style={{ background: "radial-gradient(circle, #06b6d4 0%, transparent 70%)" }}
+        />
+      </div>
 
-      {/* Hero */}
-      <section className="relative pt-24 pb-14 sm:pt-28 sm:pb-16">
-        <SectionOrnaments variant="hero" />
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-500/25 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-[11px] font-bold uppercase tracking-wider mb-5">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400" />
-              <span>Public Linux Repository Mirror</span>
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1 space-y-16 sm:space-y-24">
+        {/* HERO SECTION */}
+        <section className="relative pt-0 pb-4 sm:pb-8 flex items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-start w-full">
+            <div className="max-w-2xl relative z-30 lg:pt-20">
+              <div className="mb-8">
+                <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase whitespace-nowrap">
+                  LINUX &amp; BSD MIRROR · MIRROR.MASDIKA.ID
+                </Badge>
+              </div>
+
+              <h1 className="text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-4 text-[var(--text-primary)]">
+                Fast Package Cache. <br />
+                <span className="bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent">
+                  Direct ISO Mirror.
+                </span>
+              </h1>
+
+              <p className="text-lg md:text-xl mb-10 max-w-xl leading-relaxed text-[var(--text-secondary)] font-normal">
+                High-speed, GPG-verified package caching and ISO releases for Ubuntu, Debian, AlmaLinux, Rocky, CentOS
+                Stream, EPEL, Arch Linux, Alpine, FreeBSD, and OpenBSD.
+              </p>
+
+              <div className="flex flex-wrap items-center gap-4">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  href="/mirror/browse"
+                  rightIcon={<ArrowRight className="w-4 h-4" />}
+                >
+                  Browse Repositories
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  href="/mirror/browse/ubuntu-releases"
+                  leftIcon={<Disc className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />}
+                >
+                  Download ISO
+                </Button>
+              </div>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.08] mb-4">
-              Masdika Linux
-              <span className="block text-cyan-600 dark:text-cyan-400">Repository Mirror</span>
-            </h1>
-
-            <p className="max-w-xl text-sm sm:text-base text-slate-600 dark:text-zinc-400 leading-relaxed mb-8">
-              High-speed, GPG-verified package caching and ISO mirror for Ubuntu, Debian, AlmaLinux, Rocky, CentOS
-              Stream, EPEL, Arch Linux, Alpine, FreeBSD, and OpenBSD at{" "}
-              <code className="font-mono text-cyan-600 dark:text-cyan-400">mirror.masdika.id</code>.
-            </p>
-
-            <div className="flex flex-wrap items-center gap-3">
-              <Link
-                href="/mirror/browse"
-                className="px-5 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 text-sm font-bold inline-flex items-center gap-2 transition-colors shadow-sm"
-              >
-                <FolderOpen className="w-4 h-4" />
-                <span>Browse Repositories</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-
-              <Link
-                href="/mirror/browse/ubuntu-releases"
-                className="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0c0c0e] hover:bg-slate-50 dark:hover:bg-white/5 text-slate-800 dark:text-zinc-200 text-sm font-semibold inline-flex items-center gap-2 transition-colors"
-              >
-                <Disc className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />
-                <span>Download ISO</span>
-              </Link>
-
-              <a
-                href="#setup"
-                className="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0c0c0e] hover:bg-slate-50 dark:hover:bg-white/5 text-slate-800 dark:text-zinc-200 text-sm font-semibold inline-flex items-center gap-2 transition-colors"
-              >
-                <Terminal className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />
-                <span>Quick Setup</span>
-              </a>
+            <div className="relative flex items-center justify-center mt-6 lg:mt-0 lg:self-center">
+              <HeroAvatarFrame
+                imageSrc="/images/mirror-hero.webp"
+                imageAlt="Masdika Linux Repository & ISO Mirror"
+                imageWidth={1230}
+                imageHeight={1278}
+                badges={[
+                  { icon: HardDrive, label: "Distributions", value: "Linux & BSD Mirrors" },
+                  { icon: RefreshCw, label: "Metadata Sync", value: "5-Minute Refresh" },
+                  { icon: Disc, label: "ISO Images", value: "Direct Full-Speed Stream" },
+                  { icon: ShieldCheck, label: "Verification", value: "GPG Signature Preserved" },
+                ]}
+              />
             </div>
           </div>
+        </section>
 
-          <div className="relative flex items-center justify-center mt-4 lg:mt-0">
-            <HeroAvatarFrame
-              imageSrc="/images/mirror-hero.webp"
-              imageAlt="Masdika Linux Repository & ISO Mirror"
-              imageWidth={1230}
-              imageHeight={1278}
-              badges={[
-                { icon: HardDrive, label: "Distributions", value: "Ubuntu, Debian, Alpine" },
-                { icon: RefreshCw, label: "Metadata Sync", value: "5-Minute Refresh" },
-                { icon: Disc, label: "ISO Images", value: "Direct Full-Speed Stream" },
-                { icon: ShieldCheck, label: "Verification", value: "GPG Signature Preserved" },
-              ]}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Supported Distributions */}
-      <section id="mirrors" className="py-10">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="flex flex-wrap items-baseline justify-between gap-2 mb-6">
-            <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Supported Distributions &amp; ISO Images
+        {/* SUPPORTED DISTRIBUTIONS */}
+        <section id="mirrors" className="relative z-10 space-y-8">
+          <div className="text-center max-w-2xl mx-auto">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-2 block">
+              ALL ACTIVE DISTRIBUTIONS
+            </span>
+            <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] leading-tight">
+              Supported Repositories &amp; ISO Images
             </h2>
-            <span className="text-xs font-mono text-slate-500 dark:text-zinc-500">{MIRROR_BASE}</span>
+            <p className="text-sm sm:text-base text-[var(--text-secondary)] mt-2">
+              Copy the mirror URL for your package manager or browse directories to download ISO images directly.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {DISTROS.map((d) => (
               <article
                 key={d.id}
-                className="rounded-2xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#0a0a0c] p-5 flex flex-col gap-3.5 hover:border-cyan-500/40 transition-colors"
+                className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 flex flex-col gap-4 hover:border-cyan-500/40 transition-colors shadow-sm"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <h3 className="text-base font-bold text-slate-900 dark:text-white">{d.name}</h3>
-                    <span className="text-xs text-slate-500 dark:text-zinc-400">{d.sub}</span>
+                    <h3 className="text-base font-bold text-[var(--text-primary)]">{d.name}</h3>
+                    <span className="text-xs text-[var(--text-secondary)]">{d.sub}</span>
                   </div>
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 shrink-0">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400" />
@@ -289,13 +293,13 @@ export default function MirrorClient() {
                     return (
                       <div
                         key={p}
-                        className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl border border-slate-200 dark:border-white/[0.07] bg-slate-50 dark:bg-white/[0.03] font-mono text-xs"
+                        className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] font-mono text-xs"
                       >
-                        <code className="truncate text-slate-800 dark:text-zinc-200">{full}</code>
+                        <code className="truncate text-[var(--text-primary)]">{full}</code>
                         <button
                           type="button"
                           onClick={() => copyText(full, full)}
-                          className="p-1.5 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-black/40 text-slate-500 dark:text-zinc-400 hover:text-cyan-500 cursor-pointer shrink-0"
+                          className="p-1.5 rounded-lg border border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-secondary)] hover:text-cyan-500 cursor-pointer shrink-0 transition-colors"
                           title="Copy Mirror URL"
                         >
                           {copiedId === full ? (
@@ -309,7 +313,7 @@ export default function MirrorClient() {
                   })}
                 </div>
 
-                <div className="mt-auto pt-2 flex items-center justify-between gap-2 text-xs border-t border-slate-100 dark:border-white/[0.06]">
+                <div className="mt-auto pt-3 flex items-center justify-between gap-2 text-xs border-t border-[var(--border-subtle)]">
                   <Link
                     href={`/mirror/browse${d.paths[0].replace(/\/$/, "")}`}
                     className="font-semibold text-cyan-600 dark:text-cyan-400 hover:underline inline-flex items-center gap-1.5"
@@ -319,7 +323,7 @@ export default function MirrorClient() {
                   </Link>
                   <Link
                     href={d.isoPath}
-                    className="font-semibold text-slate-700 dark:text-zinc-300 hover:text-cyan-600 dark:hover:text-cyan-400 inline-flex items-center gap-1.5"
+                    className="font-semibold text-[var(--text-secondary)] hover:text-cyan-600 dark:hover:text-cyan-400 inline-flex items-center gap-1.5 transition-colors"
                   >
                     <Disc className="w-3.5 h-3.5" />
                     <span>Download ISO</span>
@@ -328,23 +332,24 @@ export default function MirrorClient() {
               </article>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Quick Setup */}
-      <section id="setup" className="py-10">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="flex flex-wrap items-baseline justify-between gap-2 mb-5">
-            <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Quick Client Configuration
-            </h2>
-            <span className="text-xs text-slate-500 dark:text-zinc-500">
-              Copy and run on your server or container
+        {/* QUICK SETUP */}
+        <section id="setup" className="relative z-10 space-y-6">
+          <div className="text-center max-w-2xl mx-auto">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-2 block">
+              CLIENT CONFIGURATION
             </span>
+            <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] leading-tight">
+              Switch in One Command
+            </h2>
+            <p className="text-sm sm:text-base text-[var(--text-secondary)] mt-2">
+              Select your distribution below and run the snippet on your VPS, bare-metal server, or container.
+            </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#08080a] overflow-hidden shadow-xs">
-            <div className="px-4 py-3 border-b border-slate-200 dark:border-white/[0.08] bg-slate-50/80 dark:bg-[#0f0f13] flex flex-wrap items-center justify-between gap-3">
+          <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] overflow-hidden shadow-sm">
+            <div className="px-4 py-3 border-b border-[var(--border-primary)] bg-[var(--surface-secondary)] flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0 max-w-full">
                 <div className="flex items-center gap-1.5 shrink-0">
                   <span className="w-3 h-3 rounded-full bg-[#ff5f56]" />
@@ -360,7 +365,7 @@ export default function MirrorClient() {
                       className={
                         activeTab === d.id
                           ? "px-3 py-1 rounded-lg text-xs font-bold bg-cyan-400 text-slate-950 whitespace-nowrap shrink-0 cursor-pointer"
-                          : "px-3 py-1 rounded-lg text-xs font-semibold text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white whitespace-nowrap shrink-0 cursor-pointer"
+                          : "px-3 py-1 rounded-lg text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] whitespace-nowrap shrink-0 cursor-pointer"
                       }
                     >
                       {d.name}
@@ -372,7 +377,7 @@ export default function MirrorClient() {
               <button
                 type="button"
                 onClick={() => copyText(activeSnippet, "snippet")}
-                className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-xs font-semibold text-slate-700 dark:text-zinc-200 hover:border-cyan-500/40 inline-flex items-center gap-1.5 cursor-pointer shrink-0"
+                className="px-3 py-1.5 rounded-lg border border-[var(--border-primary)] bg-[var(--surface)] text-xs font-semibold text-[var(--text-primary)] hover:border-cyan-500/40 inline-flex items-center gap-1.5 cursor-pointer shrink-0"
               >
                 {copiedId === "snippet" ? (
                   <>
@@ -388,47 +393,48 @@ export default function MirrorClient() {
               </button>
             </div>
 
-            <pre className="p-5 font-mono text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap break-all text-slate-800 dark:text-zinc-200">
+            <pre className="p-5 font-mono text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap break-all text-[var(--text-primary)]">
               {activeSnippet}
             </pre>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Architecture Highlights */}
-      <section className="py-6 pb-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="rounded-2xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#0a0a0c] p-5 space-y-2">
-            <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/25 text-cyan-600 dark:text-cyan-400 flex items-center justify-center">
-              <RefreshCw className="w-4 h-4" />
-            </div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">5-Minute Metadata Sync</h3>
-            <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
-              Repository indexes (InRelease, Packages, repomd.xml, APKINDEX) refresh every 5 minutes so Hash Sum Mismatch never occurs.
-            </p>
+        {/* ARCHITECTURE HIGHLIGHTS */}
+        <section className="relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {[
+              {
+                icon: RefreshCw,
+                title: "5-Minute Metadata Sync",
+                desc: "Repository indexes (InRelease, Packages, repomd.xml, APKINDEX) refresh every 5 minutes so Hash Sum Mismatch never occurs.",
+              },
+              {
+                icon: HardDrive,
+                title: "30-Day Cache + ISO Stream",
+                desc: "Binary packages are cached on fast SSD storage while ISO images stream directly at full speed.",
+              },
+              {
+                icon: ShieldCheck,
+                title: "GPG Signature Preserved",
+                desc: "All packages and Release signatures are proxied untouched from official upstreams and verified natively.",
+              },
+            ].map((item, idx) => (
+              <div
+                key={idx}
+                className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] flex items-start gap-4 shadow-sm hover:border-cyan-500/40 transition-colors"
+              >
+                <div className="w-11 h-11 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
+                  <item.icon className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-bold text-[var(--text-primary)] mb-1">{item.title}</h3>
+                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{item.desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
-
-          <div className="rounded-2xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#0a0a0c] p-5 space-y-2">
-            <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/25 text-cyan-600 dark:text-cyan-400 flex items-center justify-center">
-              <HardDrive className="w-4 h-4" />
-            </div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">30-Day Cache + ISO Stream</h3>
-            <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
-              Binary .deb, .rpm, and .apk packages are cached on fast SSD storage while ISO images stream directly at full speed.
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#0a0a0c] p-5 space-y-2">
-            <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/25 text-cyan-600 dark:text-cyan-400 flex items-center justify-center">
-              <ShieldCheck className="w-4 h-4" />
-            </div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">GPG Signature Preserved</h3>
-            <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
-              All packages and Release signatures are proxied untouched from official ID/SG upstreams and verified by apt, dnf, and apk.
-            </p>
-          </div>
-        </div>
-      </section>
+        </section>
+      </div>
     </div>
   );
 }

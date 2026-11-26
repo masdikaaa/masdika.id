@@ -16,7 +16,6 @@ import {
   RefreshCw,
   Search,
 } from "lucide-react";
-import { PageOrnaments } from "@/components/ui/PremiumBackground";
 
 const MIRROR_ORIGIN = "https://mirror.masdika.id";
 
@@ -116,12 +115,10 @@ export default function MirrorBrowsePage() {
   };
 
   return (
-    <div className="relative pt-24 pb-16 min-h-[75vh]">
-      <PageOrnaments />
-
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-5">
+    <div className="relative pt-28 sm:pt-32 pb-16 min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 space-y-5 relative z-10">
         {/* Breadcrumb */}
-        <div className="flex flex-wrap items-center gap-1.5 text-xs text-slate-500 dark:text-zinc-400">
+        <div className="flex flex-wrap items-center gap-1.5 text-xs text-[var(--text-secondary)]">
           <Link href="/mirror" className="hover:text-cyan-500 font-medium">
             Linux Mirror
           </Link>
@@ -150,29 +147,29 @@ export default function MirrorBrowsePage() {
         </div>
 
         {/* Directory Index Card */}
-        <div className="rounded-2xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#0a0a0c] overflow-hidden shadow-xs">
+        <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] overflow-hidden shadow-sm">
           {/* Top Bar */}
-          <div className="px-4 sm:px-6 py-4 border-b border-slate-200 dark:border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <h1 className="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-white font-mono truncate">
+          <div className="px-4 sm:px-6 py-4 border-b border-[var(--border-primary)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <h1 className="text-base sm:text-lg font-bold tracking-tight text-[var(--text-primary)] font-mono truncate">
               Index of {currentPath}
             </h1>
 
             <div className="flex items-center gap-2 w-full sm:w-auto">
               <div className="relative flex-1 sm:w-64">
-                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
+                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
                 <input
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search this directory..."
-                  className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.04] text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-cyan-400"
+                  className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-xs text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-cyan-400"
                 />
               </div>
 
               <button
                 type="button"
                 onClick={() => setViewMode(viewMode === "list" ? "grid" : "list")}
-                className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.04] text-xs font-semibold text-slate-700 dark:text-zinc-200 hover:border-cyan-500/40 inline-flex items-center gap-1.5 cursor-pointer shrink-0"
+                className="px-3 py-1.5 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-xs font-semibold text-[var(--text-primary)] hover:border-cyan-500/40 inline-flex items-center gap-1.5 cursor-pointer shrink-0"
               >
                 <span>{viewMode === "list" ? "List" : "Grid"}</span>
                 {viewMode === "list" ? <List className="w-3.5 h-3.5" /> : <LayoutGrid className="w-3.5 h-3.5" />}
