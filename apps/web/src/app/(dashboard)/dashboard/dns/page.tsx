@@ -849,11 +849,11 @@ export default function DnsDashboardPage() {
             </div>
 
             {selectedZone && (
-              <div className="flex flex-wrap items-center gap-2.5">
+              <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:items-center gap-2.5 w-full lg:w-auto">
                 {selectedZone.status === "active" ? (
                   <span
                     className={cn(
-                      "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border",
+                      "col-span-2 sm:col-span-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 sm:py-1.5 rounded-xl text-xs font-semibold border",
                       isDark
                         ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
                         : "bg-emerald-50 border-emerald-200 text-emerald-700"
@@ -864,7 +864,7 @@ export default function DnsDashboardPage() {
                 ) : (
                   <span
                     className={cn(
-                      "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border",
+                      "col-span-2 sm:col-span-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 sm:py-1.5 rounded-xl text-xs font-semibold border",
                       isDark
                         ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
                         : "bg-amber-50 border-amber-200 text-amber-700"
@@ -878,7 +878,7 @@ export default function DnsDashboardPage() {
                   onClick={() => fetchRecords(selectedZone.id)}
                   disabled={loadingRecords}
                   className={cn(
-                    "inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border transition-colors",
+                    "inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border transition-colors",
                     isDark
                       ? "bg-white/[0.03] hover:bg-white/[0.07] border-white/[0.08] text-zinc-300"
                       : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700"
@@ -893,7 +893,7 @@ export default function DnsDashboardPage() {
                 <button
                   onClick={() => setShowDnssecModal(true)}
                   className={cn(
-                    "inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border transition-colors",
+                    "inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border transition-colors",
                     dnssec.enabled
                       ? isDark
                         ? "bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/20 text-emerald-400"
@@ -910,7 +910,7 @@ export default function DnsDashboardPage() {
                 <button
                   onClick={() => setDeletingZone(selectedZone)}
                   className={cn(
-                    "inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border transition-colors",
+                    "inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border transition-colors",
                     isDark
                       ? "bg-red-500/10 hover:bg-red-500/20 border-red-500/20 text-red-400"
                       : "bg-red-50 hover:bg-red-100 border-red-200 text-red-600"
@@ -921,7 +921,7 @@ export default function DnsDashboardPage() {
 
                 <button
                   onClick={openAddRecordModal}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-cyan-400 hover:bg-cyan-300 text-zinc-950 transition-colors shadow-md shadow-cyan-500/15"
+                  className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-cyan-400 hover:bg-cyan-300 text-zinc-950 transition-colors shadow-md shadow-cyan-500/15"
                 >
                   <Plus className="w-3.5 h-3.5" /> Add Record
                 </button>
