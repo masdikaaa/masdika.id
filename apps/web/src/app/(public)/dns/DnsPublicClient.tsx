@@ -1074,72 +1074,8 @@ export default function DnsPublicClient({
           </div>
         </section>
 
-        {/* 4. ARCHITECTURE & KEY ADVANTAGES (Borderless timeline + editorial spec list) */}
-        <section className="relative z-10 space-y-16 sm:space-y-20">
-          {/* 4A. Connected Packet Flow Timeline */}
-          <div className="space-y-8">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-              <div>
-                <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-2 block">
-                  ROUTING ARCHITECTURE
-                </span>
-                <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] leading-tight">
-                  Built for Low Latency &amp; Protection
-                </h2>
-              </div>
-              <p className="text-sm text-[var(--text-secondary)] max-w-md">
-                Every DNS packet passes through three specialized layers before leaving our edge.
-              </p>
-            </div>
-
-            <div className="relative pt-4">
-              <div
-                aria-hidden="true"
-                className="hidden md:block absolute top-[34px] left-[16.66%] right-[16.66%] h-px bg-gradient-to-r from-cyan-500/20 via-cyan-400/60 to-cyan-500/20"
-              />
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10 relative">
-                {[
-                  {
-                    step: "01",
-                    icon: ShieldCheck,
-                    title: "dnsdist Edge Router",
-                    desc: "Inspects incoming UDP/TCP 53 and DoH queries, enforces per-IP rate limits, drops ANY/AXFR abuse, and serves hot responses directly from RAM packet cache.",
-                  },
-                  {
-                    step: "02",
-                    icon: Activity,
-                    title: "SafeDNS Recursor",
-                    desc: "Resolves uncached recursive lookups with DNSSEC validation and blocks 637K+ phishing, malware, and restricted hostnames in real time.",
-                  },
-                  {
-                    step: "03",
-                    icon: Globe,
-                    title: "LMDB Authoritative Backend",
-                    desc: "Serves custom domain zones from a zero-copy LMDB memory-mapped backend with 0s API updates, automatic SOA serials, and ECDSA DNSSEC.",
-                  },
-                ].map((s) => (
-                  <div key={s.step} className="relative flex md:flex-col items-start gap-4 md:gap-4">
-                    <div className="relative z-10 flex items-center gap-3 shrink-0">
-                      <div className="w-9 h-9 rounded-full border border-cyan-500/40 bg-[var(--bg-primary)] flex items-center justify-center font-mono text-xs font-bold text-cyan-500 shadow-[0_0_20px_rgba(6,182,212,0.18)]">
-                        {s.step}
-                      </div>
-                      <s.icon className="w-4 h-4 text-cyan-500 md:hidden" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-base font-bold text-[var(--text-primary)]">{s.title}</h3>
-                        <s.icon className="hidden md:inline-block w-3.5 h-3.5 text-cyan-500/80 shrink-0" />
-                      </div>
-                      <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{s.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* 4B. Editorial Asymmetric Advantages & Fast Propagation */}
+        {/* 4. WHY MASDIKA DNS (Editorial Asymmetric Advantages & Fast Propagation) */}
+        <section className="relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
             <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-28">
               <div>
