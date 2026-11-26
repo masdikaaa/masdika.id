@@ -1008,8 +1008,8 @@ export default function DnsPublicClient({
               {
                 step: "03",
                 icon: Globe,
-                title: "Authoritative Backend",
-                desc: "Serves your custom domain zones with instant API updates, automatic SOA serial increments, and DNSSEC signing.",
+                title: "LMDB Authoritative Backend",
+                desc: "Serves your custom domain zones from a zero-copy LMDB memory-mapped backend with instant API updates, automatic SOA serial increments, and DNSSEC signing.",
               },
             ].map((s) => (
               <div
@@ -1022,6 +1022,79 @@ export default function DnsPublicClient({
                 </div>
                 <h3 className="text-base font-bold text-[var(--text-primary)]">{s.title}</h3>
                 <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 4.5 KEY ADVANTAGES & FAST PROPAGATION */}
+        <section className="relative z-10 space-y-8">
+          <div className="text-center max-w-2xl mx-auto">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-2 block">
+              WHY MASDIKA DNS
+            </span>
+            <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] leading-tight">
+              Instant Propagation &amp; Carrier-Grade Stack
+            </h2>
+            <p className="text-sm sm:text-base text-[var(--text-secondary)] mt-2">
+              Engineered for rapid global DNS propagation, sub-millisecond cached lookups, and automated security at
+              every layer.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {[
+              {
+                icon: Zap,
+                badge: "0s Sync",
+                title: "Instant Record Propagation",
+                desc: "Every A, AAAA, CNAME, MX, or TXT change pushed via the Masdika DNS Console activates immediately on ns1/ns2 with 60s default TTL and automatic SOA serial updates.",
+              },
+              {
+                icon: Server,
+                badge: "LMDB Engine",
+                title: "Zero-Copy Memory-Mapped Storage",
+                desc: "Authoritative zones run on PowerDNS LMDB shards, eliminating SQL lock contention so thousands of domains and concurrent writes resolve at memory speed.",
+              },
+              {
+                icon: Activity,
+                badge: "Serve-Stale",
+                title: "500K RAM Packet Cache",
+                desc: "Repeated queries hit dnsdist's C++ in-memory packet cache in under 1 ms, while serve-stale keeps responses flowing even if an upstream domain slows down.",
+              },
+              {
+                icon: ShieldCheck,
+                badge: "637K+ Rules",
+                title: "Daily-Synced SafeDNS Filtering",
+                desc: "Blocks phishing, malware, and restricted hostnames at the edge using a daily-updated SQLite WITHOUT ROWID blocklist index.",
+              },
+              {
+                icon: Lock,
+                badge: "ECDSA P-256",
+                title: "1-Click DNSSEC & Encrypted DoH",
+                desc: "Protect domain integrity with modern ECDSAP256SHA256 DNSSEC signing and route client lookups over TLS via RFC 8484 DNS-over-HTTPS.",
+              },
+              {
+                icon: Shield,
+                badge: "Anti-DDoS",
+                title: "Reflection & Zone-Leak Shield",
+                desc: "Enforces ANY-to-TCP shunting, blocks unauthorized AXFR/IXFR zone transfers, and applies per-IP QPS rate limiting directly at the edge.",
+              },
+            ].map((feat) => (
+              <div
+                key={feat.title}
+                className="p-6 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] space-y-3 shadow-sm hover:border-cyan-500/35 transition-colors"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-500 shrink-0">
+                    <feat.icon className="w-4 h-4" />
+                  </div>
+                  <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 font-mono text-[10px] font-semibold text-cyan-600 dark:text-cyan-400 whitespace-nowrap">
+                    {feat.badge}
+                  </span>
+                </div>
+                <h3 className="text-base font-bold text-[var(--text-primary)]">{feat.title}</h3>
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{feat.desc}</p>
               </div>
             ))}
           </div>
