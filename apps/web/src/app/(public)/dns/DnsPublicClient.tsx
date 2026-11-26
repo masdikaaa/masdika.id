@@ -71,7 +71,7 @@ export default function DnsPublicClient({
   const [activeTab, setActiveTab] = useState<SetupTabId>("linux");
   const [stats, setStats] = useState<DnsStatsSnapshot>(initialStats);
   const [livePolling, setLivePolling] = useState(true);
-  const [streamConnected, setStreamConnected] = useState(false);
+  const [streamConnected, setStreamConnected] = useState<boolean>(Boolean(initialStats.available));
   const [chartRange, setChartRange] = useState<ChartRange>("live");
   const [historyData, setHistoryData] = useState<DnsHistoryResponse | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -148,63 +148,39 @@ export default function DnsPublicClient({
       return;
     }
 
-    let es: EventSource | null = null;
-    let fallbackTimer: ReturnType<typeof setInterval> | null = null;
+    let cancelled = false;
+    let inFlight = false;
 
-    const connect = () => {
-      if (document.hidden) return;
-      es = new EventSource("/api/public/dns/stream");
-      es.onopen = () => setStreamConnected(true);
-      es.onmessage = (event) => {
-        try {
-          const parsed: DnsStatsSnapshot = JSON.parse(event.data);
-          applyStatsUpdate(parsed);
-        } catch {
-          // Ignore malformed SSE payload
+    const tick = async () => {
+      if (cancelled || inFlight || document.hidden) return;
+      inFlight = true;
+      try {
+        const r = await fetch(`/api/public/dns/stats?t=${Date.now()}`, {
+          cache: "no-store",
+        });
+        if (!cancelled && r.ok) {
+          const data: DnsStatsSnapshot = await r.json();
+          applyStatsUpdate(data);
         }
-      };
-      es.onerror = () => {
-        es?.close();
-        es = null;
-        if (!fallbackTimer) {
-          const pollOnce = async () => {
-            if (document.hidden) return;
-            try {
-              const r = await fetch("/api/public/dns/stats", { cache: "no-store" });
-              if (r.ok) applyStatsUpdate(await r.json());
-            } catch {
-              setStreamConnected(false);
-            }
-          };
-          pollOnce();
-          fallbackTimer = setInterval(pollOnce, 1000);
-        }
-      };
-    };
-
-    connect();
-
-    const onVisibility = () => {
-      if (document.hidden) {
-        es?.close();
-        es = null;
-        setStreamConnected(false);
-      } else if (!es) {
-        if (fallbackTimer) {
-          clearInterval(fallbackTimer);
-          fallbackTimer = null;
-        }
-        connect();
+      } catch {
+        if (!cancelled) setStreamConnected(false);
+      } finally {
+        inFlight = false;
       }
     };
 
+    tick();
+    const timer = setInterval(tick, 1000);
+
+    const onVisibility = () => {
+      if (!document.hidden) tick();
+    };
     document.addEventListener("visibilitychange", onVisibility);
 
     return () => {
+      cancelled = true;
+      clearInterval(timer);
       document.removeEventListener("visibilitychange", onVisibility);
-      es?.close();
-      if (fallbackTimer) clearInterval(fallbackTimer);
-      setStreamConnected(false);
     };
   }, [livePolling, applyStatsUpdate]);
 
@@ -430,7 +406,7 @@ export default function DnsPublicClient({
                     Live DNS Edge Telemetry
                   </span>
                   <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 font-mono text-[10px] font-semibold text-cyan-600 dark:text-cyan-400 whitespace-nowrap shrink-0">
-                    {!livePolling ? "Paused" : streamConnected ? "Live Stream · 1s" : "Connecting..."}
+                    {!livePolling ? "Paused" : streamConnected ? "Live · 1s" : "Reconnecting..."}
                   </span>
                 </div>
 
