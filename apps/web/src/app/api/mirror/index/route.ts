@@ -168,6 +168,71 @@ function parseDirectoryHtml(html: string, basePath: string): MirrorIndexEntry[] 
   return entries.sort((a, b) => Number(b.isDir) - Number(a.isDir) || a.name.localeCompare(b.name));
 }
 
+async function fetchMikrotikOfficialVersions(): Promise<MirrorIndexEntry[]> {
+  const channels = [
+    { url: "https://upgrade.mikrotik.com/routeros/NEWESTa7.stable", label: "RouterOS v7 Stable (Official)" },
+    { url: "https://upgrade.mikrotik.com/routeros/NEWESTa7.testing", label: "RouterOS v7 Testing (Official)" },
+    { url: "https://upgrade.mikrotik.com/routeros/NEWEST7.stable", label: "RouterOS v7 Legacy Stable" },
+  ];
+
+  const seen = new Set<string>();
+  const results: MirrorIndexEntry[] = [];
+
+  await Promise.all(
+    channels.map(async (ch) => {
+      try {
+        const c = new AbortController();
+        const t = setTimeout(() => c.abort(), 3500);
+        const r = await fetch(ch.url, { signal: c.signal, cache: "no-store" });
+        clearTimeout(t);
+        if (!r.ok) return;
+        const text = (await r.text()).trim();
+        const ver = text.split(/\s+/)[0];
+        if (!ver || !/^\d+\.\d+(\.\d+)?$/.test(ver) || seen.has(ver)) return;
+        seen.add(ver);
+        const tsNum = Number(text.split(/\s+/)[1]);
+        const lastSync = Number.isFinite(tsNum) && tsNum > 0
+          ? new Date(tsNum * 1000).toISOString().slice(0, 16).replace("T", " ")
+          : ch.label;
+        results.push({
+          name: `${ver}/`,
+          href: `/mikrotik/official/${ver}/`,
+          isDir: true,
+          size: "-",
+          lastSync: `${lastSync} (${ch.label})`,
+        });
+      } catch {}
+    })
+  );
+
+  return results.sort((a, b) => b.name.localeCompare(a.name, undefined, { numeric: true }));
+}
+
+function buildMikrotikVersionFiles(ver: string, basePath: string): MirrorIndexEntry[] {
+  const files = [
+    `mikrotik-${ver}.iso`,
+    `chr-${ver}.img.zip`,
+    `chr-${ver}.vmdk.zip`,
+    `chr-${ver}.vhdx.zip`,
+    `chr-${ver}.ova`,
+    `routeros-${ver}-x86.npk`,
+    `routeros-${ver}-arm.npk`,
+    `routeros-${ver}-arm64.npk`,
+    `routeros-${ver}-mipsbe.npk`,
+    `all_packages-x86-${ver}.zip`,
+    `all_packages-arm64-${ver}.zip`,
+    `netinstall-${ver}.zip`,
+  ];
+
+  return files.map((name) => ({
+    name,
+    href: `${basePath}${name}`,
+    isDir: false,
+    size: "Official",
+    lastSync: `v${ver}`,
+  }));
+}
+
 export async function GET(req: NextRequest) {
   const rawPath = req.nextUrl.searchParams.get("path") || "/ubuntu/";
   const path = normalizePath(rawPath);
@@ -177,6 +242,17 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    if (path === "/mikrotik/official/") {
+      const entries = await fetchMikrotikOfficialVersions();
+      return NextResponse.json({ path, entries });
+    }
+
+    const officialVerMatch = path.match(/^\/mikrotik\/official\/([0-9]+\.[0-9]+(?:\.[0-9]+)?)\/$/);
+    if (officialVerMatch) {
+      const entries = buildMikrotikVersionFiles(officialVerMatch[1], path);
+      return NextResponse.json({ path, entries });
+    }
+
     const res = await fetch(`${MIRROR_ORIGIN}${path}`, {
       headers: {
         "User-Agent": "Masdika-Mirror-Browser/1.0",
@@ -194,6 +270,17 @@ export async function GET(req: NextRequest) {
 
     const html = await res.text();
     const entries = parseDirectoryHtml(html, path);
+
+    if (path === "/mikrotik/") {
+      entries.unshift({
+        name: "official/",
+        href: "/mikrotik/official/",
+        isDir: true,
+        size: "-",
+        lastSync: "Latest RouterOS v7.25+ & CHR (Official)",
+      });
+    }
+
     return NextResponse.json({ path, entries });
   } catch (err: unknown) {
     return NextResponse.json(
