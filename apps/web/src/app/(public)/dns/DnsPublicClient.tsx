@@ -10,7 +10,6 @@ import {
   Lock,
   Pause,
   Play,
-  RefreshCw,
   Server,
   Shield,
   ShieldCheck,
@@ -71,7 +70,7 @@ export default function DnsPublicClient({
   const [activeTab, setActiveTab] = useState<SetupTabId>("linux");
   const [stats, setStats] = useState<DnsStatsSnapshot>(initialStats);
   const [livePolling, setLivePolling] = useState(true);
-  const [isManualRefreshing, setIsManualRefreshing] = useState(false);
+  const [streamConnected, setStreamConnected] = useState(false);
   const [qpsHistory, setQpsHistory] = useState<QpsSample[]>(() =>
     initialStats.available && initialStats.timestamp
       ? [
@@ -103,62 +102,101 @@ export default function DnsPublicClient({
       : null
   );
 
-  const pollStats = useCallback(async (manual = false) => {
-    if (manual) setIsManualRefreshing(true);
-    try {
-      const res = await fetch("/api/public/dns/stats", { cache: "no-store" });
-      if (!res.ok) return;
-      const next: DnsStatsSnapshot = await res.json();
-      setStats(next);
+  const applyStatsUpdate = useCallback((next: DnsStatsSnapshot) => {
+    setStats(next);
 
-      if (next.available && next.timestamp) {
-        const prev = prevSampleRef.current;
-        const nowQueries = next.queries ?? 0;
-        const nowCacheHits = next.cacheHits ?? 0;
-        let qps = 0;
-        let cacheQps = 0;
+    if (next.available && next.timestamp) {
+      const prev = prevSampleRef.current;
+      const nowQueries = next.queries ?? 0;
+      const nowCacheHits = next.cacheHits ?? 0;
+      let qps = 0;
+      let cacheQps = 0;
 
-        if (prev && next.timestamp > prev.timestamp) {
-          const dtSec = Math.max(1, (next.timestamp - prev.timestamp) / 1000);
-          qps = Number((Math.max(0, nowQueries - prev.queries) / dtSec).toFixed(2));
-          cacheQps = Number((Math.max(0, nowCacheHits - prev.cacheHits) / dtSec).toFixed(2));
-        }
-
-        prevSampleRef.current = {
-          queries: nowQueries,
-          cacheHits: nowCacheHits,
-          timestamp: next.timestamp,
-        };
-
-        const timeLabel = new Date(next.timestamp).toLocaleTimeString([], {
-          hour12: false,
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        });
-
-        setQpsHistory((cur) => [...cur.slice(-19), { time: timeLabel, qps, cacheQps }]);
+      if (prev && next.timestamp > prev.timestamp) {
+        const dtSec = Math.max(0.5, (next.timestamp - prev.timestamp) / 1000);
+        qps = Number((Math.max(0, nowQueries - prev.queries) / dtSec).toFixed(2));
+        cacheQps = Number((Math.max(0, nowCacheHits - prev.cacheHits) / dtSec).toFixed(2));
       }
-    } catch {
-      // Ignore transient polling errors
-    } finally {
-      if (manual) setIsManualRefreshing(false);
+
+      prevSampleRef.current = {
+        queries: nowQueries,
+        cacheHits: nowCacheHits,
+        timestamp: next.timestamp,
+      };
+
+      const timeLabel = new Date(next.timestamp).toLocaleTimeString([], {
+        hour12: false,
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+
+      setQpsHistory((cur) => [...cur.slice(-29), { time: timeLabel, qps, cacheQps }]);
     }
   }, []);
 
   useEffect(() => {
-    if (!livePolling) return;
-    const warm = setTimeout(() => {
-      pollStats(false);
-    }, 1500);
-    const id = setInterval(() => {
-      pollStats(false);
-    }, 5000);
-    return () => {
-      clearTimeout(warm);
-      clearInterval(id);
+    if (!livePolling) {
+      setStreamConnected(false);
+      return;
+    }
+
+    let es: EventSource | null = null;
+    let fallbackTimer: ReturnType<typeof setInterval> | null = null;
+
+    const connect = () => {
+      if (document.hidden) return;
+      es = new EventSource("/api/public/dns/stream");
+      es.onopen = () => setStreamConnected(true);
+      es.onmessage = (event) => {
+        try {
+          const parsed: DnsStatsSnapshot = JSON.parse(event.data);
+          applyStatsUpdate(parsed);
+        } catch {
+          // Ignore malformed SSE payload
+        }
+      };
+      es.onerror = () => {
+        setStreamConnected(false);
+        es?.close();
+        es = null;
+        if (!fallbackTimer) {
+          fallbackTimer = setInterval(async () => {
+            if (document.hidden) return;
+            try {
+              const r = await fetch("/api/public/dns/stats", { cache: "no-store" });
+              if (r.ok) applyStatsUpdate(await r.json());
+            } catch {}
+          }, 1500);
+        }
+      };
     };
-  }, [livePolling, pollStats]);
+
+    connect();
+
+    const onVisibility = () => {
+      if (document.hidden) {
+        es?.close();
+        es = null;
+        setStreamConnected(false);
+      } else if (!es) {
+        if (fallbackTimer) {
+          clearInterval(fallbackTimer);
+          fallbackTimer = null;
+        }
+        connect();
+      }
+    };
+
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      es?.close();
+      if (fallbackTimer) clearInterval(fallbackTimer);
+      setStreamConnected(false);
+    };
+  }, [livePolling, applyStatsUpdate]);
 
   const latestQps = qpsHistory.length > 0 ? qpsHistory[qpsHistory.length - 1].qps : 0;
   const maxQps = useMemo(() => {
@@ -337,7 +375,7 @@ export default function DnsPublicClient({
                     Live DNS Edge Telemetry
                   </span>
                   <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 font-mono text-[10px] font-semibold text-cyan-600 dark:text-cyan-400 whitespace-nowrap shrink-0">
-                    {livePolling ? "Realtime API · 5s" : "Paused"}
+                    {!livePolling ? "Paused" : streamConnected ? "Live Stream · 1s" : "Connecting..."}
                   </span>
                 </div>
 
@@ -347,26 +385,15 @@ export default function DnsPublicClient({
                       Updated: {new Date(stats.timestamp).toLocaleTimeString()}
                     </span>
                   )}
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setLivePolling((v) => !v)}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-xs font-semibold text-[var(--text-primary)] hover:border-cyan-500/40 cursor-pointer transition-colors whitespace-nowrap"
-                      title={livePolling ? "Pause live polling" : "Resume live polling"}
-                    >
-                      {livePolling ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-                      <span>{livePolling ? "Pause" : "Live"}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => pollStats(true)}
-                      disabled={isManualRefreshing}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-xs font-semibold text-[var(--text-primary)] hover:border-cyan-500/40 cursor-pointer transition-colors disabled:opacity-60"
-                      title="Refresh DNS stats now"
-                    >
-                      <RefreshCw className={`w-3.5 h-3.5 ${isManualRefreshing ? "animate-spin" : ""}`} />
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setLivePolling((v) => !v)}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-xs font-semibold text-[var(--text-primary)] hover:border-cyan-500/40 cursor-pointer transition-colors whitespace-nowrap"
+                    title={livePolling ? "Pause live stream" : "Resume live stream"}
+                  >
+                    {livePolling ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                    <span>{livePolling ? "Pause" : "Live"}</span>
+                  </button>
                 </div>
               </div>
 
@@ -439,7 +466,7 @@ export default function DnsPublicClient({
                         Realtime Query Throughput (QPS)
                       </div>
                       <div className="text-[11px] text-[var(--text-secondary)] font-mono">
-                        Rolling 5s interval ({qpsHistory.length}/20 samples)
+                        Rolling 1s live stream ({qpsHistory.length}/30 samples)
                       </div>
                     </div>
                     <div className="flex items-center gap-3 text-[11px] font-mono shrink-0">
