@@ -14,6 +14,7 @@ import {
   Terminal,
 } from "lucide-react";
 import { SectionOrnaments, PageOrnaments } from "@/components/ui/PremiumBackground";
+import { HeroAvatarFrame } from "@/components/ui/HeroAvatarFrame";
 
 const MIRROR_BASE = "https://mirror.masdika.id";
 
@@ -114,47 +115,64 @@ export default function MirrorClient() {
       {/* Hero */}
       <section className="relative pt-24 pb-14 sm:pt-28 sm:pb-16">
         <SectionOrnaments variant="hero" />
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-500/25 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-[11px] font-bold uppercase tracking-wider mb-5">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400" />
-            <span>Public Linux Repository Mirror</span>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-500/25 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-[11px] font-bold uppercase tracking-wider mb-5">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400" />
+              <span>Public Linux Repository Mirror</span>
+            </div>
+
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.08] mb-4">
+              Masdika Linux
+              <span className="block text-cyan-600 dark:text-cyan-400">Repository Mirror</span>
+            </h1>
+
+            <p className="max-w-xl text-sm sm:text-base text-slate-600 dark:text-zinc-400 leading-relaxed mb-8">
+              High-speed, GPG-verified package caching and ISO mirror for Ubuntu, Debian, AlmaLinux, Rocky Linux, and
+              Alpine Linux at <code className="font-mono text-cyan-600 dark:text-cyan-400">mirror.masdika.id</code>.
+            </p>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                href="/mirror/browse"
+                className="px-5 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 text-sm font-bold inline-flex items-center gap-2 transition-colors shadow-sm"
+              >
+                <FolderOpen className="w-4 h-4" />
+                <span>Browse Repositories</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+
+              <Link
+                href="/mirror/browse/ubuntu-releases"
+                className="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0c0c0e] hover:bg-slate-50 dark:hover:bg-white/5 text-slate-800 dark:text-zinc-200 text-sm font-semibold inline-flex items-center gap-2 transition-colors"
+              >
+                <Disc className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />
+                <span>Download ISO</span>
+              </Link>
+
+              <a
+                href="#setup"
+                className="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0c0c0e] hover:bg-slate-50 dark:hover:bg-white/5 text-slate-800 dark:text-zinc-200 text-sm font-semibold inline-flex items-center gap-2 transition-colors"
+              >
+                <Terminal className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />
+                <span>Quick Setup</span>
+              </a>
+            </div>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.08] mb-4">
-            Masdika Linux
-            <span className="block text-cyan-600 dark:text-cyan-400">Repository Mirror</span>
-          </h1>
-
-          <p className="max-w-2xl text-sm sm:text-base text-slate-600 dark:text-zinc-400 leading-relaxed mb-8">
-            High-speed, GPG-verified package caching and ISO mirror for Ubuntu, Debian, AlmaLinux, Rocky Linux, and
-            Alpine Linux at <code className="font-mono text-cyan-600 dark:text-cyan-400">mirror.masdika.id</code>.
-          </p>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <Link
-              href="/mirror/browse"
-              className="px-5 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 text-sm font-bold inline-flex items-center gap-2 transition-colors shadow-sm"
-            >
-              <FolderOpen className="w-4 h-4" />
-              <span>Browse Repositories</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-
-            <Link
-              href="/mirror/browse/ubuntu-releases"
-              className="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0c0c0e] hover:bg-slate-50 dark:hover:bg-white/5 text-slate-800 dark:text-zinc-200 text-sm font-semibold inline-flex items-center gap-2 transition-colors"
-            >
-              <Disc className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />
-              <span>Download ISO</span>
-            </Link>
-
-            <a
-              href="#setup"
-              className="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0c0c0e] hover:bg-slate-50 dark:hover:bg-white/5 text-slate-800 dark:text-zinc-200 text-sm font-semibold inline-flex items-center gap-2 transition-colors"
-            >
-              <Terminal className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />
-              <span>Quick Setup</span>
-            </a>
+          <div className="relative flex items-center justify-center mt-4 lg:mt-0">
+            <HeroAvatarFrame
+              imageSrc="/images/mirror-hero.webp"
+              imageAlt="Masdika Linux Repository & ISO Mirror"
+              imageWidth={1230}
+              imageHeight={1278}
+              badges={[
+                { icon: HardDrive, label: "Distributions", value: "Ubuntu, Debian, Alpine" },
+                { icon: RefreshCw, label: "Metadata Sync", value: "5-Minute Refresh" },
+                { icon: Disc, label: "ISO Images", value: "Direct Full-Speed Stream" },
+                { icon: ShieldCheck, label: "Verification", value: "GPG Signature Preserved" },
+              ]}
+            />
           </div>
         </div>
       </section>
