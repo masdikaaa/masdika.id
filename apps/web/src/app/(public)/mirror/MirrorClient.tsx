@@ -253,6 +253,23 @@ const DISTROS: DistroItem[] = [
       "doas pkg_add -u",
     ].join("\n"),
   },
+  {
+    id: "mikrotik",
+    name: "MikroTik RouterOS",
+    pkgMgr: "NPK / CHR",
+    category: "ROLLING_BSD",
+    sub: "CHR - RouterOS v6 - RouterOS v7 (ISO & Packages)",
+    paths: ["/mikrotik/"],
+    isoPath: "/mirror/browse/mikrotik",
+    snippet: [
+      "# MikroTik RouterOS & CHR Mirror",
+      `# Browse CHR, RouterOS v6, and RouterOS v7 images:`,
+      `${MIRROR_BASE}/mikrotik/`,
+      "",
+      "# Example download via curl/fetch:",
+      `curl -LO ${MIRROR_BASE}/mikrotik/RouterOS_v7/`,
+    ].join("\n"),
+  },
 ];
 
 const ISO_SHORTCUTS = [
@@ -271,6 +288,7 @@ const ISO_SHORTCUTS = [
   { id: "freebsd", name: "FreeBSD ISO", tag: "13.x / 14.x / 15.x", href: "/mirror/browse/freebsd/releases/ISO-IMAGES" },
   { id: "freebsd", name: "FreeBSD Packages", tag: "Quarterly & Latest pkg", href: "/mirror/browse/freebsd-pkg" },
   { id: "openbsd", name: "OpenBSD ISO", tag: "7.x & Snapshots", href: "/mirror/browse/openbsd" },
+  { id: "mikrotik", name: "MikroTik RouterOS", tag: "CHR / v6 / v7", href: "/mirror/browse/mikrotik" },
   { id: "all", name: "All Repositories", tag: "Browse All 19 Roots", href: "/mirror/browse" },
 ];
 

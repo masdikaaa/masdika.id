@@ -24,6 +24,7 @@ const PROBES: Array<{
   { id: "alpine", name: "Alpine Linux", path: "/alpine/latest-stable/main/x86_64/APKINDEX.tar.gz", versionIndexPath: "/alpine/", versionFilter: /^(v3\.\d+|latest-stable|edge)$/ },
   { id: "freebsd", name: "FreeBSD", path: "/freebsd/releases/ISO-IMAGES/", versionIndexPath: "/freebsd/releases/ISO-IMAGES/", versionFilter: /^1\d\.\d+$/ },
   { id: "openbsd", name: "OpenBSD", path: "/openbsd/", versionIndexPath: "/openbsd/", versionFilter: /^(\d+\.\d+|snapshots)$/ },
+  { id: "mikrotik", name: "MikroTik RouterOS", path: "/mikrotik/" },
 ];
 
 export interface DistroHealth {
