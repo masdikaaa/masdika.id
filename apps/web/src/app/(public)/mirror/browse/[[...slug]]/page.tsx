@@ -119,7 +119,7 @@ export default function MirrorBrowsePage() {
 
   const renderFileIcon = (entry: MirrorIndexEntry) => {
     if (entry.isDir) {
-      return <Folder className="w-4 h-4 text-amber-400 fill-amber-400/20 shrink-0" />;
+      return <Folder className="w-4 h-4 text-cyan-500 dark:text-cyan-400 fill-cyan-400/15 shrink-0" />;
     }
     const lower = entry.name.toLowerCase();
     if (lower.endsWith(".iso") || lower.endsWith(".img")) {
@@ -202,74 +202,138 @@ export default function MirrorBrowsePage() {
           ) : error ? (
             <div className="py-16 text-center text-red-500 text-xs px-4">{error}</div>
           ) : viewMode === "list" ? (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-slate-200 dark:border-white/[0.08] bg-slate-50/80 dark:bg-white/[0.02] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">
-                    <th className="py-3 px-4 sm:px-6">Name</th>
-                    <th className="py-3 px-4">Size</th>
-                    <th className="py-3 px-4 sm:px-6">Last Sync</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-white/[0.05] text-xs sm:text-[13px]">
-                  {parentHref && (
-                    <tr className="hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-colors">
-                      <td className="py-2.5 px-4 sm:px-6" colSpan={3}>
-                        <Link
-                          href={parentHref}
-                          className="inline-flex items-center gap-2 font-mono font-medium text-cyan-600 dark:text-cyan-400 hover:underline"
-                        >
-                          <CornerLeftUp className="w-3.5 h-3.5" />
-                          <span>Parent Directory/</span>
-                        </Link>
-                      </td>
+            <>
+              {/* Desktop Table */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-200 dark:border-white/[0.08] bg-slate-50/80 dark:bg-white/[0.02] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">
+                      <th className="py-3 px-6">Name</th>
+                      <th className="py-3 px-4">Size</th>
+                      <th className="py-3 px-6">Last Sync</th>
                     </tr>
-                  )}
-
-                  {pagedEntries.length === 0 ? (
-                    <tr>
-                      <td colSpan={3} className="py-12 text-center text-slate-500 dark:text-zinc-500 text-xs">
-                        No files or directories match your search.
-                      </td>
-                    </tr>
-                  ) : (
-                    pagedEntries.map((entry) => (
-                      <tr
-                        key={entry.href}
-                        className="hover:bg-slate-50 dark:hover:bg-cyan-500/[0.06] transition-colors"
-                      >
-                        <td className="py-2.5 px-4 sm:px-6 font-mono">
-                          {entry.isDir ? (
-                            <Link
-                              href={`/mirror/browse${entry.href.replace(/\/$/, "")}`}
-                              className="inline-flex items-center gap-2.5 text-cyan-600 dark:text-cyan-400 hover:underline font-medium"
-                            >
-                              {renderFileIcon(entry)}
-                              <span className="break-all">{entry.name}</span>
-                            </Link>
-                          ) : (
-                            <a
-                              href={`${MIRROR_ORIGIN}${entry.href}`}
-                              className="inline-flex items-center gap-2.5 text-slate-800 dark:text-zinc-200 hover:text-cyan-600 dark:hover:text-cyan-400"
-                            >
-                              {renderFileIcon(entry)}
-                              <span className="break-all">{entry.name}</span>
-                              <Download className="w-3 h-3 opacity-50 shrink-0" />
-                            </a>
-                          )}
-                        </td>
-                        <td className="py-2.5 px-4 font-mono text-slate-500 dark:text-zinc-400 whitespace-nowrap">
-                          {entry.size}
-                        </td>
-                        <td className="py-2.5 px-4 sm:px-6 font-mono text-slate-500 dark:text-zinc-400 whitespace-nowrap">
-                          {entry.lastSync}
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-white/[0.05] text-[13px]">
+                    {parentHref && (
+                      <tr className="hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-colors">
+                        <td className="py-2.5 px-6" colSpan={3}>
+                          <Link
+                            href={parentHref}
+                            className="inline-flex items-center gap-2 font-mono font-medium text-cyan-600 dark:text-cyan-400 hover:underline"
+                          >
+                            <CornerLeftUp className="w-3.5 h-3.5" />
+                            <span>Parent Directory/</span>
+                          </Link>
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+                    )}
+
+                    {pagedEntries.length === 0 ? (
+                      <tr>
+                        <td colSpan={3} className="py-12 text-center text-slate-500 dark:text-zinc-500 text-xs">
+                          No files or directories match your search.
+                        </td>
+                      </tr>
+                    ) : (
+                      pagedEntries.map((entry) => (
+                        <tr
+                          key={entry.href}
+                          className="hover:bg-slate-50 dark:hover:bg-cyan-500/[0.06] transition-colors"
+                        >
+                          <td className="py-2.5 px-6 font-mono">
+                            {entry.isDir ? (
+                              <Link
+                                href={`/mirror/browse${entry.href.replace(/\/$/, "")}`}
+                                className="inline-flex items-center gap-2.5 text-cyan-600 dark:text-cyan-400 hover:underline font-medium"
+                              >
+                                {renderFileIcon(entry)}
+                                <span className="break-words">{entry.name}</span>
+                              </Link>
+                            ) : (
+                              <a
+                                href={`${MIRROR_ORIGIN}${entry.href}`}
+                                className="inline-flex items-center gap-2.5 text-slate-800 dark:text-zinc-200 hover:text-cyan-600 dark:hover:text-cyan-400"
+                              >
+                                {renderFileIcon(entry)}
+                                <span className="break-words">{entry.name}</span>
+                                <Download className="w-3 h-3 opacity-50 shrink-0" />
+                              </a>
+                            )}
+                          </td>
+                          <td className="py-2.5 px-4 font-mono text-slate-500 dark:text-zinc-400 whitespace-nowrap">
+                            {entry.size}
+                          </td>
+                          <td className="py-2.5 px-6 font-mono text-slate-500 dark:text-zinc-400 whitespace-nowrap">
+                            {entry.lastSync}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Compact List */}
+              <div className="block md:hidden divide-y divide-slate-100 dark:divide-white/[0.05]">
+                {parentHref && (
+                  <Link
+                    href={parentHref}
+                    className="px-4 py-3 flex items-center gap-2.5 font-mono text-xs font-medium text-cyan-600 dark:text-cyan-400 hover:bg-slate-50 dark:hover:bg-white/[0.03]"
+                  >
+                    <CornerLeftUp className="w-3.5 h-3.5 shrink-0" />
+                    <span>Parent Directory/</span>
+                  </Link>
+                )}
+
+                {pagedEntries.length === 0 ? (
+                  <div className="py-12 text-center text-slate-500 dark:text-zinc-500 text-xs">
+                    No files or directories match your search.
+                  </div>
+                ) : (
+                  pagedEntries.map((entry) =>
+                    entry.isDir ? (
+                      <Link
+                        key={entry.href}
+                        href={`/mirror/browse${entry.href.replace(/\/$/, "")}`}
+                        className="px-4 py-3 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-cyan-500/[0.06] transition-colors"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          {renderFileIcon(entry)}
+                          <div className="min-w-0">
+                            <div className="font-mono text-xs font-semibold text-cyan-600 dark:text-cyan-400 truncate">
+                              {entry.name}
+                            </div>
+                            <div className="font-mono text-[11px] text-slate-500 dark:text-zinc-500 truncate mt-0.5">
+                              {entry.lastSync}
+                            </div>
+                          </div>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 shrink-0" />
+                      </Link>
+                    ) : (
+                      <a
+                        key={entry.href}
+                        href={`${MIRROR_ORIGIN}${entry.href}`}
+                        className="px-4 py-3 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-cyan-500/[0.06] transition-colors"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          {renderFileIcon(entry)}
+                          <div className="min-w-0">
+                            <div className="font-mono text-xs font-medium text-slate-800 dark:text-zinc-200 truncate">
+                              {entry.name}
+                            </div>
+                            <div className="font-mono text-[11px] text-slate-500 dark:text-zinc-500 truncate mt-0.5">
+                              {entry.size !== "-" ? `${entry.size} • ${entry.lastSync}` : entry.lastSync}
+                            </div>
+                          </div>
+                        </div>
+                        <Download className="w-4 h-4 text-cyan-500 shrink-0" />
+                      </a>
+                    )
+                  )
+                )}
+              </div>
+            </>
           ) : (
             <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {pagedEntries.map((entry) =>
