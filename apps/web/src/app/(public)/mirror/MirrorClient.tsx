@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
+  AlertTriangle,
   ArrowRight,
   Check,
   ChevronLeft,
@@ -17,6 +18,7 @@ import {
   Terminal,
   Zap,
 } from "lucide-react";
+import type { MirrorStatusPayload } from "@/app/api/mirror/status/route";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { HeroAvatarFrame } from "@/components/ui/HeroAvatarFrame";
@@ -261,6 +263,21 @@ export default function MirrorClient() {
   const [activeTab, setActiveTab] = useState("ubuntu");
   const [category, setCategory] = useState<DistroCategory>("ALL");
   const [page, setPage] = useState(1);
+  const [health, setHealth] = useState<MirrorStatusPayload | null>(null);
+  const [checkingHealth, setCheckingHealth] = useState(true);
+
+  const fetchHealth = () => {
+    setCheckingHealth(true);
+    fetch("/api/mirror/status")
+      .then((r) => r.json())
+      .then((data: MirrorStatusPayload) => setHealth(data))
+      .catch(() => {})
+      .finally(() => setCheckingHealth(false));
+  };
+
+  useEffect(() => {
+    fetchHealth();
+  }, []);
 
   const copyText = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
@@ -303,8 +320,26 @@ export default function MirrorClient() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-start w-full">
             <div className="max-w-2xl relative z-30 lg:pt-20">
               <div className="mb-8">
-                <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase text-[10px] sm:text-xs">
-                  LINUX &amp; BSD MIRROR · MIRROR.MASDIKA.ID
+                <Badge
+                  variant="brand"
+                  dot
+                  dotColor={
+                    health?.overallStatus === "outage"
+                      ? "bg-red-500"
+                      : health?.overallStatus === "degraded"
+                        ? "bg-amber-400"
+                        : "bg-emerald-400"
+                  }
+                  size="md"
+                  className="font-mono uppercase text-[10px] sm:text-xs"
+                >
+                  {health?.overallStatus === "outage"
+                    ? "MIRROR NODE OFFLINE · MIRROR.MASDIKA.ID"
+                    : health?.overallStatus === "degraded"
+                      ? `DEGRADED (${health.upCount}/${health.totalCount} UP) · MIRROR.MASDIKA.ID`
+                      : health
+                        ? `ALL ${health.totalCount} MIRRORS OPERATIONAL · MIRROR.MASDIKA.ID`
+                        : "LINUX & BSD MIRROR · MIRROR.MASDIKA.ID"}
                 </Badge>
               </div>
 
@@ -356,6 +391,50 @@ export default function MirrorClient() {
             </div>
           </div>
         </section>
+
+        {/* SMART UPSTREAM / MIRROR HEALTH NOTIFICATION */}
+        {health && health.overallStatus !== "operational" && (
+          <section className="relative z-10">
+            <div
+              className={
+                health.overallStatus === "outage"
+                  ? "rounded-2xl border border-red-500/30 bg-red-500/10 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                  : "rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+              }
+            >
+              <div className="flex items-start gap-3">
+                <AlertTriangle
+                  className={
+                    health.overallStatus === "outage"
+                      ? "w-5 h-5 text-red-500 shrink-0 mt-0.5"
+                      : "w-5 h-5 text-amber-500 shrink-0 mt-0.5"
+                  }
+                />
+                <div className="space-y-1">
+                  <div className="text-sm font-bold text-[var(--text-primary)]">
+                    {health.overallStatus === "outage"
+                      ? "Mirror Endpoint Unreachable"
+                      : `Partial Upstream Degradation (${health.downNames.join(", ")})`}
+                  </div>
+                  <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
+                    {health.overallStatus === "outage"
+                      ? "The mirror node at mirror.masdika.id is currently unreachable. Please check tunnel connectivity or temporarily fall back to official upstream mirrors."
+                      : `Upstream mirror for ${health.downNames.join(", ")} is currently slow or unreachable. Previously cached packages remain available from local storage for 30 days.`}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={fetchHealth}
+                disabled={checkingHealth}
+                className="px-3.5 py-2 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] text-xs font-semibold text-[var(--text-primary)] inline-flex items-center gap-1.5 shrink-0 cursor-pointer self-start sm:self-center"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${checkingHealth ? "animate-spin" : ""}`} />
+                <span>Re-check</span>
+              </button>
+            </div>
+          </section>
+        )}
 
         {/* 2. ARCHITECTURE PILLARS */}
         <section className="relative z-10">
@@ -467,7 +546,26 @@ export default function MirrorClient() {
                           </div>
                           <div className="flex items-center gap-2">
                             <span className="font-bold text-[var(--text-primary)]">{d.name}</span>
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" title="Online" />
+                            {(() => {
+                              const st = health?.distros?.[d.id];
+                              if (!st) return <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" title="Checking..." />;
+                              return st.ok ? (
+                                <span
+                                  className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-600 dark:text-emerald-400"
+                                  title={`Online (${st.latencyMs}ms)`}
+                                >
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                                  {st.latencyMs}ms
+                                </span>
+                              ) : (
+                                <span
+                                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
+                                  title={`Upstream issue (HTTP ${st.status})`}
+                                >
+                                  Degraded
+                                </span>
+                              );
+                            })()}
                           </div>
                         </div>
                       </td>
