@@ -35,7 +35,35 @@ export interface PdnsZoneResponse {
   name: string;
   kind: string;
   serial: number;
+  dnssec?: boolean;
   rrsets?: PdnsRrset[];
+}
+
+export interface PdnsCryptoKey {
+  id: number;
+  keytype: string;
+  active: boolean;
+  published?: boolean;
+  bits?: number;
+  algorithm?: string;
+  dnskey?: string;
+  ds?: string[];
+}
+
+export interface ParsedDsRecord {
+  keyTag: string;
+  algorithm: string;
+  digestType: string;
+  digest: string;
+  raw: string;
+}
+
+export interface PdnsDnssecInfo {
+  enabled: boolean;
+  algorithm?: string;
+  keyType?: string;
+  dnskey?: string;
+  dsRecords: ParsedDsRecord[];
 }
 
 export interface PdnsRuntimeConfig {
@@ -507,6 +535,70 @@ export async function deletePdnsZone(domain: string): Promise<void> {
     }
     throw err;
   }
+}
+
+export function parseDsRecordString(raw: string): ParsedDsRecord | null {
+  const parts = raw.trim().split(/\s+/);
+  if (parts.length < 4) return null;
+  return {
+    keyTag: parts[0],
+    algorithm: parts[1],
+    digestType: parts[2],
+    digest: parts.slice(3).join(""),
+    raw: raw.trim(),
+  };
+}
+
+export async function getPdnsDnssecInfo(
+  domain: string,
+  zoneDnssecFlag?: boolean
+): Promise<PdnsDnssecInfo> {
+  const zoneId = encodeURIComponent(toZoneFqdn(domain));
+  let enabled = zoneDnssecFlag;
+  if (enabled === undefined) {
+    const z = await getPdnsZone(domain);
+    enabled = Boolean(z.dnssec);
+  }
+
+  if (!enabled) {
+    return { enabled: false, dsRecords: [] };
+  }
+
+  const keys = await pdnsFetch<PdnsCryptoKey[]>(`/zones/${zoneId}/cryptokeys`, {
+    method: "GET",
+  });
+
+  const activeSigningKeys = (keys || []).filter(
+    (k) => k.active && Array.isArray(k.ds) && k.ds.length > 0
+  );
+  const primary = activeSigningKeys[0];
+  const dsRecords: ParsedDsRecord[] = [];
+  for (const k of activeSigningKeys) {
+    for (const rawDs of k.ds || []) {
+      const parsed = parseDsRecordString(rawDs);
+      if (parsed) dsRecords.push(parsed);
+    }
+  }
+
+  return {
+    enabled: true,
+    algorithm: primary?.algorithm,
+    keyType: primary?.keytype?.toUpperCase(),
+    dnskey: primary?.dnskey,
+    dsRecords,
+  };
+}
+
+export async function setPdnsDnssec(
+  domain: string,
+  enabled: boolean
+): Promise<PdnsDnssecInfo> {
+  const zoneId = encodeURIComponent(toZoneFqdn(domain));
+  await pdnsFetch(`/zones/${zoneId}`, {
+    method: "PUT",
+    body: JSON.stringify({ dnssec: enabled }),
+  });
+  return getPdnsDnssecInfo(domain, enabled);
 }
 
 export async function checkNsDelegation(domain: string): Promise<{

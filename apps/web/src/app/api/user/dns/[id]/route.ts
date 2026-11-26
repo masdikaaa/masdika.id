@@ -6,8 +6,10 @@ import {
   checkNsDelegation,
   deletePdnsZone,
   formatDisplayRecordName,
+  getPdnsDnssecInfo,
   getPdnsZone,
   patchPdnsZoneRrsets,
+  setPdnsDnssec,
   SUPPORTED_RECORD_TYPES,
   SupportedRecordType,
   toRecordFqdn,
@@ -50,6 +52,10 @@ export async function GET(
       checkNsDelegation(zone.domain),
     ]);
 
+    const dnssec = await getPdnsDnssecInfo(zone.domain, Boolean(pdnsZone.dnssec)).catch(
+      () => ({ enabled: Boolean(pdnsZone.dnssec), dsRecords: [] })
+    );
+
     const newStatus = nsCheck.delegated ? "active" : "pending";
     if (newStatus !== zone.status) {
       await prisma.dnsZone.update({
@@ -81,6 +87,7 @@ export async function GET(
         detectedNs: nsCheck.detectedNs,
         serial: pdnsZone.serial,
       },
+      dnssec,
       records,
     });
   } catch (error: any) {
@@ -132,6 +139,12 @@ export async function PATCH(
     }
 
     const body = await req.json();
+    if (body?.action === "toggle_dnssec") {
+      const enabled = Boolean(body?.enabled);
+      const dnssec = await setPdnsDnssec(zone.domain, enabled);
+      return NextResponse.json({ success: true, dnssec });
+    }
+
     const action = body?.action === "delete" ? "delete" : "upsert";
     const rawType = typeof body?.type === "string" ? body.type.trim().toUpperCase() : "";
     const rawName = typeof body?.name === "string" ? body.name : "@";

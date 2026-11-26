@@ -13,6 +13,7 @@ import {
   isReservedPlatformDomain,
   isValidDomain,
   normalizeDomain,
+  parseDsRecordString,
   toRecordFqdn,
   validateAndFormatRecordContent,
 } from "../powerdns";
@@ -67,5 +68,17 @@ describe("PowerDNS Validation & Security Guards", () => {
     expect(validateAndFormatRecordContent("CAA", '0 issue "letsencrypt.org"')).toBe(
       '0 issue "letsencrypt.org"'
     );
+  });
+
+  it("parses PowerDNS DS record strings cleanly", () => {
+    const parsed = parseDsRecordString("12345 13 2 ABCDEF0123456789");
+    expect(parsed).toEqual({
+      keyTag: "12345",
+      algorithm: "13",
+      digestType: "2",
+      digest: "ABCDEF0123456789",
+      raw: "12345 13 2 ABCDEF0123456789",
+    });
+    expect(parseDsRecordString("invalid")).toBeNull();
   });
 });
