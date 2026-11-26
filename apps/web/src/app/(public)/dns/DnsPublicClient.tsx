@@ -108,6 +108,9 @@ export default function DnsPublicClient({
 
   const applyStatsUpdate = useCallback((next: DnsStatsSnapshot) => {
     setStats(next);
+    if (next.available) {
+      setStreamConnected(true);
+    }
 
     if (next.available && next.timestamp) {
       const prev = prevSampleRef.current;
@@ -161,17 +164,20 @@ export default function DnsPublicClient({
         }
       };
       es.onerror = () => {
-        setStreamConnected(false);
         es?.close();
         es = null;
         if (!fallbackTimer) {
-          fallbackTimer = setInterval(async () => {
+          const pollOnce = async () => {
             if (document.hidden) return;
             try {
               const r = await fetch("/api/public/dns/stats", { cache: "no-store" });
               if (r.ok) applyStatsUpdate(await r.json());
-            } catch {}
-          }, 1500);
+            } catch {
+              setStreamConnected(false);
+            }
+          };
+          pollOnce();
+          fallbackTimer = setInterval(pollOnce, 1000);
         }
       };
     };
