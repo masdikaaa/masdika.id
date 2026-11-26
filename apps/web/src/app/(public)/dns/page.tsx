@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { OG_IMAGE_PATH } from "@/lib/og-image";
-import { getPdnsPublicInfo } from "@/lib/powerdns";
+import { type DnsStatsSnapshot, getDnsdistStats, getPdnsPublicInfo } from "@/lib/powerdns";
 import DnsPublicClient from "./DnsPublicClient";
 
 export const dynamic = "force-dynamic";
@@ -43,13 +43,18 @@ export const metadata: Metadata = {
 };
 
 export default async function DnsPublicPage() {
-  const publicInfo = await getPdnsPublicInfo().catch(() => ({
-    enabled: false,
-    configured: false,
-    nameservers: ["ns1.masdika.id", "ns2.masdika.id"],
-    resolver: "dns1.masdika.id",
-    publicIp: "103.247.10.61",
-  }));
+  const [publicInfo, rawStats] = await Promise.all([
+    getPdnsPublicInfo().catch(() => ({
+      enabled: false,
+      configured: false,
+      nameservers: ["ns1.masdika.id", "ns2.masdika.id"],
+      resolver: "dns1.masdika.id",
+      publicIp: "103.247.10.61",
+    })),
+    getDnsdistStats().catch((): DnsStatsSnapshot => ({ available: false })),
+  ]);
 
-  return <DnsPublicClient publicInfo={publicInfo} />;
+  const { reason: _reason, ...initialStats } = rawStats;
+
+  return <DnsPublicClient publicInfo={publicInfo} initialStats={initialStats} />;
 }

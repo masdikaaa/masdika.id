@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity,
   ArrowRight,
@@ -8,12 +8,16 @@ import {
   Copy,
   Globe,
   Lock,
+  Pause,
+  Play,
+  RefreshCw,
   Server,
   Shield,
   ShieldCheck,
   Terminal,
   Zap,
 } from "lucide-react";
+import type { DnsStatsSnapshot } from "@/lib/powerdns";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { HeroAvatarFrame } from "@/components/ui/HeroAvatarFrame";
@@ -26,11 +30,167 @@ export interface DnsPublicInfo {
   publicIp: string;
 }
 
+interface QpsSample {
+  time: string;
+  qps: number;
+  cacheQps: number;
+}
+
 type SetupTabId = "linux" | "mikrotik" | "doh" | "windows";
 
-export default function DnsPublicClient({ publicInfo }: { publicInfo: DnsPublicInfo }) {
+function formatCompactCount(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  return n.toLocaleString();
+}
+
+function formatUptime(sec: number): string {
+  if (!sec || sec <= 0) return "0m";
+  const d = Math.floor(sec / 86400);
+  const h = Math.floor((sec % 86400) / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  if (d > 0) return `${d}d ${h}h ${m}m`;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
+function formatLatencyUs(us: number): string {
+  if (!us || us <= 0) return "< 1 ms";
+  if (us < 1000) return `${Math.round(us)} µs`;
+  return `${(us / 1000).toFixed(2)} ms`;
+}
+
+export default function DnsPublicClient({
+  publicInfo,
+  initialStats,
+}: {
+  publicInfo: DnsPublicInfo;
+  initialStats: DnsStatsSnapshot;
+}) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<SetupTabId>("linux");
+  const [stats, setStats] = useState<DnsStatsSnapshot>(initialStats);
+  const [livePolling, setLivePolling] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [qpsHistory, setQpsHistory] = useState<QpsSample[]>(() =>
+    initialStats.available && initialStats.timestamp
+      ? [
+          {
+            time: new Date(initialStats.timestamp).toLocaleTimeString([], {
+              hour12: false,
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+            }),
+            qps: 0,
+            cacheQps: 0,
+          },
+        ]
+      : []
+  );
+
+  const prevSampleRef = useRef<{
+    queries: number;
+    cacheHits: number;
+    timestamp: number;
+  } | null>(
+    initialStats.available && initialStats.timestamp
+      ? {
+          queries: initialStats.queries ?? 0,
+          cacheHits: initialStats.cacheHits ?? 0,
+          timestamp: initialStats.timestamp,
+        }
+      : null
+  );
+
+  const pollStats = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      const res = await fetch("/api/public/dns/stats", { cache: "no-store" });
+      if (!res.ok) return;
+      const next: DnsStatsSnapshot = await res.json();
+      setStats(next);
+
+      if (next.available && next.timestamp) {
+        const prev = prevSampleRef.current;
+        const nowQueries = next.queries ?? 0;
+        const nowCacheHits = next.cacheHits ?? 0;
+        let qps = 0;
+        let cacheQps = 0;
+
+        if (prev && next.timestamp > prev.timestamp) {
+          const dtSec = Math.max(1, (next.timestamp - prev.timestamp) / 1000);
+          qps = Number((Math.max(0, nowQueries - prev.queries) / dtSec).toFixed(2));
+          cacheQps = Number((Math.max(0, nowCacheHits - prev.cacheHits) / dtSec).toFixed(2));
+        }
+
+        prevSampleRef.current = {
+          queries: nowQueries,
+          cacheHits: nowCacheHits,
+          timestamp: next.timestamp,
+        };
+
+        const timeLabel = new Date(next.timestamp).toLocaleTimeString([], {
+          hour12: false,
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        });
+
+        setQpsHistory((cur) => [...cur.slice(-19), { time: timeLabel, qps, cacheQps }]);
+      }
+    } catch {
+      // Ignore transient polling errors
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!livePolling) return;
+    const id = setInterval(() => {
+      pollStats();
+    }, 5000);
+    return () => clearInterval(id);
+  }, [livePolling, pollStats]);
+
+  const latestQps = qpsHistory.length > 0 ? qpsHistory[qpsHistory.length - 1].qps : 0;
+  const maxQps = useMemo(() => {
+    const peak = Math.max(...qpsHistory.map((s) => Math.max(s.qps, s.cacheQps)), 1);
+    return Math.ceil(peak * 1.2);
+  }, [qpsHistory]);
+
+  const chartGeometry = useMemo(() => {
+    const W = 560;
+    const H = 170;
+    const padX = 8;
+    const padY = 14;
+    const innerW = W - padX * 2;
+    const innerH = H - padY * 2;
+
+    if (qpsHistory.length === 0) {
+      return { W, H, totalLine: "", totalArea: "", cacheLine: "", points: [] as { x: number; y: number; qps: number }[] };
+    }
+
+    const pts = qpsHistory.map((s, idx) => {
+      const x =
+        qpsHistory.length === 1
+          ? padX + innerW
+          : padX + (idx / (qpsHistory.length - 1)) * innerW;
+      const y = padY + innerH - Math.min(1, s.qps / maxQps) * innerH;
+      const cy = padY + innerH - Math.min(1, s.cacheQps / maxQps) * innerH;
+      return { x, y, cy, qps: s.qps };
+    });
+
+    const totalLine = pts.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+    const cacheLine = pts.map((p) => `${p.x.toFixed(1)},${p.cy.toFixed(1)}`).join(" ");
+    const firstX = pts[0].x.toFixed(1);
+    const lastX = pts[pts.length - 1].x.toFixed(1);
+    const bottomY = (padY + innerH).toFixed(1);
+    const totalArea = `${firstX},${bottomY} ${totalLine} ${lastX},${bottomY}`;
+
+    return { W, H, totalLine, totalArea, cacheLine, points: pts };
+  }, [qpsHistory, maxQps]);
 
   const resolverIp = publicInfo.publicIp || "103.247.10.61";
   const resolverHost =
@@ -153,6 +313,281 @@ export default function DnsPublicClient({ publicInfo }: { publicInfo: DnsPublicI
             </div>
           </div>
         </section>
+
+        {/* 1.5 LIVE DNS TELEMETRY & REALTIME GRAPHS */}
+        {stats.available && (
+          <section className="relative z-10">
+            <div className="rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 shadow-sm space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <span
+                    className={`w-2.5 h-2.5 rounded-full ${
+                      livePolling ? "bg-emerald-400 animate-pulse" : "bg-amber-400"
+                    }`}
+                  />
+                  <span className="text-xs font-mono uppercase tracking-wider font-bold text-[var(--text-primary)]">
+                    Live DNS Edge Telemetry
+                  </span>
+                  <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 font-mono text-[10px] font-semibold text-cyan-600 dark:text-cyan-400">
+                    {livePolling ? "5s Auto-Poll" : "Paused"}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {stats.timestamp && (
+                    <span className="text-xs font-mono text-[var(--text-secondary)]">
+                      Updated: {new Date(stats.timestamp).toLocaleTimeString()}
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setLivePolling((v) => !v)}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-xs font-semibold text-[var(--text-primary)] hover:border-cyan-500/40 cursor-pointer transition-colors"
+                    title={livePolling ? "Pause live polling" : "Resume live polling"}
+                  >
+                    {livePolling ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                    <span>{livePolling ? "Pause" : "Live"}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => pollStats()}
+                    disabled={isRefreshing}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-xs font-semibold text-[var(--text-primary)] hover:border-cyan-500/40 cursor-pointer transition-colors disabled:opacity-60"
+                    title="Refresh DNS stats now"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
+                  </button>
+                </div>
+              </div>
+
+              {/* KPI Strip */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="p-4 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/60 space-y-1.5">
+                  <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)]">
+                    Total Queries
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-2xl font-black text-[var(--text-primary)] font-mono">
+                      {formatCompactCount(stats.queries ?? 0)}
+                    </span>
+                    <span className="text-xs font-mono font-semibold text-cyan-600 dark:text-cyan-400">
+                      {latestQps.toFixed(1)} qps
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-[var(--text-secondary)] font-mono">
+                    {formatCompactCount(stats.rdQueries ?? 0)} recursive · {formatCompactCount(stats.authQueries ?? 0)} auth
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/60 space-y-1.5">
+                  <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)]">
+                    Cache Hit Ratio
+                  </div>
+                  <div className="text-2xl font-black text-emerald-500 font-mono">
+                    {(stats.cacheHitRatio ?? 0).toFixed(1)}%
+                  </div>
+                  <div className="w-full h-1.5 rounded-full bg-[var(--border-primary)] overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-cyan-400 to-emerald-400 rounded-full transition-all duration-500"
+                      style={{ width: `${Math.min(100, stats.cacheHitRatio ?? 0)}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/60 space-y-1.5">
+                  <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)]">
+                    Avg Edge Latency
+                  </div>
+                  <div className="text-2xl font-black text-cyan-500 font-mono">
+                    {formatLatencyUs(stats.latencyAvgUs ?? 0)}
+                  </div>
+                  <div className="text-[11px] text-[var(--text-secondary)] font-mono">
+                    {formatCompactCount(stats.cacheHits ?? 0)} packet cache hits
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/60 space-y-1.5">
+                  <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)]">
+                    Edge Uptime
+                  </div>
+                  <div className="text-2xl font-black text-[var(--text-primary)] font-mono">
+                    {formatUptime(stats.uptimeSec ?? 0)}
+                  </div>
+                  <div className="text-[11px] text-[var(--text-secondary)] font-mono">
+                    {formatCompactCount(stats.blockedOrDropped ?? 0)} abuse/ACL drops
+                  </div>
+                </div>
+              </div>
+
+              {/* Realtime Graphs */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                {/* Graph 1: Live QPS Time-Series */}
+                <div className="p-5 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/40 space-y-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <div>
+                      <div className="text-xs font-bold text-[var(--text-primary)]">
+                        Realtime Query Throughput (QPS)
+                      </div>
+                      <div className="text-[11px] text-[var(--text-secondary)] font-mono">
+                        Rolling 5s interval window ({qpsHistory.length}/20 samples)
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 text-[11px] font-mono">
+                      <span className="inline-flex items-center gap-1.5 text-cyan-600 dark:text-cyan-400">
+                        <span className="w-2 h-2 rounded-full bg-cyan-400" />
+                        Total QPS
+                      </span>
+                      <span className="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                        Cache Hits/s
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="relative w-full h-[170px]">
+                    <svg
+                      viewBox={`0 0 ${chartGeometry.W} ${chartGeometry.H}`}
+                      className="w-full h-full overflow-visible"
+                      preserveAspectRatio="none"
+                    >
+                      <defs>
+                        <linearGradient id="dnsQpsFill" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.32" />
+                          <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.0" />
+                        </linearGradient>
+                      </defs>
+
+                      {/* Horizontal Gridlines */}
+                      {[0.25, 0.5, 0.75, 1].map((ratio) => {
+                        const y = 14 + (170 - 28) * (1 - ratio);
+                        return (
+                          <line
+                            key={ratio}
+                            x1={8}
+                            x2={chartGeometry.W - 8}
+                            y1={y}
+                            y2={y}
+                            stroke="currentColor"
+                            strokeOpacity="0.1"
+                            strokeDasharray="4 4"
+                          />
+                        );
+                      })}
+
+                      {chartGeometry.totalArea && (
+                        <polygon points={chartGeometry.totalArea} fill="url(#dnsQpsFill)" />
+                      )}
+                      {chartGeometry.cacheLine && (
+                        <polyline
+                          fill="none"
+                          stroke="#10b981"
+                          strokeWidth="2"
+                          strokeDasharray="5 4"
+                          strokeLinejoin="round"
+                          strokeLinecap="round"
+                          points={chartGeometry.cacheLine}
+                        />
+                      )}
+                      {chartGeometry.totalLine && (
+                        <polyline
+                          fill="none"
+                          stroke="#06b6d4"
+                          strokeWidth="2.5"
+                          strokeLinejoin="round"
+                          strokeLinecap="round"
+                          points={chartGeometry.totalLine}
+                        />
+                      )}
+                      {chartGeometry.points.length > 0 && (() => {
+                        const last = chartGeometry.points[chartGeometry.points.length - 1];
+                        return (
+                          <circle
+                            cx={last.x}
+                            cy={last.y}
+                            r="4"
+                            fill="#06b6d4"
+                            stroke="#ffffff"
+                            strokeWidth="1.5"
+                          />
+                        );
+                      })()}
+                    </svg>
+
+                    <div className="absolute top-1 right-2 text-[10px] font-mono text-[var(--text-secondary)]">
+                      Peak: {maxQps} qps
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[10px] font-mono text-[var(--text-secondary)]">
+                    <span>{qpsHistory[0]?.time || "--:--:--"}</span>
+                    <span>Live: {latestQps.toFixed(2)} req/s</span>
+                    <span>{qpsHistory[qpsHistory.length - 1]?.time || "--:--:--"}</span>
+                  </div>
+                </div>
+
+                {/* Graph 2: Latency Distribution & Response Breakdown */}
+                <div className="p-5 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/40 space-y-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <div>
+                      <div className="text-xs font-bold text-[var(--text-primary)]">
+                        Query Latency Distribution
+                      </div>
+                      <div className="text-[11px] text-[var(--text-secondary)] font-mono">
+                        dnsdist response time buckets
+                      </div>
+                    </div>
+                    <span className="text-[11px] font-mono text-cyan-600 dark:text-cyan-400 font-semibold">
+                      Avg {formatLatencyUs(stats.latencyAvgUs ?? 0)}
+                    </span>
+                  </div>
+
+                  <div className="space-y-2.5">
+                    {(() => {
+                      const buckets = stats.latencyBuckets ?? [];
+                      const totalBucketCount = Math.max(
+                        1,
+                        buckets.reduce((acc, b) => acc + b.count, 0)
+                      );
+                      return buckets.map((b, idx) => {
+                        const pct = (b.count / totalBucketCount) * 100;
+                        const barColor =
+                          idx === 0
+                            ? "from-emerald-400 to-cyan-400"
+                            : idx === 1
+                              ? "from-cyan-400 to-sky-400"
+                              : idx === 2
+                                ? "from-sky-400 to-indigo-400"
+                                : "from-amber-400 to-orange-400";
+                        return (
+                          <div key={b.label} className="space-y-1">
+                            <div className="flex items-center justify-between text-[11px] font-mono">
+                              <span className="text-[var(--text-primary)] font-semibold">{b.label}</span>
+                              <span className="text-[var(--text-secondary)]">
+                                {formatCompactCount(b.count)} ({pct.toFixed(1)}%)
+                              </span>
+                            </div>
+                            <div className="w-full h-2 rounded-full bg-[var(--border-primary)] overflow-hidden">
+                              <div
+                                className={`h-full rounded-full bg-gradient-to-r ${barColor} transition-all duration-500`}
+                                style={{ width: `${Math.max(pct > 0 ? 2 : 0, Math.min(100, pct))}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      });
+                    })()}
+                  </div>
+
+                  <div className="pt-2 border-t border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-[var(--text-secondary)]">
+                    <span>NOERROR: {formatCompactCount(stats.noerrorAnswers ?? 0)}</span>
+                    <span>NXDOMAIN: {formatCompactCount(stats.nxdomainAnswers ?? 0)}</span>
+                    <span>SERVFAIL: {formatCompactCount(stats.servfailAnswers ?? 0)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* 2. TWO CORE DNS SERVICES */}
         <section id="services" className="relative z-10 space-y-8">
