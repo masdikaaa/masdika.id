@@ -31,8 +31,8 @@ export interface DnsPublicInfo {
 
 interface QpsSample {
   time: string;
-  qps: number;
-  cacheQps: number;
+  resolverQps: number;
+  authQps: number;
 }
 
 type SetupTabId = "linux" | "mikrotik" | "doh" | "windows";
@@ -81,22 +81,22 @@ export default function DnsPublicClient({
               minute: "2-digit",
               second: "2-digit",
             }),
-            qps: 0,
-            cacheQps: 0,
+            resolverQps: 0,
+            authQps: 0,
           },
         ]
       : []
   );
 
   const prevSampleRef = useRef<{
-    queries: number;
-    cacheHits: number;
+    rdQueries: number;
+    authQueries: number;
     timestamp: number;
   } | null>(
     initialStats.available && initialStats.timestamp
       ? {
-          queries: initialStats.queries ?? 0,
-          cacheHits: initialStats.cacheHits ?? 0,
+          rdQueries: initialStats.rdQueries ?? 0,
+          authQueries: initialStats.authQueries ?? 0,
           timestamp: initialStats.timestamp,
         }
       : null
@@ -107,20 +107,20 @@ export default function DnsPublicClient({
 
     if (next.available && next.timestamp) {
       const prev = prevSampleRef.current;
-      const nowQueries = next.queries ?? 0;
-      const nowCacheHits = next.cacheHits ?? 0;
-      let qps = 0;
-      let cacheQps = 0;
+      const nowRd = next.rdQueries ?? 0;
+      const nowAuth = next.authQueries ?? 0;
+      let resolverQps = 0;
+      let authQps = 0;
 
       if (prev && next.timestamp > prev.timestamp) {
         const dtSec = Math.max(0.5, (next.timestamp - prev.timestamp) / 1000);
-        qps = Number((Math.max(0, nowQueries - prev.queries) / dtSec).toFixed(2));
-        cacheQps = Number((Math.max(0, nowCacheHits - prev.cacheHits) / dtSec).toFixed(2));
+        resolverQps = Number((Math.max(0, nowRd - prev.rdQueries) / dtSec).toFixed(2));
+        authQps = Number((Math.max(0, nowAuth - prev.authQueries) / dtSec).toFixed(2));
       }
 
       prevSampleRef.current = {
-        queries: nowQueries,
-        cacheHits: nowCacheHits,
+        rdQueries: nowRd,
+        authQueries: nowAuth,
         timestamp: next.timestamp,
       };
 
@@ -131,7 +131,7 @@ export default function DnsPublicClient({
         second: "2-digit",
       });
 
-      setQpsHistory((cur) => [...cur.slice(-29), { time: timeLabel, qps, cacheQps }]);
+      setQpsHistory((cur) => [...cur.slice(-29), { time: timeLabel, resolverQps, authQps }]);
     }
   }, []);
 
@@ -198,9 +198,10 @@ export default function DnsPublicClient({
     };
   }, [livePolling, applyStatsUpdate]);
 
-  const latestQps = qpsHistory.length > 0 ? qpsHistory[qpsHistory.length - 1].qps : 0;
+  const latestSample = qpsHistory.length > 0 ? qpsHistory[qpsHistory.length - 1] : { resolverQps: 0, authQps: 0 };
+  const latestTotalQps = Number((latestSample.resolverQps + latestSample.authQps).toFixed(2));
   const maxQps = useMemo(() => {
-    const peak = Math.max(...qpsHistory.map((s) => Math.max(s.qps, s.cacheQps)), 0);
+    const peak = Math.max(...qpsHistory.map((s) => Math.max(s.resolverQps, s.authQps)), 0);
     if (peak <= 0) return 1;
     if (peak < 1) return Number(Math.max(0.5, peak * 1.25).toFixed(2));
     return Math.ceil(peak * 1.2);
@@ -215,7 +216,14 @@ export default function DnsPublicClient({
     const innerH = H - padY * 2;
 
     if (qpsHistory.length === 0) {
-      return { W, H, totalLine: "", totalArea: "", cacheLine: "", points: [] as { x: number; y: number; qps: number }[] };
+      return {
+        W,
+        H,
+        resolverLine: "",
+        resolverArea: "",
+        authLine: "",
+        points: [] as { x: number; y: number }[],
+      };
     }
 
     const pts = qpsHistory.map((s, idx) => {
@@ -223,19 +231,19 @@ export default function DnsPublicClient({
         qpsHistory.length === 1
           ? padX + innerW
           : padX + (idx / (qpsHistory.length - 1)) * innerW;
-      const y = padY + innerH - Math.min(1, s.qps / maxQps) * innerH;
-      const cy = padY + innerH - Math.min(1, s.cacheQps / maxQps) * innerH;
-      return { x, y, cy, qps: s.qps };
+      const y = padY + innerH - Math.min(1, s.resolverQps / maxQps) * innerH;
+      const ay = padY + innerH - Math.min(1, s.authQps / maxQps) * innerH;
+      return { x, y, ay };
     });
 
-    const totalLine = pts.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
-    const cacheLine = pts.map((p) => `${p.x.toFixed(1)},${p.cy.toFixed(1)}`).join(" ");
+    const resolverLine = pts.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+    const authLine = pts.map((p) => `${p.x.toFixed(1)},${p.ay.toFixed(1)}`).join(" ");
     const firstX = pts[0].x.toFixed(1);
     const lastX = pts[pts.length - 1].x.toFixed(1);
     const bottomY = (padY + innerH).toFixed(1);
-    const totalArea = `${firstX},${bottomY} ${totalLine} ${lastX},${bottomY}`;
+    const resolverArea = `${firstX},${bottomY} ${resolverLine} ${lastX},${bottomY}`;
 
-    return { W, H, totalLine, totalArea, cacheLine, points: pts };
+    return { W, H, resolverLine, resolverArea, authLine, points: pts };
   }, [qpsHistory, maxQps]);
 
   const resolverIp = publicInfo.publicIp || "103.247.10.61";
@@ -397,86 +405,110 @@ export default function DnsPublicClient({
                 </div>
               </div>
 
-              {/* KPI Strip */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                <div className="p-3.5 sm:p-4 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/60 space-y-1.5 min-w-0">
-                  <div className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)] truncate">
-                    Total Queries
-                  </div>
-                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                    <span className="text-xl sm:text-2xl font-black text-[var(--text-primary)] font-mono whitespace-nowrap">
-                      {formatCompactCount(stats.queries ?? 0)}
-                    </span>
-                    <span className="text-[11px] sm:text-xs font-mono font-semibold text-cyan-600 dark:text-cyan-400 whitespace-nowrap">
-                      {latestQps.toFixed(1)} qps
-                    </span>
-                  </div>
-                  <div className="text-[10px] sm:text-[11px] text-[var(--text-secondary)] font-mono leading-snug">
-                    {formatCompactCount(stats.rdQueries ?? 0)} rec · {formatCompactCount(stats.authQueries ?? 0)} auth
-                  </div>
-                </div>
+              {/* KPI Strip: Resolver vs Authoritative Pointing */}
+              {(() => {
+                const totalQ = Math.max(1, stats.queries ?? 0);
+                const recPct = (((stats.rdQueries ?? 0) / totalQ) * 100).toFixed(1);
+                const authPct = (((stats.authQueries ?? 0) / totalQ) * 100).toFixed(1);
+                return (
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                    <div className="p-3.5 sm:p-4 rounded-2xl border border-cyan-500/25 bg-[var(--surface-secondary)]/60 space-y-1.5 min-w-0">
+                      <div className="flex items-center justify-between gap-1.5">
+                        <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-cyan-600 dark:text-cyan-400 font-semibold truncate">
+                          SafeDNS Resolver
+                        </span>
+                        <Shield className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
+                      </div>
+                      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                        <span className="text-xl sm:text-2xl font-black text-[var(--text-primary)] font-mono whitespace-nowrap">
+                          {formatCompactCount(stats.rdQueries ?? 0)}
+                        </span>
+                        <span className="text-[11px] sm:text-xs font-mono font-semibold text-cyan-600 dark:text-cyan-400 whitespace-nowrap">
+                          {latestSample.resolverQps.toFixed(1)} qps
+                        </span>
+                      </div>
+                      <div className="text-[10px] sm:text-[11px] text-[var(--text-secondary)] font-mono leading-snug">
+                        {resolverIp} · {recPct}% traffic
+                      </div>
+                    </div>
 
-                <div className="p-3.5 sm:p-4 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/60 space-y-1.5 min-w-0">
-                  <div className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)] truncate">
-                    Cache Hit Ratio
-                  </div>
-                  <div className="text-xl sm:text-2xl font-black text-cyan-500 font-mono whitespace-nowrap">
-                    {(stats.cacheHitRatio ?? 0).toFixed(1)}%
-                  </div>
-                  <div className="w-full h-1.5 rounded-full bg-[var(--border-primary)] overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-cyan-500 to-cyan-300 rounded-full transition-all duration-500"
-                      style={{ width: `${Math.min(100, stats.cacheHitRatio ?? 0)}%` }}
-                    />
-                  </div>
-                </div>
+                    <div className="p-3.5 sm:p-4 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/60 space-y-1.5 min-w-0">
+                      <div className="flex items-center justify-between gap-1.5">
+                        <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)] font-semibold truncate">
+                          DNS Pointing (Auth)
+                        </span>
+                        <Server className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
+                      </div>
+                      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                        <span className="text-xl sm:text-2xl font-black text-[var(--text-primary)] font-mono whitespace-nowrap">
+                          {formatCompactCount(stats.authQueries ?? 0)}
+                        </span>
+                        <span className="text-[11px] sm:text-xs font-mono font-semibold text-cyan-600 dark:text-cyan-400 whitespace-nowrap">
+                          {latestSample.authQps.toFixed(1)} qps
+                        </span>
+                      </div>
+                      <div className="text-[10px] sm:text-[11px] text-[var(--text-secondary)] font-mono leading-snug">
+                        ns1/ns2 · {authPct}% traffic
+                      </div>
+                    </div>
 
-                <div className="p-3.5 sm:p-4 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/60 space-y-1.5 min-w-0">
-                  <div className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)] truncate">
-                    Avg Edge Latency
-                  </div>
-                  <div className="text-xl sm:text-2xl font-black text-cyan-500 font-mono whitespace-nowrap">
-                    {formatLatencyUs(stats.latencyAvgUs ?? 0)}
-                  </div>
-                  <div className="text-[10px] sm:text-[11px] text-[var(--text-secondary)] font-mono leading-snug">
-                    {formatCompactCount(stats.cacheHits ?? 0)} cache hits
-                  </div>
-                </div>
+                    <div className="p-3.5 sm:p-4 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/60 space-y-1.5 min-w-0">
+                      <div className="flex items-center justify-between gap-1.5">
+                        <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)] truncate">
+                          Packet Cache Hit
+                        </span>
+                        <Zap className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
+                      </div>
+                      <div className="text-xl sm:text-2xl font-black text-cyan-500 font-mono whitespace-nowrap">
+                        {(stats.cacheHitRatio ?? 0).toFixed(1)}%
+                      </div>
+                      <div className="w-full h-1.5 rounded-full bg-[var(--border-primary)] overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-cyan-500 to-cyan-300 rounded-full transition-all duration-500"
+                          style={{ width: `${Math.min(100, stats.cacheHitRatio ?? 0)}%` }}
+                        />
+                      </div>
+                    </div>
 
-                <div className="p-3.5 sm:p-4 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/60 space-y-1.5 min-w-0">
-                  <div className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)] truncate">
-                    Edge Uptime
+                    <div className="p-3.5 sm:p-4 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/60 space-y-1.5 min-w-0">
+                      <div className="flex items-center justify-between gap-1.5">
+                        <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)] truncate">
+                          Edge Latency
+                        </span>
+                        <Activity className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
+                      </div>
+                      <div className="text-xl sm:text-2xl font-black text-cyan-500 font-mono whitespace-nowrap">
+                        {formatLatencyUs(stats.latencyAvgUs ?? 0)}
+                      </div>
+                      <div className="text-[10px] sm:text-[11px] text-[var(--text-secondary)] font-mono leading-snug">
+                        Up {formatUptime(stats.uptimeSec ?? 0)} · {formatCompactCount(stats.blockedOrDropped ?? 0)} drops
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-xl sm:text-2xl font-black text-[var(--text-primary)] font-mono whitespace-nowrap">
-                    {formatUptime(stats.uptimeSec ?? 0)}
-                  </div>
-                  <div className="text-[10px] sm:text-[11px] text-[var(--text-secondary)] font-mono leading-snug">
-                    {formatCompactCount(stats.blockedOrDropped ?? 0)} ACL drops
-                  </div>
-                </div>
-              </div>
+                );
+              })()}
 
               {/* Realtime Graphs */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
-                {/* Graph 1: Live QPS Time-Series */}
+                {/* Graph 1: Live QPS Time-Series (Resolver vs Pointing) */}
                 <div className="p-4 sm:p-5 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/40 space-y-4 min-w-0">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div className="min-w-0">
                       <div className="text-xs font-bold text-[var(--text-primary)]">
-                        Realtime Query Throughput (QPS)
+                        Realtime Queries/sec (Resolver vs Pointing)
                       </div>
                       <div className="text-[11px] text-[var(--text-secondary)] font-mono">
-                        Rolling 1s live stream ({qpsHistory.length}/30 samples)
+                        1s live stream ({qpsHistory.length}/30 samples)
                       </div>
                     </div>
                     <div className="flex items-center gap-3 text-[11px] font-mono shrink-0">
                       <span className="inline-flex items-center gap-1.5 text-cyan-600 dark:text-cyan-400 whitespace-nowrap">
                         <span className="w-2 h-2 rounded-full bg-cyan-400 shrink-0" />
-                        Total QPS
+                        SafeDNS Resolver
                       </span>
                       <span className="inline-flex items-center gap-1.5 text-[var(--text-secondary)] whitespace-nowrap">
                         <span className="w-2 h-2 rounded-full bg-cyan-200/70 shrink-0" />
-                        Cache Hits/s
+                        DNS Pointing
                       </span>
                     </div>
                   </div>
@@ -511,10 +543,10 @@ export default function DnsPublicClient({
                         );
                       })}
 
-                      {chartGeometry.totalArea && (
-                        <polygon points={chartGeometry.totalArea} fill="url(#dnsQpsFill)" />
+                      {chartGeometry.resolverArea && (
+                        <polygon points={chartGeometry.resolverArea} fill="url(#dnsQpsFill)" />
                       )}
-                      {chartGeometry.cacheLine && (
+                      {chartGeometry.authLine && (
                         <polyline
                           fill="none"
                           stroke="#a5f3fc"
@@ -523,17 +555,17 @@ export default function DnsPublicClient({
                           strokeDasharray="5 4"
                           strokeLinejoin="round"
                           strokeLinecap="round"
-                          points={chartGeometry.cacheLine}
+                          points={chartGeometry.authLine}
                         />
                       )}
-                      {chartGeometry.totalLine && (
+                      {chartGeometry.resolverLine && (
                         <polyline
                           fill="none"
                           stroke="#06b6d4"
                           strokeWidth="2.5"
                           strokeLinejoin="round"
                           strokeLinecap="round"
-                          points={chartGeometry.totalLine}
+                          points={chartGeometry.resolverLine}
                         />
                       )}
                       {chartGeometry.points.length > 0 && (() => {
@@ -558,7 +590,7 @@ export default function DnsPublicClient({
 
                   <div className="flex items-center justify-between text-[10px] font-mono text-[var(--text-secondary)]">
                     <span>{qpsHistory[0]?.time || "--:--:--"}</span>
-                    <span>Live: {latestQps.toFixed(2)} req/s</span>
+                    <span>Total: {latestTotalQps.toFixed(2)} req/s</span>
                     <span>{qpsHistory[qpsHistory.length - 1]?.time || "--:--:--"}</span>
                   </div>
                 </div>
@@ -617,9 +649,9 @@ export default function DnsPublicClient({
                   </div>
 
                   <div className="pt-2 border-t border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-[var(--text-secondary)]">
-                    <span>NOERROR: {formatCompactCount(stats.noerrorAnswers ?? 0)}</span>
-                    <span>NXDOMAIN: {formatCompactCount(stats.nxdomainAnswers ?? 0)}</span>
-                    <span>SERVFAIL: {formatCompactCount(stats.servfailAnswers ?? 0)}</span>
+                    <span>Total: {formatCompactCount(stats.queries ?? 0)}</span>
+                    <span>Cache Hits: {formatCompactCount(stats.cacheHits ?? 0)}</span>
+                    <span>Cache Misses: {formatCompactCount(stats.cacheMisses ?? 0)}</span>
                   </div>
                 </div>
               </div>
