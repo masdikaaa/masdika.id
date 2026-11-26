@@ -168,13 +168,16 @@ function parseDirectoryHtml(html: string, basePath: string): MirrorIndexEntry[] 
   return entries.sort((a, b) => Number(b.isDir) - Number(a.isDir) || a.name.localeCompare(b.name));
 }
 
-async function fetchMikrotikOfficialVersions(): Promise<MirrorIndexEntry[]> {
-  const channels = [
-    { url: "https://upgrade.mikrotik.com/routeros/NEWESTa7.stable", label: "RouterOS v7 Stable (Official)" },
-    { url: "https://upgrade.mikrotik.com/routeros/NEWESTa7.testing", label: "RouterOS v7 Testing (Official)" },
-    { url: "https://upgrade.mikrotik.com/routeros/NEWEST7.stable", label: "RouterOS v7 Legacy Stable" },
+async function fetchMikrotikOfficialVersions(major?: "6" | "7"): Promise<MirrorIndexEntry[]> {
+  const allChannels = [
+    { url: "https://upgrade.mikrotik.com/routeros/NEWESTa7.stable", label: "RouterOS v7 Stable (Official)", maj: "7" },
+    { url: "https://upgrade.mikrotik.com/routeros/NEWESTa7.testing", label: "RouterOS v7 Testing (Official)", maj: "7" },
+    { url: "https://upgrade.mikrotik.com/routeros/NEWEST7.stable", label: "RouterOS v7 Legacy Stable", maj: "7" },
+    { url: "https://upgrade.mikrotik.com/routeros/NEWEST6.stable", label: "RouterOS v6 Stable (Official)", maj: "6" },
+    { url: "https://upgrade.mikrotik.com/routeros/NEWEST6.long-term", label: "RouterOS v6 Long-Term (Official)", maj: "6" },
   ];
 
+  const channels = major ? allChannels.filter((c) => c.maj === major) : allChannels;
   const seen = new Set<string>();
   const results: MirrorIndexEntry[] = [];
 
@@ -277,8 +280,17 @@ export async function GET(req: NextRequest) {
         href: "/mikrotik/official/",
         isDir: true,
         size: "-",
-        lastSync: "Latest RouterOS v7.25+ & CHR (Official)",
+        lastSync: "Latest RouterOS v6 & v7 + CHR (Official)",
       });
+    } else if (path === "/mikrotik/RouterOS_v6/" || path === "/mikrotik/RouterOS_v7/") {
+      const major = path === "/mikrotik/RouterOS_v6/" ? "6" : "7";
+      const official = await fetchMikrotikOfficialVersions(major);
+      const existingNames = new Set(entries.map((e) => e.name));
+      for (const item of official.reverse()) {
+        if (!existingNames.has(item.name)) {
+          entries.unshift(item);
+        }
+      }
     }
 
     return NextResponse.json({ path, entries });
