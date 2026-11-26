@@ -652,33 +652,41 @@ export default function DnsDashboardPage() {
               <Server className="w-4 h-4" />
             </div>
           </div>
-          <div className="flex items-center justify-between gap-2">
-            <code
-              className={cn(
-                "text-base sm:text-lg font-mono font-bold truncate",
-                isDark ? "text-cyan-400" : "text-cyan-700"
-              )}
-            >
-              {dnsInfo.nameservers[0] || "Not configured"}
-            </code>
-            {dnsInfo.nameservers[0] && (
-              <button
-                onClick={() =>
-                  copyText(
-                    dnsInfo.nameservers[0],
-                    "Nameserver copied"
-                  )
-                }
+          <div className="space-y-1.5">
+            {dnsInfo.nameservers.length > 0 ? (
+              dnsInfo.nameservers.map((ns) => (
+                <div key={ns} className="flex items-center justify-between gap-2">
+                  <code
+                    className={cn(
+                      "text-sm sm:text-base font-mono font-bold truncate",
+                      isDark ? "text-cyan-400" : "text-cyan-700"
+                    )}
+                  >
+                    {ns}
+                  </code>
+                  <button
+                    onClick={() => copyText(ns, `${ns} copied`)}
+                    className={cn(
+                      "p-1 rounded-lg transition-colors shrink-0",
+                      isDark
+                        ? "hover:bg-white/10 text-zinc-400 hover:text-white"
+                        : "hover:bg-slate-100 text-slate-500 hover:text-slate-900"
+                    )}
+                    title={`Copy ${ns}`}
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))
+            ) : (
+              <code
                 className={cn(
-                  "p-1.5 rounded-lg transition-colors shrink-0",
-                  isDark
-                    ? "hover:bg-white/10 text-zinc-400 hover:text-white"
-                    : "hover:bg-slate-100 text-slate-500 hover:text-slate-900"
+                  "text-base sm:text-lg font-mono font-bold truncate",
+                  isDark ? "text-cyan-400" : "text-cyan-700"
                 )}
-                title="Copy nameserver"
               >
-                <Copy className="w-4 h-4" />
-              </button>
+                Not configured
+              </code>
             )}
           </div>
           <p
@@ -915,19 +923,24 @@ export default function DnsDashboardPage() {
                 <p className={isDark ? "text-zinc-300" : "text-slate-700"}>
                   Update the Nameserver (NS) at your domain registrar for{" "}
                   <span className="font-mono font-semibold">{selectedZone.domain}</span> to{" "}
-                  <button
-                    type="button"
-                    onClick={() =>
-                      dnsInfo.nameservers[0] &&
-                      copyText(
-                        dnsInfo.nameservers[0],
-                        "Nameserver copied"
-                      )
-                    }
-                    className="font-mono font-bold text-cyan-400 hover:underline"
-                  >
-                    {dnsInfo.nameservers[0] || "your assigned nameserver"}
-                  </button>
+                  {dnsInfo.nameservers.length > 0 ? (
+                    dnsInfo.nameservers.map((ns, idx) => (
+                      <span key={ns}>
+                        {idx > 0 && ", "}
+                        <button
+                          type="button"
+                          onClick={() => copyText(ns, `${ns} copied`)}
+                          className="font-mono font-bold text-cyan-400 hover:underline"
+                        >
+                          {ns}
+                        </button>
+                      </span>
+                    ))
+                  ) : (
+                    <span className="font-mono font-bold text-cyan-400">
+                      your assigned nameservers
+                    </span>
+                  )}
                   . Propagation usually completes within a few minutes up to 24 hours.
                 </p>
               </div>
@@ -1039,8 +1052,117 @@ export default function DnsDashboardPage() {
                 </div>
               ) : (
                 <>
-                  <div className="overflow-x-auto w-full">
-                    <table className="w-full text-left border-collapse">
+                  {/* Mobile Responsive Record Cards */}
+                  <div className="md:hidden space-y-3">
+                    {paginatedRecords.map((rec) => {
+                      const isRootNs = rec.type === "NS" && rec.name === "@";
+                      return (
+                        <div
+                          key={`mobile-${rec.fqdn}-${rec.type}`}
+                          className={cn(
+                            "rounded-xl border p-3.5 space-y-2.5",
+                            isDark
+                              ? "bg-white/[0.02] border-white/[0.08]"
+                              : "bg-slate-50/70 border-slate-200"
+                          )}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span
+                                className={cn(
+                                  "inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-mono font-bold border shrink-0",
+                                  TYPE_BADGE_STYLES[rec.type] ||
+                                    "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"
+                                )}
+                              >
+                                {rec.type}
+                              </span>
+                              <span
+                                className={cn(
+                                  "font-mono text-xs font-semibold truncate",
+                                  isDark ? "text-white" : "text-slate-900"
+                                )}
+                              >
+                                {rec.name}
+                              </span>
+                              <span
+                                className={cn(
+                                  "text-[11px] shrink-0",
+                                  isDark ? "text-zinc-500" : "text-slate-500"
+                                )}
+                              >
+                                &middot; {rec.ttl}s
+                              </span>
+                            </div>
+
+                            <div className="inline-flex items-center gap-1.5 shrink-0">
+                              <button
+                                onClick={() => openEditRecordModal(rec)}
+                                className={cn(
+                                  "p-1.5 rounded-lg border transition-colors",
+                                  isDark
+                                    ? "bg-white/[0.03] hover:bg-white/[0.08] border-white/[0.08] text-zinc-300"
+                                    : "bg-white hover:bg-slate-100 border-slate-200 text-slate-600"
+                                )}
+                                title="Edit record"
+                              >
+                                <Pencil className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => !isRootNs && setDeletingRecord(rec)}
+                                disabled={isRootNs}
+                                className={cn(
+                                  "p-1.5 rounded-lg border transition-colors disabled:opacity-35 disabled:cursor-not-allowed",
+                                  isDark
+                                    ? "bg-red-500/10 hover:bg-red-500/20 border-red-500/20 text-red-400"
+                                    : "bg-red-50 hover:bg-red-100 border-red-200 text-red-600"
+                                )}
+                                title={isRootNs ? "Root NS record cannot be deleted" : "Delete record"}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="space-y-1.5 pt-1 border-t border-inherit">
+                            {rec.records.map((entry, idx) => (
+                              <div
+                                key={idx}
+                                className="flex items-start justify-between gap-2"
+                              >
+                                <code
+                                  className={cn(
+                                    "font-mono text-xs break-words min-w-0",
+                                    isDark ? "text-zinc-300" : "text-slate-700"
+                                  )}
+                                >
+                                  {entry.content}
+                                </code>
+                                <button
+                                  onClick={() =>
+                                    copyText(entry.content, "Record value copied")
+                                  }
+                                  className={cn(
+                                    "p-1 rounded shrink-0",
+                                    isDark
+                                      ? "hover:bg-white/10 text-zinc-400"
+                                      : "hover:bg-slate-200 text-slate-500"
+                                  )}
+                                  title="Copy value"
+                                >
+                                  <Copy className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Desktop Table */}
+                  <div className="hidden md:block overflow-x-auto w-full">
+                    <table className="w-full min-w-[680px] text-left border-collapse">
                       <thead>
                         <tr
                           className={cn(
@@ -1105,7 +1227,7 @@ export default function DnsDashboardPage() {
                                     >
                                       <span
                                         className={cn(
-                                          "break-all",
+                                          "break-words",
                                           isDark
                                             ? "text-zinc-300"
                                             : "text-slate-700"
@@ -1121,7 +1243,7 @@ export default function DnsDashboardPage() {
                                           )
                                         }
                                         className={cn(
-                                          "opacity-0 group-hover:opacity-100 p-1 rounded transition-opacity",
+                                          "opacity-0 group-hover:opacity-100 p-1 rounded transition-opacity shrink-0",
                                           isDark
                                             ? "hover:bg-white/10 text-zinc-400"
                                             : "hover:bg-slate-200 text-slate-500"
@@ -1156,20 +1278,19 @@ export default function DnsDashboardPage() {
                                   >
                                     <Pencil className="w-3.5 h-3.5" />
                                   </button>
-                                  {!isRootNs && (
-                                    <button
-                                      onClick={() => setDeletingRecord(rec)}
-                                      className={cn(
-                                        "p-1.5 rounded-lg border transition-colors",
-                                        isDark
-                                          ? "bg-red-500/10 hover:bg-red-500/20 border-red-500/20 text-red-400"
-                                          : "bg-red-50 hover:bg-red-100 border-red-200 text-red-600"
-                                      )}
-                                      title="Delete record"
-                                    >
-                                      <Trash2 className="w-3.5 h-3.5" />
-                                    </button>
-                                  )}
+                                  <button
+                                    onClick={() => !isRootNs && setDeletingRecord(rec)}
+                                    disabled={isRootNs}
+                                    className={cn(
+                                      "p-1.5 rounded-lg border transition-colors disabled:opacity-35 disabled:cursor-not-allowed",
+                                      isDark
+                                        ? "bg-red-500/10 hover:bg-red-500/20 border-red-500/20 text-red-400"
+                                        : "bg-red-50 hover:bg-red-100 border-red-200 text-red-600"
+                                    )}
+                                    title={isRootNs ? "Root NS record cannot be deleted" : "Delete record"}
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
                                 </div>
                               </td>
                             </tr>
