@@ -290,7 +290,6 @@ const ISO_SHORTCUTS = [
   { id: "freebsd", name: "FreeBSD Packages", tag: "Quarterly & Latest pkg", href: "/mirror/browse/freebsd-pkg" },
   { id: "openbsd", name: "OpenBSD ISO", tag: "7.x & Snapshots", href: "/mirror/browse/openbsd" },
   { id: "mikrotik", name: "MikroTik RouterOS", tag: "CHR / v6 / v7", href: "/mirror/browse/mikrotik" },
-  { id: "all", name: "All Repositories", tag: "Browse All 19 Roots", href: "/mirror/browse" },
 ];
 
 const CARDS_PER_PAGE = 8;
@@ -894,15 +893,11 @@ export default function MirrorClient() {
               <Link
                 key={iso.href}
                 href={iso.href}
-                className={`group p-5 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-all flex items-center justify-between gap-3 shadow-sm ${
-                  iso.id === "all" ? "sm:col-span-2 lg:col-span-4" : ""
-                }`}
+                className="group p-5 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-all flex items-center justify-between gap-3 shadow-sm"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-10 h-10 rounded-xl border border-[var(--border-primary)] bg-slate-50 dark:bg-white/95 flex items-center justify-center p-2 shrink-0 shadow-2xs">
-                    {iso.id === "all" ? (
-                      <FolderOpen className="w-5 h-5 text-cyan-600" />
-                    ) : iso.id === "mikrotik" ? (
+                    {iso.id === "mikrotik" ? (
                       <SiMikrotik className="w-5 h-5 text-[#182230]" />
                     ) : (
                       <img
@@ -924,6 +919,17 @@ export default function MirrorClient() {
                 <ArrowRight className="w-4 h-4 text-[var(--text-secondary)] group-hover:text-cyan-400 group-hover:translate-x-0.5 transition-all shrink-0" />
               </Link>
             ))}
+          </div>
+
+          <div className="flex justify-center pt-1">
+            <Link
+              href="/mirror/browse"
+              className="group inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 text-xs sm:text-sm font-semibold text-[var(--text-primary)] hover:text-cyan-500 transition-all shadow-sm"
+            >
+              <FolderOpen className="w-4 h-4 text-cyan-500 shrink-0" />
+              <span>Browse All 19 Repository Roots</span>
+              <ArrowRight className="w-3.5 h-3.5 text-[var(--text-secondary)] group-hover:text-cyan-400 group-hover:translate-x-0.5 transition-all shrink-0" />
+            </Link>
           </div>
         </section>
 
