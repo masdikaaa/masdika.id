@@ -19,6 +19,7 @@ import {
   Zap,
 } from "lucide-react";
 import type { MirrorStatusPayload } from "@/app/api/mirror/status/route";
+import { SiMikrotik } from "react-icons/si";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { HeroAvatarFrame } from "@/components/ui/HeroAvatarFrame";
@@ -647,13 +648,17 @@ export default function MirrorClient() {
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-3.5">
                           <div className="w-10 h-10 rounded-xl border border-[var(--border-primary)] bg-slate-50 dark:bg-white/95 flex items-center justify-center p-2 shrink-0 shadow-2xs group-hover:border-cyan-500/40 transition-colors">
-                            <img
-                              src={`/images/distros/${d.id}.svg`}
-                              alt={d.name}
-                              width={22}
-                              height={22}
-                              className="w-5 h-5 object-contain"
-                            />
+                            {d.id === "mikrotik" ? (
+                              <SiMikrotik className="w-5 h-5 text-[#182230]" />
+                            ) : (
+                              <img
+                                src={`/images/distros/${d.id}.svg`}
+                                alt={d.name}
+                                width={22}
+                                height={22}
+                                className="w-5 h-5 object-contain"
+                              />
+                            )}
                           </div>
                           <div className="space-y-0.5">
                             <div className="flex items-center gap-2">
@@ -752,13 +757,17 @@ export default function MirrorClient() {
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div className="w-8 h-8 rounded-lg border border-[var(--border-primary)] bg-slate-50 dark:bg-white/95 flex items-center justify-center p-1.5 shrink-0">
-                        <img
-                          src={`/images/distros/${d.id}.svg`}
-                          alt={d.name}
-                          width={18}
-                          height={18}
-                          className="w-4.5 h-4.5 object-contain"
-                        />
+                        {d.id === "mikrotik" ? (
+                          <SiMikrotik className="w-4.5 h-4.5 text-[#182230]" />
+                        ) : (
+                          <img
+                            src={`/images/distros/${d.id}.svg`}
+                            alt={d.name}
+                            width={18}
+                            height={18}
+                            className="w-4.5 h-4.5 object-contain"
+                          />
+                        )}
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
@@ -885,12 +894,16 @@ export default function MirrorClient() {
               <Link
                 key={iso.href}
                 href={iso.href}
-                className="group p-5 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-all flex items-center justify-between gap-3 shadow-sm"
+                className={`group p-5 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-all flex items-center justify-between gap-3 shadow-sm ${
+                  iso.id === "all" ? "sm:col-span-2 lg:col-span-4" : ""
+                }`}
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-10 h-10 rounded-xl border border-[var(--border-primary)] bg-slate-50 dark:bg-white/95 flex items-center justify-center p-2 shrink-0 shadow-2xs">
                     {iso.id === "all" ? (
                       <FolderOpen className="w-5 h-5 text-cyan-600" />
+                    ) : iso.id === "mikrotik" ? (
+                      <SiMikrotik className="w-5 h-5 text-[#182230]" />
                     ) : (
                       <img
                         src={`/images/distros/${iso.id}.svg`}
