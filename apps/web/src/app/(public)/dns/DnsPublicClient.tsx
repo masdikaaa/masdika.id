@@ -271,7 +271,7 @@ export default function DnsPublicClient({
                 </Badge>
               </div>
 
-              <h1 className="text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-4 text-[var(--text-primary)]">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-4 text-[var(--text-primary)]">
                 SafeDNS Resolver. <br />
                 <span className="bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent">
                   Authoritative DNS.
@@ -323,73 +323,75 @@ export default function DnsPublicClient({
         {/* 1.5 LIVE DNS TELEMETRY & REALTIME GRAPHS */}
         {stats.available && (
           <section className="relative z-10">
-            <div className="rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] p-4 sm:p-8 shadow-sm space-y-5 sm:space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5">
+                <div className="flex flex-wrap items-center gap-2">
                   <span
-                    className={`w-2 h-2 rounded-full ${
+                    className={`w-2 h-2 rounded-full shrink-0 ${
                       livePolling ? "bg-cyan-400" : "bg-[var(--text-secondary)]"
                     }`}
                   />
-                  <span className="text-xs font-mono uppercase tracking-wider font-bold text-[var(--text-primary)]">
+                  <span className="text-xs font-mono uppercase tracking-wider font-bold text-[var(--text-primary)] whitespace-nowrap">
                     Live DNS Edge Telemetry
                   </span>
-                  <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 font-mono text-[10px] font-semibold text-cyan-600 dark:text-cyan-400">
+                  <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 font-mono text-[10px] font-semibold text-cyan-600 dark:text-cyan-400 whitespace-nowrap shrink-0">
                     {livePolling ? "Realtime API · 5s" : "Paused"}
                   </span>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2">
                   {stats.timestamp && (
-                    <span className="text-xs font-mono text-[var(--text-secondary)]">
+                    <span className="text-xs font-mono text-[var(--text-secondary)] whitespace-nowrap">
                       Updated: {new Date(stats.timestamp).toLocaleTimeString()}
                     </span>
                   )}
-                  <button
-                    type="button"
-                    onClick={() => setLivePolling((v) => !v)}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-xs font-semibold text-[var(--text-primary)] hover:border-cyan-500/40 cursor-pointer transition-colors"
-                    title={livePolling ? "Pause live polling" : "Resume live polling"}
-                  >
-                    {livePolling ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-                    <span>{livePolling ? "Pause" : "Live"}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => pollStats(true)}
-                    disabled={isManualRefreshing}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-xs font-semibold text-[var(--text-primary)] hover:border-cyan-500/40 cursor-pointer transition-colors disabled:opacity-60"
-                    title="Refresh DNS stats now"
-                  >
-                    <RefreshCw className={`w-3.5 h-3.5 ${isManualRefreshing ? "animate-spin" : ""}`} />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setLivePolling((v) => !v)}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-xs font-semibold text-[var(--text-primary)] hover:border-cyan-500/40 cursor-pointer transition-colors whitespace-nowrap"
+                      title={livePolling ? "Pause live polling" : "Resume live polling"}
+                    >
+                      {livePolling ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                      <span>{livePolling ? "Pause" : "Live"}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => pollStats(true)}
+                      disabled={isManualRefreshing}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-xs font-semibold text-[var(--text-primary)] hover:border-cyan-500/40 cursor-pointer transition-colors disabled:opacity-60"
+                      title="Refresh DNS stats now"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${isManualRefreshing ? "animate-spin" : ""}`} />
+                    </button>
+                  </div>
                 </div>
               </div>
 
               {/* KPI Strip */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="p-4 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/60 space-y-1.5">
-                  <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)]">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div className="p-3.5 sm:p-4 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/60 space-y-1.5 min-w-0">
+                  <div className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)] truncate">
                     Total Queries
                   </div>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-[var(--text-primary)] font-mono">
+                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                    <span className="text-xl sm:text-2xl font-black text-[var(--text-primary)] font-mono whitespace-nowrap">
                       {formatCompactCount(stats.queries ?? 0)}
                     </span>
-                    <span className="text-xs font-mono font-semibold text-cyan-600 dark:text-cyan-400">
+                    <span className="text-[11px] sm:text-xs font-mono font-semibold text-cyan-600 dark:text-cyan-400 whitespace-nowrap">
                       {latestQps.toFixed(1)} qps
                     </span>
                   </div>
-                  <div className="text-[11px] text-[var(--text-secondary)] font-mono">
-                    {formatCompactCount(stats.rdQueries ?? 0)} recursive · {formatCompactCount(stats.authQueries ?? 0)} auth
+                  <div className="text-[10px] sm:text-[11px] text-[var(--text-secondary)] font-mono leading-snug">
+                    {formatCompactCount(stats.rdQueries ?? 0)} rec · {formatCompactCount(stats.authQueries ?? 0)} auth
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/60 space-y-1.5">
-                  <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)]">
+                <div className="p-3.5 sm:p-4 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/60 space-y-1.5 min-w-0">
+                  <div className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)] truncate">
                     Cache Hit Ratio
                   </div>
-                  <div className="text-2xl font-black text-cyan-500 font-mono">
+                  <div className="text-xl sm:text-2xl font-black text-cyan-500 font-mono whitespace-nowrap">
                     {(stats.cacheHitRatio ?? 0).toFixed(1)}%
                   </div>
                   <div className="w-full h-1.5 rounded-full bg-[var(--border-primary)] overflow-hidden">
@@ -400,51 +402,51 @@ export default function DnsPublicClient({
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/60 space-y-1.5">
-                  <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)]">
+                <div className="p-3.5 sm:p-4 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/60 space-y-1.5 min-w-0">
+                  <div className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)] truncate">
                     Avg Edge Latency
                   </div>
-                  <div className="text-2xl font-black text-cyan-500 font-mono">
+                  <div className="text-xl sm:text-2xl font-black text-cyan-500 font-mono whitespace-nowrap">
                     {formatLatencyUs(stats.latencyAvgUs ?? 0)}
                   </div>
-                  <div className="text-[11px] text-[var(--text-secondary)] font-mono">
-                    {formatCompactCount(stats.cacheHits ?? 0)} packet cache hits
+                  <div className="text-[10px] sm:text-[11px] text-[var(--text-secondary)] font-mono leading-snug">
+                    {formatCompactCount(stats.cacheHits ?? 0)} cache hits
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/60 space-y-1.5">
-                  <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)]">
+                <div className="p-3.5 sm:p-4 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/60 space-y-1.5 min-w-0">
+                  <div className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)] truncate">
                     Edge Uptime
                   </div>
-                  <div className="text-2xl font-black text-[var(--text-primary)] font-mono">
+                  <div className="text-xl sm:text-2xl font-black text-[var(--text-primary)] font-mono whitespace-nowrap">
                     {formatUptime(stats.uptimeSec ?? 0)}
                   </div>
-                  <div className="text-[11px] text-[var(--text-secondary)] font-mono">
-                    {formatCompactCount(stats.blockedOrDropped ?? 0)} abuse/ACL drops
+                  <div className="text-[10px] sm:text-[11px] text-[var(--text-secondary)] font-mono leading-snug">
+                    {formatCompactCount(stats.blockedOrDropped ?? 0)} ACL drops
                   </div>
                 </div>
               </div>
 
               {/* Realtime Graphs */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
                 {/* Graph 1: Live QPS Time-Series */}
-                <div className="p-5 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/40 space-y-4">
-                  <div className="flex items-center justify-between gap-2">
-                    <div>
+                <div className="p-4 sm:p-5 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/40 space-y-4 min-w-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div className="min-w-0">
                       <div className="text-xs font-bold text-[var(--text-primary)]">
                         Realtime Query Throughput (QPS)
                       </div>
                       <div className="text-[11px] text-[var(--text-secondary)] font-mono">
-                        Rolling 5s interval window ({qpsHistory.length}/20 samples)
+                        Rolling 5s interval ({qpsHistory.length}/20 samples)
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 text-[11px] font-mono">
-                      <span className="inline-flex items-center gap-1.5 text-cyan-600 dark:text-cyan-400">
-                        <span className="w-2 h-2 rounded-full bg-cyan-400" />
+                    <div className="flex items-center gap-3 text-[11px] font-mono shrink-0">
+                      <span className="inline-flex items-center gap-1.5 text-cyan-600 dark:text-cyan-400 whitespace-nowrap">
+                        <span className="w-2 h-2 rounded-full bg-cyan-400 shrink-0" />
                         Total QPS
                       </span>
-                      <span className="inline-flex items-center gap-1.5 text-[var(--text-secondary)]">
-                        <span className="w-2 h-2 rounded-full bg-cyan-200/70" />
+                      <span className="inline-flex items-center gap-1.5 text-[var(--text-secondary)] whitespace-nowrap">
+                        <span className="w-2 h-2 rounded-full bg-cyan-200/70 shrink-0" />
                         Cache Hits/s
                       </span>
                     </div>
@@ -533,9 +535,9 @@ export default function DnsPublicClient({
                 </div>
 
                 {/* Graph 2: Latency Distribution & Response Breakdown */}
-                <div className="p-5 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/40 space-y-4">
+                <div className="p-4 sm:p-5 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/40 space-y-4 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <div>
+                    <div className="min-w-0">
                       <div className="text-xs font-bold text-[var(--text-primary)]">
                         Query Latency Distribution
                       </div>
@@ -543,7 +545,7 @@ export default function DnsPublicClient({
                         dnsdist response time buckets
                       </div>
                     </div>
-                    <span className="text-[11px] font-mono text-cyan-600 dark:text-cyan-400 font-semibold">
+                    <span className="text-[11px] font-mono text-cyan-600 dark:text-cyan-400 font-semibold whitespace-nowrap shrink-0">
                       Avg {formatLatencyUs(stats.latencyAvgUs ?? 0)}
                     </span>
                   </div>
@@ -613,23 +615,23 @@ export default function DnsPublicClient({
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Card 1: Public SafeDNS Resolver */}
-            <div className="rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 flex flex-col justify-between gap-6 shadow-sm">
+            <div className="rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] p-5 sm:p-8 flex flex-col justify-between gap-6 shadow-sm min-w-0">
               <div className="space-y-5">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-500 shrink-0">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-500 shrink-0">
                       <Shield className="w-5 h-5" />
                     </div>
-                    <div>
-                      <span className="font-mono text-[11px] uppercase tracking-wider text-cyan-600 dark:text-cyan-400 font-semibold block">
+                    <div className="min-w-0">
+                      <span className="font-mono text-[10px] sm:text-[11px] uppercase tracking-wider text-cyan-600 dark:text-cyan-400 font-semibold block">
                         PUBLIC RECURSIVE RESOLVER
                       </span>
-                      <h3 className="text-xl font-black text-[var(--text-primary)]">
+                      <h3 className="text-lg sm:text-xl font-black text-[var(--text-primary)]">
                         Masdika SafeDNS
                       </h3>
                     </div>
                   </div>
-                  <Badge variant="success" size="sm" dot dotColor="bg-emerald-400">
+                  <Badge variant="brand" size="sm" dot dotColor="bg-cyan-400" className="whitespace-nowrap shrink-0">
                     Free Public
                   </Badge>
                 </div>
@@ -708,23 +710,23 @@ export default function DnsPublicClient({
             </div>
 
             {/* Card 2: Authoritative DNS */}
-            <div className="rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 flex flex-col justify-between gap-6 shadow-sm">
+            <div className="rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] p-5 sm:p-8 flex flex-col justify-between gap-6 shadow-sm min-w-0">
               <div className="space-y-5">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-500 shrink-0">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-500 shrink-0">
                       <Server className="w-5 h-5" />
                     </div>
-                    <div>
-                      <span className="font-mono text-[11px] uppercase tracking-wider text-cyan-600 dark:text-cyan-400 font-semibold block">
+                    <div className="min-w-0">
+                      <span className="font-mono text-[10px] sm:text-[11px] uppercase tracking-wider text-cyan-600 dark:text-cyan-400 font-semibold block">
                         AUTHORITATIVE NAMESERVERS
                       </span>
-                      <h3 className="text-xl font-black text-[var(--text-primary)]">
+                      <h3 className="text-lg sm:text-xl font-black text-[var(--text-primary)]">
                         Masdika Authoritative DNS
                       </h3>
                     </div>
                   </div>
-                  <Badge variant="brand" size="sm">
+                  <Badge variant="brand" size="sm" className="whitespace-nowrap shrink-0">
                     DNSSEC Ready
                   </Badge>
                 </div>
