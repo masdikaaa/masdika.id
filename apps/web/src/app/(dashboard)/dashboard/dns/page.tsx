@@ -314,9 +314,13 @@ export default function DnsDashboardPage() {
         setRecContent(firstVal.replace(/\.+$/, ""));
       }
     } else if (rec.type === "TXT") {
-      setRecContent(firstVal.replace(/^"|"$/g, ""));
+      setRecContent(
+        rec.records.map((r) => r.content.replace(/^"|"$/g, "")).join("\n")
+      );
     } else if (rec.type === "CNAME" || rec.type === "NS") {
-      setRecContent(firstVal.replace(/\.+$/, ""));
+      setRecContent(
+        rec.records.map((r) => r.content.replace(/\.+$/, "")).join("\n")
+      );
     } else {
       setRecContent(rec.records.map((r) => r.content).join("\n"));
     }
