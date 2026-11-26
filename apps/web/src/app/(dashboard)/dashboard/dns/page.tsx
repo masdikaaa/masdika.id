@@ -199,11 +199,11 @@ export default function DnsDashboardPage() {
           prev.map((z) =>
             z.id === zoneId
               ? {
-                  ...z,
-                  status: data.zone.status,
-                  detectedNs: data.zone.detectedNs || [],
-                  recordCount: (data.records || []).length,
-                }
+                ...z,
+                status: data.zone.status,
+                detectedNs: data.zone.detectedNs || [],
+                recordCount: (data.records || []).length,
+              }
               : z
           )
         );
@@ -719,18 +719,23 @@ export default function DnsDashboardPage() {
                 isDark ? "text-white" : "text-slate-900"
               )}
             >
-              {dnsInfo.resolver || "Not configured"}
+              {dnsInfo.publicIp || dnsInfo.resolver || "Not configured"}
             </code>
-            {dnsInfo.resolver && (
+            {(dnsInfo.publicIp || dnsInfo.resolver) && (
               <button
-                onClick={() => copyText(dnsInfo.resolver, "Resolver hostname copied")}
+                onClick={() =>
+                  copyText(
+                    dnsInfo.publicIp || dnsInfo.resolver,
+                    dnsInfo.publicIp ? "Resolver IP copied" : "Resolver hostname copied"
+                  )
+                }
                 className={cn(
                   "p-1.5 rounded-lg transition-colors shrink-0",
                   isDark
                     ? "hover:bg-white/10 text-zinc-400 hover:text-white"
                     : "hover:bg-slate-100 text-slate-500 hover:text-slate-900"
                 )}
-                title="Copy resolver"
+                title="Copy resolver IP"
               >
                 <Copy className="w-4 h-4" />
               </button>
@@ -742,7 +747,12 @@ export default function DnsDashboardPage() {
               isDark ? "text-zinc-500" : "text-slate-500"
             )}
           >
-            Protected with Komdigi TrustPositif content filtering.
+            {dnsInfo.resolver && (
+              <>
+                <span className="font-mono">{dnsInfo.resolver}</span> &middot;{" "}
+              </>
+            )}
+            Protected with SafeDNS content filtering.
           </p>
         </div>
       </motion.div>
@@ -852,8 +862,8 @@ export default function DnsDashboardPage() {
                         ? "bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/20 text-emerald-400"
                         : "bg-emerald-50 hover:bg-emerald-100 border-emerald-200 text-emerald-700"
                       : isDark
-                      ? "bg-white/[0.03] hover:bg-white/[0.07] border-white/[0.08] text-zinc-300"
-                      : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700"
+                        ? "bg-white/[0.03] hover:bg-white/[0.07] border-white/[0.08] text-zinc-300"
+                        : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700"
                   )}
                 >
                   <ShieldCheck className="w-3.5 h-3.5" />
@@ -1071,7 +1081,7 @@ export default function DnsDashboardPage() {
                                   className={cn(
                                     "inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-mono font-bold border",
                                     TYPE_BADGE_STYLES[rec.type] ||
-                                      "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"
+                                    "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"
                                   )}
                                 >
                                   {rec.type}
@@ -1503,8 +1513,8 @@ export default function DnsDashboardPage() {
                     {isSavingRecord
                       ? "Saving..."
                       : editingRecord
-                      ? "Save Changes"
-                      : "Add Record"}
+                        ? "Save Changes"
+                        : "Add Record"}
                   </button>
                 </div>
               </form>
@@ -1591,8 +1601,8 @@ export default function DnsDashboardPage() {
                             ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
                             : "bg-emerald-50 border-emerald-200 text-emerald-700"
                           : isDark
-                          ? "bg-zinc-500/10 border-zinc-500/20 text-zinc-400"
-                          : "bg-slate-100 border-slate-200 text-slate-600"
+                            ? "bg-zinc-500/10 border-zinc-500/20 text-zinc-400"
+                            : "bg-slate-100 border-slate-200 text-slate-600"
                       )}
                     >
                       {dnssec.enabled ? "Enabled" : "Disabled"}
@@ -1626,8 +1636,8 @@ export default function DnsDashboardPage() {
                   {isTogglingDnssec
                     ? "Updating..."
                     : dnssec.enabled
-                    ? "Disable DNSSEC"
-                    : "Enable DNSSEC"}
+                      ? "Disable DNSSEC"
+                      : "Enable DNSSEC"}
                 </button>
               </div>
 
