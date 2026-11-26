@@ -1156,6 +1156,7 @@ export default function DnsPublicClient({
                           stroke="currentColor"
                           strokeOpacity={ratio === 0 ? "0.18" : "0.08"}
                           strokeDasharray={ratio === 0 ? undefined : "4 4"}
+                          vectorEffect="non-scaling-stroke"
                         />
                       );
                     })}
@@ -1171,6 +1172,7 @@ export default function DnsPublicClient({
                         strokeDasharray="5 4"
                         strokeLinejoin="round"
                         strokeLinecap="round"
+                        vectorEffect="non-scaling-stroke"
                         d={chartGeometry.authLine}
                       />
                     )}
@@ -1181,6 +1183,7 @@ export default function DnsPublicClient({
                         strokeWidth="2.5"
                         strokeLinejoin="round"
                         strokeLinecap="round"
+                        vectorEffect="non-scaling-stroke"
                         d={chartGeometry.resolverLine}
                       />
                     )}
@@ -1190,42 +1193,50 @@ export default function DnsPublicClient({
                         hoveredIdx !== null && hoveredIdx < chartGeometry.points.length
                           ? hoveredIdx
                           : chartGeometry.points.length - 1;
-                      if (activeIdx < 0) return null;
+                      if (activeIdx < 0 || hoveredIdx === null) return null;
                       const pt = chartGeometry.points[activeIdx];
                       return (
-                        <g>
-                          {hoveredIdx !== null && (
-                            <line
-                              x1={pt.x}
-                              x2={pt.x}
-                              y1={chartGeometry.padY}
-                              y2={chartGeometry.bottomY}
-                              stroke="#22d3ee"
-                              strokeOpacity="0.35"
-                              strokeWidth="1"
-                              strokeDasharray="3 3"
-                            />
-                          )}
-                          <circle
-                            cx={pt.x}
-                            cy={pt.ay}
-                            r={hoveredIdx !== null ? "4" : "3"}
-                            fill="#a5f3fc"
-                            stroke="#09090b"
-                            strokeWidth="1.5"
-                          />
-                          <circle
-                            cx={pt.x}
-                            cy={pt.y}
-                            r="4.5"
-                            fill="#06b6d4"
-                            stroke="#ffffff"
-                            strokeWidth="1.5"
-                          />
-                        </g>
+                        <line
+                          x1={pt.x}
+                          x2={pt.x}
+                          y1={chartGeometry.padY}
+                          y2={chartGeometry.bottomY}
+                          stroke="#22d3ee"
+                          strokeOpacity="0.35"
+                          strokeWidth="1"
+                          strokeDasharray="3 3"
+                          vectorEffect="non-scaling-stroke"
+                        />
                       );
                     })()}
                   </svg>
+
+                  {/* Perfectly circular HTML indicator dots (immune to SVG aspect-ratio stretching) */}
+                  {(() => {
+                    const activeIdx =
+                      hoveredIdx !== null && hoveredIdx < chartGeometry.points.length
+                        ? hoveredIdx
+                        : chartGeometry.points.length - 1;
+                    if (activeIdx < 0) return null;
+                    const pt = chartGeometry.points[activeIdx];
+                    const xPct = (pt.x / chartGeometry.W) * 100;
+                    const yPct = (pt.y / chartGeometry.H) * 100;
+                    const ayPct = (pt.ay / chartGeometry.H) * 100;
+                    return (
+                      <>
+                        <span
+                          aria-hidden="true"
+                          className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-cyan-200 border-[1.5px] border-zinc-950 shadow-sm z-10"
+                          style={{ left: `${xPct}%`, top: `${ayPct}%` }}
+                        />
+                        <span
+                          aria-hidden="true"
+                          className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-cyan-500 border-2 border-white shadow-[0_0_8px_rgba(6,182,212,0.7)] z-10"
+                          style={{ left: `${xPct}%`, top: `${yPct}%` }}
+                        />
+                      </>
+                    );
+                  })()}
 
                   {hoveredIdx !== null && activeSeries[hoveredIdx] && (
                     <div className="pointer-events-none absolute top-2 left-2 rounded-xl border border-cyan-500/30 bg-[var(--surface)]/95 backdrop-blur-md px-3 py-2 text-[11px] font-mono shadow-lg space-y-0.5 z-20">
