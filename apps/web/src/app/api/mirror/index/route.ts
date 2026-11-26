@@ -12,7 +12,13 @@ const ALLOWED_PREFIXES = [
   "/debian-security/",
   "/almalinux/",
   "/rocky/",
+  "/centos-stream/",
+  "/epel/",
+  "/archlinux/",
   "/alpine/",
+  "/freebsd/",
+  "/freebsd-pkg/",
+  "/openbsd/",
 ];
 
 export interface MirrorIndexEntry {

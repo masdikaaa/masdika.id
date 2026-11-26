@@ -94,6 +94,84 @@ const DISTROS = [
       "apk update",
     ].join("\n"),
   },
+  {
+    id: "centos-stream",
+    name: "CentOS Stream",
+    sub: "CentOS Stream 9 - 10 (Active)",
+    paths: ["/centos-stream/"],
+    isoPath: "/mirror/browse/centos-stream/9-stream/BaseOS/x86_64/iso",
+    snippet: [
+      "# CentOS Stream 9 / 10",
+      "sudo sed -e 's|^metalink=|#metalink=|g' \\",
+      `  -e 's|^#baseurl=http://mirror.stream.centos.org|baseurl=${MIRROR_BASE}/centos-stream|g' \\`,
+      "  -i.bak /etc/yum.repos.d/centos*.repo",
+      "",
+      "sudo dnf makecache",
+    ].join("\n"),
+  },
+  {
+    id: "epel",
+    name: "EPEL (RHEL)",
+    sub: "EPEL 8 - 9 - 10 for Alma / Rocky / CentOS",
+    paths: ["/epel/"],
+    isoPath: "/mirror/browse/epel",
+    snippet: [
+      "# EPEL for AlmaLinux / Rocky / CentOS Stream",
+      "sudo dnf install -y epel-release",
+      "sudo sed -e 's|^metalink=|#metalink=|g' \\",
+      `  -e 's|^#baseurl=https://download.example/pub/epel|baseurl=${MIRROR_BASE}/epel|g' \\`,
+      "  -i.bak /etc/yum.repos.d/epel*.repo",
+      "",
+      "sudo dnf makecache",
+    ].join("\n"),
+  },
+  {
+    id: "archlinux",
+    name: "Arch Linux",
+    sub: "Core - Extra - Multilib + ISO",
+    paths: ["/archlinux/"],
+    isoPath: "/mirror/browse/archlinux/iso",
+    snippet: [
+      "# Arch Linux (/etc/pacman.d/mirrorlist)",
+      `echo 'Server = ${MIRROR_BASE}/archlinux/$repo/os/$arch' | sudo tee /etc/pacman.d/mirrorlist`,
+      "",
+      "sudo pacman -Syyu",
+    ].join("\n"),
+  },
+  {
+    id: "freebsd",
+    name: "FreeBSD",
+    sub: "FreeBSD 13 - 14 - 15 (pkg & ISO)",
+    paths: ["/freebsd/", "/freebsd-pkg/"],
+    isoPath: "/mirror/browse/freebsd/releases/ISO-IMAGES",
+    snippet: [
+      "# FreeBSD pkg (/usr/local/etc/pkg/repos/Masdika.conf)",
+      "sudo mkdir -p /usr/local/etc/pkg/repos",
+      `cat <<'EOF' | sudo tee /usr/local/etc/pkg/repos/Masdika.conf`,
+      "Masdika: {",
+      `  url: "pkg+${MIRROR_BASE}/freebsd-pkg/\${ABI}/quarterly",`,
+      '  mirror_type: "srv",',
+      '  signature_type: "fingerprints",',
+      '  fingerprints: "/usr/share/keys/pkg",',
+      "  enabled: yes",
+      "}",
+      "EOF",
+      "sudo pkg update -f",
+    ].join("\n"),
+  },
+  {
+    id: "openbsd",
+    name: "OpenBSD",
+    sub: "7.5 - 7.6 - snapshots (pkg & ISO)",
+    paths: ["/openbsd/"],
+    isoPath: "/mirror/browse/openbsd",
+    snippet: [
+      "# OpenBSD (/etc/installurl)",
+      `echo '${MIRROR_BASE}/openbsd' | doas tee /etc/installurl`,
+      "",
+      "doas pkg_add -u",
+    ].join("\n"),
+  },
 ];
 
 export default function MirrorClient() {
@@ -128,8 +206,9 @@ export default function MirrorClient() {
             </h1>
 
             <p className="max-w-xl text-sm sm:text-base text-slate-600 dark:text-zinc-400 leading-relaxed mb-8">
-              High-speed, GPG-verified package caching and ISO mirror for Ubuntu, Debian, AlmaLinux, Rocky Linux, and
-              Alpine Linux at <code className="font-mono text-cyan-600 dark:text-cyan-400">mirror.masdika.id</code>.
+              High-speed, GPG-verified package caching and ISO mirror for Ubuntu, Debian, AlmaLinux, Rocky, CentOS
+              Stream, EPEL, Arch Linux, Alpine, FreeBSD, and OpenBSD at{" "}
+              <code className="font-mono text-cyan-600 dark:text-cyan-400">mirror.masdika.id</code>.
             </p>
 
             <div className="flex flex-wrap items-center gap-3">

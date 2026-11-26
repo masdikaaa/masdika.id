@@ -36,7 +36,13 @@ const ROOT_REPOS: MirrorIndexEntry[] = [
   { name: "debian-security/", href: "/debian-security/", isDir: true, size: "-", lastSync: "Active Cache" },
   { name: "almalinux/", href: "/almalinux/", isDir: true, size: "-", lastSync: "Packages & ISO" },
   { name: "rocky/", href: "/rocky/", isDir: true, size: "-", lastSync: "Packages & ISO" },
+  { name: "centos-stream/", href: "/centos-stream/", isDir: true, size: "-", lastSync: "Stream 9 & 10" },
+  { name: "epel/", href: "/epel/", isDir: true, size: "-", lastSync: "RHEL Extra Packages" },
+  { name: "archlinux/", href: "/archlinux/", isDir: true, size: "-", lastSync: "Packages & ISO" },
   { name: "alpine/", href: "/alpine/", isDir: true, size: "-", lastSync: "Packages & ISO" },
+  { name: "freebsd/", href: "/freebsd/", isDir: true, size: "-", lastSync: "Releases & ISO" },
+  { name: "freebsd-pkg/", href: "/freebsd-pkg/", isDir: true, size: "-", lastSync: "Binary Packages" },
+  { name: "openbsd/", href: "/openbsd/", isDir: true, size: "-", lastSync: "Packages & ISO" },
 ];
 
 export default function MirrorBrowsePage() {
