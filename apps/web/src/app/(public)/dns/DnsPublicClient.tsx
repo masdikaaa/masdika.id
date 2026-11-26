@@ -75,6 +75,7 @@ export default function DnsPublicClient({
   const [chartRange, setChartRange] = useState<ChartRange>("live");
   const [historyData, setHistoryData] = useState<DnsHistoryResponse | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const [qpsHistory, setQpsHistory] = useState<QpsSample[]>(() =>
     initialStats.available && initialStats.timestamp
       ? [
@@ -232,20 +233,43 @@ export default function DnsPublicClient({
 
   const chartGeometry = useMemo(() => {
     const W = 560;
-    const H = 170;
-    const padX = 8;
-    const padY = 14;
+    const H = 180;
+    const padX = 10;
+    const padY = 16;
     const innerW = W - padX * 2;
     const innerH = H - padY * 2;
+    const bottomY = padY + innerH;
+
+    const toSmoothLine = (coords: { x: number; y: number }[]) => {
+      if (coords.length === 0) return "";
+      if (coords.length === 1) return `M ${coords[0].x.toFixed(1)} ${coords[0].y.toFixed(1)}`;
+      let d = `M ${coords[0].x.toFixed(1)} ${coords[0].y.toFixed(1)}`;
+      for (let i = 0; i < coords.length - 1; i++) {
+        const p0 = coords[i === 0 ? 0 : i - 1];
+        const p1 = coords[i];
+        const p2 = coords[i + 1];
+        const p3 = coords[i + 2 < coords.length ? i + 2 : coords.length - 1];
+        const cp1x = p1.x + (p2.x - p0.x) / 6;
+        const cp1y = Math.min(bottomY, Math.max(padY, p1.y + (p2.y - p0.y) / 6));
+        const cp2x = p2.x - (p3.x - p1.x) / 6;
+        const cp2y = Math.min(bottomY, Math.max(padY, p2.y - (p3.y - p1.y) / 6));
+        d += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+      }
+      return d;
+    };
 
     if (activeSeries.length === 0) {
       return {
         W,
         H,
+        padX,
+        padY,
+        bottomY,
         resolverLine: "",
         resolverArea: "",
         authLine: "",
-        points: [] as { x: number; y: number }[],
+        authArea: "",
+        points: [] as { x: number; y: number; ay: number }[],
       };
     }
 
@@ -259,14 +283,14 @@ export default function DnsPublicClient({
       return { x, y, ay };
     });
 
-    const resolverLine = pts.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
-    const authLine = pts.map((p) => `${p.x.toFixed(1)},${p.ay.toFixed(1)}`).join(" ");
+    const resolverLine = toSmoothLine(pts.map((p) => ({ x: p.x, y: p.y })));
+    const authLine = toSmoothLine(pts.map((p) => ({ x: p.x, y: p.ay })));
     const firstX = pts[0].x.toFixed(1);
     const lastX = pts[pts.length - 1].x.toFixed(1);
-    const bottomY = (padY + innerH).toFixed(1);
-    const resolverArea = `${firstX},${bottomY} ${resolverLine} ${lastX},${bottomY}`;
+    const resolverArea = `${resolverLine} L ${lastX} ${bottomY.toFixed(1)} L ${firstX} ${bottomY.toFixed(1)} Z`;
+    const authArea = `${authLine} L ${lastX} ${bottomY.toFixed(1)} L ${firstX} ${bottomY.toFixed(1)} Z`;
 
-    return { W, H, resolverLine, resolverArea, authLine, points: pts };
+    return { W, H, padX, padY, bottomY, resolverLine, resolverArea, authLine, authArea, points: pts };
   }, [activeSeries, maxChartVal]);
 
   const resolverIp = publicInfo.publicIp || "103.247.10.61";
@@ -521,7 +545,7 @@ export default function DnsPublicClient({
                         <div className="text-xs font-bold text-[var(--text-primary)]">
                           {chartRange === "live"
                             ? "Realtime Queries/sec (Resolver vs Pointing)"
-                            : `Query History — ${chartRange.toUpperCase()} (Resolver vs Pointing)`}
+                            : `Query History - ${chartRange.toUpperCase()} (Resolver vs Pointing)`}
                         </div>
                         <div className="text-[11px] text-[var(--text-secondary)] font-mono">
                           {chartRange === "live"
@@ -569,7 +593,16 @@ export default function DnsPublicClient({
                     </div>
                   </div>
 
-                  <div className="relative w-full h-[170px]">
+                  <div
+                    className="relative w-full h-[180px] select-none"
+                    onMouseLeave={() => setHoveredIdx(null)}
+                    onMouseMove={(e) => {
+                      if (activeSeries.length <= 1) return;
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+                      setHoveredIdx(Math.round(ratio * (activeSeries.length - 1)));
+                    }}
+                  >
                     <svg
                       viewBox={`0 0 ${chartGeometry.W} ${chartGeometry.H}`}
                       className="w-full h-full overflow-visible"
@@ -577,67 +610,128 @@ export default function DnsPublicClient({
                     >
                       <defs>
                         <linearGradient id="dnsQpsFill" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.28" />
+                          <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.32" />
                           <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.0" />
+                        </linearGradient>
+                        <linearGradient id="dnsAuthFill" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#a5f3fc" stopOpacity="0.16" />
+                          <stop offset="100%" stopColor="#a5f3fc" stopOpacity="0.0" />
                         </linearGradient>
                       </defs>
 
                       {/* Horizontal Gridlines */}
-                      {[0.25, 0.5, 0.75, 1].map((ratio) => {
-                        const y = 14 + (170 - 28) * (1 - ratio);
+                      {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
+                        const y = chartGeometry.padY + (chartGeometry.bottomY - chartGeometry.padY) * (1 - ratio);
                         return (
                           <line
                             key={ratio}
-                            x1={8}
-                            x2={chartGeometry.W - 8}
+                            x1={chartGeometry.padX}
+                            x2={chartGeometry.W - chartGeometry.padX}
                             y1={y}
                             y2={y}
                             stroke="currentColor"
-                            strokeOpacity="0.1"
-                            strokeDasharray="4 4"
+                            strokeOpacity={ratio === 0 ? "0.18" : "0.08"}
+                            strokeDasharray={ratio === 0 ? undefined : "4 4"}
                           />
                         );
                       })}
 
+                      {chartGeometry.authArea && (
+                        <path d={chartGeometry.authArea} fill="url(#dnsAuthFill)" />
+                      )}
                       {chartGeometry.resolverArea && (
-                        <polygon points={chartGeometry.resolverArea} fill="url(#dnsQpsFill)" />
+                        <path d={chartGeometry.resolverArea} fill="url(#dnsQpsFill)" />
                       )}
                       {chartGeometry.authLine && (
-                        <polyline
+                        <path
                           fill="none"
                           stroke="#a5f3fc"
-                          strokeOpacity="0.7"
-                          strokeWidth="1.75"
+                          strokeOpacity="0.85"
+                          strokeWidth="2"
                           strokeDasharray="5 4"
                           strokeLinejoin="round"
                           strokeLinecap="round"
-                          points={chartGeometry.authLine}
+                          d={chartGeometry.authLine}
                         />
                       )}
                       {chartGeometry.resolverLine && (
-                        <polyline
+                        <path
                           fill="none"
                           stroke="#06b6d4"
                           strokeWidth="2.5"
                           strokeLinejoin="round"
                           strokeLinecap="round"
-                          points={chartGeometry.resolverLine}
+                          d={chartGeometry.resolverLine}
                         />
                       )}
-                      {chartGeometry.points.length > 0 && (() => {
-                        const last = chartGeometry.points[chartGeometry.points.length - 1];
+
+                      {/* Hover Crosshair & Active Dots */}
+                      {(() => {
+                        const activeIdx =
+                          hoveredIdx !== null && hoveredIdx < chartGeometry.points.length
+                            ? hoveredIdx
+                            : chartGeometry.points.length - 1;
+                        if (activeIdx < 0) return null;
+                        const pt = chartGeometry.points[activeIdx];
                         return (
-                          <circle
-                            cx={last.x}
-                            cy={last.y}
-                            r="4"
-                            fill="#06b6d4"
-                            stroke="#ffffff"
-                            strokeWidth="1.5"
-                          />
+                          <g>
+                            {hoveredIdx !== null && (
+                              <line
+                                x1={pt.x}
+                                x2={pt.x}
+                                y1={chartGeometry.padY}
+                                y2={chartGeometry.bottomY}
+                                stroke="#22d3ee"
+                                strokeOpacity="0.35"
+                                strokeWidth="1"
+                                strokeDasharray="3 3"
+                              />
+                            )}
+                            <circle
+                              cx={pt.x}
+                              cy={pt.ay}
+                              r={hoveredIdx !== null ? "4" : "3"}
+                              fill="#a5f3fc"
+                              stroke="#09090b"
+                              strokeWidth="1.5"
+                            />
+                            <circle
+                              cx={pt.x}
+                              cy={pt.y}
+                              r="4.5"
+                              fill="#06b6d4"
+                              stroke="#ffffff"
+                              strokeWidth="1.5"
+                            />
+                          </g>
                         );
                       })()}
                     </svg>
+
+                    {/* Hover Tooltip */}
+                    {hoveredIdx !== null && activeSeries[hoveredIdx] && (
+                      <div
+                        className="pointer-events-none absolute top-2 left-2 rounded-xl border border-cyan-500/30 bg-[var(--surface)]/95 backdrop-blur-md px-3 py-2 text-[11px] font-mono shadow-lg space-y-0.5 z-20"
+                      >
+                        <div className="text-[var(--text-secondary)] font-semibold">
+                          {activeSeries[hoveredIdx].label}
+                        </div>
+                        <div className="flex items-center gap-2 text-cyan-500">
+                          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                          <span>
+                            Resolver: {activeSeries[hoveredIdx].resolverVal}
+                            {chartRange === "live" ? " qps" : " req"}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-[var(--text-primary)]">
+                          <span className="w-1.5 h-1.5 rounded-full bg-cyan-200/80" />
+                          <span>
+                            Pointing: {activeSeries[hoveredIdx].authVal}
+                            {chartRange === "live" ? " qps" : " req"}
+                          </span>
+                        </div>
+                      </div>
+                    )}
 
                     <div className="absolute top-1 right-2 text-[10px] font-mono text-[var(--text-secondary)]">
                       Peak: {chartRange === "live" ? `${maxChartVal} qps` : `${formatCompactCount(maxChartVal)} req`}
