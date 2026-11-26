@@ -7,6 +7,7 @@ import { logger } from "@/lib/logger";
 import { getEffectiveHourlyRate } from "@/lib/vps-billing-rate";
 import { verifyCronSecret } from "@/lib/cron-auth";
 import { settleServicePaygInvoices } from "@/lib/payg-invoice";
+import { getDnsdistStats } from "@/lib/powerdns";
 
 export async function GET(req: Request) {
   try {
@@ -14,6 +15,9 @@ export async function GET(req: Request) {
     if (!verifyCronSecret(req)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // Record throttled 5-minute DNS telemetry snapshot for 1d/7d/30d monitoring
+    getDnsdistStats().catch(() => null);
 
     const now = new Date();
 

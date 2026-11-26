@@ -1539,3 +1539,18 @@ model AiUsageLog {
   @@index([modelId])
 }
 
+model DnsTelemetrySample {
+  id               Int      @id @default(autoincrement())
+  queries          Int
+  rdQueries        Int
+  authQueries      Int
+  cacheHits        Int
+  cacheMisses      Int
+  latencyAvgUs     Int      @default(0)
+  blockedOrDropped Int      @default(0)
+  createdAt        DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+

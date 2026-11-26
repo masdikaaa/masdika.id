@@ -692,7 +692,7 @@ export async function getDnsdistStats(): Promise<DnsStatsSnapshot> {
       const lat50_100 = Number(raw["latency50-100"] || 0);
       const lat100_plus = Number(raw["latency100-1000"] || 0) + Number(raw["latency-slow"] || 0);
 
-      return {
+      const result: DnsStatsSnapshot = {
         available: true,
         timestamp: Date.now(),
         queries,
@@ -715,6 +715,9 @@ export async function getDnsdistStats(): Promise<DnsStatsSnapshot> {
           { label: "> 100ms", count: lat100_plus },
         ],
       };
+
+      recordDnsTelemetrySample(result).catch(() => {});
+      return result;
     } finally {
       clearTimeout(timer);
     }
@@ -722,6 +725,172 @@ export async function getDnsdistStats(): Promise<DnsStatsSnapshot> {
     return {
       available: false,
       reason: error?.message || "Stats endpoint unreachable",
+    };
+  }
+}
+
+let lastDnsSampleSavedAt = 0;
+let dnsTableEnsured = false;
+const DNS_SAMPLE_INTERVAL_MS = 5 * 60 * 1000;
+
+async function ensureDnsTelemetryTable(): Promise<void> {
+  if (dnsTableEnsured) return;
+  try {
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS "DnsTelemetrySample" (
+        "id" SERIAL PRIMARY KEY,
+        "queries" INTEGER NOT NULL,
+        "rdQueries" INTEGER NOT NULL,
+        "authQueries" INTEGER NOT NULL,
+        "cacheHits" INTEGER NOT NULL,
+        "cacheMisses" INTEGER NOT NULL,
+        "latencyAvgUs" INTEGER NOT NULL DEFAULT 0,
+        "blockedOrDropped" INTEGER NOT NULL DEFAULT 0,
+        "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await prisma.$executeRawUnsafe(
+      `CREATE INDEX IF NOT EXISTS "DnsTelemetrySample_createdAt_idx" ON "DnsTelemetrySample"("createdAt")`
+    );
+    dnsTableEnsured = true;
+  } catch {
+    // Ignore if DB unavailable
+  }
+}
+
+export async function recordDnsTelemetrySample(stats: DnsStatsSnapshot): Promise<void> {
+  if (!stats.available) return;
+  const now = Date.now();
+  if (now - lastDnsSampleSavedAt < DNS_SAMPLE_INTERVAL_MS) return;
+  lastDnsSampleSavedAt = now;
+
+  try {
+    await ensureDnsTelemetryTable();
+    const latest = await prisma.dnsTelemetrySample.findFirst({
+      orderBy: { createdAt: "desc" },
+      select: { createdAt: true },
+    });
+    if (latest && now - latest.createdAt.getTime() < DNS_SAMPLE_INTERVAL_MS) {
+      return;
+    }
+
+    await prisma.dnsTelemetrySample.create({
+      data: {
+        queries: stats.queries ?? 0,
+        rdQueries: stats.rdQueries ?? 0,
+        authQueries: stats.authQueries ?? 0,
+        cacheHits: stats.cacheHits ?? 0,
+        cacheMisses: stats.cacheMisses ?? 0,
+        latencyAvgUs: Math.round(stats.latencyAvgUs ?? 0),
+        blockedOrDropped: stats.blockedOrDropped ?? 0,
+      },
+    });
+
+    // Keep last 31 days
+    const cutoff = new Date(now - 31 * 24 * 60 * 60 * 1000);
+    await prisma.dnsTelemetrySample.deleteMany({
+      where: { createdAt: { lt: cutoff } },
+    });
+  } catch {
+    // Table may not exist yet before db push; fail silently
+  }
+}
+
+export type DnsHistoryRange = "1d" | "7d" | "30d";
+
+export interface DnsHistoryPoint {
+  label: string;
+  resolverQueries: number;
+  authQueries: number;
+  totalQueries: number;
+}
+
+export interface DnsHistoryResponse {
+  range: DnsHistoryRange;
+  points: DnsHistoryPoint[];
+  totals: {
+    totalQueries: number;
+    resolverQueries: number;
+    authQueries: number;
+  };
+  sampleCount: number;
+}
+
+export async function getDnsTelemetryHistory(range: DnsHistoryRange): Promise<DnsHistoryResponse> {
+  const now = Date.now();
+  const durationMs =
+    range === "1d"
+      ? 24 * 60 * 60 * 1000
+      : range === "7d"
+        ? 7 * 24 * 60 * 60 * 1000
+        : 30 * 24 * 60 * 60 * 1000;
+  const bucketCount = range === "1d" ? 24 : range === "7d" ? 28 : 30;
+  const bucketMs = durationMs / bucketCount;
+  const startMs = now - durationMs;
+
+  const buckets: DnsHistoryPoint[] = Array.from({ length: bucketCount }, (_, i) => {
+    const t = new Date(startMs + (i + 1) * bucketMs);
+    const label =
+      range === "1d"
+        ? t.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false })
+        : t.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    return { label, resolverQueries: 0, authQueries: 0, totalQueries: 0 };
+  });
+
+  try {
+    await ensureDnsTelemetryTable();
+    const rows = await prisma.dnsTelemetrySample.findMany({
+      where: { createdAt: { gte: new Date(startMs - bucketMs) } },
+      orderBy: { createdAt: "asc" },
+    });
+
+    let totalQueries = 0;
+    let resolverQueries = 0;
+    let authQueries = 0;
+
+    if (rows.length === 1) {
+      // Single initial sample recorded inside window: place in latest bucket
+      const r = rows[0];
+      const idx = bucketCount - 1;
+      buckets[idx].resolverQueries = r.rdQueries;
+      buckets[idx].authQueries = r.authQueries;
+      buckets[idx].totalQueries = r.queries;
+      totalQueries = r.queries;
+      resolverQueries = r.rdQueries;
+      authQueries = r.authQueries;
+    } else {
+      for (let i = 1; i < rows.length; i++) {
+        const prev = rows[i - 1];
+        const curr = rows[i];
+        const ts = curr.createdAt.getTime();
+        if (ts < startMs) continue;
+
+        const dRd = curr.rdQueries >= prev.rdQueries ? curr.rdQueries - prev.rdQueries : curr.rdQueries;
+        const dAuth = curr.authQueries >= prev.authQueries ? curr.authQueries - prev.authQueries : curr.authQueries;
+        const dTotal = curr.queries >= prev.queries ? curr.queries - prev.queries : curr.queries;
+
+        const idx = Math.min(bucketCount - 1, Math.max(0, Math.floor((ts - startMs) / bucketMs)));
+        buckets[idx].resolverQueries += dRd;
+        buckets[idx].authQueries += dAuth;
+        buckets[idx].totalQueries += dTotal;
+        resolverQueries += dRd;
+        authQueries += dAuth;
+        totalQueries += dTotal;
+      }
+    }
+
+    return {
+      range,
+      points: buckets,
+      totals: { totalQueries, resolverQueries, authQueries },
+      sampleCount: rows.length,
+    };
+  } catch {
+    return {
+      range,
+      points: buckets,
+      totals: { totalQueries: 0, resolverQueries: 0, authQueries: 0 },
+      sampleCount: 0,
     };
   }
 }

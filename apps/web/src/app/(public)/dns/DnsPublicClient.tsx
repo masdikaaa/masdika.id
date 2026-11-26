@@ -16,7 +16,7 @@ import {
   Terminal,
   Zap,
 } from "lucide-react";
-import type { DnsStatsSnapshot } from "@/lib/powerdns";
+import type { DnsHistoryRange, DnsHistoryResponse, DnsStatsSnapshot } from "@/lib/powerdns";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { HeroAvatarFrame } from "@/components/ui/HeroAvatarFrame";
@@ -36,6 +36,7 @@ interface QpsSample {
 }
 
 type SetupTabId = "linux" | "mikrotik" | "doh" | "windows";
+type ChartRange = "live" | DnsHistoryRange;
 
 function formatCompactCount(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)}M`;
@@ -71,6 +72,9 @@ export default function DnsPublicClient({
   const [stats, setStats] = useState<DnsStatsSnapshot>(initialStats);
   const [livePolling, setLivePolling] = useState(true);
   const [streamConnected, setStreamConnected] = useState(false);
+  const [chartRange, setChartRange] = useState<ChartRange>("live");
+  const [historyData, setHistoryData] = useState<DnsHistoryResponse | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const [qpsHistory, setQpsHistory] = useState<QpsSample[]>(() =>
     initialStats.available && initialStats.timestamp
       ? [
@@ -198,14 +202,51 @@ export default function DnsPublicClient({
     };
   }, [livePolling, applyStatsUpdate]);
 
+  useEffect(() => {
+    if (chartRange === "live") return;
+    let cancelled = false;
+    setHistoryLoading(true);
+    fetch(`/api/public/dns/history?range=${chartRange}`, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: DnsHistoryResponse | null) => {
+        if (!cancelled && data) setHistoryData(data);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setHistoryLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [chartRange]);
+
   const latestSample = qpsHistory.length > 0 ? qpsHistory[qpsHistory.length - 1] : { resolverQps: 0, authQps: 0 };
   const latestTotalQps = Number((latestSample.resolverQps + latestSample.authQps).toFixed(2));
-  const maxQps = useMemo(() => {
-    const peak = Math.max(...qpsHistory.map((s) => Math.max(s.resolverQps, s.authQps)), 0);
-    if (peak <= 0) return 1;
-    if (peak < 1) return Number(Math.max(0.5, peak * 1.25).toFixed(2));
-    return Math.ceil(peak * 1.2);
-  }, [qpsHistory]);
+
+  const activeSeries = useMemo(() => {
+    if (chartRange === "live") {
+      return qpsHistory.map((s) => ({
+        label: s.time,
+        resolverVal: s.resolverQps,
+        authVal: s.authQps,
+      }));
+    }
+    return (historyData?.points ?? []).map((p) => ({
+      label: p.label,
+      resolverVal: p.resolverQueries,
+      authVal: p.authQueries,
+    }));
+  }, [chartRange, qpsHistory, historyData]);
+
+  const maxChartVal = useMemo(() => {
+    const peak = Math.max(...activeSeries.map((s) => Math.max(s.resolverVal, s.authVal)), 0);
+    if (chartRange === "live") {
+      if (peak <= 0) return 1;
+      if (peak < 1) return Number(Math.max(0.5, peak * 1.25).toFixed(2));
+      return Math.ceil(peak * 1.2);
+    }
+    return Math.max(10, Math.ceil(peak * 1.2));
+  }, [activeSeries, chartRange]);
 
   const chartGeometry = useMemo(() => {
     const W = 560;
@@ -215,7 +256,7 @@ export default function DnsPublicClient({
     const innerW = W - padX * 2;
     const innerH = H - padY * 2;
 
-    if (qpsHistory.length === 0) {
+    if (activeSeries.length === 0) {
       return {
         W,
         H,
@@ -226,13 +267,13 @@ export default function DnsPublicClient({
       };
     }
 
-    const pts = qpsHistory.map((s, idx) => {
+    const pts = activeSeries.map((s, idx) => {
       const x =
-        qpsHistory.length === 1
+        activeSeries.length === 1
           ? padX + innerW
-          : padX + (idx / (qpsHistory.length - 1)) * innerW;
-      const y = padY + innerH - Math.min(1, s.resolverQps / maxQps) * innerH;
-      const ay = padY + innerH - Math.min(1, s.authQps / maxQps) * innerH;
+          : padX + (idx / (activeSeries.length - 1)) * innerW;
+      const y = padY + innerH - Math.min(1, s.resolverVal / maxChartVal) * innerH;
+      const ay = padY + innerH - Math.min(1, s.authVal / maxChartVal) * innerH;
       return { x, y, ay };
     });
 
@@ -244,7 +285,7 @@ export default function DnsPublicClient({
     const resolverArea = `${firstX},${bottomY} ${resolverLine} ${lastX},${bottomY}`;
 
     return { W, H, resolverLine, resolverArea, authLine, points: pts };
-  }, [qpsHistory, maxQps]);
+  }, [activeSeries, maxChartVal]);
 
   const resolverIp = publicInfo.publicIp || "103.247.10.61";
   const resolverHost =
@@ -490,18 +531,51 @@ export default function DnsPublicClient({
 
               {/* Realtime Graphs */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
-                {/* Graph 1: Live QPS Time-Series (Resolver vs Pointing) */}
+                {/* Graph 1: Live / 1D / 7D / 30D Time-Series (Resolver vs Pointing) */}
                 <div className="p-4 sm:p-5 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/40 space-y-4 min-w-0">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div className="min-w-0">
-                      <div className="text-xs font-bold text-[var(--text-primary)]">
-                        Realtime Queries/sec (Resolver vs Pointing)
+                  <div className="flex flex-col gap-2.5">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold text-[var(--text-primary)]">
+                          {chartRange === "live"
+                            ? "Realtime Queries/sec (Resolver vs Pointing)"
+                            : `Query History — ${chartRange.toUpperCase()} (Resolver vs Pointing)`}
+                        </div>
+                        <div className="text-[11px] text-[var(--text-secondary)] font-mono">
+                          {chartRange === "live"
+                            ? `1s live stream (${qpsHistory.length}/30 samples)`
+                            : historyLoading
+                              ? "Loading historical telemetry..."
+                              : `${historyData?.sampleCount ?? 0} snapshots recorded`}
+                        </div>
                       </div>
-                      <div className="text-[11px] text-[var(--text-secondary)] font-mono">
-                        1s live stream ({qpsHistory.length}/30 samples)
+
+                      <div className="inline-flex items-center rounded-lg border border-[var(--border-primary)] bg-[var(--surface)] p-0.5 shrink-0">
+                        {(
+                          [
+                            { id: "live", label: "Live" },
+                            { id: "1d", label: "1D" },
+                            { id: "7d", label: "7D" },
+                            { id: "30d", label: "30D" },
+                          ] as const
+                        ).map((opt) => (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            onClick={() => setChartRange(opt.id)}
+                            className={
+                              chartRange === opt.id
+                                ? "px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-cyan-400 text-slate-950 cursor-pointer transition-colors"
+                                : "px-2 py-0.5 rounded-md text-[11px] font-mono font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer transition-colors"
+                            }
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 text-[11px] font-mono shrink-0">
+
+                    <div className="flex items-center gap-3 text-[11px] font-mono">
                       <span className="inline-flex items-center gap-1.5 text-cyan-600 dark:text-cyan-400 whitespace-nowrap">
                         <span className="w-2 h-2 rounded-full bg-cyan-400 shrink-0" />
                         SafeDNS Resolver
@@ -584,14 +658,18 @@ export default function DnsPublicClient({
                     </svg>
 
                     <div className="absolute top-1 right-2 text-[10px] font-mono text-[var(--text-secondary)]">
-                      Peak: {maxQps} qps
+                      Peak: {chartRange === "live" ? `${maxChartVal} qps` : `${formatCompactCount(maxChartVal)} req`}
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between text-[10px] font-mono text-[var(--text-secondary)]">
-                    <span>{qpsHistory[0]?.time || "--:--:--"}</span>
-                    <span>Total: {latestTotalQps.toFixed(2)} req/s</span>
-                    <span>{qpsHistory[qpsHistory.length - 1]?.time || "--:--:--"}</span>
+                    <span>{activeSeries[0]?.label || "--:--:--"}</span>
+                    <span>
+                      {chartRange === "live"
+                        ? `Total: ${latestTotalQps.toFixed(2)} req/s`
+                        : `Window: ${formatCompactCount(historyData?.totals.totalQueries ?? 0)} queries`}
+                    </span>
+                    <span>{activeSeries[activeSeries.length - 1]?.label || "--:--:--"}</span>
                   </div>
                 </div>
 
