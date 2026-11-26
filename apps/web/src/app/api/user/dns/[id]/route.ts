@@ -223,19 +223,19 @@ export async function PATCH(
     if (body?.previousName && body?.previousType) {
       const prevFqdn = toRecordFqdn(String(body.previousName), zone.domain);
       const prevType = String(body.previousType).trim().toUpperCase();
-      if (prevType === "SOA" || (prevType === "NS" && prevFqdn === `${zone.domain}.`)) {
-        return NextResponse.json(
-          { error: "Root SOA and NS records cannot be replaced with another record type" },
-          { status: 400 }
-        );
-      }
-      if (!SUPPORTED_RECORD_TYPES.includes(prevType as SupportedRecordType)) {
-        return NextResponse.json(
-          { error: `Unsupported previous record type: ${prevType}` },
-          { status: 400 }
-        );
-      }
       if (prevFqdn !== fqdn || prevType !== recordType) {
+        if (prevType === "SOA" || (prevType === "NS" && prevFqdn === `${zone.domain}.`)) {
+          return NextResponse.json(
+            { error: "Root SOA and NS records cannot be replaced with another record type" },
+            { status: 400 }
+          );
+        }
+        if (!SUPPORTED_RECORD_TYPES.includes(prevType as SupportedRecordType)) {
+          return NextResponse.json(
+            { error: `Unsupported previous record type: ${prevType}` },
+            { status: 400 }
+          );
+        }
         rrsetsToPatch.unshift({
           name: prevFqdn,
           type: prevType,
