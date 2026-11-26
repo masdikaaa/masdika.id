@@ -506,7 +506,7 @@ export default function MirrorClient() {
           </section>
         )}
 
-        {/* 2. MIRROR ARCHITECTURE & LIVE NODE TELEMETRY */}
+        {/* 2. MIRROR ARCHITECTURE GUARANTEES */}
         <section className="py-10 sm:py-14 relative z-10 space-y-8">
           <div className="text-center max-w-3xl mx-auto">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
@@ -516,113 +516,129 @@ export default function MirrorClient() {
               High-Speed Caching &amp; Integrity
             </h2>
             <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
-              Live SSD cache telemetry, 5-minute repository synchronization, and untouched upstream GPG verification across Indonesia.
+              5-minute repository metadata synchronization, NVMe/SSD binary caching, and untouched upstream GPG verification across Indonesia.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] overflow-hidden shadow-sm">
-            <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[var(--border-subtle)]">
-              {[
-                {
-                  icon: Clock,
-                  title: "5-Minute Metadata Sync",
-                  desc: "InRelease, Packages, repomd.xml & APKINDEX refresh every 5 minutes so Hash Sum Mismatch never occurs.",
-                },
-                {
-                  icon: HardDrive,
-                  title: "30-Day SSD Cache + ISO Stream",
-                  desc: "Immutable binaries stay hot on NVMe/SSD storage while multi-GB ISO images stream straight at line rate.",
-                },
-                {
-                  icon: ShieldCheck,
-                  title: "GPG Signature Preserved",
-                  desc: "Packages and Release keys are proxied untouched from upstream so native client verification always passes.",
-                },
-              ].map((item) => (
-                <div key={item.title} className="p-6 sm:p-7 flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0 mt-0.5">
-                    <item.icon className="w-5 h-5" />
-                  </div>
-                  <div className="min-w-0 space-y-1">
-                    <h3 className="text-sm sm:text-base font-bold text-[var(--text-primary)]">{item.title}</h3>
-                    <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">{item.desc}</p>
-                  </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                icon: Clock,
+                title: "5-Minute Metadata Sync",
+                desc: "InRelease, Packages, repomd.xml & APKINDEX refresh every 5 minutes so Hash Sum Mismatch never occurs.",
+              },
+              {
+                icon: HardDrive,
+                title: "30-Day SSD Cache + ISO Stream",
+                desc: "Immutable binaries stay hot on NVMe/SSD storage while multi-GB ISO images stream straight at line rate.",
+              },
+              {
+                icon: ShieldCheck,
+                title: "GPG Signature Preserved",
+                desc: "Packages and Release keys are proxied untouched from upstream so native client verification always passes.",
+              },
+            ].map((item) => (
+              <div
+                key={item.title}
+                className="p-6 sm:p-7 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] flex items-start gap-4 shadow-sm hover:border-cyan-500/40 transition-colors"
+              >
+                <div className="w-11 h-11 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0 mt-0.5">
+                  <item.icon className="w-5 h-5" />
                 </div>
-              ))}
+                <div className="min-w-0 space-y-1.5">
+                  <h3 className="text-base font-bold text-[var(--text-primary)]">{item.title}</h3>
+                  <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 2.5 LIVE NODE CACHE & BANDWIDTH TELEMETRY */}
+        {health?.telemetry && (
+          <section className="py-10 sm:py-14 relative z-10 space-y-8">
+            <div className="text-center max-w-3xl mx-auto">
+              <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+                LIVE NODE TELEMETRY
+              </span>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+                Cache Performance &amp; Bandwidth
+              </h2>
+              <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
+                Real-time cache efficiency, served traffic volume, and SSD storage utilization on mirror.masdika.id.
+              </p>
             </div>
 
-            {health?.telemetry && (
-              <div className="border-t border-[var(--border-primary)] bg-[var(--surface-secondary)]/40">
-                <div className="px-6 py-3.5 border-b border-[var(--border-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-cyan-400 shrink-0" />
-                    <span className="text-xs font-mono font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400">
-                      Live Node Cache &amp; Bandwidth Telemetry
-                    </span>
-                  </div>
-                  <span className="text-[11px] font-mono text-[var(--text-secondary)]">
-                    Updated: {new Date(health.telemetry.updatedAt).toLocaleTimeString()}
+            <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] overflow-hidden shadow-sm">
+              <div className="px-6 py-3.5 border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)]/40 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-cyan-400 shrink-0" />
+                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400">
+                    Mirror Edge Node · Live Metrics
                   </span>
                 </div>
+                <span className="text-[11px] font-mono text-[var(--text-secondary)]">
+                  Updated: {new Date(health.telemetry.updatedAt).toLocaleTimeString()}
+                </span>
+              </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-[var(--border-subtle)]">
-                  <div className="p-5 sm:p-6 space-y-1.5">
-                    <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)]">
-                      Cache Hit Ratio
-                    </div>
-                    <div className="text-2xl font-black text-cyan-500 font-mono">
-                      {health.telemetry.cacheHitRatio.toFixed(1)}%
-                    </div>
-                    <div className="h-1.5 rounded-full bg-[var(--border-primary)] overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-cyan-500 to-cyan-300 rounded-full"
-                        style={{ width: `${Math.min(100, health.telemetry.cacheHitRatio)}%` }}
-                      />
-                    </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-[var(--border-subtle)]">
+                <div className="p-5 sm:p-6 space-y-1.5">
+                  <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)]">
+                    Cache Hit Ratio
                   </div>
-
-                  <div className="p-5 sm:p-6 space-y-1">
-                    <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)]">
-                      Bandwidth Served
-                    </div>
-                    <div className="text-2xl font-black text-[var(--text-primary)] font-mono">
-                      {(health.telemetry.totalBytesServed / (1024 ** 3)).toFixed(2)} GB
-                    </div>
-                    <div className="text-xs font-mono text-[var(--text-secondary)]">
-                      {health.telemetry.totalRequests.toLocaleString()} requests
-                    </div>
+                  <div className="text-2xl font-black text-cyan-500 font-mono">
+                    {health.telemetry.cacheHitRatio.toFixed(1)}%
                   </div>
-
-                  <div className="p-5 sm:p-6 space-y-1">
-                    <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)]">
-                      SSD Cache Used
-                    </div>
-                    <div className="text-2xl font-black text-[var(--text-primary)] font-mono">
-                      {(health.telemetry.cacheUsedBytes / (1024 ** 3)).toFixed(1)} GB
-                    </div>
-                    <div className="text-xs font-mono text-[var(--text-secondary)]">
-                      {(health.telemetry.diskFreeBytes / (1024 ** 3)).toFixed(0)} GB free on node
-                    </div>
+                  <div className="h-1.5 rounded-full bg-[var(--border-primary)] overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-cyan-500 to-cyan-300 rounded-full"
+                      style={{ width: `${Math.min(100, health.telemetry.cacheHitRatio)}%` }}
+                    />
                   </div>
+                </div>
 
-                  <div className="p-5 sm:p-6 space-y-1.5">
-                    <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)]">
-                      Top Cached Repos
-                    </div>
-                    <div className="space-y-1">
-                      {(health.telemetry.topRepos || []).slice(0, 3).map((repo) => (
-                        <div key={repo.name} className="flex items-center justify-between text-xs font-mono">
-                          <span className="text-cyan-600 dark:text-cyan-400 font-semibold truncate">{repo.name}</span>
-                          <span className="text-[var(--text-secondary)]">{repo.requests}</span>
-                        </div>
-                      ))}
-                    </div>
+                <div className="p-5 sm:p-6 space-y-1">
+                  <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)]">
+                    Bandwidth Served
+                  </div>
+                  <div className="text-2xl font-black text-[var(--text-primary)] font-mono">
+                    {(health.telemetry.totalBytesServed / (1024 ** 3)).toFixed(2)} GB
+                  </div>
+                  <div className="text-xs font-mono text-[var(--text-secondary)]">
+                    {health.telemetry.totalRequests.toLocaleString()} requests
+                  </div>
+                </div>
+
+                <div className="p-5 sm:p-6 space-y-1">
+                  <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)]">
+                    SSD Cache Used
+                  </div>
+                  <div className="text-2xl font-black text-[var(--text-primary)] font-mono">
+                    {(health.telemetry.cacheUsedBytes / (1024 ** 3)).toFixed(1)} GB
+                  </div>
+                  <div className="text-xs font-mono text-[var(--text-secondary)]">
+                    {(health.telemetry.diskFreeBytes / (1024 ** 3)).toFixed(0)} GB free on node
+                  </div>
+                </div>
+
+                <div className="p-5 sm:p-6 space-y-1.5">
+                  <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)]">
+                    Top Cached Repos
+                  </div>
+                  <div className="space-y-1">
+                    {(health.telemetry.topRepos || []).slice(0, 3).map((repo) => (
+                      <div key={repo.name} className="flex items-center justify-between text-xs font-mono">
+                        <span className="text-cyan-600 dark:text-cyan-400 font-semibold truncate">{repo.name}</span>
+                        <span className="text-[var(--text-secondary)]">{repo.requests}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
-            )}
-          </div>
-        </section>
+            </div>
+          </section>
+        )}
 
         {/* 3. SUPPORTED DISTRIBUTIONS WITH CATEGORY FILTER & PAGINATION */}
         <section id="mirrors" className="scroll-mt-24 py-10 sm:py-14 relative z-10 space-y-8">
