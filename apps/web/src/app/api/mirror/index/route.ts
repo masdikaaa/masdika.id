@@ -168,13 +168,16 @@ function parseDirectoryHtml(html: string, basePath: string): MirrorIndexEntry[] 
   return entries.sort((a, b) => Number(b.isDir) - Number(a.isDir) || a.name.localeCompare(b.name));
 }
 
-async function fetchMikrotikOfficialVersions(major?: "6" | "7"): Promise<MirrorIndexEntry[]> {
+async function fetchMikrotikOfficialVersions(
+  major?: "6" | "7",
+  baseFolder: "RouterOS_v6" | "RouterOS_v7" | "CHR" | "official" = "official"
+): Promise<MirrorIndexEntry[]> {
   const allChannels = [
-    { url: "https://upgrade.mikrotik.com/routeros/NEWESTa7.stable", label: "RouterOS v7 Stable (Official)", maj: "7" },
-    { url: "https://upgrade.mikrotik.com/routeros/NEWESTa7.testing", label: "RouterOS v7 Testing (Official)", maj: "7" },
-    { url: "https://upgrade.mikrotik.com/routeros/NEWEST7.stable", label: "RouterOS v7 Legacy Stable", maj: "7" },
-    { url: "https://upgrade.mikrotik.com/routeros/NEWEST6.stable", label: "RouterOS v6 Stable (Official)", maj: "6" },
-    { url: "https://upgrade.mikrotik.com/routeros/NEWEST6.long-term", label: "RouterOS v6 Long-Term (Official)", maj: "6" },
+    { url: "https://upgrade.mikrotik.com/routeros/NEWESTa7.stable", label: "RouterOS v7 Stable", maj: "7" },
+    { url: "https://upgrade.mikrotik.com/routeros/NEWESTa7.testing", label: "RouterOS v7 Testing", maj: "7" },
+    { url: "https://upgrade.mikrotik.com/routeros/NEWEST7.stable", label: "RouterOS v7 Legacy", maj: "7" },
+    { url: "https://upgrade.mikrotik.com/routeros/NEWEST6.stable", label: "RouterOS v6 Stable", maj: "6" },
+    { url: "https://upgrade.mikrotik.com/routeros/NEWEST6.long-term", label: "RouterOS v6 Long-Term", maj: "6" },
   ];
 
   const channels = major ? allChannels.filter((c) => c.maj === major) : allChannels;
@@ -199,7 +202,7 @@ async function fetchMikrotikOfficialVersions(major?: "6" | "7"): Promise<MirrorI
           : ch.label;
         results.push({
           name: `${ver}/`,
-          href: `/mikrotik/official/${ver}/`,
+          href: `/mikrotik/${baseFolder}/${ver}/`,
           isDir: true,
           size: "-",
           lastSync: `${lastSync} (${ch.label})`,
@@ -211,13 +214,17 @@ async function fetchMikrotikOfficialVersions(major?: "6" | "7"): Promise<MirrorI
   return results.sort((a, b) => b.name.localeCompare(a.name, undefined, { numeric: true }));
 }
 
-function buildMikrotikVersionFiles(ver: string, basePath: string): MirrorIndexEntry[] {
-  const files = [
-    `mikrotik-${ver}.iso`,
+function buildMikrotikVersionFiles(ver: string, chrOnly = false): MirrorIndexEntry[] {
+  const chrFiles = [
     `chr-${ver}.img.zip`,
     `chr-${ver}.vmdk.zip`,
     `chr-${ver}.vhdx.zip`,
     `chr-${ver}.ova`,
+    `chr-${ver}.vdi.zip`,
+  ];
+
+  const routerOsFiles = [
+    `mikrotik-${ver}.iso`,
     `routeros-${ver}-x86.npk`,
     `routeros-${ver}-arm.npk`,
     `routeros-${ver}-arm64.npk`,
@@ -225,11 +232,13 @@ function buildMikrotikVersionFiles(ver: string, basePath: string): MirrorIndexEn
     `all_packages-x86-${ver}.zip`,
     `all_packages-arm64-${ver}.zip`,
     `netinstall-${ver}.zip`,
+    ...chrFiles,
   ];
 
+  const files = chrOnly ? chrFiles : routerOsFiles;
   return files.map((name) => ({
     name,
-    href: `${basePath}${name}`,
+    href: `/mikrotik/${ver}/${name}`,
     isDir: false,
     size: "Official",
     lastSync: `v${ver}`,
@@ -245,14 +254,33 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    if (path === "/mikrotik/official/") {
-      const entries = await fetchMikrotikOfficialVersions();
-      return NextResponse.json({ path, entries });
+    if (path === "/mikrotik/") {
+      return NextResponse.json({
+        path,
+        entries: [
+          { name: "RouterOS_v7/", href: "/mikrotik/RouterOS_v7/", isDir: true, size: "-", lastSync: "Official v7 (7.25+)" },
+          { name: "RouterOS_v6/", href: "/mikrotik/RouterOS_v6/", isDir: true, size: "-", lastSync: "Official v6 (6.49+)" },
+          { name: "CHR/", href: "/mikrotik/CHR/", isDir: true, size: "-", lastSync: "Cloud Hosted Router (v6 & v7)" },
+        ],
+      });
     }
 
-    const officialVerMatch = path.match(/^\/mikrotik\/official\/([0-9]+\.[0-9]+(?:\.[0-9]+)?)\/$/);
-    if (officialVerMatch) {
-      const entries = buildMikrotikVersionFiles(officialVerMatch[1], path);
+    if (path === "/mikrotik/RouterOS_v7/") {
+      return NextResponse.json({ path, entries: await fetchMikrotikOfficialVersions("7", "RouterOS_v7") });
+    }
+    if (path === "/mikrotik/RouterOS_v6/") {
+      return NextResponse.json({ path, entries: await fetchMikrotikOfficialVersions("6", "RouterOS_v6") });
+    }
+    if (path === "/mikrotik/CHR/") {
+      return NextResponse.json({ path, entries: await fetchMikrotikOfficialVersions(undefined, "CHR") });
+    }
+    if (path === "/mikrotik/official/") {
+      return NextResponse.json({ path, entries: await fetchMikrotikOfficialVersions(undefined, "official") });
+    }
+
+    const verMatch = path.match(/^\/mikrotik\/(RouterOS_v[67]|CHR|official)\/([0-9]+\.[0-9]+(?:\.[0-9]+)?)\/$/);
+    if (verMatch) {
+      const entries = buildMikrotikVersionFiles(verMatch[2], verMatch[1] === "CHR");
       return NextResponse.json({ path, entries });
     }
 
@@ -273,26 +301,6 @@ export async function GET(req: NextRequest) {
 
     const html = await res.text();
     const entries = parseDirectoryHtml(html, path);
-
-    if (path === "/mikrotik/") {
-      entries.unshift({
-        name: "official/",
-        href: "/mikrotik/official/",
-        isDir: true,
-        size: "-",
-        lastSync: "Latest RouterOS v6 & v7 + CHR (Official)",
-      });
-    } else if (path === "/mikrotik/RouterOS_v6/" || path === "/mikrotik/RouterOS_v7/") {
-      const major = path === "/mikrotik/RouterOS_v6/" ? "6" : "7";
-      const official = await fetchMikrotikOfficialVersions(major);
-      const existingNames = new Set(entries.map((e) => e.name));
-      for (const item of official.reverse()) {
-        if (!existingNames.has(item.name)) {
-          entries.unshift(item);
-        }
-      }
-    }
-
     return NextResponse.json({ path, entries });
   } catch (err: unknown) {
     return NextResponse.json(
