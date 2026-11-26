@@ -12,18 +12,24 @@ import {
   Database,
   Filter,
   Gauge,
+  GitBranch,
   Globe,
   KeyRound,
+  Laptop,
   Layers,
   Lock,
+  MemoryStick,
   Network,
   Pause,
   Play,
+  Radio,
+  Route,
   Search,
   Server,
   Shield,
   ShieldAlert,
   ShieldCheck,
+  SlidersHorizontal,
   Terminal,
   Wifi,
   Zap,
@@ -35,7 +41,6 @@ import { FaqSection } from "@/components/ui/FaqSection";
 import { HeroAvatarFrame } from "@/components/ui/HeroAvatarFrame";
 import { GlowCtaCard } from "@/components/ui/GlowCtaCard";
 import { FadeIn } from "@/components/animations/FadeIn";
-import { AnimatedBeam, OrbitalRings } from "@/components/animations/DeploymentAnimations";
 
 export interface DnsPublicInfo {
   enabled: boolean;
@@ -123,6 +128,7 @@ export default function DnsPublicClient({
 }) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<SetupTabId>("linux");
+  const [flowMode, setFlowMode] = useState<"recursive" | "authoritative">("recursive");
   const [stats, setStats] = useState<DnsStatsSnapshot>(initialStats);
   const [livePolling, setLivePolling] = useState(true);
   const [streamConnected, setStreamConnected] = useState<boolean>(Boolean(initialStats.available));
@@ -490,7 +496,7 @@ export default function DnsPublicClient({
                 <Button
                   variant="secondary"
                   size="lg"
-                  href="#dns-console"
+                  href="#quick-setup-terminal"
                   leftIcon={<Terminal className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />}
                 >
                   Quick Setup
@@ -702,12 +708,23 @@ export default function DnsPublicClient({
               </div>
             </div>
           </div>
+        </section>
 
-          {/* Integrated Quick Setup Snippet Terminal (Consistent with /mirror) */}
-          <div
-            id="quick-setup-terminal"
-            className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] overflow-hidden shadow-sm"
-          >
+        {/* 2.2 DEDICATED CLIENT SETUP GUIDE SECTION */}
+        <section id="quick-setup-terminal" className="scroll-mt-24 py-10 sm:py-14 relative z-10 space-y-8">
+          <div className="text-center max-w-3xl mx-auto">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+              CLIENT CONFIGURATION GUIDE
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+              Configure SafeDNS in Seconds
+            </h2>
+            <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
+              Apply Masdika SafeDNS ({resolverIp}) across Linux servers, macOS, Windows, MikroTik RouterOS, or any DoH-compatible browser.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] overflow-hidden shadow-sm">
             <div className="px-4 py-3 border-b border-[var(--border-primary)] bg-[var(--surface-secondary)] flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="flex items-center gap-1.5 shrink-0">
@@ -1308,88 +1325,154 @@ export default function DnsPublicClient({
           </section>
         )}
 
-        {/* 4. ARCHITECTURE SHOWCASE (Matches /vps Hardware & Specs Showcase) */}
+        {/* 4. INTERACTIVE DNS RESOLUTION PIPELINE (Original DNS Architecture) */}
         <section id="features" className="scroll-mt-24 py-10 sm:py-14 relative z-10">
-          <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-8 sm:p-12 shadow-xl overflow-hidden">
-            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-              <div className="lg:col-span-7">
-                <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
-                  DNS ENGINE ARCHITECTURE
-                </span>
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
-                  Zero-Copy LMDB &amp; Sub-Millisecond Cache
-                </h2>
-                <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed mb-8 max-w-xl">
-                  Built on PowerDNS LMDB memory-mapped shards and dnsdist C++ packet caching in Sidoarjo DC for instant record propagation and edge security.
-                </p>
+          <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+              DNS ENGINE ARCHITECTURE
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+              Inside Every Sub-Millisecond Query
+            </h2>
+            <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed mb-6">
+              Inspect how Masdika routes SafeDNS recursive lookups and PowerDNS LMDB authoritative zone answers at the Sidoarjo edge.
+            </p>
 
-                <div className="space-y-3.5">
-                  {[
-                    "0-second A, AAAA, CNAME, MX & TXT propagation with auto SOA bump",
-                    "Memory-mapped LMDB shards eliminating SQL lock contention under load",
-                    "500K RAM packet cache with automatic serve-stale resilience",
-                    "ANY-to-TCP reflection shield, strict AXFR denial & per-IP rate limit",
-                  ].map((item, i) => (
-                    <div key={i} className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
-                      <div className="w-6 h-6 rounded-md bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
+            <div className="inline-flex items-center rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] p-1 shadow-sm">
+              <button
+                type="button"
+                onClick={() => setFlowMode("recursive")}
+                className={
+                  flowMode === "recursive"
+                    ? "px-4 py-2 rounded-lg text-xs font-bold bg-cyan-400 text-slate-950 cursor-pointer transition-colors"
+                    : "px-4 py-2 rounded-lg text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer transition-colors"
+                }
+              >
+                SafeDNS Recursive ({resolverIp})
+              </button>
+              <button
+                type="button"
+                onClick={() => setFlowMode("authoritative")}
+                className={
+                  flowMode === "authoritative"
+                    ? "px-4 py-2 rounded-lg text-xs font-bold bg-cyan-400 text-slate-950 cursor-pointer transition-colors"
+                    : "px-4 py-2 rounded-lg text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer transition-colors"
+                }
+              >
+                Authoritative Pointing (ns1 / ns2)
+              </button>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-10 shadow-xl space-y-8">
+            <div className="relative grid grid-cols-1 md:grid-cols-4 gap-6 items-stretch">
+              <div
+                aria-hidden="true"
+                className="hidden md:block absolute top-11 left-[12%] right-[12%] h-px bg-gradient-to-r from-cyan-500/20 via-cyan-400/60 to-cyan-500/20"
+              />
+              {(flowMode === "recursive"
+                ? [
+                    {
+                      step: "HOP 01",
+                      icon: Laptop,
+                      tag: "UDP/53 · DoH",
+                      title: "Client Query Arrives",
+                      desc: "Sent from your router, Linux server, Windows workstation, or browser RFC 8484 DoH endpoint.",
+                    },
+                    {
+                      step: "HOP 02",
+                      icon: ShieldAlert,
+                      tag: "637K+ Rules",
+                      title: "Edge Filter & Rate Guard",
+                      desc: "dnsdist shunts ANY amplification to TCP, enforces per-IP limits, and sinkholes malicious hosts to 0.0.0.0.",
+                    },
+                    {
+                      step: "HOP 03",
+                      icon: MemoryStick,
+                      tag: "<1 ms Hit",
+                      title: "500K RAM Packet Cache",
+                      desc: "Hot domains answer directly from lock-free C++ memory cache with serve-stale failover if upstream lags.",
+                    },
+                    {
+                      step: "HOP 04",
+                      icon: GitBranch,
+                      tag: "DNSSEC Check",
+                      title: "Recursive Iteration",
+                      desc: "Uncached lookups walk root and TLD authorities with full cryptographic DNSSEC validation.",
+                    },
+                  ]
+                : [
+                    {
+                      step: "STAGE 01",
+                      icon: SlidersHorizontal,
+                      tag: "DNS Console",
+                      title: "Save Record Changes",
+                      desc: "Edit A, AAAA, CNAME, MX, TXT, SRV, or CAA records from the dashboard or REST API.",
+                    },
+                    {
+                      step: "STAGE 02",
+                      icon: Database,
+                      tag: "0s Lock-Free",
+                      title: "PowerDNS LMDB Commit",
+                      desc: "Writes directly to memory-mapped LMDB shards with an automatic SOA serial increment and zero SQL locking.",
+                    },
+                    {
+                      step: "STAGE 03",
+                      icon: Radio,
+                      tag: "AXFR Locked",
+                      title: "Live on ns1 & ns2",
+                      desc: "Both authoritative nameservers serve updated zone records instantly while blocking unauthorized zone transfers.",
+                    },
+                    {
+                      step: "STAGE 04",
+                      icon: Route,
+                      tag: "60s Default TTL",
+                      title: "Rapid Edge Rollout",
+                      desc: "Short default 60-second TTLs ensure global resolvers pick up production IP swaps without stale caches.",
+                    },
+                  ]
+              ).map((hop) => (
+                <div
+                  key={hop.step}
+                  className="relative z-10 p-5 sm:p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/70 flex flex-col justify-between gap-4 hover:border-cyan-500/40 transition-colors"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="w-10 h-10 rounded-xl bg-cyan-50 dark:bg-cyan-950/50 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
+                        <hop.icon className="w-5 h-5" />
                       </div>
-                      <span className="font-medium text-[var(--text-primary)]">{item}</span>
+                      <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 font-mono text-[10px] font-semibold text-cyan-600 dark:text-cyan-400">
+                        {hop.tag}
+                      </span>
                     </div>
-                  ))}
+                    <div>
+                      <div className="font-mono text-[10px] uppercase tracking-wider text-[var(--text-secondary)] mb-1">
+                        {hop.step}
+                      </div>
+                      <h3 className="text-base font-bold text-[var(--text-primary)]">{hop.title}</h3>
+                    </div>
+                  </div>
+                  <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">{hop.desc}</p>
                 </div>
+              ))}
+            </div>
+
+            <div className="pt-6 border-t border-[var(--border-subtle)] grid grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-mono">
+              <div className="flex items-center justify-between sm:justify-start sm:gap-3">
+                <span className="text-[var(--text-secondary)]">API Sync</span>
+                <span className="font-bold text-cyan-500">0s Instant</span>
               </div>
-
-              <div className="lg:col-span-5 grid grid-cols-2 gap-4">
-                <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-center flex flex-col items-center justify-center">
-                  <span className="text-4xl sm:text-5xl font-black text-cyan-600 dark:text-cyan-400 font-mono mb-1">
-                    0s
-                  </span>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-                    Zone API Sync
-                  </span>
-                </div>
-
-                <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-center flex flex-col items-center justify-center">
-                  <span className="text-4xl sm:text-5xl font-black text-cyan-600 dark:text-cyan-400 font-mono mb-1">
-                    &lt;1ms
-                  </span>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-                    Packet Cache
-                  </span>
-                </div>
-
-                <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-center flex flex-col items-center justify-center">
-                  <div className="w-10 h-10 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-2">
-                    <KeyRound className="w-5 h-5" />
-                  </div>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)]">
-                    ECDSA DNSSEC
-                  </span>
-                </div>
-
-                <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-center flex flex-col items-center justify-center">
-                  <div className="w-10 h-10 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-2">
-                    <Database className="w-5 h-5" />
-                  </div>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)]">
-                    LMDB Shards
-                  </span>
-                </div>
-
-                <div className="col-span-2 p-5 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] flex items-center gap-4">
-                  <div className="w-11 h-11 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
-                    <ShieldAlert className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold text-[var(--text-primary)]">
-                      637,390+ Threat &amp; Ad Filter Rules
-                    </div>
-                    <div className="text-xs text-[var(--text-muted)] mt-0.5">
-                      Daily-synced SafeDNS blocklist active across port 53 &amp; DoH
-                    </div>
-                  </div>
-                </div>
+              <div className="flex items-center justify-between sm:justify-start sm:gap-3">
+                <span className="text-[var(--text-secondary)]">Packet Cache</span>
+                <span className="font-bold text-[var(--text-primary)]">&lt;1 ms · 500K Slots</span>
+              </div>
+              <div className="flex items-center justify-between sm:justify-start sm:gap-3">
+                <span className="text-[var(--text-secondary)]">Default TTL</span>
+                <span className="font-bold text-[var(--text-primary)]">60 Seconds</span>
+              </div>
+              <div className="flex items-center justify-between sm:justify-start sm:gap-3">
+                <span className="text-[var(--text-secondary)]">DNSSEC Alg</span>
+                <span className="font-bold text-cyan-500">ECDSA P-256</span>
               </div>
             </div>
           </div>
@@ -1444,55 +1527,94 @@ export default function DnsPublicClient({
           </div>
         </section>
 
-        {/* 6. HOW IT WORKS WORKFLOW (Matches /vps Section 7 AnimatedBeam + OrbitalRings) */}
+        {/* 6. SUPPORTED RECORD MATRIX & REGISTRAR DELEGATION (Original DNS Reference) */}
         <section className="py-10 sm:py-14 relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
-              DEPLOYMENT WORKFLOW
+              RECORD MATRIX &amp; DELEGATION
             </span>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
-              Go Live in 3 Simple Steps
+              Supported Record Types &amp; Registrar Setup
             </h2>
+            <p className="text-base text-[var(--text-secondary)]">
+              Full RFC-compliant record control backed by automatic SOA management and registrar-ready nameserver delegation.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative items-stretch">
-            <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-[2px] bg-slate-200 dark:bg-white/10 overflow-hidden rounded-full">
-              <AnimatedBeam />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            <div className="lg:col-span-7 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] overflow-hidden shadow-sm">
+              <div className="px-6 py-4 border-b border-[var(--border-primary)] bg-[var(--surface-secondary)] flex items-center justify-between">
+                <span className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-primary)]">
+                  Authoritative Record Specification
+                </span>
+                <span className="text-xs font-mono text-cyan-600 dark:text-cyan-400 font-semibold">
+                  Default TTL: 60s
+                </span>
+              </div>
+              <div className="divide-y divide-[var(--border-subtle)] text-xs sm:text-sm">
+                {[
+                  { type: "A / AAAA", role: "IPv4 & IPv6 host mapping", example: "@ -> 45.198.149.x" },
+                  { type: "CNAME", role: "Subdomain canonical alias target", example: "www -> app.masdika.id." },
+                  { type: "MX", role: "Mail server priority routing", example: "10 mail.yourdomain.id." },
+                  { type: "TXT", role: "SPF, DKIM, DMARC & ACME TLS-01", example: "v=spf1 a mx ~all" },
+                  { type: "SRV", role: "Service port & protocol discovery", example: "_sip._tcp -> 0 5 5060 sip." },
+                  { type: "CAA", role: "Restrict trusted TLS certificate CAs", example: '0 issue "letsencrypt.org"' },
+                  { type: "NS", role: "Sub-zone delegation nameservers", example: "sub -> ns1.masdika.id." },
+                ].map((rec) => (
+                  <div key={rec.type} className="px-6 py-3.5 grid grid-cols-12 gap-3 items-center">
+                    <span className="col-span-3 font-mono font-bold text-cyan-600 dark:text-cyan-400">
+                      {rec.type}
+                    </span>
+                    <span className="col-span-5 text-[var(--text-primary)] font-medium">{rec.role}</span>
+                    <code className="col-span-4 text-right font-mono text-xs text-[var(--text-secondary)] truncate">
+                      {rec.example}
+                    </code>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            {[
-              {
-                step: "01",
-                title: "Point Resolver or NS",
-                desc: "Set SafeDNS (103.247.10.61) on your OS/router, or set ns1 & ns2.masdika.id at your domain registrar.",
-              },
-              {
-                step: "02",
-                title: "Configure Zones & DNSSEC",
-                desc: "Add A, AAAA, CNAME, MX, or TXT records in DNS Console and activate 1-click ECDSA P-256 DNSSEC.",
-              },
-              {
-                step: "03",
-                title: "Verify Live Propagation",
-                desc: "Test answers immediately with our Live Diagnostic Probe and watch real-time query telemetry.",
-              },
-            ].map((st, i) => (
-              <FadeIn key={st.step} delay={i * 0.15} direction="up" className="h-full">
-                <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-8 text-center shadow-sm hover:border-cyan-500/40 transition-all duration-300 h-full flex flex-col justify-between relative z-10 group">
+            <div className="lg:col-span-5 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 flex flex-col justify-between gap-6 shadow-sm">
+              <div className="space-y-5">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
+                    <KeyRound className="w-5 h-5" />
+                  </div>
                   <div>
-                    <div className="w-20 h-20 mx-auto rounded-full bg-[var(--surface-secondary)] border border-[var(--border-primary)] flex items-center justify-center mb-6 relative group-hover:scale-110 transition-transform duration-300">
-                      <OrbitalRings />
-                      <span className="relative z-10 text-3xl font-black bg-gradient-to-br from-cyan-600 to-cyan-400 bg-clip-text text-transparent">
-                        {st.step}
-                      </span>
+                    <div className="text-[11px] font-mono uppercase tracking-wider text-cyan-600 dark:text-cyan-400 font-semibold">
+                      REGISTRAR DELEGATION
                     </div>
-
-                    <h3 className="text-xl font-bold text-[var(--text-primary)] mb-3">{st.title}</h3>
-                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{st.desc}</p>
+                    <h3 className="text-lg font-black text-[var(--text-primary)]">
+                      Switch Nameservers Zero-Downtime
+                    </h3>
                   </div>
                 </div>
-              </FadeIn>
-            ))}
+
+                <div className="space-y-3.5">
+                  {[
+                    "Create your domain zone inside DNS Console and replicate existing A/MX/TXT records first.",
+                    "Clear any old DS records at PANDI, Namecheap, or Porkbun before switching NS.",
+                    "Set custom nameservers to ns1.masdika.id and ns2.masdika.id.",
+                    "Enable 1-click ECDSA P-256 DNSSEC in Masdika Console and paste the new DS record back.",
+                  ].map((step) => (
+                    <div key={step} className="flex items-start gap-2.5 text-sm text-[var(--text-secondary)]">
+                      <CheckCircle2 className="w-4 h-4 text-cyan-500 shrink-0 mt-0.5" />
+                      <span className="leading-relaxed">{step}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-[var(--border-subtle)] flex items-center justify-between gap-3">
+                <span className="text-xs font-mono text-[var(--text-secondary)]">PANDI · Cloudflare · Porkbun</span>
+                <a
+                  href="/dashboard/dns"
+                  className="text-xs font-bold text-cyan-600 dark:text-cyan-400 hover:underline inline-flex items-center gap-1"
+                >
+                  Open DNS Console <ArrowRight className="w-3.5 h-3.5" />
+                </a>
+              </div>
+            </div>
           </div>
         </section>
 

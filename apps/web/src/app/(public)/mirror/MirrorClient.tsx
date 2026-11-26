@@ -8,20 +8,30 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  Clock,
+  Cloud,
   Copy,
   Disc,
+  Download,
+  ExternalLink,
   FolderOpen,
+  GitCompareArrows,
   HardDrive,
+  KeyRound,
+  Layers,
+  Lock,
+  PackageCheck,
   RefreshCw,
+  RotateCw,
   Server,
   ShieldCheck,
   Terminal,
-  Zap,
 } from "lucide-react";
 import type { MirrorStatusPayload } from "@/app/api/mirror/status/route";
 import { SiMikrotik } from "react-icons/si";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { FaqSection } from "@/components/ui/FaqSection";
 import { HeroAvatarFrame } from "@/components/ui/HeroAvatarFrame";
 import { GlowCtaCard } from "@/components/ui/GlowCtaCard";
 
@@ -295,6 +305,29 @@ const ISO_SHORTCUTS = [
 
 const CARDS_PER_PAGE = 8;
 
+const MIRROR_FAQS: { q: string; a: string }[] = [
+  {
+    q: "How often does Masdika Mirror synchronize repository metadata?",
+    a: "Package repository indexes (InRelease, Packages, repomd.xml, APKINDEX, and pacman databases) revalidate every 5 minutes against official upstream mirrors, preventing apt or dnf hash sum mismatches during updates.",
+  },
+  {
+    q: "Are GPG signatures preserved and safe for production servers?",
+    a: "Yes. Masdika Mirror proxies release signatures and packages untouched from official upstream distributions. Your local apt, dnf, pacman, apk, or pkg client verifies every GPG key natively without adding custom keys.",
+  },
+  {
+    q: "How are binary packages vs ISO installer images cached?",
+    a: "Frequently requested .deb, .rpm, .apk, and .pkg.tar.zst binaries are cached for 30 days on fast SSD storage using request-locking, while large ISO images stream directly at full line speed.",
+  },
+  {
+    q: "Can external VPS or on-premise servers outside Masdika use this mirror?",
+    a: "Yes. https://mirror.masdika.id is completely free and publicly accessible from anywhere in Indonesia or Southeast Asia without registration or rate limits.",
+  },
+  {
+    q: "Which MikroTik RouterOS and CHR artifacts are mirrored?",
+    a: "Masdika Mirror hosts official MikroTik Cloud Hosted Router (CHR) images as well as RouterOS v6 and RouterOS v7 package bundles browsable under /mirror/browse/mikrotik.",
+  },
+];
+
 export default function MirrorClient() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("ubuntu");
@@ -351,9 +384,9 @@ export default function MirrorClient() {
         />
       </div>
 
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1 space-y-16 sm:space-y-24">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
         {/* 1. HERO SECTION */}
-        <section className="relative pt-0 pb-4 sm:pb-8 flex items-center">
+        <section className="relative pt-0 pb-8 sm:pb-12 flex items-center">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-start w-full">
             <div className="max-w-2xl relative z-30 lg:pt-20">
               <div className="mb-8">
@@ -405,7 +438,7 @@ export default function MirrorClient() {
                   variant="secondary"
                   size="lg"
                   href="#iso-center"
-                  leftIcon={<Disc className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />}
+                  leftIcon={<PackageCheck className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />}
                 >
                   Download ISO
                 </Button>
@@ -419,10 +452,10 @@ export default function MirrorClient() {
                 imageWidth={1230}
                 imageHeight={1278}
                 badges={[
-                  { icon: HardDrive, label: "Distributions", value: "13+ Linux & BSD Mirrors" },
+                  { icon: Layers, label: "Distributions", value: "13+ Linux & BSD Mirrors" },
                   { icon: RefreshCw, label: "Metadata Sync", value: "5-Minute Refresh" },
                   { icon: Disc, label: "ISO Images", value: "Direct Full-Speed Stream" },
-                  { icon: ShieldCheck, label: "Verification", value: "GPG Signature Preserved" },
+                  { icon: KeyRound, label: "Verification", value: "GPG Signature Preserved" },
                 ]}
               />
             </div>
@@ -431,7 +464,7 @@ export default function MirrorClient() {
 
         {/* SMART UPSTREAM / MIRROR HEALTH NOTIFICATION */}
         {health && health.overallStatus !== "operational" && (
-          <section className="relative z-10">
+          <section className="py-4 relative z-10">
             <div
               className={
                 health.overallStatus === "outage"
@@ -466,7 +499,7 @@ export default function MirrorClient() {
                 disabled={checkingHealth}
                 className="px-3.5 py-2 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] text-xs font-semibold text-[var(--text-primary)] inline-flex items-center gap-1.5 shrink-0 cursor-pointer self-start sm:self-center"
               >
-                <RefreshCw className={`w-3.5 h-3.5 ${checkingHealth ? "animate-spin" : ""}`} />
+                <RotateCw className={`w-3.5 h-3.5 ${checkingHealth ? "animate-spin" : ""}`} />
                 <span>Re-check</span>
               </button>
             </div>
@@ -474,11 +507,11 @@ export default function MirrorClient() {
         )}
 
         {/* 2. ARCHITECTURE PILLARS */}
-        <section className="relative z-10">
+        <section className="py-10 sm:py-14 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {[
               {
-                icon: RefreshCw,
+                icon: Clock,
                 title: "5-Minute Metadata Sync",
                 desc: "Repository indexes (InRelease, Packages, repomd.xml, APKINDEX) refresh every 5 minutes so Hash Sum Mismatch never occurs.",
               },
@@ -511,13 +544,14 @@ export default function MirrorClient() {
 
         {/* 2.5 MIRROR TELEMETRY & CACHE STATS */}
         {health?.telemetry && (
-          <section className="relative z-10 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 shadow-sm space-y-5">
+          <section className="py-10 sm:py-14 relative z-10">
+            <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 shadow-sm space-y-5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <span className="text-[11px] font-bold uppercase tracking-widest text-cyan-600 dark:text-cyan-400">
                   Live Mirror Telemetry
                 </span>
-                <h2 className="text-lg font-extrabold text-[var(--text-primary)]">
+                <h2 className="text-lg sm:text-xl font-extrabold text-[var(--text-primary)]">
                   Cache Performance &amp; Bandwidth
                 </h2>
               </div>
@@ -580,19 +614,20 @@ export default function MirrorClient() {
                 </div>
               </div>
             </div>
+            </div>
           </section>
         )}
 
         {/* 3. SUPPORTED DISTRIBUTIONS WITH CATEGORY FILTER & PAGINATION */}
-        <section id="mirrors" className="relative z-10 space-y-8">
-          <div className="text-center max-w-2xl mx-auto">
-            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-2 block">
+        <section id="mirrors" className="scroll-mt-24 py-10 sm:py-14 relative z-10 space-y-8">
+          <div className="text-center max-w-3xl mx-auto">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
               ALL ACTIVE DISTRIBUTIONS
             </span>
-            <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] leading-tight">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
               Supported Repositories &amp; Packages
             </h2>
-            <p className="text-sm sm:text-base text-[var(--text-secondary)] mt-2">
+            <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
               Filter by OS family, copy mirror endpoints, or browse repository directories directly.
             </p>
           </div>
@@ -723,14 +758,14 @@ export default function MirrorClient() {
                             href={`/mirror/browse${d.paths[0].replace(/\/$/, "")}`}
                             className="px-3 py-1.5 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] hover:border-cyan-500/40 text-xs font-semibold text-cyan-600 dark:text-cyan-400 inline-flex items-center gap-1.5 transition-colors"
                           >
-                            <FolderOpen className="w-3.5 h-3.5" />
+                            <ExternalLink className="w-3.5 h-3.5" />
                             <span>Browse</span>
                           </Link>
                           <Link
                             href={d.isoPath}
                             className="px-3 py-1.5 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] hover:border-cyan-500/40 text-xs font-semibold text-[var(--text-primary)] inline-flex items-center gap-1.5 transition-colors"
                           >
-                            <Disc className="w-3.5 h-3.5 text-cyan-500" />
+                            <Download className="w-3.5 h-3.5 text-cyan-500" />
                             <span>ISO</span>
                           </Link>
                           <a
@@ -876,15 +911,15 @@ export default function MirrorClient() {
         </section>
 
         {/* 4. DIRECT ISO DOWNLOAD CENTER */}
-        <section id="iso-center" className="relative z-10 space-y-8">
-          <div className="text-center max-w-2xl mx-auto">
-            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-2 block">
+        <section id="iso-center" className="scroll-mt-24 py-10 sm:py-14 relative z-10 space-y-8">
+          <div className="text-center max-w-3xl mx-auto">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
               BOOTABLE ISO IMAGES
             </span>
-            <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] leading-tight">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
               Direct ISO Download Center
             </h2>
-            <p className="text-sm sm:text-base text-[var(--text-secondary)] mt-2">
+            <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
               Jump straight to official installer ISO directories for bare-metal servers, Proxmox VMs, and desktops.
             </p>
           </div>
@@ -935,15 +970,15 @@ export default function MirrorClient() {
         </section>
 
         {/* 5. QUICK SETUP */}
-        <section id="setup" className="relative z-10 space-y-6">
-          <div className="text-center max-w-2xl mx-auto">
-            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-2 block">
+        <section id="setup" className="scroll-mt-24 py-10 sm:py-14 relative z-10 space-y-8">
+          <div className="text-center max-w-3xl mx-auto">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
               CLIENT CONFIGURATION
             </span>
-            <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] leading-tight">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
               Switch in One Command
             </h2>
-            <p className="text-sm sm:text-base text-[var(--text-secondary)] mt-2">
+            <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
               Select your distribution below and run the snippet on your VPS, bare-metal server, or container.
             </p>
           </div>
@@ -1004,12 +1039,12 @@ export default function MirrorClient() {
         </section>
 
         {/* 6. HOW IT WORKS */}
-        <section className="relative z-10 space-y-8">
-          <div className="text-center max-w-2xl mx-auto">
-            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-2 block">
+        <section className="py-10 sm:py-14 relative z-10 space-y-8">
+          <div className="text-center max-w-3xl mx-auto">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
               CACHING ARCHITECTURE
             </span>
-            <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] leading-tight">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
               Built for Speed &amp; Consistency
             </h2>
           </div>
@@ -1018,13 +1053,13 @@ export default function MirrorClient() {
             {[
               {
                 step: "01",
-                icon: RefreshCw,
+                icon: GitCompareArrows,
                 title: "Upstream Metadata Sync",
                 desc: "Release files and package indexes expire every 5 minutes with background revalidation, preventing apt or dnf hash mismatches.",
               },
               {
                 step: "02",
-                icon: Zap,
+                icon: Lock,
                 title: "Request-Locked Binary Cache",
                 desc: "Concurrent requests for the same .deb, .rpm, .apk, or .pkg.tar.zst package share a single upstream fetch and serve at SSD speed.",
               },
@@ -1051,7 +1086,7 @@ export default function MirrorClient() {
         </section>
 
         {/* 7. BOTTOM CTA */}
-        <section className="relative z-10">
+        <section className="py-10 sm:py-14 relative z-10">
           <GlowCtaCard>
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
               <div className="max-w-2xl space-y-3">
@@ -1080,13 +1115,16 @@ export default function MirrorClient() {
                 <Button variant="primary" size="lg" href="/vps" rightIcon={<ArrowRight className="w-4 h-4" />}>
                   Explore Cloud VPS
                 </Button>
-                <Button variant="secondary" size="lg" href="/app-platform" leftIcon={<Terminal className="w-4 h-4" />}>
+                <Button variant="secondary" size="lg" href="/app-platform" leftIcon={<Cloud className="w-4 h-4" />}>
                   App Platform
                 </Button>
               </div>
             </div>
           </GlowCtaCard>
         </section>
+
+        {/* 8. FAQ SECTION */}
+        <FaqSection faqs={MIRROR_FAQS} />
       </div>
     </div>
   );

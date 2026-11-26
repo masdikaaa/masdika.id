@@ -12,24 +12,46 @@ import {
   Terminal, 
   Code2, 
   UploadCloud, 
-  FlaskConical, 
-  Copy, 
   Check, 
   Zap, 
   ArrowRight,
   ShieldCheck,
   Radio,
   Cpu,
-  HardDrive
+  HardDrive,
+  Waypoints,
+  MapPin,
+  Gauge,
+  Layers,
+  Network,
+  Copy
 } from "lucide-react";
-import { SiKubernetes } from "react-icons/si";
 import Link from "next/link";
-import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { FaqSection } from "@/components/ui/FaqSection";
 import { HeroAvatarFrame } from "@/components/ui/HeroAvatarFrame";
 import { GlowCtaCard } from "@/components/ui/GlowCtaCard";
 import { cn } from "@/lib/utils";
+
+const LG_FAQS: { q: string; a: string }[] = [
+  {
+    q: "Where is the Masdika Looking Glass probe node located?",
+    a: "All ICMP ping, MTR, traceroute, and benchmark file tests run directly from our primary edge router in Sidoarjo Datacenter, East Java, Indonesia under AS63859.",
+  },
+  {
+    q: "Which Internet Exchanges (IXPs) does AS63859 peer with directly?",
+    a: "AS63859 connects directly to CDIX (Surabaya), OpenIXP (Jakarta), IIX (APJII), and Tier-1 international transit at Equinix SG1 Singapore.",
+  },
+  {
+    q: "What is the difference between ICMP Ping, Traceroute, and MTR?",
+    a: "Ping measures round-trip time and packet loss to the final host, Traceroute maps the hop-by-hop routing path, and MTR continuously combines both to pinpoint jitter or packet loss at specific intermediate hops.",
+  },
+  {
+    q: "Can I test IPv6 and direct file download throughput?",
+    a: "Yes. Both IPv4 (45.198.149.134) and IPv6 (2402:8780:1600::237) test endpoints are exposed alongside direct 50MB, 100MB, 500MB, and 1000MB throughput test files.",
+  },
+];
 
 export default function LookingGlassPage() {
   const [testType, setTestType] = useState<"ping" | "mtr" | "traceroute">("ping");
@@ -104,7 +126,7 @@ export default function LookingGlassPage() {
   const productLinks = [
     { title: "Object Storage", desc: "S3-compatible buckets with IAM keys and presigned URLs.", path: "/object-storage", icon: HardDrive },
     { title: "File CDN", desc: "Securely upload temporary files up to 100MB.", path: "/file-cdn", icon: UploadCloud },
-    { title: "Cloud VPS", desc: "High-performance virtual private servers with SSD.", path: "/vps", icon: Terminal },
+    { title: "Cloud VPS", desc: "High-performance virtual private servers with SSD.", path: "/vps", icon: Cpu },
     { title: "API VPS", desc: "Free REST API to start, stop, and reboot your Cloud VPS.", path: "/dashboard/api-vps", icon: Code2 },
   ];
 
@@ -168,7 +190,7 @@ export default function LookingGlassPage() {
                   href="https://bgp.he.net/AS63859"
                   target="_blank"
                   rel="noopener noreferrer"
-                  leftIcon={<Globe className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />}
+                  leftIcon={<Waypoints className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />}
                 >
                   AS63859 BGP Peering
                 </Button>
@@ -186,7 +208,7 @@ export default function LookingGlassPage() {
                   { icon: Activity, label: "Direct JX Edge", value: "< 1ms Latency" },
                   { icon: Globe, label: "BGP Peering", value: "AS63859 Direct" },
                   { icon: Zap, label: "Backbone Uplink", value: "10 Gbps Redundant" },
-                  { icon: Server, label: "Datacenter PoP", value: "Sidoarjo, ID" },
+                  { icon: MapPin, label: "Datacenter PoP", value: "Sidoarjo, ID" },
                 ]}
               />
             </div>
@@ -314,7 +336,7 @@ export default function LookingGlassPage() {
                   <div>
                     <div className="flex items-center gap-2 mb-3">
                       <div className="w-8 h-8 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
-                        <Download className="w-4 h-4" />
+                        <Gauge className="w-4 h-4" />
                       </div>
                       <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-primary)]">
                         Speedtest Files
@@ -349,7 +371,7 @@ export default function LookingGlassPage() {
                 <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4 border-b border-[var(--border-primary)] pb-4 sm:pb-5">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 border bg-cyan-50 dark:bg-cyan-950/40 border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400">
-                      <Activity className="w-5 h-5 sm:w-6 sm:h-6" />
+                      <Terminal className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                     <div>
                       <h3 className="text-base sm:text-xl font-black text-[var(--text-primary)] tracking-tight">
@@ -388,17 +410,14 @@ export default function LookingGlassPage() {
 
                 {/* Target Input and Action Button */}
                 <div className="flex flex-col sm:flex-row gap-3 w-full">
-                  <div className="flex-1 relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                      <Globe className="w-4 h-4 text-[var(--text-muted)]" />
-                    </div>
+                  <div className="flex-1">
                     <input 
                       type="text" 
                       value={host}
                       onChange={(e) => setHost(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && handleRunTest()}
                       placeholder="e.g. 1.1.1.1, google.com, or your IP"
-                      className="w-full bg-[var(--surface-secondary)] border border-[var(--border-primary)] rounded-xl py-2.5 sm:py-3 pl-10 pr-4 text-xs sm:text-base text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30 font-mono transition-all shadow-inner"
+                      className="w-full bg-[var(--surface-secondary)] border border-[var(--border-primary)] rounded-xl py-2.5 sm:py-3 px-4 text-xs sm:text-base text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30 font-mono transition-all shadow-inner"
                       disabled={isRunning}
                     />
                   </div>
@@ -486,7 +505,7 @@ export default function LookingGlassPage() {
               <div className="bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-6 shadow-sm">
                 <div className="flex items-center gap-2.5 border-b border-[var(--border-primary)] pb-4 mb-4">
                   <div className="w-7 h-7 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
-                    <Cpu className="w-4 h-4" />
+                    <Layers className="w-4 h-4" />
                   </div>
                   <h3 className="text-sm font-bold text-[var(--text-primary)]">
                     Masdika Cloud Products
@@ -523,7 +542,7 @@ export default function LookingGlassPage() {
               <div className="bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-6 shadow-sm">
                 <div className="flex items-center gap-2.5 border-b border-[var(--border-primary)] pb-4 mb-4">
                   <div className="w-7 h-7 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
-                    <ShieldCheck className="w-4 h-4" />
+                    <Network className="w-4 h-4" />
                   </div>
                   <h3 className="text-sm font-bold text-[var(--text-primary)]">
                     IXP &amp; Upstream Telemetry
@@ -584,13 +603,16 @@ export default function LookingGlassPage() {
                 <Button variant="primary" size="lg" href="/vps" rightIcon={<ArrowRight className="w-4 h-4" />}>
                   Explore Cloud VPS
                 </Button>
-                <Button variant="secondary" size="lg" href="/dns" leftIcon={<Globe className="w-4 h-4" />}>
+                <Button variant="secondary" size="lg" href="/dns" leftIcon={<ShieldCheck className="w-4 h-4" />}>
                   Masdika DNS
                 </Button>
               </div>
             </div>
           </GlowCtaCard>
         </section>
+
+        {/* ── 3. FAQ SECTION ────────────────────────────────────── */}
+        <FaqSection faqs={LG_FAQS} />
 
       </main>
     </div>
