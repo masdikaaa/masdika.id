@@ -162,7 +162,9 @@ export default function DnsPublicClient({
 
   const latestQps = qpsHistory.length > 0 ? qpsHistory[qpsHistory.length - 1].qps : 0;
   const maxQps = useMemo(() => {
-    const peak = Math.max(...qpsHistory.map((s) => Math.max(s.qps, s.cacheQps)), 1);
+    const peak = Math.max(...qpsHistory.map((s) => Math.max(s.qps, s.cacheQps)), 0);
+    if (peak <= 0) return 1;
+    if (peak < 1) return Number(Math.max(0.5, peak * 1.25).toFixed(2));
     return Math.ceil(peak * 1.2);
   }, [qpsHistory]);
 
@@ -231,7 +233,7 @@ export default function DnsPublicClient({
     {
       id: "doh",
       label: "DNS-over-HTTPS (DoH)",
-      command: `# Browser / Mobile / CLI DNS-over-HTTPS Endpoint\n${dohUrl}\n\n# Verify with curl (RFC 8484 DNS JSON / Wireformat)\ncurl -sH "accept: application/dns-json" "${dohUrl}?name=masdika.id&type=A"`,
+      command: `# Browser / Mobile / CLI DNS-over-HTTPS Endpoint (RFC 8484)\n${dohUrl}\n\n# Verify with curl (RFC 8484 DNS wireformat query for masdika.id)\ncurl -sH "accept: application/dns-message" "${dohUrl}?dns=AAABAAABAAAAAAAAA21hc2Rpa2ECaWQAAAEAAQ" | wc -c`,
     },
     {
       id: "windows",
