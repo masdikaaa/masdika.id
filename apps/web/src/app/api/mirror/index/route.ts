@@ -168,81 +168,163 @@ function parseDirectoryHtml(html: string, basePath: string): MirrorIndexEntry[] 
   return entries.sort((a, b) => Number(b.isDir) - Number(a.isDir) || a.name.localeCompare(b.name));
 }
 
-async function fetchMikrotikOfficialVersions(
-  major?: "6" | "7",
-  baseFolder: "RouterOS_v6" | "RouterOS_v7" | "CHR" | "official" = "official"
+function formatBytes(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes <= 0) return "-";
+  if (bytes >= 1024 * 1024 * 1024) return `${(bytes / 1024 ** 3).toFixed(2)} GiB`;
+  if (bytes >= 1024 * 1024) return `${(bytes / 1024 ** 2).toFixed(1)} MiB`;
+  if (bytes >= 1024) return `${(bytes / 1024).toFixed(1)} KiB`;
+  return `${bytes} B`;
+}
+
+let mtVersionsCache: Record<string, { at: number; items: MirrorIndexEntry[] }> = {};
+const mtFilesCache = new Map<string, { at: number; items: MirrorIndexEntry[] }>();
+const MT_CACHE_TTL = 3_600_000;
+
+async function fetchLatestMikrotikTag(url: string, fallback: string): Promise<string> {
+  try {
+    const c = new AbortController();
+    const t = setTimeout(() => c.abort(), 3500);
+    const r = await fetch(url, { signal: c.signal, cache: "no-store" });
+    clearTimeout(t);
+    if (r.ok) {
+      const ver = (await r.text()).trim().split(/\s+/)[0];
+      if (ver && /^\d+\.\d+(\.\d+)?$/.test(ver)) return ver;
+    }
+  } catch {}
+  return fallback;
+}
+
+async function fetchMikrotikVersionsFromChangelog(
+  major: "6" | "7",
+  baseFolder: "RouterOS_v6" | "RouterOS_v7" | "CHR"
 ): Promise<MirrorIndexEntry[]> {
-  const allChannels = [
-    { url: "https://upgrade.mikrotik.com/routeros/NEWESTa7.stable", label: "RouterOS v7 Stable", maj: "7" },
-    { url: "https://upgrade.mikrotik.com/routeros/NEWESTa7.testing", label: "RouterOS v7 Testing", maj: "7" },
-    { url: "https://upgrade.mikrotik.com/routeros/NEWEST7.stable", label: "RouterOS v7 Legacy", maj: "7" },
-    { url: "https://upgrade.mikrotik.com/routeros/NEWEST6.stable", label: "RouterOS v6 Stable", maj: "6" },
-    { url: "https://upgrade.mikrotik.com/routeros/NEWEST6.long-term", label: "RouterOS v6 Long-Term", maj: "6" },
-  ];
+  const cacheKey = `${major}:${baseFolder}`;
+  const cached = mtVersionsCache[cacheKey];
+  if (cached && Date.now() - cached.at < MT_CACHE_TTL) {
+    return cached.items;
+  }
 
-  const channels = major ? allChannels.filter((c) => c.maj === major) : allChannels;
+  const latestVer =
+    major === "7"
+      ? await fetchLatestMikrotikTag("https://upgrade.mikrotik.com/routeros/NEWESTa7.stable", "7.25.2")
+      : await fetchLatestMikrotikTag("https://upgrade.mikrotik.com/routeros/NEWEST6.stable", "6.49.23");
+
+  const entries: MirrorIndexEntry[] = [];
   const seen = new Set<string>();
-  const results: MirrorIndexEntry[] = [];
 
-  await Promise.all(
-    channels.map(async (ch) => {
-      try {
-        const c = new AbortController();
-        const t = setTimeout(() => c.abort(), 3500);
-        const r = await fetch(ch.url, { signal: c.signal, cache: "no-store" });
-        clearTimeout(t);
-        if (!r.ok) return;
-        const text = (await r.text()).trim();
-        const ver = text.split(/\s+/)[0];
-        if (!ver || !/^\d+\.\d+(\.\d+)?$/.test(ver) || seen.has(ver)) return;
+  for (const changelogUrl of [
+    `${MIRROR_ORIGIN}/mikrotik/${latestVer}/CHANGELOG`,
+    `https://download.mikrotik.com/routeros/${latestVer}/CHANGELOG`,
+  ]) {
+    try {
+      const c = new AbortController();
+      const t = setTimeout(() => c.abort(), 5000);
+      const r = await fetch(changelogUrl, { signal: c.signal, cache: "no-store" });
+      clearTimeout(t);
+      if (!r.ok) continue;
+      const text = await r.text();
+      const regex = new RegExp(`What's new in (${major}\\.\\d+(?:\\.\\d+)*)\\s*\\(([^)]+)\\)`, "g");
+      let m: RegExpExecArray | null;
+      while ((m = regex.exec(text)) !== null) {
+        const ver = m[1];
+        const dateStr = m[2].trim();
+        if (seen.has(ver)) continue;
         seen.add(ver);
-        const tsNum = Number(text.split(/\s+/)[1]);
-        const lastSync = Number.isFinite(tsNum) && tsNum > 0
-          ? new Date(tsNum * 1000).toISOString().slice(0, 16).replace("T", " ")
-          : ch.label;
-        results.push({
+        entries.push({
           name: `${ver}/`,
           href: `/mikrotik/${baseFolder}/${ver}/`,
           isDir: true,
           size: "-",
-          lastSync: `${lastSync} (${ch.label})`,
+          lastSync: dateStr,
         });
-      } catch {}
-    })
-  );
+      }
+      if (entries.length > 0) break;
+    } catch {}
+  }
 
-  return results.sort((a, b) => b.name.localeCompare(a.name, undefined, { numeric: true }));
+  if (!seen.has(latestVer)) {
+    entries.unshift({
+      name: `${latestVer}/`,
+      href: `/mikrotik/${baseFolder}/${latestVer}/`,
+      isDir: true,
+      size: "-",
+      lastSync: "Latest Official",
+    });
+  }
+
+  if (entries.length > 0) {
+    mtVersionsCache[cacheKey] = { at: Date.now(), items: entries };
+  }
+  return entries;
 }
 
-function buildMikrotikVersionFiles(ver: string, chrOnly = false): MirrorIndexEntry[] {
-  const chrFiles = [
+async function fetchMikrotikVersionFiles(ver: string, chrOnly = false): Promise<MirrorIndexEntry[]> {
+  const cacheKey = `${ver}:${chrOnly ? "chr" : "all"}`;
+  const cached = mtFilesCache.get(cacheKey);
+  if (cached && Date.now() - cached.at < MT_CACHE_TTL) {
+    return cached.items;
+  }
+
+  const isV6 = ver.startsWith("6.");
+  const archs = isV6
+    ? ["x86", "mipsbe", "arm", "arm64", "mmips", "smips", "tile", "powerpc"]
+    : ["x86", "arm", "arm64", "mipsbe", "mmips", "smips", "tile", "ppc"];
+
+  const chrCandidates = [
     `chr-${ver}.img.zip`,
     `chr-${ver}.vmdk.zip`,
     `chr-${ver}.vhdx.zip`,
     `chr-${ver}.ova`,
     `chr-${ver}.vdi.zip`,
+    `chr-${ver}.qcow2.zip`,
   ];
 
-  const routerOsFiles = [
+  const routerOsCandidates = [
     `mikrotik-${ver}.iso`,
-    `routeros-${ver}-x86.npk`,
-    `routeros-${ver}-arm.npk`,
-    `routeros-${ver}-arm64.npk`,
-    `routeros-${ver}-mipsbe.npk`,
-    `all_packages-x86-${ver}.zip`,
-    `all_packages-arm64-${ver}.zip`,
+    `install-image-${ver}.zip`,
     `netinstall-${ver}.zip`,
-    ...chrFiles,
+    `netinstall-${ver}.tar.gz`,
+    ...archs.map((a) => (isV6 ? `routeros-${a}-${ver}.npk` : `routeros-${ver}-${a}.npk`)),
+    ...archs.map((a) => `all_packages-${a}-${ver}.zip`),
+    ...chrCandidates,
+    "CHANGELOG",
   ];
 
-  const files = chrOnly ? chrFiles : routerOsFiles;
-  return files.map((name) => ({
-    name,
-    href: `/mikrotik/${ver}/${name}`,
-    isDir: false,
-    size: "Official",
-    lastSync: `v${ver}`,
-  }));
+  const candidates = chrOnly ? chrCandidates : routerOsCandidates;
+
+  const probed = await Promise.all(
+    candidates.map(async (name): Promise<MirrorIndexEntry | null> => {
+      try {
+        const c = new AbortController();
+        const t = setTimeout(() => c.abort(), 3500);
+        const r = await fetch(`${MIRROR_ORIGIN}/mikrotik/${ver}/${name}`, {
+          method: "HEAD",
+          signal: c.signal,
+          cache: "no-store",
+        });
+        clearTimeout(t);
+        if (!r.ok) return null;
+        const len = Number(r.headers.get("content-length") || 0);
+        const lastMod = r.headers.get("last-modified");
+        const lastSync = lastMod ? new Date(lastMod).toISOString().slice(0, 16).replace("T", " ") : `v${ver}`;
+        return {
+          name,
+          href: `/mikrotik/${ver}/${name}`,
+          isDir: false,
+          size: formatBytes(len),
+          lastSync,
+        };
+      } catch {
+        return null;
+      }
+    })
+  );
+
+  const items = probed.filter((x): x is MirrorIndexEntry => x !== null);
+  if (items.length > 0) {
+    mtFilesCache.set(cacheKey, { at: Date.now(), items });
+  }
+  return items;
 }
 
 export async function GET(req: NextRequest) {
@@ -258,29 +340,30 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({
         path,
         entries: [
-          { name: "RouterOS_v7/", href: "/mikrotik/RouterOS_v7/", isDir: true, size: "-", lastSync: "Official v7 (7.25+)" },
-          { name: "RouterOS_v6/", href: "/mikrotik/RouterOS_v6/", isDir: true, size: "-", lastSync: "Official v6 (6.49+)" },
+          { name: "RouterOS_v7/", href: "/mikrotik/RouterOS_v7/", isDir: true, size: "-", lastSync: "All Official v7 Releases" },
+          { name: "RouterOS_v6/", href: "/mikrotik/RouterOS_v6/", isDir: true, size: "-", lastSync: "All Official v6 Releases" },
           { name: "CHR/", href: "/mikrotik/CHR/", isDir: true, size: "-", lastSync: "Cloud Hosted Router (v6 & v7)" },
         ],
       });
     }
 
     if (path === "/mikrotik/RouterOS_v7/") {
-      return NextResponse.json({ path, entries: await fetchMikrotikOfficialVersions("7", "RouterOS_v7") });
+      return NextResponse.json({ path, entries: await fetchMikrotikVersionsFromChangelog("7", "RouterOS_v7") });
     }
     if (path === "/mikrotik/RouterOS_v6/") {
-      return NextResponse.json({ path, entries: await fetchMikrotikOfficialVersions("6", "RouterOS_v6") });
+      return NextResponse.json({ path, entries: await fetchMikrotikVersionsFromChangelog("6", "RouterOS_v6") });
     }
     if (path === "/mikrotik/CHR/") {
-      return NextResponse.json({ path, entries: await fetchMikrotikOfficialVersions(undefined, "CHR") });
-    }
-    if (path === "/mikrotik/official/") {
-      return NextResponse.json({ path, entries: await fetchMikrotikOfficialVersions(undefined, "official") });
+      const [v7, v6] = await Promise.all([
+        fetchMikrotikVersionsFromChangelog("7", "CHR"),
+        fetchMikrotikVersionsFromChangelog("6", "CHR"),
+      ]);
+      return NextResponse.json({ path, entries: [...v7, ...v6] });
     }
 
-    const verMatch = path.match(/^\/mikrotik\/(RouterOS_v[67]|CHR|official)\/([0-9]+\.[0-9]+(?:\.[0-9]+)?)\/$/);
+    const verMatch = path.match(/^\/mikrotik\/(RouterOS_v[67]|CHR|official)\/([0-9]+\.[0-9]+(?:\.[0-9]+)*)\/$/);
     if (verMatch) {
-      const entries = buildMikrotikVersionFiles(verMatch[2], verMatch[1] === "CHR");
+      const entries = await fetchMikrotikVersionFiles(verMatch[2], verMatch[1] === "CHR");
       return NextResponse.json({ path, entries });
     }
 
