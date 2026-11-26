@@ -1187,23 +1187,52 @@ export default function DnsPublicClient({
           </div>
         </section>
 
-        {/* 5. MINIMALIST BOTTOM CTA */}
-        <section className="relative z-10 pt-4 border-t border-[var(--border-subtle)] flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="max-w-xl space-y-1.5">
-            <h2 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)] tracking-tight">
-              Ready to Point Your Domain to Masdika DNS?
-            </h2>
-            <p className="text-sm sm:text-base text-[var(--text-secondary)]">
-              Create your DNS zone in seconds, or test latency and routing from our Looking Glass.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <Button variant="primary" size="lg" href="/dashboard/dns" rightIcon={<ArrowRight className="w-4 h-4" />}>
-              Open DNS Console
-            </Button>
-            <Button variant="secondary" size="lg" href="/lg" leftIcon={<Globe className="w-4 h-4" />}>
-              Looking Glass
-            </Button>
+        {/* 5. BOTTOM CTA CARD */}
+        <section className="relative z-10">
+          <div className="relative overflow-hidden rounded-3xl border border-cyan-500/20 bg-[var(--surface)] p-8 sm:p-12 shadow-sm">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -top-24 -right-24 w-[420px] h-[420px] rounded-full opacity-[0.14] blur-[100px]"
+              style={{ background: "radial-gradient(circle, #06b6d4 0%, transparent 70%)" }}
+            />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent"
+            />
+
+            <div className="relative flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+              <div className="max-w-2xl space-y-3">
+                <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 block">
+                  MASDIKA CLOUD NETWORKING
+                </span>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[var(--text-primary)] tracking-tight leading-tight">
+                  Ready to Point Your Domain to Masdika DNS?
+                </h2>
+                <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
+                  Create your DNS zone in seconds, manage records with zero propagation delay, or test latency and
+                  routing from our Looking Glass.
+                </p>
+                <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-1 text-xs text-[var(--text-secondary)]">
+                  <span className="inline-flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-cyan-500" /> Free for Masdika accounts
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-cyan-500" /> 1-click DNSSEC
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-cyan-500" /> 0s record sync
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-3 shrink-0">
+                <Button variant="primary" size="lg" href="/dashboard/dns" rightIcon={<ArrowRight className="w-4 h-4" />}>
+                  Open DNS Console
+                </Button>
+                <Button variant="secondary" size="lg" href="/lg" leftIcon={<Globe className="w-4 h-4" />}>
+                  Looking Glass
+                </Button>
+              </div>
+            </div>
           </div>
         </section>
       </div>
