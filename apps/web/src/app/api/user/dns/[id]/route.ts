@@ -65,7 +65,11 @@ export async function GET(
     }
 
     const records = (pdnsZone.rrsets || [])
-      .filter((rr) => rr.type !== "SOA")
+      .filter(
+        (rr) =>
+          rr.type !== "SOA" &&
+          !(rr.type === "NS" && rr.name.toLowerCase() === `${zone.domain}.`)
+      )
       .map((rr) => ({
         fqdn: rr.name,
         name: formatDisplayRecordName(rr.name, zone.domain),
@@ -73,11 +77,7 @@ export async function GET(
         ttl: rr.ttl,
         records: rr.records || [],
       }))
-      .sort((a, b) => {
-        if (a.type === "NS" && b.type !== "NS") return -1;
-        if (b.type === "NS" && a.type !== "NS") return 1;
-        return a.name.localeCompare(b.name) || a.type.localeCompare(b.type);
-      });
+      .sort((a, b) => a.name.localeCompare(b.name) || a.type.localeCompare(b.type));
 
     return NextResponse.json({
       zone: {

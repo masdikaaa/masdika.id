@@ -44,7 +44,11 @@ export async function GET() {
             getPdnsZone(z.domain),
             checkNsDelegation(z.domain),
           ]);
-          recordCount = (pdnsZone.rrsets || []).filter((r) => r.type !== "SOA").length;
+          recordCount = (pdnsZone.rrsets || []).filter(
+            (r) =>
+              r.type !== "SOA" &&
+              !(r.type === "NS" && r.name.toLowerCase() === `${z.domain}.`)
+          ).length;
           detectedNs = nsCheck.detectedNs;
           status = nsCheck.delegated ? "active" : "pending";
 
