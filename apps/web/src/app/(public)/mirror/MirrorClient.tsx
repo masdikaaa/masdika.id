@@ -409,7 +409,7 @@ export default function MirrorClient() {
 
           {/* Category Filter Pills */}
           <div className="flex justify-center w-full">
-            <div className="inline-flex items-center gap-1.5 p-1.5 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] max-w-full overflow-x-auto no-scrollbar">
+            <div className="inline-flex items-center gap-1.5 p-1.5 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] max-w-full overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {(
                 [
                   { id: "ALL", label: `All (${DISTROS.length})` },
@@ -687,29 +687,16 @@ export default function MirrorClient() {
           </div>
 
           <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] overflow-hidden shadow-sm">
-            <div className="px-4 py-3 border-b border-[var(--border-primary)] bg-[var(--surface-secondary)] flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-3 min-w-0 max-w-full">
+            <div className="px-4 py-3 border-b border-[var(--border-primary)] bg-[var(--surface-secondary)] flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
                 <div className="flex items-center gap-1.5 shrink-0">
                   <span className="w-3 h-3 rounded-full bg-[#ff5f56]" />
                   <span className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
                   <span className="w-3 h-3 rounded-full bg-[#27c93f]" />
                 </div>
-                <div className="flex items-center gap-1 overflow-x-auto no-scrollbar max-w-full">
-                  {DISTROS.map((d) => (
-                    <button
-                      key={d.id}
-                      type="button"
-                      onClick={() => setActiveTab(d.id)}
-                      className={
-                        activeTab === d.id
-                          ? "px-3 py-1 rounded-lg text-xs font-bold bg-cyan-400 text-slate-950 whitespace-nowrap shrink-0 cursor-pointer"
-                          : "px-3 py-1 rounded-lg text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] whitespace-nowrap shrink-0 cursor-pointer"
-                      }
-                    >
-                      {d.name}
-                    </button>
-                  ))}
-                </div>
+                <span className="font-mono text-xs font-semibold text-[var(--text-secondary)] truncate">
+                  {activeTab}-mirror.sh
+                </span>
               </div>
 
               <button
@@ -729,6 +716,23 @@ export default function MirrorClient() {
                   </>
                 )}
               </button>
+            </div>
+
+            <div className="px-4 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface)] flex items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {DISTROS.map((d) => (
+                <button
+                  key={d.id}
+                  type="button"
+                  onClick={() => setActiveTab(d.id)}
+                  className={
+                    activeTab === d.id
+                      ? "px-3 py-1 rounded-lg text-xs font-bold bg-cyan-400 text-slate-950 whitespace-nowrap shrink-0 cursor-pointer"
+                      : "px-3 py-1 rounded-lg text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] whitespace-nowrap shrink-0 cursor-pointer"
+                  }
+                >
+                  {d.name}
+                </button>
+              ))}
             </div>
 
             <pre className="p-5 font-mono text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap break-all text-[var(--text-primary)]">
