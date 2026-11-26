@@ -828,7 +828,7 @@ export default function DnsPublicClient({
                 e.preventDefault();
                 runDnsLookup(lookupDomain, lookupType);
               }}
-              className="p-6 sm:p-8 flex flex-col lg:flex-row items-stretch lg:items-center gap-3"
+              className="p-4 sm:p-8 flex flex-col lg:flex-row items-stretch lg:items-center gap-3"
             >
               <input
                 type="text"
@@ -836,11 +836,11 @@ export default function DnsPublicClient({
                 onChange={(e) => setLookupDomain(e.target.value)}
                 placeholder="Enter domain or hostname (e.g. masdika.id, github.com)"
                 aria-label="Domain name to lookup"
-                className="flex-1 min-w-0 h-11 px-4 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-sm font-mono text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/60 focus:outline-none focus:border-cyan-500 transition-colors"
+                className="w-full lg:flex-1 min-w-0 h-12 shrink-0 px-4 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-sm font-mono text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/60 focus:outline-none focus:border-cyan-500 transition-colors"
               />
 
-              <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 shrink-0">
-                <div className="inline-flex items-center rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] p-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden max-w-full">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0">
+                <div className="grid grid-cols-7 sm:inline-flex items-center rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] p-1 w-full sm:w-auto">
                   {DNS_LOOKUP_TYPES.map((t) => (
                     <button
                       key={t}
@@ -848,8 +848,8 @@ export default function DnsPublicClient({
                       onClick={() => setLookupType(t)}
                       className={
                         lookupType === t
-                          ? "px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-bold bg-cyan-400 text-slate-950 cursor-pointer transition-colors"
-                          : "px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer transition-colors"
+                          ? "px-1.5 sm:px-2.5 py-2 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-mono font-bold bg-cyan-400 text-slate-950 cursor-pointer transition-colors text-center"
+                          : "px-1.5 sm:px-2.5 py-2 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-mono font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer transition-colors text-center"
                       }
                     >
                       {t}
@@ -863,6 +863,7 @@ export default function DnsPublicClient({
                   size="md"
                   disabled={lookupLoading}
                   leftIcon={<Search className="w-4 h-4" />}
+                  className="w-full sm:w-auto justify-center shrink-0 h-11"
                 >
                   {lookupLoading ? "Querying..." : "Lookup"}
                 </Button>
@@ -1338,28 +1339,28 @@ export default function DnsPublicClient({
               Inspect how Masdika routes SafeDNS recursive lookups and PowerDNS LMDB authoritative zone answers at the Sidoarjo edge.
             </p>
 
-            <div className="inline-flex items-center rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] p-1 shadow-sm">
+            <div className="flex flex-col sm:inline-flex sm:flex-row items-stretch sm:items-center rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] p-1 shadow-sm w-full sm:w-auto gap-1 sm:gap-0">
               <button
                 type="button"
                 onClick={() => setFlowMode("recursive")}
                 className={
                   flowMode === "recursive"
-                    ? "px-4 py-2 rounded-lg text-xs font-bold bg-cyan-400 text-slate-950 cursor-pointer transition-colors"
-                    : "px-4 py-2 rounded-lg text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer transition-colors"
+                    ? "px-4 py-2 rounded-lg text-xs font-bold bg-cyan-400 text-slate-950 cursor-pointer transition-colors whitespace-nowrap"
+                    : "px-4 py-2 rounded-lg text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer transition-colors whitespace-nowrap"
                 }
               >
-                SafeDNS Recursive ({resolverIp})
+                SafeDNS ({resolverIp})
               </button>
               <button
                 type="button"
                 onClick={() => setFlowMode("authoritative")}
                 className={
                   flowMode === "authoritative"
-                    ? "px-4 py-2 rounded-lg text-xs font-bold bg-cyan-400 text-slate-950 cursor-pointer transition-colors"
-                    : "px-4 py-2 rounded-lg text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer transition-colors"
+                    ? "px-4 py-2 rounded-lg text-xs font-bold bg-cyan-400 text-slate-950 cursor-pointer transition-colors whitespace-nowrap"
+                    : "px-4 py-2 rounded-lg text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer transition-colors whitespace-nowrap"
                 }
               >
-                Authoritative Pointing (ns1 / ns2)
+                Authoritative (ns1 / ns2)
               </button>
             </div>
           </div>
@@ -1457,22 +1458,22 @@ export default function DnsPublicClient({
               ))}
             </div>
 
-            <div className="pt-6 border-t border-[var(--border-subtle)] grid grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-mono">
-              <div className="flex items-center justify-between sm:justify-start sm:gap-3">
-                <span className="text-[var(--text-secondary)]">API Sync</span>
-                <span className="font-bold text-cyan-500">0s Instant</span>
+            <div className="pt-6 border-t border-[var(--border-subtle)] grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 font-mono">
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[11px] uppercase tracking-wider text-[var(--text-secondary)]">API Sync</span>
+                <span className="text-sm font-bold text-cyan-500">0s Instant</span>
               </div>
-              <div className="flex items-center justify-between sm:justify-start sm:gap-3">
-                <span className="text-[var(--text-secondary)]">Packet Cache</span>
-                <span className="font-bold text-[var(--text-primary)]">&lt;1 ms · 500K Slots</span>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[11px] uppercase tracking-wider text-[var(--text-secondary)]">Packet Cache</span>
+                <span className="text-sm font-bold text-[var(--text-primary)]">&lt;1 ms · 500K Slots</span>
               </div>
-              <div className="flex items-center justify-between sm:justify-start sm:gap-3">
-                <span className="text-[var(--text-secondary)]">Default TTL</span>
-                <span className="font-bold text-[var(--text-primary)]">60 Seconds</span>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[11px] uppercase tracking-wider text-[var(--text-secondary)]">Default TTL</span>
+                <span className="text-sm font-bold text-[var(--text-primary)]">60 Seconds</span>
               </div>
-              <div className="flex items-center justify-between sm:justify-start sm:gap-3">
-                <span className="text-[var(--text-secondary)]">DNSSEC Alg</span>
-                <span className="font-bold text-cyan-500">ECDSA P-256</span>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[11px] uppercase tracking-wider text-[var(--text-secondary)]">DNSSEC Alg</span>
+                <span className="text-sm font-bold text-cyan-500">ECDSA P-256</span>
               </div>
             </div>
           </div>
@@ -1561,12 +1562,19 @@ export default function DnsPublicClient({
                   { type: "CAA", role: "Restrict trusted TLS certificate CAs", example: '0 issue "letsencrypt.org"' },
                   { type: "NS", role: "Sub-zone delegation nameservers", example: "sub -> ns1.masdika.id." },
                 ].map((rec) => (
-                  <div key={rec.type} className="px-6 py-3.5 grid grid-cols-12 gap-3 items-center">
-                    <span className="col-span-3 font-mono font-bold text-cyan-600 dark:text-cyan-400">
-                      {rec.type}
-                    </span>
-                    <span className="col-span-5 text-[var(--text-primary)] font-medium">{rec.role}</span>
-                    <code className="col-span-4 text-right font-mono text-xs text-[var(--text-secondary)] truncate">
+                  <div
+                    key={rec.type}
+                    className="px-5 sm:px-6 py-3.5 flex flex-col sm:grid sm:grid-cols-12 gap-1.5 sm:gap-3 sm:items-center"
+                  >
+                    <div className="flex items-center justify-between sm:contents">
+                      <span className="sm:col-span-3 font-mono font-bold text-cyan-600 dark:text-cyan-400">
+                        {rec.type}
+                      </span>
+                      <span className="sm:col-span-5 text-[var(--text-primary)] font-medium text-right sm:text-left">
+                        {rec.role}
+                      </span>
+                    </div>
+                    <code className="sm:col-span-4 sm:text-right font-mono text-xs text-[var(--text-secondary)] break-all sm:truncate">
                       {rec.example}
                     </code>
                   </div>
@@ -1605,11 +1613,11 @@ export default function DnsPublicClient({
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-[var(--border-subtle)] flex items-center justify-between gap-3">
+              <div className="pt-4 border-t border-[var(--border-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <span className="text-xs font-mono text-[var(--text-secondary)]">PANDI · Cloudflare · Porkbun</span>
                 <a
                   href="/dashboard/dns"
-                  className="text-xs font-bold text-cyan-600 dark:text-cyan-400 hover:underline inline-flex items-center gap-1"
+                  className="text-xs font-bold text-cyan-600 dark:text-cyan-400 hover:underline inline-flex items-center gap-1 whitespace-nowrap shrink-0"
                 >
                   Open DNS Console <ArrowRight className="w-3.5 h-3.5" />
                 </a>
@@ -1618,7 +1626,10 @@ export default function DnsPublicClient({
           </div>
         </section>
 
-        {/* 7. BOTTOM CTA CARD (Matches /vps Section 9) */}
+        {/* 7. FREQUENTLY ASKED QUESTIONS (Placed before Bottom CTA) */}
+        <FaqSection faqs={DNS_FAQS} />
+
+        {/* 8. BOTTOM CTA CARD (Always final section above footer) */}
         <section className="py-10 sm:py-14 relative z-10 w-full">
           <GlowCtaCard>
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
@@ -1656,9 +1667,6 @@ export default function DnsPublicClient({
             </div>
           </GlowCtaCard>
         </section>
-
-        {/* 8. FREQUENTLY ASKED QUESTIONS (Matches /vps Section 10) */}
-        <FaqSection faqs={DNS_FAQS} />
       </div>
     </div>
   );

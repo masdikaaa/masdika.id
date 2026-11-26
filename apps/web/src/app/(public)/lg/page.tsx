@@ -10,8 +10,6 @@ import {
   ChevronRight, 
   Play, 
   Terminal, 
-  Code2, 
-  UploadCloud, 
   Check, 
   Zap, 
   ArrowRight,
@@ -24,7 +22,12 @@ import {
   Gauge,
   Layers,
   Network,
-  Copy
+  Copy,
+  Cloud,
+  Database,
+  Route,
+  Compass,
+  Shield
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
@@ -124,10 +127,10 @@ export default function LookingGlassPage() {
   };
 
   const productLinks = [
+    { title: "Cloud VPS", desc: "Dedicated KVM compute & NVMe storage in Sidoarjo DC.", path: "/vps", icon: Cpu },
+    { title: "App Platform", desc: "Managed Kubernetes container hosting with zero ops.", path: "/app-platform", icon: Cloud },
+    { title: "Managed Databases", desc: "Automated PostgreSQL, MySQL, Redis & MongoDB clusters.", path: "/managed-db", icon: Database },
     { title: "Object Storage", desc: "S3-compatible buckets with IAM keys and presigned URLs.", path: "/object-storage", icon: HardDrive },
-    { title: "File CDN", desc: "Securely upload temporary files up to 100MB.", path: "/file-cdn", icon: UploadCloud },
-    { title: "Cloud VPS", desc: "High-performance virtual private servers with SSD.", path: "/vps", icon: Cpu },
-    { title: "API VPS", desc: "Free REST API to start, stop, and reboot your Cloud VPS.", path: "/dashboard/api-vps", icon: Code2 },
   ];
 
   const testFiles = [
@@ -232,139 +235,135 @@ export default function LookingGlassPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            
-            {/* Left 8 Cols – Info Cards + Interactive Diagnostic Terminal */}
-            <div className="lg:col-span-8 space-y-8">
-              
-              {/* Quick Info Cards Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-                
-                {/* 1. Server Info */}
-                <div className="sm:col-span-2 xl:col-span-1 bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-5 sm:p-6 shadow-sm hover:border-cyan-500/40 hover:shadow-md transition-all flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-8 h-8 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
-                        <Server className="w-4 h-4" />
-                      </div>
-                      <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-primary)]">
-                        Core Node Info
-                      </h3>
-                    </div>
+          {/* Top Telemetry Strip (Clean 3-Column Edge Summary) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+            {/* 1. Server Info */}
+            <div className="bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-5 sm:p-6 shadow-sm hover:border-cyan-500/40 transition-all flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
+                    <Server className="w-4 h-4" />
+                  </div>
+                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-primary)]">
+                    Core Node Info
+                  </h3>
+                </div>
 
-                    <div className="space-y-3 text-xs sm:text-sm">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-[var(--text-secondary)] shrink-0 font-medium">Location:</span>
-                        <span className="text-right font-bold text-[var(--text-primary)] truncate">Sidoarjo, ID</span>
-                      </div>
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-[var(--text-secondary)] shrink-0 font-medium">ASN:</span>
-                        <a 
-                          href="https://bgp.he.net/AS63859" 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className="text-right font-mono font-bold text-cyan-600 dark:text-cyan-400 hover:underline transition-colors"
-                        >
-                          AS63859
-                        </a>
-                      </div>
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-[var(--text-secondary)] shrink-0 font-medium">Test IPv4:</span>
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-mono text-xs font-bold text-[var(--text-primary)]">45.198.149.134</span>
-                          <button 
-                            onClick={() => handleCopy("45.198.149.134")} 
-                            className="p-1 rounded-md text-[var(--text-muted)] hover:text-cyan-600 dark:hover:text-cyan-400 hover:bg-[var(--surface-secondary)] transition-all shrink-0" 
-                            title="Copy IPv4"
-                          >
-                            {copiedIp === "45.198.149.134" ? <Check className="w-3.5 h-3.5 text-cyan-500" /> : <Copy className="w-3.5 h-3.5" />}
-                          </button>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-[var(--text-secondary)] shrink-0 font-medium">Test IPv6:</span>
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <span className="font-mono text-[11px] font-bold text-[var(--text-primary)] truncate max-w-[130px] sm:max-w-none">2402:8780:1600::237</span>
-                          <button 
-                            onClick={() => handleCopy("2402:8780:1600::237:8000:e4")} 
-                            className="p-1 rounded-md text-[var(--text-muted)] hover:text-cyan-600 dark:hover:text-cyan-400 hover:bg-[var(--surface-secondary)] transition-all shrink-0" 
-                            title="Copy IPv6"
-                          >
-                            {copiedIp === "2402:8780:1600::237:8000:e4" ? <Check className="w-3.5 h-3.5 text-cyan-500" /> : <Copy className="w-3.5 h-3.5" />}
-                          </button>
-                        </div>
-                      </div>
+                <div className="space-y-3 text-xs sm:text-sm">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[var(--text-secondary)] shrink-0 font-medium">Location:</span>
+                    <span className="text-right font-bold text-[var(--text-primary)] truncate">Sidoarjo, ID</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[var(--text-secondary)] shrink-0 font-medium">ASN:</span>
+                    <a
+                      href="https://bgp.he.net/AS63859"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-right font-mono font-bold text-cyan-600 dark:text-cyan-400 hover:underline transition-colors"
+                    >
+                      AS63859
+                    </a>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[var(--text-secondary)] shrink-0 font-medium">Test IPv4:</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-mono text-xs font-bold text-[var(--text-primary)]">45.198.149.134</span>
+                      <button
+                        onClick={() => handleCopy("45.198.149.134")}
+                        className="p-1 rounded-md text-[var(--text-muted)] hover:text-cyan-600 dark:hover:text-cyan-400 hover:bg-[var(--surface-secondary)] transition-all shrink-0 cursor-pointer"
+                        title="Copy IPv4"
+                      >
+                        {copiedIp === "45.198.149.134" ? <Check className="w-3.5 h-3.5 text-cyan-500" /> : <Copy className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[var(--text-secondary)] shrink-0 font-medium">Test IPv6:</span>
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="font-mono text-[11px] font-bold text-[var(--text-primary)] truncate max-w-[140px] sm:max-w-none">2402:8780:1600::237</span>
+                      <button
+                        onClick={() => handleCopy("2402:8780:1600::237:8000:e4")}
+                        className="p-1 rounded-md text-[var(--text-muted)] hover:text-cyan-600 dark:hover:text-cyan-400 hover:bg-[var(--surface-secondary)] transition-all shrink-0 cursor-pointer"
+                        title="Copy IPv6"
+                      >
+                        {copiedIp === "2402:8780:1600::237:8000:e4" ? <Check className="w-3.5 h-3.5 text-cyan-500" /> : <Copy className="w-3.5 h-3.5" />}
+                      </button>
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
 
-                {/* 2. Client IP Address */}
-                <div className="sm:col-span-1 bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-5 sm:p-6 shadow-sm hover:border-cyan-500/40 hover:shadow-md transition-all flex flex-col justify-between text-center">
-                  <div>
-                    <div className="flex items-center justify-center gap-2 mb-3">
-                      <div className="w-8 h-8 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
-                        <Radio className="w-4 h-4" />
-                      </div>
-                      <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-primary)]">
-                        Your Connection IP
-                      </h3>
-                    </div>
-
-                    <div className="my-3 flex items-center justify-center gap-2">
-                      <p className="text-lg sm:text-xl font-mono font-black text-cyan-600 dark:text-cyan-400 tracking-tight truncate">
-                        {clientIp}
-                      </p>
-                      {clientIp !== "Loading..." && clientIp !== "Unknown" && (
-                        <button 
-                          onClick={() => handleCopy(clientIp)} 
-                          className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-cyan-600 dark:hover:text-cyan-400 hover:bg-[var(--surface-secondary)] transition-all shrink-0" 
-                          title="Copy Your IP"
-                        >
-                          {copiedIp === clientIp ? <Check className="w-4 h-4 text-cyan-500" /> : <Copy className="w-4 h-4" />}
-                        </button>
-                      )}
-                    </div>
+            {/* 2. Client IP Address */}
+            <div className="bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-5 sm:p-6 shadow-sm hover:border-cyan-500/40 transition-all flex flex-col justify-between text-center">
+              <div>
+                <div className="flex items-center justify-center gap-2 mb-3">
+                  <div className="w-8 h-8 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
+                    <Radio className="w-4 h-4" />
                   </div>
+                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-primary)]">
+                    Your Connection IP
+                  </h3>
+                </div>
 
-                  <p className="text-[11px] text-[var(--text-muted)]">
-                    Detected via real-time client TCP handshake.
+                <div className="my-4 flex items-center justify-center gap-2">
+                  <p className="text-xl sm:text-2xl font-mono font-black text-cyan-600 dark:text-cyan-400 tracking-tight truncate">
+                    {clientIp}
                   </p>
+                  {clientIp !== "Loading..." && clientIp !== "Unknown" && (
+                    <button
+                      onClick={() => handleCopy(clientIp)}
+                      className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-cyan-600 dark:hover:text-cyan-400 hover:bg-[var(--surface-secondary)] transition-all shrink-0 cursor-pointer"
+                      title="Copy Your IP"
+                    >
+                      {copiedIp === clientIp ? <Check className="w-4 h-4 text-cyan-500" /> : <Copy className="w-4 h-4" />}
+                    </button>
+                  )}
                 </div>
-                  
-                {/* 3. Download Benchmark Files */}
-                <div className="sm:col-span-1 bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-5 sm:p-6 shadow-sm hover:border-cyan-500/40 hover:shadow-md transition-all flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="w-8 h-8 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
-                        <Gauge className="w-4 h-4" />
-                      </div>
-                      <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-primary)]">
-                        Speedtest Files
-                      </h3>
-                    </div>
-
-                    <p className="text-xs text-[var(--text-secondary)] mb-3 leading-relaxed">
-                      Benchmark direct download throughput:
-                    </p>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      {testFiles.map((file) => (
-                        <a
-                          key={file.size}
-                          href={`/api/lg/test-file?size=${file.val}`}
-                          className="py-2 px-3 rounded-xl bg-[var(--surface-secondary)] hover:bg-cyan-500/10 text-[var(--text-primary)] hover:text-cyan-600 dark:hover:text-cyan-400 border border-[var(--border-subtle)] hover:border-cyan-500/30 text-xs font-mono font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm group"
-                        >
-                          <Download className="w-3 h-3 text-[var(--text-muted)] group-hover:text-cyan-500 transition-colors" />
-                          <span>{file.size}</span>
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
               </div>
 
-              {/* Network Test Terminal Module */}
+              <p className="text-xs text-[var(--text-muted)]">
+                Detected via real-time client TCP handshake.
+              </p>
+            </div>
+
+            {/* 3. Download Benchmark Files */}
+            <div className="bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-5 sm:p-6 shadow-sm hover:border-cyan-500/40 transition-all flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-8 h-8 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
+                    <Gauge className="w-4 h-4" />
+                  </div>
+                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-primary)]">
+                    Speedtest Files
+                  </h3>
+                </div>
+
+                <p className="text-xs text-[var(--text-secondary)] mb-3 leading-relaxed">
+                  Benchmark direct download throughput:
+                </p>
+
+                <div className="grid grid-cols-2 gap-2">
+                  {testFiles.map((file) => (
+                    <a
+                      key={file.size}
+                      href={`/api/lg/test-file?size=${file.val}`}
+                      className="py-2 px-3 rounded-xl bg-[var(--surface-secondary)] hover:bg-cyan-500/10 text-[var(--text-primary)] hover:text-cyan-600 dark:hover:text-cyan-400 border border-[var(--border-subtle)] hover:border-cyan-500/30 text-xs font-mono font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm group"
+                    >
+                      <Download className="w-3 h-3 text-[var(--text-muted)] group-hover:text-cyan-500 transition-colors" />
+                      <span>{file.size}</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            {/* Left 8 Cols – Interactive Diagnostic Terminal */}
+            <div className="lg:col-span-8">
               <div className="bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-4 sm:p-8 shadow-sm space-y-5 sm:space-y-6 w-full max-w-full overflow-hidden">
                 
                 {/* Module Header with Live Status Indicator */}
@@ -410,14 +409,14 @@ export default function LookingGlassPage() {
 
                 {/* Target Input and Action Button */}
                 <div className="flex flex-col sm:flex-row gap-3 w-full">
-                  <div className="flex-1">
+                  <div className="w-full sm:flex-1">
                     <input 
                       type="text" 
                       value={host}
                       onChange={(e) => setHost(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && handleRunTest()}
                       placeholder="e.g. 1.1.1.1, google.com, or your IP"
-                      className="w-full bg-[var(--surface-secondary)] border border-[var(--border-primary)] rounded-xl py-2.5 sm:py-3 px-4 text-xs sm:text-base text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30 font-mono transition-all shadow-inner"
+                      className="w-full h-12 bg-[var(--surface-secondary)] border border-[var(--border-primary)] rounded-xl px-4 text-sm sm:text-base text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30 font-mono transition-all shadow-inner"
                       disabled={isRunning}
                     />
                   </div>
@@ -428,7 +427,7 @@ export default function LookingGlassPage() {
                     variant="primary"
                     size="md"
                     leftIcon={<Play className="w-4 h-4 fill-current" />}
-                    className="w-full sm:w-auto shrink-0 font-mono font-bold"
+                    className="w-full sm:w-auto justify-center shrink-0 font-mono font-bold h-12"
                   >
                     Run Test
                   </Button>
@@ -573,7 +572,57 @@ export default function LookingGlassPage() {
           </div>
         </section>
 
-        {/* ── 2. BOTTOM CTA ─────────────────────────────────────── */}
+        {/* ── 2. AS63859 EDGE ROUTING & FABRIC STRIP ────────────────── */}
+        <section className="py-10 sm:py-14 relative z-10">
+          <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+              AS63859 BACKBONE
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+              Carrier-Grade Peering &amp; BGP Fabric
+            </h2>
+            <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
+              Optimized domestic and Singapore IXP connectivity hosted directly at our Sidoarjo edge datacenter.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] overflow-hidden shadow-sm">
+            <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[var(--border-subtle)]">
+              {[
+                {
+                  icon: ShieldCheck,
+                  title: "Hardware Anti-DDoS Scrubbing",
+                  desc: "Juniper FlowSpec & MikroTik perimeter ACLs filter UDP amplification, SYN floods, and volumetric spikes in line-rate silicon.",
+                },
+                {
+                  icon: Route,
+                  title: "Dual-Stack IPv4 & IPv6 BGP",
+                  desc: "Native dual-stack announcements with RPKI route-origin validation across Indonesia and regional Tier-1 transit.",
+                },
+                {
+                  icon: Compass,
+                  title: "Direct IXP Interconnection",
+                  desc: "Low-hop local peering to OpenIXP Jakarta, CDIX Surabaya, IIX APJII, and Equinix SG1 for <20ms domestic latency.",
+                },
+              ].map((spec) => (
+                <div key={spec.title} className="p-6 sm:p-8 flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0 mt-0.5">
+                    <spec.icon className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0 space-y-1.5">
+                    <h3 className="text-sm sm:text-base font-bold text-[var(--text-primary)]">{spec.title}</h3>
+                    <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">{spec.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── 3. FAQ SECTION (Placed above Bottom CTA) ────────────── */}
+        <FaqSection faqs={LG_FAQS} />
+
+        {/* ── 4. BOTTOM CTA (Always final section above footer) ─────── */}
         <section className="py-10 sm:py-14 relative z-10">
           <GlowCtaCard>
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
@@ -603,16 +652,13 @@ export default function LookingGlassPage() {
                 <Button variant="primary" size="lg" href="/vps" rightIcon={<ArrowRight className="w-4 h-4" />}>
                   Explore Cloud VPS
                 </Button>
-                <Button variant="secondary" size="lg" href="/dns" leftIcon={<ShieldCheck className="w-4 h-4" />}>
+                <Button variant="secondary" size="lg" href="/dns" leftIcon={<Shield className="w-4 h-4" />}>
                   Masdika DNS
                 </Button>
               </div>
             </div>
           </GlowCtaCard>
         </section>
-
-        {/* ── 3. FAQ SECTION ────────────────────────────────────── */}
-        <FaqSection faqs={LG_FAQS} />
 
       </main>
     </div>

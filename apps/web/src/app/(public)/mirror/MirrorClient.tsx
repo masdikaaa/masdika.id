@@ -506,117 +506,111 @@ export default function MirrorClient() {
           </section>
         )}
 
-        {/* 2. ARCHITECTURE PILLARS */}
+        {/* 2. MIRROR ARCHITECTURE & LIVE NODE TELEMETRY */}
         <section className="py-10 sm:py-14 relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {[
-              {
-                icon: Clock,
-                title: "5-Minute Metadata Sync",
-                desc: "Repository indexes (InRelease, Packages, repomd.xml, APKINDEX) refresh every 5 minutes so Hash Sum Mismatch never occurs.",
-              },
-              {
-                icon: HardDrive,
-                title: "30-Day Cache + ISO Stream",
-                desc: "Immutable packages are cached on fast SSD storage while ISO images stream directly at full speed.",
-              },
-              {
-                icon: ShieldCheck,
-                title: "GPG Signature Preserved",
-                desc: "All packages and Release signatures are proxied untouched from official upstreams and verified natively.",
-              },
-            ].map((item, idx) => (
-              <div
-                key={idx}
-                className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] flex items-start gap-4 shadow-sm hover:border-cyan-500/40 transition-colors"
-              >
-                <div className="w-11 h-11 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
-                  <item.icon className="w-5 h-5" />
+          <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] overflow-hidden shadow-sm">
+            <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[var(--border-subtle)]">
+              {[
+                {
+                  icon: Clock,
+                  title: "5-Minute Metadata Sync",
+                  desc: "InRelease, Packages, repomd.xml & APKINDEX refresh every 5 minutes so Hash Sum Mismatch never occurs.",
+                },
+                {
+                  icon: HardDrive,
+                  title: "30-Day SSD Cache + ISO Stream",
+                  desc: "Immutable binaries stay hot on NVMe/SSD storage while multi-GB ISO images stream straight at line rate.",
+                },
+                {
+                  icon: ShieldCheck,
+                  title: "GPG Signature Preserved",
+                  desc: "Packages and Release keys are proxied untouched from upstream so native client verification always passes.",
+                },
+              ].map((item) => (
+                <div key={item.title} className="p-6 sm:p-7 flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0 mt-0.5">
+                    <item.icon className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0 space-y-1">
+                    <h3 className="text-sm sm:text-base font-bold text-[var(--text-primary)]">{item.title}</h3>
+                    <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">{item.desc}</p>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-bold text-[var(--text-primary)] mb-1">{item.title}</h3>
-                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{item.desc}</p>
+              ))}
+            </div>
+
+            {health?.telemetry && (
+              <div className="border-t border-[var(--border-primary)] bg-[var(--surface-secondary)]/40">
+                <div className="px-6 py-3.5 border-b border-[var(--border-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-cyan-400 shrink-0" />
+                    <span className="text-xs font-mono font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400">
+                      Live Node Cache &amp; Bandwidth Telemetry
+                    </span>
+                  </div>
+                  <span className="text-[11px] font-mono text-[var(--text-secondary)]">
+                    Updated: {new Date(health.telemetry.updatedAt).toLocaleTimeString()}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-[var(--border-subtle)]">
+                  <div className="p-5 sm:p-6 space-y-1.5">
+                    <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)]">
+                      Cache Hit Ratio
+                    </div>
+                    <div className="text-2xl font-black text-cyan-500 font-mono">
+                      {health.telemetry.cacheHitRatio.toFixed(1)}%
+                    </div>
+                    <div className="h-1.5 rounded-full bg-[var(--border-primary)] overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-cyan-500 to-cyan-300 rounded-full"
+                        style={{ width: `${Math.min(100, health.telemetry.cacheHitRatio)}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="p-5 sm:p-6 space-y-1">
+                    <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)]">
+                      Bandwidth Served
+                    </div>
+                    <div className="text-2xl font-black text-[var(--text-primary)] font-mono">
+                      {(health.telemetry.totalBytesServed / (1024 ** 3)).toFixed(2)} GB
+                    </div>
+                    <div className="text-xs font-mono text-[var(--text-secondary)]">
+                      {health.telemetry.totalRequests.toLocaleString()} requests
+                    </div>
+                  </div>
+
+                  <div className="p-5 sm:p-6 space-y-1">
+                    <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)]">
+                      SSD Cache Used
+                    </div>
+                    <div className="text-2xl font-black text-[var(--text-primary)] font-mono">
+                      {(health.telemetry.cacheUsedBytes / (1024 ** 3)).toFixed(1)} GB
+                    </div>
+                    <div className="text-xs font-mono text-[var(--text-secondary)]">
+                      {(health.telemetry.diskFreeBytes / (1024 ** 3)).toFixed(0)} GB free on node
+                    </div>
+                  </div>
+
+                  <div className="p-5 sm:p-6 space-y-1.5">
+                    <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)]">
+                      Top Cached Repos
+                    </div>
+                    <div className="space-y-1">
+                      {(health.telemetry.topRepos || []).slice(0, 3).map((repo) => (
+                        <div key={repo.name} className="flex items-center justify-between text-xs font-mono">
+                          <span className="text-cyan-600 dark:text-cyan-400 font-semibold truncate">{repo.name}</span>
+                          <span className="text-[var(--text-secondary)]">{repo.requests}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
-            ))}
+            )}
           </div>
         </section>
-
-        {/* 2.5 MIRROR TELEMETRY & CACHE STATS */}
-        {health?.telemetry && (
-          <section className="py-10 sm:py-14 relative z-10">
-            <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 shadow-sm space-y-5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div>
-                <span className="text-[11px] font-bold uppercase tracking-widest text-cyan-600 dark:text-cyan-400">
-                  Live Mirror Telemetry
-                </span>
-                <h2 className="text-lg sm:text-xl font-extrabold text-[var(--text-primary)]">
-                  Cache Performance &amp; Bandwidth
-                </h2>
-              </div>
-              <span className="text-xs font-mono text-[var(--text-secondary)]">
-                Updated: {new Date(health.telemetry.updatedAt).toLocaleTimeString()}
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="p-4 rounded-xl border border-[var(--border-primary)] bg-black/[0.02] dark:bg-white/[0.02]">
-                <div className="text-[11px] uppercase tracking-wider text-[var(--text-secondary)] font-semibold">
-                  Cache Hit Ratio
-                </div>
-                <div className="text-2xl font-black text-cyan-500 mt-1 font-mono">
-                  {health.telemetry.cacheHitRatio.toFixed(1)}%
-                </div>
-                <div className="mt-2 h-1.5 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
-                  <div
-                    className="h-full bg-cyan-400 rounded-full"
-                    style={{ width: `${Math.min(100, health.telemetry.cacheHitRatio)}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="p-4 rounded-xl border border-[var(--border-primary)] bg-black/[0.02] dark:bg-white/[0.02]">
-                <div className="text-[11px] uppercase tracking-wider text-[var(--text-secondary)] font-semibold">
-                  Bandwidth Served
-                </div>
-                <div className="text-2xl font-black text-[var(--text-primary)] mt-1 font-mono">
-                  {(health.telemetry.totalBytesServed / (1024 ** 3)).toFixed(2)} GB
-                </div>
-                <div className="text-xs text-[var(--text-secondary)] mt-1">
-                  {health.telemetry.totalRequests.toLocaleString()} requests
-                </div>
-              </div>
-
-              <div className="p-4 rounded-xl border border-[var(--border-primary)] bg-black/[0.02] dark:bg-white/[0.02]">
-                <div className="text-[11px] uppercase tracking-wider text-[var(--text-secondary)] font-semibold">
-                  SSD Cache Used
-                </div>
-                <div className="text-2xl font-black text-[var(--text-primary)] mt-1 font-mono">
-                  {(health.telemetry.cacheUsedBytes / (1024 ** 3)).toFixed(1)} GB
-                </div>
-                <div className="text-xs text-[var(--text-secondary)] mt-1">
-                  {(health.telemetry.diskFreeBytes / (1024 ** 3)).toFixed(0)} GB free on node
-                </div>
-              </div>
-
-              <div className="p-4 rounded-xl border border-[var(--border-primary)] bg-black/[0.02] dark:bg-white/[0.02]">
-                <div className="text-[11px] uppercase tracking-wider text-[var(--text-secondary)] font-semibold mb-1.5">
-                  Top Repositories
-                </div>
-                <div className="space-y-1">
-                  {(health.telemetry.topRepos || []).slice(0, 3).map((repo) => (
-                    <div key={repo.name} className="flex items-center justify-between text-xs font-mono">
-                      <span className="text-cyan-500 truncate">{repo.name}</span>
-                      <span className="text-[var(--text-secondary)]">{repo.requests}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            </div>
-          </section>
-        )}
 
         {/* 3. SUPPORTED DISTRIBUTIONS WITH CATEGORY FILTER & PAGINATION */}
         <section id="mirrors" className="scroll-mt-24 py-10 sm:py-14 relative z-10 space-y-8">
@@ -837,6 +831,13 @@ export default function MirrorClient() {
                       >
                         ISO
                       </Link>
+                      <a
+                        href="#setup"
+                        onClick={() => setActiveTab(d.id)}
+                        className="px-2.5 py-1 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[11px] font-semibold text-[var(--text-secondary)]"
+                      >
+                        Setup
+                      </a>
                     </div>
                   </div>
                   <div className="space-y-1.5">
@@ -1038,54 +1039,71 @@ export default function MirrorClient() {
           </div>
         </section>
 
-        {/* 6. HOW IT WORKS */}
+        {/* 6. CACHE-TO-ISO REQUEST PIPELINE (Clean Horizontal Architecture) */}
         <section className="py-10 sm:py-14 relative z-10 space-y-8">
           <div className="text-center max-w-3xl mx-auto">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
               CACHING ARCHITECTURE
             </span>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
-              Built for Speed &amp; Consistency
+              How Mirror Traffic Is Routed
             </h2>
+            <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
+              Every request is routed differently by payload type so package indexes stay fresh while ISO images stream at full speed.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {[
-              {
-                step: "01",
-                icon: GitCompareArrows,
-                title: "Upstream Metadata Sync",
-                desc: "Release files and package indexes expire every 5 minutes with background revalidation, preventing apt or dnf hash mismatches.",
-              },
-              {
-                step: "02",
-                icon: Lock,
-                title: "Request-Locked Binary Cache",
-                desc: "Concurrent requests for the same .deb, .rpm, .apk, or .pkg.tar.zst package share a single upstream fetch and serve at SSD speed.",
-              },
-              {
-                step: "03",
-                icon: Server,
-                title: "Direct ISO Streaming",
-                desc: "Large installer ISO images bypass the package cache and stream directly from nearby Indonesia and Singapore nodes.",
-              },
-            ].map((s) => (
-              <div
-                key={s.step}
-                className="p-6 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] space-y-3 shadow-sm"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-xs font-bold text-cyan-600 dark:text-cyan-400">STEP {s.step}</span>
-                  <s.icon className="w-4 h-4 text-cyan-500" />
+          <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] overflow-hidden shadow-xl">
+            <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[var(--border-subtle)]">
+              {[
+                {
+                  tier: "TIER 01 · 5M REVALIDATE",
+                  icon: GitCompareArrows,
+                  title: "Metadata Indexes",
+                  paths: "InRelease · Packages · repomd.xml",
+                  desc: "Short 5-minute TTL with conditional upstream revalidation guarantees your apt, dnf, or pacman index matches signed binaries.",
+                },
+                {
+                  tier: "TIER 02 · 30D SSD CACHE",
+                  icon: Lock,
+                  title: "Request-Locked Binaries",
+                  paths: ".deb · .rpm · .apk · .pkg.tar.zst",
+                  desc: "Concurrent installs coalesce into a single upstream fetch while hot packages serve directly from local NVMe/SSD storage.",
+                },
+                {
+                  tier: "TIER 03 · LINE-RATE STREAM",
+                  icon: Server,
+                  title: "Zero-Wait ISO Images",
+                  paths: "ISO · QCOW2 · OVA · RouterOS CHR",
+                  desc: "Multi-gigabyte installer images bypass cache writes and stream straight to your server over domestic and SGIX peering.",
+                },
+              ].map((tier) => (
+                <div key={tier.title} className="p-6 sm:p-8 flex flex-col justify-between gap-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400">
+                        {tier.tier}
+                      </span>
+                      <div className="w-9 h-9 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
+                        <tier.icon className="w-4 h-4" />
+                      </div>
+                    </div>
+                    <h3 className="text-lg font-bold text-[var(--text-primary)]">{tier.title}</h3>
+                    <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">{tier.desc}</p>
+                  </div>
+                  <div className="pt-3 border-t border-[var(--border-subtle)] font-mono text-[11px] text-[var(--text-secondary)]">
+                    {tier.paths}
+                  </div>
                 </div>
-                <h3 className="text-base font-bold text-[var(--text-primary)]">{s.title}</h3>
-                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{s.desc}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </section>
 
-        {/* 7. BOTTOM CTA */}
+        {/* 7. FAQ SECTION (Placed above Bottom CTA) */}
+        <FaqSection faqs={MIRROR_FAQS} />
+
+        {/* 8. BOTTOM CTA (Always final section above footer) */}
         <section className="py-10 sm:py-14 relative z-10">
           <GlowCtaCard>
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
@@ -1122,9 +1140,6 @@ export default function MirrorClient() {
             </div>
           </GlowCtaCard>
         </section>
-
-        {/* 8. FAQ SECTION */}
-        <FaqSection faqs={MIRROR_FAQS} />
       </div>
     </div>
   );
