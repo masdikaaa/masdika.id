@@ -194,6 +194,60 @@ async function fetchLatestMikrotikTag(url: string, fallback: string): Promise<st
   return fallback;
 }
 
+function compareMikrotikVersionsDesc(a: string, b: string): number {
+  const pa = a.split(".").map((n) => parseInt(n, 10) || 0);
+  const pb = b.split(".").map((n) => parseInt(n, 10) || 0);
+  const len = Math.max(pa.length, pb.length);
+  for (let i = 0; i < len; i++) {
+    const diff = (pb[i] ?? 0) - (pa[i] ?? 0);
+    if (diff !== 0) return diff;
+  }
+  return 0;
+}
+
+async function headMikrotikChangelog(ver: string): Promise<boolean> {
+  try {
+    const c = new AbortController();
+    const t = setTimeout(() => c.abort(), 2500);
+    const r = await fetch(`https://download.mikrotik.com/routeros/${ver}/CHANGELOG`, {
+      method: "HEAD",
+      signal: c.signal,
+      cache: "no-store",
+    });
+    clearTimeout(t);
+    return r.ok;
+  } catch {
+    return false;
+  }
+}
+
+async function fetchChangelogsPageVersions(major: "6" | "7"): Promise<string[]> {
+  try {
+    const c = new AbortController();
+    const t = setTimeout(() => c.abort(), 6000);
+    const r = await fetch("https://mikrotik.com/download/changelogs", {
+      signal: c.signal,
+      cache: "no-store",
+    });
+    clearTimeout(t);
+    if (!r.ok) return [];
+    const html = await r.text();
+    const found: string[] = [];
+    const seen = new Set<string>();
+    const regex = new RegExp(`toggleChangelog\\('(${major}\\.\\d+(?:\\.\\d+)*)'\\)`, "g");
+    let m: RegExpExecArray | null;
+    while ((m = regex.exec(html)) !== null) {
+      if (!seen.has(m[1])) {
+        seen.add(m[1]);
+        found.push(m[1]);
+      }
+    }
+    return found;
+  } catch {
+    return [];
+  }
+}
+
 async function fetchMikrotikVersionsFromChangelog(
   major: "6" | "7",
   baseFolder: "RouterOS_v6" | "RouterOS_v7" | "CHR"
@@ -204,55 +258,76 @@ async function fetchMikrotikVersionsFromChangelog(
     return cached.items;
   }
 
-  const latestVer =
+  const [latestStable, latestLts, pageVersions] = await Promise.all([
     major === "7"
-      ? await fetchLatestMikrotikTag("https://upgrade.mikrotik.com/routeros/NEWESTa7.stable", "7.25.2")
-      : await fetchLatestMikrotikTag("https://upgrade.mikrotik.com/routeros/NEWEST6.stable", "6.49.23");
+      ? fetchLatestMikrotikTag("https://upgrade.mikrotik.com/routeros/NEWESTa7.stable", "7.25.2")
+      : fetchLatestMikrotikTag("https://upgrade.mikrotik.com/routeros/NEWEST6.stable", "6.49.23"),
+    major === "7"
+      ? fetchLatestMikrotikTag("https://upgrade.mikrotik.com/routeros/NEWESTa7.long-term", "7.24.7")
+      : fetchLatestMikrotikTag("https://upgrade.mikrotik.com/routeros/NEWEST6.long-term", "6.49.23"),
+    fetchChangelogsPageVersions(major),
+  ]);
 
-  const entries: MirrorIndexEntry[] = [];
-  const seen = new Set<string>();
+  const candidates = new Set<string>([latestStable, latestLts, ...pageVersions]);
 
-  for (const changelogUrl of [
-    `${MIRROR_ORIGIN}/mikrotik/${latestVer}/CHANGELOG`,
-    `https://download.mikrotik.com/routeros/${latestVer}/CHANGELOG`,
-  ]) {
-    try {
-      const c = new AbortController();
-      const t = setTimeout(() => c.abort(), 5000);
-      const r = await fetch(changelogUrl, { signal: c.signal, cache: "no-store" });
-      clearTimeout(t);
-      if (!r.ok) continue;
-      const text = await r.text();
-      const regex = new RegExp(`What's new in (${major}\\.\\d+(?:\\.\\d+)*)\\s*\\(([^)]+)\\)`, "g");
-      let m: RegExpExecArray | null;
-      while ((m = regex.exec(text)) !== null) {
-        const ver = m[1];
-        const dateStr = m[2].trim();
-        if (seen.has(ver)) continue;
-        seen.add(ver);
-        entries.push({
-          name: `${ver}/`,
-          href: `/mikrotik/${baseFolder}/${ver}/`,
-          isDir: true,
-          size: "-",
-          lastSync: dateStr,
-        });
+  if (major === "7") {
+    const parts = latestStable.split(".").map((n) => parseInt(n, 10) || 0);
+    const maxMinor = parts[1] ?? 25;
+    for (let minor = maxMinor; minor >= 0; minor--) {
+      candidates.add(`7.${minor}`);
+      const maxPatch = minor >= maxMinor - 5 ? 9 : 6;
+      for (let patch = 1; patch <= maxPatch; patch++) {
+        candidates.add(`7.${minor}.${patch}`);
       }
-      if (entries.length > 0) break;
-    } catch {}
+    }
+  } else {
+    const parts = latestStable.split(".").map((n) => parseInt(n, 10) || 0);
+    const maxPatch = Math.max(parts[2] ?? 23, 23);
+    candidates.add("6.49");
+    for (let patch = 1; patch <= maxPatch; patch++) {
+      candidates.add(`6.49.${patch}`);
+    }
+    candidates.add("6.48");
+    for (let patch = 1; patch <= 8; patch++) {
+      candidates.add(`6.48.${patch}`);
+    }
+    candidates.add("6.47");
+    for (let patch = 1; patch <= 10; patch++) {
+      candidates.add(`6.47.${patch}`);
+    }
   }
 
-  if (!seen.has(latestVer)) {
-    entries.unshift({
-      name: `${latestVer}/`,
-      href: `/mikrotik/${baseFolder}/${latestVer}/`,
-      isDir: true,
-      size: "-",
-      lastSync: "Latest Official",
+  // Probe candidates in parallel batches so only real official versions appear
+  const sortedCandidates = Array.from(candidates).sort(compareMikrotikVersionsDesc);
+  const confirmed = new Set<string>(pageVersions);
+  confirmed.add(latestStable);
+  confirmed.add(latestLts);
+
+  const toProbe = sortedCandidates.filter((v) => !confirmed.has(v));
+  const CONCURRENCY = 25;
+  for (let i = 0; i < toProbe.length; i += CONCURRENCY) {
+    const batch = toProbe.slice(i, i + CONCURRENCY);
+    const results = await Promise.all(batch.map((v) => headMikrotikChangelog(v)));
+    batch.forEach((v, idx) => {
+      if (results[idx]) confirmed.add(v);
     });
   }
 
-  if (entries.length > 0) {
+  const finalVersions = Array.from(confirmed).sort(compareMikrotikVersionsDesc);
+  const entries: MirrorIndexEntry[] = finalVersions.map((ver) => ({
+    name: `${ver}/`,
+    href: `/mikrotik/${baseFolder}/${ver}/`,
+    isDir: true,
+    size: "-",
+    lastSync:
+      ver === latestStable
+        ? "Latest Stable"
+        : ver === latestLts
+          ? "Long-Term"
+          : "Official Release",
+  }));
+
+  if (entries.length > 2) {
     mtVersionsCache[cacheKey] = { at: Date.now(), items: entries };
   }
   return entries;
