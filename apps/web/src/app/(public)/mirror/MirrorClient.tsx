@@ -254,7 +254,7 @@ const ISO_SHORTCUTS = [
   { name: "FreeBSD ISO", tag: "14.x / 15.x amd64", href: "/mirror/browse/freebsd/releases/ISO-IMAGES" },
 ];
 
-const CARDS_PER_PAGE = 6;
+const CARDS_PER_PAGE = 8;
 
 export default function MirrorClient() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -435,67 +435,137 @@ export default function MirrorClient() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {pagedDistros.map((d) => (
-              <article
-                key={d.id}
-                className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 flex flex-col gap-4 hover:border-cyan-500/40 transition-colors shadow-sm"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <h3 className="text-base font-bold text-[var(--text-primary)]">{d.name}</h3>
-                    <span className="text-xs text-[var(--text-secondary)]">{d.sub}</span>
-                  </div>
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 shrink-0">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400" />
-                    Online
-                  </span>
-                </div>
+          {/* Clean Repository Table (Desktop) + Compact List (Mobile) */}
+          <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] overflow-hidden shadow-sm">
+            {/* Desktop Table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[11px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">
+                    <th className="py-3.5 px-6">Distribution</th>
+                    <th className="py-3.5 px-4">Supported Versions</th>
+                    <th className="py-3.5 px-4">Mirror Endpoint</th>
+                    <th className="py-3.5 px-6 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--border-subtle)] text-sm">
+                  {pagedDistros.map((d) => (
+                    <tr
+                      key={d.id}
+                      className="hover:bg-[var(--surface-secondary)]/60 transition-colors"
+                    >
+                      <td className="py-4 px-6">
+                        <div className="flex items-center gap-3">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                          <span className="font-bold text-[var(--text-primary)]">{d.name}</span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 text-xs text-[var(--text-secondary)]">
+                        {d.sub}
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="flex flex-col gap-1.5">
+                          {d.paths.map((p) => {
+                            const full = MIRROR_BASE + p;
+                            return (
+                              <div key={p} className="inline-flex items-center gap-2 font-mono text-xs">
+                                <code className="text-[var(--text-primary)]">{full}</code>
+                                <button
+                                  type="button"
+                                  onClick={() => copyText(full, full)}
+                                  className="p-1 rounded border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:text-cyan-500 cursor-pointer transition-colors"
+                                  title="Copy Mirror URL"
+                                >
+                                  {copiedId === full ? (
+                                    <Check className="w-3 h-3 text-emerald-500" />
+                                  ) : (
+                                    <Copy className="w-3 h-3" />
+                                  )}
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </td>
+                      <td className="py-4 px-6 text-right">
+                        <div className="inline-flex items-center justify-end gap-2">
+                          <Link
+                            href={`/mirror/browse${d.paths[0].replace(/\/$/, "")}`}
+                            className="px-3 py-1.5 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] hover:border-cyan-500/40 text-xs font-semibold text-cyan-600 dark:text-cyan-400 inline-flex items-center gap-1.5 transition-colors"
+                          >
+                            <FolderOpen className="w-3.5 h-3.5" />
+                            <span>Browse</span>
+                          </Link>
+                          <Link
+                            href={d.isoPath}
+                            className="px-3 py-1.5 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] hover:border-cyan-500/40 text-xs font-semibold text-[var(--text-primary)] inline-flex items-center gap-1.5 transition-colors"
+                          >
+                            <Disc className="w-3.5 h-3.5 text-cyan-500" />
+                            <span>ISO</span>
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-                <div className="space-y-2">
-                  {d.paths.map((p) => {
-                    const full = MIRROR_BASE + p;
-                    return (
-                      <div
-                        key={p}
-                        className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] font-mono text-xs"
-                      >
-                        <code className="truncate text-[var(--text-primary)]">{full}</code>
-                        <button
-                          type="button"
-                          onClick={() => copyText(full, full)}
-                          className="p-1.5 rounded-lg border border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-secondary)] hover:text-cyan-500 cursor-pointer shrink-0 transition-colors"
-                          title="Copy Mirror URL"
-                        >
-                          {copiedId === full ? (
-                            <Check className="w-3.5 h-3.5 text-emerald-500" />
-                          ) : (
-                            <Copy className="w-3.5 h-3.5" />
-                          )}
-                        </button>
+            {/* Mobile List */}
+            <div className="md:hidden divide-y divide-[var(--border-subtle)]">
+              {pagedDistros.map((d) => (
+                <div key={d.id} className="p-4 space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                      <div className="min-w-0">
+                        <div className="font-bold text-sm text-[var(--text-primary)]">{d.name}</div>
+                        <div className="text-[11px] text-[var(--text-secondary)] truncate">{d.sub}</div>
                       </div>
-                    );
-                  })}
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <Link
+                        href={`/mirror/browse${d.paths[0].replace(/\/$/, "")}`}
+                        className="px-2.5 py-1 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[11px] font-semibold text-cyan-600 dark:text-cyan-400"
+                      >
+                        Browse
+                      </Link>
+                      <Link
+                        href={d.isoPath}
+                        className="px-2.5 py-1 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[11px] font-semibold text-[var(--text-primary)]"
+                      >
+                        ISO
+                      </Link>
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    {d.paths.map((p) => {
+                      const full = MIRROR_BASE + p;
+                      return (
+                        <div
+                          key={p}
+                          className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] font-mono text-[11px]"
+                        >
+                          <code className="truncate text-[var(--text-primary)]">{full}</code>
+                          <button
+                            type="button"
+                            onClick={() => copyText(full, full)}
+                            className="p-1 text-[var(--text-secondary)] hover:text-cyan-500 shrink-0 cursor-pointer"
+                            title="Copy Mirror URL"
+                          >
+                            {copiedId === full ? (
+                              <Check className="w-3.5 h-3.5 text-emerald-500" />
+                            ) : (
+                              <Copy className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-
-                <div className="mt-auto pt-3 flex items-center justify-between gap-2 text-xs border-t border-[var(--border-subtle)]">
-                  <Link
-                    href={`/mirror/browse${d.paths[0].replace(/\/$/, "")}`}
-                    className="font-semibold text-cyan-600 dark:text-cyan-400 hover:underline inline-flex items-center gap-1.5"
-                  >
-                    <FolderOpen className="w-3.5 h-3.5" />
-                    <span>Browse Repo</span>
-                  </Link>
-                  <Link
-                    href={d.isoPath}
-                    className="font-semibold text-[var(--text-secondary)] hover:text-cyan-600 dark:hover:text-cyan-400 inline-flex items-center gap-1.5 transition-colors"
-                  >
-                    <Disc className="w-3.5 h-3.5" />
-                    <span>Download ISO</span>
-                  </Link>
-                </div>
-              </article>
-            ))}
+              ))}
+            </div>
           </div>
 
           {/* Pagination Controls */}
