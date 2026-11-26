@@ -71,7 +71,7 @@ export default function DnsPublicClient({
   const [activeTab, setActiveTab] = useState<SetupTabId>("linux");
   const [stats, setStats] = useState<DnsStatsSnapshot>(initialStats);
   const [livePolling, setLivePolling] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isManualRefreshing, setIsManualRefreshing] = useState(false);
   const [qpsHistory, setQpsHistory] = useState<QpsSample[]>(() =>
     initialStats.available && initialStats.timestamp
       ? [
@@ -103,8 +103,8 @@ export default function DnsPublicClient({
       : null
   );
 
-  const pollStats = useCallback(async () => {
-    setIsRefreshing(true);
+  const pollStats = useCallback(async (manual = false) => {
+    if (manual) setIsManualRefreshing(true);
     try {
       const res = await fetch("/api/public/dns/stats", { cache: "no-store" });
       if (!res.ok) return;
@@ -142,16 +142,22 @@ export default function DnsPublicClient({
     } catch {
       // Ignore transient polling errors
     } finally {
-      setIsRefreshing(false);
+      if (manual) setIsManualRefreshing(false);
     }
   }, []);
 
   useEffect(() => {
     if (!livePolling) return;
+    const warm = setTimeout(() => {
+      pollStats(false);
+    }, 1500);
     const id = setInterval(() => {
-      pollStats();
+      pollStats(false);
     }, 5000);
-    return () => clearInterval(id);
+    return () => {
+      clearTimeout(warm);
+      clearInterval(id);
+    };
   }, [livePolling, pollStats]);
 
   const latestQps = qpsHistory.length > 0 ? qpsHistory[qpsHistory.length - 1].qps : 0;
@@ -321,15 +327,15 @@ export default function DnsPublicClient({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5">
                   <span
-                    className={`w-2.5 h-2.5 rounded-full ${
-                      livePolling ? "bg-emerald-400 animate-pulse" : "bg-amber-400"
+                    className={`w-2 h-2 rounded-full ${
+                      livePolling ? "bg-cyan-400" : "bg-[var(--text-secondary)]"
                     }`}
                   />
                   <span className="text-xs font-mono uppercase tracking-wider font-bold text-[var(--text-primary)]">
                     Live DNS Edge Telemetry
                   </span>
                   <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 font-mono text-[10px] font-semibold text-cyan-600 dark:text-cyan-400">
-                    {livePolling ? "5s Auto-Poll" : "Paused"}
+                    {livePolling ? "Realtime API · 5s" : "Paused"}
                   </span>
                 </div>
 
@@ -350,12 +356,12 @@ export default function DnsPublicClient({
                   </button>
                   <button
                     type="button"
-                    onClick={() => pollStats()}
-                    disabled={isRefreshing}
+                    onClick={() => pollStats(true)}
+                    disabled={isManualRefreshing}
                     className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-xs font-semibold text-[var(--text-primary)] hover:border-cyan-500/40 cursor-pointer transition-colors disabled:opacity-60"
                     title="Refresh DNS stats now"
                   >
-                    <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
+                    <RefreshCw className={`w-3.5 h-3.5 ${isManualRefreshing ? "animate-spin" : ""}`} />
                   </button>
                 </div>
               </div>
@@ -383,12 +389,12 @@ export default function DnsPublicClient({
                   <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)]">
                     Cache Hit Ratio
                   </div>
-                  <div className="text-2xl font-black text-emerald-500 font-mono">
+                  <div className="text-2xl font-black text-cyan-500 font-mono">
                     {(stats.cacheHitRatio ?? 0).toFixed(1)}%
                   </div>
                   <div className="w-full h-1.5 rounded-full bg-[var(--border-primary)] overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-cyan-400 to-emerald-400 rounded-full transition-all duration-500"
+                      className="h-full bg-gradient-to-r from-cyan-500 to-cyan-300 rounded-full transition-all duration-500"
                       style={{ width: `${Math.min(100, stats.cacheHitRatio ?? 0)}%` }}
                     />
                   </div>
@@ -437,8 +443,8 @@ export default function DnsPublicClient({
                         <span className="w-2 h-2 rounded-full bg-cyan-400" />
                         Total QPS
                       </span>
-                      <span className="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                      <span className="inline-flex items-center gap-1.5 text-[var(--text-secondary)]">
+                        <span className="w-2 h-2 rounded-full bg-cyan-200/70" />
                         Cache Hits/s
                       </span>
                     </div>
@@ -452,7 +458,7 @@ export default function DnsPublicClient({
                     >
                       <defs>
                         <linearGradient id="dnsQpsFill" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.32" />
+                          <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.28" />
                           <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.0" />
                         </linearGradient>
                       </defs>
@@ -480,8 +486,9 @@ export default function DnsPublicClient({
                       {chartGeometry.cacheLine && (
                         <polyline
                           fill="none"
-                          stroke="#10b981"
-                          strokeWidth="2"
+                          stroke="#a5f3fc"
+                          strokeOpacity="0.7"
+                          strokeWidth="1.75"
                           strokeDasharray="5 4"
                           strokeLinejoin="round"
                           strokeLinecap="round"
@@ -552,12 +559,12 @@ export default function DnsPublicClient({
                         const pct = (b.count / totalBucketCount) * 100;
                         const barColor =
                           idx === 0
-                            ? "from-emerald-400 to-cyan-400"
+                            ? "bg-cyan-400"
                             : idx === 1
-                              ? "from-cyan-400 to-sky-400"
+                              ? "bg-cyan-500/85"
                               : idx === 2
-                                ? "from-sky-400 to-indigo-400"
-                                : "from-amber-400 to-orange-400";
+                                ? "bg-cyan-600/75"
+                                : "bg-cyan-700/65";
                         return (
                           <div key={b.label} className="space-y-1">
                             <div className="flex items-center justify-between text-[11px] font-mono">
@@ -568,7 +575,7 @@ export default function DnsPublicClient({
                             </div>
                             <div className="w-full h-2 rounded-full bg-[var(--border-primary)] overflow-hidden">
                               <div
-                                className={`h-full rounded-full bg-gradient-to-r ${barColor} transition-all duration-500`}
+                                className={`h-full rounded-full ${barColor} transition-all duration-500`}
                                 style={{ width: `${Math.max(pct > 0 ? 2 : 0, Math.min(100, pct))}%` }}
                               />
                             </div>
