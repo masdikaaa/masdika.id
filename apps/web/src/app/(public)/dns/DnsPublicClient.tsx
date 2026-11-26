@@ -20,6 +20,7 @@ import type { DnsHistoryRange, DnsHistoryResponse, DnsStatsSnapshot } from "@/li
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { HeroAvatarFrame } from "@/components/ui/HeroAvatarFrame";
+import { GlowCtaCard } from "@/components/ui/GlowCtaCard";
 
 export interface DnsPublicInfo {
   enabled: boolean;
@@ -1150,18 +1151,8 @@ export default function DnsPublicClient({
 
         {/* 5. BOTTOM CTA CARD */}
         <section className="relative z-10">
-          <div className="relative overflow-hidden rounded-3xl border border-cyan-500/20 bg-[var(--surface)] p-8 sm:p-12 shadow-sm">
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute -top-24 -right-24 w-[420px] h-[420px] rounded-full opacity-[0.14] blur-[100px]"
-              style={{ background: "radial-gradient(circle, #06b6d4 0%, transparent 70%)" }}
-            />
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent"
-            />
-
-            <div className="relative flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+          <GlowCtaCard>
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
               <div className="max-w-2xl space-y-3">
                 <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 block">
                   MASDIKA CLOUD NETWORKING
@@ -1194,7 +1185,7 @@ export default function DnsPublicClient({
                 </Button>
               </div>
             </div>
-          </div>
+          </GlowCtaCard>
         </section>
       </div>
     </div>

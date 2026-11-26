@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { GlowCtaCard } from "@/components/ui/GlowCtaCard";
 import { motion } from "framer-motion";
 import { 
   Briefcase, 
@@ -171,35 +172,38 @@ export function VacanciesContent({ opportunities }: { opportunities: Opportunity
 
         {/* ── 3. RECRUITER / HIRING PARTNER CTA ───────────────────────── */}
         <section className="pt-8 pb-0">
-          <div className="rounded-2xl sm:rounded-3xl bg-[var(--surface)] border border-[var(--border-primary)] p-8 sm:p-12 lg:p-16 text-center relative overflow-hidden shadow-sm">
-            <div className="absolute top-0 left-0 w-full h-px bg-cyan-500/40" />
-            <Badge variant="brand" size="md" className="mb-4 font-mono uppercase">
-              RECRUITERS &amp; EMPLOYERS
-            </Badge>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[var(--text-primary)] tracking-tight mb-4">
-              Hiring Cloud &amp; DevOps Engineers?
-            </h2>
-            <p className="text-base sm:text-lg text-[var(--text-secondary)] max-w-2xl mx-auto mb-8 font-normal leading-relaxed">
-              Reach top tech talent in our developer network. Share your open roles with skilled cloud practitioners and systems engineers.
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-4">
-              <Button
-                variant="primary"
-                size="lg"
-                href="/contact"
-                rightIcon={<ArrowRight className="w-5 h-5" />}
-              >
-                Submit a Vacancy
-              </Button>
-              <Button
-                variant="secondary"
-                size="lg"
-                href="/resume"
-              >
-                View Engineer Profile
-              </Button>
+          <GlowCtaCard>
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+              <div className="max-w-2xl space-y-2.5">
+                <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 block">
+                  RECRUITERS &amp; EMPLOYERS
+                </span>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[var(--text-primary)] tracking-tight leading-tight">
+                  Hiring Cloud &amp; DevOps Engineers?
+                </h2>
+                <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
+                  Reach top tech talent in our developer network. Share your open roles with skilled cloud practitioners and systems engineers.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-3 shrink-0">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  href="/contact"
+                  rightIcon={<ArrowRight className="w-5 h-5" />}
+                >
+                  Submit a Vacancy
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  href="/resume"
+                >
+                  View Engineer Profile
+                </Button>
+              </div>
             </div>
-          </div>
+          </GlowCtaCard>
         </section>
 
       </div>

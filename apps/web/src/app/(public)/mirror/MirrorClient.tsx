@@ -23,6 +23,7 @@ import { SiMikrotik } from "react-icons/si";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { HeroAvatarFrame } from "@/components/ui/HeroAvatarFrame";
+import { GlowCtaCard } from "@/components/ui/GlowCtaCard";
 
 const MIRROR_BASE = "https://mirror.masdika.id";
 
@@ -1051,27 +1052,29 @@ export default function MirrorClient() {
 
         {/* 7. BOTTOM CTA */}
         <section className="relative z-10">
-          <div className="rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] p-8 sm:p-12 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 shadow-sm">
-            <div className="max-w-2xl space-y-2">
-              <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 block">
-                MASDIKA CLOUD INFRASTRUCTURE
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)] tracking-tight">
-                Need High-Speed Cloud VPS or Container Hosting?
-              </h2>
-              <p className="text-sm sm:text-base text-[var(--text-secondary)]">
-                Deploy Proxmox Cloud VPS or Kubernetes App Platform workloads in Indonesia with fast access to Masdika mirrors.
-              </p>
+          <GlowCtaCard>
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+              <div className="max-w-2xl space-y-2">
+                <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 block">
+                  MASDIKA CLOUD INFRASTRUCTURE
+                </span>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[var(--text-primary)] tracking-tight leading-tight">
+                  Need High-Speed Cloud VPS or Container Hosting?
+                </h2>
+                <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
+                  Deploy Proxmox Cloud VPS or Kubernetes App Platform workloads in Indonesia with fast access to Masdika mirrors.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-3 shrink-0">
+                <Button variant="primary" size="lg" href="/vps" rightIcon={<ArrowRight className="w-4 h-4" />}>
+                  Explore Cloud VPS
+                </Button>
+                <Button variant="secondary" size="lg" href="/app-platform" leftIcon={<Terminal className="w-4 h-4" />}>
+                  App Platform
+                </Button>
+              </div>
             </div>
-            <div className="flex flex-wrap items-center gap-3 shrink-0">
-              <Button variant="primary" size="lg" href="/vps" rightIcon={<ArrowRight className="w-4 h-4" />}>
-                Explore Cloud VPS
-              </Button>
-              <Button variant="secondary" size="lg" href="/app-platform" leftIcon={<Terminal className="w-4 h-4" />}>
-                App Platform
-              </Button>
-            </div>
-          </div>
+          </GlowCtaCard>
         </section>
       </div>
     </div>

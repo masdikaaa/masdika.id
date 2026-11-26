@@ -23,6 +23,7 @@ import {
   Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { GlowCtaCard } from "@/components/ui/GlowCtaCard";
 import { Badge } from "@/components/ui/Badge";
 import { HeroAvatarFrame } from "@/components/ui/HeroAvatarFrame";
 import { FadeIn } from "@/components/animations/FadeIn";
@@ -445,27 +446,32 @@ export default function AppPlatformClient({
         <FaqSection faqs={PAAS_FAQS} />
 
         {/* ── 8. BOTTOM CTA ─────────────────────────────────────────────── */}
-        <section className="rounded-3xl border border-cyan-500/25 bg-gradient-to-br from-cyan-500/10 via-[var(--surface)] to-transparent p-8 sm:p-12 text-center space-y-5">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-bold bg-cyan-500/15 text-cyan-500 border border-cyan-500/30">
-            <Zap className="w-3.5 h-3.5" />
-            <span>READY IN SECONDS</span>
-          </div>
-          <h2 className="text-2xl sm:text-4xl font-black text-[var(--text-primary)]">
-            Deploy Your First Container Today
-          </h2>
-          <p className="text-sm sm:text-base text-[var(--text-secondary)] max-w-xl mx-auto">
-            Start with Pay-As-You-Go from Rp 28/hour or Rp 20.000/month. Scale vCPU and RAM anytime without losing data.
-          </p>
-          <div className="pt-2">
-            <Button
-              variant="primary"
-              size="lg"
-              href="/dashboard/app-platform/new"
-              rightIcon={<ArrowRight className="w-4 h-4" />}
-            >
-              Launch App Platform
-            </Button>
-          </div>
+        <section className="relative z-10">
+          <GlowCtaCard>
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+              <div className="max-w-2xl space-y-2.5">
+                <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 block">
+                  READY IN SECONDS
+                </span>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[var(--text-primary)] tracking-tight leading-tight">
+                  Deploy Your First Container Today
+                </h2>
+                <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
+                  Start with Pay-As-You-Go from Rp 28/hour or Rp 20.000/month. Scale vCPU and RAM anytime without losing data.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-3 shrink-0">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  href="/dashboard/app-platform/new"
+                  rightIcon={<ArrowRight className="w-4 h-4" />}
+                >
+                  Launch App Platform
+                </Button>
+              </div>
+            </div>
+          </GlowCtaCard>
         </section>
       </div>
     </div>

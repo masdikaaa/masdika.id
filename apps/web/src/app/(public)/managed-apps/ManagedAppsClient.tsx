@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback, useId } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { GlowCtaCard } from "@/components/ui/GlowCtaCard";
 import { 
   Boxes,
   Cloud, 
@@ -962,19 +963,20 @@ export default function ManagedAppsClient({
 
         {/* ── 9. FINAL CTA SECTION ──────────────────────────────────────── */}
         <section className="py-10 sm:py-14 relative z-10 w-full">
-          <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-10 md:p-16 text-center shadow-xl overflow-hidden w-full">
-            <div className="relative z-10 max-w-2xl mx-auto">
-              <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
-                START BUILDING TODAY
-              </span>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-tight mb-4">
-                Ready for True Managed Cloud Applications?
-              </h2>
-              <p className="text-base sm:text-lg text-[var(--text-secondary)] mb-8 leading-relaxed">
-                Deploy production-ready AI agents and workflows on Masdika Kubernetes infrastructure today. Enjoy isolated Pods, automated SSL, and guaranteed compute.
-              </p>
-
-              <div className="flex flex-wrap items-center justify-center gap-4">
+          <GlowCtaCard>
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+              <div className="max-w-2xl space-y-2.5">
+                <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 block">
+                  START BUILDING TODAY
+                </span>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[var(--text-primary)] tracking-tight leading-tight">
+                  Ready for True Managed Cloud Applications?
+                </h2>
+                <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
+                  Deploy production-ready AI agents and workflows on Masdika Kubernetes infrastructure today. Enjoy isolated Pods, automated SSL, and guaranteed compute.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-3 shrink-0">
                 {isAppEnabled ? (
                   <Button
                     variant="primary"
@@ -1003,7 +1005,7 @@ export default function ManagedAppsClient({
                 </Button>
               </div>
             </div>
-          </div>
+          </GlowCtaCard>
         </section>
 
         {/* ── 10. FAQ SECTION ───────────────────────────────────────────── */}

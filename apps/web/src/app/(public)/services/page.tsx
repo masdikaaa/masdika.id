@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { GlowCtaCard } from "@/components/ui/GlowCtaCard";
 import Image from "next/image";
 import { 
   Server, 
@@ -339,35 +340,38 @@ export default function ServicesPage() {
 
         {/* ── 4. CALL TO ACTION ──────────────────────────────────────────────── */}
         <section className="pt-8 pb-0">
-          <div className="rounded-2xl sm:rounded-3xl bg-[var(--surface)] border border-[var(--border-primary)] p-8 sm:p-12 lg:p-16 text-center relative overflow-hidden shadow-sm">
-            <div className="absolute top-0 left-0 w-full h-px bg-cyan-500/40" />
-            <Badge variant="brand" size="md" className="mb-4 font-mono uppercase">
-              LET&apos;S COLLABORATE
-            </Badge>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[var(--text-primary)] tracking-tight mb-4">
-              Ready to Upgrade Your Cloud Infrastructure?
-            </h2>
-            <p className="text-base sm:text-lg text-[var(--text-secondary)] max-w-2xl mx-auto mb-8 font-normal leading-relaxed">
-              Whether you need high-performance compute, managed Kubernetes clusters, or architectural consulting, let&apos;s architect your success today.
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-4">
-              <Button
-                variant="primary"
-                size="lg"
-                href="/contact"
-                rightIcon={<ArrowRight className="w-5 h-5" />}
-              >
-                Start a Project
-              </Button>
-              <Button
-                variant="secondary"
-                size="lg"
-                href="/portfolio"
-              >
-                Explore Case Studies
-              </Button>
+          <GlowCtaCard>
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+              <div className="max-w-2xl space-y-2.5">
+                <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 block">
+                  LET&apos;S COLLABORATE
+                </span>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[var(--text-primary)] tracking-tight leading-tight">
+                  Ready to Upgrade Your Cloud Infrastructure?
+                </h2>
+                <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
+                  Whether you need high-performance compute, managed Kubernetes clusters, or architectural consulting, let&apos;s architect your success today.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-3 shrink-0">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  href="/contact"
+                  rightIcon={<ArrowRight className="w-5 h-5" />}
+                >
+                  Start a Project
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  href="/portfolio"
+                >
+                  Explore Case Studies
+                </Button>
+              </div>
             </div>
-          </div>
+          </GlowCtaCard>
         </section>
 
       </div>
