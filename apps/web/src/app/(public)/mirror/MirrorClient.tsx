@@ -62,7 +62,7 @@ const DISTROS: DistroItem[] = [
     name: "Debian",
     pkgMgr: "APT",
     category: "DEBIAN_UBUNTU",
-    sub: "12 Bookworm - 13 Trixie + Security",
+    sub: "12 Bookworm - 13 Trixie - 14 Forky + Security",
     paths: ["/debian/", "/debian-security/"],
     isoPath: "/mirror/browse/debian-cd",
     snippet: [
@@ -260,8 +260,8 @@ const DISTROS: DistroItem[] = [
 ];
 
 const ISO_SHORTCUTS = [
-  { id: "ubuntu", name: "Ubuntu Releases", tag: "24.04 / 22.04 LTS", href: "/mirror/browse/ubuntu-releases" },
-  { id: "debian", name: "Debian CD Images", tag: "12 Bookworm / 13", href: "/mirror/browse/debian-cd" },
+  { id: "ubuntu", name: "Ubuntu Releases", tag: "26.04 / 24.04 LTS", href: "/mirror/browse/ubuntu-releases" },
+  { id: "debian", name: "Debian CD Images", tag: "12 / 13 / 14 Forky", href: "/mirror/browse/debian-cd" },
   { id: "kali", name: "Kali Linux Images", tag: "Weekly & Installer", href: "/mirror/browse/kali-images" },
   { id: "parrot", name: "Parrot OS ISO", tag: "Security & Home", href: "/mirror/browse/parrot/iso" },
   { id: "linuxmint", name: "Linux Mint ISO", tag: "Cinnamon / XFCE", href: "/mirror/browse/linuxmint-iso" },
