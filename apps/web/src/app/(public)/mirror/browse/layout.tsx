@@ -3,14 +3,14 @@ import { OG_IMAGE_PATH } from "@/lib/og-image";
 
 export const metadata: Metadata = {
   title: {
-    absolute: "Browse Repositories & ISO Releases - Masdika Linux Mirror",
+    absolute: "Browse Repositories & ISO Releases - Linux & BSD Mirror",
   },
   description:
-    "Browse package directories and download official ISO images directly from mirror.masdika.id.",
+    "Browse package directories and download official ISO images for Ubuntu, Debian 11-14, Kali, Parrot OS, Linux Mint, AlmaLinux, Rocky, CentOS Stream, Arch, Alpine, FreeBSD, and OpenBSD.",
   openGraph: {
-    title: "Browse Repositories & ISO Releases - Masdika Linux Mirror",
+    title: "Browse Repositories & ISO Releases - Linux & BSD Mirror",
     description:
-      "Browse package directories and download official ISO images directly from mirror.masdika.id.",
+      "Browse package directories and download official ISO images for Ubuntu, Debian 11-14, Kali, Parrot OS, Linux Mint, AlmaLinux, Rocky, CentOS Stream, Arch, Alpine, FreeBSD, and OpenBSD.",
     url: "https://www.masdika.id/mirror/browse",
     siteName: "Masdika",
     images: [{ url: OG_IMAGE_PATH, width: 1200, height: 630, alt: "Masdika Mirror Repository Browser" }],
@@ -18,9 +18,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Browse Repositories & ISO Releases - Masdika Linux Mirror",
+    title: "Browse Repositories & ISO Releases - Linux & BSD Mirror",
     description:
-      "Browse package directories and download official ISO images directly from mirror.masdika.id.",
+      "Browse package directories and download official ISO images for Ubuntu, Debian 11-14, Kali, Parrot OS, Linux Mint, AlmaLinux, Rocky, CentOS Stream, Arch, Alpine, FreeBSD, and OpenBSD.",
     images: [OG_IMAGE_PATH],
   },
 };
