@@ -1074,9 +1074,9 @@ export default function DnsPublicClient({
           </div>
         </section>
 
-        {/* 4. ARCHITECTURE & KEY ADVANTAGES (No repetitive card grids) */}
+        {/* 4. ARCHITECTURE & KEY ADVANTAGES (Borderless timeline + editorial spec list) */}
         <section className="relative z-10 space-y-16 sm:space-y-20">
-          {/* 4A. Connected Packet Flow Pipeline */}
+          {/* 4A. Connected Packet Flow Timeline */}
           <div className="space-y-8">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div>
@@ -1092,38 +1092,50 @@ export default function DnsPublicClient({
               </p>
             </div>
 
-            <div className="rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)]/70 divide-y md:divide-y-0 md:divide-x divide-[var(--border-subtle)] grid grid-cols-1 md:grid-cols-3">
-              {[
-                {
-                  step: "01",
-                  icon: ShieldCheck,
-                  title: "dnsdist Edge Router",
-                  desc: "Inspects incoming UDP/TCP 53 and DoH queries, enforces per-IP rate limits, drops ANY/AXFR abuse, and serves hot responses directly from RAM packet cache.",
-                },
-                {
-                  step: "02",
-                  icon: Activity,
-                  title: "SafeDNS Recursor",
-                  desc: "Resolves uncached recursive lookups with DNSSEC validation and blocks 637K+ phishing, malware, and restricted hostnames in real time.",
-                },
-                {
-                  step: "03",
-                  icon: Globe,
-                  title: "LMDB Authoritative Backend",
-                  desc: "Serves custom domain zones from a zero-copy LMDB memory-mapped backend with 0s API updates, automatic SOA serials, and ECDSA DNSSEC.",
-                },
-              ].map((s) => (
-                <div key={s.step} className="p-6 sm:p-8 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs font-bold text-cyan-600 dark:text-cyan-400">
-                      LAYER {s.step}
-                    </span>
-                    <s.icon className="w-4 h-4 text-cyan-500" />
+            <div className="relative pt-4">
+              <div
+                aria-hidden="true"
+                className="hidden md:block absolute top-[34px] left-[16.66%] right-[16.66%] h-px bg-gradient-to-r from-cyan-500/20 via-cyan-400/60 to-cyan-500/20"
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10 relative">
+                {[
+                  {
+                    step: "01",
+                    icon: ShieldCheck,
+                    title: "dnsdist Edge Router",
+                    desc: "Inspects incoming UDP/TCP 53 and DoH queries, enforces per-IP rate limits, drops ANY/AXFR abuse, and serves hot responses directly from RAM packet cache.",
+                  },
+                  {
+                    step: "02",
+                    icon: Activity,
+                    title: "SafeDNS Recursor",
+                    desc: "Resolves uncached recursive lookups with DNSSEC validation and blocks 637K+ phishing, malware, and restricted hostnames in real time.",
+                  },
+                  {
+                    step: "03",
+                    icon: Globe,
+                    title: "LMDB Authoritative Backend",
+                    desc: "Serves custom domain zones from a zero-copy LMDB memory-mapped backend with 0s API updates, automatic SOA serials, and ECDSA DNSSEC.",
+                  },
+                ].map((s) => (
+                  <div key={s.step} className="relative flex md:flex-col items-start gap-4 md:gap-4">
+                    <div className="relative z-10 flex items-center gap-3 shrink-0">
+                      <div className="w-9 h-9 rounded-full border border-cyan-500/40 bg-[var(--bg-primary)] flex items-center justify-center font-mono text-xs font-bold text-cyan-500 shadow-[0_0_20px_rgba(6,182,212,0.18)]">
+                        {s.step}
+                      </div>
+                      <s.icon className="w-4 h-4 text-cyan-500 md:hidden" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-base font-bold text-[var(--text-primary)]">{s.title}</h3>
+                        <s.icon className="hidden md:inline-block w-3.5 h-3.5 text-cyan-500/80 shrink-0" />
+                      </div>
+                      <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{s.desc}</p>
+                    </div>
                   </div>
-                  <h3 className="text-base font-bold text-[var(--text-primary)]">{s.title}</h3>
-                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{s.desc}</p>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
 
