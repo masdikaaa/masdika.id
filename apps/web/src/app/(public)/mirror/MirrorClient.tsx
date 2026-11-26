@@ -123,7 +123,7 @@ const DISTROS: DistroItem[] = [
     category: "RHEL",
     sub: "AlmaLinux 8 - 9 - 10 (BaseOS & AppStream)",
     paths: ["/almalinux/"],
-    isoPath: "/mirror/browse/almalinux/9/isos/x86_64",
+    isoPath: "/mirror/browse/almalinux",
     snippet: [
       "# AlmaLinux 8 / 9 / 10",
       "sudo sed -e 's|^mirrorlist=|#mirrorlist=|g' \\",
@@ -140,7 +140,7 @@ const DISTROS: DistroItem[] = [
     category: "RHEL",
     sub: "Rocky Linux 8 - 9 (BaseOS & AppStream)",
     paths: ["/rocky/"],
-    isoPath: "/mirror/browse/rocky/9/isos/x86_64",
+    isoPath: "/mirror/browse/rocky",
     snippet: [
       "# Rocky Linux 8 / 9",
       "sudo sed -e 's|^mirrorlist=|#mirrorlist=|g' \\",
@@ -157,7 +157,7 @@ const DISTROS: DistroItem[] = [
     category: "RHEL",
     sub: "CentOS Stream 9 - 10 (Active)",
     paths: ["/centos-stream/"],
-    isoPath: "/mirror/browse/centos-stream/9-stream/BaseOS/x86_64/iso",
+    isoPath: "/mirror/browse/centos-stream",
     snippet: [
       "# CentOS Stream 9 / 10",
       "sudo sed -e 's|^metalink=|#metalink=|g' \\",
@@ -207,7 +207,7 @@ const DISTROS: DistroItem[] = [
     category: "ROLLING_BSD",
     sub: "v3.20 - v3.21 - latest-stable - edge",
     paths: ["/alpine/"],
-    isoPath: "/mirror/browse/alpine/latest-stable/releases/x86_64",
+    isoPath: "/mirror/browse/alpine",
     snippet: [
       "# Alpine Linux (Container & Host)",
       `sed -i 's|https\\?://dl-cdn.alpinelinux.org/alpine|${MIRROR_BASE}/alpine|g' /etc/apk/repositories`,
@@ -262,9 +262,13 @@ const ISO_SHORTCUTS = [
   { id: "kali", name: "Kali Linux Images", tag: "Weekly & Installer", href: "/mirror/browse/kali-images" },
   { id: "parrot", name: "Parrot OS ISO", tag: "Security & Home", href: "/mirror/browse/parrot/iso" },
   { id: "linuxmint", name: "Linux Mint ISO", tag: "Cinnamon / XFCE", href: "/mirror/browse/linuxmint-iso" },
-  { id: "almalinux", name: "AlmaLinux 9 ISO", tag: "Minimal / DVD / Boot", href: "/mirror/browse/almalinux/9/isos/x86_64" },
-  { id: "rocky", name: "Rocky Linux 9 ISO", tag: "Minimal / DVD / Boot", href: "/mirror/browse/rocky/9/isos/x86_64" },
-  { id: "freebsd", name: "FreeBSD ISO", tag: "14.x / 15.x amd64", href: "/mirror/browse/freebsd/releases/ISO-IMAGES" },
+  { id: "almalinux", name: "AlmaLinux ISO", tag: "8 / 9 / 10 (All Versions)", href: "/mirror/browse/almalinux" },
+  { id: "rocky", name: "Rocky Linux ISO", tag: "8 / 9 / 10 (All Versions)", href: "/mirror/browse/rocky" },
+  { id: "centos-stream", name: "CentOS Stream ISO", tag: "9-stream & 10-stream", href: "/mirror/browse/centos-stream" },
+  { id: "archlinux", name: "Arch Linux ISO", tag: "Monthly Releases", href: "/mirror/browse/archlinux/iso" },
+  { id: "alpine", name: "Alpine Linux ISO", tag: "v3.18 - v3.21 / edge", href: "/mirror/browse/alpine" },
+  { id: "freebsd", name: "FreeBSD ISO", tag: "13.x / 14.x / 15.x", href: "/mirror/browse/freebsd/releases/ISO-IMAGES" },
+  { id: "openbsd", name: "OpenBSD ISO", tag: "7.x & Snapshots", href: "/mirror/browse/openbsd" },
 ];
 
 const CARDS_PER_PAGE = 8;
