@@ -257,6 +257,7 @@ const DISTROS: DistroItem[] = [
 
 const ISO_SHORTCUTS = [
   { id: "ubuntu", name: "Ubuntu Releases", tag: "26.04 / 24.04 LTS", href: "/mirror/browse/ubuntu-releases" },
+  { id: "debian", name: "Debian 14 (Forky) ISO", tag: "Testing Weekly Builds", href: "/mirror/browse/debian-cd-testing" },
   { id: "debian", name: "Debian 13 ISO", tag: "Current & Live CD", href: "/mirror/browse/debian-cd" },
   { id: "debian", name: "Debian 11 / 12 ISO", tag: "Archive Releases", href: "/mirror/browse/debian-cd-archive" },
   { id: "kali", name: "Kali Linux Images", tag: "Weekly & Installer", href: "/mirror/browse/kali-images" },
@@ -265,7 +266,6 @@ const ISO_SHORTCUTS = [
   { id: "almalinux", name: "AlmaLinux ISO", tag: "8 / 9 / 10 (All Versions)", href: "/mirror/browse/almalinux" },
   { id: "rocky", name: "Rocky Linux ISO", tag: "8 / 9 / 10 (All Versions)", href: "/mirror/browse/rocky" },
   { id: "centos-stream", name: "CentOS Stream ISO", tag: "9-stream & 10-stream", href: "/mirror/browse/centos-stream" },
-  { id: "epel", name: "EPEL Packages", tag: "RHEL / Alma / Rocky", href: "/mirror/browse/epel" },
   { id: "archlinux", name: "Arch Linux ISO", tag: "Monthly Releases", href: "/mirror/browse/archlinux/iso" },
   { id: "alpine", name: "Alpine Linux ISO", tag: "v3.18 - v3.21 / edge", href: "/mirror/browse/alpine" },
   { id: "freebsd", name: "FreeBSD ISO", tag: "13.x / 14.x / 15.x", href: "/mirror/browse/freebsd/releases/ISO-IMAGES" },

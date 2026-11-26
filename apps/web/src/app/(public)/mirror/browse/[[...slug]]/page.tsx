@@ -32,6 +32,7 @@ const ROOT_REPOS: MirrorIndexEntry[] = [
   { name: "ubuntu-releases/", href: "/ubuntu-releases/", isDir: true, size: "-", lastSync: "ISO Releases" },
   { name: "debian/", href: "/debian/", isDir: true, size: "-", lastSync: "Active Cache" },
   { name: "debian-cd/", href: "/debian-cd/", isDir: true, size: "-", lastSync: "Debian 13 ISO" },
+  { name: "debian-cd-testing/", href: "/debian-cd-testing/", isDir: true, size: "-", lastSync: "Debian 14 (Forky) ISO" },
   { name: "debian-cd-archive/", href: "/debian-cd-archive/", isDir: true, size: "-", lastSync: "Debian 11 / 12 ISO" },
   { name: "debian-security/", href: "/debian-security/", isDir: true, size: "-", lastSync: "Active Cache" },
   { name: "kali/", href: "/kali/", isDir: true, size: "-", lastSync: "Kali Rolling" },
