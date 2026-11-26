@@ -139,6 +139,7 @@ export function Footer({ socialLinks }: { socialLinks?: any }) {
                 {[
                   { name: 'Looking Glass', path: '/lg' },
                   { name: 'Linux Mirror', path: '/mirror' },
+                  { name: 'DNS Services', path: '/dns' },
                 ].map((link, idx) => (
                   <li key={idx}>
                     <Link
