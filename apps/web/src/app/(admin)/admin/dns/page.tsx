@@ -708,7 +708,7 @@ export default function AdminDnsPage() {
                             {rec.type}
                           </td>
                           <td className="py-2.5 px-2 font-mono">
-                            {rec.name === "@" ? inspectZone.domain : rec.name}
+                            {rec.name === "@" ? inspectingZone?.domain || rec.name : rec.name}
                           </td>
                           <td className="py-2.5 px-2 font-mono break-words">
                             {rec.records.map((r: any, i: number) => (
