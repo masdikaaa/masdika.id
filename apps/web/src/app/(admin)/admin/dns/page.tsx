@@ -72,11 +72,15 @@ export default function AdminDnsPage() {
   const [inspectLoading, setInspectLoading] = useState(false);
   const [inspectRecords, setInspectRecords] = useState<any[]>([]);
   const [inspectDnssec, setInspectDnssec] = useState<any>(null);
+  const [dnsStats, setDnsStats] = useState<any>(null);
 
   const fetchZones = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/dns", { cache: "no-store" });
+      const [res, statsRes] = await Promise.all([
+        fetch("/api/admin/dns", { cache: "no-store" }),
+        fetch("/api/admin/dns/stats", { cache: "no-store" }).catch(() => null),
+      ]);
       const data = await res.json();
       if (!res.ok) {
         toast.error(data.error || "Failed to load DNS zones");
@@ -84,6 +88,10 @@ export default function AdminDnsPage() {
       }
       setZones(data.zones || []);
       if (data.dnsInfo) setDnsInfo(data.dnsInfo);
+      if (statsRes && statsRes.ok) {
+        const statsJson = await statsRes.json();
+        if (statsJson.available) setDnsStats(statsJson);
+      }
     } catch {
       toast.error("An error occurred while loading DNS zones");
     } finally {
@@ -333,6 +341,123 @@ export default function AdminDnsPage() {
           </p>
         </div>
       </div>
+
+      {/* DNS Traffic & Latency Graphs */}
+      {dnsStats?.available && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div
+            className={cn(
+              "rounded-2xl border p-5 space-y-4",
+              isDark
+                ? "bg-[#111115] border-white/[0.08]"
+                : "bg-white border-slate-200 shadow-sm"
+            )}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h3
+                  className={cn(
+                    "text-sm font-bold",
+                    isDark ? "text-white" : "text-slate-900"
+                  )}
+                >
+                  DNS Query Distribution
+                </h3>
+                <p className="text-xs text-zinc-500">
+                  Total Queries: <span className="font-mono font-semibold text-cyan-400">{dnsStats.queries.toLocaleString()}</span>
+                </p>
+              </div>
+              <span className="text-[11px] font-mono px-2.5 py-1 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                Uptime: {Math.floor((dnsStats.uptimeSec || 0) / 60)}m
+              </span>
+            </div>
+
+            <div className="space-y-3">
+              {[
+                { label: "Recursive (Resolver / SafeDNS)", value: dnsStats.rdQueries, color: "bg-cyan-400" },
+                { label: "Authoritative (Domain Pointing)", value: dnsStats.authQueries, color: "bg-emerald-400" },
+                { label: "Blocked / NXDOMAIN", value: dnsStats.nxdomainAnswers, color: "bg-amber-400" },
+                { label: "Rate-Limited / Dropped", value: dnsStats.blockedOrDropped, color: "bg-red-400" },
+              ].map((item) => {
+                const max = Math.max(1, dnsStats.queries);
+                const pct = Math.min(100, Math.round((item.value / max) * 100));
+                return (
+                  <div key={item.label} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className={isDark ? "text-zinc-300" : "text-slate-700"}>{item.label}</span>
+                      <span className="font-mono font-semibold">
+                        {item.value.toLocaleString()} ({pct}%)
+                      </span>
+                    </div>
+                    <div className={cn("h-2 rounded-full overflow-hidden", isDark ? "bg-white/[0.06]" : "bg-slate-100")}>
+                      <div className={cn("h-full rounded-full transition-all", item.color)} style={{ width: `${pct}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div
+            className={cn(
+              "rounded-2xl border p-5 space-y-4",
+              isDark
+                ? "bg-[#111115] border-white/[0.08]"
+                : "bg-white border-slate-200 shadow-sm"
+            )}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h3
+                  className={cn(
+                    "text-sm font-bold",
+                    isDark ? "text-white" : "text-slate-900"
+                  )}
+                >
+                  Response Latency Histogram
+                </h3>
+                <p className="text-xs text-zinc-500">
+                  Avg Latency:{" "}
+                  <span className="font-mono font-semibold text-cyan-400">
+                    {((dnsStats.latencyAvgUs || 0) / 1000).toFixed(2)} ms
+                  </span>
+                </p>
+              </div>
+              <span className="text-[11px] font-mono px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                NOERROR: {(dnsStats.noerrorAnswers || 0).toLocaleString()}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-5 gap-3 items-end h-36 pt-4">
+              {(() => {
+                const maxBucket = Math.max(
+                  1,
+                  ...(dnsStats.latencyBuckets || []).map((b: any) => b.count)
+                );
+                return (dnsStats.latencyBuckets || []).map((b: any) => {
+                  const hPct = Math.max(6, Math.round((b.count / maxBucket) * 100));
+                  return (
+                    <div key={b.label} className="flex flex-col items-center gap-1.5 h-full justify-end">
+                      <span className="text-[10px] font-mono text-zinc-400">
+                        {b.count}
+                      </span>
+                      <div className={cn("w-full rounded-t-lg overflow-hidden flex items-end h-24", isDark ? "bg-white/[0.04]" : "bg-slate-100")}>
+                        <div
+                          className="w-full bg-gradient-to-t from-cyan-500 to-cyan-300 rounded-t-lg transition-all"
+                          style={{ height: `${hPct}%` }}
+                        />
+                      </div>
+                      <span className="text-[10px] font-mono text-zinc-500 whitespace-nowrap">
+                        {b.label}
+                      </span>
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Zones Table Card */}
       <div

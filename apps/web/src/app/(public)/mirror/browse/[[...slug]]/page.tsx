@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
+  Check,
   ChevronRight,
+  Copy,
   CornerLeftUp,
   Disc,
   Download,
@@ -64,6 +66,29 @@ export default function MirrorBrowsePage() {
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [page, setPage] = useState(1);
+  const [shaLoadingHref, setShaLoadingHref] = useState<string | null>(null);
+  const [shaCopiedHref, setShaCopiedHref] = useState<string | null>(null);
+
+  const isIsoFile = (name: string) => /\.(iso|img|qcow2|raw)$/i.test(name);
+
+  const handleCopySha256 = async (e: React.MouseEvent, entry: MirrorIndexEntry) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShaLoadingHref(entry.href);
+    try {
+      const res = await fetch(`/api/mirror/checksum?path=${encodeURIComponent(entry.href)}`);
+      const data = await res.json();
+      if (res.ok && data.sha256) {
+        await navigator.clipboard.writeText(data.sha256);
+        setShaCopiedHref(entry.href);
+        setTimeout(() => setShaCopiedHref((prev) => (prev === entry.href ? null : prev)), 2500);
+      }
+    } catch {
+      // ignore
+    } finally {
+      setShaLoadingHref(null);
+    }
+  };
 
   useEffect(() => {
     setSearch("");
@@ -251,14 +276,37 @@ export default function MirrorBrowsePage() {
                                 <span className="break-words">{entry.name}</span>
                               </Link>
                             ) : (
-                              <a
-                                href={`${MIRROR_ORIGIN}${entry.href}`}
-                                className="inline-flex items-center gap-2.5 text-slate-800 dark:text-zinc-200 hover:text-cyan-600 dark:hover:text-cyan-400"
-                              >
-                                {renderFileIcon(entry)}
-                                <span className="break-words">{entry.name}</span>
-                                <Download className="w-3 h-3 opacity-50 shrink-0" />
-                              </a>
+                              <div className="flex items-center gap-2.5 flex-wrap">
+                                <a
+                                  href={`${MIRROR_ORIGIN}${entry.href}`}
+                                  className="inline-flex items-center gap-2.5 text-slate-800 dark:text-zinc-200 hover:text-cyan-600 dark:hover:text-cyan-400"
+                                >
+                                  {renderFileIcon(entry)}
+                                  <span className="break-words">{entry.name}</span>
+                                  <Download className="w-3 h-3 opacity-50 shrink-0" />
+                                </a>
+                                {isIsoFile(entry.name) && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => handleCopySha256(e, entry)}
+                                    disabled={shaLoadingHref === entry.href}
+                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-mono font-semibold border border-cyan-500/30 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500/20 transition-colors"
+                                    title="Copy SHA256 Checksum"
+                                  >
+                                    {shaCopiedHref === entry.href ? (
+                                      <>
+                                        <Check className="w-3 h-3" /> SHA256 Copied
+                                      </>
+                                    ) : shaLoadingHref === entry.href ? (
+                                      "SHA256..."
+                                    ) : (
+                                      <>
+                                        <Copy className="w-3 h-3" /> SHA256
+                                      </>
+                                    )}
+                                  </button>
+                                )}
+                              </div>
                             )}
                           </td>
                           <td className="py-2.5 px-4 font-mono text-slate-500 dark:text-zinc-400 whitespace-nowrap">
@@ -328,7 +376,18 @@ export default function MirrorBrowsePage() {
                             </div>
                           </div>
                         </div>
-                        <Download className="w-4 h-4 text-cyan-500 shrink-0" />
+                        <div className="flex items-center gap-2 shrink-0">
+                          {isIsoFile(entry.name) && (
+                            <button
+                              type="button"
+                              onClick={(e) => handleCopySha256(e, entry)}
+                              className="px-2 py-1 rounded-md text-[10px] font-mono font-semibold border border-cyan-500/30 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400"
+                            >
+                              {shaCopiedHref === entry.href ? "Copied" : "SHA256"}
+                            </button>
+                          )}
+                          <Download className="w-4 h-4 text-cyan-500 shrink-0" />
+                        </div>
                       </a>
                     )
                   )

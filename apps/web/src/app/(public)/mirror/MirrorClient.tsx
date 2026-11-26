@@ -490,6 +490,80 @@ export default function MirrorClient() {
           </div>
         </section>
 
+        {/* 2.5 MIRROR TELEMETRY & CACHE STATS */}
+        {health?.telemetry && (
+          <section className="relative z-10 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 shadow-sm space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <span className="text-[11px] font-bold uppercase tracking-widest text-cyan-600 dark:text-cyan-400">
+                  Live Mirror Telemetry
+                </span>
+                <h2 className="text-lg font-extrabold text-[var(--text-primary)]">
+                  Cache Performance &amp; Bandwidth
+                </h2>
+              </div>
+              <span className="text-xs font-mono text-[var(--text-secondary)]">
+                Updated: {new Date(health.telemetry.updatedAt).toLocaleTimeString()}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="p-4 rounded-xl border border-[var(--border-primary)] bg-black/[0.02] dark:bg-white/[0.02]">
+                <div className="text-[11px] uppercase tracking-wider text-[var(--text-secondary)] font-semibold">
+                  Cache Hit Ratio
+                </div>
+                <div className="text-2xl font-black text-cyan-500 mt-1 font-mono">
+                  {health.telemetry.cacheHitRatio.toFixed(1)}%
+                </div>
+                <div className="mt-2 h-1.5 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
+                  <div
+                    className="h-full bg-cyan-400 rounded-full"
+                    style={{ width: `${Math.min(100, health.telemetry.cacheHitRatio)}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="p-4 rounded-xl border border-[var(--border-primary)] bg-black/[0.02] dark:bg-white/[0.02]">
+                <div className="text-[11px] uppercase tracking-wider text-[var(--text-secondary)] font-semibold">
+                  Bandwidth Served
+                </div>
+                <div className="text-2xl font-black text-[var(--text-primary)] mt-1 font-mono">
+                  {(health.telemetry.totalBytesServed / (1024 ** 3)).toFixed(2)} GB
+                </div>
+                <div className="text-xs text-[var(--text-secondary)] mt-1">
+                  {health.telemetry.totalRequests.toLocaleString()} requests
+                </div>
+              </div>
+
+              <div className="p-4 rounded-xl border border-[var(--border-primary)] bg-black/[0.02] dark:bg-white/[0.02]">
+                <div className="text-[11px] uppercase tracking-wider text-[var(--text-secondary)] font-semibold">
+                  SSD Cache Used
+                </div>
+                <div className="text-2xl font-black text-[var(--text-primary)] mt-1 font-mono">
+                  {(health.telemetry.cacheUsedBytes / (1024 ** 3)).toFixed(1)} GB
+                </div>
+                <div className="text-xs text-[var(--text-secondary)] mt-1">
+                  {(health.telemetry.diskFreeBytes / (1024 ** 3)).toFixed(0)} GB free on node
+                </div>
+              </div>
+
+              <div className="p-4 rounded-xl border border-[var(--border-primary)] bg-black/[0.02] dark:bg-white/[0.02]">
+                <div className="text-[11px] uppercase tracking-wider text-[var(--text-secondary)] font-semibold mb-1.5">
+                  Top Repositories
+                </div>
+                <div className="space-y-1">
+                  {(health.telemetry.topRepos || []).slice(0, 3).map((repo) => (
+                    <div key={repo.name} className="flex items-center justify-between text-xs font-mono">
+                      <span className="text-cyan-500 truncate">{repo.name}</span>
+                      <span className="text-[var(--text-secondary)]">{repo.requests}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* 3. SUPPORTED DISTRIBUTIONS WITH CATEGORY FILTER & PAGINATION */}
         <section id="mirrors" className="relative z-10 space-y-8">
           <div className="text-center max-w-2xl mx-auto">

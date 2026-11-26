@@ -35,6 +35,18 @@ export interface DistroHealth {
   detectedVersions?: string;
 }
 
+export interface MirrorTelemetry {
+  updatedAt: string;
+  totalRequests: number;
+  totalBytesServed: number;
+  cacheHitRatio: number;
+  cacheUsedBytes: number;
+  diskTotalBytes: number;
+  diskUsedBytes: number;
+  diskFreeBytes: number;
+  topRepos: Array<{ name: string; requests: number }>;
+}
+
 export interface MirrorStatusPayload {
   overallStatus: "operational" | "degraded" | "outage";
   mirrorReachable: boolean;
@@ -43,6 +55,7 @@ export interface MirrorStatusPayload {
   totalCount: number;
   downNames: string[];
   distros: Record<string, DistroHealth>;
+  telemetry?: MirrorTelemetry | null;
 }
 
 let cachedPayload: MirrorStatusPayload | null = null;
@@ -118,7 +131,23 @@ export async function GET() {
     return NextResponse.json(cachedPayload);
   }
 
-  const healthProbe = await probeUrl(`${MIRROR_BASE}/health`, 3500);
+  const [healthProbe, telemetry] = await Promise.all([
+    probeUrl(`${MIRROR_BASE}/health`, 3500),
+    (async (): Promise<MirrorTelemetry | null> => {
+      for (const url of [`${MIRROR_BASE}/_telemetry.json`, "http://192.168.79.21/_telemetry.json"]) {
+        try {
+          const c = new AbortController();
+          const t = setTimeout(() => c.abort(), 2500);
+          const r = await fetch(url, { signal: c.signal, cache: "no-store" });
+          clearTimeout(t);
+          if (r.ok) {
+            return (await r.json()) as MirrorTelemetry;
+          }
+        } catch {}
+      }
+      return null;
+    })(),
+  ]);
 
   const shouldRefreshVersions = healthProbe.ok && now - versionsCachedAtMs > VERSIONS_TTL_MS;
   if (shouldRefreshVersions) {
@@ -180,6 +209,7 @@ export async function GET() {
     totalCount: PROBES.length,
     downNames,
     distros,
+    telemetry,
   };
 
   cachedPayload = payload;

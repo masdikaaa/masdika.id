@@ -753,19 +753,42 @@ export default function DnsDashboardPage() {
               </button>
             )}
           </div>
-          <p
-            className={cn(
-              "text-xs mt-2.5",
-              isDark ? "text-zinc-500" : "text-slate-500"
-            )}
-          >
+          <div className="mt-2.5 space-y-1.5">
+            <p
+              className={cn(
+                "text-xs",
+                isDark ? "text-zinc-500" : "text-slate-500"
+              )}
+            >
+              {dnsInfo.resolver && (
+                <>
+                  <span className="font-mono">{dnsInfo.resolver}</span> &middot;{" "}
+                </>
+              )}
+              Protected with SafeDNS content filtering.
+            </p>
             {dnsInfo.resolver && (
-              <>
-                <span className="font-mono">{dnsInfo.resolver}</span> &middot;{" "}
-              </>
+              <div className="flex items-center justify-between gap-2 pt-1 border-t border-white/[0.06]">
+                <span className={cn("text-[11px] font-mono truncate", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                  DoH: https://{dnsInfo.resolver}/dns-query
+                </span>
+                <button
+                  onClick={() =>
+                    copyText(`https://${dnsInfo.resolver}/dns-query`, "DoH URL copied")
+                  }
+                  className={cn(
+                    "p-1 rounded-md transition-colors shrink-0",
+                    isDark
+                      ? "hover:bg-white/10 text-zinc-400 hover:text-white"
+                      : "hover:bg-slate-100 text-slate-500 hover:text-slate-900"
+                  )}
+                  title="Copy DNS-over-HTTPS URL"
+                >
+                  <Copy className="w-3 h-3" />
+                </button>
+              </div>
             )}
-            Protected with SafeDNS content filtering.
-          </p>
+          </div>
         </div>
       </motion.div>
 
