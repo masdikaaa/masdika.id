@@ -548,21 +548,23 @@ export default function MirrorClient() {
                             <span className="font-bold text-[var(--text-primary)]">{d.name}</span>
                             {(() => {
                               const st = health?.distros?.[d.id];
-                              if (!st) return <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" title="Checking..." />;
+                              if (!st) {
+                                return (
+                                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                                    Online
+                                  </span>
+                                );
+                              }
                               return st.ok ? (
-                                <span
-                                  className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-600 dark:text-emerald-400"
-                                  title={`Online (${st.latencyMs}ms)`}
-                                >
+                                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
                                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-                                  {st.latencyMs}ms
+                                  Online
                                 </span>
                               ) : (
-                                <span
-                                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
-                                  title={`Upstream issue (HTTP ${st.status})`}
-                                >
-                                  Degraded
+                                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-red-600 dark:text-red-400">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+                                  Offline
                                 </span>
                               );
                             })()}
@@ -636,7 +638,20 @@ export default function MirrorClient() {
                         />
                       </div>
                       <div className="min-w-0">
-                        <div className="font-bold text-sm text-[var(--text-primary)]">{d.name}</div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sm text-[var(--text-primary)]">{d.name}</span>
+                          {health?.distros?.[d.id] && !health.distros[d.id].ok ? (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-red-600 dark:text-red-400">
+                              <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+                              Offline
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                              Online
+                            </span>
+                          )}
+                        </div>
                         <div className="text-[11px] text-[var(--text-secondary)] truncate">{d.sub}</div>
                       </div>
                     </div>
