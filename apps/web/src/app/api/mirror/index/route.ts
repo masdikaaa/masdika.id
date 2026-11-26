@@ -9,6 +9,7 @@ const ALLOWED_PREFIXES = [
   "/ubuntu-releases/",
   "/debian/",
   "/debian-cd/",
+  "/debian-cd-archive/",
   "/debian-security/",
   "/kali/",
   "/kali-images/",

@@ -257,7 +257,8 @@ const DISTROS: DistroItem[] = [
 
 const ISO_SHORTCUTS = [
   { id: "ubuntu", name: "Ubuntu Releases", tag: "26.04 / 24.04 LTS", href: "/mirror/browse/ubuntu-releases" },
-  { id: "debian", name: "Debian CD Images", tag: "12 / 13 / 14 Forky", href: "/mirror/browse/debian-cd" },
+  { id: "debian", name: "Debian 13 ISO", tag: "Current & Live CD", href: "/mirror/browse/debian-cd" },
+  { id: "debian", name: "Debian 11 / 12 ISO", tag: "Archive Releases", href: "/mirror/browse/debian-cd-archive" },
   { id: "kali", name: "Kali Linux Images", tag: "Weekly & Installer", href: "/mirror/browse/kali-images" },
   { id: "parrot", name: "Parrot OS ISO", tag: "Security & Home", href: "/mirror/browse/parrot/iso" },
   { id: "linuxmint", name: "Linux Mint ISO", tag: "Cinnamon / XFCE", href: "/mirror/browse/linuxmint-iso" },
