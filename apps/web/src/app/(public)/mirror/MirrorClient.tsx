@@ -413,7 +413,7 @@ export default function MirrorClient() {
                 </Badge>
               </div>
 
-              <h1 className="text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-4 text-[var(--text-primary)]">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-4 text-[var(--text-primary)]">
                 Fast Package Cache. <br />
                 <span className="bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent">
                   Direct ISO Mirror.
@@ -507,7 +507,19 @@ export default function MirrorClient() {
         )}
 
         {/* 2. MIRROR ARCHITECTURE & LIVE NODE TELEMETRY */}
-        <section className="py-10 sm:py-14 relative z-10">
+        <section className="py-10 sm:py-14 relative z-10 space-y-8">
+          <div className="text-center max-w-3xl mx-auto">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+              MIRROR EDGE ARCHITECTURE
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+              High-Speed Caching &amp; Integrity
+            </h2>
+            <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
+              Live SSD cache telemetry, 5-minute repository synchronization, and untouched upstream GPG verification across Indonesia.
+            </p>
+          </div>
+
           <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] overflow-hidden shadow-sm">
             <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[var(--border-subtle)]">
               {[
