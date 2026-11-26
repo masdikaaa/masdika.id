@@ -724,70 +724,72 @@ export default function DnsDashboardPage() {
               <ShieldCheck className="w-4 h-4" />
             </div>
           </div>
-          <div className="flex items-center justify-between gap-2">
-            <code
-              className={cn(
-                "text-base sm:text-lg font-mono font-bold truncate",
-                isDark ? "text-white" : "text-slate-900"
-              )}
-            >
-              {dnsInfo.publicIp || dnsInfo.resolver || "Not configured"}
-            </code>
-            {(dnsInfo.publicIp || dnsInfo.resolver) && (
-              <button
-                onClick={() =>
-                  copyText(
-                    dnsInfo.publicIp || dnsInfo.resolver,
-                    dnsInfo.publicIp ? "Resolver IP copied" : "Resolver hostname copied"
-                  )
-                }
-                className={cn(
-                  "p-1.5 rounded-lg transition-colors shrink-0",
-                  isDark
-                    ? "hover:bg-white/10 text-zinc-400 hover:text-white"
-                    : "hover:bg-slate-100 text-slate-500 hover:text-slate-900"
-                )}
-                title="Copy resolver IP"
-              >
-                <Copy className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-          <div className="mt-2.5 space-y-1.5">
-            <p
-              className={cn(
-                "text-xs",
-                isDark ? "text-zinc-500" : "text-slate-500"
-              )}
-            >
-              {dnsInfo.resolver && (
-                <>
-                  <span className="font-mono">{dnsInfo.resolver}</span> &middot;{" "}
-                </>
-              )}
-              Protected with SafeDNS content filtering.
-            </p>
-            {dnsInfo.resolver && (
-              <div className="flex items-center justify-between gap-2 pt-1 border-t border-white/[0.06]">
-                <span className={cn("text-[11px] font-mono truncate", isDark ? "text-cyan-400" : "text-cyan-700")}>
-                  DoH: https://{dnsInfo.resolver}/dns-query
+          <div className="space-y-2.5">
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <span className={cn("text-[10px] font-semibold uppercase tracking-wider block", isDark ? "text-zinc-500" : "text-slate-500")}>
+                  Standard DNS (Port 53)
                 </span>
+                <code
+                  className={cn(
+                    "text-base sm:text-lg font-mono font-bold truncate block",
+                    isDark ? "text-white" : "text-slate-900"
+                  )}
+                >
+                  {dnsInfo.publicIp || "Not configured"}
+                </code>
+              </div>
+              {dnsInfo.publicIp && (
+                <button
+                  onClick={() => copyText(dnsInfo.publicIp, "Resolver IP copied")}
+                  className={cn(
+                    "p-1.5 rounded-lg transition-colors shrink-0",
+                    isDark
+                      ? "hover:bg-white/10 text-zinc-400 hover:text-white"
+                      : "hover:bg-slate-100 text-slate-500 hover:text-slate-900"
+                  )}
+                  title="Copy Standard DNS IP"
+                >
+                  <Copy className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
+            {dnsInfo.resolver && (
+              <div className="flex items-center justify-between gap-2 pt-2 border-t border-white/[0.06]">
+                <div className="min-w-0">
+                  <span className={cn("text-[10px] font-semibold uppercase tracking-wider block", isDark ? "text-zinc-500" : "text-slate-500")}>
+                    DNS-over-HTTPS (DoH)
+                  </span>
+                  <code className={cn("text-xs font-mono truncate block", isDark ? "text-cyan-400" : "text-cyan-700")}>
+                    https://{dnsInfo.resolver}/dns-query
+                  </code>
+                </div>
                 <button
                   onClick={() =>
                     copyText(`https://${dnsInfo.resolver}/dns-query`, "DoH URL copied")
                   }
                   className={cn(
-                    "p-1 rounded-md transition-colors shrink-0",
+                    "p-1.5 rounded-lg transition-colors shrink-0",
                     isDark
                       ? "hover:bg-white/10 text-zinc-400 hover:text-white"
                       : "hover:bg-slate-100 text-slate-500 hover:text-slate-900"
                   )}
                   title="Copy DNS-over-HTTPS URL"
                 >
-                  <Copy className="w-3 h-3" />
+                  <Copy className="w-3.5 h-3.5" />
                 </button>
               </div>
             )}
+
+            <p
+              className={cn(
+                "text-[11px]",
+                isDark ? "text-zinc-500" : "text-slate-500"
+              )}
+            >
+              Use IP for Router/OS (port 53) or DoH URL for browsers. SafeDNS filtering enabled.
+            </p>
           </div>
         </div>
       </motion.div>
