@@ -356,12 +356,12 @@ export default function DnsPublicClient({
                 <Badge
                   variant="brand"
                   dot
-                  dotColor={isOperational ? "bg-emerald-400" : "bg-amber-400"}
+                  dotColor={isOperational ? "bg-cyan-400" : "bg-amber-400"}
                   size="md"
                   className="font-mono uppercase text-[10px] sm:text-xs"
                 >
                   {isOperational
-                    ? `DNS NETWORK OPERATIONAL · ${resolverHost.toUpperCase()}`
+                    ? `DNS NETWORK ONLINE · ${resolverHost.toUpperCase()}`
                     : `SAFEDNS & AUTHORITATIVE · ${resolverHost.toUpperCase()}`}
                 </Badge>
               </div>
@@ -374,8 +374,8 @@ export default function DnsPublicClient({
               </h1>
 
               <p className="text-lg md:text-xl mb-10 max-w-xl leading-relaxed text-[var(--text-secondary)] font-normal">
-                Sub-millisecond cached public DNS resolver with SafeDNS filtering and DNS-over-HTTPS, paired with
-                instant-propagation authoritative nameservers and DNSSEC.
+                Protect every device with a fast, filtered public resolver - or point your domains to nameservers that
+                update the moment you hit save.
               </p>
 
               <div className="flex flex-wrap items-center gap-4">
@@ -817,14 +817,14 @@ export default function DnsPublicClient({
         <section id="services" className="relative z-10 space-y-8">
           <div className="max-w-2xl">
             <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-2 block">
-              CORE DNS INFRASTRUCTURE
+              TWO WAYS TO USE MASDIKA DNS
             </span>
             <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] leading-tight">
-              Two Dedicated Services, One Network
+              Pick What You Need
             </h2>
             <p className="text-sm sm:text-base text-[var(--text-secondary)] mt-2">
-              Use our public SafeDNS resolver for fast, filtered lookups on any device, or point your domains to our
-              authoritative cluster for zero-delay record updates.
+              Point your devices to SafeDNS for cleaner, faster browsing, or connect your domain nameservers for instant
+              DNS management.
             </p>
           </div>
 
@@ -1016,10 +1016,10 @@ export default function DnsPublicClient({
               QUICK CONFIGURATION
             </span>
             <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] leading-tight">
-              Start Using Masdika SafeDNS
+              Set Up in 30 Seconds
             </h2>
             <p className="text-sm sm:text-base text-[var(--text-secondary)] mt-2">
-              Point your Linux server, MikroTik router, Windows workstation, or browser DoH client to{" "}
+              Choose your platform below and paste the snippet to start resolving through{" "}
               <code className="font-mono text-cyan-600 dark:text-cyan-400">{resolverIp}</code>.
             </p>
           </div>
