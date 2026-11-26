@@ -303,7 +303,7 @@ export default function MirrorClient() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-start w-full">
             <div className="max-w-2xl relative z-30 lg:pt-20">
               <div className="mb-8">
-                <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase whitespace-nowrap">
+                <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase text-[10px] sm:text-xs">
                   LINUX &amp; BSD MIRROR · MIRROR.MASDIKA.ID
                 </Badge>
               </div>
@@ -408,8 +408,8 @@ export default function MirrorClient() {
           </div>
 
           {/* Category Filter Pills */}
-          <div className="flex items-center justify-center">
-            <div className="inline-flex flex-wrap items-center justify-center gap-1.5 p-1.5 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)]">
+          <div className="flex justify-center w-full">
+            <div className="inline-flex items-center gap-1.5 p-1.5 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] max-w-full overflow-x-auto no-scrollbar">
               {(
                 [
                   { id: "ALL", label: `All (${DISTROS.length})` },
@@ -425,8 +425,8 @@ export default function MirrorClient() {
                   onClick={() => handleCategoryChange(cat.id)}
                   className={
                     category === cat.id
-                      ? "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-cyan-400 text-slate-950 transition-all cursor-pointer"
-                      : "px-3.5 py-1.5 rounded-xl text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer"
+                      ? "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-cyan-400 text-slate-950 transition-all cursor-pointer whitespace-nowrap shrink-0"
+                      : "px-3.5 py-1.5 rounded-xl text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer whitespace-nowrap shrink-0"
                   }
                 >
                   {cat.label}
@@ -694,7 +694,7 @@ export default function MirrorClient() {
                   <span className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
                   <span className="w-3 h-3 rounded-full bg-[#27c93f]" />
                 </div>
-                <div className="flex items-center gap-1 overflow-x-auto max-w-full">
+                <div className="flex items-center gap-1 overflow-x-auto no-scrollbar max-w-full">
                   {DISTROS.map((d) => (
                     <button
                       key={d.id}
