@@ -6,7 +6,7 @@ export const metadata: Metadata = {
     absolute: "Browse Repositories & ISO Releases - Linux & BSD Mirror",
   },
   description:
-    "Browse package directories and download official ISO images for Ubuntu, Debian 11-14, Kali, Parrot OS, Linux Mint, AlmaLinux, Rocky, CentOS Stream, Arch, Alpine, FreeBSD, and OpenBSD.",
+    "Browse package directories and download official ISO images for Ubuntu, Debian, Kali, Parrot OS, Linux Mint, AlmaLinux, Rocky, CentOS Stream, Arch, Alpine, FreeBSD, and OpenBSD.",
   openGraph: {
     title: "Browse Repositories & ISO Releases - Linux & BSD Mirror",
     description:
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Browse Repositories & ISO Releases - Linux & BSD Mirror",
     description:
-      "Browse package directories and download official ISO images for Ubuntu, Debian 11-14, Kali, Parrot OS, Linux Mint, AlmaLinux, Rocky, CentOS Stream, Arch, Alpine, FreeBSD, and OpenBSD.",
+      "Browse package directories and download official ISO images for Ubuntu, Debians, Kali, Parrot OS, Linux Mint, AlmaLinux, Rocky, CentOS Stream, Arch, Alpine, FreeBSD, and OpenBSD.",
     images: [OG_IMAGE_PATH],
   },
 };

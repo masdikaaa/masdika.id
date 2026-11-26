@@ -74,6 +74,7 @@ model User {
   objectStorageKeys     ObjectStorageKey[]
   aiGatewayKeys         AiGatewayKey[]
   aiUsageLogs           AiUsageLog[]
+  dnsZones              DnsZone[]
 
   @@index([createdAt])
 }
@@ -1073,6 +1074,20 @@ model CloudflareDomain {
   cfZoneId    String   @unique
   domain      String   @unique
   nameServers String
+  status      String   @default("pending")
+  userId      Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model DnsZone {
+  id          Int      @id @default(autoincrement())
+  zoneId      String   @unique
+  domain      String   @unique
+  nameservers String   @default("[\"ns1.masdika.id\"]")
   status      String   @default("pending")
   userId      Int
   createdAt   DateTime @default(now())

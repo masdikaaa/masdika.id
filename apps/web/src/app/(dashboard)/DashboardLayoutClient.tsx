@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Key, Settings, LogOut, Bell, Menu, LayoutDashboard, BarChart3, Database, Receipt, HardDrive, Server, Layers, MessageSquare, Wallet, Ticket, Network, Terminal, UploadCloud, MapPin, Flame, Activity, Gift, Clock, Code2, Sun, Moon, ShieldAlert, Loader2, Plus, ChevronDown, Search, Rocket, Boxes, AppWindow, Sparkles, Bot } from "lucide-react";
+import { Key, Settings, LogOut, Bell, Menu, LayoutDashboard, BarChart3, Database, Receipt, HardDrive, Server, Layers, MessageSquare, Wallet, Ticket, Network, Terminal, UploadCloud, MapPin, Flame, Activity, Gift, Clock, Code2, Sun, Moon, ShieldAlert, Loader2, Plus, ChevronDown, Search, Rocket, Boxes, AppWindow, Sparkles, Bot, Globe } from "lucide-react";
 import { SiKubernetes, SiCloudflare } from "react-icons/si";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -83,6 +83,7 @@ const SIDEBAR_LINKS = [
   { name: "Incident Reports", href: "/dashboard/incidents", icon: ShieldAlert, color: "text-cyan-400", group: "IaaS Configuration" },
   { name: "Auto Scheduler", href: "/dashboard/scheduler", icon: Clock, color: "text-cyan-400", group: "IaaS Configuration" },
   { name: "Elastic Static IPs", href: "/dashboard/reserved-ips", icon: Network, color: "text-cyan-400", group: "IaaS Configuration" },
+  { name: "DNS Pointing", href: "/dashboard/dns", icon: Globe, color: "text-cyan-400", group: "IaaS Configuration", badge: "New" },
   { name: "Virtual Private Cloud", href: "/dashboard/vpc", icon: VpcIcon, color: "text-cyan-400", group: "IaaS Configuration" },
   { name: "Cloudflared", href: "/dashboard/cloudflared", icon: SiCloudflare, color: "text-[#F38020]", group: "IaaS Configuration" },
   { name: "Firewalls", href: "/dashboard/firewalls", icon: FirewallIcon, color: "text-orange-500", group: "IaaS Configuration" },

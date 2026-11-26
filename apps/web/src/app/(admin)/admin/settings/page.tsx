@@ -20,7 +20,7 @@ export default function SettingsPage() {
   const isDark = theme === "dark";
   const inputClass = isDark ? inputClassDark : inputClassLight;
   const labelClass = isDark ? labelClassDark : labelClassLight;
-  const [activeTab, setActiveTab] = useUrlTab<'profile' | 'contact' | 'website' | 'seo' | 'security' | 'services' | 'storage' | 'customer-storage' | 'database' | 'apps' | 'cloud-apps'>('profile', { allowed: ['profile', 'contact', 'website', 'seo', 'security', 'services', 'storage', 'customer-storage', 'database', 'apps', 'cloud-apps'] as const });
+  const [activeTab, setActiveTab] = useUrlTab<'profile' | 'contact' | 'website' | 'seo' | 'security' | 'services' | 'storage' | 'customer-storage' | 'database' | 'apps' | 'cloud-apps' | 'powerdns'>('profile', { allowed: ['profile', 'contact', 'website', 'seo', 'security', 'services', 'storage', 'customer-storage', 'database', 'apps', 'cloud-apps', 'powerdns'] as const });
 
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User, desc: 'Manage personal info' },
@@ -34,6 +34,7 @@ export default function SettingsPage() {
     { id: 'database', label: 'Managed DB (Kubernetes)', icon: Database, desc: 'Kubernetes Cluster, PMA, pgAdmin & Mongo' },
     { id: 'apps', label: 'Managed Apps (Kubernetes)', icon: Boxes, desc: 'Kubernetes Cluster & Let\'s Encrypt SSL for Apps' },
     { id: 'cloud-apps', label: 'Cloud Apps (Kubernetes)', icon: Boxes, desc: 'Kubernetes Cluster & Let\'s Encrypt SSL for Cloud Apps' },
+    { id: 'powerdns', label: 'PowerDNS (DNS)', icon: Globe, desc: 'Authoritative DNS & Public Resolver' },
   ];
 
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
@@ -94,6 +95,11 @@ export default function SettingsPage() {
   // Cloud Apps / App Platform (K8s) State
   const [testingCloudAppsK3s, setTestingCloudAppsK3s] = useState(false);
   const [cloudAppsK3sTestResult, setCloudAppsK3sTestResult] = useState<{ success: boolean; message: string; latencyMs?: number; nodes?: string[] } | null>(null);
+
+  // PowerDNS State
+  const [testingPowerDns, setTestingPowerDns] = useState(false);
+  const [powerDnsTestResult, setPowerDnsTestResult] = useState<{ success: boolean; message: string; latencyMs?: number } | null>(null);
+  const [showPowerDnsApiKey, setShowPowerDnsApiKey] = useState(false);
 
 
 
@@ -191,7 +197,15 @@ export default function SettingsPage() {
     app_platform_max_instances: "50",
     app_platform_max_cpu: "8.0",
     app_platform_max_ram_gb: "16",
-    app_platform_max_disk_gb: "96"
+    app_platform_max_disk_gb: "96",
+
+    // PowerDNS Authoritative & Resolver Settings
+    powerdns_enabled: true,
+    powerdns_api_url: "",
+    powerdns_api_key: "",
+    powerdns_nameservers: "",
+    powerdns_resolver: "",
+    powerdns_public_ip: ""
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -296,7 +310,14 @@ export default function SettingsPage() {
             app_platform_max_instances: data.settings?.app_platform_max_instances || "50",
             app_platform_max_cpu: data.settings?.app_platform_max_cpu || "8.0",
             app_platform_max_ram_gb: data.settings?.app_platform_max_ram_gb || "16",
-            app_platform_max_disk_gb: data.settings?.app_platform_max_disk_gb || "96"
+            app_platform_max_disk_gb: data.settings?.app_platform_max_disk_gb || "96",
+
+            powerdns_enabled: data.settings?.powerdns_enabled !== "false",
+            powerdns_api_url: data.settings?.powerdns_api_url || "",
+            powerdns_api_key: data.settings?.powerdns_api_key || "",
+            powerdns_nameservers: data.settings?.powerdns_nameservers || "",
+            powerdns_resolver: data.settings?.powerdns_resolver || "",
+            powerdns_public_ip: data.settings?.powerdns_public_ip || ""
           });
           if (data.settings?.profileImage) {
             setProfilePreview(data.settings?.profileImage);
@@ -476,6 +497,35 @@ export default function SettingsPage() {
       setAppK3sTestResult({ success: false, message: e?.message || "Connection failed" });
     } finally {
       setTestingAppK3s(false);
+    }
+  };
+
+  const handleTestPowerDns = async () => {
+    setTestingPowerDns(true);
+    setPowerDnsTestResult(null);
+    const toastId = toast.loading("Connecting to PowerDNS HTTP API...");
+    try {
+      const res = await fetch('/api/admin/dns/test-connection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          apiUrl: formData.powerdns_api_url,
+          apiKey: formData.powerdns_api_key,
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(data.message, { id: toastId });
+        setPowerDnsTestResult({ success: true, message: data.message, latencyMs: data.latencyMs });
+      } else {
+        toast.error(data.message || "Connection failed", { id: toastId });
+        setPowerDnsTestResult({ success: false, message: data.message || "Failed to connect to PowerDNS API", latencyMs: data.latencyMs });
+      }
+    } catch (e: any) {
+      toast.error(e?.message || "Connection failed", { id: toastId });
+      setPowerDnsTestResult({ success: false, message: e?.message || "Connection failed" });
+    } finally {
+      setTestingPowerDns(false);
     }
   };
 
@@ -2828,6 +2878,178 @@ export default function SettingsPage() {
                     >
                       <Save className="w-3.5 h-3.5" />
                       <span>{saving ? "Saving Changes..." : "Save Cloud Apps Settings"}</span>
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+
+            {/* PowerDNS (DNS Pointing) Tab */}
+            {activeTab === 'powerdns' && (
+              <motion.div
+                key="powerdns"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-6"
+              >
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={cn(
+                    "p-6 rounded-2xl border backdrop-blur-xl space-y-6 relative overflow-hidden",
+                    isDark ? "bg-[#101014]/60 border-white/[0.08]" : "bg-white border-slate-200 shadow-sm"
+                  )}
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-inherit">
+                    <div>
+                      <h2 className={cn("text-lg font-bold flex items-center gap-2", isDark ? "text-white" : "text-slate-900")}>
+                        <Globe className="w-5 h-5 text-cyan-400" /> PowerDNS Server &amp; Public Resolver
+                      </h2>
+                      <p className={cn("text-xs mt-1", isDark ? "text-zinc-400" : "text-slate-500")}>
+                        Connect your PowerDNS Authoritative HTTP API and configure nameserver/resolver details shown to customers.
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleTestPowerDns}
+                      disabled={testingPowerDns}
+                      className="px-4 py-2 rounded-xl text-xs font-semibold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 shrink-0 self-start sm:self-auto"
+                    >
+                      <RefreshCw className={cn("w-3.5 h-3.5", testingPowerDns && "animate-spin")} />
+                      <span>{testingPowerDns ? "Testing Connection..." : "Test PowerDNS Connection"}</span>
+                    </button>
+                  </div>
+
+                  {powerDnsTestResult && (
+                    <div className={cn(
+                      "p-4 rounded-xl border text-xs flex items-start gap-3 transition-all",
+                      powerDnsTestResult.success
+                        ? isDark ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-800"
+                        : isDark ? "bg-red-500/10 border-red-500/20 text-red-400" : "bg-red-50 border-red-200 text-red-800"
+                    )}>
+                      {powerDnsTestResult.success ? (
+                        <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+                      ) : (
+                        <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                      )}
+                      <div className="flex items-center justify-between w-full">
+                        <p className="font-semibold">{powerDnsTestResult.message}</p>
+                        {powerDnsTestResult.latencyMs !== undefined && (
+                          <span className="font-mono text-[11px] opacity-80">{powerDnsTestResult.latencyMs}ms</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-6 relative z-20">
+                    <div className="pt-1">
+                      <AdminCheckbox
+                        checked={formData.powerdns_enabled}
+                        onChange={(checked) => setFormData(prev => ({ ...prev, powerdns_enabled: checked }))}
+                        label="Enable PowerDNS Domain Pointing for Customers"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2 md:col-span-2">
+                        <label className={labelClass}>PowerDNS API URL *</label>
+                        <input
+                          type="text"
+                          name="powerdns_api_url"
+                          value={formData.powerdns_api_url}
+                          onChange={handleChange}
+                          placeholder="e.g. http://192.168.79.21:8081/api/v1/servers/localhost"
+                          className={inputClass}
+                        />
+                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>
+                          Full base URL to your PowerDNS Authoritative server REST API endpoint.
+                        </p>
+                      </div>
+
+                      <div className="space-y-2 md:col-span-2">
+                        <label className={labelClass}>PowerDNS API Key *</label>
+                        <div className="relative">
+                          <input
+                            type={showPowerDnsApiKey ? "text" : "password"}
+                            name="powerdns_api_key"
+                            value={formData.powerdns_api_key}
+                            onChange={handleChange}
+                            placeholder={formData.powerdns_api_key === "••••••••" ? "•••••••• (Configured and encrypted)" : "Enter X-API-Key"}
+                            className={cn(inputClass, "pr-10 font-mono")}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPowerDnsApiKey(!showPowerDnsApiKey)}
+                            className={cn("absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg", isDark ? "text-zinc-400 hover:text-white" : "text-slate-400 hover:text-slate-700")}
+                          >
+                            {showPowerDnsApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
+                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>
+                          Encrypted at rest in PostgreSQL using AES-256.
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className={labelClass}>Authoritative Nameservers *</label>
+                        <input
+                          type="text"
+                          name="powerdns_nameservers"
+                          value={formData.powerdns_nameservers}
+                          onChange={handleChange}
+                          placeholder="e.g. ns1.masdika.id, ns2.masdika.id"
+                          className={inputClass}
+                        />
+                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>
+                          Comma-separated nameserver hostnames assigned to new customer zones.
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className={labelClass}>Public DNS Resolver</label>
+                        <input
+                          type="text"
+                          name="powerdns_resolver"
+                          value={formData.powerdns_resolver}
+                          onChange={handleChange}
+                          placeholder="e.g. dns1.masdika.id"
+                          className={inputClass}
+                        />
+                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>
+                          Hostname displayed to customers for filtered DNS resolver usage.
+                        </p>
+                      </div>
+
+                      <div className="space-y-2 md:col-span-2">
+                        <label className={labelClass}>Public DNS IP Address</label>
+                        <input
+                          type="text"
+                          name="powerdns_public_ip"
+                          value={formData.powerdns_public_ip}
+                          onChange={handleChange}
+                          placeholder="e.g. 103.247.10.61"
+                          className={inputClass}
+                        />
+                        <p className={cn("text-[11px]", isDark ? "text-zinc-500" : "text-slate-500")}>
+                          Public IPv4 address of the DNS server shown in customer setup instructions.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Save Button */}
+                  <div className={cn("pt-6 border-t flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3", isDark ? "border-white/[0.08]" : "border-slate-200")}>
+                    <button
+                      type="button"
+                      onClick={handleSave}
+                      disabled={saving}
+                      className="w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-xs bg-cyan-400 hover:bg-cyan-300 active:scale-95 text-slate-950 transition-all shadow-md cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      <Save className="w-3.5 h-3.5" />
+                      <span>{saving ? "Saving Changes..." : "Save PowerDNS Settings"}</span>
                     </button>
                   </div>
                 </motion.div>

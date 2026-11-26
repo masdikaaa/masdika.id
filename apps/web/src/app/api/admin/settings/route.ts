@@ -10,6 +10,7 @@ import { invalidateRustFSCache } from '@/lib/rustfs';
 import { invalidateCustomerRustFSCache } from '@/lib/customer-rustfs';
 import { invalidateK8sClusterConfigCache, validateSafeKubeConfig } from '@/lib/k8s-database';
 import { invalidatePublicSettingsCache } from '@/lib/settings';
+import { invalidatePowerDnsCache } from '@/lib/powerdns';
 import { SERVICE_SETTING_KEYS } from '@/lib/service-availability';
 import { revalidatePath } from 'next/cache';
 import { checkRateLimit } from '@/lib/rate-limit';
@@ -100,6 +101,15 @@ export async function GET() {
     settingsObj['app_platform_max_cpu'] = settingsObj['app_platform_max_cpu'] || '8.0';
     settingsObj['app_platform_max_ram_gb'] = settingsObj['app_platform_max_ram_gb'] || '16';
     settingsObj['app_platform_max_disk_gb'] = settingsObj['app_platform_max_disk_gb'] || '96';
+
+    // PowerDNS Authoritative & Resolver Settings
+    const hasPowerDnsApiKey = Boolean(settingsObj['powerdns_api_key'] || process.env.POWERDNS_API_KEY);
+    settingsObj['powerdns_enabled'] = settingsObj['powerdns_enabled'] ?? (process.env.POWERDNS_ENABLED ?? 'true');
+    settingsObj['powerdns_api_url'] = settingsObj['powerdns_api_url'] || process.env.POWERDNS_API_URL || '';
+    settingsObj['powerdns_api_key'] = hasPowerDnsApiKey ? MASKED_SECRET : '';
+    settingsObj['powerdns_nameservers'] = settingsObj['powerdns_nameservers'] || process.env.POWERDNS_NAMESERVERS || '';
+    settingsObj['powerdns_resolver'] = settingsObj['powerdns_resolver'] || process.env.POWERDNS_RESOLVER || '';
+    settingsObj['powerdns_public_ip'] = settingsObj['powerdns_public_ip'] || process.env.POWERDNS_PUBLIC_IP || '';
 
     return NextResponse.json({
       user: {
@@ -292,6 +302,25 @@ export async function PUT(req: Request) {
     if (app_platform_max_ram_gb !== undefined) settingsToUpdate.push({ key: 'app_platform_max_ram_gb', value: String(app_platform_max_ram_gb).trim() });
     if (app_platform_max_disk_gb !== undefined) settingsToUpdate.push({ key: 'app_platform_max_disk_gb', value: String(app_platform_max_disk_gb).trim() });
 
+    // PowerDNS Authoritative & Resolver Settings
+    const {
+      powerdns_enabled,
+      powerdns_api_url,
+      powerdns_api_key,
+      powerdns_nameservers,
+      powerdns_resolver,
+      powerdns_public_ip,
+    } = body;
+
+    if (powerdns_enabled !== undefined) settingsToUpdate.push({ key: 'powerdns_enabled', value: String(powerdns_enabled) });
+    if (powerdns_api_url !== undefined) settingsToUpdate.push({ key: 'powerdns_api_url', value: String(powerdns_api_url).trim().replace(/\/+$/, '') });
+    if (powerdns_api_key !== undefined && powerdns_api_key !== MASKED_SECRET && String(powerdns_api_key).trim() !== '') {
+      settingsToUpdate.push({ key: 'powerdns_api_key', value: encryptDeterministic(String(powerdns_api_key).trim()) });
+    }
+    if (powerdns_nameservers !== undefined) settingsToUpdate.push({ key: 'powerdns_nameservers', value: String(powerdns_nameservers).trim().toLowerCase() });
+    if (powerdns_resolver !== undefined) settingsToUpdate.push({ key: 'powerdns_resolver', value: String(powerdns_resolver).trim().toLowerCase() });
+    if (powerdns_public_ip !== undefined) settingsToUpdate.push({ key: 'powerdns_public_ip', value: String(powerdns_public_ip).trim() });
+
     // SSRF & Kubeconfig exec-plugin pre-flight validation before persisting settings
     try {
       const endpointChecks: Array<[unknown, string]> = [
@@ -300,6 +329,7 @@ export async function PUT(req: Request) {
         [managed_db_api_server, 'Managed DB API Server'],
         [managed_app_api_server, 'Managed App API Server'],
         [app_platform_api_server, 'Cloud Apps API Server'],
+        [powerdns_api_url, 'PowerDNS API URL'],
       ];
       for (const [val, label] of endpointChecks) {
         if (val !== undefined && String(val).trim() !== '') {
@@ -331,6 +361,7 @@ export async function PUT(req: Request) {
     invalidateCustomerRustFSCache();
     invalidateK8sClusterConfigCache();
     await invalidatePublicSettingsCache();
+    invalidatePowerDnsCache();
     try {
       revalidatePath('/', 'layout');
     } catch {}
