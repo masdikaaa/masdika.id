@@ -438,13 +438,16 @@ export default function DnsDashboardPage() {
       if (typeFilter !== "ALL" && rec.type !== typeFilter) return false;
       if (!q) return true;
       const values = rec.records.map((r) => r.content.toLowerCase()).join(" ");
+      const displayName =
+        rec.name === "@" && selectedZone ? selectedZone.domain.toLowerCase() : rec.name.toLowerCase();
       return (
         rec.name.toLowerCase().includes(q) ||
+        displayName.includes(q) ||
         rec.type.toLowerCase().includes(q) ||
         values.includes(q)
       );
     });
-  }, [records, recordSearch, typeFilter]);
+  }, [records, recordSearch, typeFilter, selectedZone]);
 
   const totalRecordPages = Math.max(
     1,
@@ -1112,7 +1115,7 @@ export default function DnsDashboardPage() {
                                   isDark ? "text-white" : "text-slate-900"
                                 )}
                               >
-                                {rec.name}
+                                {rec.name === "@" ? selectedZone.domain : rec.name}
                               </span>
                               <span
                                 className={cn(
@@ -1244,7 +1247,7 @@ export default function DnsDashboardPage() {
                                     isDark ? "text-white" : "text-slate-900"
                                   }
                                 >
-                                  {rec.name}
+                                  {rec.name === "@" ? selectedZone.domain : rec.name}
                                 </span>
                               </td>
                               <td className="py-3.5 px-3 font-mono text-xs max-w-md">
@@ -1961,7 +1964,9 @@ export default function DnsDashboardPage() {
         onClose={() => setDeletingRecord(null)}
         onConfirm={handleDeleteRecord}
         title="Delete DNS Record"
-        description={`Are you sure you want to delete the ${deletingRecord?.type} record for ${deletingRecord?.name}?`}
+        description={`Are you sure you want to delete the ${deletingRecord?.type} record for ${
+          deletingRecord?.name === "@" && selectedZone ? selectedZone.domain : deletingRecord?.name
+        }?`}
         confirmText="Delete Record"
         variant="danger"
         isLoading={isDeletingRecord}
