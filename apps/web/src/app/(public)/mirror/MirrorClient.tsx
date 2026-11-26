@@ -30,6 +30,7 @@ type DistroCategory = "ALL" | "DEBIAN_UBUNTU" | "RHEL" | "ROLLING_BSD" | "SECURI
 interface DistroItem {
   id: string;
   name: string;
+  pkgMgr: string;
   category: Exclude<DistroCategory, "ALL">;
   sub: string;
   paths: string[];
@@ -41,6 +42,7 @@ const DISTROS: DistroItem[] = [
   {
     id: "ubuntu",
     name: "Ubuntu",
+    pkgMgr: "APT",
     category: "DEBIAN_UBUNTU",
     sub: "22.04 Jammy - 24.04 Noble - 26.04 Resolute",
     paths: ["/ubuntu/"],
@@ -58,6 +60,7 @@ const DISTROS: DistroItem[] = [
   {
     id: "debian",
     name: "Debian",
+    pkgMgr: "APT",
     category: "DEBIAN_UBUNTU",
     sub: "12 Bookworm - 13 Trixie + Security",
     paths: ["/debian/", "/debian-security/"],
@@ -75,6 +78,7 @@ const DISTROS: DistroItem[] = [
   {
     id: "linuxmint",
     name: "Linux Mint",
+    pkgMgr: "APT",
     category: "DEBIAN_UBUNTU",
     sub: "Wilma - Zara - LMDE (Packages & ISO)",
     paths: ["/linuxmint/"],
@@ -89,6 +93,7 @@ const DISTROS: DistroItem[] = [
   {
     id: "kali",
     name: "Kali Linux",
+    pkgMgr: "APT",
     category: "SECURITY",
     sub: "Kali Rolling (Packages & ISO Images)",
     paths: ["/kali/"],
@@ -103,6 +108,7 @@ const DISTROS: DistroItem[] = [
   {
     id: "parrot",
     name: "Parrot OS",
+    pkgMgr: "APT",
     category: "SECURITY",
     sub: "Parrot 6 Lory (Packages & ISO)",
     paths: ["/parrot/"],
@@ -117,6 +123,7 @@ const DISTROS: DistroItem[] = [
   {
     id: "almalinux",
     name: "AlmaLinux",
+    pkgMgr: "DNF",
     category: "RHEL",
     sub: "AlmaLinux 8 - 9 - 10 (BaseOS & AppStream)",
     paths: ["/almalinux/"],
@@ -133,6 +140,7 @@ const DISTROS: DistroItem[] = [
   {
     id: "rocky",
     name: "Rocky Linux",
+    pkgMgr: "DNF",
     category: "RHEL",
     sub: "Rocky Linux 8 - 9 (BaseOS & AppStream)",
     paths: ["/rocky/"],
@@ -149,6 +157,7 @@ const DISTROS: DistroItem[] = [
   {
     id: "centos-stream",
     name: "CentOS Stream",
+    pkgMgr: "DNF",
     category: "RHEL",
     sub: "CentOS Stream 9 - 10 (Active)",
     paths: ["/centos-stream/"],
@@ -165,6 +174,7 @@ const DISTROS: DistroItem[] = [
   {
     id: "epel",
     name: "EPEL (RHEL)",
+    pkgMgr: "DNF",
     category: "RHEL",
     sub: "EPEL 8 - 9 - 10 for Alma / Rocky / CentOS",
     paths: ["/epel/"],
@@ -182,6 +192,7 @@ const DISTROS: DistroItem[] = [
   {
     id: "archlinux",
     name: "Arch Linux",
+    pkgMgr: "PACMAN",
     category: "ROLLING_BSD",
     sub: "Core - Extra - Multilib + ISO",
     paths: ["/archlinux/"],
@@ -196,6 +207,7 @@ const DISTROS: DistroItem[] = [
   {
     id: "alpine",
     name: "Alpine Linux",
+    pkgMgr: "APK",
     category: "ROLLING_BSD",
     sub: "v3.20 - v3.21 - latest-stable - edge",
     paths: ["/alpine/"],
@@ -210,6 +222,7 @@ const DISTROS: DistroItem[] = [
   {
     id: "freebsd",
     name: "FreeBSD",
+    pkgMgr: "PKG",
     category: "ROLLING_BSD",
     sub: "FreeBSD 13 - 14 - 15 (pkg & ISO)",
     paths: ["/freebsd/", "/freebsd-pkg/"],
@@ -232,6 +245,7 @@ const DISTROS: DistroItem[] = [
   {
     id: "openbsd",
     name: "OpenBSD",
+    pkgMgr: "PKG_ADD",
     category: "ROLLING_BSD",
     sub: "7.5 - 7.6 - snapshots (pkg & ISO)",
     paths: ["/openbsd/"],
@@ -515,7 +529,8 @@ export default function MirrorClient() {
           </div>
 
           {/* Clean Repository Table (Desktop) + Compact List (Mobile) */}
-          <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] overflow-hidden shadow-sm">
+          <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] overflow-hidden shadow-sm relative">
+            <div className="h-px w-full bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent" />
             {/* Desktop Table */}
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left border-collapse">
@@ -531,11 +546,11 @@ export default function MirrorClient() {
                   {pagedDistros.map((d) => (
                     <tr
                       key={d.id}
-                      className="hover:bg-[var(--surface-secondary)]/60 transition-colors"
+                      className="group hover:bg-[var(--surface-secondary)]/70 transition-colors"
                     >
                       <td className="py-4 px-6">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl border border-[var(--border-primary)] bg-slate-50 dark:bg-white/95 flex items-center justify-center p-1.5 shrink-0 shadow-2xs">
+                        <div className="flex items-center gap-3.5">
+                          <div className="w-10 h-10 rounded-xl border border-[var(--border-primary)] bg-slate-50 dark:bg-white/95 flex items-center justify-center p-2 shrink-0 shadow-2xs group-hover:border-cyan-500/40 transition-colors">
                             <img
                               src={`/images/distros/${d.id}.svg`}
                               alt={d.name}
@@ -544,11 +559,16 @@ export default function MirrorClient() {
                               className="w-5 h-5 object-contain"
                             />
                           </div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-[var(--text-primary)]">{d.name}</span>
+                          <div className="space-y-0.5">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-[var(--text-primary)]">{d.name}</span>
+                              <span className="px-1.5 py-0.5 rounded bg-[var(--surface-secondary)] border border-[var(--border-primary)] font-mono text-[10px] font-semibold text-[var(--text-secondary)]">
+                                {d.pkgMgr}
+                              </span>
+                            </div>
                             {(() => {
                               const st = health?.distros?.[d.id];
-                              if (!st) {
+                              if (!st || st.ok) {
                                 return (
                                   <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
@@ -556,12 +576,7 @@ export default function MirrorClient() {
                                   </span>
                                 );
                               }
-                              return st.ok ? (
-                                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-                                  Online
-                                </span>
-                              ) : (
+                              return (
                                 <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-red-600 dark:text-red-400">
                                   <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
                                   Offline
@@ -579,18 +594,21 @@ export default function MirrorClient() {
                           {d.paths.map((p) => {
                             const full = MIRROR_BASE + p;
                             return (
-                              <div key={p} className="inline-flex items-center gap-2 font-mono text-xs">
-                                <code className="text-[var(--text-primary)]">{full}</code>
+                              <div
+                                key={p}
+                                className="inline-flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)]/80 font-mono text-xs w-fit max-w-full"
+                              >
+                                <code className="text-[var(--text-primary)] truncate">{full}</code>
                                 <button
                                   type="button"
                                   onClick={() => copyText(full, full)}
-                                  className="p-1 rounded border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:text-cyan-500 cursor-pointer transition-colors"
+                                  className="p-1 rounded text-[var(--text-secondary)] hover:text-cyan-500 cursor-pointer transition-colors shrink-0"
                                   title="Copy Mirror URL"
                                 >
                                   {copiedId === full ? (
-                                    <Check className="w-3 h-3 text-emerald-500" />
+                                    <Check className="w-3.5 h-3.5 text-emerald-500" />
                                   ) : (
-                                    <Copy className="w-3 h-3" />
+                                    <Copy className="w-3.5 h-3.5" />
                                   )}
                                 </button>
                               </div>
@@ -614,6 +632,15 @@ export default function MirrorClient() {
                             <Disc className="w-3.5 h-3.5 text-cyan-500" />
                             <span>ISO</span>
                           </Link>
+                          <a
+                            href="#setup"
+                            onClick={() => setActiveTab(d.id)}
+                            className="px-3 py-1.5 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] hover:border-cyan-500/40 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center gap-1.5 transition-colors"
+                            title="Show quick setup command"
+                          >
+                            <Terminal className="w-3.5 h-3.5" />
+                            <span>Setup</span>
+                          </a>
                         </div>
                       </td>
                     </tr>
