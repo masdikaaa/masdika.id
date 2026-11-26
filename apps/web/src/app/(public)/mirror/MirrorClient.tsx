@@ -1053,8 +1053,8 @@ export default function MirrorClient() {
         {/* 7. BOTTOM CTA */}
         <section className="relative z-10">
           <GlowCtaCard>
-            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-              <div className="max-w-2xl space-y-2">
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+              <div className="max-w-2xl space-y-3">
                 <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 block">
                   MASDIKA CLOUD INFRASTRUCTURE
                 </span>
@@ -1064,6 +1064,17 @@ export default function MirrorClient() {
                 <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
                   Deploy Proxmox Cloud VPS or Kubernetes App Platform workloads in Indonesia with fast access to Masdika mirrors.
                 </p>
+                <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-1 text-xs text-[var(--text-secondary)]">
+                  <span className="inline-flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-cyan-500" /> Free public access
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-cyan-500" /> 5-minute repo sync
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-cyan-500" /> GPG signature verified
+                  </span>
+                </div>
               </div>
               <div className="flex flex-wrap items-center gap-3 shrink-0">
                 <Button variant="primary" size="lg" href="/vps" rightIcon={<ArrowRight className="w-4 h-4" />}>

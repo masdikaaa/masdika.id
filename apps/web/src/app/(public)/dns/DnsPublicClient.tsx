@@ -10,6 +10,7 @@ import {
   Lock,
   Pause,
   Play,
+  Search,
   Server,
   Shield,
   ShieldCheck,
@@ -19,6 +20,7 @@ import {
 import type { DnsHistoryRange, DnsHistoryResponse, DnsStatsSnapshot } from "@/lib/powerdns";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { FaqSection } from "@/components/ui/FaqSection";
 import { HeroAvatarFrame } from "@/components/ui/HeroAvatarFrame";
 import { GlowCtaCard } from "@/components/ui/GlowCtaCard";
 
@@ -61,6 +63,44 @@ function formatLatencyUs(us: number): string {
   return `${(us / 1000).toFixed(2)} ms`;
 }
 
+type LookupRecordType = "A" | "AAAA" | "MX" | "TXT" | "NS" | "CNAME" | "SOA";
+
+interface DnsLookupResult {
+  domain: string;
+  type: LookupRecordType;
+  server: string;
+  latencyMs: number;
+  status: string;
+  filtered: boolean;
+  records: { value: string; ttl?: number }[];
+  message?: string;
+}
+
+const DNS_LOOKUP_TYPES: LookupRecordType[] = ["A", "AAAA", "MX", "TXT", "NS", "CNAME", "SOA"];
+
+const DNS_FAQS: { q: string; a: string }[] = [
+  {
+    q: "What is the difference between SafeDNS Resolver and DNS Pointing?",
+    a: "SafeDNS Resolver (103.247.10.61) is a public recursive DNS endpoint you configure on servers, MikroTik routers, Windows, or browsers (via DoH) to resolve the open internet while filtering ads, phishing, and malware domains at zero cost. DNS Pointing (ns1.masdika.id & ns2.masdika.id) is authoritative zone hosting where you manage your own domain's A, AAAA, CNAME, MX, TXT, and SRV records.",
+  },
+  {
+    q: "Do I need a Masdika Cloud account to use SafeDNS (103.247.10.61)?",
+    a: "No account or registration is required for SafeDNS Resolver or DNS-over-HTTPS (https://dns.masdika.id/dns-query). Any device, VPS, or office router can point to 103.247.10.61 immediately. Authoritative DNS zones in the DNS Console are included free for Masdika accounts.",
+  },
+  {
+    q: "How fast do DNS record edits go live on ns1.masdika.id and ns2.masdika.id?",
+    a: "Updates committed through the Masdika DNS Console write straight into PowerDNS LMDB shards with an automatic SOA serial increment, activating in 0 seconds on ns1 and ns2. New records default to a 60-second TTL so external resolvers pick up changes rapidly.",
+  },
+  {
+    q: "How does SafeDNS handle blocked domains and false positives?",
+    a: "When a queried hostname matches our daily-synced 637K+ threat and tracker blocklist, dnsdist and PowerDNS Recursor sinkhole the lookup to 0.0.0.0 (IPv4) or :: (IPv6) right at the resolver layer without injecting forged web pages or touching TLS traffic.",
+  },
+  {
+    q: "Does Masdika DNS support DNSSEC and DNS-over-HTTPS (DoH)?",
+    a: "Yes. Every authoritative zone hosted on ns1/ns2 supports 1-click ECDSA P-256 (ECDSAP256SHA256) DNSSEC key generation and DS record export. On the resolver side, SafeDNS serves encrypted RFC 8484 DNS-over-HTTPS at https://dns.masdika.id/dns-query.",
+  },
+];
+
 export default function DnsPublicClient({
   publicInfo,
   initialStats,
@@ -77,6 +117,41 @@ export default function DnsPublicClient({
   const [historyData, setHistoryData] = useState<DnsHistoryResponse | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+
+  const [lookupDomain, setLookupDomain] = useState("masdika.id");
+  const [lookupType, setLookupType] = useState<LookupRecordType>("A");
+  const [lookupLoading, setLookupLoading] = useState(false);
+  const [lookupError, setLookupError] = useState<string | null>(null);
+  const [lookupResult, setLookupResult] = useState<DnsLookupResult | null>(null);
+
+  const runDnsLookup = useCallback(async (targetDomain: string, targetType: LookupRecordType) => {
+    const clean = targetDomain.trim().toLowerCase().replace(/^https?:\/\//, "").split("/")[0];
+    if (!clean) {
+      setLookupError("Enter a domain name to query (for example: masdika.id).");
+      return;
+    }
+    setLookupDomain(clean);
+    setLookupLoading(true);
+    setLookupError(null);
+    try {
+      const res = await fetch(
+        `/api/public/dns/lookup?domain=${encodeURIComponent(clean)}&type=${encodeURIComponent(targetType)}`,
+        { cache: "no-store" }
+      );
+      const data = await res.json();
+      if (!res.ok) {
+        setLookupError(data?.error || "DNS lookup failed");
+        setLookupResult(null);
+      } else {
+        setLookupResult(data as DnsLookupResult);
+      }
+    } catch {
+      setLookupError("Unable to reach the DNS lookup probe right now.");
+      setLookupResult(null);
+    } finally {
+      setLookupLoading(false);
+    }
+  }, []);
 
   const [qpsHistory, setQpsHistory] = useState<QpsSample[]>(() =>
     initialStats.available && initialStats.timestamp
@@ -676,6 +751,156 @@ export default function DnsPublicClient({
           </div>
         </section>
 
+        {/* 2.5 LIVE DNS LOOKUP & SAFEDNS PROBE */}
+        <section id="dns-lookup" className="relative z-10 scroll-mt-24">
+          <div className="rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] overflow-hidden shadow-sm">
+            <div className="px-5 sm:px-7 py-5 border-b border-[var(--border-subtle)] flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Search className="w-4 h-4 text-cyan-500" />
+                  <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-cyan-600 dark:text-cyan-400">
+                    LIVE RESOLVER PROBE ({resolverIp})
+                  </span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-black text-[var(--text-primary)] tracking-tight">
+                  Test DNS Resolution &amp; SafeDNS Filtering
+                </h2>
+                <p className="text-xs sm:text-sm text-[var(--text-secondary)]">
+                  Run a real-time lookup directly through Masdika dnsdist to verify record propagation, TTLs, or threat sinkholing.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 shrink-0 text-[11px] font-mono">
+                <span className="text-[var(--text-secondary)]">Quick test:</span>
+                {[
+                  { domain: "masdika.id", type: "A" as const },
+                  { domain: "cloudflare.com", type: "MX" as const },
+                  { domain: "doubleclick.net", type: "A" as const },
+                ].map((sample) => (
+                  <button
+                    key={`${sample.domain}-${sample.type}`}
+                    type="button"
+                    onClick={() => {
+                      setLookupType(sample.type);
+                      runDnsLookup(sample.domain, sample.type);
+                    }}
+                    className="px-2.5 py-1 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-primary)] hover:border-cyan-500/50 hover:text-cyan-500 transition-colors cursor-pointer"
+                  >
+                    {sample.domain} ({sample.type})
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                runDnsLookup(lookupDomain, lookupType);
+              }}
+              className="p-5 sm:p-7 border-b border-[var(--border-subtle)] flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
+            >
+              <div className="relative flex-1 min-w-0">
+                <Globe className="w-4 h-4 text-[var(--text-secondary)] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  value={lookupDomain}
+                  onChange={(e) => setLookupDomain(e.target.value)}
+                  placeholder="Enter hostname (e.g. masdika.id, github.com, doubleclick.net)"
+                  aria-label="Domain name to lookup"
+                  className="w-full h-11 pl-10 pr-4 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-sm font-mono text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/60 focus:outline-none focus:border-cyan-500 transition-colors"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <div className="inline-flex items-center rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] p-1">
+                  {DNS_LOOKUP_TYPES.map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setLookupType(t)}
+                      className={
+                        lookupType === t
+                          ? "px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-bold bg-cyan-400 text-slate-950 cursor-pointer transition-colors"
+                          : "px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer transition-colors"
+                      }
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="md"
+                  disabled={lookupLoading}
+                  leftIcon={<Search className="w-4 h-4" />}
+                >
+                  {lookupLoading ? "Querying..." : "Lookup"}
+                </Button>
+              </div>
+            </form>
+
+            {lookupError && (
+              <div className="px-5 sm:px-7 py-4 text-xs sm:text-sm font-mono text-rose-500 bg-rose-500/5">
+                {lookupError}
+              </div>
+            )}
+
+            {lookupResult && !lookupError && (
+              <div className="divide-y divide-[var(--border-subtle)]">
+                <div className="px-5 sm:px-7 py-3.5 flex flex-wrap items-center justify-between gap-3 text-xs font-mono bg-[var(--surface-secondary)]/50">
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <span
+                      className={
+                        lookupResult.filtered
+                          ? "px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-500 font-bold"
+                          : lookupResult.status === "NOERROR"
+                            ? "px-2 py-0.5 rounded-md bg-cyan-500/15 border border-cyan-500/30 text-cyan-600 dark:text-cyan-400 font-bold"
+                            : "px-2 py-0.5 rounded-md bg-rose-500/15 border border-rose-500/30 text-rose-500 font-bold"
+                      }
+                    >
+                      {lookupResult.filtered ? "BLOCKED BY SAFEDNS" : lookupResult.status}
+                    </span>
+                    <span className="text-[var(--text-primary)] font-semibold">
+                      {lookupResult.domain} ({lookupResult.type})
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-4 text-[var(--text-secondary)]">
+                    <span>Server: {lookupResult.server}</span>
+                    <span className="text-cyan-600 dark:text-cyan-400 font-semibold">{lookupResult.latencyMs} ms</span>
+                  </div>
+                </div>
+
+                {lookupResult.records.length > 0 ? (
+                  <div className="divide-y divide-[var(--border-subtle)]">
+                    {lookupResult.records.map((rec, i) => (
+                      <div
+                        key={`${rec.value}-${i}`}
+                        className="px-5 sm:px-7 py-3 flex items-center justify-between gap-4 font-mono text-xs sm:text-sm"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <span className="text-[11px] font-bold text-cyan-600 dark:text-cyan-400 shrink-0 w-12">
+                            {lookupResult.type}
+                          </span>
+                          <span className="text-[var(--text-primary)] break-all">{rec.value}</span>
+                        </div>
+                        <span className="text-xs text-[var(--text-secondary)] shrink-0">
+                          {rec.ttl !== undefined ? `TTL ${rec.ttl}s` : "-"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="px-5 sm:px-7 py-4 text-xs sm:text-sm font-mono text-[var(--text-secondary)]">
+                    {lookupResult.message || "No records returned for this query."}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </section>
+
         {/* 3. LIVE DNS TELEMETRY & HISTORY */}
         {stats.available && (
           <section className="relative z-10 space-y-6">
@@ -1148,6 +1373,9 @@ export default function DnsPublicClient({
             </div>
           </div>
         </section>
+
+        {/* 4.5 FREQUENTLY ASKED QUESTIONS */}
+        <FaqSection faqs={DNS_FAQS} />
 
         {/* 5. BOTTOM CTA CARD */}
         <section className="relative z-10">

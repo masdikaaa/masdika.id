@@ -28,6 +28,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { HeroAvatarFrame } from "@/components/ui/HeroAvatarFrame";
+import { GlowCtaCard } from "@/components/ui/GlowCtaCard";
 import { cn } from "@/lib/utils";
 
 export default function LookingGlassPage() {
@@ -551,6 +552,44 @@ export default function LookingGlassPage() {
             </div>
 
           </div>
+        </section>
+
+        {/* ── 2. BOTTOM CTA ─────────────────────────────────────── */}
+        <section className="py-10 sm:py-14 relative z-10">
+          <GlowCtaCard>
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+              <div className="max-w-2xl space-y-3">
+                <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 block">
+                  MASDIKA CLOUD NETWORKING
+                </span>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[var(--text-primary)] tracking-tight leading-tight">
+                  Deploy Closer to Indonesian Eyeballs?
+                </h2>
+                <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
+                  Launch NVMe Cloud VPS on AS63859 with direct IIX/OpenIXP/CDIX peering, or pair your domain with zero-delay Masdika DNS.
+                </p>
+                <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-1 text-xs text-[var(--text-secondary)]">
+                  <span className="inline-flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-cyan-500" /> Real-time BGP &amp; IXP peering
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-cyan-500" /> Zero-cache ICMP &amp; MTR
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-cyan-500" /> Instant route inspection
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-3 shrink-0">
+                <Button variant="primary" size="lg" href="/vps" rightIcon={<ArrowRight className="w-4 h-4" />}>
+                  Explore Cloud VPS
+                </Button>
+                <Button variant="secondary" size="lg" href="/dns" leftIcon={<Globe className="w-4 h-4" />}>
+                  Masdika DNS
+                </Button>
+              </div>
+            </div>
+          </GlowCtaCard>
         </section>
 
       </main>
