@@ -23,7 +23,7 @@ import {
   Layers,
   Network,
   Copy,
-  Cloud,
+  AppWindow,
   Database,
   Route,
   Compass,
@@ -127,9 +127,9 @@ export default function LookingGlassPage() {
   };
 
   const productLinks = [
-    { title: "Cloud VPS", desc: "Dedicated KVM compute & NVMe storage in Sidoarjo DC.", path: "/vps", icon: Cpu },
-    { title: "App Platform", desc: "Managed Kubernetes container hosting with zero ops.", path: "/app-platform", icon: Cloud },
-    { title: "Managed Databases", desc: "Automated PostgreSQL, MySQL, Redis & MongoDB clusters.", path: "/managed-db", icon: Database },
+    { title: "Cloud VPS", desc: "High-performance virtual private servers.", path: "/vps", icon: Terminal },
+    { title: "App Platform", desc: "Git-to-Container PaaS with BuildKit, CI/CD & live PTY.", path: "/app-platform", icon: AppWindow },
+    { title: "Managed DB", desc: "High-performance MySQL, PostgreSQL, Redis & MongoDB.", path: "/managed-db", icon: Database },
     { title: "Object Storage", desc: "S3-compatible buckets with IAM keys and presigned URLs.", path: "/object-storage", icon: HardDrive },
   ];
 
@@ -370,7 +370,7 @@ export default function LookingGlassPage() {
                 <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4 border-b border-[var(--border-primary)] pb-4 sm:pb-5">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 border bg-cyan-50 dark:bg-cyan-950/40 border-cyan-200/80 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400">
-                      <Terminal className="w-5 h-5 sm:w-6 sm:h-6" />
+                      <Cpu className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                     <div>
                       <h3 className="text-base sm:text-xl font-black text-[var(--text-primary)] tracking-tight">
