@@ -244,14 +244,14 @@ const DISTROS: DistroItem[] = [
 ];
 
 const ISO_SHORTCUTS = [
-  { name: "Ubuntu Releases", tag: "24.04 / 22.04 LTS", href: "/mirror/browse/ubuntu-releases" },
-  { name: "Debian CD Images", tag: "12 Bookworm / 13", href: "/mirror/browse/debian-cd" },
-  { name: "Kali Linux Images", tag: "Weekly & Installer", href: "/mirror/browse/kali-images" },
-  { name: "Parrot OS ISO", tag: "Security & Home", href: "/mirror/browse/parrot/iso" },
-  { name: "Linux Mint ISO", tag: "Cinnamon / XFCE", href: "/mirror/browse/linuxmint-iso" },
-  { name: "AlmaLinux 9 ISO", tag: "Minimal / DVD / Boot", href: "/mirror/browse/almalinux/9/isos/x86_64" },
-  { name: "Rocky Linux 9 ISO", tag: "Minimal / DVD / Boot", href: "/mirror/browse/rocky/9/isos/x86_64" },
-  { name: "FreeBSD ISO", tag: "14.x / 15.x amd64", href: "/mirror/browse/freebsd/releases/ISO-IMAGES" },
+  { id: "ubuntu", name: "Ubuntu Releases", tag: "24.04 / 22.04 LTS", href: "/mirror/browse/ubuntu-releases" },
+  { id: "debian", name: "Debian CD Images", tag: "12 Bookworm / 13", href: "/mirror/browse/debian-cd" },
+  { id: "kali", name: "Kali Linux Images", tag: "Weekly & Installer", href: "/mirror/browse/kali-images" },
+  { id: "parrot", name: "Parrot OS ISO", tag: "Security & Home", href: "/mirror/browse/parrot/iso" },
+  { id: "linuxmint", name: "Linux Mint ISO", tag: "Cinnamon / XFCE", href: "/mirror/browse/linuxmint-iso" },
+  { id: "almalinux", name: "AlmaLinux 9 ISO", tag: "Minimal / DVD / Boot", href: "/mirror/browse/almalinux/9/isos/x86_64" },
+  { id: "rocky", name: "Rocky Linux 9 ISO", tag: "Minimal / DVD / Boot", href: "/mirror/browse/rocky/9/isos/x86_64" },
+  { id: "freebsd", name: "FreeBSD ISO", tag: "14.x / 15.x amd64", href: "/mirror/browse/freebsd/releases/ISO-IMAGES" },
 ];
 
 const CARDS_PER_PAGE = 8;
@@ -456,8 +456,19 @@ export default function MirrorClient() {
                     >
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-3">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-                          <span className="font-bold text-[var(--text-primary)]">{d.name}</span>
+                          <div className="w-9 h-9 rounded-xl border border-[var(--border-primary)] bg-slate-50 dark:bg-white/95 flex items-center justify-center p-1.5 shrink-0 shadow-2xs">
+                            <img
+                              src={`/images/distros/${d.id}.svg`}
+                              alt={d.name}
+                              width={22}
+                              height={22}
+                              className="w-5 h-5 object-contain"
+                            />
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-[var(--text-primary)]">{d.name}</span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" title="Online" />
+                          </div>
                         </div>
                       </td>
                       <td className="py-4 px-4 text-xs text-[var(--text-secondary)]">
@@ -517,7 +528,15 @@ export default function MirrorClient() {
                 <div key={d.id} className="p-4 space-y-3">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                      <div className="w-8 h-8 rounded-lg border border-[var(--border-primary)] bg-slate-50 dark:bg-white/95 flex items-center justify-center p-1.5 shrink-0">
+                        <img
+                          src={`/images/distros/${d.id}.svg`}
+                          alt={d.name}
+                          width={18}
+                          height={18}
+                          className="w-4.5 h-4.5 object-contain"
+                        />
+                      </div>
                       <div className="min-w-0">
                         <div className="font-bold text-sm text-[var(--text-primary)]">{d.name}</div>
                         <div className="text-[11px] text-[var(--text-secondary)] truncate">{d.sub}</div>
@@ -631,8 +650,14 @@ export default function MirrorClient() {
                 className="group p-5 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-all flex items-center justify-between gap-3 shadow-sm"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
-                    <Disc className="w-5 h-5" />
+                  <div className="w-10 h-10 rounded-xl border border-[var(--border-primary)] bg-slate-50 dark:bg-white/95 flex items-center justify-center p-2 shrink-0 shadow-2xs">
+                    <img
+                      src={`/images/distros/${iso.id}.svg`}
+                      alt={iso.name}
+                      width={22}
+                      height={22}
+                      className="w-5 h-5 object-contain"
+                    />
                   </div>
                   <div className="min-w-0">
                     <div className="text-sm font-bold text-[var(--text-primary)] truncate group-hover:text-cyan-500 transition-colors">
