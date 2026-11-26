@@ -591,7 +591,7 @@ export default function MirrorClient() {
                         </div>
                       </td>
                       <td className="py-4 px-4 text-xs text-[var(--text-secondary)]">
-                        {d.sub}
+                        {health?.distros?.[d.id]?.detectedVersions || d.sub}
                       </td>
                       <td className="py-4 px-4">
                         <div className="flex flex-col gap-1.5">
@@ -683,7 +683,9 @@ export default function MirrorClient() {
                             </span>
                           )}
                         </div>
-                        <div className="text-[11px] text-[var(--text-secondary)] truncate">{d.sub}</div>
+                        <div className="text-[11px] text-[var(--text-secondary)] truncate">
+                          {health?.distros?.[d.id]?.detectedVersions || d.sub}
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
