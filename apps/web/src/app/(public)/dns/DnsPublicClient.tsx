@@ -35,7 +35,6 @@ interface QpsSample {
   authQps: number;
 }
 
-type ServiceTab = "resolver" | "authoritative";
 type SetupTabId = "linux" | "mikrotik" | "doh" | "windows";
 type ChartRange = "live" | DnsHistoryRange;
 
@@ -69,7 +68,6 @@ export default function DnsPublicClient({
   initialStats: DnsStatsSnapshot;
 }) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [serviceTab, setServiceTab] = useState<ServiceTab>("resolver");
   const [activeTab, setActiveTab] = useState<SetupTabId>("linux");
   const [stats, setStats] = useState<DnsStatsSnapshot>(initialStats);
   const [livePolling, setLivePolling] = useState(true);
@@ -422,295 +420,247 @@ export default function DnsPublicClient({
           </div>
         </section>
 
-        {/* 2. INTERACTIVE DNS CONSOLE (Unified Endpoints + Quick Setup) */}
-        <section id="dns-console" className="relative z-10 space-y-6">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-            <div className="max-w-xl">
-              <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-2 block">
-                GET STARTED IN SECONDS
-              </span>
-              <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] leading-tight">
-                Pick What You Need
-              </h2>
+        {/* 2. TWO DNS SERVICES SIDE-BY-SIDE + QUICK SETUP */}
+        <section id="dns-console" className="relative z-10 space-y-8">
+          <div className="max-w-2xl">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-2 block">
+              CORE DNS SERVICES
+            </span>
+            <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] leading-tight">
+              SafeDNS Resolver &amp; Authoritative Pointing
+            </h2>
+            <p className="text-sm sm:text-base text-[var(--text-secondary)] mt-2">
+              Use our filtered public DNS resolver on any device or router, or point your domain nameservers for zero-delay
+              DNS management.
+            </p>
+          </div>
+
+          {/* Service Cards Side-by-Side (Both Always Visible) */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* SafeDNS Public Resolver Card */}
+            <div className="relative overflow-hidden rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 flex flex-col justify-between gap-6 shadow-sm">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"
+              />
+              <div className="space-y-5">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-11 h-11 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-500 shrink-0">
+                      <Shield className="w-5 h-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <span className="font-mono text-[10px] sm:text-[11px] uppercase tracking-wider text-cyan-600 dark:text-cyan-400 font-semibold block">
+                        PUBLIC RECURSIVE RESOLVER
+                      </span>
+                      <h3 className="text-xl font-black text-[var(--text-primary)]">Masdika SafeDNS</h3>
+                    </div>
+                  </div>
+                  <Badge variant="brand" size="sm" dot dotColor="bg-cyan-400" className="whitespace-nowrap shrink-0">
+                    Free Public
+                  </Badge>
+                </div>
+
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                  Point your Linux servers, MikroTik routers, Wi-Fi, or browsers to{" "}
+                  <span className="font-semibold text-[var(--text-primary)]">Masdika SafeDNS</span> for fast cached
+                  resolution with automatic filtering of phishing, malware, and TrustPositif-restricted domains.
+                </p>
+
+                <div className="space-y-2.5">
+                  <div>
+                    <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)] mb-1">
+                      Standard DNS IP (UDP / TCP 53)
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => copyText(resolverIp, "resolver-ip")}
+                      className="w-full flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] hover:border-cyan-500/40 font-mono text-sm transition-colors cursor-pointer group"
+                    >
+                      <code className="text-[var(--text-primary)] font-semibold">{resolverIp}</code>
+                      <span className="inline-flex items-center gap-1.5 text-xs text-[var(--text-secondary)] group-hover:text-cyan-500 shrink-0">
+                        {copiedId === "resolver-ip" ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-cyan-500" />
+                            <span className="text-cyan-500">Copied</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3.5 h-3.5" />
+                            <span>Copy</span>
+                          </>
+                        )}
+                      </span>
+                    </button>
+                  </div>
+
+                  <div>
+                    <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)] mb-1">
+                      Encrypted DNS-over-HTTPS (DoH)
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => copyText(dohUrl, "doh-url")}
+                      className="w-full flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] hover:border-cyan-500/40 font-mono text-xs sm:text-sm transition-colors cursor-pointer group"
+                    >
+                      <code className="text-[var(--text-primary)] truncate">{dohUrl}</code>
+                      <span className="inline-flex items-center gap-1.5 text-xs text-[var(--text-secondary)] group-hover:text-cyan-500 shrink-0">
+                        {copiedId === "doh-url" ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-cyan-500" />
+                            <span className="text-cyan-500">Copied</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3.5 h-3.5" />
+                            <span>Copy</span>
+                          </>
+                        )}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--text-secondary)]">
+                <span>637,390+ SafeDNS rules · &lt;1ms cache · Serve-Stale</span>
+                <a
+                  href="#quick-setup-terminal"
+                  className="font-semibold text-cyan-600 dark:text-cyan-400 hover:underline inline-flex items-center gap-1 shrink-0"
+                >
+                  Setup Guide <ArrowRight className="w-3.5 h-3.5" />
+                </a>
+              </div>
             </div>
 
-            {/* Mode Switcher */}
-            <div className="inline-flex rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] p-1 w-fit shrink-0">
-              <button
-                type="button"
-                onClick={() => setServiceTab("resolver")}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold cursor-pointer transition-all ${
-                  serviceTab === "resolver"
-                    ? "bg-cyan-400 text-slate-950 shadow-sm"
-                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                }`}
-              >
-                <Shield className="w-4 h-4" />
-                <span>SafeDNS Resolver</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setServiceTab("authoritative")}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold cursor-pointer transition-all ${
-                  serviceTab === "authoritative"
-                    ? "bg-cyan-400 text-slate-950 shadow-sm"
-                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                }`}
-              >
-                <Server className="w-4 h-4" />
-                <span>Domain Pointing</span>
-              </button>
+            {/* Authoritative DNS Card */}
+            <div className="relative overflow-hidden rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 flex flex-col justify-between gap-6 shadow-sm">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"
+              />
+              <div className="space-y-5">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-11 h-11 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-500 shrink-0">
+                      <Server className="w-5 h-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <span className="font-mono text-[10px] sm:text-[11px] uppercase tracking-wider text-cyan-600 dark:text-cyan-400 font-semibold block">
+                        AUTHORITATIVE NAMESERVERS
+                      </span>
+                      <h3 className="text-xl font-black text-[var(--text-primary)]">DNS Pointing (Authoritative)</h3>
+                    </div>
+                  </div>
+                  <Badge variant="brand" size="sm" className="whitespace-nowrap shrink-0">
+                    DNSSEC Ready
+                  </Badge>
+                </div>
+
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                  Register your domain in the Masdika DNS Console, then point your registrar nameservers to our{" "}
+                  <span className="font-semibold text-[var(--text-primary)]">LMDB-backed PowerDNS cluster</span> for
+                  instant 0-second record updates and 1-click ECDSA DNSSEC.
+                </p>
+
+                <div className="space-y-2.5">
+                  <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)]">
+                    Nameserver Targets (NS1 &amp; NS2)
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {nameservers.map((ns, i) => (
+                      <button
+                        key={ns}
+                        type="button"
+                        onClick={() => copyText(ns, `ns-${ns}`)}
+                        className="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] hover:border-cyan-500/40 font-mono text-sm transition-colors cursor-pointer group"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-[10px] text-[var(--text-secondary)] uppercase">NS{i + 1}</span>
+                          <code className="text-cyan-600 dark:text-cyan-400 font-semibold truncate">{ns}</code>
+                        </div>
+                        <span className="inline-flex items-center text-xs text-[var(--text-secondary)] group-hover:text-cyan-500 shrink-0">
+                          {copiedId === `ns-${ns}` ? (
+                            <Check className="w-3.5 h-3.5 text-cyan-500" />
+                          ) : (
+                            <Copy className="w-3.5 h-3.5" />
+                          )}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                  <div className="px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-secondary)]/50 text-xs text-[var(--text-secondary)] flex flex-wrap items-center justify-between gap-2">
+                    <span>Supports A, AAAA, CNAME, MX, TXT, NS, SRV &amp; CAA</span>
+                    <span className="font-mono text-cyan-600 dark:text-cyan-400">AXFR Locked</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--text-secondary)]">
+                <span>Works with PANDI, WHMCS, Namecheap &amp; Porkbun</span>
+                <a
+                  href="/dashboard/dns"
+                  className="font-semibold text-cyan-600 dark:text-cyan-400 hover:underline inline-flex items-center gap-1 shrink-0"
+                >
+                  Manage Zones <ArrowRight className="w-3.5 h-3.5" />
+                </a>
+              </div>
             </div>
           </div>
 
-          <div className="rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] overflow-hidden shadow-sm">
-            <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-[var(--border-subtle)]">
-              {/* Left: Copyable Endpoints */}
-              <div className="lg:col-span-5 p-6 sm:p-8 flex flex-col justify-between gap-6">
-                {serviceTab === "resolver" ? (
+          {/* Integrated Quick Setup Snippet Terminal */}
+          <div
+            id="quick-setup-terminal"
+            className="rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] overflow-hidden shadow-sm"
+          >
+            <div className="px-5 py-3.5 border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)]/50 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="flex items-center gap-1.5 text-xs font-mono font-semibold text-[var(--text-primary)] shrink-0">
+                  <Terminal className="w-4 h-4 text-cyan-500" />
+                  <span className="hidden sm:inline">Quick SafeDNS Setup:</span>
+                </div>
+                <div className="flex items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  {setupTabs.map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setActiveTab(t.id)}
+                      className={
+                        activeTab === t.id
+                          ? "px-3 py-1 rounded-lg text-xs font-bold bg-cyan-400 text-slate-950 whitespace-nowrap shrink-0 cursor-pointer"
+                          : "px-3 py-1 rounded-lg text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] whitespace-nowrap shrink-0 cursor-pointer"
+                      }
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => copyText(activeSetup.command, `setup-${activeSetup.id}`)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--border-primary)] bg-[var(--surface)] text-xs font-semibold text-[var(--text-primary)] hover:border-cyan-500/40 cursor-pointer transition-colors shrink-0"
+              >
+                {copiedId === `setup-${activeSetup.id}` ? (
                   <>
-                    <div className="space-y-5">
-                      <div className="space-y-1.5">
-                        <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-cyan-600 dark:text-cyan-400 font-semibold">
-                          <span>For Devices, Routers &amp; Browsers</span>
-                        </div>
-                        <h3 className="text-xl sm:text-2xl font-black text-[var(--text-primary)]">
-                          Masdika SafeDNS
-                        </h3>
-                        <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-                          Free public resolver with automatic phishing, malware, and TrustPositif filtering at the edge.
-                        </p>
-                      </div>
-
-                      <div className="space-y-3">
-                        <div>
-                          <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">
-                            DNS Server IP (UDP / TCP 53)
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => copyText(resolverIp, "resolver-ip")}
-                            className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] hover:border-cyan-500/40 font-mono text-sm transition-colors cursor-pointer group"
-                          >
-                            <code className="text-[var(--text-primary)] font-semibold">{resolverIp}</code>
-                            <span className="inline-flex items-center gap-1.5 text-xs text-[var(--text-secondary)] group-hover:text-cyan-500">
-                              {copiedId === "resolver-ip" ? (
-                                <>
-                                  <Check className="w-3.5 h-3.5 text-cyan-500" />
-                                  <span className="text-cyan-500">Copied</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Copy className="w-3.5 h-3.5" />
-                                  <span>Copy</span>
-                                </>
-                              )}
-                            </span>
-                          </button>
-                        </div>
-
-                        <div>
-                          <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">
-                            Encrypted DNS-over-HTTPS (DoH)
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => copyText(dohUrl, "doh-url")}
-                            className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] hover:border-cyan-500/40 font-mono text-xs sm:text-sm transition-colors cursor-pointer group"
-                          >
-                            <code className="text-[var(--text-primary)] truncate">{dohUrl}</code>
-                            <span className="inline-flex items-center gap-1.5 text-xs text-[var(--text-secondary)] group-hover:text-cyan-500 shrink-0">
-                              {copiedId === "doh-url" ? (
-                                <>
-                                  <Check className="w-3.5 h-3.5 text-cyan-500" />
-                                  <span className="text-cyan-500">Copied</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Copy className="w-3.5 h-3.5" />
-                                  <span>Copy</span>
-                                </>
-                              )}
-                            </span>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[var(--text-secondary)] pt-2 border-t border-[var(--border-subtle)]">
-                      <span className="inline-flex items-center gap-1.5">
-                        <Check className="w-3.5 h-3.5 text-cyan-500" /> No logs sold
-                      </span>
-                      <span className="inline-flex items-center gap-1.5">
-                        <Check className="w-3.5 h-3.5 text-cyan-500" /> 637K+ filter rules
-                      </span>
-                      <span className="inline-flex items-center gap-1.5">
-                        <Check className="w-3.5 h-3.5 text-cyan-500" /> &lt;1ms cache
-                      </span>
-                    </div>
+                    <Check className="w-3.5 h-3.5 text-cyan-500" />
+                    <span className="text-cyan-500">Copied</span>
                   </>
                 ) : (
                   <>
-                    <div className="space-y-5">
-                      <div className="space-y-1.5">
-                        <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-cyan-600 dark:text-cyan-400 font-semibold">
-                          <span>For Domains &amp; Cloud Infrastructure</span>
-                        </div>
-                        <h3 className="text-xl sm:text-2xl font-black text-[var(--text-primary)]">
-                          Authoritative Nameservers
-                        </h3>
-                        <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-                          Add your domain in the Masdika DNS Console, then point your registrar nameservers to both targets below.
-                        </p>
-                      </div>
-
-                      <div className="space-y-2.5">
-                        <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)]">
-                          Nameserver Targets
-                        </div>
-                        {nameservers.map((ns, i) => (
-                          <button
-                            key={ns}
-                            type="button"
-                            onClick={() => copyText(ns, `ns-${ns}`)}
-                            className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] hover:border-cyan-500/40 font-mono text-sm transition-colors cursor-pointer group"
-                          >
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <span className="text-[10px] text-[var(--text-secondary)] uppercase">NS{i + 1}</span>
-                              <code className="text-cyan-600 dark:text-cyan-400 font-semibold truncate">{ns}</code>
-                            </div>
-                            <span className="inline-flex items-center gap-1.5 text-xs text-[var(--text-secondary)] group-hover:text-cyan-500 shrink-0">
-                              {copiedId === `ns-${ns}` ? (
-                                <>
-                                  <Check className="w-3.5 h-3.5 text-cyan-500" />
-                                  <span className="text-cyan-500">Copied</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Copy className="w-3.5 h-3.5" />
-                                  <span>Copy</span>
-                                </>
-                              )}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="pt-2 border-t border-[var(--border-subtle)] flex items-center justify-between gap-3">
-                      <span className="text-xs text-[var(--text-secondary)]">
-                        Supports A, AAAA, CNAME, MX, TXT, SRV, CAA &amp; DNSSEC
-                      </span>
-                      <Button variant="primary" size="sm" href="/dashboard/dns" rightIcon={<ArrowRight className="w-3.5 h-3.5" />}>
-                        Add Zone
-                      </Button>
-                    </div>
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>Copy Snippet</span>
                   </>
                 )}
-              </div>
-
-              {/* Right: Setup Guide / Pointing Walkthrough */}
-              <div className="lg:col-span-7 bg-[var(--surface-secondary)]/30 flex flex-col justify-between">
-                {serviceTab === "resolver" ? (
-                  <>
-                    <div>
-                      <div className="px-5 py-3.5 border-b border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-3">
-                        <div className="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                          {setupTabs.map((t) => (
-                            <button
-                              key={t.id}
-                              type="button"
-                              onClick={() => setActiveTab(t.id)}
-                              className={
-                                activeTab === t.id
-                                  ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-400 text-slate-950 whitespace-nowrap shrink-0 cursor-pointer"
-                                  : "px-3 py-1.5 rounded-lg text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] whitespace-nowrap shrink-0 cursor-pointer"
-                              }
-                            >
-                              {t.label}
-                            </button>
-                          ))}
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => copyText(activeSetup.command, `setup-${activeSetup.id}`)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--border-primary)] bg-[var(--surface)] text-xs font-semibold text-[var(--text-primary)] hover:border-cyan-500/40 cursor-pointer transition-colors shrink-0"
-                        >
-                          {copiedId === `setup-${activeSetup.id}` ? (
-                            <>
-                              <Check className="w-3.5 h-3.5 text-cyan-500" />
-                              <span className="text-cyan-500">Copied</span>
-                            </>
-                          ) : (
-                            <>
-                              <Copy className="w-3.5 h-3.5" />
-                              <span>Copy Snippet</span>
-                            </>
-                          )}
-                        </button>
-                      </div>
-
-                      <div className="px-5 pt-4 text-xs text-[var(--text-secondary)]">{activeSetup.hint}</div>
-
-                      <pre className="p-5 font-mono text-xs sm:text-[13px] leading-relaxed overflow-x-auto whitespace-pre [scrollbar-width:none] [&::-webkit-scrollbar]:hidden text-[var(--text-primary)]">
-                        {activeSetup.command}
-                      </pre>
-                    </div>
-
-                    <div className="px-5 py-3.5 border-t border-[var(--border-subtle)] flex items-center justify-between text-[11px] font-mono text-[var(--text-secondary)]">
-                      <span>Protocol: UDP/TCP 53 &amp; RFC 8484 DoH</span>
-                      <span>Endpoint: {resolverHost}</span>
-                    </div>
-                  </>
-                ) : (
-                  <div className="p-6 sm:p-8 flex flex-col justify-between h-full gap-6">
-                    <div className="space-y-5">
-                      <div className="text-xs font-mono uppercase tracking-wider text-cyan-600 dark:text-cyan-400 font-semibold">
-                        How Domain Delegation Works
-                      </div>
-
-                      <div className="divide-y divide-[var(--border-subtle)]">
-                        {[
-                          {
-                            num: "01",
-                            title: "Register your zone in Masdika Console",
-                            desc: "Add your domain in /dashboard/dns first so our LMDB authoritative cluster is ready to answer SOA and NS queries.",
-                          },
-                          {
-                            num: "02",
-                            title: "Point NS1 & NS2 at your registrar",
-                            desc: `Update your domain's nameservers at your registrar (PANDI, Namecheap, Porkbun, WHMCS, etc.) to ${nameservers.join(" and ")}.`,
-                          },
-                          {
-                            num: "03",
-                            title: "Auto-verified & instant 0s record updates",
-                            desc: "Once delegated, any record edit or 1-click ECDSA DNSSEC key change takes effect immediately with zero wait.",
-                          },
-                        ].map((step) => (
-                          <div key={step.num} className="py-4 first:pt-0 last:pb-0 flex items-start gap-4">
-                            <span className="font-mono text-xs font-bold text-cyan-500 pt-0.5 shrink-0">
-                              {step.num}
-                            </span>
-                            <div className="space-y-0.5">
-                              <div className="text-sm font-bold text-[var(--text-primary)]">{step.title}</div>
-                              <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
-                                {step.desc}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="pt-3 border-t border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--text-secondary)] font-mono">
-                      <span>Engine: PowerDNS LMDB (Sharded)</span>
-                      <span>DNSSEC: ECDSAP256SHA256</span>
-                    </div>
-                  </div>
-                )}
-              </div>
+              </button>
             </div>
+
+            <div className="px-5 pt-4 text-xs text-[var(--text-secondary)]">{activeSetup.hint}</div>
+
+            <pre className="p-5 font-mono text-xs sm:text-[13px] leading-relaxed overflow-x-auto whitespace-pre [scrollbar-width:none] [&::-webkit-scrollbar]:hidden text-[var(--text-primary)]">
+              {activeSetup.command}
+            </pre>
           </div>
         </section>
 
@@ -1098,9 +1048,9 @@ export default function DnsPublicClient({
           </section>
         )}
 
-        {/* 4. WHY MASDIKA DNS (Editorial Asymmetric Advantages & Fast Propagation) */}
+        {/* 4. WHY MASDIKA DNS (Balanced Bento Metrics + Framed Capability List) */}
         <section className="relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
             <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-28">
               <div>
                 <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-2 block">
@@ -1115,27 +1065,27 @@ export default function DnsPublicClient({
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-2 border-t border-[var(--border-subtle)]">
-                <div>
+              <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] grid grid-cols-2 divide-x divide-y divide-[var(--border-subtle)] overflow-hidden shadow-sm">
+                <div className="p-4 sm:p-5">
                   <div className="text-2xl sm:text-3xl font-black font-mono text-cyan-500">0s</div>
-                  <div className="text-xs text-[var(--text-secondary)] mt-0.5">Zone &amp; record API sync</div>
+                  <div className="text-xs text-[var(--text-secondary)] mt-1">Zone &amp; record API sync</div>
                 </div>
-                <div>
+                <div className="p-4 sm:p-5">
                   <div className="text-2xl sm:text-3xl font-black font-mono text-[var(--text-primary)]">&lt;1 ms</div>
-                  <div className="text-xs text-[var(--text-secondary)] mt-0.5">500K RAM packet cache</div>
+                  <div className="text-xs text-[var(--text-secondary)] mt-1">500K RAM packet cache</div>
                 </div>
-                <div>
+                <div className="p-4 sm:p-5">
                   <div className="text-2xl sm:text-3xl font-black font-mono text-[var(--text-primary)]">60s</div>
-                  <div className="text-xs text-[var(--text-secondary)] mt-0.5">Fast default record TTL</div>
+                  <div className="text-xs text-[var(--text-secondary)] mt-1">Fast default record TTL</div>
                 </div>
-                <div>
+                <div className="p-4 sm:p-5">
                   <div className="text-2xl sm:text-3xl font-black font-mono text-cyan-500">637K+</div>
-                  <div className="text-xs text-[var(--text-secondary)] mt-0.5">Daily-synced blocklist</div>
+                  <div className="text-xs text-[var(--text-secondary)] mt-1">Daily-synced blocklist</div>
                 </div>
               </div>
             </div>
 
-            <div className="lg:col-span-7 divide-y divide-[var(--border-subtle)] border-y border-[var(--border-subtle)]">
+            <div className="lg:col-span-7 rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] divide-y divide-[var(--border-subtle)] px-5 sm:px-7 shadow-sm">
               {[
                 {
                   icon: Zap,
@@ -1175,7 +1125,7 @@ export default function DnsPublicClient({
                   <div className="min-w-0 flex-1 space-y-1">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <h3 className="text-sm sm:text-base font-bold text-[var(--text-primary)]">{feat.title}</h3>
-                      <span className="font-mono text-[11px] font-semibold text-cyan-600 dark:text-cyan-400">
+                      <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 font-mono text-[10px] font-semibold text-cyan-600 dark:text-cyan-400 whitespace-nowrap">
                         {feat.tag}
                       </span>
                     </div>
