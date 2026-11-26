@@ -699,7 +699,7 @@ export default function DnsDashboardPage() {
               isDark ? "text-zinc-500" : "text-slate-500"
             )}
           >
-            Public IP: <span className="font-mono">{dnsInfo.publicIp || "—"}</span>
+            Set these nameservers at your domain registrar to activate DNS.
           </p>
         </div>
 
