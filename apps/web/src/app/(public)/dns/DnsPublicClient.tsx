@@ -5,16 +5,27 @@ import {
   Activity,
   ArrowRight,
   Check,
+  CheckCircle2,
+  Compass,
   Copy,
+  Cpu,
+  Database,
+  Filter,
+  Gauge,
   Globe,
+  KeyRound,
+  Layers,
   Lock,
+  Network,
   Pause,
   Play,
   Search,
   Server,
   Shield,
+  ShieldAlert,
   ShieldCheck,
   Terminal,
+  Wifi,
   Zap,
 } from "lucide-react";
 import type { DnsHistoryRange, DnsHistoryResponse, DnsStatsSnapshot } from "@/lib/powerdns";
@@ -23,6 +34,8 @@ import { Button } from "@/components/ui/Button";
 import { FaqSection } from "@/components/ui/FaqSection";
 import { HeroAvatarFrame } from "@/components/ui/HeroAvatarFrame";
 import { GlowCtaCard } from "@/components/ui/GlowCtaCard";
+import { FadeIn } from "@/components/animations/FadeIn";
+import { AnimatedBeam, OrbitalRings } from "@/components/animations/DeploymentAnimations";
 
 export interface DnsPublicInfo {
   enabled: boolean;
@@ -434,9 +447,9 @@ export default function DnsPublicClient({
         />
       </div>
 
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1 space-y-20 sm:space-y-28">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
         {/* 1. HERO SECTION */}
-        <section className="relative pt-0 pb-2 sm:pb-6 flex items-center">
+        <section className="relative pt-0 pb-8 sm:pb-12 flex items-center">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-start w-full">
             <div className="max-w-2xl relative z-30 lg:pt-20">
               <div className="mb-8">
@@ -503,15 +516,15 @@ export default function DnsPublicClient({
         </section>
 
         {/* 2. TWO DNS SERVICES SIDE-BY-SIDE + QUICK SETUP */}
-        <section id="dns-console" className="relative z-10 space-y-8">
-          <div className="max-w-2xl">
-            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-2 block">
+        <section id="dns-console" className="scroll-mt-24 py-10 sm:py-14 relative z-10 space-y-8">
+          <div className="text-center max-w-3xl mx-auto">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
               CORE DNS SERVICES
             </span>
-            <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] leading-tight">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
               SafeDNS Resolver &amp; Authoritative Pointing
             </h2>
-            <p className="text-sm sm:text-base text-[var(--text-secondary)] mt-2">
+            <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed">
               Use our filtered public DNS resolver on any device or router, or point your domain nameservers for zero-delay
               DNS management.
             </p>
@@ -751,68 +764,66 @@ export default function DnsPublicClient({
           </div>
         </section>
 
-        {/* 2.5 LIVE DNS LOOKUP & SAFEDNS PROBE */}
-        <section id="dns-lookup" className="relative z-10 scroll-mt-24">
-          <div className="rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] overflow-hidden shadow-sm">
-            <div className="px-5 sm:px-7 py-5 border-b border-[var(--border-subtle)] flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <Search className="w-4 h-4 text-cyan-500" />
-                  <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-cyan-600 dark:text-cyan-400">
-                    LIVE RESOLVER PROBE ({resolverIp})
-                  </span>
-                </div>
-                <h2 className="text-xl sm:text-2xl font-black text-[var(--text-primary)] tracking-tight">
-                  Test DNS Resolution &amp; SafeDNS Filtering
-                </h2>
-                <p className="text-xs sm:text-sm text-[var(--text-secondary)]">
-                  Run a real-time lookup directly through Masdika dnsdist to verify record propagation, TTLs, or threat sinkholing.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2 shrink-0 text-[11px] font-mono">
-                <span className="text-[var(--text-secondary)]">Quick test:</span>
-                {[
-                  { domain: "masdika.id", type: "A" as const },
-                  { domain: "cloudflare.com", type: "MX" as const },
-                  { domain: "doubleclick.net", type: "A" as const },
-                ].map((sample) => (
-                  <button
-                    key={`${sample.domain}-${sample.type}`}
-                    type="button"
-                    onClick={() => {
-                      setLookupType(sample.type);
-                      runDnsLookup(sample.domain, sample.type);
-                    }}
-                    className="px-2.5 py-1 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[var(--text-primary)] hover:border-cyan-500/50 hover:text-cyan-500 transition-colors cursor-pointer"
-                  >
-                    {sample.domain} ({sample.type})
-                  </button>
-                ))}
-              </div>
+        {/* 2.5 LIVE DIAGNOSTIC PROBE (VPS Section Blueprint) */}
+        <section id="dns-lookup" className="scroll-mt-24 py-10 sm:py-14 relative z-10">
+          <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+              LIVE DIAGNOSTIC PROBE
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+              Real-Time DNS Lookup &amp; SafeDNS Check
+            </h2>
+            <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed mb-6">
+              Query any domain live through <span className="font-mono font-semibold text-[var(--text-primary)]">{resolverIp}</span> to verify record propagation, TTLs, or threat sinkholing.
+            </p>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--border-primary)] bg-[var(--surface)] text-xs text-[var(--text-secondary)] shadow-sm">
+              <span>
+                <strong className="text-[var(--text-primary)]">Tip:</strong> Try{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLookupType("A");
+                    runDnsLookup("doubleclick.net", "A");
+                  }}
+                  className="font-mono font-semibold text-cyan-600 dark:text-cyan-400 hover:underline cursor-pointer"
+                >
+                  doubleclick.net
+                </button>{" "}
+                to see SafeDNS sinkhole blocking (<code className="font-mono">0.0.0.0</code>), or test{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLookupType("MX");
+                    runDnsLookup("cloudflare.com", "MX");
+                  }}
+                  className="font-mono font-semibold text-cyan-600 dark:text-cyan-400 hover:underline cursor-pointer"
+                >
+                  cloudflare.com MX
+                </button>
+                .
+              </span>
             </div>
+          </div>
 
+          <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] shadow-xl overflow-hidden">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 runDnsLookup(lookupDomain, lookupType);
               }}
-              className="p-5 sm:p-7 border-b border-[var(--border-subtle)] flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
+              className="p-6 sm:p-8 flex flex-col lg:flex-row items-stretch lg:items-center gap-3"
             >
-              <div className="relative flex-1 min-w-0">
-                <Globe className="w-4 h-4 text-[var(--text-secondary)] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                <input
-                  type="text"
-                  value={lookupDomain}
-                  onChange={(e) => setLookupDomain(e.target.value)}
-                  placeholder="Enter hostname (e.g. masdika.id, github.com, doubleclick.net)"
-                  aria-label="Domain name to lookup"
-                  className="w-full h-11 pl-10 pr-4 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-sm font-mono text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/60 focus:outline-none focus:border-cyan-500 transition-colors"
-                />
-              </div>
+              <input
+                type="text"
+                value={lookupDomain}
+                onChange={(e) => setLookupDomain(e.target.value)}
+                placeholder="Enter domain or hostname (e.g. masdika.id, github.com)"
+                aria-label="Domain name to lookup"
+                className="flex-1 min-w-0 h-11 px-4 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-sm font-mono text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/60 focus:outline-none focus:border-cyan-500 transition-colors"
+              />
 
-              <div className="flex items-center gap-2 shrink-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                <div className="inline-flex items-center rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] p-1">
+              <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 shrink-0">
+                <div className="inline-flex items-center rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] p-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden max-w-full">
                   {DNS_LOOKUP_TYPES.map((t) => (
                     <button
                       key={t}
@@ -842,22 +853,22 @@ export default function DnsPublicClient({
             </form>
 
             {lookupError && (
-              <div className="px-5 sm:px-7 py-4 text-xs sm:text-sm font-mono text-rose-500 bg-rose-500/5">
+              <div className="px-6 sm:px-8 py-4 border-t border-[var(--border-subtle)] text-xs sm:text-sm font-mono text-rose-500 bg-rose-500/5">
                 {lookupError}
               </div>
             )}
 
             {lookupResult && !lookupError && (
-              <div className="divide-y divide-[var(--border-subtle)]">
-                <div className="px-5 sm:px-7 py-3.5 flex flex-wrap items-center justify-between gap-3 text-xs font-mono bg-[var(--surface-secondary)]/50">
+              <div className="border-t border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]">
+                <div className="px-6 sm:px-8 py-3.5 flex flex-wrap items-center justify-between gap-3 text-xs font-mono bg-[var(--surface-secondary)]/50">
                   <div className="flex flex-wrap items-center gap-2.5">
                     <span
                       className={
                         lookupResult.filtered
-                          ? "px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-500 font-bold"
+                          ? "px-2.5 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-500 font-bold"
                           : lookupResult.status === "NOERROR"
-                            ? "px-2 py-0.5 rounded-md bg-cyan-500/15 border border-cyan-500/30 text-cyan-600 dark:text-cyan-400 font-bold"
-                            : "px-2 py-0.5 rounded-md bg-rose-500/15 border border-rose-500/30 text-rose-500 font-bold"
+                            ? "px-2.5 py-0.5 rounded-md bg-cyan-500/15 border border-cyan-500/30 text-cyan-600 dark:text-cyan-400 font-bold"
+                            : "px-2.5 py-0.5 rounded-md bg-rose-500/15 border border-rose-500/30 text-rose-500 font-bold"
                       }
                     >
                       {lookupResult.filtered ? "BLOCKED BY SAFEDNS" : lookupResult.status}
@@ -877,7 +888,7 @@ export default function DnsPublicClient({
                     {lookupResult.records.map((rec, i) => (
                       <div
                         key={`${rec.value}-${i}`}
-                        className="px-5 sm:px-7 py-3 flex items-center justify-between gap-4 font-mono text-xs sm:text-sm"
+                        className="px-6 sm:px-8 py-3.5 flex items-center justify-between gap-4 font-mono text-xs sm:text-sm"
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <span className="text-[11px] font-bold text-cyan-600 dark:text-cyan-400 shrink-0 w-12">
@@ -892,7 +903,7 @@ export default function DnsPublicClient({
                     ))}
                   </div>
                 ) : (
-                  <div className="px-5 sm:px-7 py-4 text-xs sm:text-sm font-mono text-[var(--text-secondary)]">
+                  <div className="px-6 sm:px-8 py-4 text-xs sm:text-sm font-mono text-[var(--text-secondary)]">
                     {lookupResult.message || "No records returned for this query."}
                   </div>
                 )}
@@ -903,7 +914,19 @@ export default function DnsPublicClient({
 
         {/* 3. LIVE DNS TELEMETRY & HISTORY */}
         {stats.available && (
-          <section className="relative z-10 space-y-6">
+          <section className="py-10 sm:py-14 relative z-10 space-y-6">
+            <div className="text-center max-w-3xl mx-auto mb-4">
+              <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+                REAL-TIME EDGE TELEMETRY
+              </span>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-3">
+                Live Network Pulse
+              </h2>
+              <p className="text-base text-[var(--text-secondary)] leading-relaxed">
+                Live 1-second metrics streamed straight from our edge dnsdist packet cache and LMDB shards.
+              </p>
+            </div>
+
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex flex-wrap items-center gap-2.5">
                 <span
@@ -911,9 +934,9 @@ export default function DnsPublicClient({
                     livePolling ? "bg-cyan-400" : "bg-[var(--text-secondary)]"
                   }`}
                 />
-                <h2 className="text-lg sm:text-xl font-black text-[var(--text-primary)] tracking-tight">
-                  Live Network Pulse
-                </h2>
+                <span className="text-sm font-bold text-[var(--text-primary)] tracking-tight">
+                  Edge Stream Status
+                </span>
                 <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 font-mono text-[10px] font-semibold text-cyan-600 dark:text-cyan-400 whitespace-nowrap shrink-0">
                   {!livePolling ? "Paused" : streamConnected ? "Live · 1s" : "Reconnecting..."}
                 </span>
@@ -948,7 +971,7 @@ export default function DnsPublicClient({
                       <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-cyan-600 dark:text-cyan-400 font-semibold truncate">
                         SafeDNS Resolver
                       </span>
-                      <Shield className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
+                      <Filter className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
                     </div>
                     <div className="flex flex-wrap items-baseline gap-x-2">
                       <span className="text-2xl sm:text-3xl font-black text-[var(--text-primary)] font-mono whitespace-nowrap">
@@ -968,7 +991,7 @@ export default function DnsPublicClient({
                       <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)] font-semibold truncate">
                         DNS Pointing (Auth)
                       </span>
-                      <Server className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
+                      <Network className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
                     </div>
                     <div className="flex flex-wrap items-baseline gap-x-2">
                       <span className="text-2xl sm:text-3xl font-black text-[var(--text-primary)] font-mono whitespace-nowrap">
@@ -988,7 +1011,7 @@ export default function DnsPublicClient({
                       <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)] truncate">
                         Packet Cache Hit
                       </span>
-                      <Zap className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
+                      <Gauge className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
                     </div>
                     <div className="text-2xl sm:text-3xl font-black text-cyan-500 font-mono whitespace-nowrap">
                       {(stats.cacheHitRatio ?? 0).toFixed(1)}%
@@ -1285,100 +1308,196 @@ export default function DnsPublicClient({
           </section>
         )}
 
-        {/* 4. WHY MASDIKA DNS (Balanced Bento Metrics + Framed Capability List) */}
-        <section className="relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
-            <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-28">
-              <div>
-                <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-2 block">
-                  WHY MASDIKA DNS
+        {/* 4. ARCHITECTURE SHOWCASE (Matches /vps Hardware & Specs Showcase) */}
+        <section id="features" className="scroll-mt-24 py-10 sm:py-14 relative z-10">
+          <div className="relative rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-8 sm:p-12 shadow-xl overflow-hidden">
+            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+              <div className="lg:col-span-7">
+                <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+                  DNS ENGINE ARCHITECTURE
                 </span>
-                <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] leading-tight">
-                  Instant Propagation &amp; Carrier-Grade Stack
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+                  Zero-Copy LMDB &amp; Sub-Millisecond Cache
                 </h2>
-                <p className="text-sm sm:text-base text-[var(--text-secondary)] mt-3 leading-relaxed">
-                  Engineered for rapid global DNS propagation, sub-millisecond cached lookups, and automated security
-                  without SQL bottlenecks.
+                <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed mb-8 max-w-xl">
+                  Built on PowerDNS LMDB memory-mapped shards and dnsdist C++ packet caching in Sidoarjo DC for instant record propagation and edge security.
                 </p>
-              </div>
 
-              <div className="grid grid-cols-2 gap-x-6 gap-y-5 pt-4 border-t border-[var(--border-subtle)]">
-                <div>
-                  <div className="text-2xl sm:text-3xl font-black font-mono text-cyan-500">0s</div>
-                  <div className="text-xs text-[var(--text-secondary)] mt-1">Zone &amp; record API sync</div>
-                </div>
-                <div>
-                  <div className="text-2xl sm:text-3xl font-black font-mono text-[var(--text-primary)]">&lt;1 ms</div>
-                  <div className="text-xs text-[var(--text-secondary)] mt-1">500K RAM packet cache</div>
-                </div>
-                <div>
-                  <div className="text-2xl sm:text-3xl font-black font-mono text-[var(--text-primary)]">60s</div>
-                  <div className="text-xs text-[var(--text-secondary)] mt-1">Fast default record TTL</div>
-                </div>
-                <div>
-                  <div className="text-2xl sm:text-3xl font-black font-mono text-cyan-500">637K+</div>
-                  <div className="text-xs text-[var(--text-secondary)] mt-1">Daily-synced blocklist</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="lg:col-span-7 rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] divide-y divide-[var(--border-subtle)] px-5 sm:px-7 shadow-sm">
-              {[
-                {
-                  icon: Zap,
-                  tag: "0s Sync",
-                  title: "Instant Record Propagation",
-                  desc: "Every A, AAAA, CNAME, MX, or TXT change pushed from the DNS Console activates immediately on ns1/ns2 with automatic SOA serial increments.",
-                },
-                {
-                  icon: Server,
-                  tag: "LMDB Engine",
-                  title: "Zero-Copy Memory-Mapped Storage",
-                  desc: "Authoritative zones run on PowerDNS LMDB shards, eliminating SQL lock contention at high concurrent write and read loads.",
-                },
-                {
-                  icon: Activity,
-                  tag: "Serve-Stale",
-                  title: "Resilient In-Memory Packet Cache",
-                  desc: "Repeated queries hit dnsdist's C++ packet cache in under 1 ms, while serve-stale keeps responses flowing if an upstream slows down.",
-                },
-                {
-                  icon: Lock,
-                  tag: "ECDSA P-256",
-                  title: "1-Click DNSSEC & Encrypted DoH",
-                  desc: "Sign zones with modern ECDSAP256SHA256 keys and route client lookups over TLS via RFC 8484 DNS-over-HTTPS.",
-                },
-                {
-                  icon: Shield,
-                  tag: "Anti-DDoS",
-                  title: "Reflection & Zone-Leak Shield",
-                  desc: "Enforces ANY-to-TCP shunting, refuses unauthorized AXFR/IXFR transfers, and applies per-IP QPS rate limiting at the edge.",
-                },
-              ].map((feat) => (
-                <div key={feat.title} className="py-5 flex items-start gap-4">
-                  <div className="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-500 shrink-0 mt-0.5">
-                    <feat.icon className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0 flex-1 space-y-1">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <h3 className="text-sm sm:text-base font-bold text-[var(--text-primary)]">{feat.title}</h3>
-                      <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 font-mono text-[10px] font-semibold text-cyan-600 dark:text-cyan-400 whitespace-nowrap">
-                        {feat.tag}
-                      </span>
+                <div className="space-y-3.5">
+                  {[
+                    "0-second A, AAAA, CNAME, MX & TXT propagation with auto SOA bump",
+                    "Memory-mapped LMDB shards eliminating SQL lock contention under load",
+                    "500K RAM packet cache with automatic serve-stale resilience",
+                    "ANY-to-TCP reflection shield, strict AXFR denial & per-IP rate limit",
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
+                      <div className="w-6 h-6 rounded-md bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                      </div>
+                      <span className="font-medium text-[var(--text-primary)]">{item}</span>
                     </div>
-                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{feat.desc}</p>
+                  ))}
+                </div>
+              </div>
+
+              <div className="lg:col-span-5 grid grid-cols-2 gap-4">
+                <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-center flex flex-col items-center justify-center">
+                  <span className="text-4xl sm:text-5xl font-black text-cyan-600 dark:text-cyan-400 font-mono mb-1">
+                    0s
+                  </span>
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                    Zone API Sync
+                  </span>
+                </div>
+
+                <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-center flex flex-col items-center justify-center">
+                  <span className="text-4xl sm:text-5xl font-black text-cyan-600 dark:text-cyan-400 font-mono mb-1">
+                    &lt;1ms
+                  </span>
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                    Packet Cache
+                  </span>
+                </div>
+
+                <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-center flex flex-col items-center justify-center">
+                  <div className="w-10 h-10 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-2">
+                    <KeyRound className="w-5 h-5" />
+                  </div>
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)]">
+                    ECDSA DNSSEC
+                  </span>
+                </div>
+
+                <div className="p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-center flex flex-col items-center justify-center">
+                  <div className="w-10 h-10 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-2">
+                    <Database className="w-5 h-5" />
+                  </div>
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)]">
+                    LMDB Shards
+                  </span>
+                </div>
+
+                <div className="col-span-2 p-5 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] flex items-center gap-4">
+                  <div className="w-11 h-11 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
+                    <ShieldAlert className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-bold text-[var(--text-primary)]">
+                      637,390+ Threat &amp; Ad Filter Rules
+                    </div>
+                    <div className="text-xs text-[var(--text-muted)] mt-0.5">
+                      Daily-synced SafeDNS blocklist active across port 53 &amp; DoH
+                    </div>
                   </div>
                 </div>
-              ))}
+              </div>
             </div>
           </div>
         </section>
 
-        {/* 4.5 FREQUENTLY ASKED QUESTIONS */}
-        <FaqSection faqs={DNS_FAQS} />
+        {/* 5. USE CASES (Matches /vps Section 5 Blueprint) */}
+        <section className="py-10 sm:py-14 relative z-10">
+          <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+              NETWORK USE CASES
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+              Built for Every Network Workload
+            </h2>
+            <p className="text-base text-[var(--text-secondary)]">
+              Whether filtering office Wi-Fi or serving production Kubernetes domains, Masdika DNS adapts effortlessly.
+            </p>
+          </div>
 
-        {/* 5. BOTTOM CTA CARD */}
-        <section className="relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+            {[
+              {
+                icon: Wifi,
+                title: "Routers, LAN & Personal Devices",
+                desc: "Configure 103.247.10.61 once on MikroTik DHCP, Windows, or systemd-resolved to block trackers and malware across every client.",
+              },
+              {
+                icon: Layers,
+                title: "SaaS & Production Domains",
+                desc: "Manage apex A/AAAA, CNAME targets, SPF/DKIM TXT records, and MX mail routing with fast 60s default TTLs and ECDSA DNSSEC.",
+              },
+              {
+                icon: Cpu,
+                title: "CI/CD & ACME Automation",
+                desc: "Publish verification records from Masdika DNS Console for instant zero-wait TLS issuance and zero propagation delays.",
+              },
+            ].map((item, idx) => (
+              <FadeIn key={item.title} delay={idx * 0.1} direction="up" className="h-full">
+                <div className="p-8 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-all duration-200 h-full flex flex-col justify-between group shadow-sm">
+                  <div>
+                    <div className="w-12 h-12 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-6 group-hover:scale-105 transition-transform">
+                      <item.icon className="w-6 h-6" />
+                    </div>
+                    <h3 className="text-xl font-bold text-[var(--text-primary)] mb-3 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
+                      {item.title}
+                    </h3>
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{item.desc}</p>
+                  </div>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </section>
+
+        {/* 6. HOW IT WORKS WORKFLOW (Matches /vps Section 7 AnimatedBeam + OrbitalRings) */}
+        <section className="py-10 sm:py-14 relative z-10">
+          <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3 block">
+              DEPLOYMENT WORKFLOW
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-[1.15] mb-4">
+              Go Live in 3 Simple Steps
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative items-stretch">
+            <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-[2px] bg-slate-200 dark:bg-white/10 overflow-hidden rounded-full">
+              <AnimatedBeam />
+            </div>
+
+            {[
+              {
+                step: "01",
+                title: "Point Resolver or NS",
+                desc: "Set SafeDNS (103.247.10.61) on your OS/router, or set ns1 & ns2.masdika.id at your domain registrar.",
+              },
+              {
+                step: "02",
+                title: "Configure Zones & DNSSEC",
+                desc: "Add A, AAAA, CNAME, MX, or TXT records in DNS Console and activate 1-click ECDSA P-256 DNSSEC.",
+              },
+              {
+                step: "03",
+                title: "Verify Live Propagation",
+                desc: "Test answers immediately with our Live Diagnostic Probe and watch real-time query telemetry.",
+              },
+            ].map((st, i) => (
+              <FadeIn key={st.step} delay={i * 0.15} direction="up" className="h-full">
+                <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-8 text-center shadow-sm hover:border-cyan-500/40 transition-all duration-300 h-full flex flex-col justify-between relative z-10 group">
+                  <div>
+                    <div className="w-20 h-20 mx-auto rounded-full bg-[var(--surface-secondary)] border border-[var(--border-primary)] flex items-center justify-center mb-6 relative group-hover:scale-110 transition-transform duration-300">
+                      <OrbitalRings />
+                      <span className="relative z-10 text-3xl font-black bg-gradient-to-br from-cyan-600 to-cyan-400 bg-clip-text text-transparent">
+                        {st.step}
+                      </span>
+                    </div>
+
+                    <h3 className="text-xl font-bold text-[var(--text-primary)] mb-3">{st.title}</h3>
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{st.desc}</p>
+                  </div>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </section>
+
+        {/* 7. BOTTOM CTA CARD (Matches /vps Section 9) */}
+        <section className="py-10 sm:py-14 relative z-10 w-full">
           <GlowCtaCard>
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
               <div className="max-w-2xl space-y-3">
@@ -1408,13 +1527,16 @@ export default function DnsPublicClient({
                 <Button variant="primary" size="lg" href="/dashboard/dns" rightIcon={<ArrowRight className="w-4 h-4" />}>
                   Open DNS Console
                 </Button>
-                <Button variant="secondary" size="lg" href="/lg" leftIcon={<Globe className="w-4 h-4" />}>
+                <Button variant="secondary" size="lg" href="/lg" leftIcon={<Compass className="w-4 h-4" />}>
                   Looking Glass
                 </Button>
               </div>
             </div>
           </GlowCtaCard>
         </section>
+
+        {/* 8. FREQUENTLY ASKED QUESTIONS (Matches /vps Section 10) */}
+        <FaqSection faqs={DNS_FAQS} />
       </div>
     </div>
   );
