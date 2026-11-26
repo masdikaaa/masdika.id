@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { GlowCtaCard } from "@/components/ui/GlowCtaCard";
 import Image from "next/image";
 import { getPaginationItems } from "@/components/ui/Pagination";
 import {
@@ -406,37 +407,40 @@ export function PortfolioClient({ initialProjects = [] }: PortfolioClientProps) 
           </div>
         </section>
 
-        {/* ── 3. CALL TO ACTION (Identik Patokan Events) ──────────────────────── */}
+        {/* ── 3. CALL TO ACTION ──────────────────────────────────────── */}
         <section className="pt-8 pb-0">
-          <div className="rounded-2xl sm:rounded-3xl bg-[var(--surface)] border border-[var(--border-primary)] p-8 sm:p-12 lg:p-16 text-center relative overflow-hidden shadow-sm">
-            <div className="absolute top-0 left-0 w-full h-px bg-cyan-500/40" />
-            <Badge variant="brand" size="md" className="mb-4 font-mono uppercase">
-              ENGINEERING &amp; COLLABORATION
-            </Badge>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[var(--text-primary)] tracking-tight mb-4">
-              Have a Mission-Critical Architecture to Build?
-            </h2>
-            <p className="text-base sm:text-lg text-[var(--text-secondary)] max-w-2xl mx-auto mb-8 font-normal leading-relaxed">
-              Whether you are scaling high-concurrency systems, architecting Kubernetes clusters, or migrating to multi-cloud, let&apos;s engineer your success.
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-4">
-              <Button
-                variant="primary"
-                size="lg"
-                href="/contact"
-                rightIcon={<ArrowRight className="w-5 h-5" />}
-              >
-                Start a Project
-              </Button>
-              <Button
-                variant="secondary"
-                size="lg"
-                href="/skills"
-              >
-                View Skills &amp; Stack
-              </Button>
+          <GlowCtaCard>
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+              <div className="max-w-2xl space-y-2.5">
+                <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 block">
+                  ENGINEERING &amp; COLLABORATION
+                </span>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[var(--text-primary)] tracking-tight leading-tight">
+                  Have a Mission-Critical Architecture to Build?
+                </h2>
+                <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
+                  Whether you are scaling high-concurrency systems, architecting Kubernetes clusters, or migrating to multi-cloud, let&apos;s engineer your success.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-3 shrink-0">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  href="/contact"
+                  rightIcon={<ArrowRight className="w-5 h-5" />}
+                >
+                  Start a Project
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  href="/skills"
+                >
+                  View Skills &amp; Stack
+                </Button>
+              </div>
             </div>
-          </div>
+          </GlowCtaCard>
         </section>
 
       </div>

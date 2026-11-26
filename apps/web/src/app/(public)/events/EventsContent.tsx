@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { GlowCtaCard } from "@/components/ui/GlowCtaCard";
 import { motion } from "framer-motion";
 import {
   Video,
@@ -178,35 +179,38 @@ export function EventsContent({ opportunities }: { opportunities: any }) {
 
         {/* ── 3. CALL TO ACTION ──────────────────────────────────────── */}
         <section className="pt-8 pb-0">
-          <div className="rounded-2xl sm:rounded-3xl bg-[var(--surface)] border border-[var(--border-primary)] p-8 sm:p-12 lg:p-16 text-center relative overflow-hidden shadow-sm">
-            <div className="absolute top-0 left-0 w-full h-px bg-cyan-500/40" />
-            <Badge variant="brand" size="md" className="mb-4 font-mono uppercase">
-              COMMUNITY &amp; SPEAKING
-            </Badge>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[var(--text-primary)] tracking-tight mb-4">
-              Planning a Tech Meetup or Conference?
-            </h2>
-            <p className="text-base sm:text-lg text-[var(--text-secondary)] max-w-2xl mx-auto mb-8 font-normal leading-relaxed">
-              I am available for keynotes, virtual panels, and technical workshops on Kubernetes, Cloud Architecture, and DevOps automation.
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-4">
-              <Button
-                variant="primary"
-                size="lg"
-                href="/contact"
-                rightIcon={<ArrowRight className="w-5 h-5" />}
-              >
-                Request a Speaker
-              </Button>
-              <Button
-                variant="secondary"
-                size="lg"
-                href="/portfolio"
-              >
-                View Case Studies
-              </Button>
+          <GlowCtaCard>
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+              <div className="max-w-2xl space-y-2.5">
+                <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 block">
+                  COMMUNITY &amp; SPEAKING
+                </span>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[var(--text-primary)] tracking-tight leading-tight">
+                  Planning a Tech Meetup or Conference?
+                </h2>
+                <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
+                  I am available for keynotes, virtual panels, and technical workshops on Kubernetes, Cloud Architecture, and DevOps automation.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-3 shrink-0">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  href="/contact"
+                  rightIcon={<ArrowRight className="w-5 h-5" />}
+                >
+                  Request a Speaker
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  href="/portfolio"
+                >
+                  View Case Studies
+                </Button>
+              </div>
             </div>
-          </div>
+          </GlowCtaCard>
         </section>
 
       </div>

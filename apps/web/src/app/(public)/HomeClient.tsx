@@ -2,6 +2,7 @@
 
 import ReactDOM from "react-dom";
 import Link from "next/link";
+import { GlowCtaOrnaments } from "@/components/ui/GlowCtaCard";
 import Image from "next/image";
 import {
   ArrowRight,
@@ -1414,8 +1415,8 @@ export function HomeClient({
       <section className="py-10 sm:py-14 relative z-10 overflow-hidden">
         <SectionOrnaments variant="cta" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <FadeIn direction="up" duration={0.7} className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 dark:hover:border-cyan-500/30 p-6 sm:p-8 md:p-12 lg:p-14 xl:p-16 shadow-sm transition-all duration-300">
-            <div className="absolute top-0 left-0 w-full h-px bg-cyan-500/40" />
+          <FadeIn direction="up" duration={0.7} className="relative rounded-3xl overflow-hidden border border-cyan-500/20 bg-[var(--surface)] hover:border-cyan-500/40 p-6 sm:p-8 md:p-12 lg:p-14 xl:p-16 shadow-sm transition-all duration-300">
+            <GlowCtaOrnaments />
 
             {/* Left Content */}
             <div className="max-w-xl lg:max-w-2xl text-left relative z-10">
