@@ -265,10 +265,13 @@ const ISO_SHORTCUTS = [
   { id: "almalinux", name: "AlmaLinux ISO", tag: "8 / 9 / 10 (All Versions)", href: "/mirror/browse/almalinux" },
   { id: "rocky", name: "Rocky Linux ISO", tag: "8 / 9 / 10 (All Versions)", href: "/mirror/browse/rocky" },
   { id: "centos-stream", name: "CentOS Stream ISO", tag: "9-stream & 10-stream", href: "/mirror/browse/centos-stream" },
+  { id: "epel", name: "EPEL Packages", tag: "RHEL / Alma / Rocky", href: "/mirror/browse/epel" },
   { id: "archlinux", name: "Arch Linux ISO", tag: "Monthly Releases", href: "/mirror/browse/archlinux/iso" },
   { id: "alpine", name: "Alpine Linux ISO", tag: "v3.18 - v3.21 / edge", href: "/mirror/browse/alpine" },
   { id: "freebsd", name: "FreeBSD ISO", tag: "13.x / 14.x / 15.x", href: "/mirror/browse/freebsd/releases/ISO-IMAGES" },
+  { id: "freebsd", name: "FreeBSD Packages", tag: "Quarterly & Latest pkg", href: "/mirror/browse/freebsd-pkg" },
   { id: "openbsd", name: "OpenBSD ISO", tag: "7.x & Snapshots", href: "/mirror/browse/openbsd" },
+  { id: "all", name: "All Repositories", tag: "Browse All 19 Roots", href: "/mirror/browse" },
 ];
 
 const CARDS_PER_PAGE = 8;
@@ -792,13 +795,17 @@ export default function MirrorClient() {
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-10 h-10 rounded-xl border border-[var(--border-primary)] bg-slate-50 dark:bg-white/95 flex items-center justify-center p-2 shrink-0 shadow-2xs">
-                    <img
-                      src={`/images/distros/${iso.id}.svg`}
-                      alt={iso.name}
-                      width={22}
-                      height={22}
-                      className="w-5 h-5 object-contain"
-                    />
+                    {iso.id === "all" ? (
+                      <FolderOpen className="w-5 h-5 text-cyan-600" />
+                    ) : (
+                      <img
+                        src={`/images/distros/${iso.id}.svg`}
+                        alt={iso.name}
+                        width={22}
+                        height={22}
+                        className="w-5 h-5 object-contain"
+                      />
+                    )}
                   </div>
                   <div className="min-w-0">
                     <div className="text-sm font-bold text-[var(--text-primary)] truncate group-hover:text-cyan-500 transition-colors">
@@ -876,7 +883,7 @@ export default function MirrorClient() {
               ))}
             </div>
 
-            <pre className="p-5 font-mono text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap break-all text-[var(--text-primary)]">
+            <pre className="p-4 sm:p-5 font-mono text-xs sm:text-[13px] leading-relaxed overflow-x-auto whitespace-pre [scrollbar-width:none] [&::-webkit-scrollbar]:hidden text-[var(--text-primary)]">
               {activeSnippet}
             </pre>
           </div>
