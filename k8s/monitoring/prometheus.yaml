@@ -176,7 +176,7 @@ spec:
       containers:
         - name: prometheus
           image: prom/prometheus:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           env:
             - name: TZ
               value: "Asia/Jakarta"

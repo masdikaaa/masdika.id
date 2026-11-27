@@ -39,7 +39,7 @@ spec:
         fsGroup: 1000
       containers:
         - name: elasticsearch
-          image: docker.elastic.co/elasticsearch/elasticsearch:8.17.2
+          image: docker.elastic.co/elasticsearch/elasticsearch:8.19.26
           imagePullPolicy: IfNotPresent
           env:
             - name: TZ

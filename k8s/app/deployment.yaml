@@ -31,7 +31,7 @@ spec:
         fsGroup: 1001 # GID nodejs agar permissions mount uploads writable oleh user nextjs
       initContainers:
         - name: wait-for-dependencies
-          image: busybox:1.36
+          image: busybox:1.38.0-musl
           imagePullPolicy: IfNotPresent
           command:
             - sh
@@ -194,7 +194,7 @@ spec:
         fsGroup: 1001
       initContainers:
         - name: wait-for-dependencies
-          image: busybox:1.36
+          image: busybox:1.38.0-musl
           imagePullPolicy: IfNotPresent
           command:
             - sh
@@ -337,7 +337,7 @@ spec:
       automountServiceAccountToken: false
       initContainers:
         - name: wait-for-dependencies
-          image: busybox:1.36
+          image: busybox:1.38.0-musl
           imagePullPolicy: IfNotPresent
           command:
             - sh

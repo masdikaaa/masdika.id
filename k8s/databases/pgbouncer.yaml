@@ -40,7 +40,7 @@ spec:
       containers:
         - name: pgbouncer
           image: edoburu/pgbouncer:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
