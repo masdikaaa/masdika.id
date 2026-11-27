@@ -160,7 +160,7 @@ export default function MirrorBrowsePage() {
   };
 
   return (
-    <div className="relative pt-24 sm:pt-32 pb-24 sm:pb-16 min-h-screen overflow-x-hidden bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300">
+    <div className="relative pt-24 sm:pt-32 pb-12 sm:pb-16 overflow-x-hidden text-[var(--text-primary)] transition-colors duration-300">
       <div className="max-w-[1400px] mx-auto px-3.5 sm:px-6 lg:px-8 space-y-4 sm:space-y-5 relative z-10">
         {/* Breadcrumb */}
         <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-[var(--text-secondary)]">

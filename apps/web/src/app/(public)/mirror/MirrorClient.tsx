@@ -432,7 +432,7 @@ export default function MirrorClient() {
   const activeSnippet = DISTROS.find((d) => d.id === activeTab)?.snippet || DISTROS[0].snippet;
 
   return (
-    <div className="flex flex-col min-h-screen pt-24 sm:pt-36 md:pt-40 pb-20 sm:pb-14 overflow-x-hidden bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300 relative">
+    <div className="flex flex-col min-h-screen pt-24 sm:pt-36 md:pt-40 pb-10 sm:pb-14 overflow-x-hidden bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300 relative">
       {/* Background Glow */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div
