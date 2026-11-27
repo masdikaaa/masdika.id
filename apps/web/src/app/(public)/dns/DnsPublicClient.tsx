@@ -730,8 +730,8 @@ export default function DnsPublicClient({
             </p>
           </div>
 
-          <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] overflow-hidden shadow-sm">
-            <div className="px-4 py-3 border-b border-[var(--border-primary)] bg-[var(--surface-secondary)] flex items-center justify-between gap-3">
+          <div className="max-w-4xl mx-auto rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)]/95 backdrop-blur-sm overflow-hidden shadow-2xl shadow-black/25">
+            <div className="px-4 sm:px-5 py-3 border-b border-[var(--border-primary)] bg-[var(--surface-secondary)]/80 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="flex items-center gap-1.5 shrink-0">
                   <span className="w-3 h-3 rounded-full bg-[#ff5f56]" />
@@ -746,7 +746,7 @@ export default function DnsPublicClient({
               <button
                 type="button"
                 onClick={() => copyText(activeSetup.command, `setup-${activeSetup.id}`)}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border border-[var(--border-primary)] bg-[var(--surface)] text-xs font-semibold text-[var(--text-primary)] hover:border-cyan-500/40 cursor-pointer transition-colors shrink-0"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--border-primary)] bg-[var(--surface)] text-xs font-semibold text-[var(--text-primary)] hover:border-cyan-500/50 hover:text-cyan-400 cursor-pointer transition-colors shrink-0"
               >
                 {copiedId === `setup-${activeSetup.id}` ? (
                   <>
@@ -762,24 +762,30 @@ export default function DnsPublicClient({
               </button>
             </div>
 
-            <div className="px-4 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface)] flex items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {setupTabs.map((t) => (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => setActiveTab(t.id)}
-                  className={
-                    activeTab === t.id
-                      ? "px-3 py-1 rounded-lg text-xs font-bold bg-cyan-400 text-slate-950 whitespace-nowrap shrink-0 cursor-pointer"
-                      : "px-3 py-1 rounded-lg text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] whitespace-nowrap shrink-0 cursor-pointer"
-                  }
-                >
-                  {t.label}
-                </button>
-              ))}
+            <div className="px-4 sm:px-5 py-2.5 border-b border-[var(--border-subtle)] bg-[var(--surface)] flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {setupTabs.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => setActiveTab(t.id)}
+                    className={
+                      activeTab === t.id
+                        ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-400 text-slate-950 shadow-sm whitespace-nowrap shrink-0 cursor-pointer transition-all"
+                        : "px-3 py-1.5 rounded-lg text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] whitespace-nowrap shrink-0 cursor-pointer transition-colors"
+                    }
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+              <span className="text-[11px] font-mono text-cyan-600 dark:text-cyan-400/90 hidden sm:inline-flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                {activeSetup.hint}
+              </span>
             </div>
 
-            <div className="px-4 sm:px-5 pt-3.5 text-xs text-[var(--text-secondary)]">{activeSetup.hint}</div>
+            <div className="sm:hidden px-4 pt-3 text-xs text-[var(--text-secondary)]">{activeSetup.hint}</div>
 
             <AnimatePresence mode="wait">
               <motion.pre
@@ -788,7 +794,7 @@ export default function DnsPublicClient({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.2 }}
-                className="p-4 sm:p-5 font-mono text-xs sm:text-[13px] leading-relaxed overflow-x-auto whitespace-pre [scrollbar-width:none] [&::-webkit-scrollbar]:hidden text-[var(--text-primary)]"
+                className="p-4 sm:p-6 bg-[var(--surface-secondary)]/35 font-mono text-xs sm:text-[13px] leading-6 overflow-x-auto whitespace-pre [scrollbar-width:none] [&::-webkit-scrollbar]:hidden text-[var(--text-primary)]"
               >
                 {activeSetup.command}
               </motion.pre>
