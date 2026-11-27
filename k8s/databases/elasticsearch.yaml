@@ -41,6 +41,10 @@ spec:
         - name: elasticsearch
           image: docker.elastic.co/elasticsearch/elasticsearch:8.19.26
           imagePullPolicy: IfNotPresent
+          securityContext:
+            capabilities:
+              add:
+                - SYS_PTRACE
           env:
             - name: TZ
               value: "Asia/Jakarta"
@@ -51,7 +55,7 @@ spec:
             - name: bootstrap.memory_lock
               value: "false"
             - name: ES_JAVA_OPTS
-              value: "-Xms1536m -Xmx1536m -javaagent:/usr/share/elasticsearch/lib/entitlement-agent/elasticsearch-entitlement-agent-8.19.26.jar"
+              value: "-Xms1536m -Xmx1536m"
             - name: xpack.security.enabled
               value: "true"
             - name: ELASTIC_PASSWORD
