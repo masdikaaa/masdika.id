@@ -160,28 +160,28 @@ export default function MirrorBrowsePage() {
   };
 
   return (
-    <div className="relative pt-28 sm:pt-32 pb-16 min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 space-y-5 relative z-10">
+    <div className="relative pt-24 sm:pt-32 pb-24 sm:pb-16 min-h-screen overflow-x-hidden bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300">
+      <div className="max-w-[1400px] mx-auto px-3.5 sm:px-6 lg:px-8 space-y-4 sm:space-y-5 relative z-10">
         {/* Breadcrumb */}
-        <div className="flex flex-wrap items-center gap-1.5 text-xs text-[var(--text-secondary)]">
-          <Link href="/mirror" className="hover:text-cyan-500 font-medium">
+        <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-[var(--text-secondary)]">
+          <Link href="/mirror" className="hover:text-cyan-500 font-medium py-0.5 shrink-0">
             Linux Mirror
           </Link>
-          <ChevronRight className="w-3.5 h-3.5" />
-          <Link href="/mirror/browse" className="hover:text-cyan-500 font-medium">
+          <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+          <Link href="/mirror/browse" className="hover:text-cyan-500 font-medium py-0.5 shrink-0">
             Repositories
           </Link>
           {slug.map((seg, i) => {
             const href = `/mirror/browse/${slug.slice(0, i + 1).join("/")}`;
             return (
-              <span key={href} className="inline-flex items-center gap-1.5">
-                <ChevronRight className="w-3.5 h-3.5" />
+              <span key={href} className="inline-flex items-center gap-1.5 min-w-0">
+                <ChevronRight className="w-3.5 h-3.5 shrink-0" />
                 <Link
                   href={href}
                   className={
                     i === slug.length - 1
-                      ? "text-cyan-600 dark:text-cyan-400 font-semibold"
-                      : "hover:text-cyan-500"
+                      ? "text-cyan-600 dark:text-cyan-400 font-semibold break-all py-0.5"
+                      : "hover:text-cyan-500 break-all py-0.5"
                   }
                 >
                   {seg}
@@ -189,32 +189,32 @@ export default function MirrorBrowsePage() {
               </span>
             );
           })}
-        </div>
+        </nav>
 
         {/* Directory Index Card */}
         <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] overflow-hidden shadow-sm">
           {/* Top Bar */}
-          <div className="px-4 sm:px-6 py-4 border-b border-[var(--border-primary)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <h1 className="text-base sm:text-lg font-bold tracking-tight text-[var(--text-primary)] font-mono truncate">
+          <div className="px-3.5 sm:px-6 py-3.5 sm:py-4 border-b border-[var(--border-primary)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <h1 className="text-sm sm:text-lg font-bold tracking-tight text-[var(--text-primary)] font-mono break-all sm:truncate">
               Index of {currentPath}
             </h1>
 
             <div className="flex items-center gap-2 w-full sm:w-auto">
-              <div className="relative flex-1 sm:w-64">
+              <div className="relative flex-1 sm:w-64 min-w-0">
                 <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
                 <input
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search this directory..."
-                  className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-xs text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-cyan-400"
+                  className="w-full pl-8 pr-3 py-2 sm:py-1.5 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-xs text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-cyan-400"
                 />
               </div>
 
               <button
                 type="button"
                 onClick={() => setViewMode(viewMode === "list" ? "grid" : "list")}
-                className="px-3 py-1.5 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-xs font-semibold text-[var(--text-primary)] hover:border-cyan-500/40 inline-flex items-center gap-1.5 cursor-pointer shrink-0"
+                className="px-3 py-2 sm:py-1.5 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-xs font-semibold text-[var(--text-primary)] hover:border-cyan-500/40 inline-flex items-center gap-1.5 cursor-pointer shrink-0"
               >
                 <span>{viewMode === "list" ? "List" : "Grid"}</span>
                 {viewMode === "list" ? <List className="w-3.5 h-3.5" /> : <LayoutGrid className="w-3.5 h-3.5" />}
@@ -329,7 +329,7 @@ export default function MirrorBrowsePage() {
                 {parentHref && (
                   <Link
                     href={parentHref}
-                    className="px-4 py-3 flex items-center gap-2.5 font-mono text-xs font-medium text-cyan-600 dark:text-cyan-400 hover:bg-slate-50 dark:hover:bg-white/[0.03]"
+                    className="px-3.5 py-3 flex items-center gap-2.5 font-mono text-xs font-medium text-cyan-600 dark:text-cyan-400 hover:bg-slate-50 dark:hover:bg-white/[0.03]"
                   >
                     <CornerLeftUp className="w-3.5 h-3.5 shrink-0" />
                     <span>Parent Directory/</span>
@@ -346,7 +346,7 @@ export default function MirrorBrowsePage() {
                       <Link
                         key={entry.href}
                         href={`/mirror/browse${entry.href.replace(/\/$/, "")}`}
-                        className="px-4 py-3 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-cyan-500/[0.06] transition-colors"
+                        className="px-3.5 py-3 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-cyan-500/[0.06] transition-colors"
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           {renderFileIcon(entry)}
@@ -354,50 +354,78 @@ export default function MirrorBrowsePage() {
                             <div className="font-mono text-xs font-semibold text-cyan-600 dark:text-cyan-400 truncate">
                               {entry.name}
                             </div>
-                            <div className="font-mono text-[11px] text-slate-500 dark:text-zinc-500 truncate mt-0.5">
-                              {entry.lastSync}
-                            </div>
+                            {entry.lastSync && entry.lastSync !== "-" && (
+                              <div className="font-mono text-[11px] text-slate-500 dark:text-zinc-500 truncate mt-0.5">
+                                {entry.lastSync}
+                              </div>
+                            )}
                           </div>
                         </div>
                         <ChevronRight className="w-4 h-4 text-slate-400 dark:text-zinc-500 shrink-0" />
                       </Link>
                     ) : (
-                      <a
+                      <div
                         key={entry.href}
-                        href={`${MIRROR_ORIGIN}${entry.href}`}
-                        className="px-4 py-3 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-cyan-500/[0.06] transition-colors"
+                        className="px-3.5 py-3 flex items-center justify-between gap-2.5 hover:bg-slate-50 dark:hover:bg-cyan-500/[0.06] transition-colors"
                       >
-                        <div className="flex items-center gap-3 min-w-0">
+                        <a
+                          href={`${MIRROR_ORIGIN}${entry.href}`}
+                          className="flex items-center gap-3 min-w-0 flex-1"
+                        >
                           {renderFileIcon(entry)}
                           <div className="min-w-0">
                             <div className="font-mono text-xs font-medium text-slate-800 dark:text-zinc-200 truncate">
                               {entry.name}
                             </div>
-                            <div className="font-mono text-[11px] text-slate-500 dark:text-zinc-500 truncate mt-0.5">
-                              {entry.size !== "-" ? `${entry.size} • ${entry.lastSync}` : entry.lastSync}
-                            </div>
+                            {(entry.size !== "-" || (entry.lastSync && entry.lastSync !== "-")) && (
+                              <div className="font-mono text-[11px] text-slate-500 dark:text-zinc-500 truncate mt-0.5">
+                                {[entry.size !== "-" ? entry.size : null, entry.lastSync && entry.lastSync !== "-" ? entry.lastSync : null]
+                                  .filter(Boolean)
+                                  .join(" • ")}
+                              </div>
+                            )}
                           </div>
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
+                        </a>
+                        <div className="flex items-center gap-1.5 shrink-0">
                           {isIsoFile(entry.name) && (
                             <button
                               type="button"
                               onClick={(e) => handleCopySha256(e, entry)}
-                              className="px-2 py-1 rounded-md text-[10px] font-mono font-semibold border border-cyan-500/30 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400"
+                              disabled={shaLoadingHref === entry.href}
+                              className="px-2 py-1 rounded-md text-[10px] font-mono font-semibold border border-cyan-500/30 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 cursor-pointer"
                             >
-                              {shaCopiedHref === entry.href ? "Copied" : "SHA256"}
+                              {shaCopiedHref === entry.href ? "Copied" : shaLoadingHref === entry.href ? "..." : "SHA256"}
                             </button>
                           )}
-                          <Download className="w-4 h-4 text-cyan-500 shrink-0" />
+                          <a
+                            href={`${MIRROR_ORIGIN}${entry.href}`}
+                            className="p-1.5 rounded-lg text-cyan-500 hover:bg-cyan-500/10"
+                            aria-label={`Download ${entry.name}`}
+                          >
+                            <Download className="w-4 h-4 shrink-0" />
+                          </a>
                         </div>
-                      </a>
+                      </div>
                     )
                   )
                 )}
               </div>
             </>
           ) : (
-            <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="p-3.5 sm:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+              {parentHref && (
+                <Link
+                  href={parentHref}
+                  className="p-3 rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-50 dark:bg-white/[0.02] hover:border-cyan-500/40 flex items-center gap-3 transition-colors"
+                >
+                  <CornerLeftUp className="w-4 h-4 text-cyan-500 shrink-0" />
+                  <div className="min-w-0">
+                    <div className="font-mono text-xs font-semibold text-cyan-600 dark:text-cyan-400 truncate">
+                      Parent Directory/
+                    </div>
+                  </div>
+                </Link>
+              )}
               {pagedEntries.map((entry) =>
                 entry.isDir ? (
                   <Link
@@ -410,9 +438,11 @@ export default function MirrorBrowsePage() {
                       <div className="font-mono text-xs font-semibold text-cyan-600 dark:text-cyan-400 truncate">
                         {entry.name}
                       </div>
-                      <div className="text-[11px] text-slate-500 dark:text-zinc-500 truncate">
-                        {entry.lastSync}
-                      </div>
+                      {entry.lastSync && entry.lastSync !== "-" && (
+                        <div className="text-[11px] text-slate-500 dark:text-zinc-500 truncate">
+                          {entry.lastSync}
+                        </div>
+                      )}
                     </div>
                   </Link>
                 ) : (
@@ -426,9 +456,11 @@ export default function MirrorBrowsePage() {
                       <div className="font-mono text-xs font-medium text-slate-800 dark:text-zinc-200 truncate">
                         {entry.name}
                       </div>
-                      <div className="text-[11px] text-slate-500 dark:text-zinc-500 truncate">
-                        {entry.size}
-                      </div>
+                      {entry.size && entry.size !== "-" && (
+                        <div className="text-[11px] text-slate-500 dark:text-zinc-500 truncate">
+                          {entry.size}
+                        </div>
+                      )}
                     </div>
                     <Download className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
                   </a>
@@ -438,7 +470,7 @@ export default function MirrorBrowsePage() {
           )}
 
           {!loading && !error && totalPages > 1 && (
-            <div className="px-4 sm:px-6 py-3 border-t border-[var(--border-primary)] bg-[var(--surface-secondary)] flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="px-3.5 sm:px-6 py-3 border-t border-[var(--border-primary)] bg-[var(--surface-secondary)] flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs">
               <span className="text-[var(--text-secondary)]">
                 Showing {(safePage - 1) * PAGE_SIZE + 1}-{Math.min(safePage * PAGE_SIZE, filtered.length)} of {filtered.length} items
               </span>

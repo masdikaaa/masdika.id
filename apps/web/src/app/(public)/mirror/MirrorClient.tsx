@@ -432,7 +432,7 @@ export default function MirrorClient() {
   const activeSnippet = DISTROS.find((d) => d.id === activeTab)?.snippet || DISTROS[0].snippet;
 
   return (
-    <div className="flex flex-col min-h-screen pt-28 sm:pt-36 md:pt-40 pb-10 sm:pb-14 overflow-x-hidden bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300 relative">
+    <div className="flex flex-col min-h-screen pt-24 sm:pt-36 md:pt-40 pb-20 sm:pb-14 overflow-x-hidden bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300 relative">
       {/* Background Glow */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div
@@ -475,7 +475,7 @@ export default function MirrorClient() {
                 </Badge>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-4 text-[var(--text-primary)]">
+              <h1 className="text-[32px] sm:text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.08] sm:leading-[1.05] mb-4 text-[var(--text-primary)]">
                 Fast Package Cache. <br />
                 <span className="bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent">
                   Direct ISO Mirror.
@@ -644,7 +644,7 @@ export default function MirrorClient() {
                 </span>
               </div>
 
-              <div data-gsap-stagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-[var(--border-subtle)]">
+              <div data-gsap-stagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 lg:divide-x divide-[var(--border-subtle)] [&>*:nth-child(odd)]:sm:border-r [&>*:nth-child(odd)]:lg:border-r-0 [&>*:nth-child(-n+2)]:sm:border-b [&>*:nth-child(-n+2)]:lg:border-b-0 [&>*]:border-[var(--border-subtle)]">
                 <div className="p-5 sm:p-6 space-y-1.5">
                   <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)]">
                     Cache Hit Ratio
@@ -888,26 +888,29 @@ export default function MirrorClient() {
             <div className="md:hidden divide-y divide-[var(--border-subtle)]">
               {pagedDistros.map((d) => (
                 <div key={d.id} className="p-4 space-y-3">
-                  <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-start justify-between gap-2.5">
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-8 h-8 rounded-lg border border-[var(--border-primary)] bg-slate-50 dark:bg-white/95 flex items-center justify-center p-1.5 shrink-0">
+                      <div className="w-9 h-9 rounded-lg border border-[var(--border-primary)] bg-slate-50 dark:bg-white/95 flex items-center justify-center p-1.5 shrink-0">
                         {d.id === "mikrotik" ? (
-                          <SiMikrotik className="w-4.5 h-4.5 text-[#182230]" />
+                          <SiMikrotik className="w-5 h-5 text-[#182230]" />
                         ) : d.id === "proxmox" ? (
-                          <SiProxmox className="w-4.5 h-4.5 text-[#E57000]" />
+                          <SiProxmox className="w-5 h-5 text-[#E57000]" />
                         ) : (
                           <img
                             src={`/images/distros/${d.id}.svg`}
                             alt={d.name}
                             width={18}
                             height={18}
-                            className="w-4.5 h-4.5 object-contain"
+                            className="w-5 h-5 object-contain"
                           />
                         )}
                       </div>
                       <div className="min-w-0">
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-1.5">
                           <span className="font-bold text-sm text-[var(--text-primary)]">{d.name}</span>
+                          <span className="px-1.5 py-0.5 rounded bg-[var(--surface-secondary)] border border-[var(--border-primary)] font-mono text-[9px] font-semibold text-[var(--text-secondary)]">
+                            {d.pkgMgr}
+                          </span>
                           {health?.distros?.[d.id] && !health.distros[d.id].ok ? (
                             <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-red-600 dark:text-red-400">
                               <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
@@ -920,31 +923,10 @@ export default function MirrorClient() {
                             </span>
                           )}
                         </div>
-                        <div className="text-[11px] text-[var(--text-secondary)] truncate">
+                        <div className="text-[11px] text-[var(--text-secondary)] leading-snug mt-0.5">
                           {health?.distros?.[d.id]?.detectedVersions || d.sub}
                         </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <Link
-                        href={`/mirror/browse${d.paths[0].replace(/\/$/, "")}`}
-                        className="px-2.5 py-1 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[11px] font-semibold text-cyan-600 dark:text-cyan-400"
-                      >
-                        Browse
-                      </Link>
-                      <Link
-                        href={d.isoPath}
-                        className="px-2.5 py-1 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[11px] font-semibold text-[var(--text-primary)]"
-                      >
-                        ISO
-                      </Link>
-                      <a
-                        href="#setup"
-                        onClick={() => setActiveTab(d.id)}
-                        className="px-2.5 py-1 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[11px] font-semibold text-[var(--text-secondary)]"
-                      >
-                        Setup
-                      </a>
                     </div>
                   </div>
                   <div className="space-y-1.5">
@@ -971,6 +953,30 @@ export default function MirrorClient() {
                         </div>
                       );
                     })}
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 pt-0.5">
+                    <Link
+                      href={`/mirror/browse${d.paths[0].replace(/\/$/, "")}`}
+                      className="py-1.5 px-2 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[11px] font-semibold text-cyan-600 dark:text-cyan-400 inline-flex items-center justify-center gap-1"
+                    >
+                      <ExternalLink className="w-3 h-3 shrink-0" />
+                      <span>Browse</span>
+                    </Link>
+                    <Link
+                      href={d.isoPath}
+                      className="py-1.5 px-2 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[11px] font-semibold text-[var(--text-primary)] inline-flex items-center justify-center gap-1"
+                    >
+                      <Download className="w-3 h-3 text-cyan-500 shrink-0" />
+                      <span>ISO</span>
+                    </Link>
+                    <a
+                      href="#setup"
+                      onClick={() => setActiveTab(d.id)}
+                      className="py-1.5 px-2 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-[11px] font-semibold text-[var(--text-secondary)] inline-flex items-center justify-center gap-1"
+                    >
+                      <Terminal className="w-3 h-3 shrink-0" />
+                      <span>Setup</span>
+                    </a>
                   </div>
                 </div>
               ))}
