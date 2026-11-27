@@ -16,6 +16,7 @@ import {
   Bell,
   UserPlus,
   Server,
+  Terminal,
   Database,
   Boxes,
   HardDrive,
@@ -130,7 +131,7 @@ export default function AdminDashboard() {
     {
       name: "Cloud VPS",
       href: "/admin/vps",
-      icon: Server,
+      icon: Terminal,
       count: stats.cloud.activeVps,
       sub: stats.cloud.suspendedVps > 0 ? `${stats.cloud.suspendedVps} Suspended` : "Proxmox KVM",
     },
