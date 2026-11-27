@@ -9,6 +9,7 @@ const CHECKSUM_FILES = [
   "SHA256SUMS",
   "SHA256SUMS.txt",
   "sha256sum.txt",
+  "sha256sums.txt",
   "SHA256",
   "CHECKSUM",
   "CHECKSUM.SHA256",
@@ -33,42 +34,47 @@ export async function GET(req: NextRequest) {
   }
 
   const result = await getCachedData<{ found: boolean; sha256?: string; sourceFile?: string } | null>(
-    `mirror:checksum:v1:${rawPath}`,
+    `mirror:checksum:v2:${rawPath}`,
     3600,
     async () => {
-      for (const csFile of CHECKSUM_FILES) {
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 3500);
-        try {
-          const res = await fetch(`${MIRROR_ORIGIN}${dirPath}${csFile}`, {
-            signal: controller.signal,
-            headers: { "User-Agent": "Masdika-Mirror-Checksum/1.0" },
-            cache: "no-store",
-          });
-          if (!res.ok) continue;
-          const text = await res.text();
-          if (!text || text.length > 512_000) continue;
+      const candidates = [...CHECKSUM_FILES, `${fileName}.sha256`, `${fileName}.sha256sum`];
+      const results = await Promise.all(
+        candidates.map(async (csFile) => {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 4500);
+          try {
+            const res = await fetch(`${MIRROR_ORIGIN}${dirPath}${csFile}`, {
+              signal: controller.signal,
+              headers: { "User-Agent": "Masdika-Mirror-Checksum/1.0" },
+              cache: "no-store",
+            });
+            if (!res.ok) return null;
+            const text = await res.text();
+            if (!text || text.length > 512_000) return null;
 
-          const lines = text.split(/\r?\n/);
-          for (const line of lines) {
-            if (!line.includes(fileName)) continue;
-            // Format 1: "<64-hex>  filename" or "<64-hex> *filename"
-            const stdMatch = line.match(/\b([a-fA-F0-9]{64})\b/);
-            if (stdMatch) {
-              return {
-                found: true,
-                sha256: stdMatch[1].toLowerCase(),
-                sourceFile: csFile,
-              };
+            const lines = text.split(/\r?\n/);
+            const isPerFileChecksum = csFile.startsWith(fileName);
+            for (const line of lines) {
+              if (!isPerFileChecksum && !line.includes(fileName)) continue;
+              const stdMatch = line.match(/\b([a-fA-F0-9]{64})\b/);
+              if (stdMatch) {
+                return {
+                  found: true,
+                  sha256: stdMatch[1].toLowerCase(),
+                  sourceFile: csFile,
+                };
+              }
             }
+            return null;
+          } catch {
+            return null;
+          } finally {
+            clearTimeout(timer);
           }
-        } catch {
-          // try next checksum filename
-        } finally {
-          clearTimeout(timer);
-        }
-      }
-      return null;
+        })
+      );
+
+      return results.find((r) => r !== null) ?? null;
     }
   );
 

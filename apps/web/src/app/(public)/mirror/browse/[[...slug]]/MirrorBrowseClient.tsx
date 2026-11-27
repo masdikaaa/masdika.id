@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import {
   Check,
   ChevronRight,
@@ -73,20 +74,91 @@ export default function MirrorBrowsePage() {
 
   const isIsoFile = (name: string) => /\.(iso|img|qcow2|raw)$/i.test(name);
 
+  const copyWithFallback = async (text: string): Promise<boolean> => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch {
+      // fall through to execCommand fallback
+    }
+    try {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      const ok = document.execCommand("copy");
+      document.body.removeChild(textarea);
+      return ok;
+    } catch {
+      return false;
+    }
+  };
+
   const handleCopySha256 = async (e: React.MouseEvent, entry: MirrorIndexEntry) => {
     e.preventDefault();
     e.stopPropagation();
     setShaLoadingHref(entry.href);
     try {
-      const res = await fetch(`/api/mirror/checksum?path=${encodeURIComponent(entry.href)}`);
-      const data = await res.json();
-      if (res.ok && data.sha256) {
-        await navigator.clipboard.writeText(data.sha256);
+      let resolvedSha = "";
+
+      if (typeof ClipboardItem !== "undefined" && navigator.clipboard?.write) {
+        try {
+          const textBlobPromise = fetch(`/api/mirror/checksum?path=${encodeURIComponent(entry.href)}`)
+            .then(async (res) => {
+              const data = await res.json();
+              if (!res.ok || !data.sha256) {
+                throw new Error(data.error || "SHA256 checksum not available");
+              }
+              resolvedSha = data.sha256;
+              return new Blob([data.sha256], { type: "text/plain" });
+            });
+
+          await navigator.clipboard.write([new ClipboardItem({ "text/plain": textBlobPromise })]);
+          setShaCopiedHref(entry.href);
+          toast.success(`SHA256 copied for ${entry.name}`);
+          setTimeout(() => setShaCopiedHref((prev) => (prev === entry.href ? null : prev)), 2500);
+          return;
+        } catch {
+          // If ClipboardItem fails or fetch threw, fall back below
+          if (!resolvedSha) {
+            // Let standard flow handle fetch + fallback copy/toast
+          } else {
+            const copied = await copyWithFallback(resolvedSha);
+            if (copied) {
+              setShaCopiedHref(entry.href);
+              toast.success(`SHA256 copied for ${entry.name}`);
+              setTimeout(() => setShaCopiedHref((prev) => (prev === entry.href ? null : prev)), 2500);
+              return;
+            }
+          }
+        }
+      }
+
+      if (!resolvedSha) {
+        const res = await fetch(`/api/mirror/checksum?path=${encodeURIComponent(entry.href)}`);
+        const data = await res.json();
+        if (!res.ok || !data.sha256) {
+          toast.error(data.error || "SHA256 checksum not published for this file");
+          return;
+        }
+        resolvedSha = data.sha256;
+      }
+
+      const copied = await copyWithFallback(resolvedSha);
+      if (copied) {
         setShaCopiedHref(entry.href);
+        toast.success(`SHA256 copied for ${entry.name}`);
         setTimeout(() => setShaCopiedHref((prev) => (prev === entry.href ? null : prev)), 2500);
+      } else {
+        toast.info(`SHA256: ${resolvedSha}`, { duration: 10000 });
       }
     } catch {
-      // ignore
+      toast.error("Failed to fetch SHA256 checksum");
     } finally {
       setShaLoadingHref(null);
     }
