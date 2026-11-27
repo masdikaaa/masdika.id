@@ -23,30 +23,6 @@ RUN rm -rf node_modules/@img node_modules/sharp && \
     npm install --os=linux --libc=musl --cpu=x64 sharp --legacy-peer-deps && \
     mkdir -p /app/apps/web/node_modules
 
-# ─── Stage 1b: Production-only dependencies (exclude devDependencies from runner) ─
-FROM base AS prod-deps
-RUN apk add --no-cache openssl vips-dev
-WORKDIR /app
-
-COPY package.json package-lock.json* ./
-COPY apps/web/package.json ./apps/web/
-COPY apps/web/prisma ./apps/web/prisma
-COPY apps/web/prisma.config.ts ./apps/web/
-
-RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public" \
-    npm install --omit=dev --ignore-scripts --legacy-peer-deps
-
-# Reinstall sharp specifically for Alpine/musl so the native binary is correct
-RUN rm -rf node_modules/@img node_modules/sharp && \
-    npm install --os=linux --libc=musl --cpu=x64 sharp --omit=dev --no-save --legacy-peer-deps && \
-    mkdir -p /app/apps/web/node_modules
-
-# Keep prisma CLI (for entrypoint.sh) and dotenv (for next.config.ts)
-# Installed AFTER sharp --omit=dev so sharp install does not prune them.
-RUN PRISMA_VER=$(node -p "require('./apps/web/package.json').devDependencies.prisma") && \
-    DOTENV_VER=$(node -p "require('./apps/web/package.json').devDependencies.dotenv") && \
-    npm install --no-save --ignore-scripts "prisma@${PRISMA_VER}" "dotenv@${DOTENV_VER}" --legacy-peer-deps
-
 # ─── Stage 2: Build the Next.js app ───────────────────────────────────────────
 FROM base AS builder
 RUN apk add --no-cache openssl vips-dev
@@ -147,11 +123,11 @@ COPY --from=builder --chown=nextjs:nodejs /app/apps/web/prisma.config.ts ./apps/
 COPY --chown=nextjs:nodejs apps/web/package.json ./apps/web/package.json
 COPY --chown=nextjs:nodejs package.json ./package.json
 
-# CRITICAL: Override the standalone's minimal node_modules with production-only
-# node_modules from prod-deps (excludes eslint, vite, vitest, typescript, etc.)
-# plus the generated Prisma client from builder.
-COPY --from=prod-deps --chown=nextjs:nodejs /app/node_modules ./node_modules
-COPY --from=prod-deps --chown=nextjs:nodejs /app/apps/web/node_modules ./apps/web/node_modules
+# CRITICAL: Override the standalone's minimal node_modules with the FULL node_modules
+# from deps stage (which includes next, react, ws, cookie, dotenv, prisma, and
+# Alpine-compatible sharp). NO npm install runs here to avoid pruning.
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
+COPY --from=deps --chown=nextjs:nodejs /app/apps/web/node_modules ./apps/web/node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
 RUN rm -rf /app/node_modules/minimatch /app/node_modules/@typescript-eslint /app/node_modules/postcss-selector-parser
 
