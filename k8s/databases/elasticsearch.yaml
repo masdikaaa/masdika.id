@@ -51,7 +51,7 @@ spec:
             - name: bootstrap.memory_lock
               value: "false"
             - name: ES_JAVA_OPTS
-              value: "-Xms1536m -Xmx1536m"
+              value: "-Xms1536m -Xmx1536m -Des.entitlements.enabled=false"
             - name: xpack.security.enabled
               value: "true"
             - name: ELASTIC_PASSWORD
