@@ -13,7 +13,7 @@ export const metadata: Metadata = {
       "Browse package directories and download official ISO images for Ubuntu, Debian 11-14, Kali, Parrot OS, Linux Mint, AlmaLinux, Rocky, CentOS Stream, Arch, Alpine, FreeBSD, and OpenBSD.",
     url: "https://www.masdika.id/mirror/browse",
     siteName: "Masdika",
-    images: [{ url: OG_IMAGE_PATH, width: 1200, height: 630, alt: "Masdika Mirror Repository Browser" }],
+    images: [{ url: `https://www.masdika.id${OG_IMAGE_PATH}`, width: 1200, height: 630, alt: "Masdika Mirror Repository Browser" }],
     type: "website",
   },
   twitter: {
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     title: "Browse Repositories & ISO Releases - Linux & BSD Mirror",
     description:
       "Browse package directories and download official ISO images for Ubuntu, Debians, Kali, Parrot OS, Linux Mint, AlmaLinux, Rocky, CentOS Stream, Arch, Alpine, FreeBSD, and OpenBSD.",
-    images: [OG_IMAGE_PATH],
+    images: [`https://www.masdika.id${OG_IMAGE_PATH}`],
   },
 };
 

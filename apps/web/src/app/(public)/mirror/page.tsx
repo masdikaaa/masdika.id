@@ -34,7 +34,7 @@ export const metadata: Metadata = {
       "Fast GPG-verified package cache and direct ISO mirror for Ubuntu, Debian 11-14, Kali, Parrot OS, Linux Mint, AlmaLinux, Rocky, CentOS Stream, EPEL, Arch, Alpine, FreeBSD, and OpenBSD.",
     url: "https://www.masdika.id/mirror",
     siteName: "Masdika",
-    images: [{ url: OG_IMAGE_PATH, width: 1200, height: 630, alt: "Masdika Linux & BSD Repository Mirror" }],
+    images: [{ url: `https://www.masdika.id${OG_IMAGE_PATH}`, width: 1200, height: 630, alt: "Masdika Linux & BSD Repository Mirror" }],
     locale: "en_US",
     type: "website",
   },
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     title: "Linux & BSD Repository Mirror - Ubuntu, Debian, RHEL, Arch, Kali, BSD",
     description:
       "Fast GPG-verified package cache and direct ISO mirror for Ubuntu, Debian 11-14, Kali, Parrot OS, Linux Mint, AlmaLinux, Rocky, CentOS Stream, EPEL, Arch, Alpine, FreeBSD, and OpenBSD.",
-    images: [OG_IMAGE_PATH],
+    images: [`https://www.masdika.id${OG_IMAGE_PATH}`],
   },
 };
 
