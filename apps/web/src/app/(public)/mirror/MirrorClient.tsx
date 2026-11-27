@@ -29,7 +29,41 @@ import {
   Terminal,
 } from "lucide-react";
 import type { MirrorStatusPayload } from "@/app/api/mirror/status/route";
-import { SiMikrotik } from "react-icons/si";
+import type { IconType } from "react-icons";
+import {
+  SiAlmalinux,
+  SiAlpinelinux,
+  SiArchlinux,
+  SiCentos,
+  SiDebian,
+  SiFedora,
+  SiFreebsd,
+  SiKalilinux,
+  SiLinux,
+  SiLinuxmint,
+  SiMikrotik,
+  SiOpenbsd,
+  SiRockylinux,
+  SiUbuntu,
+} from "react-icons/si";
+
+const TOP_REPO_ICONS: Record<string, IconType> = {
+  ubuntu: SiUbuntu,
+  "ubuntu-releases": SiUbuntu,
+  debian: SiDebian,
+  "debian-cd": SiDebian,
+  alpine: SiAlpinelinux,
+  archlinux: SiArchlinux,
+  kali: SiKalilinux,
+  almalinux: SiAlmalinux,
+  rocky: SiRockylinux,
+  "centos-stream": SiCentos,
+  epel: SiFedora,
+  freebsd: SiFreebsd,
+  openbsd: SiOpenbsd,
+  linuxmint: SiLinuxmint,
+  mikrotik: SiMikrotik,
+};
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { FaqSection } from "@/components/ui/FaqSection";
@@ -633,12 +667,18 @@ export default function MirrorClient() {
                     Top Cached Repos
                   </div>
                   <div className="space-y-1">
-                    {(health.telemetry.topRepos || []).slice(0, 3).map((repo) => (
-                      <div key={repo.name} className="flex items-center justify-between text-xs font-mono">
-                        <span className="text-cyan-600 dark:text-cyan-400 font-semibold truncate">{repo.name}</span>
-                        <span className="text-[var(--text-secondary)]">{repo.requests}</span>
-                      </div>
-                    ))}
+                    {(health.telemetry.topRepos || []).slice(0, 3).map((repo) => {
+                      const RepoIcon = TOP_REPO_ICONS[repo.name.toLowerCase()] ?? SiLinux;
+                      return (
+                        <div key={repo.name} className="flex items-center justify-between gap-2 text-xs font-mono">
+                          <span className="inline-flex items-center gap-2 text-cyan-600 dark:text-cyan-400 font-semibold truncate">
+                            <RepoIcon className="w-3.5 h-3.5 shrink-0" />
+                            <span className="truncate">{repo.name}</span>
+                          </span>
+                          <span className="text-[var(--text-secondary)] shrink-0">{repo.requests}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
