@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { HeroOrnaments } from "@/components/ui/PremiumBackground";
 
@@ -58,30 +59,35 @@ export function HeroAvatarFrame({
       {/* Architectural Hero Background Ornaments precisely framed around the hero avatar */}
       <HeroOrnaments className="z-0" />
 
-      {/* Hero Character with progressive grounded bottom fade */}
-      <div
-        className="w-full h-full relative z-10 flex items-end justify-center overflow-hidden"
-        style={{
-          maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 84%, rgba(0,0,0,0.6) 93%, rgba(0,0,0,0) 100%)",
-          WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 84%, rgba(0,0,0,0.6) 93%, rgba(0,0,0,0) 100%)",
-        }}
-      >
-        <Image
-          referrerPolicy="no-referrer"
-          src={imageSrc}
-          alt={imageAlt}
-          width={imageWidth}
-          height={imageHeight}
-          priority={priority}
-          sizes={
-            isPortrait
-              ? "(max-width: 640px) 340px, (max-width: 1024px) 420px, 500px"
-              : "(max-width: 640px) 360px, (max-width: 1024px) 460px, 560px"
-          }
-          className="w-full h-full object-contain object-bottom relative z-10"
-        />
-        {/* Soft grounded bottom vignette fade into background */}
-        <div className="absolute bottom-0 inset-x-0 h-10 sm:h-14 bg-gradient-to-t from-[var(--background)] via-[var(--background)]/30 to-transparent pointer-events-none z-10" />
+      {/* Hero Character with progressive grounded bottom fade + Motion & GSAP parallax */}
+      <div data-gsap-parallax="-16" className="w-full h-full relative z-10">
+        <motion.div
+          initial={{ y: 10, scale: 0.985 }}
+          animate={{ y: 0, scale: 1 }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          className="w-full h-full relative flex items-end justify-center overflow-hidden"
+          style={{
+            maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 84%, rgba(0,0,0,0.6) 93%, rgba(0,0,0,0) 100%)",
+            WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 84%, rgba(0,0,0,0.6) 93%, rgba(0,0,0,0) 100%)",
+          }}
+        >
+          <Image
+            referrerPolicy="no-referrer"
+            src={imageSrc}
+            alt={imageAlt}
+            width={imageWidth}
+            height={imageHeight}
+            priority={priority}
+            sizes={
+              isPortrait
+                ? "(max-width: 640px) 340px, (max-width: 1024px) 420px, 500px"
+                : "(max-width: 640px) 360px, (max-width: 1024px) 460px, 560px"
+            }
+            className="w-full h-full object-contain object-bottom relative z-10"
+          />
+          {/* Soft grounded bottom vignette fade into background */}
+          <div className="absolute bottom-0 inset-x-0 h-10 sm:h-14 bg-gradient-to-t from-[var(--background)] via-[var(--background)]/30 to-transparent pointer-events-none z-10" />
+        </motion.div>
       </div>
 
       {/* 4 Floating animated hero badges */}
@@ -89,15 +95,19 @@ export function HeroAvatarFrame({
         const { pos, anim } = BADGE_POSITIONS[idx] || BADGE_POSITIONS[0];
         const Icon = badge.icon;
         return (
-          <div
+          <motion.div
             key={idx}
+            initial={{ opacity: 0, scale: 0.88, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.12 + idx * 0.08, ease: [0.22, 1, 0.36, 1] }}
+            whileHover={{ y: -4, scale: 1.04 }}
             className={cn(
               "flex absolute z-30 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl items-center gap-2 sm:gap-3 max-w-[170px] sm:max-w-none",
               pos,
               anim,
               "bg-white dark:bg-[#0a0a0c] border border-slate-200/90 dark:border-white/15",
               "shadow-[0_8px_32px_0_rgba(31,38,135,0.08)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.6)]",
-              "hover:border-cyan-500/50 hover:scale-105 transition-all duration-200 cursor-default"
+              "hover:border-cyan-500/50 transition-colors duration-200 cursor-default"
             )}
           >
             <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0">
@@ -111,7 +121,7 @@ export function HeroAvatarFrame({
                 {badge.value}
               </div>
             </div>
-          </div>
+          </motion.div>
         );
       })}
     </div>

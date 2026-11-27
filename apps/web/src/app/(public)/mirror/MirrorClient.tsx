@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   AlertTriangle,
   ArrowRight,
@@ -388,7 +389,12 @@ export default function MirrorClient() {
         {/* 1. HERO SECTION */}
         <section className="relative pt-0 pb-8 sm:pb-12 flex items-center">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-start w-full">
-            <div className="max-w-2xl relative z-30 lg:pt-20">
+            <motion.div
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+              className="max-w-2xl relative z-30 lg:pt-20"
+            >
               <div className="mb-8">
                 <Badge
                   variant="brand"
@@ -443,7 +449,7 @@ export default function MirrorClient() {
                   Download ISO
                 </Button>
               </div>
-            </div>
+            </motion.div>
 
             <div className="relative flex items-center justify-center mt-6 lg:mt-0 lg:self-center">
               <HeroAvatarFrame
@@ -520,7 +526,7 @@ export default function MirrorClient() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div data-gsap-stagger className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               {
                 icon: Clock,
@@ -582,7 +588,7 @@ export default function MirrorClient() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-[var(--border-subtle)]">
+              <div data-gsap-stagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-[var(--border-subtle)]">
                 <div className="p-5 sm:p-6 space-y-1.5">
                   <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)]">
                     Cache Hit Ratio
@@ -672,11 +678,18 @@ export default function MirrorClient() {
                   onClick={() => handleCategoryChange(cat.id)}
                   className={
                     category === cat.id
-                      ? "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-cyan-400 text-slate-950 transition-all cursor-pointer whitespace-nowrap shrink-0"
-                      : "px-3.5 py-1.5 rounded-xl text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer whitespace-nowrap shrink-0"
+                      ? "relative px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-950 transition-colors cursor-pointer whitespace-nowrap shrink-0"
+                      : "relative px-3.5 py-1.5 rounded-xl text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer whitespace-nowrap shrink-0"
                   }
                 >
-                  {cat.label}
+                  {category === cat.id && (
+                    <motion.span
+                      layoutId="mirrorCatPill"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      className="absolute inset-0 rounded-xl bg-cyan-400"
+                    />
+                  )}
+                  <span className="relative z-10">{cat.label}</span>
                 </button>
               ))}
             </div>
@@ -953,12 +966,12 @@ export default function MirrorClient() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div data-gsap-stagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {ISO_SHORTCUTS.map((iso) => (
               <Link
                 key={iso.href}
                 href={iso.href}
-                className="group p-5 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-all flex items-center justify-between gap-3 shadow-sm"
+                className="group p-5 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 transition-colors flex items-center justify-between gap-3 shadow-sm"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-10 h-10 rounded-xl border border-[var(--border-primary)] bg-slate-50 dark:bg-white/95 flex items-center justify-center p-2 shrink-0 shadow-2xs">
@@ -1061,9 +1074,18 @@ export default function MirrorClient() {
               ))}
             </div>
 
-            <pre className="p-4 sm:p-5 font-mono text-xs sm:text-[13px] leading-relaxed overflow-x-auto whitespace-pre [scrollbar-width:none] [&::-webkit-scrollbar]:hidden text-[var(--text-primary)]">
-              {activeSnippet}
-            </pre>
+            <AnimatePresence mode="wait">
+              <motion.pre
+                key={activeTab}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.2 }}
+                className="p-4 sm:p-5 font-mono text-xs sm:text-[13px] leading-relaxed overflow-x-auto whitespace-pre [scrollbar-width:none] [&::-webkit-scrollbar]:hidden text-[var(--text-primary)]"
+              >
+                {activeSnippet}
+              </motion.pre>
+            </AnimatePresence>
           </div>
         </section>
 
@@ -1082,7 +1104,7 @@ export default function MirrorClient() {
           </div>
 
           <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] overflow-hidden shadow-xl">
-            <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[var(--border-subtle)]">
+            <div data-gsap-stagger className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[var(--border-subtle)]">
               {[
                 {
                   tier: "TIER 01 · 5M REVALIDATE",

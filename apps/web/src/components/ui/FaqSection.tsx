@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from "framer-motion";
 import { useTheme } from "@/components/ThemeProvider";
 import { cn } from "@/lib/utils";
 
@@ -25,9 +26,14 @@ export function FaqSection({ faqs }: FaqSectionProps) {
           <h2 className={cn("text-3xl sm:text-4xl lg:text-5xl font-black leading-tight", isDark ? "text-white" : "text-slate-900")}>Frequently Asked Questions</h2>
         </div>
 
-        <div className="space-y-4 sm:space-y-5">
+        <div data-gsap-stagger className="space-y-4 sm:space-y-5">
           {faqs.map((faq, i) => (
-            <details key={i} className={cn("group rounded-2xl overflow-hidden cursor-pointer shadow-md transition-colors", isDark ? "bg-[var(--surface)] backdrop-blur-md border border-[var(--border-primary)] hover:border-cyan-500/50 shadow-black/40" : "bg-white border border-cyan-200 hover:border-cyan-400 shadow-sm")}>
+            <motion.details
+              key={i}
+              whileHover={{ y: -2 }}
+              transition={{ type: "spring", stiffness: 320, damping: 24 }}
+              className={cn("group rounded-2xl overflow-hidden cursor-pointer shadow-md transition-colors", isDark ? "bg-[var(--surface)] backdrop-blur-md border border-[var(--border-primary)] hover:border-cyan-500/50 shadow-black/40" : "bg-white border border-cyan-200 hover:border-cyan-400 shadow-sm")}
+            >
               <summary className={cn("flex items-center justify-between gap-4 p-5 sm:p-6 font-bold text-base sm:text-lg select-none list-none group-open:text-cyan-400 transition-colors [&::-webkit-details-marker]:hidden", isDark ? "text-white" : "text-slate-900")}>
                 <span className="flex-1 leading-snug">{faq.q}</span>
                 <div className={cn("shrink-0 w-8 h-8 rounded-full border flex items-center justify-center transition-all", isDark ? "bg-cyan-500/10 border-cyan-500/20 group-open:bg-cyan-500/20 group-open:border-cyan-500/40" : "bg-cyan-50 border-cyan-200 group-open:bg-cyan-100 group-open:border-cyan-300")}>
@@ -37,7 +43,7 @@ export function FaqSection({ faqs }: FaqSectionProps) {
               <div className={cn("px-5 pb-5 sm:px-6 sm:pb-6 pt-0 text-sm sm:text-base leading-relaxed font-medium", isDark ? "text-zinc-400" : "text-slate-600")}>
                 {faq.a}
               </div>
-            </details>
+            </motion.details>
           ))}
         </div>
       </div>

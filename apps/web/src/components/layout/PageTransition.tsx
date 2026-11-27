@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { PageOrnaments } from "@/components/ui/PremiumBackground";
+import { GsapScrollOrchestrator } from "@/components/animations/GsapScrollOrchestrator";
 
 /**
  * Lightweight page transition with instant scroll to top on page mount.
@@ -25,7 +26,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
     >
       {!isHomePage && <PageOrnaments />}
       <div className="relative z-10 flex flex-col flex-1 w-full max-w-full min-w-0">
-        {children}
+        <GsapScrollOrchestrator>{children}</GsapScrollOrchestrator>
       </div>
     </div>
   );

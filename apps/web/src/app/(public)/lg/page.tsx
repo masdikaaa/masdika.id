@@ -156,7 +156,12 @@ export default function LookingGlassPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-start w-full">
 
             {/* Left – Text & Actions */}
-            <div className="max-w-2xl relative z-30 lg:pt-20">
+            <motion.div
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+              className="max-w-2xl relative z-30 lg:pt-20"
+            >
               {/* Status pill using shared Badge */}
               <div className="mb-8">
                 <Badge variant="brand" dot dotColor="bg-cyan-400" size="md" className="font-mono uppercase">
@@ -198,7 +203,7 @@ export default function LookingGlassPage() {
                   AS63859 BGP Peering
                 </Button>
               </div>
-            </div>
+            </motion.div>
 
             {/* Right – Hero Avatar (looking-glass.webp) with Floating Badges */}
             <div className="relative flex items-center justify-center mt-6 lg:mt-0 lg:self-center">
@@ -236,7 +241,7 @@ export default function LookingGlassPage() {
           </div>
 
           {/* Top Telemetry Strip (Clean 3-Column Edge Summary) */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+          <div data-gsap-stagger className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
             {/* 1. Server Info */}
             <div className="bg-[var(--surface)] border border-[var(--border-primary)] rounded-2xl p-5 sm:p-6 shadow-sm hover:border-cyan-500/40 transition-all flex flex-col justify-between">
               <div>
@@ -396,13 +401,20 @@ export default function LookingGlassPage() {
                       key={type}
                       onClick={() => setTestType(type)}
                       className={cn(
-                        "flex-1 py-1.5 sm:py-2 text-[11px] sm:text-xs font-mono font-bold rounded-lg uppercase tracking-wider transition-all text-center",
+                        "relative flex-1 py-1.5 sm:py-2 text-[11px] sm:text-xs font-mono font-bold rounded-lg uppercase tracking-wider transition-colors text-center cursor-pointer",
                         testType === type 
-                          ? "bg-[var(--surface)] text-cyan-600 dark:text-cyan-400 shadow-sm border border-[var(--border-primary)]"
+                          ? "text-cyan-600 dark:text-cyan-400"
                           : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium"
                       )}
                     >
-                      {type}
+                      {testType === type && (
+                        <motion.span
+                          layoutId="lgProtoPill"
+                          transition={{ type: "spring", stiffness: 360, damping: 30 }}
+                          className="absolute inset-0 rounded-lg bg-[var(--surface)] shadow-sm border border-[var(--border-primary)]"
+                        />
+                      )}
+                      <span className="relative z-10">{type}</span>
                     </button>
                   ))}
                 </div>
@@ -587,7 +599,7 @@ export default function LookingGlassPage() {
           </div>
 
           <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] overflow-hidden shadow-sm">
-            <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[var(--border-subtle)]">
+            <div data-gsap-stagger className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[var(--border-subtle)]">
               {[
                 {
                   icon: ShieldCheck,

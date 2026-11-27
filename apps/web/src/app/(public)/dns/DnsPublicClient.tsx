@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Activity,
   ArrowRight,
@@ -457,7 +458,12 @@ export default function DnsPublicClient({
         {/* 1. HERO SECTION */}
         <section className="relative pt-0 pb-8 sm:pb-12 flex items-center">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-start w-full">
-            <div className="max-w-2xl relative z-30 lg:pt-20">
+            <motion.div
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+              className="max-w-2xl relative z-30 lg:pt-20"
+            >
               <div className="mb-8">
                 <Badge
                   variant="brand"
@@ -502,7 +508,7 @@ export default function DnsPublicClient({
                   Quick Setup
                 </Button>
               </div>
-            </div>
+            </motion.div>
 
             <div className="relative flex items-center justify-center mt-6 lg:mt-0 lg:self-center">
               <HeroAvatarFrame
@@ -537,7 +543,7 @@ export default function DnsPublicClient({
           </div>
 
           {/* Service Cards Side-by-Side (Both Always Visible) */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div data-gsap-stagger className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* SafeDNS Public Resolver Card */}
             <div className="relative overflow-hidden rounded-3xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-8 flex flex-col justify-between gap-6 shadow-sm">
               <div
@@ -775,9 +781,18 @@ export default function DnsPublicClient({
 
             <div className="px-4 sm:px-5 pt-3.5 text-xs text-[var(--text-secondary)]">{activeSetup.hint}</div>
 
-            <pre className="p-4 sm:p-5 font-mono text-xs sm:text-[13px] leading-relaxed overflow-x-auto whitespace-pre [scrollbar-width:none] [&::-webkit-scrollbar]:hidden text-[var(--text-primary)]">
-              {activeSetup.command}
-            </pre>
+            <AnimatePresence mode="wait">
+              <motion.pre
+                key={activeTab}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.2 }}
+                className="p-4 sm:p-5 font-mono text-xs sm:text-[13px] leading-relaxed overflow-x-auto whitespace-pre [scrollbar-width:none] [&::-webkit-scrollbar]:hidden text-[var(--text-primary)]"
+              >
+                {activeSetup.command}
+              </motion.pre>
+            </AnimatePresence>
           </div>
         </section>
 
@@ -870,63 +885,82 @@ export default function DnsPublicClient({
               </div>
             </form>
 
-            {lookupError && (
-              <div className="px-6 sm:px-8 py-4 border-t border-[var(--border-subtle)] text-xs sm:text-sm font-mono text-rose-500 bg-rose-500/5">
-                {lookupError}
-              </div>
-            )}
+            <AnimatePresence mode="wait">
+              {lookupError && (
+                <motion.div
+                  key="lookup-err"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="px-6 sm:px-8 py-4 border-t border-[var(--border-subtle)] text-xs sm:text-sm font-mono text-rose-500 bg-rose-500/5"
+                >
+                  {lookupError}
+                </motion.div>
+              )}
 
-            {lookupResult && !lookupError && (
-              <div className="border-t border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]">
-                <div className="px-6 sm:px-8 py-3.5 flex flex-wrap items-center justify-between gap-3 text-xs font-mono bg-[var(--surface-secondary)]/50">
-                  <div className="flex flex-wrap items-center gap-2.5">
-                    <span
-                      className={
-                        lookupResult.filtered
-                          ? "px-2.5 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-500 font-bold"
-                          : lookupResult.status === "NOERROR"
-                            ? "px-2.5 py-0.5 rounded-md bg-cyan-500/15 border border-cyan-500/30 text-cyan-600 dark:text-cyan-400 font-bold"
-                            : "px-2.5 py-0.5 rounded-md bg-rose-500/15 border border-rose-500/30 text-rose-500 font-bold"
-                      }
-                    >
-                      {lookupResult.filtered ? "BLOCKED BY SAFEDNS" : lookupResult.status}
-                    </span>
-                    <span className="text-[var(--text-primary)] font-semibold">
-                      {lookupResult.domain} ({lookupResult.type})
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-4 text-[var(--text-secondary)]">
-                    <span>Server: {lookupResult.server}</span>
-                    <span className="text-cyan-600 dark:text-cyan-400 font-semibold">{lookupResult.latencyMs} ms</span>
-                  </div>
-                </div>
-
-                {lookupResult.records.length > 0 ? (
-                  <div className="divide-y divide-[var(--border-subtle)]">
-                    {lookupResult.records.map((rec, i) => (
-                      <div
-                        key={`${rec.value}-${i}`}
-                        className="px-6 sm:px-8 py-3.5 flex items-center justify-between gap-4 font-mono text-xs sm:text-sm"
+              {lookupResult && !lookupError && (
+                <motion.div
+                  key={`${lookupResult.domain}-${lookupResult.type}-${lookupResult.latencyMs}`}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                  className="border-t border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]"
+                >
+                  <div className="px-6 sm:px-8 py-3.5 flex flex-wrap items-center justify-between gap-3 text-xs font-mono bg-[var(--surface-secondary)]/50">
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      <span
+                        className={
+                          lookupResult.filtered
+                            ? "px-2.5 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-500 font-bold"
+                            : lookupResult.status === "NOERROR"
+                              ? "px-2.5 py-0.5 rounded-md bg-cyan-500/15 border border-cyan-500/30 text-cyan-600 dark:text-cyan-400 font-bold"
+                              : "px-2.5 py-0.5 rounded-md bg-rose-500/15 border border-rose-500/30 text-rose-500 font-bold"
+                        }
                       >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <span className="text-[11px] font-bold text-cyan-600 dark:text-cyan-400 shrink-0 w-12">
-                            {lookupResult.type}
+                        {lookupResult.filtered ? "BLOCKED BY SAFEDNS" : lookupResult.status}
+                      </span>
+                      <span className="text-[var(--text-primary)] font-semibold">
+                        {lookupResult.domain} ({lookupResult.type})
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-4 text-[var(--text-secondary)]">
+                      <span>Server: {lookupResult.server}</span>
+                      <span className="text-cyan-600 dark:text-cyan-400 font-semibold">{lookupResult.latencyMs} ms</span>
+                    </div>
+                  </div>
+
+                  {lookupResult.records.length > 0 ? (
+                    <div className="divide-y divide-[var(--border-subtle)]">
+                      {lookupResult.records.map((rec, i) => (
+                        <motion.div
+                          key={`${rec.value}-${i}`}
+                          initial={{ opacity: 0, x: -6 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.2, delay: i * 0.04 }}
+                          className="px-6 sm:px-8 py-3.5 flex items-center justify-between gap-4 font-mono text-xs sm:text-sm"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <span className="text-[11px] font-bold text-cyan-600 dark:text-cyan-400 shrink-0 w-12">
+                              {lookupResult.type}
+                            </span>
+                            <span className="text-[var(--text-primary)] break-all">{rec.value}</span>
+                          </div>
+                          <span className="text-xs text-[var(--text-secondary)] shrink-0">
+                            {rec.ttl !== undefined ? `TTL ${rec.ttl}s` : "-"}
                           </span>
-                          <span className="text-[var(--text-primary)] break-all">{rec.value}</span>
-                        </div>
-                        <span className="text-xs text-[var(--text-secondary)] shrink-0">
-                          {rec.ttl !== undefined ? `TTL ${rec.ttl}s` : "-"}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="px-6 sm:px-8 py-4 text-xs sm:text-sm font-mono text-[var(--text-secondary)]">
-                    {lookupResult.message || "No records returned for this query."}
-                  </div>
-                )}
-              </div>
-            )}
+                        </motion.div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="px-6 sm:px-8 py-4 text-xs sm:text-sm font-mono text-[var(--text-secondary)]">
+                      {lookupResult.message || "No records returned for this query."}
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </section>
 
@@ -983,7 +1017,7 @@ export default function DnsPublicClient({
               const recPct = (((stats.rdQueries ?? 0) / totalQ) * 100).toFixed(1);
               const authPct = (((stats.authQueries ?? 0) / totalQ) * 100).toFixed(1);
               return (
-                <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 divide-x divide-[var(--border-subtle)]">
+                <div data-gsap-stagger className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 divide-x divide-[var(--border-subtle)]">
                   <div className="p-4 sm:p-5 space-y-1 min-w-0">
                     <div className="flex items-center justify-between gap-1.5">
                       <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-cyan-600 dark:text-cyan-400 font-semibold truncate">
@@ -1351,123 +1385,138 @@ export default function DnsPublicClient({
             </p>
 
             <div className="flex flex-col sm:inline-flex sm:flex-row items-stretch sm:items-center rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] p-1 shadow-sm w-full sm:w-auto gap-1 sm:gap-0">
-              <button
-                type="button"
-                onClick={() => setFlowMode("recursive")}
-                className={
-                  flowMode === "recursive"
-                    ? "px-4 py-2 rounded-lg text-xs font-bold bg-cyan-400 text-slate-950 cursor-pointer transition-colors whitespace-nowrap"
-                    : "px-4 py-2 rounded-lg text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer transition-colors whitespace-nowrap"
-                }
-              >
-                SafeDNS ({resolverIp})
-              </button>
-              <button
-                type="button"
-                onClick={() => setFlowMode("authoritative")}
-                className={
-                  flowMode === "authoritative"
-                    ? "px-4 py-2 rounded-lg text-xs font-bold bg-cyan-400 text-slate-950 cursor-pointer transition-colors whitespace-nowrap"
-                    : "px-4 py-2 rounded-lg text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer transition-colors whitespace-nowrap"
-                }
-              >
-                Authoritative (ns1 / ns2)
-              </button>
+              {(
+                [
+                  { id: "recursive", label: `SafeDNS (${resolverIp})` },
+                  { id: "authoritative", label: "Authoritative (ns1 / ns2)" },
+                ] as const
+              ).map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setFlowMode(tab.id)}
+                  className={
+                    flowMode === tab.id
+                      ? "relative px-4 py-2 rounded-lg text-xs font-bold text-slate-950 cursor-pointer whitespace-nowrap"
+                      : "relative px-4 py-2 rounded-lg text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer transition-colors whitespace-nowrap"
+                  }
+                >
+                  {flowMode === tab.id && (
+                    <motion.span
+                      layoutId="dnsFlowPill"
+                      transition={{ type: "spring", stiffness: 360, damping: 30 }}
+                      className="absolute inset-0 rounded-lg bg-cyan-400"
+                    />
+                  )}
+                  <span className="relative z-10">{tab.label}</span>
+                </button>
+              ))}
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-10 shadow-xl space-y-8">
-            <div className="relative grid grid-cols-1 md:grid-cols-4 gap-6 items-stretch">
-              <div
-                aria-hidden="true"
-                className="hidden md:block absolute top-11 left-[12%] right-[12%] h-px bg-gradient-to-r from-cyan-500/20 via-cyan-400/60 to-cyan-500/20"
-              />
-              {(flowMode === "recursive"
-                ? [
-                    {
-                      step: "HOP 01",
-                      icon: Laptop,
-                      tag: "UDP/53 · DoH",
-                      title: "Client Query Arrives",
-                      desc: "Sent from your router, Linux server, Windows workstation, or browser RFC 8484 DoH endpoint.",
-                    },
-                    {
-                      step: "HOP 02",
-                      icon: ShieldAlert,
-                      tag: "637K+ Rules",
-                      title: "Edge Filter & Rate Guard",
-                      desc: "dnsdist shunts ANY amplification to TCP, enforces per-IP limits, and sinkholes malicious hosts to 0.0.0.0.",
-                    },
-                    {
-                      step: "HOP 03",
-                      icon: MemoryStick,
-                      tag: "<1 ms Hit",
-                      title: "500K RAM Packet Cache",
-                      desc: "Hot domains answer directly from lock-free C++ memory cache with serve-stale failover if upstream lags.",
-                    },
-                    {
-                      step: "HOP 04",
-                      icon: GitBranch,
-                      tag: "DNSSEC Check",
-                      title: "Recursive Iteration",
-                      desc: "Uncached lookups walk root and TLD authorities with full cryptographic DNSSEC validation.",
-                    },
-                  ]
-                : [
-                    {
-                      step: "STAGE 01",
-                      icon: SlidersHorizontal,
-                      tag: "DNS Console",
-                      title: "Save Record Changes",
-                      desc: "Edit A, AAAA, CNAME, MX, TXT, SRV, or CAA records from the dashboard or REST API.",
-                    },
-                    {
-                      step: "STAGE 02",
-                      icon: Database,
-                      tag: "0s Lock-Free",
-                      title: "PowerDNS LMDB Commit",
-                      desc: "Writes directly to memory-mapped LMDB shards with an automatic SOA serial increment and zero SQL locking.",
-                    },
-                    {
-                      step: "STAGE 03",
-                      icon: Radio,
-                      tag: "AXFR Locked",
-                      title: "Live on ns1 & ns2",
-                      desc: "Both authoritative nameservers serve updated zone records instantly while blocking unauthorized zone transfers.",
-                    },
-                    {
-                      step: "STAGE 04",
-                      icon: Route,
-                      tag: "60s Default TTL",
-                      title: "Rapid Edge Rollout",
-                      desc: "Short default 60-second TTLs ensure global resolvers pick up production IP swaps without stale caches.",
-                    },
-                  ]
-              ).map((hop) => (
+          <div data-no-gsap className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 sm:p-10 shadow-xl space-y-8">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={flowMode}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                className="relative grid grid-cols-1 md:grid-cols-4 gap-6 items-stretch"
+              >
                 <div
-                  key={hop.step}
-                  className="relative z-10 p-5 sm:p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/70 flex flex-col justify-between gap-4 hover:border-cyan-500/40 transition-colors"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="w-10 h-10 rounded-xl bg-cyan-50 dark:bg-cyan-950/50 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
-                        <hop.icon className="w-5 h-5" />
+                  aria-hidden="true"
+                  className="hidden md:block absolute top-11 left-[12%] right-[12%] h-px bg-gradient-to-r from-cyan-500/20 via-cyan-400/60 to-cyan-500/20"
+                />
+                {(flowMode === "recursive"
+                  ? [
+                      {
+                        step: "HOP 01",
+                        icon: Laptop,
+                        tag: "UDP/53 · DoH",
+                        title: "Client Query Arrives",
+                        desc: "Sent from your router, Linux server, Windows workstation, or browser RFC 8484 DoH endpoint.",
+                      },
+                      {
+                        step: "HOP 02",
+                        icon: ShieldAlert,
+                        tag: "637K+ Rules",
+                        title: "Edge Filter & Rate Guard",
+                        desc: "dnsdist shunts ANY amplification to TCP, enforces per-IP limits, and sinkholes malicious hosts to 0.0.0.0.",
+                      },
+                      {
+                        step: "HOP 03",
+                        icon: MemoryStick,
+                        tag: "<1 ms Hit",
+                        title: "500K RAM Packet Cache",
+                        desc: "Hot domains answer directly from lock-free C++ memory cache with serve-stale failover if upstream lags.",
+                      },
+                      {
+                        step: "HOP 04",
+                        icon: GitBranch,
+                        tag: "DNSSEC Check",
+                        title: "Recursive Iteration",
+                        desc: "Uncached lookups walk root and TLD authorities with full cryptographic DNSSEC validation.",
+                      },
+                    ]
+                  : [
+                      {
+                        step: "STAGE 01",
+                        icon: SlidersHorizontal,
+                        tag: "DNS Console",
+                        title: "Save Record Changes",
+                        desc: "Edit A, AAAA, CNAME, MX, TXT, SRV, or CAA records from the dashboard or REST API.",
+                      },
+                      {
+                        step: "STAGE 02",
+                        icon: Database,
+                        tag: "0s Lock-Free",
+                        title: "PowerDNS LMDB Commit",
+                        desc: "Writes directly to memory-mapped LMDB shards with an automatic SOA serial increment and zero SQL locking.",
+                      },
+                      {
+                        step: "STAGE 03",
+                        icon: Radio,
+                        tag: "AXFR Locked",
+                        title: "Live on ns1 & ns2",
+                        desc: "Both authoritative nameservers serve updated zone records instantly while blocking unauthorized zone transfers.",
+                      },
+                      {
+                        step: "STAGE 04",
+                        icon: Route,
+                        tag: "60s Default TTL",
+                        title: "Rapid Edge Rollout",
+                        desc: "Short default 60-second TTLs ensure global resolvers pick up production IP swaps without stale caches.",
+                      },
+                    ]
+                ).map((hop) => (
+                  <motion.div
+                    key={hop.step}
+                    whileHover={{ y: -3 }}
+                    transition={{ type: "spring", stiffness: 320, damping: 24 }}
+                    className="relative z-10 p-5 sm:p-6 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/70 flex flex-col justify-between gap-4 hover:border-cyan-500/40 transition-colors"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="w-10 h-10 rounded-xl bg-cyan-50 dark:bg-cyan-950/50 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
+                          <hop.icon className="w-5 h-5" />
+                        </div>
+                        <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 font-mono text-[10px] font-semibold text-cyan-600 dark:text-cyan-400">
+                          {hop.tag}
+                        </span>
                       </div>
-                      <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 font-mono text-[10px] font-semibold text-cyan-600 dark:text-cyan-400">
-                        {hop.tag}
-                      </span>
-                    </div>
-                    <div>
-                      <div className="font-mono text-[10px] uppercase tracking-wider text-[var(--text-secondary)] mb-1">
-                        {hop.step}
+                      <div>
+                        <div className="font-mono text-[10px] uppercase tracking-wider text-[var(--text-secondary)] mb-1">
+                          {hop.step}
+                        </div>
+                        <h3 className="text-base font-bold text-[var(--text-primary)]">{hop.title}</h3>
                       </div>
-                      <h3 className="text-base font-bold text-[var(--text-primary)]">{hop.title}</h3>
                     </div>
-                  </div>
-                  <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">{hop.desc}</p>
-                </div>
-              ))}
-            </div>
+                    <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">{hop.desc}</p>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </AnimatePresence>
 
             <div className="pt-6 border-t border-[var(--border-subtle)] grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 font-mono">
               <div className="flex flex-col gap-0.5">
@@ -1563,7 +1612,7 @@ export default function DnsPublicClient({
                   Default TTL: 60s
                 </span>
               </div>
-              <div className="divide-y divide-[var(--border-subtle)] text-xs sm:text-sm">
+              <div data-gsap-stagger className="divide-y divide-[var(--border-subtle)] text-xs sm:text-sm">
                 {[
                   { type: "A / AAAA", role: "IPv4 & IPv6 host mapping", example: "@ -> 45.198.149.x" },
                   { type: "CNAME", role: "Subdomain canonical alias target", example: "www -> app.masdika.id." },

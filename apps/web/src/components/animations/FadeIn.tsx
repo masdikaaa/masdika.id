@@ -33,6 +33,7 @@ export function FadeIn({
 
   return (
     <motion.div
+      data-motion-owned
       initial={{
         opacity: 0,
         ...directions[direction],
