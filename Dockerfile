@@ -36,9 +36,10 @@ COPY apps/web/prisma.config.ts ./apps/web/
 RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public" \
     npm install --omit=dev --ignore-scripts --legacy-peer-deps
 
-# Keep prisma CLI only for entrypoint.sh (prisma db push)
+# Keep prisma CLI (for entrypoint.sh) and dotenv (for next.config.ts)
 RUN PRISMA_VER=$(node -p "require('./apps/web/package.json').devDependencies.prisma") && \
-    npm install --no-save --ignore-scripts "prisma@${PRISMA_VER}" --legacy-peer-deps
+    DOTENV_VER=$(node -p "require('./apps/web/package.json').devDependencies.dotenv") && \
+    npm install --no-save "prisma@${PRISMA_VER}" "dotenv@${DOTENV_VER}" --legacy-peer-deps
 
 # Reinstall sharp specifically for Alpine/musl so the native binary is correct
 RUN rm -rf node_modules/@img node_modules/sharp && \
