@@ -35,6 +35,9 @@ import {
   Wifi,
   Zap,
 } from "lucide-react";
+import type { IconType } from "react-icons";
+import { SiApple, SiLinux, SiMikrotik } from "react-icons/si";
+import { FaWindows } from "react-icons/fa";
 import type { DnsHistoryRange, DnsHistoryResponse, DnsStatsSnapshot } from "@/lib/powerdns";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -730,8 +733,9 @@ export default function DnsPublicClient({
             </p>
           </div>
 
-          <div className="max-w-4xl mx-auto rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)]/95 backdrop-blur-sm overflow-hidden shadow-2xl shadow-black/25">
-            <div className="px-4 sm:px-5 py-3 border-b border-[var(--border-primary)] bg-[var(--surface-secondary)]/80 flex items-center justify-between gap-3">
+          <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)]/95 backdrop-blur-sm overflow-hidden shadow-2xl shadow-black/25">
+            {/* Top Window Bar */}
+            <div className="px-4 sm:px-5 py-3 border-b border-[var(--border-primary)] bg-[var(--surface-secondary)]/85 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="flex items-center gap-1.5 shrink-0">
                   <span className="w-3 h-3 rounded-full bg-[#ff5f56]" />
@@ -740,6 +744,10 @@ export default function DnsPublicClient({
                 </div>
                 <span className="font-mono text-xs font-semibold text-[var(--text-secondary)] truncate">
                   {activeTab}-safedns.{activeTab === "windows" ? "ps1" : "sh"}
+                </span>
+                <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold border border-cyan-500/25 bg-cyan-500/10 text-cyan-500">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                  Anycast Ready
                 </span>
               </div>
 
@@ -756,49 +764,101 @@ export default function DnsPublicClient({
                 ) : (
                   <>
                     <Copy className="w-3.5 h-3.5" />
-                    <span>Copy</span>
+                    <span>Copy Script</span>
                   </>
                 )}
               </button>
             </div>
 
-            <div className="px-4 sm:px-5 py-2.5 border-b border-[var(--border-subtle)] bg-[var(--surface)] flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                {setupTabs.map((t) => (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => setActiveTab(t.id)}
-                    className={
-                      activeTab === t.id
-                        ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-400 text-slate-950 shadow-sm whitespace-nowrap shrink-0 cursor-pointer transition-all"
-                        : "px-3 py-1.5 rounded-lg text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] whitespace-nowrap shrink-0 cursor-pointer transition-colors"
-                    }
-                  >
-                    {t.label}
-                  </button>
-                ))}
+            {/* Unified IDE-Style Split Body */}
+            <div className="flex flex-col md:flex-row">
+              {/* Left Vertical Platform Rail */}
+              <div className="md:w-56 shrink-0 border-b md:border-b-0 md:border-r border-[var(--border-primary)] bg-[var(--surface-secondary)]/40 p-2.5 flex md:flex-col gap-1 overflow-x-auto md:overflow-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <div className="hidden md:block px-2.5 py-1.5 text-[10px] font-mono uppercase tracking-widest text-[var(--text-secondary)]/80 font-semibold">
+                  Target Platform
+                </div>
+                {setupTabs.map((t) => {
+                  const isActive = activeTab === t.id;
+                  const iconMap: Record<SetupTabId, IconType> = {
+                    linux: SiLinux,
+                    macos: SiApple,
+                    windows: FaWindows,
+                    mikrotik: SiMikrotik,
+                    doh: Globe,
+                  };
+                  const PlatformIcon = iconMap[t.id];
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setActiveTab(t.id)}
+                      className={
+                        isActive
+                          ? "px-3 py-2 rounded-xl text-xs font-bold bg-cyan-500/15 text-cyan-400 border border-cyan-500/35 whitespace-nowrap shrink-0 cursor-pointer transition-all text-left flex items-center justify-between gap-2"
+                          : "px-3 py-2 rounded-xl text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)]/70 border border-transparent whitespace-nowrap shrink-0 cursor-pointer transition-colors text-left flex items-center justify-between gap-2"
+                      }
+                    >
+                      <span className="inline-flex items-center gap-2">
+                        <PlatformIcon className="w-3.5 h-3.5 shrink-0" />
+                        <span>{t.label}</span>
+                      </span>
+                      {isActive && <span className="hidden md:inline-block w-1.5 h-1.5 rounded-full bg-cyan-400" />}
+                    </button>
+                  );
+                })}
               </div>
-              <span className="text-[11px] font-mono text-cyan-600 dark:text-cyan-400/90 hidden sm:inline-flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-                {activeSetup.hint}
-              </span>
+
+              {/* Right Code Pane + Inline Endpoint Strip */}
+              <div className="flex-1 min-w-0 flex flex-col justify-between">
+                <div className="px-4 sm:px-6 py-3 border-b border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--text-secondary)]">
+                  <span>{activeSetup.hint}</span>
+                  <span className="font-mono text-[11px] text-cyan-500 hidden sm:inline">
+                    # Test: dig doubleclick.net @{resolverIp} +short
+                  </span>
+                </div>
+
+                <AnimatePresence mode="wait">
+                  <motion.pre
+                    key={activeTab}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex-1 p-4 sm:p-6 bg-[var(--surface-secondary)]/25 font-mono text-xs sm:text-[13px] leading-6 overflow-x-auto whitespace-pre [scrollbar-width:none] [&::-webkit-scrollbar]:hidden text-[var(--text-primary)]"
+                  >
+                    {activeSetup.command}
+                  </motion.pre>
+                </AnimatePresence>
+
+                <div className="px-4 sm:px-6 py-3 border-t border-[var(--border-subtle)] bg-[var(--surface-secondary)]/50 flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {[
+                      { id: "ep-v4", label: "IPv4", value: resolverIp },
+                      { id: "ep-doh", label: "DoH", value: "https://dns.masdika.id/dns-query" },
+                      { id: "ep-dot", label: "DoT", value: "dns.masdika.id:853" },
+                    ].map((ep) => (
+                      <button
+                        key={ep.id}
+                        type="button"
+                        onClick={() => copyText(ep.value, ep.id)}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 text-[11px] font-mono text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer transition-colors"
+                      >
+                        <span className="text-cyan-500 font-bold">{ep.label}:</span>
+                        <span>{ep.value}</span>
+                        {copiedId === ep.id ? (
+                          <Check className="w-3 h-3 text-cyan-500" />
+                        ) : (
+                          <Copy className="w-3 h-3 opacity-60" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                  <span className="text-[11px] font-mono text-[var(--text-secondary)]">
+                    No-Logs · DNSSEC · 637K+ Rules
+                  </span>
+                </div>
+              </div>
             </div>
-
-            <div className="sm:hidden px-4 pt-3 text-xs text-[var(--text-secondary)]">{activeSetup.hint}</div>
-
-            <AnimatePresence mode="wait">
-              <motion.pre
-                key={activeTab}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
-                transition={{ duration: 0.2 }}
-                className="p-4 sm:p-6 bg-[var(--surface-secondary)]/35 font-mono text-xs sm:text-[13px] leading-6 overflow-x-auto whitespace-pre [scrollbar-width:none] [&::-webkit-scrollbar]:hidden text-[var(--text-primary)]"
-              >
-                {activeSetup.command}
-              </motion.pre>
-            </AnimatePresence>
           </div>
         </section>
 
@@ -843,56 +903,125 @@ export default function DnsPublicClient({
             </div>
           </div>
 
-          <div className="max-w-4xl mx-auto rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)]/95 backdrop-blur-sm shadow-xl shadow-black/20 overflow-hidden">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                runDnsLookup(lookupDomain, lookupType);
-              }}
-              className="p-4 sm:p-5 flex flex-col lg:flex-row items-stretch lg:items-center gap-3"
-            >
-              <div className="relative flex-1 min-w-0">
-                <Globe className="w-4 h-4 text-[var(--text-secondary)]/70 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                <input
-                  type="text"
-                  value={lookupDomain}
-                  onChange={(e) => setLookupDomain(e.target.value)}
-                  placeholder="Enter domain or hostname (e.g. masdika.id)"
-                  aria-label="Domain name to lookup"
-                  className="w-full h-11 pl-10 pr-4 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-sm font-mono text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/60 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15 transition-all"
-                />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            <div className="lg:col-span-4 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-5 flex flex-col justify-between gap-4 shadow-xl shadow-black/20">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <div className="text-[11px] font-mono uppercase tracking-wider text-cyan-600 dark:text-cyan-400 font-semibold">
+                    QUICK TEST PRESETS
+                  </div>
+                  <h3 className="text-sm font-bold text-[var(--text-primary)] mt-0.5">
+                    Click to Run Instant Probe
+                  </h3>
+                </div>
+                <Zap className="w-4 h-4 text-cyan-500 shrink-0" />
               </div>
 
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0">
-                <div className="grid grid-cols-7 sm:inline-flex items-center rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] p-1 h-11 w-full sm:w-auto">
-                  {DNS_LOOKUP_TYPES.map((t) => (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => setLookupType(t)}
-                      className={
-                        lookupType === t
-                          ? "px-2 sm:px-2.5 h-full rounded-lg text-[10px] sm:text-[11px] font-mono font-bold bg-cyan-400 text-slate-950 shadow-sm cursor-pointer transition-all text-center flex items-center justify-center"
-                          : "px-2 sm:px-2.5 h-full rounded-lg text-[10px] sm:text-[11px] font-mono font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer transition-colors text-center flex items-center justify-center"
-                      }
-                    >
-                      {t}
-                    </button>
-                  ))}
+              <div className="space-y-2">
+                {[
+                  {
+                    domain: "masdika.id",
+                    type: "SOA" as LookupRecordType,
+                    tag: "Authoritative",
+                    desc: "Verify primary zone SOA & serial propagation",
+                  },
+                  {
+                    domain: "doubleclick.net",
+                    type: "A" as LookupRecordType,
+                    tag: "SafeDNS Block",
+                    desc: "Test RPZ tracker sinkhole (returns 0.0.0.0)",
+                  },
+                  {
+                    domain: "cloudflare.com",
+                    type: "MX" as LookupRecordType,
+                    tag: "Mail Routing",
+                    desc: "Inspect live MX priority & TTL caching",
+                  },
+                  {
+                    domain: "google.com",
+                    type: "AAAA" as LookupRecordType,
+                    tag: "IPv6 Stack",
+                    desc: "Verify dual-stack AAAA recursive resolution",
+                  },
+                ].map((preset) => (
+                  <button
+                    key={`${preset.domain}-${preset.type}`}
+                    type="button"
+                    onClick={() => {
+                      setLookupType(preset.type);
+                      runDnsLookup(preset.domain, preset.type);
+                    }}
+                    className="w-full text-left rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)]/55 hover:border-cyan-500/45 hover:bg-[var(--surface-secondary)] p-3 transition-all cursor-pointer group"
+                  >
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className="font-mono text-xs font-bold text-[var(--text-primary)] group-hover:text-cyan-400 transition-colors">
+                        {preset.domain} ({preset.type})
+                      </span>
+                      <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold border border-[var(--border-primary)] bg-[var(--surface)] text-[var(--text-secondary)] group-hover:border-cyan-500/30 group-hover:text-cyan-400 transition-colors">
+                        {preset.tag}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[var(--text-secondary)] leading-snug">{preset.desc}</p>
+                  </button>
+                ))}
+              </div>
+
+              <div className="pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between text-[11px] font-mono text-[var(--text-secondary)]">
+                <span>Edge: Sidoarjo (AS63859)</span>
+                <span className="text-cyan-500">dnsdist + RPZ</span>
+              </div>
+            </div>
+
+            <div className="lg:col-span-8 rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)]/95 backdrop-blur-sm shadow-xl shadow-black/20 overflow-hidden flex flex-col">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  runDnsLookup(lookupDomain, lookupType);
+                }}
+                className="p-4 sm:p-5 flex flex-col xl:flex-row items-stretch xl:items-center gap-3"
+              >
+                <div className="relative flex-1 min-w-0">
+                  <Globe className="w-4 h-4 text-[var(--text-secondary)]/70 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={lookupDomain}
+                    onChange={(e) => setLookupDomain(e.target.value)}
+                    placeholder="Enter domain or hostname (e.g. masdika.id)"
+                    aria-label="Domain name to lookup"
+                    className="w-full h-11 pl-10 pr-4 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-sm font-mono text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/60 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15 transition-all"
+                  />
                 </div>
 
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="md"
-                  disabled={lookupLoading}
-                  leftIcon={<Search className="w-4 h-4" />}
-                  className="w-full sm:w-auto justify-center shrink-0 h-11 px-5"
-                >
-                  {lookupLoading ? "Querying..." : "Lookup"}
-                </Button>
-              </div>
-            </form>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0">
+                  <div className="grid grid-cols-7 sm:inline-flex items-center rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] p-1 h-11 w-full sm:w-auto">
+                    {DNS_LOOKUP_TYPES.map((t) => (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => setLookupType(t)}
+                        className={
+                          lookupType === t
+                            ? "px-2 sm:px-2.5 h-full rounded-lg text-[10px] sm:text-[11px] font-mono font-bold bg-cyan-400 text-slate-950 shadow-sm cursor-pointer transition-all text-center flex items-center justify-center"
+                            : "px-2 sm:px-2.5 h-full rounded-lg text-[10px] sm:text-[11px] font-mono font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer transition-colors text-center flex items-center justify-center"
+                        }
+                      >
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="md"
+                    disabled={lookupLoading}
+                    leftIcon={<Search className="w-4 h-4" />}
+                    className="w-full sm:w-auto justify-center shrink-0 h-11 px-5"
+                  >
+                    {lookupLoading ? "Querying..." : "Lookup"}
+                  </Button>
+                </div>
+              </form>
 
             <AnimatePresence mode="wait">
               {lookupError && (
@@ -905,6 +1034,53 @@ export default function DnsPublicClient({
                   className="px-6 sm:px-8 py-4 border-t border-[var(--border-subtle)] text-xs sm:text-sm font-mono text-rose-500 bg-rose-500/5"
                 >
                   {lookupError}
+                </motion.div>
+              )}
+
+              {!lookupResult && !lookupError && (
+                <motion.div
+                  key="lookup-empty"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex-1 border-t border-[var(--border-subtle)] bg-[var(--surface-secondary)]/25 p-5 sm:p-6 flex flex-col justify-between gap-6"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-mono text-[var(--text-secondary)]">
+                    <span className="inline-flex items-center gap-2">
+                      <span className={`w-2 h-2 rounded-full bg-cyan-400 ${lookupLoading ? "animate-ping" : ""}`} />
+                      <span className="text-[var(--text-primary)] font-semibold">
+                        {lookupLoading ? "QUERYING EDGE RESOLVER..." : "PROBE READY"}
+                      </span>
+                    </span>
+                    <span>Resolver: {resolverIp} · DNSSEC Enabled</span>
+                  </div>
+
+                  <div className="my-auto py-4 text-center max-w-md mx-auto space-y-2">
+                    <div className="w-11 h-11 rounded-2xl bg-cyan-500/10 border border-cyan-500/25 flex items-center justify-center text-cyan-500 mx-auto">
+                      <Terminal className="w-5 h-5" />
+                    </div>
+                    <h4 className="text-sm font-bold text-[var(--text-primary)]">
+                      {lookupLoading ? `Resolving ${lookupDomain} (${lookupType})...` : "Live Authoritative & Recursive Probe"}
+                    </h4>
+                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                      Enter any domain above or select a preset on the left to inspect live DNS records, authoritative TTLs, and SafeDNS sinkhole status.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-[var(--border-subtle)]">
+                    {[
+                      { label: "NOERROR", desc: "Valid record answer" },
+                      { label: "SAFE-DNS BLOCK", desc: "Sinkholed to 0.0.0.0" },
+                      { label: "NXDOMAIN", desc: "Domain not found" },
+                    ].map((item) => (
+                      <div key={item.label} className="rounded-xl border border-[var(--border-primary)] bg-[var(--surface)]/70 px-3 py-2 flex items-center justify-between gap-2">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold border border-cyan-500/25 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">
+                          {item.label}
+                        </span>
+                        <span className="text-[11px] text-[var(--text-secondary)] truncate">{item.desc}</span>
+                      </div>
+                    ))}
+                  </div>
                 </motion.div>
               )}
 
@@ -970,6 +1146,7 @@ export default function DnsPublicClient({
                 </motion.div>
               )}
             </AnimatePresence>
+            </div>
           </div>
         </section>
 

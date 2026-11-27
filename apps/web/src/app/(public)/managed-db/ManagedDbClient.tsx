@@ -1338,7 +1338,10 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
           provisionEstimate="Backend: Native Kubernetes (~15 Seconds)"
         />
 
-        {/* ── 9. FINAL CTA SECTION ──────────────────────────────────────── */}
+        {/* ── 9. FAQ SECTION ───────────────────────────────────────────── */}
+        <FaqSection faqs={DB_FAQS} />
+
+        {/* ── 10. FINAL CTA SECTION ──────────────────────────────────────── */}
         <section className="py-10 sm:py-14 relative z-10 w-full">
           <GlowCtaCard>
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
@@ -1373,9 +1376,6 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
             </div>
           </GlowCtaCard>
         </section>
-
-        {/* ── 10. FAQ SECTION ───────────────────────────────────────────── */}
-        <FaqSection faqs={DB_FAQS} />
 
       </div>
     </div>

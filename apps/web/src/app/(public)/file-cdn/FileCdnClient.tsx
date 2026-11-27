@@ -608,7 +608,9 @@ export default function FileCdnClient({
           </div>
         </section>
 
-        {/* ── 6. PROVISIONING TERMINAL & FAQ ────────── */}
+        <FaqSection faqs={CDN_FAQS} />
+
+        {/* ── 6. PROVISIONING TERMINAL ────────── */}
         <ProvisioningSection
           title="Instant File CDN Distribution"
           description="Deploy isolated File CDN spaces and instantly distribute assets with encrypted edge storage, delivery links, and REST API keys."
@@ -621,8 +623,6 @@ export default function FileCdnClient({
           targetServer="Edge CDN Cluster • Sidoarjo DC"
           provisionEstimate="Backend: Encrypted SSD Edge Storage (< 5 Sec)"
         />
-
-        <FaqSection faqs={CDN_FAQS} />
 
       </div>
     </div>

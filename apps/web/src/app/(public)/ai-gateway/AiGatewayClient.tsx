@@ -1374,7 +1374,10 @@ export default function AiGatewayClient({
           provisionEstimate="Latency: Sub-ms Proxy + Instant TTFT"
         />
 
-        {/* ── 8. FINAL CTA SECTION ────────────────────────────────────────── */}
+        {/* ── 8. FAQ SECTION ──────────────────────────────────────────────── */}
+        <FaqSection faqs={AI_FAQS} />
+
+        {/* ── 9. FINAL CTA SECTION ────────────────────────────────────────── */}
         <section className="py-10 sm:py-14 relative z-10 w-full">
           <GlowCtaCard>
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
@@ -1409,9 +1412,6 @@ export default function AiGatewayClient({
             </div>
           </GlowCtaCard>
         </section>
-
-        {/* ── 9. FAQ SECTION ──────────────────────────────────────────────── */}
-        <FaqSection faqs={AI_FAQS} />
 
       </div>
     </div>

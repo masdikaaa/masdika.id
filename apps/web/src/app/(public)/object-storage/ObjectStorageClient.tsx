@@ -602,7 +602,9 @@ export default function ObjectStorageClient({
           </div>
         </section>
 
-        {/* ── 6. PROVISIONING TERMINAL & FAQ ────────── */}
+        <FaqSection faqs={S3_FAQS} />
+
+        {/* ── 6. PROVISIONING TERMINAL ────────── */}
         <ProvisioningSection
           title="Instant S3 Bucket Provisioning"
           description="Deploy isolated S3-compatible object storage with IAM keys, presigned URLs, and sub-15ms Indonesian peering."
@@ -615,8 +617,6 @@ export default function ObjectStorageClient({
           targetServer="S3 SSD Cluster • Sidoarjo DC"
           provisionEstimate="Backend: S3-Compatible Object Engine (< 5 Sec)"
         />
-
-        <FaqSection faqs={S3_FAQS} />
 
       </div>
     </div>
