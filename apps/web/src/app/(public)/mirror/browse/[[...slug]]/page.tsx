@@ -52,6 +52,7 @@ const ROOT_REPOS: MirrorIndexEntry[] = [
   { name: "freebsd-pkg/", href: "/freebsd-pkg/", isDir: true, size: "-", lastSync: "Binary Packages" },
   { name: "openbsd/", href: "/openbsd/", isDir: true, size: "-", lastSync: "Packages & ISO" },
   { name: "mikrotik/", href: "/mikrotik/", isDir: true, size: "-", lastSync: "CHR & RouterOS v6/v7" },
+  { name: "proxmox/", href: "/proxmox/", isDir: true, size: "-", lastSync: "PVE 8 / 9 & ISO" },
 ];
 
 const PAGE_SIZE = 50;

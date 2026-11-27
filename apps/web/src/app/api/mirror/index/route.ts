@@ -27,6 +27,7 @@ const ALLOWED_PREFIXES = [
   "/freebsd-pkg/",
   "/openbsd/",
   "/mikrotik/",
+  "/proxmox/",
 ];
 
 export interface MirrorIndexEntry {

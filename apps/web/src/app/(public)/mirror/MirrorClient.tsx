@@ -43,6 +43,7 @@ import {
   SiLinuxmint,
   SiMikrotik,
   SiOpenbsd,
+  SiProxmox,
   SiRockylinux,
   SiUbuntu,
 } from "react-icons/si";
@@ -63,6 +64,7 @@ const TOP_REPO_ICONS: Record<string, IconType> = {
   openbsd: SiOpenbsd,
   linuxmint: SiLinuxmint,
   mikrotik: SiMikrotik,
+  proxmox: SiProxmox,
 };
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -317,6 +319,22 @@ const DISTROS: DistroItem[] = [
       `curl -LO ${MIRROR_BASE}/mikrotik/RouterOS_v7/`,
     ].join("\n"),
   },
+  {
+    id: "proxmox",
+    name: "Proxmox VE",
+    pkgMgr: "APT",
+    category: "DEBIAN_UBUNTU",
+    sub: "PVE 8 Bookworm - PVE 9 Trixie - Ceph & ISO",
+    paths: ["/proxmox/debian/"],
+    isoPath: "/mirror/browse/proxmox/iso",
+    snippet: [
+      "# Proxmox VE 8 (Bookworm) / 9 (Trixie) No-Subscription Mirror",
+      "CODENAME=$(. /etc/os-release && echo \"$VERSION_CODENAME\")",
+      `echo "deb ${MIRROR_BASE}/proxmox/debian \$CODENAME pve-no-subscription" | tee /etc/apt/sources.list.d/pve-no-subscription.list`,
+      "",
+      "apt-get update",
+    ].join("\n"),
+  },
 ];
 
 const ISO_SHORTCUTS = [
@@ -324,6 +342,10 @@ const ISO_SHORTCUTS = [
   { id: "debian", name: "Debian 14 (Forky) ISO", tag: "Testing Weekly Builds", href: "/mirror/browse/debian-cd-testing" },
   { id: "debian", name: "Debian 13 ISO", tag: "Current & Live CD", href: "/mirror/browse/debian-cd" },
   { id: "debian", name: "Debian 11 / 12 ISO", tag: "Archive Releases", href: "/mirror/browse/debian-cd-archive" },
+  { id: "debian", name: "Debian Security", tag: "Bookworm / Trixie Sec", href: "/mirror/browse/debian-security" },
+  { id: "proxmox", name: "Proxmox VE ISO", tag: "PVE 8 / 9 & PBS", href: "/mirror/browse/proxmox/iso" },
+  { id: "proxmox", name: "Proxmox VE Repo", tag: "PVE & Ceph APT", href: "/mirror/browse/proxmox/debian" },
+  { id: "proxmox", name: "Proxmox Templates", tag: "LXC Container Images", href: "/mirror/browse/proxmox/images" },
   { id: "kali", name: "Kali Linux Images", tag: "Weekly & Installer", href: "/mirror/browse/kali-images" },
   { id: "parrot", name: "Parrot OS ISO", tag: "Security & Home", href: "/mirror/browse/parrot/iso" },
   { id: "linuxmint", name: "Linux Mint ISO", tag: "Cinnamon / XFCE", href: "/mirror/browse/linuxmint-iso" },
@@ -760,6 +782,8 @@ export default function MirrorClient() {
                           <div className="w-10 h-10 rounded-xl border border-[var(--border-primary)] bg-slate-50 dark:bg-white/95 flex items-center justify-center p-2 shrink-0 shadow-2xs group-hover:border-cyan-500/40 transition-colors">
                             {d.id === "mikrotik" ? (
                               <SiMikrotik className="w-5 h-5 text-[#182230]" />
+                            ) : d.id === "proxmox" ? (
+                              <SiProxmox className="w-5 h-5 text-[#E57000]" />
                             ) : (
                               <img
                                 src={`/images/distros/${d.id}.svg`}
@@ -869,6 +893,8 @@ export default function MirrorClient() {
                       <div className="w-8 h-8 rounded-lg border border-[var(--border-primary)] bg-slate-50 dark:bg-white/95 flex items-center justify-center p-1.5 shrink-0">
                         {d.id === "mikrotik" ? (
                           <SiMikrotik className="w-4.5 h-4.5 text-[#182230]" />
+                        ) : d.id === "proxmox" ? (
+                          <SiProxmox className="w-4.5 h-4.5 text-[#E57000]" />
                         ) : (
                           <img
                             src={`/images/distros/${d.id}.svg`}
@@ -1017,6 +1043,8 @@ export default function MirrorClient() {
                   <div className="w-10 h-10 rounded-xl border border-[var(--border-primary)] bg-slate-50 dark:bg-white/95 flex items-center justify-center p-2 shrink-0 shadow-2xs">
                     {iso.id === "mikrotik" ? (
                       <SiMikrotik className="w-5 h-5 text-[#182230]" />
+                    ) : iso.id === "proxmox" ? (
+                      <SiProxmox className="w-5 h-5 text-[#E57000]" />
                     ) : (
                       <img
                         src={`/images/distros/${iso.id}.svg`}
@@ -1045,7 +1073,7 @@ export default function MirrorClient() {
               className="group inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] hover:border-cyan-500/40 text-xs sm:text-sm font-semibold text-[var(--text-primary)] hover:text-cyan-500 transition-all shadow-sm"
             >
               <FolderOpen className="w-4 h-4 text-cyan-500 shrink-0" />
-              <span>Browse All 19 Repository Roots</span>
+              <span>Browse All 23 Repository Roots</span>
               <ArrowRight className="w-3.5 h-3.5 text-[var(--text-secondary)] group-hover:text-cyan-400 group-hover:translate-x-0.5 transition-all shrink-0" />
             </Link>
           </div>

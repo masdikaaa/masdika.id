@@ -25,6 +25,7 @@ const PROBES: Array<{
   { id: "freebsd", name: "FreeBSD", path: "/freebsd/releases/ISO-IMAGES/", versionIndexPath: "/freebsd/releases/ISO-IMAGES/", versionFilter: /^1\d\.\d+$/ },
   { id: "openbsd", name: "OpenBSD", path: "/openbsd/", versionIndexPath: "/openbsd/", versionFilter: /^(\d+\.\d+|snapshots)$/ },
   { id: "mikrotik", name: "MikroTik RouterOS", path: "/mikrotik/7.25.2/mikrotik-7.25.2.iso" },
+  { id: "proxmox", name: "Proxmox VE", path: "/proxmox/debian/dists/trixie/InRelease", versionIndexPath: "/proxmox/debian/dists/", versionFilter: /^(bullseye|bookworm|trixie)$/ },
 ];
 
 export interface DistroHealth {
