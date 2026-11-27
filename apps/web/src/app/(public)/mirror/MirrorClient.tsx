@@ -393,9 +393,9 @@ export default function MirrorClient() {
   const [health, setHealth] = useState<MirrorStatusPayload | null>(null);
   const [checkingHealth, setCheckingHealth] = useState(true);
 
-  const fetchHealth = () => {
+  const fetchHealth = (forceRefresh = false) => {
     setCheckingHealth(true);
-    fetch("/api/mirror/status")
+    fetch(forceRefresh ? "/api/mirror/status?refresh=1" : "/api/mirror/status")
       .then((r) => r.json())
       .then((data: MirrorStatusPayload) => setHealth(data))
       .catch(() => {})
@@ -520,26 +520,19 @@ export default function MirrorClient() {
         {/* SMART UPSTREAM / MIRROR HEALTH NOTIFICATION */}
         {health && health.overallStatus !== "operational" && (
           <section className="py-4 relative z-10">
-            <div
-              className={
-                health.overallStatus === "outage"
-                  ? "rounded-2xl border border-red-500/30 bg-red-500/10 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-                  : "rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-              }
-            >
-              <div className="flex items-start gap-3">
-                <AlertTriangle
-                  className={
-                    health.overallStatus === "outage"
-                      ? "w-5 h-5 text-red-500 shrink-0 mt-0.5"
-                      : "w-5 h-5 text-amber-500 shrink-0 mt-0.5"
-                  }
-                />
+            <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+              <div className="flex items-start gap-3.5">
+                <div className="w-10 h-10 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200/80 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0 mt-0.5">
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
                 <div className="space-y-1">
-                  <div className="text-sm font-bold text-[var(--text-primary)]">
-                    {health.overallStatus === "outage"
-                      ? "Mirror Endpoint Unreachable"
-                      : `Partial Upstream Degradation (${health.downNames.join(", ")})`}
+                  <div className="flex items-center gap-2 text-sm font-bold text-[var(--text-primary)]">
+                    <span className="w-2 h-2 rounded-full bg-cyan-400 shrink-0" />
+                    <span>
+                      {health.overallStatus === "outage"
+                        ? "Mirror Endpoint Unreachable"
+                        : `Partial Upstream Degradation (${health.downNames.join(", ")})`}
+                    </span>
                   </div>
                   <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
                     {health.overallStatus === "outage"
@@ -550,11 +543,11 @@ export default function MirrorClient() {
               </div>
               <button
                 type="button"
-                onClick={fetchHealth}
+                onClick={() => fetchHealth(true)}
                 disabled={checkingHealth}
-                className="px-3.5 py-2 rounded-xl border border-[var(--border-primary)] bg-[var(--surface)] text-xs font-semibold text-[var(--text-primary)] inline-flex items-center gap-1.5 shrink-0 cursor-pointer self-start sm:self-center"
+                className="px-3.5 py-2 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] hover:border-cyan-500/40 text-xs font-semibold text-[var(--text-primary)] inline-flex items-center gap-1.5 shrink-0 cursor-pointer transition-colors self-start sm:self-center"
               >
-                <RotateCw className={`w-3.5 h-3.5 ${checkingHealth ? "animate-spin" : ""}`} />
+                <RotateCw className={`w-3.5 h-3.5 text-cyan-500 ${checkingHealth ? "animate-spin" : ""}`} />
                 <span>Re-check</span>
               </button>
             </div>

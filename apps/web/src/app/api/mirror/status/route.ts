@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-import { getCachedData } from "@/lib/cache";
+import { NextRequest, NextResponse } from "next/server";
+import { getCachedData, setCachedData } from "@/lib/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -123,94 +123,104 @@ async function detectVersions(indexPath: string, filter: RegExp): Promise<string
   }
 }
 
-export async function GET() {
+async function computeMirrorStatus(): Promise<MirrorStatusPayload> {
+  const [healthProbe, telemetry] = await Promise.all([
+    probeUrl(`${MIRROR_BASE}/health`, 4000),
+    (async (): Promise<MirrorTelemetry | null> => {
+      for (const url of [`${MIRROR_BASE}/_telemetry.json`, "http://192.168.79.21/_telemetry.json"]) {
+        try {
+          const c = new AbortController();
+          const t = setTimeout(() => c.abort(), 2500);
+          const r = await fetch(url, { signal: c.signal, cache: "no-store" });
+          clearTimeout(t);
+          if (r.ok) {
+            return (await r.json()) as MirrorTelemetry;
+          }
+        } catch {}
+      }
+      return null;
+    })(),
+  ]);
+
+  const detectedVersionsMap = healthProbe.ok
+    ? await getCachedData<Record<string, string>>(
+        "mirror:versions:v1",
+        VERSIONS_CACHE_TTL_SEC,
+        async () => {
+          const versionEntries = await Promise.all(
+            PROBES.filter((p) => p.versionIndexPath && p.versionFilter).map(async (p) => {
+              const v = await detectVersions(p.versionIndexPath!, p.versionFilter!);
+              return [p.id, v] as const;
+            })
+          );
+          const nextVersions: Record<string, string> = {};
+          for (const [id, v] of versionEntries) {
+            if (v) nextVersions[id] = v;
+          }
+          return nextVersions;
+        }
+      )
+    : {};
+
+  const results = await Promise.all(
+    PROBES.map(async (p) => {
+      if (!healthProbe.ok) {
+        return { id: p.id, name: p.name, ok: false, status: 0, latencyMs: 0 };
+      }
+      const r = await probeUrl(`${MIRROR_BASE}${p.path}`, 6000);
+      return {
+        id: p.id,
+        name: p.name,
+        ...r,
+        detectedVersions: detectedVersionsMap[p.id],
+      };
+    })
+  );
+
+  const distros: Record<string, DistroHealth> = {};
+  const downNames: string[] = [];
+  let upCount = 0;
+
+  for (const item of results) {
+    distros[item.id] = item;
+    if (item.ok) {
+      upCount++;
+    } else {
+      downNames.push(item.name);
+    }
+  }
+
+  const overallStatus: MirrorStatusPayload["overallStatus"] = !healthProbe.ok
+    ? "outage"
+    : downNames.length > 0
+      ? "degraded"
+      : "operational";
+
+  return {
+    overallStatus,
+    mirrorReachable: healthProbe.ok,
+    checkedAt: new Date().toISOString(),
+    upCount,
+    totalCount: PROBES.length,
+    downNames,
+    distros,
+    telemetry,
+  };
+}
+
+export async function GET(req: NextRequest) {
+  const forceRefresh = req.nextUrl.searchParams.get("refresh") === "1";
+
+  if (forceRefresh) {
+    const fresh = await computeMirrorStatus();
+    await setCachedData("mirror:status:v1", STATUS_CACHE_TTL_SEC, fresh);
+    return NextResponse.json(fresh);
+  }
+
   const payload = await getCachedData<MirrorStatusPayload>(
     "mirror:status:v1",
     STATUS_CACHE_TTL_SEC,
-    async () => {
-      const [healthProbe, telemetry] = await Promise.all([
-        probeUrl(`${MIRROR_BASE}/health`, 3500),
-        (async (): Promise<MirrorTelemetry | null> => {
-          for (const url of [`${MIRROR_BASE}/_telemetry.json`, "http://192.168.79.21/_telemetry.json"]) {
-            try {
-              const c = new AbortController();
-              const t = setTimeout(() => c.abort(), 2500);
-              const r = await fetch(url, { signal: c.signal, cache: "no-store" });
-              clearTimeout(t);
-              if (r.ok) {
-                return (await r.json()) as MirrorTelemetry;
-              }
-            } catch {}
-          }
-          return null;
-        })(),
-      ]);
-
-      const detectedVersionsMap = healthProbe.ok
-        ? await getCachedData<Record<string, string>>(
-            "mirror:versions:v1",
-            VERSIONS_CACHE_TTL_SEC,
-            async () => {
-              const versionEntries = await Promise.all(
-                PROBES.filter((p) => p.versionIndexPath && p.versionFilter).map(async (p) => {
-                  const v = await detectVersions(p.versionIndexPath!, p.versionFilter!);
-                  return [p.id, v] as const;
-                })
-              );
-              const nextVersions: Record<string, string> = {};
-              for (const [id, v] of versionEntries) {
-                if (v) nextVersions[id] = v;
-              }
-              return nextVersions;
-            }
-          )
-        : {};
-
-      const results = await Promise.all(
-        PROBES.map(async (p) => {
-          if (!healthProbe.ok) {
-            return { id: p.id, name: p.name, ok: false, status: 0, latencyMs: 0 };
-          }
-          const r = await probeUrl(`${MIRROR_BASE}${p.path}`, 4000);
-          return {
-            id: p.id,
-            name: p.name,
-            ...r,
-            detectedVersions: detectedVersionsMap[p.id],
-          };
-        })
-      );
-
-      const distros: Record<string, DistroHealth> = {};
-      const downNames: string[] = [];
-      let upCount = 0;
-
-      for (const item of results) {
-        distros[item.id] = item;
-        if (item.ok) {
-          upCount++;
-        } else {
-          downNames.push(item.name);
-        }
-      }
-
-      const overallStatus: MirrorStatusPayload["overallStatus"] = !healthProbe.ok
-        ? "outage"
-        : downNames.length > 0
-          ? "degraded"
-          : "operational";
-
-      return {
-        overallStatus,
-        mirrorReachable: healthProbe.ok,
-        checkedAt: new Date().toISOString(),
-        upCount,
-        totalCount: PROBES.length,
-        downNames,
-        distros,
-        telemetry,
-      };
-    }
+    computeMirrorStatus
   );
 
   return NextResponse.json(payload);
