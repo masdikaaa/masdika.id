@@ -131,7 +131,9 @@ function parseDirectoryHtml(html: string, basePath: string): MirrorIndexEntry[] 
       !rawHref ||
       rawHref.startsWith("?") ||
       rawHref.startsWith("/") ||
+      rawHref.startsWith("#") ||
       rawHref.startsWith("http") ||
+      rawHref.startsWith("mailto:") ||
       rawHref === "../" ||
       rawHref === "./" ||
       rawName.toLowerCase().includes("parent directory")
@@ -153,13 +155,20 @@ function parseDirectoryHtml(html: string, basePath: string): MirrorIndexEntry[] 
       }
     }
 
-    const cleanHref = rawHref.split("?")[0];
+    const cleanHref = rawHref.replace(/^\.\//, "").split("?")[0];
+    if (!cleanHref) continue;
     const fullHref = basePath + cleanHref;
     if (seen.has(fullHref)) continue;
     seen.add(fullHref);
 
+    const genericButtonNames = new Set(["download iso", "checksum", "torrent", "signature", "download"]);
+    const displayName =
+      !rawName || genericButtonNames.has(rawName.toLowerCase()) || rawHref.startsWith("./")
+        ? cleanHref
+        : rawName;
+
     entries.push({
-      name: rawName || cleanHref,
+      name: displayName,
       href: fullHref,
       isDir,
       size: size === "-" || size === "" ? "-" : size,
@@ -456,7 +465,7 @@ export async function GET(req: NextRequest) {
     }
 
     const result = await getCachedData<{ ok: boolean; status: number; entries: MirrorIndexEntry[] }>(
-      `mirror:index:v2:${path}`,
+      `mirror:index:v3:${path}`,
       180,
       async () => {
         const res = await fetch(`${MIRROR_ORIGIN}${path}`, {
