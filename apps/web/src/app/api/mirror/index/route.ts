@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getCachedData } from "@/lib/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -424,47 +425,75 @@ export async function GET(req: NextRequest) {
     }
 
     if (path === "/mikrotik/RouterOS_v7/") {
-      return NextResponse.json({ path, entries: await fetchMikrotikVersionsFromChangelog("7", "RouterOS_v7") });
+      const entries = await getCachedData(`mirror:index:v2:${path}`, 1800, () =>
+        fetchMikrotikVersionsFromChangelog("7", "RouterOS_v7")
+      );
+      return NextResponse.json({ path, entries });
     }
     if (path === "/mikrotik/RouterOS_v6/") {
-      return NextResponse.json({ path, entries: await fetchMikrotikVersionsFromChangelog("6", "RouterOS_v6") });
+      const entries = await getCachedData(`mirror:index:v2:${path}`, 1800, () =>
+        fetchMikrotikVersionsFromChangelog("6", "RouterOS_v6")
+      );
+      return NextResponse.json({ path, entries });
     }
     if (path === "/mikrotik/CHR/") {
-      const [v7, v6] = await Promise.all([
-        fetchMikrotikVersionsFromChangelog("7", "CHR"),
-        fetchMikrotikVersionsFromChangelog("6", "CHR"),
-      ]);
-      return NextResponse.json({ path, entries: [...v7, ...v6] });
+      const entries = await getCachedData(`mirror:index:v2:${path}`, 1800, async () => {
+        const [v7, v6] = await Promise.all([
+          fetchMikrotikVersionsFromChangelog("7", "CHR"),
+          fetchMikrotikVersionsFromChangelog("6", "CHR"),
+        ]);
+        return [...v7, ...v6];
+      });
+      return NextResponse.json({ path, entries });
     }
 
     const verMatch = path.match(/^\/mikrotik\/(RouterOS_v[67]|CHR|official)\/([0-9]+\.[0-9]+(?:\.[0-9]+)*)\/$/);
     if (verMatch) {
-      const entries = await fetchMikrotikVersionFiles(verMatch[2], verMatch[1] === "CHR");
+      const entries = await getCachedData(`mirror:index:v2:${path}`, 1800, () =>
+        fetchMikrotikVersionFiles(verMatch[2], verMatch[1] === "CHR")
+      );
       return NextResponse.json({ path, entries });
     }
 
-    const res = await fetch(`${MIRROR_ORIGIN}${path}`, {
-      headers: {
-        "User-Agent": "Masdika-Mirror-Browser/1.0",
-        Accept: "text/html,application/xhtml+xml",
-      },
-      cache: "no-store",
-    });
+    const result = await getCachedData<{ ok: boolean; status: number; entries: MirrorIndexEntry[] }>(
+      `mirror:index:v2:${path}`,
+      180,
+      async () => {
+        const res = await fetch(`${MIRROR_ORIGIN}${path}`, {
+          headers: {
+            "User-Agent": "Masdika-Mirror-Browser/1.0",
+            Accept: "text/html,application/xhtml+xml",
+          },
+          cache: "no-store",
+        });
 
-    if (!res.ok) {
+        if (!res.ok) {
+          throw new Error(`HTTP_${res.status}`);
+        }
+
+        const html = await res.text();
+        return {
+          ok: true,
+          status: 200,
+          entries: parseDirectoryHtml(html, path),
+        };
+      }
+    );
+
+    return NextResponse.json({ path, entries: result.entries });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Failed to fetch directory index";
+    const httpMatch = msg.match(/^HTTP_(\d{3})$/);
+    if (httpMatch) {
+      const status = Number(httpMatch[1]);
       return NextResponse.json(
-        { error: `Mirror returned HTTP ${res.status}`, path, entries: [] },
-        { status: res.status }
+        { error: `Mirror returned HTTP ${status}`, path, entries: [] },
+        { status }
       );
     }
-
-    const html = await res.text();
-    const entries = parseDirectoryHtml(html, path);
-    return NextResponse.json({ path, entries });
-  } catch (err: unknown) {
     return NextResponse.json(
       {
-        error: err instanceof Error ? err.message : "Failed to fetch directory index",
+        error: msg,
         path,
         entries: [],
       },

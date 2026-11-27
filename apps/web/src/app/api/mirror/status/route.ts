@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getCachedData } from "@/lib/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -60,13 +61,8 @@ export interface MirrorStatusPayload {
   telemetry?: MirrorTelemetry | null;
 }
 
-let cachedPayload: MirrorStatusPayload | null = null;
-let cachedAtMs = 0;
-const CACHE_TTL_MS = 60_000;
-
-let cachedVersions: Record<string, string> = {};
-let versionsCachedAtMs = 0;
-const VERSIONS_TTL_MS = 3_600_000;
+const STATUS_CACHE_TTL_SEC = 60;
+const VERSIONS_CACHE_TTL_SEC = 3600;
 
 async function probeUrl(url: string, timeoutMs = 4000): Promise<{ ok: boolean; status: number; latencyMs: number }> {
   const start = Date.now();
@@ -128,94 +124,94 @@ async function detectVersions(indexPath: string, filter: RegExp): Promise<string
 }
 
 export async function GET() {
-  const now = Date.now();
-  if (cachedPayload && now - cachedAtMs < CACHE_TTL_MS) {
-    return NextResponse.json(cachedPayload);
-  }
-
-  const [healthProbe, telemetry] = await Promise.all([
-    probeUrl(`${MIRROR_BASE}/health`, 3500),
-    (async (): Promise<MirrorTelemetry | null> => {
-      for (const url of [`${MIRROR_BASE}/_telemetry.json`, "http://192.168.79.21/_telemetry.json"]) {
-        try {
-          const c = new AbortController();
-          const t = setTimeout(() => c.abort(), 2500);
-          const r = await fetch(url, { signal: c.signal, cache: "no-store" });
-          clearTimeout(t);
-          if (r.ok) {
-            return (await r.json()) as MirrorTelemetry;
+  const payload = await getCachedData<MirrorStatusPayload>(
+    "mirror:status:v1",
+    STATUS_CACHE_TTL_SEC,
+    async () => {
+      const [healthProbe, telemetry] = await Promise.all([
+        probeUrl(`${MIRROR_BASE}/health`, 3500),
+        (async (): Promise<MirrorTelemetry | null> => {
+          for (const url of [`${MIRROR_BASE}/_telemetry.json`, "http://192.168.79.21/_telemetry.json"]) {
+            try {
+              const c = new AbortController();
+              const t = setTimeout(() => c.abort(), 2500);
+              const r = await fetch(url, { signal: c.signal, cache: "no-store" });
+              clearTimeout(t);
+              if (r.ok) {
+                return (await r.json()) as MirrorTelemetry;
+              }
+            } catch {}
           }
-        } catch {}
-      }
-      return null;
-    })(),
-  ]);
+          return null;
+        })(),
+      ]);
 
-  const shouldRefreshVersions = healthProbe.ok && now - versionsCachedAtMs > VERSIONS_TTL_MS;
-  if (shouldRefreshVersions) {
-    const versionEntries = await Promise.all(
-      PROBES.filter((p) => p.versionIndexPath && p.versionFilter).map(async (p) => {
-        const v = await detectVersions(p.versionIndexPath!, p.versionFilter!);
-        return [p.id, v] as const;
-      })
-    );
-    const nextVersions: Record<string, string> = {};
-    for (const [id, v] of versionEntries) {
-      if (v) nextVersions[id] = v;
-    }
-    if (Object.keys(nextVersions).length > 0) {
-      cachedVersions = nextVersions;
-      versionsCachedAtMs = now;
-    }
-  }
+      const detectedVersionsMap = healthProbe.ok
+        ? await getCachedData<Record<string, string>>(
+            "mirror:versions:v1",
+            VERSIONS_CACHE_TTL_SEC,
+            async () => {
+              const versionEntries = await Promise.all(
+                PROBES.filter((p) => p.versionIndexPath && p.versionFilter).map(async (p) => {
+                  const v = await detectVersions(p.versionIndexPath!, p.versionFilter!);
+                  return [p.id, v] as const;
+                })
+              );
+              const nextVersions: Record<string, string> = {};
+              for (const [id, v] of versionEntries) {
+                if (v) nextVersions[id] = v;
+              }
+              return nextVersions;
+            }
+          )
+        : {};
 
-  const results = await Promise.all(
-    PROBES.map(async (p) => {
-      if (!healthProbe.ok) {
-        return { id: p.id, name: p.name, ok: false, status: 0, latencyMs: 0 };
+      const results = await Promise.all(
+        PROBES.map(async (p) => {
+          if (!healthProbe.ok) {
+            return { id: p.id, name: p.name, ok: false, status: 0, latencyMs: 0 };
+          }
+          const r = await probeUrl(`${MIRROR_BASE}${p.path}`, 4000);
+          return {
+            id: p.id,
+            name: p.name,
+            ...r,
+            detectedVersions: detectedVersionsMap[p.id],
+          };
+        })
+      );
+
+      const distros: Record<string, DistroHealth> = {};
+      const downNames: string[] = [];
+      let upCount = 0;
+
+      for (const item of results) {
+        distros[item.id] = item;
+        if (item.ok) {
+          upCount++;
+        } else {
+          downNames.push(item.name);
+        }
       }
-      const r = await probeUrl(`${MIRROR_BASE}${p.path}`, 4000);
+
+      const overallStatus: MirrorStatusPayload["overallStatus"] = !healthProbe.ok
+        ? "outage"
+        : downNames.length > 0
+          ? "degraded"
+          : "operational";
+
       return {
-        id: p.id,
-        name: p.name,
-        ...r,
-        detectedVersions: cachedVersions[p.id],
+        overallStatus,
+        mirrorReachable: healthProbe.ok,
+        checkedAt: new Date().toISOString(),
+        upCount,
+        totalCount: PROBES.length,
+        downNames,
+        distros,
+        telemetry,
       };
-    })
-  );
-
-  const distros: Record<string, DistroHealth> = {};
-  const downNames: string[] = [];
-  let upCount = 0;
-
-  for (const item of results) {
-    distros[item.id] = item;
-    if (item.ok) {
-      upCount++;
-    } else {
-      downNames.push(item.name);
     }
-  }
-
-  const overallStatus: MirrorStatusPayload["overallStatus"] = !healthProbe.ok
-    ? "outage"
-    : downNames.length > 0
-      ? "degraded"
-      : "operational";
-
-  const payload: MirrorStatusPayload = {
-    overallStatus,
-    mirrorReachable: healthProbe.ok,
-    checkedAt: new Date().toISOString(),
-    upCount,
-    totalCount: PROBES.length,
-    downNames,
-    distros,
-    telemetry,
-  };
-
-  cachedPayload = payload;
-  cachedAtMs = now;
+  );
 
   return NextResponse.json(payload);
 }
