@@ -81,7 +81,9 @@ function parseDirectoryHtml(html: string, basePath: string): MirrorIndexEntry[] 
       continue;
     }
 
-    const tdMatches = [...row.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)].map((m) =>
+    const rawTds = [...row.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)];
+    const linkTdIdx = rawTds.findIndex((m) => /<a[^>]+href=/i.test(m[1]));
+    const afterTds = (linkTdIdx >= 0 ? rawTds.slice(linkTdIdx + 1) : rawTds.slice(1)).map((m) =>
       stripTags(m[1])
     );
 
@@ -89,15 +91,13 @@ function parseDirectoryHtml(html: string, basePath: string): MirrorIndexEntry[] 
     let size = "-";
     let lastSync = "-";
 
-    if (tdMatches.length >= 3) {
-      const col1 = tdMatches[tdMatches.length - 2] || "-";
-      const col2 = tdMatches[tdMatches.length - 1] || "-";
-      if (/^\d{4}-|^[A-Za-z]+ \d+|\d{2}:\d{2}/.test(col1)) {
-        lastSync = col1;
-        size = isDir ? "-" : col2 || "-";
-      } else {
-        size = isDir ? "-" : col1 || "-";
-        lastSync = col2 || "-";
+    const datePattern = /^\d{4}-\d{2}-\d{2}|\d{2}-[A-Za-z]{3}-\d{4}|^[A-Za-z]+ \d+|\d{2}:\d{2}/;
+    for (const cell of afterTds) {
+      if (!cell || cell === "-") continue;
+      if (lastSync === "-" && datePattern.test(cell)) {
+        lastSync = cell;
+      } else if (!isDir && size === "-") {
+        size = cell;
       }
     }
 
