@@ -370,64 +370,92 @@ export default function AppPlatformClient({
         </section>
 
         {/* ── 4. WORKFLOW HIGHLIGHTS ────────────────────────────────────── */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            {
-              icon: GitBranch,
-              title: "1. Connect Any Git Repo",
-              desc: "Link GitHub, GitLab, or Bitbucket with OAuth/PAT or paste any public HTTPS repository URL. Inspect branches and manifests automatically.",
-            },
-            {
-              icon: Lock,
-              title: "2. Configure Dockerfile & Env",
-              desc: "Build directly from your repo Dockerfile or edit inline. Inject runtime environment variables directly into Kubernetes Pod secrets.",
-            },
-            {
-              icon: Globe,
-              title: "3. Instant HTTPS & Live Shell",
-              desc: "Get an instant *.app.masdikacloud.my.id URL with Let's Encrypt SSL, custom domain CNAME support, metrics, and live Linux PTY terminal.",
-            },
-          ].map((step, idx) => (
-            <div
-              key={idx}
-              className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 space-y-3"
-            >
-              <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-500">
-                <step.icon className="w-5 h-5" />
+        <section className="space-y-8">
+          <div className="text-center max-w-2xl mx-auto">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-2 block">
+              DEPLOYMENT WORKFLOW
+            </span>
+            <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] leading-tight">
+              From Git Push to Production in 3 Steps
+            </h2>
+            <p className="text-sm sm:text-base text-[var(--text-secondary)] mt-2">
+              Connect your repository, customize build and runtime secrets, and ship with instant HTTPS and live container shell access.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                icon: GitBranch,
+                title: "1. Connect Any Git Repo",
+                desc: "Link GitHub, GitLab, or Bitbucket with OAuth/PAT or paste any public HTTPS repository URL. Inspect branches and manifests automatically.",
+              },
+              {
+                icon: Lock,
+                title: "2. Configure Dockerfile & Env",
+                desc: "Build directly from your repo Dockerfile or edit inline. Inject runtime environment variables directly into Kubernetes Pod secrets.",
+              },
+              {
+                icon: Globe,
+                title: "3. Instant HTTPS & Live Shell",
+                desc: "Get an instant *.app.masdikacloud.my.id URL with Let's Encrypt SSL, custom domain CNAME support, metrics, and live Linux PTY terminal.",
+              },
+            ].map((step, idx) => (
+              <div
+                key={idx}
+                className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 space-y-3"
+              >
+                <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-500">
+                  <step.icon className="w-5 h-5" />
+                </div>
+                <h3 className="text-base font-bold text-[var(--text-primary)]">{step.title}</h3>
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{step.desc}</p>
               </div>
-              <h3 className="text-base font-bold text-[var(--text-primary)]">{step.title}</h3>
-              <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{step.desc}</p>
-            </div>
-          ))}
+            ))}
+          </div>
         </section>
 
         {/* ── 5. ARCHITECTURE & SECURITY ISOLATION ──────────────────────── */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {[
-            {
-              icon: Server,
-              title: "Kubernetes Pod & Cgroup Isolation",
-              desc: "Every application runs in its own isolated Kubernetes Deployment with enforced vCPU/RAM limits, readiness probes, and zero-downtime RollingUpdate rollouts.",
-            },
-            {
-              icon: KeyRound,
-              title: "Encrypted Git Tokens & Runtime Env",
-              desc: "GitHub, GitLab, and Bitbucket access tokens are encrypted at rest and never exposed in build logs. Container env variables mount directly at runtime.",
-            },
-          ].map((sec, idx) => (
-            <div
-              key={idx}
-              className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 flex items-start gap-4"
-            >
-              <div className="w-11 h-11 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-500 shrink-0">
-                <sec.icon className="w-5 h-5" />
+        <section className="space-y-8">
+          <div className="text-center max-w-2xl mx-auto">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-2 block">
+              SECURITY &amp; ISOLATION
+            </span>
+            <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] leading-tight">
+              Hardened Multi-Tenant Kubernetes Runtime
+            </h2>
+            <p className="text-sm sm:text-base text-[var(--text-secondary)] mt-2">
+              Strict cgroup resource enforcement, encrypted Git credentials, and zero-downtime RollingUpdate orchestration out of the box.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[
+              {
+                icon: Server,
+                title: "Kubernetes Pod & Cgroup Isolation",
+                desc: "Every application runs in its own isolated Kubernetes Deployment with enforced vCPU/RAM limits, readiness probes, and zero-downtime RollingUpdate rollouts.",
+              },
+              {
+                icon: KeyRound,
+                title: "Encrypted Git Tokens & Runtime Env",
+                desc: "GitHub, GitLab, and Bitbucket access tokens are encrypted at rest and never exposed in build logs. Container env variables mount directly at runtime.",
+              },
+            ].map((sec, idx) => (
+              <div
+                key={idx}
+                className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] p-6 flex items-start gap-4"
+              >
+                <div className="w-11 h-11 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-500 shrink-0">
+                  <sec.icon className="w-5 h-5" />
+                </div>
+                <div className="space-y-1.5">
+                  <h3 className="text-base font-bold text-[var(--text-primary)]">{sec.title}</h3>
+                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{sec.desc}</p>
+                </div>
               </div>
-              <div className="space-y-1.5">
-                <h3 className="text-base font-bold text-[var(--text-primary)]">{sec.title}</h3>
-                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{sec.desc}</p>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </section>
 
         {/* ── 6. PROVISIONING TERMINAL PREVIEW ──────────────────────────── */}
