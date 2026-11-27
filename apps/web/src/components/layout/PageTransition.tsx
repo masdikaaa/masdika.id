@@ -22,7 +22,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
   return (
     <div
       key={pathname}
-      className="flex flex-col min-h-[calc(100vh-64px)] w-full max-w-full page-fade-in relative z-20"
+      className="flex flex-col w-full max-w-full page-fade-in relative z-20"
     >
       {!isHomePage && <PageOrnaments />}
       <div className="relative z-10 flex flex-col flex-1 w-full max-w-full min-w-0">
