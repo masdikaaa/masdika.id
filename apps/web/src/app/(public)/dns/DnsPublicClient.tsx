@@ -837,25 +837,28 @@ export default function DnsPublicClient({
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)] shadow-xl overflow-hidden">
+          <div className="max-w-4xl mx-auto rounded-2xl border border-[var(--border-primary)] bg-[var(--surface)]/95 backdrop-blur-sm shadow-xl shadow-black/20 overflow-hidden">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 runDnsLookup(lookupDomain, lookupType);
               }}
-              className="p-4 sm:p-8 flex flex-col lg:flex-row items-stretch lg:items-center gap-3"
+              className="p-4 sm:p-5 flex flex-col lg:flex-row items-stretch lg:items-center gap-3"
             >
-              <input
-                type="text"
-                value={lookupDomain}
-                onChange={(e) => setLookupDomain(e.target.value)}
-                placeholder="Enter domain or hostname (e.g. masdika.id, github.com)"
-                aria-label="Domain name to lookup"
-                className="w-full lg:flex-1 min-w-0 h-12 shrink-0 px-4 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-sm font-mono text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/60 focus:outline-none focus:border-cyan-500 transition-colors"
-              />
+              <div className="relative flex-1 min-w-0">
+                <Globe className="w-4 h-4 text-[var(--text-secondary)]/70 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  value={lookupDomain}
+                  onChange={(e) => setLookupDomain(e.target.value)}
+                  placeholder="Enter domain or hostname (e.g. masdika.id)"
+                  aria-label="Domain name to lookup"
+                  className="w-full h-11 pl-10 pr-4 rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] text-sm font-mono text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/60 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15 transition-all"
+                />
+              </div>
 
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0">
-                <div className="grid grid-cols-7 sm:inline-flex items-center rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] p-1 w-full sm:w-auto">
+                <div className="grid grid-cols-7 sm:inline-flex items-center rounded-xl border border-[var(--border-primary)] bg-[var(--surface-secondary)] p-1 h-11 w-full sm:w-auto">
                   {DNS_LOOKUP_TYPES.map((t) => (
                     <button
                       key={t}
@@ -863,8 +866,8 @@ export default function DnsPublicClient({
                       onClick={() => setLookupType(t)}
                       className={
                         lookupType === t
-                          ? "px-1.5 sm:px-2.5 py-2 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-mono font-bold bg-cyan-400 text-slate-950 cursor-pointer transition-colors text-center"
-                          : "px-1.5 sm:px-2.5 py-2 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-mono font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer transition-colors text-center"
+                          ? "px-2 sm:px-2.5 h-full rounded-lg text-[10px] sm:text-[11px] font-mono font-bold bg-cyan-400 text-slate-950 shadow-sm cursor-pointer transition-all text-center flex items-center justify-center"
+                          : "px-2 sm:px-2.5 h-full rounded-lg text-[10px] sm:text-[11px] font-mono font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer transition-colors text-center flex items-center justify-center"
                       }
                     >
                       {t}
@@ -878,7 +881,7 @@ export default function DnsPublicClient({
                   size="md"
                   disabled={lookupLoading}
                   leftIcon={<Search className="w-4 h-4" />}
-                  className="w-full sm:w-auto justify-center shrink-0 h-11"
+                  className="w-full sm:w-auto justify-center shrink-0 h-11 px-5"
                 >
                   {lookupLoading ? "Querying..." : "Lookup"}
                 </Button>
