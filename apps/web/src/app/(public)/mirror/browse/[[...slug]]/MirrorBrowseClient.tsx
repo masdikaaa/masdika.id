@@ -223,8 +223,8 @@ export default function MirrorBrowsePage() {
           </div>
 
           {loading ? (
-            <div className="py-16 text-center text-slate-500 dark:text-zinc-400">
-              <RefreshCw className="w-5 h-5 text-cyan-400 animate-spin mx-auto mb-2" />
+            <div className="min-h-[420px] flex flex-col items-center justify-center text-slate-500 dark:text-zinc-400">
+              <RefreshCw className="w-5 h-5 text-cyan-400 animate-spin mb-2" />
               <span className="text-xs">Loading directory index...</span>
             </div>
           ) : error ? (
