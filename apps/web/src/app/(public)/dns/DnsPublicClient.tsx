@@ -448,14 +448,7 @@ export default function DnsPublicClient({
   const activeSetup = setupTabs.find((t) => t.id === activeTab) ?? setupTabs[0];
 
   return (
-    <div className="flex flex-col min-h-screen pt-28 sm:pt-36 md:pt-40 pb-12 sm:pb-16 overflow-x-hidden bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300 relative">
-      {/* Subtle Top Ambient Glow */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div
-          className="absolute -top-[10%] left-1/2 -translate-x-1/2 w-[900px] h-[520px] rounded-full opacity-[0.12] dark:opacity-[0.18] blur-[140px]"
-          style={{ background: "radial-gradient(circle, #06b6d4 0%, transparent 70%)" }}
-        />
-      </div>
+    <div className="flex flex-col min-h-screen pt-28 sm:pt-36 md:pt-40 pb-12 sm:pb-16 overflow-x-hidden text-[var(--text-primary)] transition-colors duration-300 relative">
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex-1">
         {/* 1. HERO SECTION */}
