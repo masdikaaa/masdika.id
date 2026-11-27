@@ -165,8 +165,8 @@ export default function LookingGlassPage() {
               </div>
 
               {/* Headline H1 (Ukuran sama persis Home Page, SLA, Privacy, Terms & DNS) */}
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-4 text-[var(--text-primary)]">
-                Network Routing &amp; <br />
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-[72px] font-black tracking-tight leading-[1.05] mb-4 text-[var(--text-primary)]">
+                Network Routing. <br />
                 <span className="bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent">
                   Looking Glass.
                 </span>
