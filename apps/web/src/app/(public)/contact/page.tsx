@@ -135,11 +135,11 @@ export default function ContactPage() {
             
             {/* Left Column: Headline & Action */}
             <div className="max-w-2xl lg:pt-20">
-              <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="mb-6 sm:mb-8 font-mono uppercase">
+              <Badge variant="brand" dot dotColor="bg-cyan-400" size="md" className="mb-6 sm:mb-8 font-mono uppercase">
                 AVAILABLE FOR INQUIRIES &amp; PROJECTS
               </Badge>
 
-              <h1 className="text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-6 text-[var(--text-primary)]">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-5xl xl:text-6xl 2xl:text-[70px] font-black tracking-tight leading-[1.08] text-balance mb-6 text-[var(--text-primary)]">
                 Have an idea? <br />
                 <span className="bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent">
                   Let&apos;s talk.

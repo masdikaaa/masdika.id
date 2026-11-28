@@ -453,7 +453,7 @@ export default function MirrorClient() {
                       ? "bg-red-500"
                       : health?.overallStatus === "degraded"
                         ? "bg-amber-400"
-                        : "bg-emerald-400"
+                        : "bg-cyan-400"
                   }
                   size="md"
                   className="font-mono uppercase text-[10px] sm:text-xs"
@@ -468,7 +468,7 @@ export default function MirrorClient() {
                 </Badge>
               </div>
 
-              <h1 className="text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-4 text-[var(--text-primary)]">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-5xl xl:text-6xl 2xl:text-[70px] font-black tracking-tight leading-[1.08] text-balance mb-4 text-[var(--text-primary)]">
                 Package &amp; <br />
                 <span className="bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent">
                   ISO Mirror.

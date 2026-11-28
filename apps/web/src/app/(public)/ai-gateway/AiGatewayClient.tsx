@@ -400,7 +400,7 @@ export default function AiGatewayClient({
             {/* Left – Text & Actions */}
             <div className="max-w-2xl relative z-30 lg:pt-20">
               <div className="mb-8">
-                <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase whitespace-nowrap">
+                <Badge variant="brand" dot dotColor="bg-cyan-400" size="md" className="font-mono uppercase whitespace-nowrap">
                   UNIFIED AI INFERENCE GATEWAY
                 </Badge>
               </div>

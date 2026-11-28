@@ -462,18 +462,18 @@ export function HomeClient({
             >
               {/* Status pill using shared Badge */}
               <div className="mb-8">
-                <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase">
+                <Badge variant="brand" dot dotColor="bg-cyan-400" size="md" className="font-mono uppercase">
                   AVAILABLE FOR NEW PROJECTS
                 </Badge>
               </div>
 
               {/* Headline */}
               <div className="mb-6">
-                <h1 className="text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-3 text-[var(--text-primary)]">
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-5xl xl:text-6xl 2xl:text-[70px] font-black tracking-tight leading-[1.08] text-balance mb-3 text-[var(--text-primary)]">
                   {settings?.hero_title || "Hi, I'm Masdika,"}
                 </h1>
 
-                <div className="min-h-[48px] sm:min-h-[56px] md:min-h-[72px] flex items-center">
+                <div className="min-h-[48px] sm:min-h-[56px] md:min-h-[64px] flex items-center">
                   {isMounted ? (
                     <TypeAnimation
                       key={typingSequence.join(",")}
@@ -481,18 +481,10 @@ export function HomeClient({
                       wrapper="span"
                       speed={50}
                       repeat={Infinity}
-                      className={cn(
-                        "font-black text-3xl sm:text-4xl md:text-[56px] tracking-tight leading-tight block",
-                        iconAccent
-                      )}
+                      className="font-black text-3xl sm:text-4xl md:text-5xl lg:text-4xl xl:text-5xl 2xl:text-[58px] tracking-tight leading-[1.1] block bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent"
                     />
                   ) : (
-                    <span
-                      className={cn(
-                        "font-black text-3xl sm:text-4xl md:text-[56px] tracking-tight leading-tight block",
-                        iconAccent
-                      )}
-                    >
+                    <span className="font-black text-3xl sm:text-4xl md:text-5xl lg:text-4xl xl:text-5xl 2xl:text-[58px] tracking-tight leading-[1.1] block bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent">
                       {typingSequence[0] || "DevOps Engineer"}
                     </span>
                   )}

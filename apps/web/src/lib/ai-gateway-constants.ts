@@ -24,7 +24,7 @@ export const DEFAULT_AI_MODELS: AiModelSeed[] = [
     cachePricePer1M: 13,
     outputPricePer1M: 1250,
     originalInputPricePer1M: 1246,
-    originalCachePricePer1M: 63,
+    originalCachePricePer1M: 53,
     originalOutputPricePer1M: 5002,
     discountBadge: '-75%',
   },

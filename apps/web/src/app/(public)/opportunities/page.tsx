@@ -75,7 +75,7 @@ export default async function OpportunitiesPage() {
             <span className="text-cyan-500 font-bold tracking-[0.2em] text-xs mb-4 block">
               Discover Opportunities
             </span>
-            <h1 className="text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-6 text-[var(--text-primary)]">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-5xl xl:text-6xl 2xl:text-[70px] font-black tracking-tight leading-[1.08] text-balance mb-6 text-[var(--text-primary)]">
               Events &amp; <br />
               <span className="bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent">
                 Opportunities.

@@ -453,12 +453,12 @@ export default function ManagedDbClient({ safePricing, isDatabaseEnabled }: Mana
             {/* Left – Text & Actions */}
             <div className="max-w-2xl relative z-30 lg:pt-20">
               <div className="mb-8">
-                <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase whitespace-nowrap">
+                <Badge variant="brand" dot dotColor="bg-cyan-400" size="md" className="font-mono uppercase whitespace-nowrap">
                   ENTERPRISE KUBERNETES CLUSTER
                 </Badge>
               </div>
 
-              <h1 className="text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-4 text-[var(--text-primary)]">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-5xl xl:text-6xl 2xl:text-[70px] font-black tracking-tight leading-[1.08] text-balance mb-4 text-[var(--text-primary)]">
                 Managed Database &amp; <br />
                 <span className="bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent">
                   High-Availability Storage.

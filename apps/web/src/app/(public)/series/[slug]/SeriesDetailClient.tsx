@@ -241,7 +241,7 @@ export function SeriesDetailClient({ initialSeries, slug }: { initialSeries: any
               >
                 {/* Status pill using shared Badge */}
                 <div className="flex flex-wrap items-center gap-3 mb-6">
-                  <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase">
+                  <Badge variant="brand" dot dotColor="bg-cyan-400" size="md" className="font-mono uppercase">
                     {series.level.toUpperCase()} TRACK
                   </Badge>
                   <span className={cn(
