@@ -164,7 +164,7 @@ export default function LookingGlassPage() {
             >
               {/* Status pill using shared Badge */}
               <div className="mb-8">
-                <Badge variant="brand" dot dotColor="bg-cyan-400" size="md" className="font-mono uppercase">
+                <Badge variant="brand" dot dotColor="bg-emerald-400" size="md" className="font-mono uppercase">
                   NETWORK ROUTEGLASS &amp; BGP
                 </Badge>
               </div>

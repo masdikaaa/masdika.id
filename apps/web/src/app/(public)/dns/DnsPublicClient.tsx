@@ -464,7 +464,7 @@ export default function DnsPublicClient({
                 <Badge
                   variant="brand"
                   dot
-                  dotColor={isOperational ? "bg-cyan-400" : "bg-amber-400"}
+                  dotColor={isOperational ? "bg-emerald-400" : "bg-amber-400"}
                   size="md"
                   className="font-mono uppercase text-[10px] sm:text-xs"
                 >
@@ -559,7 +559,7 @@ export default function DnsPublicClient({
                       <h3 className="text-xl font-black text-[var(--text-primary)]">Masdika SafeDNS</h3>
                     </div>
                   </div>
-                  <Badge variant="brand" size="sm" dot dotColor="bg-cyan-400" className="whitespace-nowrap shrink-0">
+                  <Badge variant="brand" size="sm" dot dotColor="bg-emerald-400" className="whitespace-nowrap shrink-0">
                     Free Public
                   </Badge>
                 </div>
