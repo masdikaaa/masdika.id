@@ -113,6 +113,17 @@ export default function AdminDnsPage() {
 
   useEffect(() => {
     fetchZones();
+    const interval = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        fetch("/api/admin/dns/stats", { cache: "no-store" })
+          .then((r) => (r.ok ? r.json() : null))
+          .then((statsJson) => {
+            if (statsJson?.available) setDnsStats(statsJson);
+          })
+          .catch(() => {});
+      }
+    }, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleInspect = async (zone: AdminDnsZone) => {

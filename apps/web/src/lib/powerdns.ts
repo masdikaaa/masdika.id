@@ -701,10 +701,15 @@ export async function getDnsdistStats(): Promise<DnsStatsSnapshot> {
         cacheHits,
         cacheMisses,
         cacheHitRatio,
-        noerrorAnswers: Number(raw["noerror-answers"] || 0),
-        nxdomainAnswers: Number(raw["nxdomain-answers"] || 0),
-        servfailAnswers: Number(raw["servfail-answers"] || 0),
-        blockedOrDropped: Number(raw["acl-drops"] || 0) + Number(raw["rule-drop"] || 0),
+        noerrorAnswers: Number(raw["frontend-noerror"] ?? raw["noerror-answers"] ?? 0),
+        nxdomainAnswers: Number(raw["frontend-nxdomain"] ?? raw["nxdomain-answers"] ?? 0),
+        servfailAnswers: Number(raw["frontend-servfail"] ?? raw["servfail-answers"] ?? 0),
+        blockedOrDropped:
+          Number(raw["acl-drops"] || 0) +
+          Number(raw["rule-drop"] || 0) +
+          Number(raw["rule-nxdomain"] || 0) +
+          Number(raw["rule-refused"] || 0) +
+          Number(raw["dyn-blocked"] || 0),
         uptimeSec: Number(raw.uptime || 0),
         latencyAvgUs: Number(raw["latency-avg100"] || 0),
         latencyBuckets: [
