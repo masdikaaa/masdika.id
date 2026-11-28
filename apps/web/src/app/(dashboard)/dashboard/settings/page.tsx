@@ -131,6 +131,7 @@ export default function SettingsPage() {
   const [remainingBackupCodesCount, setRemainingBackupCodesCount] = useState(0);
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
   const [showBackupCodesModal, setShowBackupCodesModal] = useState(false);
+  const [hasSavedBackupCodes, setHasSavedBackupCodes] = useState(false);
   const [copiedBackupCodes, setCopiedBackupCodes] = useState(false);
   const [showRegenerateBackupModal, setShowRegenerateBackupModal] = useState(false);
   const [regenerate2FACode, setRegenerate2FACode] = useState('');
@@ -620,6 +621,7 @@ export default function SettingsPage() {
         if (Array.isArray(data.backupCodes) && data.backupCodes.length > 0) {
           setBackupCodes(data.backupCodes);
           setRemainingBackupCodesCount(data.remainingBackupCodesCount ?? data.backupCodes.length);
+          setHasSavedBackupCodes(false);
           setShowBackupCodesModal(true);
         }
       }
@@ -647,6 +649,7 @@ export default function SettingsPage() {
         setRemainingBackupCodesCount(data.remainingBackupCodesCount ?? data.backupCodes.length);
         setShowRegenerateBackupModal(false);
         setRegenerate2FACode('');
+        setHasSavedBackupCodes(false);
         setShowBackupCodesModal(true);
       } else {
         toast.error(data.error || 'Invalid verification code');
@@ -689,6 +692,7 @@ export default function SettingsPage() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+    setHasSavedBackupCodes(true);
     toast.success('Backup codes file downloaded');
   };
 
@@ -697,6 +701,7 @@ export default function SettingsPage() {
     try {
       await navigator.clipboard.writeText(backupCodes.join('\n'));
       setCopiedBackupCodes(true);
+      setHasSavedBackupCodes(true);
       toast.success('All backup codes copied');
       setTimeout(() => setCopiedBackupCodes(false), 2000);
     } catch {
@@ -1800,7 +1805,7 @@ export default function SettingsPage() {
         {showTwoFactorModal && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("rounded-2xl border p-5 sm:p-6 w-full max-w-md shadow-2xl relative overflow-hidden", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90")}>
-              <button onClick={() => setShowTwoFactorModal(false)} className={cn("absolute top-4 right-4 sm:top-5 sm:right-5 transition-colors p-2 rounded-xl cursor-pointer", isDark ? "text-zinc-400 hover:text-white bg-[#111115] hover:bg-white/[0.08]" : "text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200")}><X className="w-4 h-4" /></button>
+              <button type="button" onClick={() => setShowTwoFactorModal(false)} aria-label="Close Setup 2FA" className={cn("absolute top-4 right-4 sm:top-5 sm:right-5 z-20 transition-colors p-2 rounded-xl cursor-pointer", isDark ? "text-zinc-400 hover:text-white bg-[#111115] hover:bg-white/[0.08]" : "text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200")}><X className="w-4 h-4" /></button>
 
               <div className="text-center mb-6 relative z-10">
                 <div className={cn("w-14 h-14 sm:w-16 sm:h-16 border rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4", isDark ? "bg-[#111115] border-white/[0.08] text-cyan-400" : "bg-slate-50/80 border-slate-200/90 text-cyan-600")}>
@@ -1955,8 +1960,10 @@ export default function SettingsPage() {
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("rounded-2xl border p-5 sm:p-6 w-full max-w-md shadow-2xl relative overflow-hidden", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90")}>
               <button
                 type="button"
+                disabled={!hasSavedBackupCodes}
                 onClick={() => setShowBackupCodesModal(false)}
-                className={cn("absolute top-4 right-4 transition-colors p-2 rounded-xl cursor-pointer", isDark ? "text-zinc-400 hover:text-white bg-[#111115] hover:bg-white/[0.08]" : "text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200")}
+                title={hasSavedBackupCodes ? "Close" : "Download or copy your backup codes first"}
+                className={cn("absolute top-4 right-4 z-20 transition-colors p-2 rounded-xl cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed", isDark ? "text-zinc-400 hover:text-white bg-[#111115] hover:bg-white/[0.08]" : "text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200")}
               >
                 <X className="w-4 h-4" />
               </button>
@@ -2003,10 +2010,14 @@ export default function SettingsPage() {
 
               <button
                 type="button"
+                disabled={!hasSavedBackupCodes}
                 onClick={() => setShowBackupCodesModal(false)}
-                className={cn("w-full mt-3 py-2 rounded-xl text-xs font-medium transition-colors cursor-pointer", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-800")}
+                className={cn(
+                  "w-full mt-3 py-2 rounded-xl text-xs font-medium transition-colors cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed",
+                  isDark ? "text-zinc-300 hover:text-white" : "text-slate-600 hover:text-slate-900"
+                )}
               >
-                I have saved my backup codes
+                {hasSavedBackupCodes ? 'I have saved my backup codes' : 'Please download or copy your backup codes first'}
               </button>
             </motion.div>
           </motion.div>
