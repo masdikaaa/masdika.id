@@ -49,6 +49,18 @@ interface AdminDnsInfo {
 
 const ITEMS_PER_PAGE = 10;
 
+function formatUptime(seconds: number): string {
+  const total = Math.max(0, Math.floor(seconds));
+  const days = Math.floor(total / 86400);
+  const hours = Math.floor((total % 86400) / 3600);
+  const mins = Math.floor((total % 3600) / 60);
+  const parts: string[] = [];
+  if (days > 0) parts.push(`${days}d`);
+  if (hours > 0) parts.push(`${hours}h`);
+  if (mins > 0 || parts.length === 0) parts.push(`${mins}m`);
+  return parts.join(" ");
+}
+
 export default function AdminDnsPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -368,7 +380,7 @@ export default function AdminDnsPage() {
                 </p>
               </div>
               <span className="text-[11px] font-mono px-2.5 py-1 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                Uptime: {Math.floor((dnsStats.uptimeSec || 0) / 60)}m
+                Uptime: {formatUptime(dnsStats.uptimeSec || 0)}
               </span>
             </div>
 
