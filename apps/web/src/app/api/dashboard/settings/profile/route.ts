@@ -24,7 +24,7 @@ export async function GET() {
     const user = await prisma.user.findUnique({
       where: { id: auth.userId },
       select: {
-        name: true, email: true, image: true, twoFactorEnabled: true,
+        name: true, email: true, image: true, twoFactorEnabled: true, twoFactorBackupCodes: true,
         companyName: true, phone: true, address1: true, address2: true,
         city: true, state: true, postalCode: true, country: true,
       }
@@ -33,9 +33,16 @@ export async function GET() {
     if (user) {
       if (user.email) user.email = decryptDeterministic(user.email);
       if (user.name) user.name = decryptDeterministic(user.name);
+      const { twoFactorBackupCodes, ...safeUser } = user;
+      return NextResponse.json({
+        user: {
+          ...safeUser,
+          remainingBackupCodesCount: Array.isArray(twoFactorBackupCodes) ? twoFactorBackupCodes.length : 0,
+        },
+      });
     }
 
-    return NextResponse.json({ user });
+    return NextResponse.json({ user: null });
   } catch (error) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

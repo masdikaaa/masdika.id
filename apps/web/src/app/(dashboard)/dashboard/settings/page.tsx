@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/ThemeProvider";
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
-import { User, Shield, Upload, Save, Lock, Loader2, Smartphone, ShieldCheck, Settings, Camera, Mail, KeyRound, X, Eye, EyeOff, CheckCircle2, AlertTriangle, Phone, MapPin, Briefcase, Building2, History, RefreshCw, Laptop, Tablet, Globe, LogOut, ChevronLeft, ChevronRight, Clock, Calendar, ShieldAlert, Trash2 } from 'lucide-react';
+import { User, Shield, Upload, Save, Lock, Loader2, Smartphone, ShieldCheck, Settings, Camera, Mail, KeyRound, X, Eye, EyeOff, CheckCircle2, AlertTriangle, Phone, MapPin, Briefcase, Building2, History, RefreshCw, Laptop, Tablet, Globe, LogOut, ChevronLeft, ChevronRight, Clock, Calendar, ShieldAlert, Trash2, Download, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Select } from '@/components/ui/Select';
@@ -128,6 +128,12 @@ export default function SettingsPage() {
 
   // 2FA State
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const [remainingBackupCodesCount, setRemainingBackupCodesCount] = useState(0);
+  const [backupCodes, setBackupCodes] = useState<string[]>([]);
+  const [showBackupCodesModal, setShowBackupCodesModal] = useState(false);
+  const [copiedBackupCodes, setCopiedBackupCodes] = useState(false);
+  const [showRegenerateBackupModal, setShowRegenerateBackupModal] = useState(false);
+  const [regenerate2FACode, setRegenerate2FACode] = useState('');
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [secret, setSecret] = useState<string | null>(null);
   const [twoFactorCode, setTwoFactorCode] = useState('');
@@ -138,6 +144,9 @@ export default function SettingsPage() {
 
   // Login Logs & Session State
   const [loginLogs, setLoginLogs] = useState<any[]>([]);
+  const [selectedLogIds, setSelectedLogIds] = useState<string[]>([]);
+  const [isDeletingSelected, setIsDeletingSelected] = useState(false);
+  const [confirmDeleteSelectedModal, setConfirmDeleteSelectedModal] = useState(false);
   const [loadingLoginLogs, setLoadingLoginLogs] = useState(false);
   const [currentIp, setCurrentIp] = useState('');
   const [loginLogsPage, setLoginLogsPage] = useState(1);
@@ -154,6 +163,7 @@ export default function SettingsPage() {
 
   const fetchLoginLogs = async (page = 1) => {
     setLoadingLoginLogs(true);
+    setSelectedLogIds([]);
     try {
       const res = await fetch(`/api/user/security/login-logs?page=${page}&limit=5`);
       const data = await res.json();
@@ -261,6 +271,7 @@ export default function SettingsPage() {
       const data = await res.json();
       if (res.ok && data.success) {
         toast.success(data.message || 'Login history cleared successfully.');
+        setSelectedLogIds([]);
         fetchLoginLogs(1);
       } else {
         toast.error(data.error || 'Failed to clear login history.');
@@ -270,6 +281,44 @@ export default function SettingsPage() {
     } finally {
       setIsClearingAll(false);
       setConfirmClearAllModal(false);
+    }
+  };
+
+  const toggleSelectLog = (id: string) => {
+    setSelectedLogIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectAllLogs = () => {
+    if (loginLogs.length === 0) return;
+    const allIds = loginLogs.map((l) => l.id).filter(Boolean);
+    const allSelected = allIds.length > 0 && allIds.every((id) => selectedLogIds.includes(id));
+    setSelectedLogIds(allSelected ? [] : allIds);
+  };
+
+  const handleDeleteSelectedLogs = async () => {
+    if (selectedLogIds.length === 0) return;
+    setIsDeletingSelected(true);
+    try {
+      const res = await fetch('/api/user/security/login-logs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete_selected', logIds: selectedLogIds }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success(data.message || 'Selected login records deleted.');
+        setSelectedLogIds([]);
+        fetchLoginLogs(loginLogsPage);
+      } else {
+        toast.error(data.error || 'Failed to delete selected records.');
+      }
+    } catch {
+      toast.error('Something went wrong while deleting selected records.');
+    } finally {
+      setIsDeletingSelected(false);
+      setConfirmDeleteSelectedModal(false);
     }
   };
 
@@ -314,6 +363,7 @@ export default function SettingsPage() {
         setEmail(data.user.email || '');
         setImagePreview(data.user.image || null);
         setTwoFactorEnabled(data.user.twoFactorEnabled || false);
+        setRemainingBackupCodesCount(data.user.remainingBackupCodesCount ?? 0);
         setCompanyName(data.user.companyName || '');
         setPhone(data.user.phone || '');
         setAddress1(data.user.address1 || '');
@@ -529,7 +579,7 @@ export default function SettingsPage() {
         body: JSON.stringify({ action: 'disable', code: disable2FACode }),
       });
       const data = await res.json();
-      if (data.success) { toast.success('2FA disabled successfully'); setTwoFactorEnabled(false); setShowDisable2FAModal(false); }
+      if (data.success) { toast.success('2FA disabled successfully'); setTwoFactorEnabled(false); setRemainingBackupCodesCount(0); setBackupCodes([]); setShowDisable2FAModal(false); }
       else { toast.error(data.error || 'Failed to disable 2FA'); }
     } catch (error) { toast.error('An error occurred'); }
     finally { setIs2FALoading(false); }
@@ -562,10 +612,96 @@ export default function SettingsPage() {
         body: JSON.stringify({ action: 'verify_enable', code: twoFactorCode }),
       });
       const data = await res.json();
-      if (data.success) { toast.success('2FA enabled successfully!'); setTwoFactorEnabled(true); setShowTwoFactorModal(false); setTwoFactorCode(''); }
+      if (data.success) {
+        toast.success('2FA enabled successfully!');
+        setTwoFactorEnabled(true);
+        setShowTwoFactorModal(false);
+        setTwoFactorCode('');
+        if (Array.isArray(data.backupCodes) && data.backupCodes.length > 0) {
+          setBackupCodes(data.backupCodes);
+          setRemainingBackupCodesCount(data.remainingBackupCodesCount ?? data.backupCodes.length);
+          setShowBackupCodesModal(true);
+        }
+      }
       else { toast.error(data.error || 'Invalid code'); }
     } catch (error) { toast.error('An error occurred'); }
     finally { setIs2FALoading(false); }
+  };
+
+  const handleRegenerateBackupCodes = async () => {
+    if (!regenerate2FACode || regenerate2FACode.length < 6) {
+      toast.error('Please enter your 6-digit authenticator code');
+      return;
+    }
+    try {
+      setIs2FALoading(true);
+      const res = await fetch('/api/dashboard/settings/2fa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'regenerate_backup_codes', code: regenerate2FACode }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success && Array.isArray(data.backupCodes)) {
+        toast.success('New backup codes generated');
+        setBackupCodes(data.backupCodes);
+        setRemainingBackupCodesCount(data.remainingBackupCodesCount ?? data.backupCodes.length);
+        setShowRegenerateBackupModal(false);
+        setRegenerate2FACode('');
+        setShowBackupCodesModal(true);
+      } else {
+        toast.error(data.error || 'Invalid verification code');
+      }
+    } catch {
+      toast.error('Failed to regenerate backup codes');
+    } finally {
+      setIs2FALoading(false);
+    }
+  };
+
+  const handleDownloadBackupCodes = () => {
+    if (backupCodes.length === 0) return;
+    const content = [
+      '============================================================',
+      '  MASDIKA CLOUD - TWO-FACTOR AUTHENTICATION BACKUP CODES',
+      '============================================================',
+      `Account   : ${email || 'Masdika User'}`,
+      `Generated : ${new Date().toISOString()}`,
+      '',
+      'IMPORTANT:',
+      '- Keep these recovery codes in a safe, offline location.',
+      '- Each code can only be used ONCE to sign in if you lose',
+      '  access to your authenticator app.',
+      '- Regenerating backup codes invalidates all previous codes.',
+      '',
+      'RECOVERY CODES:',
+      ...backupCodes.map((c, idx) => `  ${String(idx + 1).padStart(2, '0')}. ${c}`),
+      '',
+      '============================================================',
+      '',
+    ].join('\n');
+
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'masdika-2fa-backup-codes.txt';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success('Backup codes file downloaded');
+  };
+
+  const handleCopyBackupCodes = async () => {
+    if (backupCodes.length === 0) return;
+    try {
+      await navigator.clipboard.writeText(backupCodes.join('\n'));
+      setCopiedBackupCodes(true);
+      toast.success('All backup codes copied');
+      setTimeout(() => setCopiedBackupCodes(false), 2000);
+    } catch {
+      toast.error('Failed to copy backup codes');
+    }
   };
 
   const tabs = [
@@ -1085,7 +1221,7 @@ export default function SettingsPage() {
                       </p>
                     </div>
 
-                    {!twoFactorEnabled && (
+                    {!twoFactorEnabled ? (
                       <button
                         type="button"
                         onClick={handle2FAToggle}
@@ -1094,6 +1230,29 @@ export default function SettingsPage() {
                       >
                         Setup 2FA
                       </button>
+                    ) : (
+                      <div className="flex flex-wrap items-center gap-2 shrink-0 self-start sm:self-auto">
+                        <span className={cn("px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-semibold border", isDark ? "bg-white/[0.04] border-white/[0.08] text-zinc-300" : "bg-white border-slate-200 text-slate-700")}>
+                          {remainingBackupCodesCount}/8 backup codes left
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setRegenerate2FACode('');
+                            setShowRegenerateBackupModal(true);
+                          }}
+                          disabled={is2FALoading}
+                          className={cn(
+                            "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer",
+                            isDark
+                              ? "border-cyan-500/30 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20"
+                              : "border-cyan-200 bg-white text-cyan-700 hover:bg-cyan-50"
+                          )}
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          <span>Backup Codes</span>
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -1112,6 +1271,23 @@ export default function SettingsPage() {
                     </div>
 
                     <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap w-full sm:w-auto">
+                      {selectedLogIds.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setConfirmDeleteSelectedModal(true)}
+                          disabled={isDeletingSelected || loadingLoginLogs}
+                          className={cn(
+                            "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer disabled:opacity-50",
+                            isDark
+                              ? "border-rose-500/40 bg-rose-500/15 text-rose-300 hover:bg-rose-500/25"
+                              : "border-rose-300 bg-rose-50 text-rose-700 hover:bg-rose-100"
+                          )}
+                        >
+                          {isDeletingSelected ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                          <span>Delete Selected ({selectedLogIds.length})</span>
+                        </button>
+                      )}
+
                       {loginLogs.length > 0 && (
                         <button
                           type="button"
@@ -1181,6 +1357,15 @@ export default function SettingsPage() {
                           <table className="w-full text-left text-xs border-collapse">
                             <thead>
                               <tr className={cn("uppercase tracking-wider font-semibold border-b text-[11px]", isDark ? "bg-[#111115] text-zinc-400 border-white/[0.08]" : "bg-slate-50/80 text-slate-500 border-slate-200/90")}>
+                                <th className="pl-3.5 pr-1 py-2 w-9">
+                                  <input
+                                    type="checkbox"
+                                    aria-label="Select all login records on this page"
+                                    checked={loginLogs.length > 0 && loginLogs.every((l) => selectedLogIds.includes(l.id))}
+                                    onChange={toggleSelectAllLogs}
+                                    className="w-3.5 h-3.5 rounded border-white/20 accent-cyan-400 cursor-pointer"
+                                  />
+                                </th>
                                 <th className="px-3.5 py-2 whitespace-nowrap">Device & Browser</th>
                                 <th className="px-3.5 py-2 w-36 whitespace-nowrap">IP Address</th>
                                 <th className="px-3.5 py-2 w-32 whitespace-nowrap">Login Time</th>
@@ -1191,8 +1376,18 @@ export default function SettingsPage() {
                             <tbody className={cn("divide-y", isDark ? "divide-white/[0.06]" : "divide-slate-200/90")}>
                               {loginLogs.map((log) => {
                                 const dt = formatDateTime(log.createdAt);
+                                const isSelected = selectedLogIds.includes(log.id);
                                 return (
-                                  <tr key={log.id} className={cn("transition-colors", isDark ? "hover:bg-white/[0.02]" : "hover:bg-slate-50/80")}>
+                                  <tr key={log.id} className={cn("transition-colors", isSelected ? (isDark ? "bg-cyan-500/[0.06]" : "bg-cyan-50/60") : (isDark ? "hover:bg-white/[0.02]" : "hover:bg-slate-50/80"))}>
+                                    <td className="pl-3.5 pr-1 py-2 align-middle">
+                                      <input
+                                        type="checkbox"
+                                        aria-label={`Select record ${log.ipAddress}`}
+                                        checked={isSelected}
+                                        onChange={() => toggleSelectLog(log.id)}
+                                        className="w-3.5 h-3.5 rounded border-white/20 accent-cyan-400 cursor-pointer"
+                                      />
+                                    </td>
                                     <td className="px-3.5 py-2 align-middle">
                                       <div className="flex items-center gap-2.5">
                                         <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
@@ -1292,12 +1487,35 @@ export default function SettingsPage() {
 
                         {/* ── Mobile View (<md) ── */}
                         <div className={cn("block md:hidden divide-y", isDark ? "divide-white/[0.06]" : "divide-slate-200/90")}>
+                          <div className={cn("px-3.5 py-2.5 flex items-center justify-between text-xs", isDark ? "bg-[#111115]" : "bg-slate-50/80")}>
+                            <label className="inline-flex items-center gap-2 cursor-pointer font-semibold">
+                              <input
+                                type="checkbox"
+                                checked={loginLogs.length > 0 && loginLogs.every((l) => selectedLogIds.includes(l.id))}
+                                onChange={toggleSelectAllLogs}
+                                className="w-3.5 h-3.5 rounded border-white/20 accent-cyan-400 cursor-pointer"
+                              />
+                              <span className={isDark ? "text-zinc-300" : "text-slate-700"}>Select All</span>
+                            </label>
+                            {selectedLogIds.length > 0 && (
+                              <span className="text-[11px] font-mono text-cyan-400">
+                                {selectedLogIds.length} selected
+                              </span>
+                            )}
+                          </div>
                           {loginLogs.map((log) => {
                             const dt = formatDateTime(log.createdAt);
+                            const isSelected = selectedLogIds.includes(log.id);
                             return (
-                              <div key={log.id} className="p-3.5 space-y-2.5 transition-colors">
+                              <div key={log.id} className={cn("p-3.5 space-y-2.5 transition-colors", isSelected && (isDark ? "bg-cyan-500/[0.05]" : "bg-cyan-50/50"))}>
                                 <div className="flex items-start justify-between gap-2">
                                   <div className="flex items-center gap-2.5 min-w-0">
+                                    <input
+                                      type="checkbox"
+                                      checked={isSelected}
+                                      onChange={() => toggleSelectLog(log.id)}
+                                      className="w-3.5 h-3.5 rounded border-white/20 accent-cyan-400 cursor-pointer shrink-0"
+                                    />
                                     <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                                       <BrowserIcon browser={log.browser || log.deviceLabel} device={log.device} className="w-4 h-4 shrink-0" />
                                     </div>
@@ -1659,6 +1877,100 @@ export default function SettingsPage() {
         isLoading={isClearingAll}
         icon={<Trash2 className="w-8 h-8" />}
       />
+
+      {/* Delete Selected Logs Modal */}
+      <ConfirmModal
+        isOpen={confirmDeleteSelectedModal}
+        onClose={() => setConfirmDeleteSelectedModal(false)}
+        onConfirm={handleDeleteSelectedLogs}
+        title={`Delete ${selectedLogIds.length} Selected Record${selectedLogIds.length === 1 ? '' : 's'}?`}
+        description="The selected login history and session records will be permanently removed."
+        confirmText="Delete Selected"
+        cancelText="Cancel"
+        variant="danger"
+        isLoading={isDeletingSelected}
+        icon={<Trash2 className="w-8 h-8" />}
+      />
+
+      {/* Regenerate Backup Codes Verification Modal */}
+      <ConfirmModal
+        isOpen={showRegenerateBackupModal}
+        onClose={() => setShowRegenerateBackupModal(false)}
+        onConfirm={handleRegenerateBackupCodes}
+        title="Regenerate 2FA Backup Codes"
+        description="Enter your current 6-digit authenticator code to generate 8 new recovery codes. Any previously unused backup codes will be invalidated."
+        confirmText="Generate New Codes"
+        variant="warning"
+        isLoading={is2FALoading}
+        icon={<KeyRound className="w-8 h-8" />}
+      >
+        <OtpInput value={regenerate2FACode} onChange={setRegenerate2FACode} />
+      </ConfirmModal>
+
+      {/* 2FA Backup Codes Modal (WHMCS-style Download & Copy) */}
+      <AnimatePresence>
+        {showBackupCodesModal && backupCodes.length > 0 && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className={cn("rounded-2xl border p-5 sm:p-6 w-full max-w-md shadow-2xl relative overflow-hidden", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-white border-slate-200/90")}>
+              <button
+                type="button"
+                onClick={() => setShowBackupCodesModal(false)}
+                className={cn("absolute top-4 right-4 transition-colors p-2 rounded-xl cursor-pointer", isDark ? "text-zinc-400 hover:text-white bg-[#111115] hover:bg-white/[0.08]" : "text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200")}
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              <div className="text-center mb-5">
+                <div className={cn("w-14 h-14 border rounded-2xl flex items-center justify-center mx-auto mb-3", isDark ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-600")}>
+                  <KeyRound className="w-7 h-7" />
+                </div>
+                <h3 className={cn("text-xl font-bold mb-1", isDark ? "text-white" : "text-slate-900")}>
+                  2FA Backup Codes
+                </h3>
+                <p className={cn("text-xs leading-relaxed", isDark ? "text-zinc-400" : "text-slate-500")}>
+                  Save or download these single-use recovery codes. You can use any code to sign in if you lose access to your authenticator app.
+                </p>
+              </div>
+
+              <div className={cn("grid grid-cols-2 gap-2 p-3.5 rounded-xl border mb-4 font-mono text-xs font-bold", isDark ? "bg-black/40 border-white/[0.08] text-cyan-300" : "bg-slate-50 border-slate-200 text-slate-800")}>
+                {backupCodes.map((code, idx) => (
+                  <div key={code} className={cn("px-2.5 py-2 rounded-lg border text-center tracking-wider", isDark ? "bg-[#111115] border-white/[0.06]" : "bg-white border-slate-200/80")}>
+                    <span className="text-[10px] opacity-50 mr-1.5">{idx + 1}.</span>
+                    {code}
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-2.5">
+                <button
+                  type="button"
+                  onClick={handleCopyBackupCodes}
+                  className={cn("flex-1 inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border text-xs font-semibold transition-colors cursor-pointer", isDark ? "border-white/[0.08] text-zinc-200 hover:bg-white/[0.04]" : "border-slate-200 text-slate-700 hover:bg-slate-100")}
+                >
+                  {copiedBackupCodes ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedBackupCodes ? 'Copied' : 'Copy All'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDownloadBackupCodes}
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 text-slate-950 text-xs font-bold transition-all cursor-pointer shadow-2xs"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Download .txt</span>
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowBackupCodesModal(false)}
+                className={cn("w-full mt-3 py-2 rounded-xl text-xs font-medium transition-colors cursor-pointer", isDark ? "text-zinc-400 hover:text-white" : "text-slate-500 hover:text-slate-800")}
+              >
+                I have saved my backup codes
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

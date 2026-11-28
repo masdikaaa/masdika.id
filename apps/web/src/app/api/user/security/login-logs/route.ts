@@ -106,19 +106,23 @@ export async function GET(req: NextRequest) {
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
 
-    // 6. Deduplicate: if device and IP match, keep only the most recent login timestamp
-    const seenSuccessKeys = new Set<string>();
+    // 6. Deduplicate: keep only the most recent entry per IP for sessions and auth activity logs
+    const seenSessionIps = new Set<string>();
+    const seenActivityIps = new Set<string>();
     const deduplicatedLogs: typeof allLogs = [];
 
     for (const log of allLogs) {
       if (log.isSession && (log.status === 'SUCCESS' || log.status === 'REVOKED')) {
-        // Group by IP + device + browser + os
         const dedupeKey = `${log.ipAddress}_${log.device}_${log.browser}_${log.os}`;
-        if (seenSuccessKeys.has(dedupeKey)) {
-          // If we already have the most recent login for this device & IP, skip older duplicates
+        if (seenSessionIps.has(dedupeKey)) {
           continue;
         }
-        seenSuccessKeys.add(dedupeKey);
+        seenSessionIps.add(dedupeKey);
+      } else if (!log.isSession) {
+        if (seenActivityIps.has(log.ipAddress)) {
+          continue;
+        }
+        seenActivityIps.add(log.ipAddress);
       }
       deduplicatedLogs.push(log);
     }
@@ -229,53 +233,79 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    const deleteRecordById = async (targetLogId: string | number) => {
+      if (String(targetLogId).startsWith('activity-')) {
+        const id = Number(String(targetLogId).replace('activity-', ''));
+        if (!Number.isSafeInteger(id) || id <= 0) return false;
+        await prisma.clientActivityLog.deleteMany({
+          where: { id, userId: auth.user!.id }
+        });
+        return true;
+      }
+
+      const id = Number(String(targetLogId).replace('login-', ''));
+      if (!Number.isSafeInteger(id) || id <= 0) return false;
+
+      const targetLog = await prisma.loginLog.findFirst({
+        where: {
+          id,
+          OR: [
+            { userId: auth.user!.id },
+            { emailAttempt: plainEmail },
+            { emailAttempt: auth.user!.email }
+          ]
+        }
+      });
+
+      if (targetLog) {
+        if (targetLog.sessionId && targetLog.createdAt >= retentionCutoff) {
+          await prisma.loginLog.update({
+            where: { id: targetLog.id },
+            data: {
+              isRevoked: targetLog.sessionId === auth.sessionId ? targetLog.isRevoked : true,
+              userId: targetLog.sessionId === auth.sessionId ? targetLog.userId : null,
+              emailAttempt: targetLog.sessionId === auth.sessionId ? targetLog.emailAttempt : '[revoked-tombstone]'
+            }
+          });
+        } else {
+          await prisma.loginLog.delete({ where: { id: targetLog.id } });
+        }
+      }
+      return true;
+    };
+
     // Delete a single log/session record from history
     if (action === 'delete') {
       if (!logId) {
         return NextResponse.json({ error: 'Log ID is required' }, { status: 400 });
       }
-
-      if (String(logId).startsWith('activity-')) {
-        const id = Number(String(logId).replace('activity-', ''));
-        await prisma.clientActivityLog.deleteMany({
-          where: { id, userId: auth.user.id }
-        });
-      } else {
-        const id = Number(String(logId).replace('login-', ''));
-        if (!Number.isSafeInteger(id) || id <= 0) {
-          return NextResponse.json({ error: 'Invalid log ID' }, { status: 400 });
-        }
-        const targetLog = await prisma.loginLog.findFirst({
-          where: {
-            id,
-            OR: [
-              { userId: auth.user.id },
-              { emailAttempt: plainEmail },
-              { emailAttempt: auth.user.email }
-            ]
-          }
-        });
-
-        if (targetLog) {
-          if (targetLog.sessionId && targetLog.createdAt >= retentionCutoff) {
-            // Preserve sessionId tombstone for 31 days so revoked/removed sessions cannot be replayed
-            await prisma.loginLog.update({
-              where: { id: targetLog.id },
-              data: {
-                isRevoked: targetLog.sessionId === auth.sessionId ? targetLog.isRevoked : true,
-                userId: targetLog.sessionId === auth.sessionId ? targetLog.userId : null,
-                emailAttempt: targetLog.sessionId === auth.sessionId ? targetLog.emailAttempt : '[revoked-tombstone]'
-              }
-            });
-          } else {
-            await prisma.loginLog.delete({ where: { id: targetLog.id } });
-          }
-        }
+      const ok = await deleteRecordById(logId);
+      if (!ok) {
+        return NextResponse.json({ error: 'Invalid log ID' }, { status: 400 });
       }
 
       return NextResponse.json({
         success: true,
         message: 'Login record removed successfully'
+      });
+    }
+
+    // Delete multiple selected log/session records
+    if (action === 'delete_selected') {
+      const logIds = Array.isArray(body?.logIds) ? body.logIds.slice(0, 100) : [];
+      if (logIds.length === 0) {
+        return NextResponse.json({ error: 'No log records selected' }, { status: 400 });
+      }
+
+      let deletedCount = 0;
+      for (const id of logIds) {
+        if (await deleteRecordById(id)) deletedCount++;
+      }
+
+      return NextResponse.json({
+        success: true,
+        deletedCount,
+        message: `Removed ${deletedCount} selected login record${deletedCount === 1 ? '' : 's'}`,
       });
     }
 
@@ -313,6 +343,14 @@ export async function POST(req: NextRequest) {
             { createdAt: { lt: retentionCutoff } }
           ]
         }
+      });
+
+      // Also clear auth activity logs (e.g. Admin Impersonation / Security Activity)
+      await prisma.clientActivityLog.deleteMany({
+        where: {
+          userId: auth.user.id,
+          category: 'auth',
+        },
       });
 
       return NextResponse.json({

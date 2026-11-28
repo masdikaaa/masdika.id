@@ -39,6 +39,24 @@ export async function logClientActivity({
 
     const metaString = typeof metadata === 'object' ? JSON.stringify(metadata) : metadata || null;
 
+    if (category === 'auth' && ipAddress) {
+      const existing = await prisma.clientActivityLog.findFirst({
+        where: { userId, category: 'auth', ipAddress },
+        orderBy: { createdAt: 'desc' },
+      });
+      if (existing) {
+        return await prisma.clientActivityLog.update({
+          where: { id: existing.id },
+          data: {
+            description: description.trim(),
+            username,
+            metadata: metaString,
+            createdAt: new Date(),
+          },
+        });
+      }
+    }
+
     return await prisma.clientActivityLog.create({
       data: {
         userId,

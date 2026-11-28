@@ -5,6 +5,28 @@ import { generateSecret, generateURI, verify } from 'otplib';
 import QRCode from 'qrcode';
 import { decryptDeterministic } from '@/lib/encryption';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { generateBackupCodes, hashBackupCode } from '@/lib/two-factor-backup';
+
+export async function GET() {
+  const auth = await requireAuth({ allowedRoles: ['USER', 'ADMIN'] });
+  if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: auth.userId },
+      select: { twoFactorEnabled: true, twoFactorBackupCodes: true },
+    });
+    if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+
+    return NextResponse.json({
+      twoFactorEnabled: user.twoFactorEnabled,
+      remainingBackupCodesCount: Array.isArray(user.twoFactorBackupCodes) ? user.twoFactorBackupCodes.length : 0,
+    });
+  } catch (error) {
+    console.error('2FA status error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
 
 export async function POST(req: Request) {
   const auth = await requireAuth({ allowedRoles: ['USER', 'ADMIN'] });
@@ -53,12 +75,48 @@ export async function POST(req: Request) {
       const verifyRes = await verify({ token: tokenString, secret: user.twoFactorSecret });
       if (!verifyRes.valid) return NextResponse.json({ error: 'Invalid verification code' }, { status: 400 });
 
+      const backupCodes = generateBackupCodes(8);
+      const hashedBackupCodes = backupCodes.map(hashBackupCode);
+
       await prisma.user.update({
         where: { id: user.id },
-        data: { twoFactorEnabled: true }
+        data: { twoFactorEnabled: true, twoFactorBackupCodes: hashedBackupCodes }
       });
 
-      return NextResponse.json({ success: true, message: '2FA enabled successfully' });
+      return NextResponse.json({
+        success: true,
+        message: '2FA enabled successfully',
+        backupCodes,
+        remainingBackupCodesCount: backupCodes.length,
+      });
+    }
+
+    if (action === 'regenerate_backup_codes') {
+      const tokenString = typeof code === 'string' || typeof code === 'number' ? String(code).trim() : '';
+      if (!/^\d{6}$/.test(tokenString)) {
+        return NextResponse.json({ error: 'A valid 6-digit verification code is required to regenerate backup codes' }, { status: 400 });
+      }
+      if (!user.twoFactorSecret || !user.twoFactorEnabled) {
+        return NextResponse.json({ error: '2FA is not enabled' }, { status: 400 });
+      }
+
+      const verifyRes = await verify({ token: tokenString, secret: user.twoFactorSecret });
+      if (!verifyRes.valid) return NextResponse.json({ error: 'Invalid verification code' }, { status: 400 });
+
+      const backupCodes = generateBackupCodes(8);
+      const hashedBackupCodes = backupCodes.map(hashBackupCode);
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { twoFactorBackupCodes: hashedBackupCodes }
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: 'Backup codes regenerated successfully',
+        backupCodes,
+        remainingBackupCodesCount: backupCodes.length,
+      });
     }
 
     if (action === 'disable') {
@@ -75,7 +133,7 @@ export async function POST(req: Request) {
 
       await prisma.user.update({
         where: { id: user.id },
-        data: { twoFactorEnabled: false, twoFactorSecret: null }
+        data: { twoFactorEnabled: false, twoFactorSecret: null, twoFactorBackupCodes: [] }
       });
 
       return NextResponse.json({ success: true, message: '2FA disabled successfully' });

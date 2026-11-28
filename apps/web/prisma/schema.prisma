@@ -14,8 +14,9 @@ model User {
   name               String
   image              String?
   role               String                @default("USER")
-  twoFactorEnabled   Boolean               @default(false)
-  twoFactorSecret    String?
+  twoFactorEnabled     Boolean               @default(false)
+  twoFactorSecret      String?
+  twoFactorBackupCodes String[]              @default([])
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @updatedAt
   lastActive         DateTime?

@@ -23,6 +23,7 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [show2FA, setShow2FA] = useState(false);
   const [twoFactorCode, setTwoFactorCode] = useState("");
+  const [useBackupCode, setUseBackupCode] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
@@ -291,27 +292,63 @@ export default function LoginPage() {
               {/* 2FA Input Field */}
               {show2FA && (
                 <div className="space-y-3 py-2">
-                  <label className={labelClass}>Verification Code</label>
+                  <div className="flex items-center justify-between gap-2">
+                    <label className={labelClass}>
+                      {useBackupCode ? "Backup Recovery Code" : "Verification Code"}
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUseBackupCode((prev) => !prev);
+                        setTwoFactorCode("");
+                      }}
+                      className="text-[11px] font-semibold text-cyan-500 hover:text-cyan-400 transition-colors cursor-pointer"
+                    >
+                      {useBackupCode ? "Use 6-digit authenticator" : "Use backup code"}
+                    </button>
+                  </div>
                   <div className="relative group">
                     <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-cyan-400/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
                     <div className={inputWrapper}>
                       <div className="pl-4 pr-3 flex items-center justify-center">
                         <Lock className={cn("w-4 h-4", iconClass)} />
                       </div>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        pattern="\d*"
-                        maxLength={6}
-                        value={twoFactorCode}
-                        onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, ""))}
-                        placeholder="••••••"
-                        className={cn(inputClass, "font-black tracking-[0.5em] text-center text-lg")}
-                        autoFocus
-                        required
-                      />
+                      {useBackupCode ? (
+                        <input
+                          type="text"
+                          maxLength={9}
+                          value={twoFactorCode}
+                          onChange={(e) =>
+                            setTwoFactorCode(
+                              e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, "")
+                            )
+                          }
+                          placeholder="XXXX-XXXX"
+                          className={cn(inputClass, "font-mono font-bold tracking-[0.2em] text-center text-base uppercase")}
+                          autoFocus
+                          required
+                        />
+                      ) : (
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          pattern="\d*"
+                          maxLength={6}
+                          value={twoFactorCode}
+                          onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, ""))}
+                          placeholder="••••••"
+                          className={cn(inputClass, "font-black tracking-[0.5em] text-center text-lg")}
+                          autoFocus
+                          required
+                        />
+                      )}
                     </div>
                   </div>
+                  {useBackupCode && (
+                    <p className={cn("text-[11px] text-center", isDark ? "text-zinc-400" : "text-slate-500")}>
+                      Enter one of your 8-character single-use backup codes from your downloaded file.
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -380,6 +417,7 @@ export default function LoginPage() {
                   type="button"
                   onClick={() => {
                     setShow2FA(false);
+                    setUseBackupCode(false);
                     setTwoFactorCode("");
                     sessionStorage.removeItem("pending2FA");
                   }}

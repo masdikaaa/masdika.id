@@ -4,6 +4,7 @@ import { getClientIp } from '@/lib/get-ip';
 import { prisma } from '@/lib/prisma';
 import { decryptDeterministic, encryptDeterministic, hashPassword, verifyPassword } from '@/lib/encryption';
 import { create2FAChallengeToken, createSessionToken, verify2FAChallengeToken } from '@/lib/session';
+import { isBackupCodeFormat, verifyAndConsumeBackupCode } from '@/lib/two-factor-backup';
 import { invalidateSecurityBlockCache, isIpBlocked } from '@/lib/ip-check';
 import { verify } from 'otplib';
 import { checkRateLimit } from '@/lib/rate-limit';
@@ -26,6 +27,92 @@ async function getActiveTwoFactorSecret(user: { role: string; twoFactorEnabled: 
     return { required: true, secret: user.twoFactorSecret };
   }
   return { required: false, secret: null };
+}
+
+async function verifyTwoFactorOrBackup(
+  user: { id: number; twoFactorBackupCodes?: string[] | null },
+  secret: string,
+  rawCode: unknown
+): Promise<{ valid: boolean; usedBackupCode: boolean; remainingBackupCodes?: number }> {
+  const tokenString = String(rawCode || '').trim();
+  if (/^\d{6}$/.test(tokenString)) {
+    try {
+      const result = await verify({ token: tokenString, secret });
+      return { valid: Boolean(result.valid), usedBackupCode: false };
+    } catch {
+      return { valid: false, usedBackupCode: false };
+    }
+  }
+
+  if (isBackupCodeFormat(tokenString)) {
+    const check = verifyAndConsumeBackupCode(user.twoFactorBackupCodes, tokenString);
+    if (!check.valid) return { valid: false, usedBackupCode: true };
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { twoFactorBackupCodes: check.remainingHashes },
+    });
+    return {
+      valid: true,
+      usedBackupCode: true,
+      remainingBackupCodes: check.remainingHashes.length,
+    };
+  }
+
+  return { valid: false, usedBackupCode: false };
+}
+
+async function upsertLoginSessionLog(params: {
+  userId: number;
+  sessionId: string;
+  ipAddress: string;
+  emailAttempt: string;
+  device: string;
+  browser: string;
+  os: string;
+  userAgent: string;
+}) {
+  const existing = await prisma.loginLog.findFirst({
+    where: {
+      userId: params.userId,
+      ipAddress: params.ipAddress,
+      success: true,
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  if (existing) {
+    await prisma.loginLog.update({
+      where: { id: existing.id },
+      data: {
+        sessionId: params.sessionId,
+        emailAttempt: params.emailAttempt,
+        device: params.device,
+        browser: params.browser,
+        os: params.os,
+        userAgent: params.userAgent,
+        isBanned: false,
+        isRevoked: false,
+        createdAt: new Date(),
+      },
+    });
+    return;
+  }
+
+  await prisma.loginLog.create({
+    data: {
+      userId: params.userId,
+      sessionId: params.sessionId,
+      ipAddress: params.ipAddress,
+      emailAttempt: params.emailAttempt,
+      device: params.device,
+      browser: params.browser,
+      os: params.os,
+      userAgent: params.userAgent,
+      success: true,
+      isBanned: false,
+      isRevoked: false,
+    },
+  });
 }
 
 export async function POST(req: Request) {
@@ -120,38 +207,22 @@ export async function POST(req: Request) {
         return errRes;
       }
 
-      const tokenString = String(twoFactorCode).trim();
-      if (!/^\d{6}$/.test(tokenString)) {
+      const twoFactorCheck = await verifyTwoFactorOrBackup(user, twoFactorState.secret, twoFactorCode);
+      if (!twoFactorCheck.valid) {
         await handleFailedLogin(plainEmail);
-        return NextResponse.json({ error: 'Invalid 2FA code' }, { status: 400 });
-      }
-
-      try {
-        const result = await verify({ token: tokenString, secret: twoFactorState.secret });
-        if (!result.valid) {
-          await handleFailedLogin(plainEmail);
-          return NextResponse.json({ error: 'Invalid 2FA code' }, { status: 400 });
-        }
-      } catch {
-        await handleFailedLogin(plainEmail);
-        return NextResponse.json({ error: 'Invalid 2FA code' }, { status: 400 });
+        return NextResponse.json({ error: 'Invalid 2FA or backup code' }, { status: 400 });
       }
 
       const { token, maxAge, sessionId } = createSessionToken(user.id, user.role, verifiedChallenge.rememberMe);
-      await prisma.loginLog.create({
-        data: {
-          userId: user.id,
-          sessionId,
-          ipAddress: ip,
-          emailAttempt: plainEmail.toLowerCase(),
-          device: deviceInfo.device,
-          browser: deviceInfo.browser,
-          os: deviceInfo.os,
-          userAgent,
-          success: true,
-          isBanned: false,
-          isRevoked: false,
-        }
+      await upsertLoginSessionLog({
+        userId: user.id,
+        sessionId,
+        ipAddress: ip,
+        emailAttempt: plainEmail.toLowerCase(),
+        device: deviceInfo.device,
+        browser: deviceInfo.browser,
+        os: deviceInfo.os,
+        userAgent,
       });
 
       const now = new Date();
@@ -277,41 +348,25 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: '2FA configuration error on server' }, { status: 500 });
       }
 
-      const tokenString = String(twoFactorCode).trim();
-      if (!/^\d{6}$/.test(tokenString)) {
+      const twoFactorCheck = await verifyTwoFactorOrBackup(user, twoFactorState.secret, twoFactorCode);
+      if (!twoFactorCheck.valid) {
         await handleFailedLogin(normalizedEmail);
-        return NextResponse.json({ error: 'Invalid 2FA code' }, { status: 400 });
-      }
-
-      try {
-        const result = await verify({ token: tokenString, secret: twoFactorState.secret });
-        if (!result.valid) {
-          await handleFailedLogin(normalizedEmail);
-          return NextResponse.json({ error: 'Invalid 2FA code' }, { status: 400 });
-        }
-      } catch {
-        await handleFailedLogin(normalizedEmail);
-        return NextResponse.json({ error: 'Invalid 2FA code' }, { status: 400 });
+        return NextResponse.json({ error: 'Invalid 2FA or backup code' }, { status: 400 });
       }
     }
 
-    // Generate signed session token & append immutable LoginLog row (never un-revoke or overwrite old sessions)
+    // Generate signed session token & upsert session log by IP so same-IP logins don't pile up
     const { token, maxAge, sessionId } = createSessionToken(user.id, user.role, Boolean(rememberMe));
 
-    await prisma.loginLog.create({
-      data: {
-        userId: user.id,
-        sessionId,
-        ipAddress: ip,
-        emailAttempt: normalizedEmail,
-        device: deviceInfo.device,
-        browser: deviceInfo.browser,
-        os: deviceInfo.os,
-        userAgent,
-        success: true,
-        isBanned: false,
-        isRevoked: false
-      }
+    await upsertLoginSessionLog({
+      userId: user.id,
+      sessionId,
+      ipAddress: ip,
+      emailAttempt: normalizedEmail,
+      device: deviceInfo.device,
+      browser: deviceInfo.browser,
+      os: deviceInfo.os,
+      userAgent,
     });
 
     // Update lastActive timestamp on successful login and immediately broadcast presence
