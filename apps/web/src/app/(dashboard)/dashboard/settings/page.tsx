@@ -1357,14 +1357,24 @@ export default function SettingsPage() {
                           <table className="w-full text-left text-xs border-collapse">
                             <thead>
                               <tr className={cn("uppercase tracking-wider font-semibold border-b text-[11px]", isDark ? "bg-[#111115] text-zinc-400 border-white/[0.08]" : "bg-slate-50/80 text-slate-500 border-slate-200/90")}>
-                                <th className="pl-3.5 pr-1 py-2 w-9">
-                                  <input
-                                    type="checkbox"
+                                <th className="pl-3.5 pr-1 py-2 w-10">
+                                  <button
+                                    type="button"
+                                    role="checkbox"
+                                    aria-checked={loginLogs.length > 0 && loginLogs.every((l) => selectedLogIds.includes(l.id))}
                                     aria-label="Select all login records on this page"
-                                    checked={loginLogs.length > 0 && loginLogs.every((l) => selectedLogIds.includes(l.id))}
-                                    onChange={toggleSelectAllLogs}
-                                    className="w-3.5 h-3.5 rounded border-white/20 accent-cyan-400 cursor-pointer"
-                                  />
+                                    onClick={toggleSelectAllLogs}
+                                    className={cn(
+                                      "w-5 h-5 rounded-md border flex items-center justify-center transition-all cursor-pointer",
+                                      loginLogs.length > 0 && loginLogs.every((l) => selectedLogIds.includes(l.id))
+                                        ? "bg-cyan-400 border-cyan-400 text-slate-950 shadow-[0_0_8px_rgba(34,211,238,0.25)]"
+                                        : isDark
+                                          ? "border-white/20 bg-white/[0.04] hover:border-cyan-400/60 text-transparent"
+                                          : "border-slate-300 bg-white hover:border-cyan-500 text-transparent"
+                                    )}
+                                  >
+                                    <CheckCircle2 className="w-3.5 h-3.5 stroke-[2.4]" />
+                                  </button>
                                 </th>
                                 <th className="px-3.5 py-2 whitespace-nowrap">Device & Browser</th>
                                 <th className="px-3.5 py-2 w-36 whitespace-nowrap">IP Address</th>
@@ -1380,13 +1390,23 @@ export default function SettingsPage() {
                                 return (
                                   <tr key={log.id} className={cn("transition-colors", isSelected ? (isDark ? "bg-cyan-500/[0.06]" : "bg-cyan-50/60") : (isDark ? "hover:bg-white/[0.02]" : "hover:bg-slate-50/80"))}>
                                     <td className="pl-3.5 pr-1 py-2 align-middle">
-                                      <input
-                                        type="checkbox"
+                                      <button
+                                        type="button"
+                                        role="checkbox"
+                                        aria-checked={isSelected}
                                         aria-label={`Select record ${log.ipAddress}`}
-                                        checked={isSelected}
-                                        onChange={() => toggleSelectLog(log.id)}
-                                        className="w-3.5 h-3.5 rounded border-white/20 accent-cyan-400 cursor-pointer"
-                                      />
+                                        onClick={() => toggleSelectLog(log.id)}
+                                        className={cn(
+                                          "w-5 h-5 rounded-md border flex items-center justify-center transition-all cursor-pointer",
+                                          isSelected
+                                            ? "bg-cyan-400 border-cyan-400 text-slate-950 shadow-[0_0_8px_rgba(34,211,238,0.25)]"
+                                            : isDark
+                                              ? "border-white/20 bg-white/[0.04] hover:border-cyan-400/60 text-transparent"
+                                              : "border-slate-300 bg-white hover:border-cyan-500 text-transparent"
+                                        )}
+                                      >
+                                        <CheckCircle2 className="w-3.5 h-3.5 stroke-[2.4]" />
+                                      </button>
                                     </td>
                                     <td className="px-3.5 py-2 align-middle">
                                       <div className="flex items-center gap-2.5">
@@ -1488,15 +1508,25 @@ export default function SettingsPage() {
                         {/* ── Mobile View (<md) ── */}
                         <div className={cn("block md:hidden divide-y", isDark ? "divide-white/[0.06]" : "divide-slate-200/90")}>
                           <div className={cn("px-3.5 py-2.5 flex items-center justify-between text-xs", isDark ? "bg-[#111115]" : "bg-slate-50/80")}>
-                            <label className="inline-flex items-center gap-2 cursor-pointer font-semibold">
-                              <input
-                                type="checkbox"
-                                checked={loginLogs.length > 0 && loginLogs.every((l) => selectedLogIds.includes(l.id))}
-                                onChange={toggleSelectAllLogs}
-                                className="w-3.5 h-3.5 rounded border-white/20 accent-cyan-400 cursor-pointer"
-                              />
+                            <button
+                              type="button"
+                              onClick={toggleSelectAllLogs}
+                              className="inline-flex items-center gap-2.5 cursor-pointer font-semibold"
+                            >
+                              <span
+                                className={cn(
+                                  "w-5 h-5 rounded-md border flex items-center justify-center transition-all shrink-0",
+                                  loginLogs.length > 0 && loginLogs.every((l) => selectedLogIds.includes(l.id))
+                                    ? "bg-cyan-400 border-cyan-400 text-slate-950 shadow-[0_0_8px_rgba(34,211,238,0.25)]"
+                                    : isDark
+                                      ? "border-white/20 bg-white/[0.04] text-transparent"
+                                      : "border-slate-300 bg-white text-transparent"
+                                )}
+                              >
+                                <CheckCircle2 className="w-3.5 h-3.5 stroke-[2.4]" />
+                              </span>
                               <span className={isDark ? "text-zinc-300" : "text-slate-700"}>Select All</span>
-                            </label>
+                            </button>
                             {selectedLogIds.length > 0 && (
                               <span className="text-[11px] font-mono text-cyan-400">
                                 {selectedLogIds.length} selected
@@ -1510,12 +1540,23 @@ export default function SettingsPage() {
                               <div key={log.id} className={cn("p-3.5 space-y-2.5 transition-colors", isSelected && (isDark ? "bg-cyan-500/[0.05]" : "bg-cyan-50/50"))}>
                                 <div className="flex items-start justify-between gap-2">
                                   <div className="flex items-center gap-2.5 min-w-0">
-                                    <input
-                                      type="checkbox"
-                                      checked={isSelected}
-                                      onChange={() => toggleSelectLog(log.id)}
-                                      className="w-3.5 h-3.5 rounded border-white/20 accent-cyan-400 cursor-pointer shrink-0"
-                                    />
+                                    <button
+                                      type="button"
+                                      role="checkbox"
+                                      aria-checked={isSelected}
+                                      aria-label={`Select record ${log.ipAddress}`}
+                                      onClick={() => toggleSelectLog(log.id)}
+                                      className={cn(
+                                        "w-5 h-5 rounded-md border flex items-center justify-center transition-all cursor-pointer shrink-0",
+                                        isSelected
+                                          ? "bg-cyan-400 border-cyan-400 text-slate-950 shadow-[0_0_8px_rgba(34,211,238,0.25)]"
+                                          : isDark
+                                            ? "border-white/20 bg-white/[0.04] text-transparent"
+                                            : "border-slate-300 bg-white text-transparent"
+                                      )}
+                                    >
+                                      <CheckCircle2 className="w-3.5 h-3.5 stroke-[2.4]" />
+                                    </button>
                                     <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border", isDark ? "bg-[#111115] border-white/[0.08]" : "bg-slate-50/80 border-slate-200/90")}>
                                       <BrowserIcon browser={log.browser || log.deviceLabel} device={log.device} className="w-4 h-4 shrink-0" />
                                     </div>

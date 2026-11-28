@@ -216,12 +216,18 @@ export async function POST(req: NextRequest) {
     if (action === 'revoke_all_other') {
       await prisma.loginLog.updateMany({
         where: {
-          OR: [
-            { userId: auth.user.id },
-            { emailAttempt: plainEmail },
-            { emailAttempt: auth.user.email }
+          AND: [
+            {
+              OR: [
+                { userId: auth.user.id },
+                { emailAttempt: plainEmail },
+                { emailAttempt: auth.user.email }
+              ],
+            },
+            ...(auth.sessionId
+              ? [{ OR: [{ sessionId: null }, { sessionId: { not: auth.sessionId } }] }]
+              : []),
           ],
-          ...(auth.sessionId ? { NOT: { sessionId: auth.sessionId } } : {}),
           isRevoked: false
         },
         data: { isRevoked: true }
@@ -246,14 +252,16 @@ export async function POST(req: NextRequest) {
       const id = Number(String(targetLogId).replace('login-', ''));
       if (!Number.isSafeInteger(id) || id <= 0) return false;
 
+      const ownerOr = [
+        { userId: auth.user!.id },
+        { emailAttempt: plainEmail },
+        { emailAttempt: auth.user!.email }
+      ];
+
       const targetLog = await prisma.loginLog.findFirst({
         where: {
           id,
-          OR: [
-            { userId: auth.user!.id },
-            { emailAttempt: plainEmail },
-            { emailAttempt: auth.user!.email }
-          ]
+          OR: ownerOr
         }
       });
 
@@ -269,6 +277,17 @@ export async function POST(req: NextRequest) {
           });
         } else {
           await prisma.loginLog.delete({ where: { id: targetLog.id } });
+        }
+
+        // Also clean up any legacy duplicate non-session rows for the same IP so they don't resurface
+        if (!targetLog.sessionId && targetLog.ipAddress) {
+          await prisma.loginLog.deleteMany({
+            where: {
+              OR: ownerOr,
+              ipAddress: targetLog.ipAddress,
+              sessionId: null,
+            },
+          });
         }
       }
       return true;
@@ -312,12 +331,18 @@ export async function POST(req: NextRequest) {
     // Clear all login history (except current active session)
     if (action === 'clear_history') {
       const ownerFilter = {
-        OR: [
-          { userId: auth.user.id },
-          { emailAttempt: plainEmail },
-          { emailAttempt: auth.user.email }
+        AND: [
+          {
+            OR: [
+              { userId: auth.user.id },
+              { emailAttempt: plainEmail },
+              { emailAttempt: auth.user.email }
+            ],
+          },
+          ...(auth.sessionId
+            ? [{ OR: [{ sessionId: null }, { sessionId: { not: auth.sessionId } }] }]
+            : []),
         ],
-        ...(auth.sessionId ? { NOT: { sessionId: auth.sessionId } } : {})
       };
 
       // Tombstone recent session-bearing rows so revoked tokens stay blocked until natural expiry
