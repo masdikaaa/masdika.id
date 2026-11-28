@@ -1117,7 +1117,7 @@ export default function MirrorClient() {
               </button>
             </div>
 
-            <div className="px-4 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface)] flex items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="px-4 py-2 border-b border-[var(--border-subtle)] bg-[var(--surface)] flex items-center flex-nowrap md:flex-wrap gap-1 overflow-x-auto md:overflow-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {DISTROS.map((d) => (
                 <button
                   key={d.id}
