@@ -468,10 +468,10 @@ export default function MirrorClient() {
                 </Badge>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-4 text-[var(--text-primary)]">
-                Fast Package Cache. <br />
+              <h1 className="text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-4 text-[var(--text-primary)]">
+                Package &amp; <br />
                 <span className="bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent">
-                  Direct ISO Mirror.
+                  ISO Mirror.
                 </span>
               </h1>
 

@@ -474,10 +474,10 @@ export default function DnsPublicClient({
                 </Badge>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-4 text-[var(--text-primary)]">
-                SafeDNS Resolver. <br />
+              <h1 className="text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.05] mb-4 text-[var(--text-primary)]">
+                SafeDNS &amp; <br />
                 <span className="bg-gradient-to-r from-cyan-400 via-cyan-300 to-cyan-100 bg-clip-text text-transparent">
-                  Authoritative DNS.
+                  Cloud DNS.
                 </span>
               </h1>
 
